@@ -61,23 +61,19 @@ class WorkerTaskTests(PreflightApiTestBase):
 
         with patch("backend.tasks._flask_app", return_value=self.app), patch(
             "backend.security_ops.cleanup_security_data",
-            return_value=(7, 2),
+            return_value=7,
         ) as mock_cleanup:
             previous_security_days = self.app.config.get("SECURITY_EVENTS_RETENTION_DAYS")
-            previous_ingested_days = self.app.config.get("INGESTED_MESSAGES_RETENTION_DAYS")
             try:
                 self.app.config["SECURITY_EVENTS_RETENTION_DAYS"] = 123
-                self.app.config["INGESTED_MESSAGES_RETENTION_DAYS"] = 45
                 result = cleanup_security_data.apply()
             finally:
                 self.app.config["SECURITY_EVENTS_RETENTION_DAYS"] = previous_security_days
-                self.app.config["INGESTED_MESSAGES_RETENTION_DAYS"] = previous_ingested_days
 
         self.assertEqual(result.status, "SUCCESS")
-        self.assertEqual(result.result, {"security_events_deleted": 7, "ingested_messages_deleted": 2})
+        self.assertEqual(result.result, {"security_events_deleted": 7})
         mock_cleanup.assert_called_once_with(
             security_events_days=123,
-            ingested_messages_days=45,
         )
 
     def test_tasks_are_idempotent_on_zero_deletions(self):

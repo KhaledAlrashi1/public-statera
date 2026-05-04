@@ -1,8 +1,5 @@
-import tempfile
 import unittest
-import sqlite3
 from datetime import datetime, timezone
-from pathlib import Path
 
 from preflight_base import PreflightApiTestBase
 
@@ -12,27 +9,6 @@ class TemplateSuggestionsPreflightTests(PreflightApiTestBase):
         client = self.app.test_client()
         res = client.get("/api/transaction-suggestions?q=am&limit=5")
         self.assertEqual(res.status_code, 401)
-
-    def test_messages_snapshot_cleanup(self):
-        from backend.lib.messages import messages_db_snapshot
-
-        with tempfile.TemporaryDirectory() as tmp:
-            src = Path(tmp) / "chat.db"
-            conn = sqlite3.connect(src)
-            try:
-                conn.execute("CREATE TABLE message (ROWID INTEGER PRIMARY KEY AUTOINCREMENT, date INTEGER)")
-                conn.execute("INSERT INTO message (date) VALUES (1)")
-                conn.commit()
-            finally:
-                conn.close()
-
-            with messages_db_snapshot(str(src)) as snap:
-                snap_path = Path(snap)
-                snap_dir = snap_path.parent
-                self.assertTrue(snap_path.exists())
-                self.assertTrue(snap_dir.exists())
-
-            self.assertFalse(snap_dir.exists())
 
     def test_template_suggestions_disabled_returns_empty(self):
         self._create_user("temploff@example.com", "Password123!")

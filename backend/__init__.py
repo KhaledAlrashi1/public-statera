@@ -415,7 +415,6 @@ def create_app() -> Flask:
         30,
     )
     app.config["SECURITY_EVENTS_RETENTION_DAYS"] = _env_int("SECURITY_EVENTS_RETENTION_DAYS", 365)
-    app.config["INGESTED_MESSAGES_RETENTION_DAYS"] = _env_int("INGESTED_MESSAGES_RETENTION_DAYS", 180)
     app.config["PRODUCT_EVENTS_RETENTION_DAYS"] = _env_int("PRODUCT_EVENTS_RETENTION_DAYS", 90)
     # Raw bank payloads: purge after 7 days (not 90). Normalized transactions survive.
     app.config["BANK_RAW_RETENTION_DAYS"] = _env_int("BANK_RAW_RETENTION_DAYS", 7)

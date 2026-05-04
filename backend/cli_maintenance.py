@@ -261,18 +261,12 @@ def register_maintenance_commands(app):
         help="Retention window for security_events. Defaults to app config.",
     )
     @click.option(
-        "--ingested-messages-days",
-        default=None,
-        type=int,
-        help="Retention window for ingested_messages. Defaults to app config.",
-    )
-    @click.option(
         "--product-events-days",
         default=None,
         type=int,
         help="Retention window for product_events. Defaults to app config. (reserved)",
     )
-    def run_maintenance_pass_cmd(security_events_days, ingested_messages_days, product_events_days):
+    def run_maintenance_pass_cmd(security_events_days, product_events_days):
         """Run one deterministic cleanup pass across maintenance domains."""
         resolved_security_days = max(
             1,
@@ -282,20 +276,10 @@ def register_maintenance_commands(app):
                 else app.config.get("SECURITY_EVENTS_RETENTION_DAYS", 365)
             ),
         )
-        resolved_ingested_days = max(
-            1,
-            int(
-                ingested_messages_days
-                if ingested_messages_days is not None
-                else app.config.get("INGESTED_MESSAGES_RETENTION_DAYS", 180)
-            ),
-        )
         counts = run_maintenance_pass(
             security_events_days=resolved_security_days,
-            ingested_messages_days=resolved_ingested_days,
         )
         print("Maintenance pass complete.")
         print(f"   deleted expired account tokens: {counts['account_action_tokens_expired_deleted']}")
         print(f"   deleted used account tokens: {counts['account_action_tokens_used_deleted']}")
         print(f"   deleted security_events: {counts['security_events_deleted']}")
-        print(f"   deleted ingested_messages: {counts['ingested_messages_deleted']}")

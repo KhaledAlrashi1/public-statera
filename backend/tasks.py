@@ -332,15 +332,11 @@ def execute_cleanup_account_tokens() -> tuple[int, int]:
 def execute_cleanup_security_data(
     *,
     security_events_days: int,
-    ingested_messages_days: int,
-) -> tuple[int, int]:
-    """Prune old security events and ingested messages."""
+) -> int:
+    """Prune old security events."""
     from backend.security_ops import cleanup_security_data as _cleanup
 
-    return _cleanup(
-        security_events_days=security_events_days,
-        ingested_messages_days=ingested_messages_days,
-    )
+    return _cleanup(security_events_days=security_events_days)
 
 
 def execute_cleanup_product_events(*, product_events_days: int) -> int:
@@ -821,11 +817,10 @@ def cleanup_security_data(self) -> dict:
             )
             if not acquired:
                 return {"status": "skipped", "reason": "already_ran", "period_key": period_key}
-            events, ingested = execute_cleanup_security_data(
+            events = execute_cleanup_security_data(
                 security_events_days=app.config["SECURITY_EVENTS_RETENTION_DAYS"],
-                ingested_messages_days=app.config["INGESTED_MESSAGES_RETENTION_DAYS"],
             )
-        return {"security_events_deleted": events, "ingested_messages_deleted": ingested}
+        return {"security_events_deleted": events}
     except Exception as exc:  # noqa: BLE001 - worker tasks should log failures and keep the scheduler or worker loop alive.
         raise self.retry(exc=exc, countdown=60 * (2 ** self.request.retries))
 

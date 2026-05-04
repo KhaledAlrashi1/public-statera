@@ -26,18 +26,16 @@ class MaintenanceWorkflowTests(PreflightApiTestBase):
             return_value=(3, 2),
         ) as cleanup_tokens, patch(
             "backend.security_ops.cleanup_security_data",
-            return_value=(5, 7),
+            return_value=5,
         ) as cleanup_security_data:
             result = run_maintenance_pass(
                 security_events_days=365,
-                ingested_messages_days=180,
             )
 
         cleanup_rate_limiter.assert_called_once_with()
         cleanup_tokens.assert_called_once_with()
         cleanup_security_data.assert_called_once_with(
             security_events_days=365,
-            ingested_messages_days=180,
         )
         self.assertEqual(
             result,
@@ -45,7 +43,6 @@ class MaintenanceWorkflowTests(PreflightApiTestBase):
                 "account_action_tokens_expired_deleted": 3,
                 "account_action_tokens_used_deleted": 2,
                 "security_events_deleted": 5,
-                "ingested_messages_deleted": 7,
             },
         )
 
@@ -55,7 +52,6 @@ class MaintenanceWorkflowTests(PreflightApiTestBase):
             "account_action_tokens_expired_deleted": 1,
             "account_action_tokens_used_deleted": 2,
             "security_events_deleted": 3,
-            "ingested_messages_deleted": 4,
         }
         with patch("backend.cli_maintenance.run_maintenance_pass", return_value=expected_counts) as run_pass:
             result = runner.invoke(args=["run-maintenance-pass"])
@@ -63,7 +59,6 @@ class MaintenanceWorkflowTests(PreflightApiTestBase):
         self.assertEqual(result.exit_code, 0, result.output)
         run_pass.assert_called_once_with(
             security_events_days=self.app.config["SECURITY_EVENTS_RETENTION_DAYS"],
-            ingested_messages_days=self.app.config["INGESTED_MESSAGES_RETENTION_DAYS"],
         )
         self.assertIn("Maintenance pass complete.", result.output)
 
@@ -75,7 +70,6 @@ class MaintenanceWorkflowTests(PreflightApiTestBase):
                 "account_action_tokens_expired_deleted": 0,
                 "account_action_tokens_used_deleted": 0,
                 "security_events_deleted": 0,
-                "ingested_messages_deleted": 0,
             },
         ) as run_pass:
             result = runner.invoke(
@@ -83,15 +77,12 @@ class MaintenanceWorkflowTests(PreflightApiTestBase):
                     "run-maintenance-pass",
                     "--security-events-days",
                     "90",
-                    "--ingested-messages-days",
-                    "60",
                 ]
             )
 
         self.assertEqual(result.exit_code, 0, result.output)
         run_pass.assert_called_once_with(
             security_events_days=90,
-            ingested_messages_days=60,
         )
 
     def test_flatten_grouped_transactions_cli_dry_run_does_not_mutate(self):

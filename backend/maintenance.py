@@ -18,7 +18,6 @@ def _positive_int(value: Any, default: int) -> int:
 def run_maintenance_pass(
     *,
     security_events_days: int,
-    ingested_messages_days: int,
     product_events_days: int = 90,
 ) -> dict[str, int]:
     """Run one full maintenance pass and return deletion counters."""
@@ -32,9 +31,8 @@ def run_maintenance_pass(
 
     execute_cleanup_rate_limiter()
     expired_deleted, used_deleted = execute_cleanup_account_tokens()
-    security_events_deleted, ingested_messages_deleted = execute_cleanup_security_data(
+    security_events_deleted = execute_cleanup_security_data(
         security_events_days=security_events_days,
-        ingested_messages_days=ingested_messages_days,
     )
     # Extended cleanups require Flask app context and are intentionally non-fatal.
     if has_app_context():
@@ -51,5 +49,4 @@ def run_maintenance_pass(
         "account_action_tokens_expired_deleted": int(expired_deleted or 0),
         "account_action_tokens_used_deleted": int(used_deleted or 0),
         "security_events_deleted": int(security_events_deleted or 0),
-        "ingested_messages_deleted": int(ingested_messages_deleted or 0),
     }

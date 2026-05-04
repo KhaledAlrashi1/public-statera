@@ -1072,8 +1072,12 @@ def account_deletion_status(task_id: str):
 @login_required
 def me():
     """Get current authenticated user and feature flags."""
-    from backend.routes.features import build_feature_flags
-    flags = build_feature_flags()
+    from flask import current_app
+    flags = {
+        "open_banking": bool(current_app.config.get("ENABLE_OPEN_BANKING", False)),
+        "template_suggestions": bool(current_app.config.get("ENABLE_TEMPLATE_SUGGESTIONS", False)),
+        "recurring_patterns": bool(current_app.config.get("ENABLE_RECURRING_PATTERNS", True)),
+    }
     return jsonify({"ok": True, "user": current_user.to_dict(), "flags": flags})
 
 
