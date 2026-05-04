@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+  <body style="font-family: Arial, sans-serif; color: #111827;">
+    <h2 style="margin: 0 0 12px;">Weekly Digest</h2>
+    <p style="margin: 0 0 8px;">Week: {{ week_start }} to {{ week_end }}</p>
+    <p style="margin: 0 0 8px;">Top categories:</p>
+    <ul>
+      {% for row in top_categories %}
+      <li>{{ row.name }} — KD {{ row.amount_kd }}</li>
+      {% endfor %}
+    </ul>
+    <p style="margin: 0; color: #6b7280;">Upcoming bills: {{ upcoming_bills_count }}</p>
+  </body>
+</html>

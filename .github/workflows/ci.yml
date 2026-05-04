@@ -1,0 +1,197 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: finance
+          POSTGRES_PASSWORD: ci-password
+          POSTGRES_DB: personal_statera_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    env:
+      DATABASE_URL: postgresql://finance:ci-password@localhost:5432/personal_statera_test
+      TEST_DATABASE_URL: postgresql://finance:ci-password@localhost:5432/personal_statera_test
+      PERSONAL_STATERA_DEV_MODE: "true"
+      SECRET_KEY: ci-secret-key-for-tests-only
+      ENCRYPTION_KEY: "0000000000000000000000000000000000000000000000000000000000000001"
+      REDIS_URL: redis://localhost:6379/0
+      CELERY_BROKER_URL: redis://localhost:6379/0
+      CELERY_RESULT_BACKEND: redis://localhost:6379/1
+      RATE_LIMIT_BACKEND: memory
+      ENABLE_TEMPLATE_SUGGESTIONS: "false"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run migrations
+        run: python -m flask db upgrade
+        env:
+          FLASK_APP: run.py
+
+      - name: Run tests
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+  frontend-unit:
+    name: Frontend Unit Tests & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Typecheck & lint
+        run: npm run lint
+        working-directory: frontend
+
+      - name: Unit tests
+        run: npm run test:unit
+        working-directory: frontend
+
+      - name: Build
+        run: npm run build
+        working-directory: frontend
+
+  playwright-e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-unit]
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: finance
+          POSTGRES_PASSWORD: ci-password
+          POSTGRES_DB: personal_statera_ci
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    env:
+      DATABASE_URL: postgresql://finance:ci-password@localhost:5432/personal_statera_ci
+      PERSONAL_STATERA_DEV_MODE: "true"
+      SECRET_KEY: ci-secret-key-for-e2e-only
+      ENCRYPTION_KEY: "0000000000000000000000000000000000000000000000000000000000000001"
+      REDIS_URL: redis://localhost:6379/0
+      CELERY_BROKER_URL: redis://localhost:6379/0
+      CELERY_RESULT_BACKEND: redis://localhost:6379/1
+      RATE_LIMIT_BACKEND: memory
+      ENABLE_TEMPLATE_SUGGESTIONS: "false"
+      FLASK_APP: run.py
+      FLASK_PORT: "5004"
+      CI: "true"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install backend dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run migrations
+        run: python -m flask db upgrade
+
+      - name: Start backend
+        run: |
+          python run.py &
+          echo "BACKEND_PID=$!" >> "$GITHUB_ENV"
+          # Wait for the backend to be ready
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:5004/healthz && break
+            sleep 2
+          done
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: frontend
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        working-directory: frontend
+        env:
+          VITE_API_PROXY_TARGET: http://127.0.0.1:5004
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7

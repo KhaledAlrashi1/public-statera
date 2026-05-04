@@ -1,0 +1,11 @@
+Bank Connection Revoked — Personal Statera
+
+Your consent for Personal Statera to access {{ institution_name }} has been revoked.
+
+Connection:  {{ institution_name }}
+Revoked at:  {{ revoked_at }}
+
+Your raw bank transaction data has been deleted immediately. Normalised transaction
+records will be retained for 30 days for dispute purposes, then permanently deleted.
+
+This is an automated consent receipt — do not reply to this email.

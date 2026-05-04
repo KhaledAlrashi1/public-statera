@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+set -eu
+
+ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+VENV_PYTHON="$ROOT_DIR/.venv/bin/python"
+
+if [ ! -x "$VENV_PYTHON" ]; then
+  echo "Missing project interpreter: $VENV_PYTHON" >&2
+  echo "Bootstrap the repo environment first:" >&2
+  echo "  cd $ROOT_DIR && make bootstrap-python" >&2
+  exit 1
+fi
+
+exec "$VENV_PYTHON" "$@"

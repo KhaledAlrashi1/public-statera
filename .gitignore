@@ -1,0 +1,30 @@
+# Local environment and secrets
+.env
+.env.prod
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Frontend build and package artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/playwright-report/
+frontend/test-results/
+frontend/tsconfig.tsbuildinfo
+
+# Runtime artifacts
+logs/
+reports/
+.messages_snapshot/
+data/messages/chat.db
+data/messages/chat.db-shm
+data/messages/chat.db-wal
+
+# OS/editor noise
+.DS_Store

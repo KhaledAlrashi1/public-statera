@@ -1,0 +1,2305 @@
+openapi: 3.0.3
+info:
+  title: Statera API (Partial Static Spec)
+  version: 1.0.0
+  description: >-
+    Partial static OpenAPI contract for the Flask backend. It does not yet cover
+    health probes, worker-health endpoints, feature flags, messages,
+    notifications, categories, merchants, budgets, memorized transactions, or
+    the open-banking route group.
+  license:
+    name: Proprietary
+servers:
+  - url: /
+tags:
+  - name: Auth
+  - name: Transactions
+  - name: Analytics
+  - name: Debt
+  - name: Goals
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+  parameters:
+    txnId:
+      name: txn_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    accountId:
+      name: account_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    goalId:
+      name: goal_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    taskId:
+      name: task_id
+      in: path
+      required: true
+      description: Opaque account-deletion poll token returned by `DELETE /api/account`.
+      schema:
+        type: string
+    q:
+      name: q
+      in: query
+      schema:
+        type: string
+    limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+    offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+    month:
+      name: month
+      in: query
+      schema:
+        type: string
+        pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+  responses:
+    Unauthorized:
+      description: Authentication required.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ValidationError:
+      description: Validation error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflict.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RateLimited:
+      description: Rate limit exceeded.
+      headers:
+        Retry-After:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    GenericObject:
+      type: object
+      additionalProperties: true
+    OkEnvelope:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/GenericObject'
+        meta:
+          $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+      required:
+        - ok
+    ErrorResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: false
+        error:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
+        code:
+          type: string
+        error_code:
+          type: string
+        retry_after:
+          type: integer
+      additionalProperties: true
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        display_name:
+          type: string
+          nullable: true
+        totp_enabled:
+          type: boolean
+        is_active:
+          type: boolean
+      additionalProperties: true
+    UserProfile:
+      type: object
+      properties:
+        monthly_income_kd:
+          type: string
+          nullable: true
+        payday_day:
+          type: integer
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        email_notifications_enabled:
+          type: boolean
+        has_debt_choice:
+          type: boolean
+          nullable: true
+        setup_guide_seen:
+          type: boolean
+        setup_guide_dismissed:
+          type: boolean
+      additionalProperties: true
+    DemoWorkspaceState:
+      type: object
+      properties:
+        active:
+          type: boolean
+        clearable:
+          type: boolean
+        loaded_at:
+          type: string
+          format: date-time
+          nullable: true
+        month:
+          type: string
+        months_seeded:
+          type: integer
+        transactions:
+          type: integer
+        budgets:
+          type: integer
+        debt_accounts:
+          type: integer
+        savings_goals:
+          type: integer
+        profile_seeded_fields:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+    DemoDataClearResult:
+      type: object
+      properties:
+        transactions_cleared:
+          type: integer
+        budgets_cleared:
+          type: integer
+        debt_accounts_cleared:
+          type: integer
+        savings_goals_cleared:
+          type: integer
+        profile_fields_cleared:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+    SecurityEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        event_type:
+          type: string
+        ip_address:
+          type: string
+          nullable: true
+        user_agent:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        details:
+          $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        is_income:
+          type: boolean
+        user_id:
+          type: integer
+          nullable: true
+      additionalProperties: true
+    Merchant:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        user_id:
+          type: integer
+          nullable: true
+      additionalProperties: true
+    Item:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+        amount_kd:
+          type: string
+        sort_order:
+          type: integer
+      additionalProperties: true
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        date:
+          type: string
+          format: date
+        name:
+          type: string
+        memo:
+          type: string
+          nullable: true
+        amount_kd:
+          type: string
+        category:
+          type: string
+        merchant:
+          type: string
+          nullable: true
+        source:
+          type: string
+        source_label:
+          type: string
+        item_count:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+      additionalProperties: true
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        first_name:
+          type: string
+        last_name:
+          type: string
+        display_name:
+          type: string
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        remember_me:
+          type: boolean
+    TotpConfirmRequest:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+    TotpVerifyRequest:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+        type:
+          type: string
+          enum:
+            - totp
+            - backup
+    Disable2faRequest:
+      type: object
+      required:
+        - password
+        - code
+      properties:
+        password:
+          type: string
+        code:
+          type: string
+    ProfileUpdateRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        display_name:
+          type: string
+          nullable: true
+        monthly_income_kd:
+          type: string
+          nullable: true
+        payday_day:
+          type: integer
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        email_notifications_enabled:
+          type: boolean
+        has_debt_choice:
+          type: boolean
+          nullable: true
+        setup_guide_seen:
+          type: boolean
+        setup_guide_dismissed:
+          type: boolean
+    ChangePasswordRequest:
+      type: object
+      required:
+        - current_password
+        - new_password
+        - confirm_password
+      properties:
+        current_password:
+          type: string
+        new_password:
+          type: string
+          minLength: 8
+        confirm_password:
+          type: string
+    DeleteAccountRequest:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+        confirmation_token:
+          type: string
+        totp_code:
+          type: string
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+    ForgotPasswordConfirmRequest:
+      type: object
+      required:
+        - token
+        - new_password
+        - confirm_password
+      properties:
+        token:
+          type: string
+        new_password:
+          type: string
+          minLength: 8
+        confirm_password:
+          type: string
+    RequestEmailChangeLinkRequest:
+      type: object
+      required:
+        - new_email
+        - current_password
+      properties:
+        new_email:
+          type: string
+          format: email
+        current_password:
+          type: string
+    ConfirmEmailChangeRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+    RequestPasswordChangeLinkRequest:
+      type: object
+      required:
+        - current_password
+      properties:
+        current_password:
+          type: string
+    ConfirmPasswordChangeRequest:
+      type: object
+      required:
+        - token
+        - new_password
+        - confirm_password
+      properties:
+        token:
+          type: string
+        new_password:
+          type: string
+          minLength: 8
+        confirm_password:
+          type: string
+    TransactionCreateRequest:
+      type: object
+      required:
+        - date
+        - category
+        - name
+        - amount_kd
+      properties:
+        date:
+          type: string
+          format: date
+        category:
+          type: string
+        name:
+          type: string
+        amount_kd:
+          type: string
+        merchant:
+          type: string
+        memo:
+          type: string
+        force:
+          type: boolean
+        items_json:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                $ref: '#/components/schemas/Item'
+      additionalProperties: true
+    TransactionUpdateRequest:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        category:
+          type: string
+        name:
+          type: string
+        amount_kd:
+          type: string
+        merchant:
+          type: string
+        memo:
+          type: string
+        force:
+          type: boolean
+        items_json:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                $ref: '#/components/schemas/Item'
+      additionalProperties: true
+    DupCheckRequest:
+      type: object
+      required:
+        - date
+        - name
+        - amount_kd
+      properties:
+        date:
+          type: string
+          format: date
+        name:
+          type: string
+        amount_kd:
+          type: string
+    ImportCommitRequest:
+      type: object
+      required:
+        - rows
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required:
+              - date
+              - name
+              - amount_kd
+            properties:
+              transaction_id:
+                type: integer
+              date:
+                type: string
+                format: date
+              category:
+                type: string
+              name:
+                type: string
+              amount_kd:
+                type: string
+              merchant:
+                type: string
+              memo:
+                type: string
+              items:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+            additionalProperties: true
+        source_messages:
+          type: array
+          description: >
+            Previewed iMessage metadata used to mark reviewed Messages rows as ingested.
+            These refs are intentionally consumed even when a user removes the corresponding
+            rows from the final import payload, so already-handled transactions do not
+            reappear in later iMessage fetches.
+          items:
+            $ref: '#/components/schemas/GenericObject'
+        allow_duplicates:
+          type: boolean
+        replace_demo_data:
+          type: boolean
+        atomic:
+          type: boolean
+          description: Deprecated. Import commits are always atomic and this flag is ignored.
+    TemplateFeedbackRequest:
+      type: object
+      required:
+        - feedback_key
+        - outcome
+      properties:
+        feedback_key:
+          type: string
+        outcome:
+          type: string
+          enum:
+            - accepted
+            - rejected
+    DebtAccount:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        debt_type:
+          type: string
+        balance_kd:
+          type: string
+        minimum_payment_kd:
+          type: string
+        due_day:
+          type: integer
+          nullable: true
+        apr_pct:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        is_active:
+          type: boolean
+      additionalProperties: true
+    DebtAccountRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        debt_type:
+          type: string
+          enum:
+            - credit_card
+            - personal_loan
+            - car_loan
+            - other
+        balance_kd:
+          type: string
+        minimum_payment_kd:
+          type: string
+        due_day:
+          type: integer
+          nullable: true
+        apr_pct:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+      additionalProperties: true
+    SavingsGoal:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        goal_type:
+          type: string
+        target_kd:
+          type: string
+        current_kd:
+          type: string
+        target_date:
+          type: string
+          format: date
+          nullable: true
+        linked_category:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        is_active:
+          type: boolean
+        projection:
+          $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+    SavingsGoalRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        goal_type:
+          type: string
+        target_kd:
+          type: string
+        current_kd:
+          type: string
+        target_date:
+          type: string
+          format: date
+          nullable: true
+        linked_category:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+      additionalProperties: true
+paths:
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user.
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OkEnvelope'
+                  - type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in with email and password.
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login succeeded or requires 2FA.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OkEnvelope'
+                  - type: object
+                    properties:
+                      requires_2fa:
+                        type: boolean
+                      user:
+                        $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Account disabled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/auth/2fa/setup:
+    post:
+      tags: [Auth]
+      summary: Start 2FA enrollment for the current user.
+      operationId: setupTwoFactor
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Enrollment secret and QR code issued.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OkEnvelope'
+                  - type: object
+                    properties:
+                      qr_data_uri:
+                        type: string
+                      secret_b32:
+                        type: string
+                      backup_codes:
+                        type: array
+                        items:
+                          type: string
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/transactions/export-xlsx:
+    get:
+      tags: [Transactions]
+      summary: Export the current user transaction dataset as Excel.
+      operationId: exportTransactionsXlsx
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Excel export file.
+          headers:
+            X-Export-Truncated:
+              schema:
+                type: string
+            X-Export-Row-Limit:
+              schema:
+                type: string
+            X-Export-Error-Code:
+              schema:
+                type: string
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/auth/2fa/confirm:
+    post:
+      tags: [Auth]
+      summary: Confirm 2FA setup with a TOTP code.
+      operationId: confirmTwoFactor
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TotpConfirmRequest'
+      responses:
+        '200':
+          description: 2FA enabled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/auth/2fa/verify:
+    post:
+      tags: [Auth]
+      summary: Complete a pending 2FA challenge.
+      operationId: verifyTwoFactor
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TotpVerifyRequest'
+      responses:
+        '200':
+          description: 2FA verification succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '410':
+          description: Pending 2FA session expired.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/auth/2fa/disable:
+    post:
+      tags: [Auth]
+      summary: Disable 2FA for the current user.
+      operationId: disableTwoFactor
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Disable2faRequest'
+      responses:
+        '200':
+          description: 2FA disabled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Log out the current user.
+      operationId: logoutUser
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Logged out.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/auth/sessions/revoke-all:
+    post:
+      tags: [Auth]
+      summary: Revoke all active sessions for the current user.
+      operationId: revokeAllSessions
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Sessions revoked.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OkEnvelope'
+                  - type: object
+                    properties:
+                      session_version:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/account:
+    delete:
+      tags: [Auth]
+      summary: Request or confirm account deletion.
+      operationId: deleteAccount
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteAccountRequest'
+      responses:
+        '200':
+          description: Deletion dispatched or completed synchronously.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '202':
+          description: Confirmation token issued.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '410':
+          description: Confirmation token expired.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/account/deletion-status/{task_id}:
+    get:
+      tags: [Auth]
+      summary: Poll account deletion task status with an opaque encrypted token.
+      operationId: getAccountDeletionStatus
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/taskId'
+      responses:
+        '200':
+          description: Deletion task status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Return the current user and feature flags.
+      operationId: getCurrentUser
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Current user payload.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OkEnvelope'
+                  - type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      flags:
+                        $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/auth/profile:
+    get:
+      tags: [Auth]
+      summary: Return the authenticated user profile.
+      operationId: getProfile
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Profile payload.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OkEnvelope'
+                  - type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      profile:
+                        $ref: '#/components/schemas/UserProfile'
+                      demo_workspace:
+                        $ref: '#/components/schemas/DemoWorkspaceState'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/auth/demo-data:
+    post:
+      tags: [Auth]
+      summary: Load a demo workspace into an empty authenticated account.
+      operationId: loadDemoData
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        '200':
+          description: Demo data loaded successfully.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OkEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          month:
+                            type: string
+                          transactions_created:
+                            type: integer
+                          budgets_created:
+                            type: integer
+                          debt_accounts_created:
+                            type: integer
+                          savings_goals_created:
+                            type: integer
+                          months_seeded:
+                            type: integer
+                        additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/ValidationError'
+  /api/auth/demo-data/clear:
+    post:
+      tags: [Auth]
+      summary: Clear the active demo workspace from the authenticated account.
+      operationId: clearDemoData
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        '200':
+          description: Demo workspace cleared successfully.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OkEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DemoDataClearResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/auth/profile/security-events:
+    get:
+      tags: [Auth]
+      summary: List security events for the current user.
+      operationId: listProfileSecurityEvents
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: Security events list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SecurityEvent'
+                  has_more:
+                    type: boolean
+                  offset:
+                    type: integer
+                  limit:
+                    type: integer
+                additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/auth/profile/update:
+    post:
+      tags: [Auth]
+      summary: Update non-sensitive profile fields.
+      operationId: updateProfile
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdateRequest'
+      responses:
+        '200':
+          description: Updated profile.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OkEnvelope'
+                  - type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      profile:
+                        $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/auth/profile/change-password:
+    post:
+      tags: [Auth]
+      summary: Change the current password.
+      operationId: changePassword
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Password changed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/auth/forgot-password/request:
+    post:
+      tags: [Auth]
+      summary: Request a password reset link.
+      operationId: requestForgotPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Reset request accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/auth/forgot-password/confirm:
+    post:
+      tags: [Auth]
+      summary: Confirm a password reset token and set a new password.
+      operationId: confirmForgotPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordConfirmRequest'
+      responses:
+        '200':
+          description: Password reset completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/auth/profile/request-email-change-link:
+    post:
+      tags: [Auth]
+      summary: Request an email change confirmation link.
+      operationId: requestEmailChangeLink
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestEmailChangeLinkRequest'
+      responses:
+        '200':
+          description: Verification link sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/auth/profile/confirm-email-change:
+    post:
+      tags: [Auth]
+      summary: Confirm an email change token.
+      operationId: confirmEmailChange
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmEmailChangeRequest'
+      responses:
+        '200':
+          description: Email changed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/auth/profile/request-password-change-link:
+    post:
+      tags: [Auth]
+      summary: Request a password change confirmation link.
+      operationId: requestPasswordChangeLink
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestPasswordChangeLinkRequest'
+      responses:
+        '200':
+          description: Password change link sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/auth/profile/confirm-password-change:
+    post:
+      tags: [Auth]
+      summary: Confirm a password change token.
+      operationId: confirmPasswordChange
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmPasswordChangeRequest'
+      responses:
+        '200':
+          description: Password changed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/transactions/search:
+    get:
+      tags: [Transactions]
+      summary: Search transactions.
+      operationId: searchTransactions
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: merchant
+          in: query
+          schema:
+            type: string
+        - name: date_from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: source
+          in: query
+          schema:
+            type: string
+        - name: include_total
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Search result.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OkEnvelope'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Transaction'
+                      total:
+                        type: integer
+                      offset:
+                        type: integer
+                      limit:
+                        type: integer
+                      has_more:
+                        type: boolean
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/transactions/summary:
+    get:
+      tags: [Transactions]
+      summary: Return monthly transaction summary counts.
+      operationId: getTransactionSummary
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/month'
+      responses:
+        '200':
+          description: Transaction summary.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/transactions/top-patterns:
+    get:
+      tags: [Transactions]
+      summary: Return top recurring transaction patterns.
+      operationId: getTopTransactionPatterns
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/month'
+      responses:
+        '200':
+          description: Top transaction patterns.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/transactions/by-category:
+    get:
+      tags: [Transactions]
+      summary: List transactions for a category.
+      operationId: getTransactionsByCategory
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: category
+          in: query
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/month'
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: Category transaction list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/transactions/dup-check:
+    post:
+      tags: [Transactions]
+      summary: Check whether a transaction appears to be a duplicate.
+      operationId: checkTransactionDuplicate
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DupCheckRequest'
+      responses:
+        '200':
+          description: Duplicate-check result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/transactions/create:
+    post:
+      tags: [Transactions]
+      summary: Create a transaction.
+      operationId: createTransaction
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionCreateRequest'
+      responses:
+        '200':
+          description: Transaction created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/transactions/{txn_id}:
+    get:
+      tags: [Transactions]
+      summary: Get a transaction by id.
+      operationId: getTransaction
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/txnId'
+      responses:
+        '200':
+          description: Transaction detail.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  transaction:
+                    $ref: '#/components/schemas/Transaction'
+                additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/transactions/{txn_id}/update:
+    post:
+      tags: [Transactions]
+      summary: Update a transaction.
+      operationId: updateTransaction
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/txnId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionUpdateRequest'
+      responses:
+        '200':
+          description: Transaction updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/transactions/{txn_id}/delete:
+    post:
+      tags: [Transactions]
+      summary: Delete a transaction.
+      operationId: deleteTransaction
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/txnId'
+      responses:
+        '200':
+          description: Transaction deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/transactions/export-csv:
+    get:
+      tags: [Transactions]
+      summary: Export the current user transaction dataset as CSV.
+      operationId: exportTransactionsCsv
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: CSV export stream.
+          headers:
+            X-Export-Truncated:
+              schema:
+                type: string
+            X-Export-Row-Limit:
+              schema:
+                type: string
+            X-Export-Error-Code:
+              schema:
+                type: string
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/transactions/upload-preview:
+    post:
+      tags: [Transactions]
+      summary: Validate and preview a CSV or Excel import file.
+      operationId: previewTransactionUpload
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                column_map:
+                  type: string
+                  description: JSON-encoded explicit column mapping.
+      responses:
+        '200':
+          description: Parsed preview rows and schema mapping.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  count:
+                    type: integer
+                  preview_count:
+                    type: integer
+                  skipped:
+                    type: integer
+                  skipped_rows:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GenericObject'
+                  skipped_row_count:
+                    type: integer
+                  capped:
+                    type: boolean
+                  flagged_count:
+                    type: integer
+                  flagged_rows:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GenericObject'
+                  preview_rows:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GenericObject'
+                  original_columns:
+                    $ref: '#/components/schemas/GenericObject'
+                  schema:
+                    type: array
+                    items:
+                      type: string
+                additionalProperties: true
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/transactions/import-commit:
+    post:
+      tags: [Transactions]
+      summary: Persist an approved import preview atomically.
+      operationId: commitTransactionImport
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportCommitRequest'
+      responses:
+        '200':
+          description: Import completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/ValidationError'
+  /api/spend-by-category:
+    get:
+      tags: [Analytics]
+      summary: Return spend totals grouped by category.
+      operationId: getSpendByCategory
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/month'
+      responses:
+        '200':
+          description: Spend-by-category payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/spend-by-month:
+    get:
+      tags: [Analytics]
+      summary: Return spend totals grouped by month.
+      operationId: getSpendByMonth
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: months
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Spend-by-month payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/dashboard-metrics:
+    get:
+      tags: [Analytics]
+      summary: Return dashboard metrics.
+      operationId: getDashboardMetrics
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: months
+          in: query
+          schema:
+            type: integer
+        - name: until
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Dashboard metrics payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/analytics/account-overview:
+    get:
+      tags: [Analytics]
+      summary: Return aggregate account overview metrics.
+      operationId: getAccountOverview
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Account overview payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/expense-breakdown:
+    get:
+      tags: [Analytics]
+      summary: Return an expense breakdown view.
+      operationId: getExpenseBreakdown
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/month'
+      responses:
+        '200':
+          description: Expense breakdown payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/expense-merchant-trend:
+    get:
+      tags: [Analytics]
+      summary: Return merchant expense trend data.
+      operationId: getExpenseMerchantTrend
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: merchant
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Merchant trend payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /api/budget-metrics:
+    get:
+      tags: [Analytics]
+      summary: Return budget status metrics.
+      operationId: getBudgetMetrics
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/month'
+      responses:
+        '200':
+          description: Budget metrics payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/safe-to-spend:
+    get:
+      tags: [Analytics]
+      summary: Return safe-to-spend guidance.
+      operationId: getSafeToSpend
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Safe-to-spend payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/weekly-digest:
+    get:
+      tags: [Analytics]
+      summary: Return weekly digest metrics.
+      operationId: getWeeklyDigest
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Weekly digest payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/income-pattern:
+    get:
+      tags: [Analytics]
+      summary: Return inferred income cadence and payday window.
+      operationId: getIncomePattern
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Income pattern payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/recurring-patterns:
+    get:
+      tags: [Analytics]
+      summary: Return recurring expense and income patterns.
+      operationId: getRecurringPatterns
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Recurring pattern payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/transaction-suggestions:
+    get:
+      tags: [Analytics]
+      summary: Return memorized transaction suggestions.
+      operationId: getTransactionSuggestions
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Suggestion payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/transaction-template-suggestions:
+    get:
+      tags: [Analytics]
+      summary: Return full transaction template suggestions.
+      operationId: getTransactionTemplateSuggestions
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Template suggestion payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/transaction-template-suggestions/feedback:
+    post:
+      tags: [Analytics]
+      summary: Submit feedback for a template suggestion.
+      operationId: submitTransactionTemplateFeedback
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateFeedbackRequest'
+      responses:
+        '200':
+          description: Feedback recorded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /api/snapshot:
+    get:
+      tags: [Analytics]
+      summary: Return a snapshot summary payload.
+      operationId: getSnapshot
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Snapshot payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/spending-intelligence:
+    get:
+      tags: [Analytics]
+      summary: Return higher-order spending intelligence analysis.
+      operationId: getSpendingIntelligence
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: month
+          in: query
+          schema:
+            type: string
+            pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+          required: false
+          description: Reference month in YYYY-MM format.
+      responses:
+        '200':
+          description: Spending intelligence payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/debt-accounts:
+    get:
+      tags: [Debt]
+      summary: List active debt accounts.
+      operationId: listDebtAccounts
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Debt account list.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OkEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          accounts:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/DebtAccount'
+                        additionalProperties: true
+    post:
+      tags: [Debt]
+      summary: Create a debt account.
+      operationId: createDebtAccount
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DebtAccountRequest'
+      responses:
+        '201':
+          description: Debt account created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/debt-accounts/summary:
+    get:
+      tags: [Debt]
+      summary: Return debt summary metrics.
+      operationId: getDebtSummary
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Debt summary payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/debt-accounts/payoff-plan:
+    get:
+      tags: [Debt]
+      summary: Return avalanche and snowball payoff plans.
+      operationId: getDebtPayoffPlan
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: monthly_payment_kd
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Payoff plan payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /api/debt-accounts/{account_id}/update:
+    post:
+      tags: [Debt]
+      summary: Update a debt account.
+      operationId: updateDebtAccount
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/accountId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DebtAccountRequest'
+      responses:
+        '200':
+          description: Debt account updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/debt-accounts/{account_id}/delete:
+    post:
+      tags: [Debt]
+      summary: Soft-delete a debt account.
+      operationId: deleteDebtAccount
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/accountId'
+      responses:
+        '200':
+          description: Debt account archived.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/savings-goals:
+    get:
+      tags: [Goals]
+      summary: List savings goals.
+      operationId: listSavingsGoals
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: include_inactive
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Savings goals list.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OkEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          goals:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/SavingsGoal'
+                          include_inactive:
+                            type: boolean
+                        additionalProperties: true
+    post:
+      tags: [Goals]
+      summary: Create a savings goal.
+      operationId: createSavingsGoal
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavingsGoalRequest'
+      responses:
+        '201':
+          description: Savings goal created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /api/savings-goals/{goal_id}/projection:
+    get:
+      tags: [Goals]
+      summary: Return projection details for a savings goal.
+      operationId: getSavingsGoalProjection
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/goalId'
+      responses:
+        '200':
+          description: Projection payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/savings-goals/{goal_id}/update:
+    post:
+      tags: [Goals]
+      summary: Update a savings goal.
+      operationId: updateSavingsGoal
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/goalId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavingsGoalRequest'
+      responses:
+        '200':
+          description: Savings goal updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/savings-goals/{goal_id}/deposit:
+    post:
+      tags: [Goals]
+      summary: Deposit progress into a savings goal.
+      operationId: depositSavingsGoal
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/goalId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount_kd
+              properties:
+                amount_kd:
+                  type: string
+      responses:
+        '200':
+          description: Savings goal progress updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/savings-goals/{goal_id}/delete:
+    post:
+      tags: [Goals]
+      summary: Soft-delete a savings goal.
+      operationId: deleteSavingsGoal
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/goalId'
+      responses:
+        '200':
+          description: Savings goal archived.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'

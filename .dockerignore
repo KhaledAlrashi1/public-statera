@@ -1,0 +1,17 @@
+.git
+.gitignore
+.env
+.env.prod
+.venv
+__pycache__
+.pytest_cache
+.mypy_cache
+.ruff_cache
+frontend/node_modules
+frontend/dist
+logs
+reports
+.messages_snapshot
+data/messages/chat.db
+data/messages/chat.db-shm
+data/messages/chat.db-wal

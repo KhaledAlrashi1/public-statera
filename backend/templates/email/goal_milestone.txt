@@ -1,0 +1,6 @@
+Savings Goal Milestone
+
+You reached {{ milestone_pct }}% of your goal {{ goal_name }}.
+Progress: KD {{ current_kd }} of KD {{ target_kd }}.
+
+Keep the momentum going.

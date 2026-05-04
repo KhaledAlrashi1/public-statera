@@ -1,0 +1,6 @@
+Bank Connection Expiring
+
+Your {{ institution_name }} connection expires in {{ days_remaining }} day{% if days_remaining != 1 %}s{% endif %}.
+Expiry date: {{ expires_on }}.
+
+Renew consent to keep Personal Statera synced.

@@ -1,0 +1,7 @@
+Weekly Digest
+
+Week: {{ week_start }} to {{ week_end }}
+Top categories:
+{% for row in top_categories %}- {{ row.name }} — KD {{ row.amount_kd }}
+{% endfor %}
+Upcoming bills: {{ upcoming_bills_count }}
