@@ -17,12 +17,12 @@ MESSAGES_SNAPSHOT_INTERVAL_SECONDS ?= 60
 dev:          ## Start Flask + Vite in one terminal with clone-safe defaults
 	@docker compose up -d postgres redis; \
 	trap 'kill 0' EXIT; \
-	FLASK_PORT=$(FLASK_PORT) PERSONAL_STATERA_DEV_MODE=true ENABLE_MESSAGES_INGEST=true $(PYTHON) run.py & \
+	FLASK_PORT=$(FLASK_PORT) PERSONAL_STATERA_DEV_MODE=true $(PYTHON) run.py & \
 	cd frontend && FRONTEND_DEV_HOST=$(FRONTEND_DEV_HOST) FRONTEND_DEV_PORT=$(FRONTEND_DEV_PORT) VITE_API_PROXY_TARGET=$(FRONTEND_PROXY_TARGET) npm run dev -- --host $(FRONTEND_DEV_HOST) --port $(FRONTEND_DEV_PORT) & \
 	wait
 
 backend:      ## Start Flask only
-	FLASK_PORT=$(FLASK_PORT) PERSONAL_STATERA_DEV_MODE=true ENABLE_MESSAGES_INGEST=true $(PYTHON) run.py
+	FLASK_PORT=$(FLASK_PORT) PERSONAL_STATERA_DEV_MODE=true $(PYTHON) run.py
 
 frontend:     ## Start Vite only
 	cd frontend && FRONTEND_DEV_HOST=$(FRONTEND_DEV_HOST) FRONTEND_DEV_PORT=$(FRONTEND_DEV_PORT) VITE_API_PROXY_TARGET=$(FRONTEND_PROXY_TARGET) npm run dev -- --host $(FRONTEND_DEV_HOST) --port $(FRONTEND_DEV_PORT)
