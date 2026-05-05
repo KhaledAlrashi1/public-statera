@@ -2,7 +2,7 @@
 .env
 .env.prod
 
-# Python
+# Python (Phase 1 remnants — fully removed in Phase 2)
 .venv/
 __pycache__/
 *.py[cod]
@@ -10,21 +10,22 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
-# Frontend build and package artifacts
-frontend/node_modules/
-frontend/dist/
-frontend/.vite/
-frontend/playwright-report/
-frontend/test-results/
-frontend/tsconfig.tsbuildinfo
+# Node / pnpm
+node_modules/
+apps/*/node_modules/
+apps/*/dist/
+
+# Frontend artifacts
+apps/web/.vite/
+apps/web/playwright-report/
+apps/web/test-results/
+apps/web/tsconfig.tsbuildinfo
 
 # Runtime artifacts
 logs/
 reports/
 .messages_snapshot/
-data/messages/chat.db
-data/messages/chat.db-shm
-data/messages/chat.db-wal
+data/
 
 # OS/editor noise
 .DS_Store

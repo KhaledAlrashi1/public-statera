@@ -510,12 +510,10 @@ def create_app() -> Flask:
     # Register blueprints
     from backend.routes import (
         auth, password_reset, profile_security_links, pages, transactions, categories, merchants,
-        budgets, analytics, memorized, upload, messages, health, bank, notifications, debt, goals,
-        features,
+        budgets, analytics, memorized, upload, health, bank, notifications, debt, goals,
     )
     for mod in [auth, password_reset, profile_security_links, pages, transactions, categories, merchants,
-                budgets, analytics, memorized, upload, messages, health, notifications, debt, goals,
-                features]:
+                budgets, analytics, memorized, upload, health, notifications, debt, goals]:
         app.register_blueprint(mod.bp)
     app.register_blueprint(bank.bp, url_prefix="/api/bank")
 
