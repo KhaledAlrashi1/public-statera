@@ -1,6 +1,0 @@
-Budget Alert
-
-You have used {{ ratio_pct }}% of your {{ category }} budget for {{ month_label }}.
-Spent: KD {{ spent_kd }} of KD {{ budget_kd }}.
-
-Open Personal Statera to review and adjust your plan.
