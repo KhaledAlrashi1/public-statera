@@ -76,5 +76,32 @@ services:
       retries: 8
       start_period: 30s
 
+  worker:
+    profiles: ["docker-app"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    restart: unless-stopped
+    command: ["pnpm", "--filter", "statera-api", "worker"]
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: mysql://${MYSQL_USER:-statera}:${MYSQL_PASSWORD:-statera}@mysql:3306/${MYSQL_DATABASE:-statera}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+      ENCRYPTION_KEY_PREVIOUS: ${ENCRYPTION_KEY_PREVIOUS:-}
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      REDIS_URL: "redis://redis:6379/1"
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-development}
+      POSTMARK_API_KEY: ${POSTMARK_API_KEY:-}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@example.com}
+      ENABLE_OPEN_BANKING: ${ENABLE_OPEN_BANKING:-false}
+      ENABLE_TEMPLATE_SUGGESTIONS: ${ENABLE_TEMPLATE_SUGGESTIONS:-false}
+      ENABLE_RECURRING_PATTERNS: ${ENABLE_RECURRING_PATTERNS:-true}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
   mysqldata:
