@@ -6,6 +6,7 @@ import { env } from "./lib/env"
 import { Sentry } from "./lib/sentry"
 import { healthRouter } from "./routes/health"
 import { authRouter } from "./routes/auth"
+import { categoriesRouter } from "./routes/categories"
 
 export function createApp() {
   const app = new Hono()
@@ -27,6 +28,9 @@ export function createApp() {
 
   // Auth routes
   app.route("/api/auth", authRouter)
+
+  // Domain routes
+  app.route("/api/categories", categoriesRouter)
 
   // 404 fallback for unmatched /api/* routes
   app.notFound((c) => {
