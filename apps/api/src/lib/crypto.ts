@@ -8,7 +8,7 @@
  * and vice versa — useful for future data migrations.
  */
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto"
-import { env } from "./env.js"
+import { env } from "./env"
 
 const ENC_PREFIX = "enc1:"
 const NONCE_BYTES = 12

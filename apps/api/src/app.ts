@@ -1,9 +1,9 @@
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { logger } from "hono/logger"
-import { env } from "./lib/env.js"
-import { healthRouter } from "./routes/health.js"
-import { authRouter } from "./routes/auth.js"
+import { env } from "./lib/env"
+import { healthRouter } from "./routes/health"
+import { authRouter } from "./routes/auth"
 
 export function createApp() {
   const app = new Hono()

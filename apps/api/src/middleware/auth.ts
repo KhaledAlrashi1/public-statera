@@ -11,7 +11,7 @@ import type { Context, Next } from "hono"
 import { getCookie } from "hono/cookie"
 import { HTTPException } from "hono/http-exception"
 import * as jose from "jose"
-import { env } from "../lib/env.js"
+import { env } from "../lib/env"
 
 export interface Session {
   userId: number

@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server"
-import { env } from "./lib/env.js"
-import { createApp } from "./app.js"
+import { env } from "./lib/env"
+import { createApp } from "./app"
 
 const app = createApp()
 

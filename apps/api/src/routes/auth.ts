@@ -15,8 +15,8 @@
 import { Hono } from "hono"
 import { getCookie, setCookie, deleteCookie } from "hono/cookie"
 import { HTTPException } from "hono/http-exception"
-import { env } from "../lib/env.js"
-import { createSessionToken, requireAuth } from "../middleware/auth.js"
+import { env } from "../lib/env"
+import { createSessionToken, requireAuth } from "../middleware/auth"
 
 const auth = new Hono()
 
