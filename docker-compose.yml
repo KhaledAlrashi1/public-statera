@@ -11,140 +11,70 @@ services:
       timeout: 3s
       retries: 10
 
-  postgres:
-    image: postgres:16-alpine
+  mysql:
+    image: mysql:8.0
     restart: unless-stopped
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci
     ports:
-      - "${POSTGRES_HOST_PORT:-5435}:5432"
+      - "${MYSQL_HOST_PORT:-3306}:3306"
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-personal_statera}
-      POSTGRES_USER: ${POSTGRES_USER:-finance}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-statera}
+      MYSQL_USER: ${MYSQL_USER:-statera}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-statera}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - mysqldata:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-finance} -d ${POSTGRES_DB:-personal_statera}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 20
+      start_period: 30s
 
-  backend:
+  api:
     profiles: ["docker-app"]
     build:
       context: .
-      dockerfile: Dockerfile.backend
+      dockerfile: docker/Dockerfile.api
     restart: unless-stopped
     ports:
-      - "${APP_PORT:-8004}:8000"
+      - "${API_HOST_PORT:-3000}:3000"
     environment:
-      FLASK_APP: run.py
-      DATABASE_URL: postgresql://${POSTGRES_USER:-finance}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-personal_statera}
-      SECRET_KEY: ${SECRET_KEY}
+      NODE_ENV: development
+      API_PORT: "3000"
+      DATABASE_URL: mysql://${MYSQL_USER:-statera}:${MYSQL_PASSWORD:-statera}@mysql:3306/${MYSQL_DATABASE:-statera}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
-      PERSONAL_STATERA_DEV_MODE: "${PERSONAL_STATERA_DEV_MODE:-${DINARTRACK_DEV_MODE:-false}}"
-      PROXY_FIX_NUM_PROXIES: "0"
-      REDIS_URL: "redis://redis:6379/0"
-      CELERY_BROKER_URL: "redis://redis:6379/0"
-      CELERY_RESULT_BACKEND: "redis://redis:6379/0"
-      RATE_LIMIT_BACKEND: "redis"
-      GUNICORN_WORKERS: "1"
-      GUNICORN_THREADS: "4"
-      OPERATOR_API_TOKEN: "${OPERATOR_API_TOKEN:-}"
-      SENTRY_DSN: "${SENTRY_DSN:-}"
-      SENTRY_ENVIRONMENT: "${SENTRY_ENVIRONMENT:-development}"
-      ANALYTICS_COMPUTE_TIMEOUT_SECONDS: "${ANALYTICS_COMPUTE_TIMEOUT_SECONDS:-10}"
-      ANALYTICS_CACHE_CIRCUIT_BREAKER_ENABLED: "${ANALYTICS_CACHE_CIRCUIT_BREAKER_ENABLED:-true}"
-      ANALYTICS_CACHE_CIRCUIT_BREAKER_TIMEOUT_SECONDS: "${ANALYTICS_CACHE_CIRCUIT_BREAKER_TIMEOUT_SECONDS:-10}"
-      CORS_ORIGINS: "${CORS_ORIGINS:-http://127.0.0.1:3001}"
+      ENCRYPTION_KEY_PREVIOUS: ${ENCRYPTION_KEY_PREVIOUS:-}
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      REDIS_URL: "redis://redis:6379/1"
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://127.0.0.1:3002}
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID:-}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET:-}
+      OAUTH_ISSUER_URL: ${OAUTH_ISSUER_URL:-https://accounts.google.com}
+      OAUTH_PROVIDER: ${OAUTH_PROVIDER:-google}
+      OAUTH_REDIRECT_URI: ${OAUTH_REDIRECT_URI:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-development}
+      POSTMARK_API_KEY: ${POSTMARK_API_KEY:-}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@example.com}
+      ENABLE_OPEN_BANKING: ${ENABLE_OPEN_BANKING:-false}
+      ENABLE_TEMPLATE_SUGGESTIONS: ${ENABLE_TEMPLATE_SUGGESTIONS:-false}
+      ENABLE_RECURRING_PATTERNS: ${ENABLE_RECURRING_PATTERNS:-true}
     depends_on:
-      postgres:
+      mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
       test:
         [
-          "CMD",
-          "python",
-          "-c",
-          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/readyz', timeout=3).read()",
+          "CMD-SHELL",
+          "node -e \"const h=require('http');h.get('http://127.0.0.1:3000/healthz',r=>{process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))\"",
         ]
       interval: 15s
       timeout: 5s
       retries: 8
-      start_period: 60s
-
-  worker:
-    profiles: ["docker-app"]
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    restart: unless-stopped
-    entrypoint: ["./docker/worker-entrypoint.sh"]
-    environment:
-      FLASK_APP: run.py
-      DATABASE_URL: postgresql://${POSTGRES_USER:-finance}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-personal_statera}
-      SECRET_KEY: ${SECRET_KEY}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
-      REDIS_URL: "redis://redis:6379/0"
-      CELERY_BROKER_URL: "redis://redis:6379/0"
-      CELERY_RESULT_BACKEND: "redis://redis:6379/0"
-      CELERY_CONCURRENCY: "${CELERY_CONCURRENCY:-2}"
-      RATE_LIMIT_BACKEND: "redis"
-      PERSONAL_STATERA_DEV_MODE: "${PERSONAL_STATERA_DEV_MODE:-${DINARTRACK_DEV_MODE:-false}}"
-      OPERATOR_API_TOKEN: "${OPERATOR_API_TOKEN:-}"
-      SENTRY_DSN: "${SENTRY_DSN:-}"
-      SENTRY_ENVIRONMENT: "${SENTRY_ENVIRONMENT:-development}"
-      CORS_ORIGINS: "${CORS_ORIGINS:-http://127.0.0.1:3001}"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      backend:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "celery -A backend.worker.celery_app inspect ping --timeout 10 -d celery@$$HOSTNAME"]
-      interval: 30s
-      timeout: 15s
-      retries: 3
-      start_period: 60s
-
-  beat:
-    profiles: ["docker-app"]
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    restart: unless-stopped
-    entrypoint: ["./docker/beat-entrypoint.sh"]
-    environment:
-      FLASK_APP: run.py
-      DATABASE_URL: postgresql://${POSTGRES_USER:-finance}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-personal_statera}
-      SECRET_KEY: ${SECRET_KEY}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
-      REDIS_URL: "redis://redis:6379/0"
-      CELERY_BROKER_URL: "redis://redis:6379/0"
-      CELERY_RESULT_BACKEND: "redis://redis:6379/0"
-      RATE_LIMIT_BACKEND: "redis"
-      PERSONAL_STATERA_DEV_MODE: "${PERSONAL_STATERA_DEV_MODE:-${DINARTRACK_DEV_MODE:-false}}"
-      OPERATOR_API_TOKEN: "${OPERATOR_API_TOKEN:-}"
-      SENTRY_DSN: "${SENTRY_DSN:-}"
-      SENTRY_ENVIRONMENT: "${SENTRY_ENVIRONMENT:-development}"
-      CORS_ORIGINS: "${CORS_ORIGINS:-http://127.0.0.1:3001}"
-    depends_on:
-      redis:
-        condition: service_healthy
-      backend:
-        condition: service_healthy
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
-    # IMPORTANT: Never scale this service beyond 1 replica.
-    # Multiple Beat instances double-execute maintenance tasks.
-    # See beat_task_lock handling in backend/tasks.py.
-    # Container naming is left to Compose so parallel clones do not collide.
+      start_period: 30s
 
 volumes:
-  pgdata:
+  mysqldata:
