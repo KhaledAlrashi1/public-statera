@@ -7,6 +7,7 @@ import {
   int,
   mysqlTable,
   text,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core"
 
@@ -15,8 +16,8 @@ export const users = mysqlTable(
   {
     id: int("id").primaryKey().autoincrement(),
     email: varchar("email", { length: 255 }).notNull().unique(),
-    // Manus OAuth external identifier — populated on first OAuth login.
-    manusUserId: varchar("manus_user_id", { length: 255 }).notNull().unique(),
+    authProvider: varchar("auth_provider", { length: 32 }).notNull().default("google"),
+    externalId: varchar("external_id", { length: 255 }).notNull(),
     displayName: varchar("display_name", { length: 128 }),
     firstName: varchar("first_name", { length: 64 }),
     lastName: varchar("last_name", { length: 64 }),
@@ -31,7 +32,10 @@ export const users = mysqlTable(
       .notNull()
       .default(sql`CURRENT_TIMESTAMP(3)`),
   },
-  (t) => [index("ix_users_email").on(t.email)],
+  (t) => [
+    index("ix_users_email").on(t.email),
+    uniqueIndex("uq_users_provider_external_id").on(t.authProvider, t.externalId),
+  ],
 )
 
 export const userProfiles = mysqlTable("user_profiles", {

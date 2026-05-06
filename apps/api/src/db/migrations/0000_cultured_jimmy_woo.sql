@@ -16,7 +16,8 @@ CREATE TABLE `user_profiles` (
 CREATE TABLE `users` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`email` varchar(255) NOT NULL,
-	`manus_user_id` varchar(255) NOT NULL,
+	`auth_provider` varchar(32) NOT NULL DEFAULT 'google',
+	`external_id` varchar(255) NOT NULL,
 	`display_name` varchar(128),
 	`first_name` varchar(64),
 	`last_name` varchar(64),
@@ -28,7 +29,7 @@ CREATE TABLE `users` (
 	`created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	CONSTRAINT `users_id` PRIMARY KEY(`id`),
 	CONSTRAINT `users_email_unique` UNIQUE(`email`),
-	CONSTRAINT `users_manus_user_id_unique` UNIQUE(`manus_user_id`)
+	CONSTRAINT `uq_users_provider_external_id` UNIQUE(`auth_provider`,`external_id`)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 --> statement-breakpoint
 CREATE TABLE `categories` (

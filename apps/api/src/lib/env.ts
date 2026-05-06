@@ -34,16 +34,22 @@ export const env = {
   encryptionKey: isDev ? optional("ENCRYPTION_KEY", "0".repeat(64)) : required("ENCRYPTION_KEY"),
   encryptionKeyPrevious: optional("ENCRYPTION_KEY_PREVIOUS"),
 
-  sessionSecret: isDev ? optional("SESSION_SECRET", "dev-session-secret-do-not-use-in-production") : required("SESSION_SECRET"),
+  sessionSecret: isDev
+    ? optional("SESSION_SECRET", "dev-session-secret-do-not-use-in-production")
+    : required("SESSION_SECRET"),
 
-  manusClientId: optional("MANUS_CLIENT_ID"),
-  manusClientSecret: optional("MANUS_CLIENT_SECRET"),
-  manusAuthUrl: optional("MANUS_AUTH_URL"),
-  manusTokenUrl: optional("MANUS_TOKEN_URL"),
-  manusUserinfoUrl: optional("MANUS_USERINFO_URL"),
-  manusCallbackUrl: optional("MANUS_CALLBACK_URL"),
+  oauthClientId: isDev ? optional("OAUTH_CLIENT_ID") : required("OAUTH_CLIENT_ID"),
+  oauthClientSecret: isDev ? optional("OAUTH_CLIENT_SECRET") : required("OAUTH_CLIENT_SECRET"),
+  oauthIssuerUrl: optional("OAUTH_ISSUER_URL", "https://accounts.google.com"),
+  oauthProvider: optional("OAUTH_PROVIDER", "google"),
+  oauthRedirectUri: optional(
+    "OAUTH_REDIRECT_URI",
+    "http://127.0.0.1:3000/api/auth/callback",
+  ),
 
-  corsOrigins: optional("CORS_ORIGINS", "http://127.0.0.1:3002").split(",").map(s => s.trim()),
+  corsOrigins: optional("CORS_ORIGINS", "http://127.0.0.1:3002")
+    .split(",")
+    .map((s) => s.trim()),
 
   redisUrl: optional("REDIS_URL", "redis://127.0.0.1:6379/1"),
 
@@ -55,5 +61,6 @@ export const env = {
 
   enableOpenBanking: optional("ENABLE_OPEN_BANKING").toLowerCase() === "true",
   enableTemplateSuggestions: optional("ENABLE_TEMPLATE_SUGGESTIONS").toLowerCase() === "true",
-  enableRecurringPatterns: optional("ENABLE_RECURRING_PATTERNS", "true").toLowerCase() === "true",
+  enableRecurringPatterns:
+    optional("ENABLE_RECURRING_PATTERNS", "true").toLowerCase() === "true",
 }

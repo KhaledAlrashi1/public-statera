@@ -1,59 +1,173 @@
-/**
- * Manus OAuth auth routes — stub implementation.
- *
- * Full flow:
- *   GET  /api/auth/login     → redirect to Manus authorization endpoint
- *   GET  /api/auth/callback  → exchange code → create/update user → set session cookie
- *   POST /api/auth/logout    → clear session cookie
- *   GET  /api/auth/me        → return current user (requires auth)
- *
- * NOTE: existing private-version users (bcrypt passwords) cannot log in to
- * this system without a separate account-migration step planned after Phase 3.
- *
- * TODO (Phase 3): implement full OAuth code exchange and user upsert.
- */
 import { Hono } from "hono"
-import { getCookie, setCookie, deleteCookie } from "hono/cookie"
-import { HTTPException } from "hono/http-exception"
+import { deleteCookie, getCookie, setCookie } from "hono/cookie"
+import { SignJWT, jwtVerify } from "jose"
+import { and, eq } from "drizzle-orm"
+import { getDb } from "../db/connection"
+import { users } from "../db/schema"
 import { env } from "../lib/env"
+import { generators, getOidcClient } from "../lib/oidc"
 import { createSessionToken, requireAuth } from "../middleware/auth"
 
-const auth = new Hono()
+const router = new Hono()
 
-auth.get("/login", (c) => {
-  if (!env.manusClientId || !env.manusAuthUrl) {
-    if (env.isDev) {
-      return c.json({ ok: false, error: "Manus OAuth not configured. Set MANUS_CLIENT_ID and MANUS_AUTH_URL." }, 503)
-    }
-    throw new HTTPException(503, { message: "OAuth provider not configured." })
+// Short-lived signed cookie carries state + nonce across the OAuth redirect.
+const OIDC_STATE_COOKIE = "oidc_state"
+const OIDC_STATE_TTL = 600 // 10 minutes
+
+function stateSecret(): Uint8Array {
+  return new TextEncoder().encode(env.sessionSecret)
+}
+
+async function packStateCookie(state: string, nonce: string): Promise<string> {
+  return new SignJWT({ state, nonce })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime(`${OIDC_STATE_TTL}s`)
+    .sign(stateSecret())
+}
+
+async function unpackStateCookie(
+  token: string,
+): Promise<{ state: string; nonce: string }> {
+  const { payload } = await jwtVerify(token, stateSecret())
+  return { state: payload["state"] as string, nonce: payload["nonce"] as string }
+}
+
+// GET /api/auth/login
+// Redirects to the OIDC provider's authorization endpoint.
+router.get("/login", async (c) => {
+  if (!env.oauthClientId) {
+    return c.json({ error: "OAuth not configured — set OAUTH_CLIENT_ID" }, 503)
   }
 
-  const params = new URLSearchParams({
-    client_id: env.manusClientId,
-    redirect_uri: env.manusCallbackUrl,
-    response_type: "code",
-    scope: "openid email profile",
+  const client = await getOidcClient()
+  const state = generators.state()
+  const nonce = generators.nonce()
+
+  const packed = await packStateCookie(state, nonce)
+  setCookie(c, OIDC_STATE_COOKIE, packed, {
+    httpOnly: true,
+    sameSite: "Lax",
+    secure: !env.isDev,
+    maxAge: OIDC_STATE_TTL,
+    path: "/",
   })
 
-  return c.redirect(`${env.manusAuthUrl}?${params.toString()}`)
+  const authUrl = client.authorizationUrl({
+    scope: "openid email profile",
+    state,
+    nonce,
+  })
+
+  return c.redirect(authUrl)
 })
 
-auth.get("/callback", async (c) => {
-  // TODO (Phase 3): exchange code for token, fetch userinfo, upsert user row
-  if (env.isDev) {
-    return c.json({ ok: false, error: "OAuth callback stub — not yet implemented." }, 501)
+// GET /api/auth/callback
+// Exchanges the authorization code, upserts the user, and sets the session cookie.
+router.get("/callback", async (c) => {
+  const packed = getCookie(c, OIDC_STATE_COOKIE)
+  deleteCookie(c, OIDC_STATE_COOKIE, { path: "/" })
+
+  if (!packed) {
+    return c.json(
+      { error: "Missing state cookie — login session expired or cookies blocked" },
+      400,
+    )
   }
-  throw new HTTPException(501, { message: "OAuth callback not yet implemented." })
+
+  let storedState: string
+  let storedNonce: string
+  try {
+    ;({ state: storedState, nonce: storedNonce } = await unpackStateCookie(packed))
+  } catch {
+    return c.json({ error: "Invalid or expired state cookie" }, 400)
+  }
+
+  const client = await getOidcClient()
+  // callbackParams() accepts a full URL string in openid-client v5.
+  const params = client.callbackParams(c.req.url)
+
+  let tokenSet
+  try {
+    tokenSet = await client.callback(env.oauthRedirectUri, params, {
+      state: storedState,
+      nonce: storedNonce,
+    })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "OAuth callback failed"
+    return c.json({ error: message }, 400)
+  }
+
+  const claims = tokenSet.claims()
+  const externalId = claims.sub
+  const email = claims.email
+  if (!email) {
+    return c.json(
+      { error: "No email in OIDC claims — verify provider scopes include 'email'" },
+      400,
+    )
+  }
+
+  const provider = env.oauthProvider
+  const db = getDb()
+
+  const [existing] = await db
+    .select()
+    .from(users)
+    .where(and(eq(users.authProvider, provider), eq(users.externalId, externalId)))
+    .limit(1)
+
+  let userId: number
+
+  if (!existing) {
+    const [inserted] = await db
+      .insert(users)
+      .values({
+        authProvider: provider,
+        externalId,
+        email,
+        displayName: (claims["name"] as string | undefined) ?? null,
+        firstName: (claims["given_name"] as string | undefined) ?? null,
+        lastName: (claims["family_name"] as string | undefined) ?? null,
+      })
+      .$returningId()
+    userId = inserted.id
+  } else {
+    if (!existing.isActive) {
+      return c.json({ error: "Account is deactivated" }, 403)
+    }
+    userId = existing.id
+    // Refresh email and display name in case they changed at the provider.
+    await db
+      .update(users)
+      .set({
+        email,
+        displayName: (claims["name"] as string | undefined) ?? existing.displayName,
+      })
+      .where(eq(users.id, userId))
+  }
+
+  const sessionToken = await createSessionToken({ userId, externalId, authProvider: provider })
+  setCookie(c, "statera_session", sessionToken, {
+    httpOnly: true,
+    sameSite: "Lax",
+    secure: !env.isDev,
+    maxAge: 60 * 60 * 24 * 30,
+    path: "/",
+  })
+
+  const frontendOrigin = env.corsOrigins[0] ?? "http://127.0.0.1:3002"
+  return c.redirect(`${frontendOrigin}/`)
 })
 
-auth.post("/logout", (c) => {
+// POST /api/auth/logout
+router.post("/logout", (c) => {
   deleteCookie(c, "statera_session", { path: "/" })
   return c.json({ ok: true })
 })
 
-auth.get("/me", requireAuth, (c) => {
-  const session = c.get("session")
-  return c.json({ ok: true, session })
+// GET /api/auth/me
+router.get("/me", requireAuth, (c) => {
+  return c.json({ session: c.var.session })
 })
 
-export { auth as authRouter }
+export { router as authRouter }

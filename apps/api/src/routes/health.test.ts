@@ -7,7 +7,7 @@ describe("health routes", () => {
   it("GET /health returns 200 with ok:true", async () => {
     const res = await app.request("/health")
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await res.json() as Record<string, unknown>
     expect(body.ok).toBe(true)
     expect(body.status).toBe("healthy")
   })
@@ -25,7 +25,7 @@ describe("health routes", () => {
   it("unknown /api/ route returns 404 JSON", async () => {
     const res = await app.request("/api/does-not-exist")
     expect(res.status).toBe(404)
-    const body = await res.json()
+    const body = await res.json() as Record<string, unknown>
     expect(body.ok).toBe(false)
   })
 })
