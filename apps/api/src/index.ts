@@ -1,3 +1,7 @@
+// initSentry must be called before anything else so startup errors are captured.
+import { initSentry } from "./lib/sentry"
+initSentry()
+
 import { serve } from "@hono/node-server"
 import { env } from "./lib/env"
 import { createApp } from "./app"

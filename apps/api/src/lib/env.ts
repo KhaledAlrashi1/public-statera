@@ -54,7 +54,8 @@ export const env = {
   redisUrl: optional("REDIS_URL", "redis://127.0.0.1:6379/1"),
 
   sentryDsn: optional("SENTRY_DSN"),
-  sentryEnvironment: optional("SENTRY_ENVIRONMENT", "development"),
+  sentryEnvironment: optional("SENTRY_ENVIRONMENT", isDev ? "development" : "production"),
+  sentryRelease: optional("SENTRY_RELEASE"),
 
   postmarkApiKey: optional("POSTMARK_API_KEY"),
   mailFromAddress: optional("MAIL_FROM_ADDRESS", "noreply@example.com"),

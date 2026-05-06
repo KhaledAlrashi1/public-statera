@@ -1,7 +1,9 @@
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { logger } from "hono/logger"
+import { HTTPException } from "hono/http-exception"
 import { env } from "./lib/env"
+import { Sentry } from "./lib/sentry"
 import { healthRouter } from "./routes/health"
 import { authRouter } from "./routes/auth"
 
@@ -35,9 +37,17 @@ export function createApp() {
   })
 
   app.onError((err, c) => {
-    console.error(err)
-    const status = "status" in err ? (err as { status: number }).status : 500
-    const message = err.message || "Internal server error."
+    // Report unexpected errors to Sentry. HTTPExceptions (4xx) are operational
+    // errors, not bugs — only report 5xx.
+    const status = err instanceof HTTPException ? err.status : 500
+    if (status >= 500) {
+      Sentry.captureException(err, {
+        tags: { url: c.req.url, method: c.req.method },
+      })
+    }
+
+    const message =
+      err instanceof HTTPException ? err.message : (err.message || "Internal server error.")
     return c.json({ ok: false, error: message }, status as 500)
   })
 
