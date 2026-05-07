@@ -12,6 +12,7 @@ import { transactionsRouter } from "./routes/transactions"
 import { memorizedRouter } from "./routes/memorized"
 import { budgetsRouter } from "./routes/budgets"
 import { debtRouter } from "./routes/debt"
+import { savingsGoalsRouter } from "./routes/savings-goals"
 
 export function createApp() {
   const app = new Hono()
@@ -41,6 +42,7 @@ export function createApp() {
   app.route("/api/memorized-transactions", memorizedRouter)
   app.route("/api/budgets", budgetsRouter)
   app.route("/api/debt-accounts", debtRouter)
+  app.route("/api/savings-goals", savingsGoalsRouter)
 
   // 404 fallback for unmatched /api/* routes
   app.notFound((c) => {

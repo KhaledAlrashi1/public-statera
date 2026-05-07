@@ -20,7 +20,8 @@ export type GoalRow = {
   userId: number
   targetKd: string
   currentKd: string
-  targetDate: string | null // YYYY-MM-DD or null
+  // Drizzle MySQL date() may return a Date object; the lib normalizes to string internally.
+  targetDate: Date | string | null
 }
 
 export type GoalProjection = {
@@ -62,11 +63,12 @@ function shiftMonths(yyyyMmDd: string, months: number): string {
 }
 
 // Python: max(1, (days + 29) // 30) where days = (target_date - today).days
-function monthsToTargetDate(today: string, targetDate: string | null): number | null {
+function monthsToTargetDate(today: string, targetDate: Date | string | null): number | null {
   if (!targetDate) return null
-  if (targetDate <= today) return 0
+  const targetStr = targetDate instanceof Date ? targetDate.toISOString().slice(0, 10) : targetDate
+  if (targetStr <= today) return 0
   const [ty, tm, td] = today.split("-").map(Number)
-  const [dy, dm, dd] = targetDate.split("-").map(Number)
+  const [dy, dm, dd] = targetStr.split("-").map(Number)
   const daysDiff = Math.round(
     (Date.UTC(dy, dm - 1, dd) - Date.UTC(ty, tm - 1, td)) / 86400000,
   )
