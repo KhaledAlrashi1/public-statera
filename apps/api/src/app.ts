@@ -8,6 +8,7 @@ import { healthRouter } from "./routes/health"
 import { authRouter } from "./routes/auth"
 import { categoriesRouter } from "./routes/categories"
 import { merchantsRouter } from "./routes/merchants"
+import { transactionsRouter } from "./routes/transactions"
 
 export function createApp() {
   const app = new Hono()
@@ -33,6 +34,7 @@ export function createApp() {
   // Domain routes
   app.route("/api/categories", categoriesRouter)
   app.route("/api/merchants", merchantsRouter)
+  app.route("/api/transactions", transactionsRouter)
 
   // 404 fallback for unmatched /api/* routes
   app.notFound((c) => {
