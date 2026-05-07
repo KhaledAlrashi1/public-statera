@@ -28,5 +28,7 @@ export const productEvents = mysqlTable(
     index("ix_product_events_event_ts").on(t.eventTs),
     index("ix_product_events_user_event").on(t.userId, t.eventName),
     index("ix_product_events_event_ts_name").on(t.eventName, t.eventTs),
+    // Covers the savings-goal deposit pace query: WHERE user_id=? AND event_name=? AND event_ts>=?
+    index("ix_product_events_user_event_ts").on(t.userId, t.eventName, t.eventTs),
   ],
 )

@@ -8,6 +8,13 @@
       "when": 1778084034254,
       "tag": "0000_cultured_jimmy_woo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1778172786365,
+      "tag": "0001_add_product_events_user_event_ts_index",
+      "breakpoints": true
     }
   ]
 }

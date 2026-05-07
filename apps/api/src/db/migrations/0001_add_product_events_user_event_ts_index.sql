@@ -1,0 +1,1 @@
+CREATE INDEX `ix_product_events_user_event_ts` ON `product_events` (`user_id`,`event_name`,`event_ts`);
