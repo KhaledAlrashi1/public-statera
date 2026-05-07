@@ -22,7 +22,7 @@ import { transactions } from "../db/schema/transactions"
 import { categories } from "../db/schema/categories"
 import { merchants } from "../db/schema/merchants"
 import { requireAuth } from "../middleware/auth"
-import { importRateLimit } from "../lib/rate-limit"
+import { importRateLimit, searchRateLimit } from "../lib/rate-limit"
 import {
   validateTransactionInput,
   createTransactionWithDupCheck,
@@ -44,7 +44,7 @@ export const transactionsRouter = new Hono()
 
 // ── GET /api/transactions/:id ─────────────────────────────────────────────────
 
-transactionsRouter.get("/:id", requireAuth, async (c) => {
+transactionsRouter.get("/:id{[0-9]+}", requireAuth, async (c) => {
   const id = Number(c.req.param("id"))
   if (!Number.isInteger(id) || id <= 0) {
     return c.json({ ok: false, data: null, error: "Invalid transaction id.", code: "validation_error" }, 400)
@@ -203,7 +203,7 @@ transactionsRouter.post("/", requireAuth, importRateLimit, async (c) => {
 // Partial update. If any of name/category/amount_kd are present, all three
 // must be valid (matches Flask's summary_fields_provided check).
 
-transactionsRouter.patch("/:id", requireAuth, async (c) => {
+transactionsRouter.patch("/:id{[0-9]+}", requireAuth, async (c) => {
   const id = Number(c.req.param("id"))
   if (!Number.isInteger(id) || id <= 0) {
     return c.json({ ok: false, data: null, error: "Invalid transaction id.", code: "validation_error" }, 400)
@@ -306,7 +306,7 @@ transactionsRouter.patch("/:id", requireAuth, async (c) => {
 
 // ── DELETE /api/transactions/:id ──────────────────────────────────────────────
 
-transactionsRouter.delete("/:id", requireAuth, async (c) => {
+transactionsRouter.delete("/:id{[0-9]+}", requireAuth, async (c) => {
   const id = Number(c.req.param("id"))
   if (!Number.isInteger(id) || id <= 0) {
     return c.json({ ok: false, data: null, error: "Invalid transaction id.", code: "validation_error" }, 400)
@@ -332,7 +332,7 @@ transactionsRouter.delete("/:id", requireAuth, async (c) => {
 // Replaces the original transaction with two or more sibling transactions.
 // The first split row mutates the existing row; additional rows are inserted.
 
-transactionsRouter.post("/:id/split", requireAuth, async (c) => {
+transactionsRouter.post("/:id{[0-9]+}/split", requireAuth, async (c) => {
   const id = Number(c.req.param("id"))
   if (!Number.isInteger(id) || id <= 0) {
     return c.json({ ok: false, data: null, error: "Invalid transaction id.", code: "validation_error" }, 400)
@@ -545,8 +545,455 @@ transactionsRouter.post("/:id/split", requireAuth, async (c) => {
   return c.json({ ok: true, data: { transactions: resultItems }, error: null, meta: {} })
 })
 
-// ── Placeholder for queries (commit 3) ────────────────────────────────────────
-// GET  /search, /summary, /top-patterns, /by-category, /dup-check
+// ── GET /api/transactions/summary ────────────────────────────────────────────
+
+transactionsRouter.get("/summary", requireAuth, async (c) => {
+  let month = (c.req.query("month") ?? "").trim()
+  if (!month) {
+    const now = new Date()
+    month = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`
+  }
+  if (!/^\d{4}-\d{2}$/.test(month)) {
+    return c.json({ ok: false, data: null, error: "month must be in YYYY-MM format.", code: "validation_error" }, 400)
+  }
+
+  const { userId } = c.get("session")
+  const db = getDb()
+
+  // COUNT income vs expense transactions for the month using DATE_FORMAT
+  const [incomeRow] = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(transactions)
+    .leftJoin(categories, eq(transactions.categoryId, categories.id))
+    .where(
+      and(
+        eq(transactions.userId, userId),
+        sql`DATE_FORMAT(${transactions.date}, '%Y-%m') = ${month}`,
+        sql`(${categories.isIncome} = 1 OR ${categories.name} IS NOT NULL AND ${categories.isIncome} = 1)`,
+      ),
+    )
+  const [expenseRow] = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(transactions)
+    .leftJoin(categories, eq(transactions.categoryId, categories.id))
+    .where(
+      and(
+        eq(transactions.userId, userId),
+        sql`DATE_FORMAT(${transactions.date}, '%Y-%m') = ${month}`,
+        sql`(${categories.isIncome} IS NULL OR ${categories.isIncome} = 0)`,
+      ),
+    )
+
+  return c.json({
+    ok: true,
+    data: {
+      month,
+      transaction_count: Number(expenseRow?.count ?? 0),
+      income_count: Number(incomeRow?.count ?? 0),
+    },
+    error: null,
+    meta: {},
+  })
+})
+
+// ── GET /api/transactions/top-patterns ───────────────────────────────────────
+
+transactionsRouter.get("/top-patterns", requireAuth, searchRateLimit, async (c) => {
+  const rangeKey = (c.req.query("range") ?? "30").trim()
+  if (!["30", "90", "365", "all"].includes(rangeKey)) {
+    return c.json(
+      { ok: false, data: null, error: "range must be one of: 30, 90, 365, all", code: "validation_error" },
+      400,
+    )
+  }
+  const { userId } = c.get("session")
+  const db = getDb()
+
+  const nameKeyExpr = sql<string>`LOWER(TRIM(${transactions.name}))`
+  let whereClause = and(
+    eq(transactions.userId, userId),
+    sql`(${categories.isIncome} IS NULL OR ${categories.isIncome} = 0)`,
+    sql`LENGTH(TRIM(${transactions.name})) > 0`,
+  )
+
+  if (rangeKey !== "all") {
+    const cutoff = new Date()
+    cutoff.setDate(cutoff.getDate() - Number(rangeKey))
+    const cutoffStr = cutoff.toISOString().slice(0, 10)
+    whereClause = and(whereClause, sql`${transactions.date} >= ${cutoffStr}`)
+  }
+
+  const rows = await db
+    .select({
+      nameKey: nameKeyExpr,
+      name: sql<string>`MIN(${transactions.name})`,
+      count: sql<number>`COUNT(${transactions.id})`,
+      sumKd: sql<string>`SUM(${transactions.amountKd})`,
+    })
+    .from(transactions)
+    .leftJoin(categories, eq(transactions.categoryId, categories.id))
+    .where(whereClause)
+    .groupBy(nameKeyExpr)
+    .orderBy(
+      sql`COUNT(${transactions.id}) DESC`,
+      sql`SUM(${transactions.amountKd}) DESC`,
+      sql`MIN(${transactions.name}) ASC`,
+    )
+    .limit(3)
+
+  return c.json({
+    ok: true,
+    data: {
+      range: rangeKey,
+      items: rows.map((r) => ({
+        name: r.name ?? "",
+        count: Number(r.count ?? 0),
+        sum_kd: formatKd(r.sumKd ?? "0"),
+      })),
+    },
+    error: null,
+    meta: {},
+  })
+})
+
+// ── GET /api/transactions/search ──────────────────────────────────────────────
+
+transactionsRouter.get("/search", requireAuth, searchRateLimit, async (c) => {
+  const q = (c.req.query("q") ?? "").trim()
+  const catFilter = (c.req.query("category") ?? "").trim()
+  const merchantFilter = (c.req.query("merchant") ?? "").trim()
+  const dateFromRaw = (c.req.query("date_from") ?? "").trim()
+  const dateToRaw = (c.req.query("date_to") ?? "").trim()
+  const incomeOnly = argBool(c.req.query("income_only"))
+  const excludeIncome = argBool(c.req.query("exclude_income"))
+  const sourceFilter = (c.req.query("source") ?? "").trim().toLowerCase()
+  const rawLimit = c.req.query("limit")
+  const rawOffset = c.req.query("offset")
+  const includeTotal = argBool(c.req.query("include_total"), true)
+
+  if (incomeOnly && excludeIncome) {
+    return c.json(
+      { ok: false, data: null, error: "income_only and exclude_income cannot both be true.", code: "validation_error" },
+      400,
+    )
+  }
+
+  let limit = rawLimit !== undefined ? parseInt(rawLimit, 10) : 20
+  let offset = rawOffset !== undefined ? parseInt(rawOffset, 10) : 0
+  if (isNaN(limit) || limit < 1 || limit > 100) {
+    return c.json({ ok: false, data: null, error: "limit must be between 1 and 100.", code: "validation_error" }, 400)
+  }
+  if (isNaN(offset) || offset < 0) {
+    return c.json({ ok: false, data: null, error: "offset must be >= 0.", code: "validation_error" }, 400)
+  }
+
+  if (dateFromRaw && !/^\d{4}-\d{2}-\d{2}$/.test(dateFromRaw)) {
+    return c.json({ ok: false, data: null, error: "date_from must be in YYYY-MM-DD format.", code: "validation_error" }, 400)
+  }
+  if (dateToRaw && !/^\d{4}-\d{2}-\d{2}$/.test(dateToRaw)) {
+    return c.json({ ok: false, data: null, error: "date_to must be in YYYY-MM-DD format.", code: "validation_error" }, 400)
+  }
+  if (dateFromRaw && dateToRaw && dateFromRaw > dateToRaw) {
+    return c.json(
+      { ok: false, data: null, error: "date_from must be on or before date_to.", code: "invalid_date_range" },
+      400,
+    )
+  }
+
+  const { userId } = c.get("session")
+  const db = getDb()
+
+  const catIds = catFilter
+    ? await resolveNameFilterIds(catFilter, userId, db, "category")
+    : null
+  const merIds = merchantFilter
+    ? await resolveNameFilterIds(merchantFilter, userId, db, "merchant")
+    : null
+
+  if ((catFilter && !catIds) || (merchantFilter && !merIds)) {
+    return emptySearchResponse(offset, limit)
+  }
+
+  let where = and(eq(transactions.userId, userId))
+
+  if (q) {
+    const like = likePattern(q)
+    where = and(
+      where,
+      or(
+        sql`${transactions.name} LIKE ${like} ESCAPE '\\'`,
+        sql`${categories.name} LIKE ${like} ESCAPE '\\'`,
+        sql`${merchants.name} LIKE ${like} ESCAPE '\\'`,
+      ),
+    )
+  }
+  if (catIds) where = and(where, inArray(transactions.categoryId as Parameters<typeof inArray>[0], catIds))
+  if (merIds) where = and(where, inArray(transactions.merchantId as Parameters<typeof inArray>[0], merIds))
+  if (dateFromRaw) where = and(where, sql`${transactions.date} >= ${dateFromRaw}`)
+  if (dateToRaw) where = and(where, sql`${transactions.date} <= ${dateToRaw}`)
+  if (incomeOnly) where = and(where, sql`${categories.isIncome} = 1`)
+  else if (excludeIncome) where = and(where, sql`(${categories.isIncome} IS NULL OR ${categories.isIncome} = 0)`)
+
+  const selectFields = {
+    id: transactions.id,
+    date: transactions.date,
+    name: transactions.name,
+    memo: transactions.memo,
+    amountKd: transactions.amountKd,
+    source: transactions.source,
+    importBatchId: transactions.importBatchId,
+    categoryId: transactions.categoryId,
+    merchantId: transactions.merchantId,
+    categoryName: categories.name,
+    merchantName: merchants.name,
+  }
+
+  let total = -1
+  let hasMore: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let rows: any[]
+
+  if (includeTotal) {
+    // Count first so the DB call sequence is predictable for tests
+    const [countRow] = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(transactions)
+      .leftJoin(categories, eq(transactions.categoryId, categories.id))
+      .leftJoin(merchants, eq(transactions.merchantId, merchants.id))
+      .where(where)
+    total = Number(countRow?.count ?? 0)
+    rows = await db
+      .select(selectFields)
+      .from(transactions)
+      .leftJoin(categories, eq(transactions.categoryId, categories.id))
+      .leftJoin(merchants, eq(transactions.merchantId, merchants.id))
+      .where(where)
+      .orderBy(sql`${transactions.date} DESC`, sql`${transactions.id} DESC`)
+      .offset(offset)
+      .limit(limit)
+    hasMore = offset + rows.length < total
+  } else {
+    rows = await db
+      .select(selectFields)
+      .from(transactions)
+      .leftJoin(categories, eq(transactions.categoryId, categories.id))
+      .leftJoin(merchants, eq(transactions.merchantId, merchants.id))
+      .where(where)
+      .orderBy(sql`${transactions.date} DESC`, sql`${transactions.id} DESC`)
+      .offset(offset)
+      .limit(limit + 1)
+    hasMore = rows.length > limit
+    if (hasMore) rows = rows.slice(0, limit)
+  }
+
+  const items = rows.map((r) => serializeTransaction(r))
+
+  // DataAccessLog for bank_sync source filter
+  // TODO(module-6-banksync): validate connection_id/consent_id ownership
+  if (sourceFilter === "bank_sync") {
+    const { dataAccessLogs } = await import("../db/schema/data-access-logs")
+    const ip = c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
+    const dates = items.map((i) => i.date).sort()
+    try {
+      await db.insert(dataAccessLogs).values({
+        userId,
+        action: "transactions.search",
+        recordsAccessed: items.length,
+        dateRangeStart: dates[0] ? new Date(`${dates[0]}T00:00:00Z`) : undefined,
+        dateRangeEnd: dates[dates.length - 1] ? new Date(`${dates[dates.length - 1]}T00:00:00Z`) : undefined,
+        ipAddress: ip.slice(0, 64),
+      })
+    } catch {
+      // Non-critical — don't fail the response
+    }
+  }
+
+  const meta = { total, offset, limit, has_more: hasMore }
+  return c.json({
+    ok: true,
+    data: { items },
+    error: null,
+    meta,
+  })
+})
+
+// ── GET /api/transactions/by-category ────────────────────────────────────────
+
+transactionsRouter.get("/by-category", requireAuth, async (c) => {
+  const category = (c.req.query("category") ?? "").trim()
+  if (!category) {
+    return c.json({ ok: false, data: null, error: "category is required.", code: "validation_error" }, 400)
+  }
+  const q = (c.req.query("q") ?? "").trim()
+  const month = (c.req.query("month") ?? "").trim() || null
+  const rawLimit = c.req.query("limit")
+  const rawOffset = c.req.query("offset")
+  const includeTotal = argBool(c.req.query("include_total"), true)
+
+  let limit = rawLimit !== undefined ? parseInt(rawLimit, 10) : 20
+  let offset = rawOffset !== undefined ? parseInt(rawOffset, 10) : 0
+  if (isNaN(limit) || limit < 1 || limit > 100) {
+    return c.json({ ok: false, data: null, error: "limit must be between 1 and 100.", code: "validation_error" }, 400)
+  }
+  if (isNaN(offset) || offset < 0) {
+    return c.json({ ok: false, data: null, error: "offset must be >= 0.", code: "validation_error" }, 400)
+  }
+
+  const { userId } = c.get("session")
+  const db = getDb()
+
+  const catIds = await resolveNameFilterIds(category, userId, db, "category")
+  if (!catIds) {
+    return c.json({
+      ok: true,
+      data: { category, month, items: [] },
+      error: null,
+      meta: { total: 0, offset, limit, has_more: false },
+    })
+  }
+
+  let where = and(
+    eq(transactions.userId, userId),
+    inArray(transactions.categoryId as Parameters<typeof inArray>[0], catIds),
+  )
+  if (month) where = and(where, sql`DATE_FORMAT(${transactions.date}, '%Y-%m') = ${month}`)
+  if (q) {
+    const like = likePattern(q)
+    where = and(where, sql`${transactions.name} LIKE ${like} ESCAPE '\\'`)
+  }
+
+  const byCatFields = {
+    id: transactions.id,
+    date: transactions.date,
+    name: transactions.name,
+    memo: transactions.memo,
+    amountKd: transactions.amountKd,
+    source: transactions.source,
+    importBatchId: transactions.importBatchId,
+    categoryId: transactions.categoryId,
+    merchantId: transactions.merchantId,
+    categoryName: categories.name,
+    merchantName: merchants.name,
+  }
+
+  let total = -1
+  let hasMore: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let rows: any[]
+
+  if (includeTotal) {
+    // Count first so the DB call sequence is predictable for tests
+    const [countRow] = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(transactions)
+      .leftJoin(categories, eq(transactions.categoryId, categories.id))
+      .leftJoin(merchants, eq(transactions.merchantId, merchants.id))
+      .where(where)
+    total = Number(countRow?.count ?? 0)
+    rows = await db
+      .select(byCatFields)
+      .from(transactions)
+      .leftJoin(categories, eq(transactions.categoryId, categories.id))
+      .leftJoin(merchants, eq(transactions.merchantId, merchants.id))
+      .where(where)
+      .orderBy(sql`${transactions.date} DESC`, sql`${transactions.id} DESC`)
+      .offset(offset)
+      .limit(limit)
+    hasMore = offset + rows.length < total
+  } else {
+    rows = await db
+      .select(byCatFields)
+      .from(transactions)
+      .leftJoin(categories, eq(transactions.categoryId, categories.id))
+      .leftJoin(merchants, eq(transactions.merchantId, merchants.id))
+      .where(where)
+      .orderBy(sql`${transactions.date} DESC`, sql`${transactions.id} DESC`)
+      .offset(offset)
+      .limit(limit + 1)
+    hasMore = rows.length > limit
+    if (hasMore) rows = rows.slice(0, limit)
+  }
+
+  return c.json({
+    ok: true,
+    data: { category, month, items: rows.map((r) => serializeTransaction(r)) },
+    error: null,
+    meta: { total, offset, limit, has_more: hasMore },
+  })
+})
+
+// ── GET /api/transactions/dup-check ──────────────────────────────────────────
+
+transactionsRouter.get("/dup-check", requireAuth, async (c) => {
+  const dateParam = (c.req.query("date") ?? "").trim()
+  const nameParam = (c.req.query("name") ?? "").trim()
+  const amountParam = (c.req.query("amount_kd") ?? "").trim()
+
+  if (!dateParam || !nameParam || !amountParam) {
+    return c.json(
+      { ok: false, data: null, error: "date, name, amount_kd are required.", code: "validation_error" },
+      400,
+    )
+  }
+
+  let amountKd: string
+  try {
+    amountKd = formatKd(parseKd(amountParam))
+  } catch {
+    return c.json(
+      { ok: false, data: null, error: "Invalid duplicate-check payload.", code: "validation_error" },
+      400,
+    )
+  }
+
+  const nameKey = buildNameKey(nameParam)
+  const { userId } = c.get("session")
+  const db = getDb()
+
+  const [row] = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(transactions)
+    .where(
+      and(
+        eq(transactions.userId, userId),
+        sql`${transactions.date} = ${dateParam}`,
+        eq(transactions.nameKey, nameKey),
+        eq(transactions.amountKd, amountKd),
+      ),
+    )
+
+  return c.json({ ok: true, data: { count: Number(row?.count ?? 0) }, error: null, meta: {} })
+})
+
+// ── Private helpers ───────────────────────────────────────────────────────────
+
+function argBool(val: string | undefined, defaultVal = false): boolean {
+  if (val === undefined) return defaultVal
+  return ["1", "true", "yes", "on"].includes(val.trim().toLowerCase())
+}
+
+function emptySearchResponse(offset: number, limit: number) {
+  return Response.json({
+    ok: true,
+    data: { items: [] },
+    error: null,
+    meta: { total: 0, offset, limit, has_more: false },
+  })
+}
+
+async function resolveNameFilterIds(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  name: string, userId: number, db: any, type: "category" | "merchant",
+): Promise<number[] | null> {
+  if (!name) return null
+  const table = type === "category" ? categories : merchants
+  const rows: Array<{ id: number }> = await db
+    .select({ id: table.id })
+    .from(table)
+    .where(and(eq(table.userId, userId), sql`LOWER(${table.name}) LIKE LOWER(${`%${name}%`})`))
+  if (!rows.length) return null
+  return rows.map((r) => r.id)
+}
 
 // ── Placeholder for bulk + import-batch (commit 4) ────────────────────────────
 // POST /bulk-delete, POST /bulk-update, DELETE /import-batch/:batch_id

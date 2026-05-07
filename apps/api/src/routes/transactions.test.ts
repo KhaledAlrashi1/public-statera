@@ -64,12 +64,12 @@ describe("GET /api/transactions/:id", () => {
     expect(res.status).toBe(401)
   })
 
-  it("returns 400 for non-integer id", async () => {
+  it("returns 404 for non-integer id", async () => {
     vi.mocked(getDb).mockReturnValue(makeMockDb([]))
     const res = await app.request("/api/transactions/abc", {
       headers: { Authorization: await authHeader() },
     })
-    expect(res.status).toBe(400)
+    expect(res.status).toBe(404)
   })
 
   it("returns 404 when transaction not found", async () => {
@@ -218,14 +218,14 @@ describe("PATCH /api/transactions/:id", () => {
     expect(res.status).toBe(401)
   })
 
-  it("returns 400 for non-integer id", async () => {
+  it("returns 404 for non-integer id", async () => {
     vi.mocked(getDb).mockReturnValue(makeMockDb([]))
     const res = await app.request("/api/transactions/abc", {
       method: "PATCH",
       headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
       body: JSON.stringify({ name: "Coffee" }),
     })
-    expect(res.status).toBe(400)
+    expect(res.status).toBe(404)
   })
 
   it("returns 404 when transaction not found", async () => {
@@ -332,5 +332,161 @@ describe("POST /api/transactions/:id/split", () => {
     const body = (await res.json()) as Record<string, unknown>
     expect(body.code).toBe("validation_error")
     expect(String(body.error)).toContain("sum")
+  })
+})
+
+// ── GET /api/transactions/summary ────────────────────────────────────────────
+
+describe("GET /api/transactions/summary", () => {
+  it("returns 401 without auth", async () => {
+    const res = await app.request("/api/transactions/summary")
+    expect(res.status).toBe(401)
+  })
+
+  it("returns 400 for invalid month format", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([{ count: 0 }]))
+    const res = await app.request("/api/transactions/summary?month=not-a-month", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).code).toBe("validation_error")
+  })
+
+  it("returns 200 with counts", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([{ count: 5 }]))
+    const res = await app.request("/api/transactions/summary?month=2026-04", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(true)
+    expect((body.data as Record<string, unknown>).month).toBe("2026-04")
+  })
+})
+
+// ── GET /api/transactions/top-patterns ───────────────────────────────────────
+
+describe("GET /api/transactions/top-patterns", () => {
+  it("returns 401 without auth", async () => {
+    const res = await app.request("/api/transactions/top-patterns")
+    expect(res.status).toBe(401)
+  })
+
+  it("returns 400 for invalid range", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/top-patterns?range=999", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).code).toBe("validation_error")
+  })
+
+  it("returns 200 with items for valid range", async () => {
+    const row = { nameKey: "coffee", name: "Coffee", count: 5, sumKd: "17.500" }
+    vi.mocked(getDb).mockReturnValue(makeMockDb([row]))
+    const res = await app.request("/api/transactions/top-patterns?range=30", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(true)
+    expect((body.data as Record<string, unknown>).range).toBe("30")
+  })
+})
+
+// ── GET /api/transactions/search ──────────────────────────────────────────────
+
+describe("GET /api/transactions/search", () => {
+  it("returns 401 without auth", async () => {
+    const res = await app.request("/api/transactions/search")
+    expect(res.status).toBe(401)
+  })
+
+  it("returns 400 when income_only and exclude_income are both true", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/search?income_only=true&exclude_income=true", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).code).toBe("validation_error")
+  })
+
+  it("returns 400 when date_from > date_to", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request(
+      "/api/transactions/search?date_from=2026-04-30&date_to=2026-04-01",
+      { headers: { Authorization: await authHeader() } },
+    )
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).code).toBe("invalid_date_range")
+  })
+
+  it("returns 200 with items and meta", async () => {
+    const txn = {
+      id: 1, date: new Date("2026-04-15"), name: "Coffee", memo: null,
+      amountKd: "3.500", source: "manual", importBatchId: null,
+      categoryId: null, merchantId: null, categoryName: null, merchantName: null,
+    }
+    let callCount = 0
+    vi.mocked(getDb).mockImplementation(() => {
+      const proxy: ReturnType<typeof getDb> = new Proxy({}, {
+        get(_t, prop: string) {
+          if (prop === "transaction") return async (cb: unknown) => (cb as (tx: unknown) => Promise<unknown>)(proxy)
+          return (..._args: unknown[]) => {
+            callCount++
+            if (callCount === 1) return makeChain([{ count: 1 }]) // total count
+            return makeChain([txn])
+          }
+        },
+      }) as ReturnType<typeof getDb>
+      return proxy
+    })
+    const res = await app.request("/api/transactions/search", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(true)
+    expect(Array.isArray((body.data as Record<string, unknown>).items)).toBe(true)
+    expect((body.meta as Record<string, unknown>).total).toBe(1)
+  })
+})
+
+// ── GET /api/transactions/dup-check ──────────────────────────────────────────
+
+describe("GET /api/transactions/dup-check", () => {
+  it("returns 401 without auth", async () => {
+    const res = await app.request("/api/transactions/dup-check")
+    expect(res.status).toBe(401)
+  })
+
+  it("returns 400 when params missing", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/dup-check?date=2026-04-15", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+  })
+
+  it("returns 200 with count=0 when no duplicate", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([{ count: 0 }]))
+    const res = await app.request(
+      "/api/transactions/dup-check?date=2026-04-15&name=Coffee&amount_kd=3.500",
+      { headers: { Authorization: await authHeader() } },
+    )
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect((body.data as Record<string, unknown>).count).toBe(0)
+  })
+
+  it("returns 200 with count=1 when duplicate exists", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([{ count: 1 }]))
+    const res = await app.request(
+      "/api/transactions/dup-check?date=2026-04-15&name=Coffee&amount_kd=3.500",
+      { headers: { Authorization: await authHeader() } },
+    )
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect((body.data as Record<string, unknown>).count).toBe(1)
   })
 })
