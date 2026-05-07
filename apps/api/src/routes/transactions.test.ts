@@ -490,3 +490,181 @@ describe("GET /api/transactions/dup-check", () => {
     expect((body.data as Record<string, unknown>).count).toBe(1)
   })
 })
+
+// ── POST /api/transactions/bulk-delete ───────────────────────────────────────
+
+describe("POST /api/transactions/bulk-delete", () => {
+  it("returns 401 without auth", async () => {
+    const res = await app.request("/api/transactions/bulk-delete", { method: "POST" })
+    expect(res.status).toBe(401)
+  })
+
+  it("returns 400 when ids is missing or empty", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/bulk-delete", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [] }),
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).code).toBe("validation_error")
+  })
+
+  it("returns 400 when ids exceeds 200", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const ids = Array.from({ length: 201 }, (_, i) => i + 1)
+    const res = await app.request("/api/transactions/bulk-delete", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids }),
+    })
+    expect(res.status).toBe(400)
+  })
+
+  it("returns 200 with deleted count", async () => {
+    let callCount = 0
+    vi.mocked(getDb).mockImplementation(() => {
+      const proxy: ReturnType<typeof getDb> = new Proxy({}, {
+        get(_t, prop: string) {
+          if (prop === "transaction") return async (cb: unknown) => (cb as (tx: unknown) => Promise<unknown>)(proxy)
+          return (..._args: unknown[]) => {
+            callCount++
+            if (callCount === 1) return makeChain([{ id: 1 }, { id: 2 }]) // select owned rows
+            return makeChain([])                                             // delete
+          }
+        },
+      }) as ReturnType<typeof getDb>
+      return proxy
+    })
+    const res = await app.request("/api/transactions/bulk-delete", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [1, 2, 999] }),
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect((body.data as Record<string, unknown>).deleted).toBe(2)
+  })
+})
+
+// ── POST /api/transactions/bulk-update ───────────────────────────────────────
+
+describe("POST /api/transactions/bulk-update", () => {
+  it("returns 401 without auth", async () => {
+    const res = await app.request("/api/transactions/bulk-update", { method: "POST" })
+    expect(res.status).toBe(401)
+  })
+
+  it("returns 400 when ids is empty", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/bulk-update", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [], changes: { category: "Food" } }),
+    })
+    expect(res.status).toBe(400)
+  })
+
+  it("returns 400 when changes is empty", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/bulk-update", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [1], changes: {} }),
+    })
+    expect(res.status).toBe(400)
+  })
+
+  it("returns 400 when changes contains unknown field", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/bulk-update", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [1], changes: { amount_kd: "5.000" } }),
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).code).toBe("validation_error")
+  })
+
+  it("returns 200 with updated count", async () => {
+    let callCount = 0
+    vi.mocked(getDb).mockImplementation(() => {
+      const proxy: ReturnType<typeof getDb> = new Proxy({}, {
+        get(_t, prop: string) {
+          if (prop === "transaction") return async (cb: unknown) => (cb as (tx: unknown) => Promise<unknown>)(proxy)
+          return (..._args: unknown[]) => {
+            callCount++
+            if (callCount === 1) return makeChain([])          // getOrCreateCategory: no existing
+            if (callCount === 2) return makeChain([{ id: 7 }]) // category insert $returningId
+            if (callCount === 3) return makeChain([{ id: 1 }, { id: 2 }]) // select owned ids
+            return makeChain([])                                             // update
+          }
+        },
+      }) as ReturnType<typeof getDb>
+      return proxy
+    })
+    const res = await app.request("/api/transactions/bulk-update", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [1, 2], changes: { category: "Food" } }),
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect((body.data as Record<string, unknown>).updated).toBe(2)
+  })
+})
+
+// ── DELETE /api/transactions/import-batch/:batch_id ───────────────────────────
+
+describe("DELETE /api/transactions/import-batch/:batch_id", () => {
+  it("returns 401 without auth", async () => {
+    const res = await app.request(
+      "/api/transactions/import-batch/00000000-0000-0000-0000-000000000001",
+      { method: "DELETE" },
+    )
+    expect(res.status).toBe(401)
+  })
+
+  it("returns 404 for non-UUID batch_id", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/import-batch/not-a-uuid", {
+      method: "DELETE",
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(404)
+    expect(((await res.json()) as Record<string, unknown>).code).toBe("import_batch_not_found")
+  })
+
+  it("returns 404 when no transactions match the batch", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request(
+      "/api/transactions/import-batch/00000000-0000-0000-0000-000000000001",
+      { method: "DELETE", headers: { Authorization: await authHeader() } },
+    )
+    expect(res.status).toBe(404)
+  })
+
+  it("returns 200 with deleted_count when batch exists", async () => {
+    let callCount = 0
+    vi.mocked(getDb).mockImplementation(() => {
+      const proxy: ReturnType<typeof getDb> = new Proxy({}, {
+        get(_t, prop: string) {
+          if (prop === "transaction") return async (cb: unknown) => (cb as (tx: unknown) => Promise<unknown>)(proxy)
+          return (..._args: unknown[]) => {
+            callCount++
+            if (callCount === 1) return makeChain([{ id: 10 }, { id: 11 }]) // select owned rows
+            return makeChain([])                                               // delete
+          }
+        },
+      }) as ReturnType<typeof getDb>
+      return proxy
+    })
+    const res = await app.request(
+      "/api/transactions/import-batch/00000000-0000-0000-0000-000000000001",
+      { method: "DELETE", headers: { Authorization: await authHeader() } },
+    )
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect((body.data as Record<string, unknown>).deleted_count).toBe(2)
+  })
+})

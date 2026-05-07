@@ -995,8 +995,150 @@ async function resolveNameFilterIds(
   return rows.map((r) => r.id)
 }
 
-// ── Placeholder for bulk + import-batch (commit 4) ────────────────────────────
-// POST /bulk-delete, POST /bulk-update, DELETE /import-batch/:batch_id
+// ── POST /api/transactions/bulk-delete ───────────────────────────────────────
+
+transactionsRouter.post("/bulk-delete", requireAuth, async (c) => {
+  const body = (await c.req.json().catch(() => ({}))) as Record<string, unknown>
+  const ids = body["ids"]
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return c.json({ ok: false, data: null, error: "ids must be a non-empty list.", code: "validation_error" }, 400)
+  }
+  if (ids.length > 200) {
+    return c.json({ ok: false, data: null, error: "Cannot delete more than 200 transactions at once.", code: "validation_error" }, 400)
+  }
+
+  const { userId } = c.get("session")
+  const db = getDb()
+
+  const numericIds = ids.map(Number).filter((n) => Number.isInteger(n) && n > 0)
+  if (!numericIds.length) {
+    return c.json({ ok: true, data: { deleted: 0 }, error: null, meta: {} })
+  }
+
+  const rows = await db
+    .select({ id: transactions.id })
+    .from(transactions)
+    .where(and(eq(transactions.userId, userId), inArray(transactions.id, numericIds)))
+
+  const ownedIds = rows.map((r) => r.id)
+  if (ownedIds.length > 0) {
+    await db.delete(transactions).where(inArray(transactions.id, ownedIds))
+  }
+
+  return c.json({ ok: true, data: { deleted: ownedIds.length }, error: null, meta: {} })
+})
+
+// ── POST /api/transactions/bulk-update ───────────────────────────────────────
+
+transactionsRouter.post("/bulk-update", requireAuth, async (c) => {
+  const body = (await c.req.json().catch(() => ({}))) as Record<string, unknown>
+  const ids = body["ids"]
+  const changes = body["changes"]
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return c.json({ ok: false, data: null, error: "ids must be a non-empty list.", code: "validation_error" }, 400)
+  }
+  if (ids.length > 200) {
+    return c.json({ ok: false, data: null, error: "Cannot update more than 200 transactions at once.", code: "validation_error" }, 400)
+  }
+  if (typeof changes !== "object" || changes === null || Array.isArray(changes) || Object.keys(changes).length === 0) {
+    return c.json({ ok: false, data: null, error: "changes must be a non-empty object.", code: "validation_error" }, 400)
+  }
+
+  const changesObj = changes as Record<string, unknown>
+  const allowed = new Set(["merchant", "category", "name"])
+  const unknown = Object.keys(changesObj).filter((k) => !allowed.has(k))
+  if (unknown.length > 0) {
+    return c.json({ ok: false, data: null, error: `Unknown fields: ${unknown.join(", ")}.`, code: "validation_error" }, 400)
+  }
+
+  const { userId } = c.get("session")
+  const db = getDb()
+
+  let newCategoryId: number | null | undefined
+  if ("category" in changesObj) {
+    const catName = ((changesObj["category"] as string) ?? "").trim()
+    if (!catName) {
+      return c.json({ ok: false, data: null, error: "category cannot be empty.", code: "validation_error" }, 400)
+    }
+    const cat = await getOrCreateCategory(catName, userId, db)
+    newCategoryId = cat?.id ?? null
+  }
+
+  let newMerchantId: number | null | undefined
+  let merchantClear = false
+  if ("merchant" in changesObj) {
+    const merchantName = ((changesObj["merchant"] as string) ?? "").trim()
+    if (merchantName) {
+      const mer = await getOrCreateMerchant(merchantName, userId, db)
+      newMerchantId = mer?.id ?? null
+    } else {
+      merchantClear = true
+    }
+  }
+
+  const numericIds = ids.map(Number).filter((n) => Number.isInteger(n) && n > 0)
+  if (!numericIds.length) {
+    return c.json({ ok: true, data: { updated: 0 }, error: null, meta: {} })
+  }
+
+  const rows = await db
+    .select({ id: transactions.id })
+    .from(transactions)
+    .where(and(eq(transactions.userId, userId), inArray(transactions.id, numericIds)))
+
+  const ownedIds = rows.map((r) => r.id)
+  if (!ownedIds.length) {
+    return c.json({ ok: true, data: { updated: 0 }, error: null, meta: {} })
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const patch: Record<string, any> = {}
+  if (newCategoryId !== undefined) patch.categoryId = newCategoryId
+  if (newMerchantId !== undefined) patch.merchantId = newMerchantId
+  else if (merchantClear) patch.merchantId = null
+
+  if ("name" in changesObj) {
+    const nm = ((changesObj["name"] as string) ?? "").trim()
+    if (nm) {
+      patch.name = nm
+      patch.nameKey = buildNameKey(nm)
+    }
+  }
+
+  if (Object.keys(patch).length > 0) {
+    await db.update(transactions).set(patch).where(inArray(transactions.id, ownedIds))
+  }
+
+  return c.json({ ok: true, data: { updated: ownedIds.length }, error: null, meta: {} })
+})
+
+// ── DELETE /api/transactions/import-batch/:batch_id ───────────────────────────
+
+transactionsRouter.delete("/import-batch/:batch_id", requireAuth, async (c) => {
+  const rawBatchId = (c.req.param("batch_id") ?? "").trim()
+  const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!uuidRe.test(rawBatchId)) {
+    return c.json({ ok: false, data: null, error: "Import batch not found.", code: "import_batch_not_found" }, 404)
+  }
+  const normalizedBatchId = rawBatchId.toLowerCase()
+
+  const { userId } = c.get("session")
+  const db = getDb()
+
+  const rows = await db
+    .select({ id: transactions.id })
+    .from(transactions)
+    .where(and(eq(transactions.userId, userId), eq(transactions.importBatchId, normalizedBatchId)))
+
+  if (rows.length === 0) {
+    return c.json({ ok: false, data: null, error: "Import batch not found.", code: "import_batch_not_found" }, 404)
+  }
+
+  const batchIds = rows.map((r) => r.id)
+  await db.delete(transactions).where(inArray(transactions.id, batchIds))
+
+  return c.json({ ok: true, data: { deleted_count: batchIds.length }, error: null, meta: {} })
+})
 
 // Re-export helpers needed by the upload module (commit 3b)
 export { buildNameKey, formatKd, parseKd, likePattern }
