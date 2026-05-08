@@ -43,7 +43,7 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - 4c Savings goals (projection lib + routes)
 - 5a-1 Dashboard snapshot lib
 - 5a-2 Analytics cache layer (circuit breaker, Redis helpers, withAnalyticsTimeout)
-- 5a-3 Dashboard snapshots rebuild job *(in progress as of this file's creation)*
+- 5a-3 Dashboard snapshots rebuild job
 
 **Remaining modules (in order):**
 - 4d Transaction suggestions (standalone micro-module)
