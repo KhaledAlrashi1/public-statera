@@ -7,6 +7,7 @@ import { users } from "../db/schema"
 import { env } from "../lib/env"
 import { generators, getOidcClient } from "../lib/oidc"
 import { createSessionToken, requireAuth } from "../middleware/auth"
+import { Sentry } from "../lib/sentry"
 
 const router = new Hono()
 
@@ -145,6 +146,12 @@ router.get("/callback", async (c) => {
       })
       .where(eq(users.id, userId))
   }
+
+  // Non-blocking: failure must not delay the redirect or surface to the user.
+  db.update(users)
+    .set({ lastLoginAt: new Date() })
+    .where(eq(users.id, userId))
+    .catch((err) => Sentry.captureException(err, { tags: { handler: "auth.callback.lastLoginAt", userId } }))
 
   const sessionToken = await createSessionToken({ userId, externalId, authProvider: provider })
   setCookie(c, "statera_session", sessionToken, {

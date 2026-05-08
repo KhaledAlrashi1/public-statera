@@ -8,10 +8,16 @@ export async function registerScheduledJobs(queue: Queue): Promise<void> {
     repeat: { every: MINUTE_MS },
   })
 
+  // Overlap guard: fixed jobId prevents BullMQ from enqueueing a second run
+  // while a previous run is still queued or active.
+  await queue.add("rebuild-dashboard-snapshots", {}, {
+    jobId: "rebuild-dashboard-snapshots-singleton",
+    repeat: { every: 15 * MINUTE_MS },
+  })
+
   // TODO (module 4a — budget alerts): budget-alert-check, daily
   // TODO (module 4b — debt accounts): debt-payment-reminder, daily
   // TODO (module 4c — savings goals): savings-goal-snapshot, daily
-  // TODO (module 5a — dashboard): dashboard-snapshot-refresh, every hour
   // TODO (module 5b — template suggestions): suggestion-model-refresh, daily
   // TODO (module 5c — recurring patterns): recurring-pattern-scan, daily
   // TODO (module 6a — bank sync): bank-sync-fetch, every 4 hours

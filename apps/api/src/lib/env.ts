@@ -18,6 +18,20 @@ function optionalInt(key: string, fallback: number): number {
   return n
 }
 
+// Accepts: "true"|"1"|"yes"|"on" → true; "false"|"0"|"no"|"off"|"" → false.
+// Throws on startup for any other value so misconfiguration surfaces immediately.
+function optionalBool(key: string, fallback: boolean): boolean {
+  const raw = process.env[key]
+  if (raw === undefined) return fallback
+  const val = raw.trim().toLowerCase()
+  if (val === "") return fallback
+  if (["true", "1", "yes", "on"].includes(val)) return true
+  if (["false", "0", "no", "off"].includes(val)) return false
+  throw new Error(
+    `Environment variable ${key} must be a boolean (true/false/1/0/yes/no/on/off), got: "${raw}"`,
+  )
+}
+
 const isDev =
   optional("NODE_ENV", "development") === "development" ||
   optional("STATERA_DEV_MODE").toLowerCase() === "true"
@@ -60,8 +74,23 @@ export const env = {
   postmarkApiKey: optional("POSTMARK_API_KEY"),
   mailFromAddress: optional("MAIL_FROM_ADDRESS", "noreply@example.com"),
 
-  enableOpenBanking: optional("ENABLE_OPEN_BANKING").toLowerCase() === "true",
-  enableTemplateSuggestions: optional("ENABLE_TEMPLATE_SUGGESTIONS").toLowerCase() === "true",
-  enableRecurringPatterns:
-    optional("ENABLE_RECURRING_PATTERNS", "true").toLowerCase() === "true",
+  enableOpenBanking: optionalBool("ENABLE_OPEN_BANKING", false),
+  enableTemplateSuggestions: optionalBool("ENABLE_TEMPLATE_SUGGESTIONS", false),
+  enableRecurringPatterns: optionalBool("ENABLE_RECURRING_PATTERNS", true),
+
+  // Analytics cache and snapshot configuration
+  analyticsComputeTimeoutSeconds: optionalInt("ANALYTICS_COMPUTE_TIMEOUT_SECONDS", 10),
+  analyticsCacheCircuitBreakerTimeoutSeconds: optionalInt(
+    "ANALYTICS_CACHE_CIRCUIT_BREAKER_TIMEOUT_SECONDS",
+    10,
+  ),
+  // Default true: fast-fail with 503 on Redis outage is safer than silent
+  // degrade, which can cascade into MySQL DoS during long outages.
+  analyticsCacheCircuitBreakerEnabled: optionalBool(
+    "ANALYTICS_CACHE_CIRCUIT_BREAKER_ENABLED",
+    true,
+  ),
+  dashboardSnapshotMonths: optionalInt("DASHBOARD_SNAPSHOT_MONTHS", 24),
+  snapshotRebuildWindowDays: optionalInt("SNAPSHOT_REBUILD_WINDOW_DAYS", 14),
+  snapshotRebuildConcurrency: optionalInt("SNAPSHOT_REBUILD_CONCURRENCY", 5),
 }

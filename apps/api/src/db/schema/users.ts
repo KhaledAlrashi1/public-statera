@@ -28,6 +28,7 @@ export const users = mysqlTable(
     // Increment to invalidate all active sessions for this user.
     sessionVersion: int("session_version").notNull().default(1),
     isActive: boolean("is_active").notNull().default(true),
+    lastLoginAt: datetime("last_login_at", { fsp: 3 }),
     createdAt: datetime("created_at", { fsp: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP(3)`),

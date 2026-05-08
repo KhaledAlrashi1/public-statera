@@ -1,7 +1,7 @@
 import { Queue } from "bullmq"
 import { getRedisConnection } from "./connection"
 
-export type JobName = "ping"
+export type JobName = "ping" | "rebuild-dashboard-snapshots"
 
 let _queue: Queue | null = null
 
