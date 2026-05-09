@@ -137,6 +137,18 @@ describe("txnNorm — digit-token stripping (3+ digit standalone tokens)", () =>
   it("strips only the 3+ digit tokens, leaves the rest", () => {
     expect(txnNorm("ref 99 code 1234 ok")).toBe("ref 99 code ok")
   })
+
+  it("does NOT strip digit-letter mixed token (abc123 kept as unit)", () => {
+    expect(txnNorm("shop abc123")).toBe("shop abc123")
+  })
+
+  it("strips 3-digit token at start of string", () => {
+    expect(txnNorm("123 shop")).toBe("shop")
+  })
+
+  it("strips 3-digit token at end of string", () => {
+    expect(txnNorm("shop 123")).toBe("shop")
+  })
 })
 
 describe("txnNorm — 255-char truncation", () => {

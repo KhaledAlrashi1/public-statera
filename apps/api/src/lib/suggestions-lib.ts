@@ -4,8 +4,13 @@
 // - \b in digit-strip regex: JS \b treats Arabic letters as non-word chars; Python re.U treats
 //   them as word chars. A digit sequence directly adjacent to an Arabic letter (no space) is
 //   stripped in JS but preserved in Python. Does not occur in real transaction names.
-// - category/merchant: Flask stores as raw strings on the model row; TS uses FK columns from
-//   Phase 2. We join and return the name string to preserve the same API surface.
+// - category/merchant: Flask stores name strings denormalized on the memorized_transactions
+//   row (snapshot semantics: a renamed category keeps the old name on existing memorized rows
+//   until the rule is rewritten). TS uses FK columns from Phase 2 and LEFT JOINs at query
+//   time (live semantics: a renamed category appears with the new name in suggestions
+//   immediately). The API surface (returned name string) is identical; the value may differ
+//   from Flask's after a rename. This is an intentional improvement, not a bug — users
+//   renaming a category expect the new name everywhere.
 
 import { and, desc, eq, like, or } from "drizzle-orm"
 import { categories } from "../db/schema/categories"
