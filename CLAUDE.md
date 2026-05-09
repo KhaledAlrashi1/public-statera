@@ -44,9 +44,9 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - 5a-1 Dashboard snapshot lib
 - 5a-2 Analytics cache layer (circuit breaker, Redis helpers, withAnalyticsTimeout)
 - 5a-3 Dashboard snapshots rebuild job
+- 4d Transaction suggestions
 
 **Remaining modules (in order):**
-- 4d Transaction suggestions (standalone micro-module)
 - 5b Aggregation routes (depends on 5a)
 - 5c Intelligence/detection routes (algorithmic; fixture-based equivalence tests required)
 - Module 6: Maintenance jobs (non-bank-sync Celery beat jobs → BullMQ)
