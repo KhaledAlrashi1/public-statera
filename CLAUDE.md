@@ -78,6 +78,7 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - **Deviations from Flask:** flag in the proposal *before* implementing, not in the summary after. Add a "Deliberate deviations from Flask" comment block at the top of files where deviations exist.
 - **TODO format:** `// TODO(module-X-name):` for grep-able deferred work.
 - **Update this file:** at the end of every module commit, update the "Migration status" section above to reflect the new state. This is part of the commit, not a follow-up.
+- **Sequential gates are sequential.** When a prompt requires a verification report (e.g., a status check on a previous module) before work on a new module proceeds, deliver the verification report and wait for explicit approval before starting the new work. An approval issued conditionally on a prior report being clean is not standing approval to ship in parallel. If a verification surfaces a problem, the new work pauses until the prior gap is resolved.
 
 ## Key architectural decisions (do not revisit)
 
