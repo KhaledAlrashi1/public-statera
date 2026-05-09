@@ -10,6 +10,7 @@ import { searchRateLimit } from "../lib/rate-limit"
 import { formatKd } from "../lib/transaction-lib"
 import { Sentry } from "../lib/sentry"
 import { goalProjection } from "../lib/savings-goals-lib"
+import { cacheBustSafeToSpend } from "../lib/analytics-cache"
 
 export const savingsGoalsRouter = new Hono()
 
@@ -286,6 +287,15 @@ savingsGoalsRouter.post("/", requireAuth, searchRateLimit, async (c) => {
     .$returningId()
 
   const [created] = await db.select().from(savingsGoals).where(eq(savingsGoals.id, id)).limit(1)
+
+  ;(async () => {
+    try {
+      await cacheBustSafeToSpend(userId)
+    } catch (err) {
+      Sentry.captureException(err, { tags: { handler: "savings-goals.post.cacheBust", userId } })
+    }
+  })()
+
   const projection = await goalProjection(
     { id: created.id, userId: created.userId, targetKd: created.targetKd, currentKd: created.currentKd, targetDate: toTargetDateStr(created.targetDate) },
     db,
@@ -363,6 +373,15 @@ savingsGoalsRouter.patch("/:id{[0-9]+}", requireAuth, searchRateLimit, async (c)
   }
 
   await db.update(savingsGoals).set(patch).where(eq(savingsGoals.id, id))
+
+  ;(async () => {
+    try {
+      await cacheBustSafeToSpend(userId)
+    } catch (err) {
+      Sentry.captureException(err, { tags: { handler: "savings-goals.patch.cacheBust", userId } })
+    }
+  })()
+
   const [updated] = await db.select().from(savingsGoals).where(eq(savingsGoals.id, id)).limit(1)
   const projection = await goalProjection(
     { id: updated.id, userId: updated.userId, targetKd: updated.targetKd, currentKd: updated.currentKd, targetDate: toTargetDateStr(updated.targetDate) },
@@ -451,6 +470,14 @@ savingsGoalsRouter.post("/:id{[0-9]+}/deposit", requireAuth, searchRateLimit, as
     )
   }
 
+  ;(async () => {
+    try {
+      await cacheBustSafeToSpend(userId)
+    } catch (err) {
+      Sentry.captureException(err, { tags: { handler: "savings-goals.deposit.cacheBust", userId } })
+    }
+  })()
+
   await recordProductEvent(
     userId,
     "savings_goal.deposit",
@@ -524,6 +551,15 @@ savingsGoalsRouter.delete("/:id{[0-9]+}", requireAuth, searchRateLimit, async (c
   }
 
   await db.update(savingsGoals).set({ isActive: false }).where(eq(savingsGoals.id, id))
+
+  ;(async () => {
+    try {
+      await cacheBustSafeToSpend(userId)
+    } catch (err) {
+      Sentry.captureException(err, { tags: { handler: "savings-goals.delete.cacheBust", userId } })
+    }
+  })()
+
   const [updated] = await db.select().from(savingsGoals).where(eq(savingsGoals.id, id)).limit(1)
   const projection = await goalProjection(
     { id: updated.id, userId: updated.userId, targetKd: updated.targetKd, currentKd: updated.currentKd, targetDate: toTargetDateStr(updated.targetDate) },

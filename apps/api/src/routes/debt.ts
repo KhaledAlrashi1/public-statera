@@ -7,6 +7,8 @@ import { requireAuth } from "../middleware/auth"
 import { searchRateLimit } from "../lib/rate-limit"
 import { formatKd } from "../lib/transaction-lib"
 import { avalanchePlan, snowballPlan, minimumRequiredPayment } from "../lib/debt-calculator"
+import { Sentry } from "../lib/sentry"
+import { cacheBustDashboardMetrics, cacheBustSafeToSpend } from "../lib/analytics-cache"
 
 export const debtRouter = new Hono()
 
@@ -123,6 +125,29 @@ function isDupEntry(err: unknown): boolean {
   return false
 }
 
+// ── buildDebtSummaryPayload ───────────────────────────────────────────────────
+// Exported so aggregation routes (5b-2+) can include debt summary data without
+// re-implementing the query.
+
+type Db = ReturnType<typeof getDb>
+
+export async function buildDebtSummaryPayload(userId: number, db: Db) {
+  const [row] = await db
+    .select({
+      totalBalance: sql<string>`COALESCE(SUM(${debtAccounts.balanceKd}), '0')`,
+      totalMinimum: sql<string>`COALESCE(SUM(${debtAccounts.minimumPaymentKd}), '0')`,
+      accountCount: sql<number>`COUNT(${debtAccounts.id})`,
+    })
+    .from(debtAccounts)
+    .where(and(eq(debtAccounts.userId, userId), eq(debtAccounts.isActive, true)))
+
+  return {
+    total_balance_kd: formatKd(row?.totalBalance ?? "0"),
+    total_minimum_kd: formatKd(row?.totalMinimum ?? "0"),
+    account_count: Number(row?.accountCount ?? 0),
+  }
+}
+
 // ── GET /api/debt-accounts ────────────────────────────────────────────────────
 
 debtRouter.get("/", requireAuth, searchRateLimit, async (c) => {
@@ -155,26 +180,8 @@ debtRouter.get("/", requireAuth, searchRateLimit, async (c) => {
 debtRouter.get("/summary", requireAuth, searchRateLimit, async (c) => {
   const { userId } = c.get("session")
   const db = getDb()
-
-  const [row] = await db
-    .select({
-      totalBalance: sql<string>`COALESCE(SUM(${debtAccounts.balanceKd}), '0')`,
-      totalMinimum: sql<string>`COALESCE(SUM(${debtAccounts.minimumPaymentKd}), '0')`,
-      accountCount: sql<number>`COUNT(${debtAccounts.id})`,
-    })
-    .from(debtAccounts)
-    .where(and(eq(debtAccounts.userId, userId), eq(debtAccounts.isActive, true)))
-
-  return c.json({
-    ok: true,
-    data: {
-      total_balance_kd: formatKd(row?.totalBalance ?? "0"),
-      total_minimum_kd: formatKd(row?.totalMinimum ?? "0"),
-      account_count: Number(row?.accountCount ?? 0),
-    },
-    error: null,
-    meta: {},
-  })
+  const data = await buildDebtSummaryPayload(userId, db)
+  return c.json({ ok: true, data, error: null, meta: {} })
 })
 
 // ── GET /api/debt-accounts/payoff-plan ───────────────────────────────────────
@@ -280,6 +287,14 @@ debtRouter.post("/", requireAuth, searchRateLimit, async (c) => {
       })
       .$returningId()
 
+    ;(async () => {
+      try {
+        await Promise.all([cacheBustDashboardMetrics(userId, db), cacheBustSafeToSpend(userId)])
+      } catch (err) {
+        Sentry.captureException(err, { tags: { handler: "debt.post.cacheBust", userId } })
+      }
+    })()
+
     const [created] = await db.select().from(debtAccounts).where(eq(debtAccounts.id, id)).limit(1)
     return c.json({ ok: true, data: { account: serializeAccount(created) }, error: null, meta: {} }, 201)
   } catch (err) {
@@ -351,6 +366,14 @@ debtRouter.patch("/:id{[0-9]+}", requireAuth, async (c) => {
     throw err
   }
 
+  ;(async () => {
+    try {
+      await Promise.all([cacheBustDashboardMetrics(userId, db), cacheBustSafeToSpend(userId)])
+    } catch (err) {
+      Sentry.captureException(err, { tags: { handler: "debt.patch.cacheBust", userId } })
+    }
+  })()
+
   const [updated] = await db.select().from(debtAccounts).where(eq(debtAccounts.id, id)).limit(1)
   return c.json({ ok: true, data: { account: serializeAccount(updated) }, error: null, meta: {} })
 })
@@ -375,6 +398,15 @@ debtRouter.delete("/:id{[0-9]+}", requireAuth, async (c) => {
   }
 
   await db.update(debtAccounts).set({ isActive: false }).where(eq(debtAccounts.id, id))
+
+  ;(async () => {
+    try {
+      await Promise.all([cacheBustDashboardMetrics(userId, db), cacheBustSafeToSpend(userId)])
+    } catch (err) {
+      Sentry.captureException(err, { tags: { handler: "debt.delete.cacheBust", userId } })
+    }
+  })()
+
   const [updated] = await db.select().from(debtAccounts).where(eq(debtAccounts.id, id)).limit(1)
   return c.json({ ok: true, data: { account: serializeAccount(updated) }, error: null, meta: {} })
 })

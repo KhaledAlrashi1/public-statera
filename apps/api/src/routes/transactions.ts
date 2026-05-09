@@ -39,6 +39,8 @@ import {
   type TransactionItem,
 } from "../lib/transaction-lib"
 // TODO(module-3b-memorized): import memorizedTransactions for learnTransaction in split
+import { Sentry } from "../lib/sentry"
+import { cacheBustDashboardMetrics, cacheBustSafeToSpend } from "../lib/analytics-cache"
 
 export const transactionsRouter = new Hono()
 
@@ -173,6 +175,14 @@ transactionsRouter.post("/", requireAuth, importRateLimit, async (c) => {
 
   await learnTransaction(db, validated.name, userId, { categoryId, merchantId })
 
+  ;(async () => {
+    try {
+      await Promise.all([cacheBustDashboardMetrics(userId, db), cacheBustSafeToSpend(userId)])
+    } catch (err) {
+      Sentry.captureException(err, { tags: { handler: "transactions.post.cacheBust", userId } })
+    }
+  })()
+
   const [created] = await db
     .select({
       id: transactions.id,
@@ -281,6 +291,14 @@ transactionsRouter.patch("/:id{[0-9]+}", requireAuth, async (c) => {
 
   await learnTransaction(db, name, userId, { categoryId, merchantId })
 
+  ;(async () => {
+    try {
+      await Promise.all([cacheBustDashboardMetrics(userId, db), cacheBustSafeToSpend(userId)])
+    } catch (err) {
+      Sentry.captureException(err, { tags: { handler: "transactions.patch.cacheBust", userId } })
+    }
+  })()
+
   const [updated] = await db
     .select({
       id: transactions.id,
@@ -325,6 +343,15 @@ transactionsRouter.delete("/:id{[0-9]+}", requireAuth, async (c) => {
   }
 
   await db.delete(transactions).where(eq(transactions.id, id))
+
+  ;(async () => {
+    try {
+      await Promise.all([cacheBustDashboardMetrics(userId, db), cacheBustSafeToSpend(userId)])
+    } catch (err) {
+      Sentry.captureException(err, { tags: { handler: "transactions.delete.cacheBust", userId } })
+    }
+  })()
+
   return c.json({ ok: true, data: { deleted: true }, error: null, meta: {} })
 })
 
@@ -541,6 +568,14 @@ transactionsRouter.post("/:id{[0-9]+}/split", requireAuth, async (c) => {
       400,
     )
   }
+
+  ;(async () => {
+    try {
+      await Promise.all([cacheBustDashboardMetrics(userId, db), cacheBustSafeToSpend(userId)])
+    } catch (err) {
+      Sentry.captureException(err, { tags: { handler: "transactions.split.cacheBust", userId } })
+    }
+  })()
 
   return c.json({ ok: true, data: { transactions: resultItems }, error: null, meta: {} })
 })
@@ -1023,6 +1058,13 @@ transactionsRouter.post("/bulk-delete", requireAuth, async (c) => {
   const ownedIds = rows.map((r) => r.id)
   if (ownedIds.length > 0) {
     await db.delete(transactions).where(inArray(transactions.id, ownedIds))
+    ;(async () => {
+      try {
+        await Promise.all([cacheBustDashboardMetrics(userId, db), cacheBustSafeToSpend(userId)])
+      } catch (err) {
+        Sentry.captureException(err, { tags: { handler: "transactions.bulk-delete.cacheBust", userId } })
+      }
+    })()
   }
 
   return c.json({ ok: true, data: { deleted: ownedIds.length }, error: null, meta: {} })
@@ -1107,6 +1149,13 @@ transactionsRouter.post("/bulk-update", requireAuth, async (c) => {
 
   if (Object.keys(patch).length > 0) {
     await db.update(transactions).set(patch).where(inArray(transactions.id, ownedIds))
+    ;(async () => {
+      try {
+        await Promise.all([cacheBustDashboardMetrics(userId, db), cacheBustSafeToSpend(userId)])
+      } catch (err) {
+        Sentry.captureException(err, { tags: { handler: "transactions.bulk-update.cacheBust", userId } })
+      }
+    })()
   }
 
   return c.json({ ok: true, data: { updated: ownedIds.length }, error: null, meta: {} })
@@ -1136,6 +1185,14 @@ transactionsRouter.delete("/import-batch/:batch_id", requireAuth, async (c) => {
 
   const batchIds = rows.map((r) => r.id)
   await db.delete(transactions).where(inArray(transactions.id, batchIds))
+
+  ;(async () => {
+    try {
+      await Promise.all([cacheBustDashboardMetrics(userId, db), cacheBustSafeToSpend(userId)])
+    } catch (err) {
+      Sentry.captureException(err, { tags: { handler: "transactions.import-batch-delete.cacheBust", userId } })
+    }
+  })()
 
   return c.json({ ok: true, data: { deleted_count: batchIds.length }, error: null, meta: {} })
 })

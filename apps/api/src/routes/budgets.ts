@@ -16,6 +16,7 @@ import { requireAuth } from "../middleware/auth"
 import { Sentry } from "../lib/sentry"
 import { getOrCreateCategory } from "../lib/transaction-lib"
 import { parseKd, formatKd } from "../lib/transaction-lib"
+import { cacheBustSafeToSpend } from "../lib/analytics-cache"
 
 export const budgetsRouter = new Hono()
 
@@ -127,7 +128,7 @@ async function buildProfileContext(
 // ── Budget payload builder ────────────────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function buildBudgetPayload(userId: number, month: string, db: any) {
+export async function buildBudgetPayload(userId: number, month: string, db: any) {
   const rows = await db
     .select({
       id: budgets.id,
@@ -332,6 +333,15 @@ budgetsRouter.post("/", requireAuth, async (c) => {
     console.error("[budgets.post] save failed userId=%d month=%s:", userId, month, err)
     return c.json({ ok: false, data: null, error: "Failed to save budgets.", code: "budget_save_failed" }, 500)
   }
+
+  // ── Fire-and-forget: bust safe-to-spend cache (budget totals affect STS)
+  ;(async () => {
+    try {
+      await cacheBustSafeToSpend(userId)
+    } catch (err) {
+      Sentry.captureException(err, { tags: { handler: "budgets.post.cacheBust", userId } })
+    }
+  })()
 
   // ── Fire-and-forget product events (errors never block the response)
   if (validated.length > 0) {

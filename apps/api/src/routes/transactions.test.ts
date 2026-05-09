@@ -3,6 +3,15 @@ import { Hono } from "hono"
 import { transactionsRouter } from "./transactions"
 import { createSessionToken } from "../middleware/auth"
 
+// Cache-bust and Sentry mocks — must be hoisted before transactionsRouter import.
+vi.mock("../lib/analytics-cache", () => ({
+  cacheBustDashboardMetrics: vi.fn().mockResolvedValue(0),
+  cacheBustSafeToSpend: vi.fn().mockResolvedValue(0),
+}))
+vi.mock("../lib/sentry", () => ({
+  Sentry: { captureException: vi.fn() },
+}))
+
 // ── DB mock (same Proxy pattern as categories/merchants) ──────────────────────
 
 function makeChain(result: unknown): object {
@@ -39,6 +48,8 @@ function makeMockDb(defaultResult: unknown = []): ReturnType<typeof getDb> {
 
 vi.mock("../db/connection", () => ({ getDb: vi.fn() }))
 import { getDb } from "../db/connection"
+import { cacheBustDashboardMetrics } from "../lib/analytics-cache"
+import { Sentry } from "../lib/sentry"
 
 // Rate-limit middleware: pass-through in tests
 vi.mock("../lib/rate-limit", () => ({
@@ -666,5 +677,67 @@ describe("DELETE /api/transactions/import-batch/:batch_id", () => {
     expect(res.status).toBe(200)
     const body = (await res.json()) as Record<string, unknown>
     expect((body.data as Record<string, unknown>).deleted_count).toBe(2)
+  })
+})
+
+// ── A3: cache-bust failure is non-fatal ───────────────────────────────────────
+
+describe("POST /api/transactions — cache-bust failure is non-fatal", () => {
+  beforeEach(() => {
+    vi.mocked(cacheBustDashboardMetrics).mockResolvedValue(0)
+    vi.mocked(Sentry.captureException).mockReset()
+  })
+
+  it("returns 201 and calls Sentry when cache bust throws", async () => {
+    const bustError = new Error("Redis unavailable")
+    vi.mocked(cacheBustDashboardMetrics).mockRejectedValueOnce(bustError)
+
+    const created = {
+      id: 99,
+      date: new Date("2026-04-15T00:00:00Z"),
+      name: "Coffee",
+      memo: null,
+      amountKd: "3.500",
+      source: "manual",
+      importBatchId: null,
+      categoryId: null,
+      merchantId: null,
+      categoryName: null,
+      merchantName: null,
+    }
+    let callCount = 0
+    vi.mocked(getDb).mockImplementation(() => {
+      const proxy: ReturnType<typeof getDb> = new Proxy({}, {
+        get(_t, prop: string) {
+          if (prop === "transaction") return async (cb: unknown) => (cb as (tx: unknown) => Promise<unknown>)(proxy)
+          return (..._args: unknown[]) => {
+            callCount++
+            if (callCount === 1) return makeChain([])            // category get (not found)
+            if (callCount === 2) return makeChain([{ id: 1 }])  // category insert $returningId
+            if (callCount === 3) return makeChain([])            // dup check (no dup)
+            if (callCount === 4) return makeChain([{ id: 99 }]) // insert $returningId
+            return makeChain([created])                          // select after insert
+          }
+        },
+      }) as ReturnType<typeof getDb>
+      return proxy
+    })
+
+    const res = await app.request("/api/transactions", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ date: "2026-04-15", name: "Coffee", amount_kd: "3.500", category: "Food" }),
+    })
+
+    // Let fire-and-forget IIFE complete before asserting on Sentry
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(res.status).toBe(201)
+    expect(vi.mocked(Sentry.captureException)).toHaveBeenCalledWith(
+      bustError,
+      expect.objectContaining({
+        tags: expect.objectContaining({ handler: "transactions.post.cacheBust" }),
+      }),
+    )
   })
 })

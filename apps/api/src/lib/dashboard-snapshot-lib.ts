@@ -28,6 +28,11 @@ import { categories } from "../db/schema/categories"
 import { dashboardSnapshots } from "../db/schema/dashboard-snapshots"
 import { transactions } from "../db/schema/transactions"
 import { formatKd } from "./transaction-lib"
+import { ymExpr, buildMonthWindow } from "./analytics-helpers"
+import { incomeCategoryFilter } from "./payday-lib"
+
+// Re-export buildMonthWindow for existing callers (including tests importing from this file).
+export { buildMonthWindow }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -63,20 +68,6 @@ function toD(v: string | null | undefined): Decimal {
   } catch {
     return new Decimal(0)
   }
-}
-
-// Produces an ordered list of YYYY-MM strings ending at endYear/endMonth,
-// going back `months` calendar months (inclusive of the end month).
-export function buildMonthWindow(endYear: number, endMonth: number, months: number): string[] {
-  const keys: string[] = []
-  const endIdx = endYear * 12 + (endMonth - 1)
-  for (let i = months - 1; i >= 0; i--) {
-    const idx = endIdx - i
-    const y = Math.floor(idx / 12)
-    const m = (idx % 12) + 1
-    keys.push(`${y}-${String(m).padStart(2, "0")}`)
-  }
-  return keys
 }
 
 // Produces YYYY-MM keys for every calendar month from startDate to endDate inclusive.
@@ -161,14 +152,10 @@ export async function computeDashboardMetricsPayload(
       ? buildMonthsFromRange(cycleStart, cycleEnd)
       : buildMonthWindow(endYear, endMonth, months)
 
-  // MySQL equivalent of Flask's month_bucket(Transaction.date): to_char(date, 'YYYY-MM').
-  // MySQL has no to_char; DATE_FORMAT is the direct equivalent.
-  const ymExpr = sql<string>`DATE_FORMAT(${transactions.date}, '%Y-%m')`
-
-  // Mirrors Flask's income_category_filter_expr:
-  //   OR(is_income IS TRUE, LOWER(COALESCE(name,'')) LIKE 'income%')
-  // The LIKE fallback handles legacy rows where is_income was not explicitly set.
-  const isIncomeExpr = sql<number>`(${categories.isIncome} IS TRUE OR LOWER(COALESCE(${categories.name}, '')) LIKE 'income%')`
+  // ymExpr and isIncomeExpr are imported from analytics-helpers and payday-lib.
+  // Capture incomeCategoryFilter() once so the same object is used in both
+  // select() and groupBy() — consistent with the original local-variable pattern.
+  const isIncomeExpr = incomeCategoryFilter()
 
   let whereClause
   if (cycleEnabled && cycleStart && cycleEnd) {

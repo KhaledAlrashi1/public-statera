@@ -45,9 +45,11 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - 5a-2 Analytics cache layer (circuit breaker, Redis helpers, withAnalyticsTimeout)
 - 5a-3 Dashboard snapshots rebuild job
 - 4d Transaction suggestions
+- 5b-1 Aggregation pre-work (analytics-helpers, payday-lib, income-lib; cache busts wired to all write routes)
 
 **Remaining modules (in order):**
-- 5b Aggregation routes (depends on 5a)
+- 5b-2 Pure aggregation routes (safe-to-spend, budget summary, spending by category, income detection)
+- 5b-3 Cached/composite/computational routes (dashboard metrics, commitments ratio, avg spend)
 - 5c Intelligence/detection routes (algorithmic; fixture-based equivalence tests required)
 - Module 6: Maintenance jobs (non-bank-sync Celery beat jobs → BullMQ)
 - Module 7: TOTP 2FA
@@ -102,6 +104,9 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - `lib/transaction-lib.ts` — `learnTransaction` (canonical; memorized module consumes it, does not duplicate)
 - `lib/dashboard-snapshot-lib.ts` — snapshot helpers
 - `lib/analytics-cache.ts` — cache layer, `withAnalyticsTimeout`, `getDashboardMetricsWithCache`
+- `lib/analytics-helpers.ts` — `currentLocalDate`, `currentMonthKey`, `calendarMonthBounds`, `buildMonthWindow`, `ymExpr`, `roundedKd`
+- `lib/payday-lib.ts` — `incomeCategoryFilter`, `expenseCategoryFilter`, `currentPayPeriod`
+- `lib/income-lib.ts` — `detectMonthlyIncome`, `resolveIncomeForPeriod` (typed `IncomeSource` / `IncomeResolution`)
 - `db/sql-helpers.ts` — `nullsLast` helper
 - Rate limit middleware from transactions — reuse for new endpoints
 - Worker task tracking from 1c — `markWorkerTaskStarted`, `markWorkerTaskFinished` (call once at batch start/end, not per-user)
