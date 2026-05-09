@@ -51,6 +51,8 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - 5c Intelligence/detection routes (algorithmic; fixture-based equivalence tests required)
 - Module 6: Maintenance jobs (non-bank-sync Celery beat jobs → BullMQ)
 - Module 7: TOTP 2FA
+- Module 8: Deployment (host selection between Railway/Hetzner/similar, secrets management, TLS, CI/CD, backups, monitoring, staging environment)
+- Module 9: Frontend parity verification (apps/web tested against the new Hono API end-to-end before any external sharing)
 
 **Deferred indefinitely:**
 - Bank sync (CBK Open Banking dependency; replaced future scope: bank statement PDF parsing for Kuwaiti banks)
@@ -87,6 +89,7 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - **BullMQ concurrency:** Option B — p-limit with configurable concurrency, default 5 (`SNAPSHOT_REBUILD_CONCURRENCY`).
 - **Per-user budget vs MySQL timeout:** per-user budget = `analyticsComputeTimeoutSeconds + 2` so the two error modes are distinguishable in Sentry.
 - **Template emails deferred:** when adding, use a separate `email-templates.ts` module; preserve the Flask path-traversal guard (reject template names containing `..`, `/`, or `\`).
+- **Deployment target:** self-controlled environment (Railway, Hetzner, or similar managed/VPS host). To be finalized in Module 8. The repo's Docker Compose configuration is the source of truth for production deploys; the host runs Docker images built from this repo. Manus AI (manus.im) was briefly considered at scaffold stage and removed in commit 13c709a (provider-agnostic OAuth); do not reintroduce platform-specific assumptions for any autonomous-agent hosting platform.
 
 ## Helpers and patterns to reuse (do not reimplement)
 

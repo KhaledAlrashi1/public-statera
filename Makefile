@@ -89,7 +89,7 @@ check-secrets: ## Ensure required production secrets are present
 		set -a; . "$(PROD_ENV_FILE)"; set +a; \
 	fi; \
 	missing=0; \
-	for key in ENCRYPTION_KEY MYSQL_PASSWORD SESSION_SECRET MANUS_CLIENT_ID MANUS_CLIENT_SECRET SENTRY_DSN POSTMARK_API_KEY MAIL_FROM_ADDRESS; do \
+	for key in ENCRYPTION_KEY MYSQL_PASSWORD SESSION_SECRET OAUTH_CLIENT_ID OAUTH_CLIENT_SECRET SENTRY_DSN POSTMARK_API_KEY MAIL_FROM_ADDRESS; do \
 		value="$$(printenv "$$key" || true)"; \
 		if [ -z "$$value" ]; then \
 			echo "Missing required production secret: $$key"; \
