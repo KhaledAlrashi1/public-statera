@@ -15,6 +15,11 @@
  *   as 0 not 0.0 (JS JSON.stringify vs Python json.dumps). Module 9 verifies.
  * - R7 range_spent_by_category groups by categories.name (not COALESCE) to
  *   match Flask exactly, with JS-side null → "Uncategorized" coalescing.
+ * - Monetary serialization differs by route: R1–R7 return numbers (roundedKd);
+ *   R4/R9/R10 return strings (formatKd), matching Flask's format_kd() contract.
+ *   R3 (dashboard-metrics) delegates to computeDashboardMetricsPayload which uses
+ *   formatKd() strings, where Flask used floats (_rounded_number) — pre-existing
+ *   5a-1 deviation, Module 9 verifies frontend compatibility.
  */
 
 import { Hono } from "hono"
@@ -30,11 +35,21 @@ import { requireAuth } from "../middleware/auth"
 import {
   currentLocalDate,
   currentMonthKey,
+  calendarMonthBounds,
   buildMonthWindow,
   ymExpr,
   roundedKd,
 } from "../lib/analytics-helpers"
-import { expenseCategoryFilter, currentPayPeriod } from "../lib/payday-lib"
+import { expenseCategoryFilter, incomeCategoryFilter, currentPayPeriod } from "../lib/payday-lib"
+import { formatKd } from "../lib/transaction-lib"
+import {
+  CacheBackendUnavailableError,
+  AnalyticsComputationTimeoutError,
+  withAnalyticsTimeout,
+  getDashboardMetricsWithCache,
+} from "../lib/analytics-cache"
+import { searchRateLimit } from "../lib/rate-limit"
+import { env } from "../lib/env"
 
 export const aggregationRouter = new Hono()
 
@@ -439,5 +454,259 @@ aggregationRouter.get("/budget-metrics", requireAuth, async (c) => {
     },
     error: null,
     meta: {},
+  })
+})
+
+// ── R3: GET /api/analytics/dashboard-metrics ─────────────────────────────────
+// 3-tier cached dashboard metrics: Redis → snapshot table → on-demand recompute.
+// Sets X-Cache-Status: hit|snapshot|miss response header.
+// updated_at injected into miss-path payload before Redis write (analytics-cache.ts).
+// cache_warning always null — Hono's circuit breaker converts Redis degradation to
+// 503 with no partial-failure path. Module 9 verifies frontend handles both fields.
+//
+// TODO(module-6-product-events): record "app_opened" daily event on each
+// dashboard_metrics hit (all 3 cache paths). Requires porting record_event_daily
+// (once-per-day dedup logic). Only out-of-scope analytics pipelines read app_opened
+// rows; no functional behavior in the migration depends on it.
+
+aggregationRouter.get("/dashboard-metrics", requireAuth, searchRateLimit, async (c) => {
+  const { userId } = c.get("session")
+
+  // Validate months (1-60, default 24)
+  const monthsRaw = c.req.query("months")
+  const months = parseIntParam(monthsRaw, 24)
+  if (months < 1 || months > 60) {
+    return c.json({ ok: false, data: null, error: "months must be between 1 and 60", code: "validation_error" }, 400)
+  }
+
+  // Validate until (optional YYYY-MM)
+  const until = (c.req.query("until") ?? "").trim()
+  if (until && !MONTH_RE.test(until)) {
+    return c.json({ ok: false, data: null, error: "until must be in YYYY-MM format", code: "validation_error" }, 400)
+  }
+
+  const cycleEnabled = parseBoolParam(c.req.query("cycle"))
+  const db = getDb()
+
+  // Resolve current month key and end year/month
+  const currentMonth = currentMonthKey()
+  let endYear: number
+  let endMonth: number
+  if (until) {
+    endYear = parseInt(until.slice(0, 4), 10)
+    endMonth = parseInt(until.slice(5, 7), 10)
+  } else {
+    endYear = parseInt(currentMonth.slice(0, 4), 10)
+    endMonth = parseInt(currentMonth.slice(5, 7), 10)
+  }
+
+  // Resolve cycle bounds if enabled
+  let cycleStart: string | null = null
+  let cycleEnd: string | null = null
+  if (cycleEnabled) {
+    const [profile] = await db
+      .select({ paydayDay: userProfiles.paydayDay })
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, userId))
+      .limit(1)
+    const refDate = new Date(Date.UTC(endYear, endMonth - 1, 1))
+    const period = currentPayPeriod(profile?.paydayDay ?? null, refDate)
+    cycleStart = period.start
+    cycleEnd = period.end
+  }
+
+  // Build cache_until key suffix matching Flask's cache_until logic
+  // (routes/analytics/__init__.py:260: f"{cache_until}|cycle=1|{start}|{end}" when cycle)
+  let cacheUntil = until || currentMonth
+  if (cycleEnabled && cycleStart && cycleEnd) {
+    cacheUntil = `${cacheUntil}|cycle=1|${cycleStart}|${cycleEnd}`
+  }
+
+  try {
+    const { payload, cacheStatus } = await withAnalyticsTimeout(
+      db,
+      env.analyticsComputeTimeoutSeconds,
+      () => getDashboardMetricsWithCache(userId, db, {
+        months, endYear, endMonth, cycleEnabled, cycleStart, cycleEnd,
+        until: cacheUntil, hardFail: true,
+      }),
+    )
+
+    // cache_warning always null — no partial-failure path in Hono; Redis degradation → 503.
+    // Flask line 348 sets this after the cache write, so it is NOT stored in Redis.
+    // We match by adding it at the route level (not in getDashboardMetricsWithCache).
+    const data = { ...payload, cache_warning: null }
+
+    // X-Cache-Status header matches Flask's response.headers["X-Cache-Status"].
+    // Must be set before c.json() to be included in the response headers.
+    c.header("X-Cache-Status", cacheStatus)
+    return c.json({
+      ok: true,
+      data,
+      error: null,
+      meta: { months_count: payload.months?.length ?? 0 },
+    })
+  } catch (err) {
+    if (err instanceof CacheBackendUnavailableError) {
+      return c.json({ ok: false, data: null, error: "Dashboard analytics are temporarily unavailable while Redis recovers. Please try again shortly.", code: "analytics_cache_unavailable" }, 503)
+    }
+    if (err instanceof AnalyticsComputationTimeoutError) {
+      return c.json({ ok: false, data: null, error: "Analytics are taking longer than expected. Please try again shortly.", code: "analytics_timeout" }, 503)
+    }
+    throw err
+  }
+})
+
+// ── R4: GET /api/analytics/account-overview ──────────────────────────────────
+// Deviation from Flask: connected_accounts always [] — bank sync deferred
+// (BankConnection/RawBankTransaction queries not ported; see Module 8 for bank sync scope).
+// Monetary serialization: KWD amounts use formatKd() (string, 3dp), matching Flask's
+// format_kd() contract. pct is a JS number (float), delta matches Python float behavior.
+// The 0 vs 0.0 float serialization difference (JSON.stringify(0) vs json.dumps(0.0))
+// is documented in the 5b-1 deviation block and verified in Module 9.
+
+aggregationRouter.get("/account-overview", requireAuth, searchRateLimit, async (c) => {
+  const { userId } = c.get("session")
+
+  let month = (c.req.query("month") ?? "").trim()
+  if (!month) {
+    month = currentMonthKey()
+  } else if (!MONTH_RE.test(month)) {
+    return c.json({ ok: false, data: null, error: "month must be in YYYY-MM format", code: "validation_error" }, 400)
+  }
+
+  const db = getDb()
+  const year = parseInt(month.slice(0, 4), 10)
+  const monthNumber = parseInt(month.slice(5, 7), 10)
+  const { start: monthStart, end: monthEnd } = calendarMonthBounds(year, monthNumber)
+  const monthKeys = buildMonthWindow(year, monthNumber, 6)
+
+  // Q1: total expense spend MTD
+  const [spendRow] = await db
+    .select({ total: sql<string>`COALESCE(SUM(${transactions.amountKd}), '0')` })
+    .from(transactions)
+    .leftJoin(categories, eq(transactions.categoryId, categories.id))
+    .where(and(
+      eq(transactions.userId, userId),
+      expenseCategoryFilter(),
+      sql`${transactions.date} >= ${monthStart}`,
+      sql`${transactions.date} <= ${monthEnd}`,
+    ))
+  const totalSpendMtd = new Decimal(spendRow?.total ?? "0")
+
+  // Q2: total income MTD
+  const [incomeRow] = await db
+    .select({ total: sql<string>`COALESCE(SUM(${transactions.amountKd}), '0')` })
+    .from(transactions)
+    .leftJoin(categories, eq(transactions.categoryId, categories.id))
+    .where(and(
+      eq(transactions.userId, userId),
+      incomeCategoryFilter(),
+      sql`${transactions.date} >= ${monthStart}`,
+      sql`${transactions.date} <= ${monthEnd}`,
+    ))
+  const totalIncomeMtd = new Decimal(incomeRow?.total ?? "0")
+
+  // Q3: manual transaction count MTD (all transactions, not expense-filtered)
+  const [manualCountRow] = await db
+    .select({ count: sql<string>`COUNT(*)` })
+    .from(transactions)
+    .where(and(
+      eq(transactions.userId, userId),
+      eq(transactions.source, "manual"),
+      sql`${transactions.date} >= ${monthStart}`,
+      sql`${transactions.date} <= ${monthEnd}`,
+    ))
+  const manualTransactionsMtd = parseInt(manualCountRow?.count ?? "0", 10)
+
+  // Q4: manual expense spend MTD
+  const [manualSpendRow] = await db
+    .select({ total: sql<string>`COALESCE(SUM(${transactions.amountKd}), '0')` })
+    .from(transactions)
+    .leftJoin(categories, eq(transactions.categoryId, categories.id))
+    .where(and(
+      eq(transactions.userId, userId),
+      eq(transactions.source, "manual"),
+      expenseCategoryFilter(),
+      sql`${transactions.date} >= ${monthStart}`,
+      sql`${transactions.date} <= ${monthEnd}`,
+    ))
+  const manualSpendMtd = new Decimal(manualSpendRow?.total ?? "0")
+
+  // Q5: top 5 expense categories MTD
+  const topCatExpr = sql<string>`COALESCE(${categories.name}, ${UNCAT})`
+  const topRows = await db
+    .select({
+      category: topCatExpr,
+      total: sql<string>`COALESCE(SUM(${transactions.amountKd}), '0')`,
+    })
+    .from(transactions)
+    .leftJoin(categories, eq(transactions.categoryId, categories.id))
+    .where(and(
+      eq(transactions.userId, userId),
+      expenseCategoryFilter(),
+      sql`${transactions.date} >= ${monthStart}`,
+      sql`${transactions.date} <= ${monthEnd}`,
+    ))
+    .groupBy(topCatExpr)
+    .orderBy(desc(sql`SUM(${transactions.amountKd})`), asc(topCatExpr))
+    .limit(5)
+
+  const totalSpendForPct = totalSpendMtd.gt(0) ? totalSpendMtd : new Decimal(0)
+  const topCategories = topRows.map((r) => {
+    const amount = new Decimal(r.total || "0")
+    const pct = totalSpendForPct.gt(0)
+      ? Number(amount.div(totalSpendForPct).mul(100).toDecimalPlaces(1))
+      : 0
+    return {
+      category: r.category,
+      amount_kd: formatKd(amount),
+      pct,
+    }
+  })
+
+  // Q6: 6-month income/expense trend — single CASE WHEN dual-column query
+  // Flask overview.py:171-189: func.sum(case((income_filter, amount), else_=0))
+  const trendRows = await db
+    .select({
+      ym: ymExpr,
+      incomeTotal: sql<string>`COALESCE(SUM(CASE WHEN ${incomeCategoryFilter()} THEN ${transactions.amountKd} ELSE 0 END), '0')`,
+      spendTotal: sql<string>`COALESCE(SUM(CASE WHEN ${expenseCategoryFilter()} THEN ${transactions.amountKd} ELSE 0 END), '0')`,
+    })
+    .from(transactions)
+    .leftJoin(categories, eq(transactions.categoryId, categories.id))
+    .where(and(eq(transactions.userId, userId), inArray(ymExpr, monthKeys)))
+    .groupBy(ymExpr)
+
+  const trendMap: Record<string, { income: string; spend: string }> = {}
+  for (const row of trendRows) {
+    trendMap[row.ym] = {
+      income: formatKd(new Decimal(row.incomeTotal || "0")),
+      spend: formatKd(new Decimal(row.spendTotal || "0")),
+    }
+  }
+  // Zero-fill all 6 months (sparse months get 0.000)
+  const monthTrend = monthKeys.map((mk) => ({
+    month: mk,
+    spend: trendMap[mk]?.spend ?? formatKd(new Decimal(0)),
+    income: trendMap[mk]?.income ?? formatKd(new Decimal(0)),
+  }))
+
+  return c.json({
+    ok: true,
+    data: {
+      month,
+      total_spend_mtd: formatKd(totalSpendMtd),
+      total_income_mtd: formatKd(totalIncomeMtd),
+      connected_accounts: [], // bank sync deferred — always empty
+      manual_entry_summary: {
+        transactions_mtd: manualTransactionsMtd,
+        spend_mtd: formatKd(manualSpendMtd),
+      },
+      top_categories: topCategories,
+      month_trend: monthTrend,
+    },
+    error: null,
+    meta: { connected_accounts_count: 0 },
   })
 })

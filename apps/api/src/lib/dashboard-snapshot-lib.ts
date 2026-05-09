@@ -49,6 +49,7 @@ export type DashboardMetricsPayload = {
   cycle_enabled: boolean
   cycle_start: string | null
   cycle_end: string | null
+  updated_at?: string
 }
 
 export type ComputeOpts = {

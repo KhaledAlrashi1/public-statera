@@ -13,7 +13,11 @@ import { transactions } from "../db/schema/transactions"
 
 const KUWAIT_OFFSET_MS = 3 * 60 * 60 * 1000 // UTC+3, no DST
 
-// Returns the current wall-clock date in Kuwait time (UTC+3).
+// IMPORTANT: currentLocalDate() returns a Date object whose UTC representation
+// is shifted forward by 3 hours (Kuwait UTC+3, no DST). All consumers MUST use
+// UTC accessors only: .toISOString(), .getUTCDay(), .getUTCDate(), .getUTCHours(),
+// Date.UTC(...). Local accessors (.getDay(), .getDate(), .toString(), etc.)
+// produce double-offset garbage on any machine whose local timezone isn't UTC.
 export function currentLocalDate(): Date {
   return new Date(Date.now() + KUWAIT_OFFSET_MS)
 }

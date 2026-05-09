@@ -445,7 +445,10 @@ export async function getDashboardMetricsWithCache(
       })
     }
   }
-  await cacheSet(cacheKey, JSON.stringify(payload), 900)
-
-  return { payload, cacheStatus: "miss" }
+  // Flask stores updated_at in the cached payload (routes/analytics/__init__.py line 324,
+  // before _cache_dashboard_payload at line 342) so cache hits return the original miss-time
+  // timestamp. Match that behavior by injecting before cacheSet.
+  const payloadWithMeta = { ...payload, updated_at: new Date().toISOString().replace(/\.\d{3}Z$/, "+00:00") }
+  await cacheSet(cacheKey, JSON.stringify(payloadWithMeta), 900)
+  return { payload: payloadWithMeta, cacheStatus: "miss" }
 }

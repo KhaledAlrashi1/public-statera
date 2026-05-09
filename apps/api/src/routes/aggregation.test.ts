@@ -1,9 +1,9 @@
 /**
- * Tests for aggregation routes: R1–R7 (5b-2).
+ * Tests for aggregation routes: R1–R7 (5b-2), R3+R4 (5b-3a).
  *
  * Uses the flat self-referential proxy pattern (CLAUDE.md: "Drizzle proxy-mock
- * pattern") for single-query routes, and makeSequentialDb for R7 which makes
- * 2–3 sequential DB calls depending on cycle and range flags.
+ * pattern") for single-query routes, and makeSequentialDb for R7/R4 which make
+ * multiple sequential DB calls.
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest"
@@ -57,6 +57,38 @@ function makeSequentialDb(sequences: unknown[][]): any {
 
 vi.mock("../db/connection", () => ({ getDb: vi.fn() }))
 import { getDb } from "../db/connection"
+
+vi.mock("../lib/rate-limit", () => ({
+  searchRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
+  importRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
+  exportRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
+}))
+
+// ── analytics-cache mock ──────────────────────────────────────────────────────
+// vi.mock is hoisted by vitest — must be at module level. The error classes are
+// defined here so that the same class references are used in the mock factory
+// and in instanceof checks within the route handler.
+vi.mock("../lib/analytics-cache", () => {
+  class CacheBackendUnavailableError extends Error {
+    constructor(msg = "") {
+      super(msg)
+      this.name = "CacheBackendUnavailableError"
+    }
+  }
+  class AnalyticsComputationTimeoutError extends Error {
+    constructor(msg = "") {
+      super(msg)
+      this.name = "AnalyticsComputationTimeoutError"
+    }
+  }
+  return {
+    getDashboardMetricsWithCache: vi.fn(),
+    withAnalyticsTimeout: vi.fn((_db: unknown, _seconds: unknown, fn: () => Promise<unknown>) => fn()),
+    CacheBackendUnavailableError,
+    AnalyticsComputationTimeoutError,
+  }
+})
+import { getDashboardMetricsWithCache, withAnalyticsTimeout, CacheBackendUnavailableError, AnalyticsComputationTimeoutError } from "../lib/analytics-cache"
 
 // ── Test app ──────────────────────────────────────────────────────────────────
 
@@ -478,5 +510,176 @@ describe("GET /api/analytics/budget-metrics", () => {
     const body = (await res.json()) as Record<string, unknown>
     expect(body.error).toBe("range must be one of: month, 30, 90, 365, all")
     expect(body.code).toBe("validation_error")
+  })
+})
+
+// ── R3: dashboard-metrics ─────────────────────────────────────────────────────
+
+describe("GET /api/analytics/dashboard-metrics", () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    // Restore withAnalyticsTimeout passthrough after resetAllMocks clears its impl.
+    vi.mocked(withAnalyticsTimeout).mockImplementation((_db, _seconds, fn) => fn())
+    vi.mocked(getDashboardMetricsWithCache).mockResolvedValue({
+      payload: {
+        months: ["2024-06"],
+        monthly: [],
+        expense_by_category: {},
+        cycle_enabled: false,
+        cycle_start: null,
+        cycle_end: null,
+        updated_at: "2024-06-01T00:00:00+00:00",
+      },
+      cacheStatus: "miss",
+    })
+  })
+
+  it("returns 401 without auth", async () => {
+    const res = await app.request("/api/analytics/dashboard-metrics")
+    expect(res.status).toBe(401)
+  })
+
+  it("miss path: returns 200 with X-Cache-Status: miss and data.updated_at", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/dashboard-metrics", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    expect(res.headers.get("X-Cache-Status")).toBe("miss")
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(true)
+    const data = body.data as Record<string, unknown>
+    expect(data.cache_warning).toBeNull()
+    expect(data.updated_at).toBe("2024-06-01T00:00:00+00:00")
+    expect((body.meta as Record<string, unknown>).months_count).toBe(1)
+  })
+
+  it("hit path: returns X-Cache-Status: hit", async () => {
+    vi.mocked(withAnalyticsTimeout).mockImplementation((_db, _seconds, fn) => fn())
+    vi.mocked(getDashboardMetricsWithCache).mockResolvedValue({
+      payload: {
+        months: ["2024-06"],
+        monthly: [],
+        expense_by_category: {},
+        cycle_enabled: false,
+        cycle_start: null,
+        cycle_end: null,
+        updated_at: "2024-06-01T00:00:00+00:00",
+      },
+      cacheStatus: "hit",
+    })
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/dashboard-metrics", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    expect(res.headers.get("X-Cache-Status")).toBe("hit")
+  })
+
+  it("CacheBackendUnavailableError returns 503 with analytics_cache_unavailable code", async () => {
+    vi.mocked(withAnalyticsTimeout).mockImplementation((_db, _seconds, fn) => fn())
+    vi.mocked(getDashboardMetricsWithCache).mockRejectedValue(new CacheBackendUnavailableError())
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/dashboard-metrics", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(503)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(false)
+    expect(body.code).toBe("analytics_cache_unavailable")
+  })
+
+  it("invalid months=0 returns 400 with validation_error", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/dashboard-metrics?months=0", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(false)
+    expect(body.code).toBe("validation_error")
+  })
+})
+
+// ── R4: account-overview ──────────────────────────────────────────────────────
+
+describe("GET /api/analytics/account-overview", () => {
+  beforeEach(() => vi.resetAllMocks())
+
+  it("returns 401 without auth", async () => {
+    const res = await app.request("/api/analytics/account-overview?month=2024-06")
+    expect(res.status).toBe(401)
+  })
+
+  it("happy path: correct shape, pct calculation, zero-filled month_trend", async () => {
+    // 6 sequential DB calls: Q1 spend, Q2 income, Q3 manual count, Q4 manual spend, Q5 top cats, Q6 trend
+    vi.mocked(getDb).mockReturnValue(
+      makeSequentialDb([
+        [{ total: "500.000" }],          // Q1: total expense spend MTD
+        [{ total: "2000.000" }],         // Q2: total income MTD
+        [{ count: "5" }],                // Q3: manual transaction count MTD
+        [{ total: "300.000" }],          // Q4: manual expense spend MTD
+        [{ category: "Food", total: "200.000" }], // Q5: top categories (1 of 5)
+        [{ ym: "2024-06", incomeTotal: "2000.000", spendTotal: "500.000" }], // Q6: trend (1 of 6)
+      ]),
+    )
+    const res = await app.request("/api/analytics/account-overview?month=2024-06", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(true)
+    const data = body.data as Record<string, unknown>
+
+    expect(data.total_spend_mtd).toBe("500.000")
+    expect(data.total_income_mtd).toBe("2000.000")
+    expect(data.connected_accounts).toEqual([])
+    expect((body.meta as Record<string, unknown>).connected_accounts_count).toBe(0)
+
+    const manual = data.manual_entry_summary as Record<string, unknown>
+    expect(manual.transactions_mtd).toBe(5)
+    expect(manual.spend_mtd).toBe("300.000")
+
+    const topCats = data.top_categories as Array<{ category: string; amount_kd: string; pct: number }>
+    expect(topCats).toHaveLength(1)
+    // 200/500 * 100 = 40.0
+    expect(topCats[0].pct).toBe(40)
+    expect(topCats[0].amount_kd).toBe("200.000")
+    expect(topCats[0].category).toBe("Food")
+
+    const trend = data.month_trend as Array<{ month: string; spend: string; income: string }>
+    // buildMonthWindow(2024, 6, 6) = ["2024-01","2024-02","2024-03","2024-04","2024-05","2024-06"]
+    expect(trend).toHaveLength(6)
+    // The 5 zero-filled months
+    const zeroMonths = trend.filter((t) => t.month !== "2024-06")
+    for (const m of zeroMonths) {
+      expect(m.spend).toBe("0.000")
+      expect(m.income).toBe("0.000")
+    }
+    // The real data month
+    const realMonth = trend.find((t) => t.month === "2024-06")
+    expect(realMonth?.spend).toBe("500.000")
+    expect(realMonth?.income).toBe("2000.000")
+  })
+
+  it("default month (no param): data.month equals currentMonthKey()", async () => {
+    // Import currentMonthKey to compute expected value at test time
+    const { currentMonthKey } = await import("../lib/analytics-helpers")
+    vi.mocked(getDb).mockReturnValue(
+      makeSequentialDb([
+        [{ total: "0" }],   // Q1
+        [{ total: "0" }],   // Q2
+        [{ count: "0" }],   // Q3
+        [{ total: "0" }],   // Q4
+        [],                  // Q5
+        [],                  // Q6
+      ]),
+    )
+    const res = await app.request("/api/analytics/account-overview", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const data = ((await res.json()) as Record<string, unknown>).data as Record<string, unknown>
+    expect(data.month).toBe(currentMonthKey())
   })
 })
