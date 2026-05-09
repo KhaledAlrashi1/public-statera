@@ -48,8 +48,8 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - 5b-1 Aggregation pre-work (analytics-helpers, payday-lib, income-lib; cache busts wired to all write routes)
 
 **Remaining modules (in order):**
-- 5b-2 Pure aggregation routes (safe-to-spend, budget summary, spending by category, income detection)
-- 5b-3 Cached/composite/computational routes (dashboard metrics, commitments ratio, avg spend)
+- 5b-2 Pure aggregation routes (R1 spend-by-category, R2 spend-by-month, R5 expense-breakdown, R6 expense-merchant-trend, R7 budget-metrics)
+- 5b-3 Cached/composite/computational routes (R3 dashboard-metrics, R4 account-overview, R9 safe-to-spend, R10 weekly-digest, R8 dashboard-bundle)
 - 5c Intelligence/detection routes (algorithmic; fixture-based equivalence tests required)
 - Module 6: Maintenance jobs (non-bank-sync Celery beat jobs → BullMQ)
 - Module 7: TOTP 2FA
@@ -114,6 +114,7 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 ## Test conventions
 
 - **Route tests:** Proxy mock pattern (mock Drizzle db), unit-level.
+- **Drizzle proxy-mock pattern:** use a flat self-referential proxy where every property access returns either a `then`-resolver (for awaitability) or the same proxy (for chaining). Do NOT use outer/inner alternation — Drizzle chain lengths vary by query (3 for `select().from().where()`, 4+ when joins are present), and alternation only resolves on chains that happen to end on the thenable side. The flat pattern resolves any chain length. See `apps/api/src/lib/income-lib.test.ts` for the canonical example.
 - **Lib tests:** fixture-based equivalence against Flask output for any non-trivial calculation. Captured Python output is hardcoded as expected value.
 - **Integration tests:** gated on `INTEGRATION=true` env var, run against docker-compose MySQL.
 - **Atomicity tests:** required for any route that uses `db.transaction()`. Mock transactions always commit; use real DB to verify rollback behavior.
