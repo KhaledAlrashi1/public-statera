@@ -1,5 +1,5 @@
 /*
- * Deliberate deviations from Flask (routes/analytics/__init__.py, spending.py):
+ * Deliberate deviations from Flask (routes/analytics/__init__.py, spending.py, digest.py):
  * - Routes mounted at /api/analytics/* instead of Flask's /api/* root paths.
  *   Module 9 verifies frontend URL parity.
  * - currentLocalDate() / currentMonthKey() use fixed UTC+3 (Kuwait, no DST)
@@ -20,6 +20,10 @@
  *   R3 (dashboard-metrics) delegates to computeDashboardMetricsPayload which uses
  *   formatKd() strings, where Flask used floats (_rounded_number) — pre-existing
  *   5a-1 deviation, Module 9 verifies frontend compatibility.
+ * - R9 _goalMonthlyCommitment: lazy pace computation — monthlyPaceFromDeposits is
+ *   called only when required_monthly is null or lte(0). Flask's
+ *   _goal_projection_snapshot always computes pace unconditionally. Output is
+ *   functionally identical because pace is only used in the current_pace branch.
  */
 
 import { Hono } from "hono"
@@ -31,6 +35,9 @@ import { transactions } from "../db/schema/transactions"
 import { categories } from "../db/schema/categories"
 import { merchants } from "../db/schema/merchants"
 import { userProfiles } from "../db/schema/users"
+import { budgets } from "../db/schema/budgets"
+import { debtAccounts } from "../db/schema/debt-accounts"
+import { savingsGoals } from "../db/schema/savings-goals"
 import { requireAuth } from "../middleware/auth"
 import {
   currentLocalDate,
@@ -47,7 +54,13 @@ import {
   AnalyticsComputationTimeoutError,
   withAnalyticsTimeout,
   getDashboardMetricsWithCache,
+  safeToSpendCacheKey,
+  cacheGet,
+  cacheSet,
 } from "../lib/analytics-cache"
+import { resolveIncomeForPeriod } from "../lib/income-lib"
+import { monthlyPaceFromDeposits } from "../lib/savings-goals-lib"
+import { Sentry } from "../lib/sentry"
 import { searchRateLimit } from "../lib/rate-limit"
 import { env } from "../lib/env"
 
@@ -557,6 +570,307 @@ aggregationRouter.get("/dashboard-metrics", requireAuth, searchRateLimit, async 
   }
 })
 
+// ── R9: safe-to-spend private helpers ────────────────────────────────────────
+
+function _q3(d: Decimal): Decimal {
+  return d.toDecimalPlaces(3, Decimal.ROUND_HALF_UP)
+}
+
+async function _sumExpenseBetween(
+  userId: number,
+  start: string,
+  end: string,
+  db: ReturnType<typeof getDb>,
+): Promise<Decimal> {
+  if (end < start) return new Decimal("0")
+  const [row] = await db
+    .select({ total: sql<string>`COALESCE(SUM(${transactions.amountKd}), '0')` })
+    .from(transactions)
+    .leftJoin(categories, eq(transactions.categoryId, categories.id))
+    .where(and(
+      eq(transactions.userId, userId),
+      sql`${transactions.date} >= ${start}`,
+      sql`${transactions.date} <= ${end}`,
+      expenseCategoryFilter(),
+    ))
+  return new Decimal(row?.total ?? "0")
+}
+
+async function _budgetAmountsForMonth(
+  userId: number,
+  month: string,
+  db: ReturnType<typeof getDb>,
+): Promise<[Decimal, Record<string, Decimal>]> {
+  const rows = await db
+    .select({ amount: budgets.amountKd, catName: categories.name })
+    .from(budgets)
+    .leftJoin(categories, eq(budgets.categoryId, categories.id))
+    .where(and(eq(budgets.userId, userId), eq(budgets.month, month)))
+  let totalBudget = new Decimal("0")
+  const amountsByCategory: Record<string, Decimal> = {}
+  for (const row of rows) {
+    const amount = new Decimal(row.amount || "0")
+    totalBudget = totalBudget.plus(amount)
+    const key = (row.catName ?? "").trim().toLowerCase()
+    if (key) {
+      amountsByCategory[key] = (amountsByCategory[key] ?? new Decimal("0")).plus(amount)
+    }
+  }
+  return [totalBudget, amountsByCategory]
+}
+
+// Inlined from savings-goals-lib (not exported) to keep _goalMonthlyCommitment self-contained.
+// Python: max(1, (days + 29) // 30) where days = (target_date - today).days
+function _monthsToTargetDate(today: string, targetDate: Date | string | null): number | null {
+  if (!targetDate) return null
+  const targetStr = targetDate instanceof Date ? targetDate.toISOString().slice(0, 10) : targetDate
+  if (targetStr <= today) return 0
+  const [ty, tm, td] = today.split("-").map(Number)
+  const [dy, dm, dd] = targetStr.split("-").map(Number)
+  const daysDiff = Math.round(
+    (Date.UTC(dy, dm - 1, dd) - Date.UTC(ty, tm - 1, td)) / 86400000,
+  )
+  return Math.max(1, Math.floor((daysDiff + 29) / 30))
+}
+
+type GoalCommitment = {
+  monthlyCommitmentKd: Decimal
+  source: "completed" | "required_monthly" | "current_pace" | "unscheduled"
+  remainingKd: Decimal
+}
+
+// Ports Flask's goal_monthly_commitment (lib/savings_goals.py:163).
+// Strict comparators per spec Item 8: lte(0) for completed, gt(0) for required_monthly and current_pace.
+async function _goalMonthlyCommitment(
+  goal: { id: number; userId: number; targetKd: string; currentKd: string; targetDate: Date | string | null },
+  db: ReturnType<typeof getDb>,
+  today: string, // YYYY-MM-DD (Kuwait date via UTC accessors on currentLocalDate())
+): Promise<GoalCommitment> {
+  const target = Decimal.max(new Decimal(goal.targetKd || "0"), new Decimal(0))
+  const current = Decimal.max(new Decimal(goal.currentKd || "0"), new Decimal(0))
+  const remaining = Decimal.max(target.minus(current), new Decimal(0))
+
+  if (remaining.lte(0)) {
+    return { monthlyCommitmentKd: new Decimal("0"), source: "completed", remainingKd: new Decimal("0") }
+  }
+
+  const monthsToTarget = _monthsToTargetDate(today, goal.targetDate)
+  let requiredMonthly: Decimal | null = null
+  if (monthsToTarget !== null && monthsToTarget > 0) {
+    requiredMonthly = _q3(remaining.div(new Decimal(monthsToTarget)))
+  } else if (monthsToTarget === 0) {
+    requiredMonthly = _q3(remaining)
+  }
+
+  if (requiredMonthly !== null && requiredMonthly.gt(0)) {
+    return { monthlyCommitmentKd: requiredMonthly, source: "required_monthly", remainingKd: _q3(remaining) }
+  }
+
+  const currentPace = await monthlyPaceFromDeposits(goal.id, goal.userId, db, today)
+  if (currentPace.gt(0)) {
+    return { monthlyCommitmentKd: currentPace, source: "current_pace", remainingKd: _q3(remaining) }
+  }
+
+  return { monthlyCommitmentKd: new Decimal("0"), source: "unscheduled", remainingKd: _q3(remaining) }
+}
+
+type SavingsGoalSummary = {
+  count: number
+  unscheduledCount: number
+  monthlyTotalKd: Decimal
+  budgetCoveredKd: Decimal
+  reserveKd: Decimal
+}
+
+async function _savingsGoalReserveForSafeToSpend(
+  userId: number,
+  today: string, // YYYY-MM-DD
+  budgetAmountsByCategory: Record<string, Decimal>,
+  db: ReturnType<typeof getDb>,
+): Promise<SavingsGoalSummary> {
+  const goalRows = await db
+    .select({
+      id: savingsGoals.id,
+      userId: savingsGoals.userId,
+      targetKd: savingsGoals.targetKd,
+      currentKd: savingsGoals.currentKd,
+      targetDate: savingsGoals.targetDate,
+      catName: categories.name,
+    })
+    .from(savingsGoals)
+    .leftJoin(categories, eq(savingsGoals.linkedCategoryId, categories.id))
+    .where(and(eq(savingsGoals.userId, userId), eq(savingsGoals.isActive, true)))
+
+  const goalMonthlyByCategory: Record<string, Decimal> = {}
+  let savingsGoalMonthlyTotal = new Decimal("0")
+  let savingsGoalUnlinkedTotal = new Decimal("0")
+  let savingsGoalUnscheduledCount = 0
+
+  for (const goal of goalRows) {
+    const commitment = await _goalMonthlyCommitment(goal, db, today)
+    const monthlyCommitment = commitment.monthlyCommitmentKd
+    savingsGoalMonthlyTotal = savingsGoalMonthlyTotal.plus(monthlyCommitment)
+    if (commitment.source === "unscheduled") savingsGoalUnscheduledCount++
+    if (monthlyCommitment.lte(0)) continue
+    const linkedCatKey = (goal.catName ?? "").trim().toLowerCase()
+    if (linkedCatKey) {
+      goalMonthlyByCategory[linkedCatKey] =
+        (goalMonthlyByCategory[linkedCatKey] ?? new Decimal("0")).plus(monthlyCommitment)
+    } else {
+      savingsGoalUnlinkedTotal = savingsGoalUnlinkedTotal.plus(monthlyCommitment)
+    }
+  }
+
+  let savingsGoalBudgetCovered = new Decimal("0")
+  let savingsGoalReserve = savingsGoalUnlinkedTotal
+  for (const [catKey, monthlyCommitment] of Object.entries(goalMonthlyByCategory)) {
+    const covered = Decimal.min(monthlyCommitment, budgetAmountsByCategory[catKey] ?? new Decimal("0"))
+    savingsGoalBudgetCovered = savingsGoalBudgetCovered.plus(covered)
+    savingsGoalReserve = savingsGoalReserve.plus(monthlyCommitment.minus(covered))
+  }
+
+  return {
+    count: goalRows.length,
+    unscheduledCount: savingsGoalUnscheduledCount,
+    monthlyTotalKd: savingsGoalMonthlyTotal,
+    budgetCoveredKd: savingsGoalBudgetCovered,
+    reserveKd: savingsGoalReserve,
+  }
+}
+
+async function _buildSafeToSpendPayload(
+  userId: number,
+  month: string,
+  today: Date, // from currentLocalDate() — use UTC accessors only
+  db: ReturnType<typeof getDb>,
+): Promise<Record<string, unknown>> {
+  const year = parseInt(month.slice(0, 4), 10)
+  const monthNumber = parseInt(month.slice(5, 7), 10)
+  const { start: cycleStart, end: cycleEnd } = calendarMonthBounds(year, monthNumber)
+
+  // UTC accessors on today (currentLocalDate() contract: value is UTC + Kuwait offset)
+  const todayStr = today.toISOString().slice(0, 10)
+
+  const cycleStartMs = new Date(cycleStart + "T00:00:00Z").getTime()
+  const cycleEndMs = new Date(cycleEnd + "T00:00:00Z").getTime()
+  const cycleDays = Math.round((cycleEndMs - cycleStartMs) / 86400000) + 1
+
+  let daysElapsed: number
+  let daysRemaining: number
+  let spendWindowEnd: string | null
+
+  if (todayStr < cycleStart) {
+    daysElapsed = 0
+    daysRemaining = cycleDays
+    spendWindowEnd = null
+  } else if (todayStr > cycleEnd) {
+    daysElapsed = cycleDays
+    daysRemaining = 0
+    spendWindowEnd = cycleEnd
+  } else {
+    const todayMs = new Date(todayStr + "T00:00:00Z").getTime()
+    daysElapsed = Math.round((todayMs - cycleStartMs) / 86400000) + 1
+    daysRemaining = Math.round((cycleEndMs - todayMs) / 86400000)
+    spendWindowEnd = todayStr
+  }
+
+  const incomeResolution = await resolveIncomeForPeriod(userId, month, db)
+  const monthlyIncome = incomeResolution.amountKd
+  const incomeSource = incomeResolution.source
+
+  const [totalBudget, budgetAmountsByCategory] = await _budgetAmountsForMonth(userId, month, db)
+
+  const goalSummary = await _savingsGoalReserveForSafeToSpend(
+    userId, todayStr, budgetAmountsByCategory, db,
+  )
+
+  const [debtRow] = await db
+    .select({
+      total: sql<string>`COALESCE(SUM(${debtAccounts.minimumPaymentKd}), '0')`,
+      count: sql<string>`COUNT(${debtAccounts.id})`,
+    })
+    .from(debtAccounts)
+    .where(and(eq(debtAccounts.userId, userId), eq(debtAccounts.isActive, true)))
+  const debtMinimumTotal = new Decimal(debtRow?.total ?? "0")
+  const debtAccountCount = parseInt(debtRow?.count ?? "0", 10)
+
+  let actualSpend = new Decimal("0")
+  if (spendWindowEnd !== null) {
+    actualSpend = await _sumExpenseBetween(userId, cycleStart, spendWindowEnd, db)
+  }
+
+  const incomeForCalc = monthlyIncome ?? new Decimal("0")
+  const committed = totalBudget.plus(debtMinimumTotal).plus(goalSummary.reserveKd)
+  const commitmentsOverCap =
+    incomeForCalc.gt(0) && committed.gt(incomeForCalc.mul(new Decimal("0.40")))
+
+  const remainingRaw = incomeForCalc.minus(committed).minus(actualSpend)
+  const remainingBudget = remainingRaw.gt(0) ? remainingRaw : new Decimal("0")
+  const dailyRate = remainingBudget.div(new Decimal(Math.max(daysRemaining, 1)))
+
+  const warnings: string[] = []
+  if (monthlyIncome === null) warnings.push("income_not_set")
+  if (totalBudget.lte(0)) warnings.push("budgets_not_set")
+  if (debtAccountCount === 0) warnings.push("debts_not_set_optional")
+  if (goalSummary.unscheduledCount > 0) warnings.push("savings_goals_unscheduled_optional")
+  if (commitmentsOverCap) warnings.push("commitments_over_40pct_cap")
+
+  return {
+    month,
+    cycle_start: cycleStart,
+    cycle_end: cycleEnd,
+    days_elapsed: daysElapsed,
+    days_remaining: daysRemaining,
+    monthly_income_kd: monthlyIncome !== null ? formatKd(monthlyIncome) : null,
+    income_auto_detected: incomeSource === "detected_from_transactions",
+    income_source: incomeSource,
+    total_budget_kd: formatKd(totalBudget),
+    debt_minimum_total_kd: formatKd(debtMinimumTotal),
+    savings_goal_count: goalSummary.count,
+    savings_goal_unscheduled_count: goalSummary.unscheduledCount,
+    savings_goal_monthly_total_kd: formatKd(goalSummary.monthlyTotalKd),
+    savings_goal_budget_covered_kd: formatKd(goalSummary.budgetCoveredKd),
+    savings_goal_reserve_kd: formatKd(goalSummary.reserveKd),
+    committed_kd: formatKd(committed),
+    committed_breakdown_kd: {
+      budget_allocations: formatKd(totalBudget),
+      debt_minimums: formatKd(debtMinimumTotal),
+      savings_goal_reserve: formatKd(goalSummary.reserveKd),
+      savings_goal_budget_covered: formatKd(goalSummary.budgetCoveredKd),
+    },
+    actual_spend_kd: formatKd(actualSpend),
+    remaining_budget_kd: formatKd(remainingBudget),
+    daily_rate_kd: formatKd(dailyRate),
+    data_complete: monthlyIncome !== null && totalBudget.gt(0),
+    warnings,
+  }
+}
+
+async function _getSafeToSpendPayloadCached(
+  userId: number,
+  month: string,
+  today: Date,
+  db: ReturnType<typeof getDb>,
+): Promise<Record<string, unknown>> {
+  const cacheKey = safeToSpendCacheKey(userId, month)
+  const cached = await cacheGet(cacheKey, { hardFail: true })
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached) as Record<string, unknown>
+      if (parsed && typeof parsed === "object") return parsed
+    } catch {
+      // corrupt cache entry — recompute
+    }
+  }
+  const payload = await _buildSafeToSpendPayload(userId, month, today, db)
+  try {
+    await cacheSet(cacheKey, JSON.stringify(payload), 300, { hardFail: true })
+  } catch (err) {
+    Sentry.captureException(err, { tags: { handler: "_getSafeToSpendPayloadCached", userId } })
+  }
+  return payload
+}
+
 // ── R4: GET /api/analytics/account-overview ──────────────────────────────────
 // Deviation from Flask: connected_accounts always [] — bank sync deferred
 // (BankConnection/RawBankTransaction queries not ported; see Module 8 for bank sync scope).
@@ -709,4 +1023,41 @@ aggregationRouter.get("/account-overview", requireAuth, searchRateLimit, async (
     error: null,
     meta: { connected_accounts_count: 0 },
   })
+})
+
+// ── R9: GET /api/analytics/safe-to-spend ─────────────────────────────────────
+// Cached safe-to-spend computation: income − committed − actual_spend.
+// Cache key: safeToSpendCacheKey(userId, month), TTL 300s.
+// hardFail: true → CacheBackendUnavailableError → 503 analytics_cache_unavailable.
+//                   AnalyticsComputationTimeoutError → 503 analytics_timeout.
+
+aggregationRouter.get("/safe-to-spend", requireAuth, searchRateLimit, async (c) => {
+  const { userId } = c.get("session")
+
+  let month = (c.req.query("month") ?? "").trim()
+  if (!month) {
+    month = currentMonthKey()
+  } else if (!MONTH_RE.test(month)) {
+    return c.json({ ok: false, data: null, error: "month must be in YYYY-MM format", code: "validation_error" }, 400)
+  }
+
+  const today = currentLocalDate()
+  const db = getDb()
+
+  try {
+    const payload = await withAnalyticsTimeout(
+      db,
+      env.analyticsComputeTimeoutSeconds,
+      () => _getSafeToSpendPayloadCached(userId, month, today, db),
+    )
+    return c.json({ ok: true, data: payload, error: null, meta: {} })
+  } catch (err) {
+    if (err instanceof CacheBackendUnavailableError) {
+      return c.json({ ok: false, data: null, error: "Dashboard analytics are temporarily unavailable while Redis recovers. Please try again shortly.", code: "analytics_cache_unavailable" }, 503)
+    }
+    if (err instanceof AnalyticsComputationTimeoutError) {
+      return c.json({ ok: false, data: null, error: "Analytics are taking longer than expected. Please try again shortly.", code: "analytics_timeout" }, 503)
+    }
+    throw err
+  }
 })

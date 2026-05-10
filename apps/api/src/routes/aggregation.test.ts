@@ -7,6 +7,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest"
+import Decimal from "decimal.js"
 import { Hono } from "hono"
 import { aggregationRouter } from "./aggregation"
 import { createSessionToken } from "../middleware/auth"
@@ -86,9 +87,29 @@ vi.mock("../lib/analytics-cache", () => {
     withAnalyticsTimeout: vi.fn((_db: unknown, _seconds: unknown, fn: () => Promise<unknown>) => fn()),
     CacheBackendUnavailableError,
     AnalyticsComputationTimeoutError,
+    safeToSpendCacheKey: vi.fn((_userId: unknown, month: unknown) => `safe_to_spend:1:${month}`),
+    cacheGet: vi.fn(async () => null),  // always miss — forces recompute in R9 fixture tests
+    cacheSet: vi.fn(async () => true),
   }
 })
-import { getDashboardMetricsWithCache, withAnalyticsTimeout, CacheBackendUnavailableError, AnalyticsComputationTimeoutError } from "../lib/analytics-cache"
+import {
+  getDashboardMetricsWithCache,
+  withAnalyticsTimeout,
+  CacheBackendUnavailableError,
+  AnalyticsComputationTimeoutError,
+  cacheGet,
+  cacheSet,
+} from "../lib/analytics-cache"
+
+vi.mock("../lib/income-lib", () => ({
+  resolveIncomeForPeriod: vi.fn(),
+}))
+import { resolveIncomeForPeriod } from "../lib/income-lib"
+
+vi.mock("../lib/savings-goals-lib", () => ({
+  monthlyPaceFromDeposits: vi.fn(),
+}))
+import { monthlyPaceFromDeposits } from "../lib/savings-goals-lib"
 
 // ── Test app ──────────────────────────────────────────────────────────────────
 
@@ -681,5 +702,355 @@ describe("GET /api/analytics/account-overview", () => {
     expect(res.status).toBe(200)
     const data = ((await res.json()) as Record<string, unknown>).data as Record<string, unknown>
     expect(data.month).toBe(currentMonthKey())
+  })
+})
+
+// ── R9: safe-to-spend ─────────────────────────────────────────────────────────
+//
+// Fixtures F1–F5: computed from Flask's _build_safe_to_spend_payload arithmetic
+// using fixed inputs and stable past month 2025-06 (today > cycle_end always,
+// so days_elapsed=30, days_remaining=0, spend_window_end="2025-06-30").
+//
+// Capture methodology: inputs are substituted into Flask's formula
+// (digest.py:113-219) symbolically; format_kd()/Decimal arithmetic verified by
+// running backend/money_math.py directly. Results hardcoded below.
+
+// F1: baseline — detected income, budget + debt set, no goals. data_complete=true, no warnings.
+const FIXTURE_F1 = {
+  month: "2025-06",
+  cycle_start: "2025-06-01",
+  cycle_end: "2025-06-30",
+  days_elapsed: 30,
+  days_remaining: 0,
+  monthly_income_kd: "1500.000",
+  income_auto_detected: true,
+  income_source: "detected_from_transactions",
+  total_budget_kd: "500.000",
+  debt_minimum_total_kd: "75.000",
+  savings_goal_count: 0,
+  savings_goal_unscheduled_count: 0,
+  savings_goal_monthly_total_kd: "0.000",
+  savings_goal_budget_covered_kd: "0.000",
+  savings_goal_reserve_kd: "0.000",
+  committed_kd: "575.000",
+  committed_breakdown_kd: {
+    budget_allocations: "500.000",
+    debt_minimums: "75.000",
+    savings_goal_reserve: "0.000",
+    savings_goal_budget_covered: "0.000",
+  },
+  actual_spend_kd: "120.000",
+  remaining_budget_kd: "805.000",
+  daily_rate_kd: "805.000",   // days_remaining=0 → div by max(0,1)=1
+  data_complete: true,
+  warnings: [],
+} as const
+
+// F2: income_not_set — no income transactions or profile income. data_complete=false.
+const FIXTURE_F2 = {
+  month: "2025-06",
+  cycle_start: "2025-06-01",
+  cycle_end: "2025-06-30",
+  days_elapsed: 30,
+  days_remaining: 0,
+  monthly_income_kd: null,
+  income_auto_detected: false,
+  income_source: "not_set",
+  total_budget_kd: "500.000",
+  debt_minimum_total_kd: "75.000",
+  savings_goal_count: 0,
+  savings_goal_unscheduled_count: 0,
+  savings_goal_monthly_total_kd: "0.000",
+  savings_goal_budget_covered_kd: "0.000",
+  savings_goal_reserve_kd: "0.000",
+  committed_kd: "575.000",
+  committed_breakdown_kd: {
+    budget_allocations: "500.000",
+    debt_minimums: "75.000",
+    savings_goal_reserve: "0.000",
+    savings_goal_budget_covered: "0.000",
+  },
+  actual_spend_kd: "0.000",
+  remaining_budget_kd: "0.000",
+  daily_rate_kd: "0.000",
+  data_complete: false,
+  warnings: ["income_not_set"],
+} as const
+
+// F3: budgets_not_set — income declared in profile, no budgets for month. data_complete=false.
+const FIXTURE_F3 = {
+  month: "2025-06",
+  cycle_start: "2025-06-01",
+  cycle_end: "2025-06-30",
+  days_elapsed: 30,
+  days_remaining: 0,
+  monthly_income_kd: "1200.000",
+  income_auto_detected: false,
+  income_source: "declared_in_profile",
+  total_budget_kd: "0.000",
+  debt_minimum_total_kd: "75.000",
+  savings_goal_count: 0,
+  savings_goal_unscheduled_count: 0,
+  savings_goal_monthly_total_kd: "0.000",
+  savings_goal_budget_covered_kd: "0.000",
+  savings_goal_reserve_kd: "0.000",
+  committed_kd: "75.000",
+  committed_breakdown_kd: {
+    budget_allocations: "0.000",
+    debt_minimums: "75.000",
+    savings_goal_reserve: "0.000",
+    savings_goal_budget_covered: "0.000",
+  },
+  actual_spend_kd: "0.000",
+  remaining_budget_kd: "1125.000",
+  daily_rate_kd: "1125.000",
+  data_complete: false,
+  warnings: ["budgets_not_set"],
+} as const
+
+// F4: commitments_over_40pct_cap — income=1000, committed=450 (45%>40%). data_complete=true.
+// Arithmetic check: 350+100=450 > 40%*1000=400 → cap triggered.
+const FIXTURE_F4 = {
+  month: "2025-06",
+  cycle_start: "2025-06-01",
+  cycle_end: "2025-06-30",
+  days_elapsed: 30,
+  days_remaining: 0,
+  monthly_income_kd: "1000.000",
+  income_auto_detected: true,
+  income_source: "detected_from_transactions",
+  total_budget_kd: "350.000",
+  debt_minimum_total_kd: "100.000",
+  savings_goal_count: 0,
+  savings_goal_unscheduled_count: 0,
+  savings_goal_monthly_total_kd: "0.000",
+  savings_goal_budget_covered_kd: "0.000",
+  savings_goal_reserve_kd: "0.000",
+  committed_kd: "450.000",
+  committed_breakdown_kd: {
+    budget_allocations: "350.000",
+    debt_minimums: "100.000",
+    savings_goal_reserve: "0.000",
+    savings_goal_budget_covered: "0.000",
+  },
+  actual_spend_kd: "50.000",
+  remaining_budget_kd: "500.000",
+  daily_rate_kd: "500.000",
+  data_complete: true,
+  warnings: ["commitments_over_40pct_cap"],
+} as const
+
+// F5: debts_not_set_optional + savings_goals_unscheduled_optional.
+// 1 active goal with no target_date and no deposit history → source="unscheduled", monthly=0.
+// Mutual-exclusivity note: commitments_over_40pct_cap cannot appear here because
+// income is set (income_not_set absent) and committed=500 < 40%*1500=600
+// (commitmentsOverCap requires incomeForCalc.gt(0) AND committed.gt(40% income)).
+// income_not_set cannot appear here because income is declared_in_profile.
+// Therefore F5 is the only fixture that tests both optional warnings simultaneously
+// without either of the two mutually-exclusive conditions triggering.
+const FIXTURE_F5 = {
+  month: "2025-06",
+  cycle_start: "2025-06-01",
+  cycle_end: "2025-06-30",
+  days_elapsed: 30,
+  days_remaining: 0,
+  monthly_income_kd: "1500.000",
+  income_auto_detected: false,
+  income_source: "declared_in_profile",
+  total_budget_kd: "500.000",
+  debt_minimum_total_kd: "0.000",
+  savings_goal_count: 1,
+  savings_goal_unscheduled_count: 1,
+  savings_goal_monthly_total_kd: "0.000",
+  savings_goal_budget_covered_kd: "0.000",
+  savings_goal_reserve_kd: "0.000",
+  committed_kd: "500.000",
+  committed_breakdown_kd: {
+    budget_allocations: "500.000",
+    debt_minimums: "0.000",
+    savings_goal_reserve: "0.000",
+    savings_goal_budget_covered: "0.000",
+  },
+  actual_spend_kd: "100.000",
+  remaining_budget_kd: "900.000",
+  daily_rate_kd: "900.000",
+  data_complete: true,
+  warnings: ["debts_not_set_optional", "savings_goals_unscheduled_optional"],
+} as const
+
+// Helper: sequential DB mock for R9 — covers budgets, savings_goals, debt, expense queries.
+// Sequences assume resolveIncomeForPeriod and monthlyPaceFromDeposits are separately mocked.
+function makeR9Db(
+  budgetRows: unknown[],
+  goalRows: unknown[],
+  debtRows: unknown[],
+  expenseRows: unknown[],
+) {
+  return makeSequentialDb([budgetRows, goalRows, debtRows, expenseRows])
+}
+
+describe("GET /api/analytics/safe-to-spend", () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    vi.mocked(withAnalyticsTimeout).mockImplementation((_db, _seconds, fn) => fn())
+    vi.mocked(cacheGet).mockResolvedValue(null)
+    vi.mocked(cacheSet).mockResolvedValue(true)
+  })
+
+  it("returns 401 without auth", async () => {
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06")
+    expect(res.status).toBe(401)
+  })
+
+  it("invalid month format returns 400", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-6", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.code).toBe("validation_error")
+    expect(body.error).toBe("month must be in YYYY-MM format")
+  })
+
+  it("CacheBackendUnavailableError returns 503 analytics_cache_unavailable", async () => {
+    vi.mocked(withAnalyticsTimeout).mockImplementation((_db, _seconds, fn) => fn())
+    vi.mocked(cacheGet).mockRejectedValue(new CacheBackendUnavailableError())
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(503)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.code).toBe("analytics_cache_unavailable")
+  })
+
+  it("AnalyticsComputationTimeoutError returns 503 analytics_timeout", async () => {
+    vi.mocked(withAnalyticsTimeout).mockImplementation(() => {
+      throw new AnalyticsComputationTimeoutError()
+    })
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(503)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.code).toBe("analytics_timeout")
+  })
+
+  // ── F1: baseline — detected income, budget+debt set, no goals ─────────────
+  it("F1: baseline — full Hono response matches Flask-captured fixture", async () => {
+    // Seed: income=1500 detected, budget=500, debt=75 (1 account), actual_spend=120
+    vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
+      amountKd: new Decimal("1500.000"),
+      source: "detected_from_transactions",
+    })
+    vi.mocked(getDb).mockReturnValue(
+      makeR9Db(
+        [{ amount: "500.000", catName: "Groceries" }],      // budgets
+        [],                                                   // savings goals (none)
+        [{ total: "75.000", count: "1" }],                   // debt: 1 account
+        [{ total: "120.000" }],                              // expense sum
+      ),
+    )
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(true)
+    expect(body.data).toEqual(FIXTURE_F1)
+  })
+
+  // ── F2: income_not_set ────────────────────────────────────────────────────
+  it("F2: income_not_set — full Hono response matches Flask-captured fixture", async () => {
+    vi.mocked(resolveIncomeForPeriod).mockResolvedValue({ amountKd: null, source: "not_set" })
+    vi.mocked(getDb).mockReturnValue(
+      makeR9Db(
+        [{ amount: "500.000", catName: "Groceries" }],
+        [],
+        [{ total: "75.000", count: "1" }],
+        [{ total: "0.000" }],
+      ),
+    )
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.data).toEqual(FIXTURE_F2)
+  })
+
+  // ── F3: budgets_not_set ───────────────────────────────────────────────────
+  it("F3: budgets_not_set — full Hono response matches Flask-captured fixture", async () => {
+    vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
+      amountKd: new Decimal("1200.000"),
+      source: "declared_in_profile",
+    })
+    vi.mocked(getDb).mockReturnValue(
+      makeR9Db(
+        [],                                                   // no budgets
+        [],
+        [{ total: "75.000", count: "1" }],
+        [{ total: "0.000" }],
+      ),
+    )
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.data).toEqual(FIXTURE_F3)
+  })
+
+  // ── F4: commitments_over_40pct_cap ────────────────────────────────────────
+  // Boundary: income=1000, committed=350+100=450, 40%*1000=400. 450>400 → cap.
+  it("F4: commitments_over_40pct_cap — full Hono response matches Flask-captured fixture", async () => {
+    vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
+      amountKd: new Decimal("1000.000"),
+      source: "detected_from_transactions",
+    })
+    vi.mocked(getDb).mockReturnValue(
+      makeR9Db(
+        [{ amount: "350.000", catName: "Food" }],
+        [],
+        [{ total: "100.000", count: "1" }],
+        [{ total: "50.000" }],
+      ),
+    )
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.data).toEqual(FIXTURE_F4)
+  })
+
+  // ── F5: debts_not_set_optional + savings_goals_unscheduled_optional ────────
+  // 1 active goal, no target_date, no deposit history → pace=0 → source="unscheduled".
+  // Mutual-exclusivity: commitments_over_40pct_cap absent (500 < 40%*1500=600);
+  // income_not_set absent (income is declared_in_profile).
+  it("F5: debts_not_set_optional + savings_goals_unscheduled_optional — full Hono response matches Flask-captured fixture", async () => {
+    vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
+      amountKd: new Decimal("1500.000"),
+      source: "declared_in_profile",
+    })
+    // monthlyPaceFromDeposits returns 0 → source="unscheduled"
+    vi.mocked(monthlyPaceFromDeposits).mockResolvedValue(new Decimal("0"))
+    vi.mocked(getDb).mockReturnValue(
+      makeSequentialDb([
+        [{ amount: "500.000", catName: "Groceries" }],       // budgets
+        // goal row: no target_date, no linked category
+        [{ id: 10, userId: 1, targetKd: "300.000", currentKd: "0.000", targetDate: null, catName: null }],
+        [{ total: "0.000", count: "0" }],                    // debt: 0 accounts
+        [{ total: "100.000" }],                              // expense sum
+      ]),
+    )
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.data).toEqual(FIXTURE_F5)
   })
 })
