@@ -111,6 +111,9 @@ vi.mock("../lib/savings-goals-lib", () => ({
 }))
 import { monthlyPaceFromDeposits } from "../lib/savings-goals-lib"
 
+// Namespace import so vi.spyOn can patch currentLocalDate per-fixture-test.
+import * as analyticsHelpers from "../lib/analytics-helpers"
+
 // ── Test app ──────────────────────────────────────────────────────────────────
 
 const app = new Hono().route("/api/analytics", aggregationRouter)
@@ -707,19 +710,95 @@ describe("GET /api/analytics/account-overview", () => {
 
 // ── R9: safe-to-spend ─────────────────────────────────────────────────────────
 //
-// Fixtures F1–F5: computed from Flask's _build_safe_to_spend_payload arithmetic
-// using fixed inputs and stable past month 2025-06 (today > cycle_end always,
-// so days_elapsed=30, days_remaining=0, spend_window_end="2025-06-30").
-//
-// Capture methodology: inputs are substituted into Flask's formula
-// (digest.py:113-219) symbolically; format_kd()/Decimal arithmetic verified by
-// running backend/money_math.py directly. Results hardcoded below.
+// Fixtures F1–F5: captured from Flask's _build_safe_to_spend_payload via a
+// seeded PostgreSQL test transaction (rolled back) on 2026-05-10.
+// Each fixture targets a distinct today-vs-cycle code path:
+//   F1 today WITHIN cycle  → days_elapsed=10, days_remaining=20
+//   F2 today BEFORE cycle  → days_elapsed=0,  days_remaining=31, actual_spend=0
+//   F3 today AFTER cycle   → days_elapsed=30, days_remaining=0, daily_rate denominator=1
+//   F4 commitments_over_40pct_cap warning trigger
+//   F5 4-warning scenario (income_not_set + budgets_not_set + 2 optional)
+// currentLocalDate() is mocked per-test via vi.spyOn(analyticsHelpers,...);
+// vi.restoreAllMocks() in afterEach returns it to real. WC1–WC4 (below) test
+// warning-state combinations using a stable past month without mocking.
 
-// F1: baseline — detected income, budget + debt set, no goals. data_complete=true, no warnings.
+// F1: today WITHIN cycle. Seed: month=2025-11, today=2025-11-10.
+// Nov cycle: Nov 1–30 (30 days). days_elapsed=10, days_remaining=20.
+// Income 1500 detected; budget 500; debt 75 (1 account); expense 120 (Nov 1–10).
+// Captured from Flask 2026-05-10.
 const FIXTURE_F1 = {
-  month: "2025-06",
-  cycle_start: "2025-06-01",
-  cycle_end: "2025-06-30",
+  month: "2025-11",
+  cycle_start: "2025-11-01",
+  cycle_end: "2025-11-30",
+  days_elapsed: 10,
+  days_remaining: 20,
+  monthly_income_kd: "1500.000",
+  income_auto_detected: true,
+  income_source: "detected_from_transactions",
+  total_budget_kd: "500.000",
+  debt_minimum_total_kd: "75.000",
+  savings_goal_count: 0,
+  savings_goal_unscheduled_count: 0,
+  savings_goal_monthly_total_kd: "0.000",
+  savings_goal_budget_covered_kd: "0.000",
+  savings_goal_reserve_kd: "0.000",
+  committed_kd: "575.000",
+  committed_breakdown_kd: {
+    budget_allocations: "500.000",
+    debt_minimums: "75.000",
+    savings_goal_reserve: "0.000",
+    savings_goal_budget_covered: "0.000",
+  },
+  actual_spend_kd: "120.000",
+  remaining_budget_kd: "805.000",
+  daily_rate_kd: "40.250",     // 805 / 20
+  data_complete: true,
+  warnings: [],
+} as const
+
+// F2: today BEFORE cycle start. Seed: month=2025-12, today=2025-11-30.
+// Dec cycle: Dec 1–31 (31 days). days_elapsed=0, days_remaining=31.
+// _sumExpenseBetween NOT called (spend_window_end=null); actual_spend=0.
+// Income 1500 declared_in_profile; budget 500 for Dec; debt 75 (1 account).
+// Captured from Flask 2026-05-10.
+const FIXTURE_F2 = {
+  month: "2025-12",
+  cycle_start: "2025-12-01",
+  cycle_end: "2025-12-31",
+  days_elapsed: 0,
+  days_remaining: 31,
+  monthly_income_kd: "1500.000",
+  income_auto_detected: false,
+  income_source: "declared_in_profile",
+  total_budget_kd: "500.000",
+  debt_minimum_total_kd: "75.000",
+  savings_goal_count: 0,
+  savings_goal_unscheduled_count: 0,
+  savings_goal_monthly_total_kd: "0.000",
+  savings_goal_budget_covered_kd: "0.000",
+  savings_goal_reserve_kd: "0.000",
+  committed_kd: "575.000",
+  committed_breakdown_kd: {
+    budget_allocations: "500.000",
+    debt_minimums: "75.000",
+    savings_goal_reserve: "0.000",
+    savings_goal_budget_covered: "0.000",
+  },
+  actual_spend_kd: "0.000",
+  remaining_budget_kd: "925.000",
+  daily_rate_kd: "29.839",     // 925 / 31 (ROUND_HALF_UP)
+  data_complete: true,
+  warnings: [],
+} as const
+
+// F3: today AFTER cycle end. Seed: month=2025-11, today=2025-12-01.
+// Nov cycle: Nov 1–30 (30 days). days_elapsed=30, days_remaining=0.
+// daily_rate denominator = max(0, 1) = 1; same seed as F1 but today past end.
+// Captured from Flask 2026-05-10.
+const FIXTURE_F3 = {
+  month: "2025-11",
+  cycle_start: "2025-11-01",
+  cycle_end: "2025-11-30",
   days_elapsed: 30,
   days_remaining: 0,
   monthly_income_kd: "1500.000",
@@ -741,13 +820,90 @@ const FIXTURE_F1 = {
   },
   actual_spend_kd: "120.000",
   remaining_budget_kd: "805.000",
-  daily_rate_kd: "805.000",   // days_remaining=0 → div by max(0,1)=1
+  daily_rate_kd: "805.000",    // 805 / max(0, 1) = 805
   data_complete: true,
   warnings: [],
 } as const
 
-// F2: income_not_set — no income transactions or profile income. data_complete=false.
-const FIXTURE_F2 = {
+// F4: commitments_over_40pct_cap. Seed: month=2025-11, today=2025-11-10.
+// Income 1000 detected; budget 350; debt 100.
+// committed=450 > 40%*1000=400 → cap triggered.
+// remaining=1000−450−50=500; daily_rate=500/20=25.000.
+// Captured from Flask 2026-05-10.
+const FIXTURE_F4 = {
+  month: "2025-11",
+  cycle_start: "2025-11-01",
+  cycle_end: "2025-11-30",
+  days_elapsed: 10,
+  days_remaining: 20,
+  monthly_income_kd: "1000.000",
+  income_auto_detected: true,
+  income_source: "detected_from_transactions",
+  total_budget_kd: "350.000",
+  debt_minimum_total_kd: "100.000",
+  savings_goal_count: 0,
+  savings_goal_unscheduled_count: 0,
+  savings_goal_monthly_total_kd: "0.000",
+  savings_goal_budget_covered_kd: "0.000",
+  savings_goal_reserve_kd: "0.000",
+  committed_kd: "450.000",
+  committed_breakdown_kd: {
+    budget_allocations: "350.000",
+    debt_minimums: "100.000",
+    savings_goal_reserve: "0.000",
+    savings_goal_budget_covered: "0.000",
+  },
+  actual_spend_kd: "50.000",
+  remaining_budget_kd: "500.000",
+  daily_rate_kd: "25.000",     // 500 / 20
+  data_complete: true,
+  warnings: ["commitments_over_40pct_cap"],
+} as const
+
+// F5: 4-warning scenario — income_not_set + budgets_not_set + debts_not_set_optional
+//     + savings_goals_unscheduled_optional. Seed: month=2025-11, today=2025-11-10.
+// No income, no budget, no debt; 1 unscheduled goal (no target_date, no deposits).
+// committed=0 (no budget+debt+reserve); income_for_calc=0 → commitments_over_cap=false
+// (requires income.gt(0)); remaining=0; daily_rate=0.
+// Flask income_source=null (income not set); Hono maps null→"not_set" via income-lib.ts
+// (deliberate typed deviation: Flask returns Python None, Hono returns string "not_set").
+// Captured from Flask 2026-05-10.
+const FIXTURE_F5 = {
+  month: "2025-11",
+  cycle_start: "2025-11-01",
+  cycle_end: "2025-11-30",
+  days_elapsed: 10,
+  days_remaining: 20,
+  monthly_income_kd: null,
+  income_auto_detected: false,
+  income_source: "not_set",    // Flask: null; Hono maps None→"not_set" (income-lib.ts)
+  total_budget_kd: "0.000",
+  debt_minimum_total_kd: "0.000",
+  savings_goal_count: 1,
+  savings_goal_unscheduled_count: 1,
+  savings_goal_monthly_total_kd: "0.000",
+  savings_goal_budget_covered_kd: "0.000",
+  savings_goal_reserve_kd: "0.000",
+  committed_kd: "0.000",
+  committed_breakdown_kd: {
+    budget_allocations: "0.000",
+    debt_minimums: "0.000",
+    savings_goal_reserve: "0.000",
+    savings_goal_budget_covered: "0.000",
+  },
+  actual_spend_kd: "0.000",
+  remaining_budget_kd: "0.000",
+  daily_rate_kd: "0.000",      // 0 / max(20, 1) = 0
+  data_complete: false,
+  warnings: ["income_not_set", "budgets_not_set", "debts_not_set_optional", "savings_goals_unscheduled_optional"],
+} as const
+
+// WC1–WC4: warning-state combinations. Use stable past month 2025-06 so real
+// currentLocalDate() (today > 2025-06-30) always puts days_elapsed=30, days_remaining=0.
+// These exercise warning combinations not directly covered by F1–F5.
+
+// WC1: income_not_set standalone — budget+debt set, income absent.
+const FIXTURE_WC1 = {
   month: "2025-06",
   cycle_start: "2025-06-01",
   cycle_end: "2025-06-30",
@@ -777,8 +933,8 @@ const FIXTURE_F2 = {
   warnings: ["income_not_set"],
 } as const
 
-// F3: budgets_not_set — income declared in profile, no budgets for month. data_complete=false.
-const FIXTURE_F3 = {
+// WC2: budgets_not_set — income declared in profile, no budgets for month.
+const FIXTURE_WC2 = {
   month: "2025-06",
   cycle_start: "2025-06-01",
   cycle_end: "2025-06-30",
@@ -803,14 +959,13 @@ const FIXTURE_F3 = {
   },
   actual_spend_kd: "0.000",
   remaining_budget_kd: "1125.000",
-  daily_rate_kd: "1125.000",
+  daily_rate_kd: "1125.000",    // 1125 / max(0,1) = 1125
   data_complete: false,
   warnings: ["budgets_not_set"],
 } as const
 
-// F4: commitments_over_40pct_cap — income=1000, committed=450 (45%>40%). data_complete=true.
-// Arithmetic check: 350+100=450 > 40%*1000=400 → cap triggered.
-const FIXTURE_F4 = {
+// WC3: commitments_over_40pct_cap — stable-month path (days_remaining=0 → daily_rate=500/1=500).
+const FIXTURE_WC3 = {
   month: "2025-06",
   cycle_start: "2025-06-01",
   cycle_end: "2025-06-30",
@@ -835,20 +990,16 @@ const FIXTURE_F4 = {
   },
   actual_spend_kd: "50.000",
   remaining_budget_kd: "500.000",
-  daily_rate_kd: "500.000",
+  daily_rate_kd: "500.000",    // 500 / max(0,1) = 500
   data_complete: true,
   warnings: ["commitments_over_40pct_cap"],
 } as const
 
-// F5: debts_not_set_optional + savings_goals_unscheduled_optional.
-// 1 active goal with no target_date and no deposit history → source="unscheduled", monthly=0.
-// Mutual-exclusivity note: commitments_over_40pct_cap cannot appear here because
-// income is set (income_not_set absent) and committed=500 < 40%*1500=600
-// (commitmentsOverCap requires incomeForCalc.gt(0) AND committed.gt(40% income)).
-// income_not_set cannot appear here because income is declared_in_profile.
-// Therefore F5 is the only fixture that tests both optional warnings simultaneously
-// without either of the two mutually-exclusive conditions triggering.
-const FIXTURE_F5 = {
+// WC4: debts_not_set_optional + savings_goals_unscheduled_optional.
+// 1 active goal, no target_date, no deposits → pace=0 → source="unscheduled".
+// Mutual-exclusivity: commitments_over_40pct_cap absent (500 < 40%*1500=600);
+// income_not_set absent (income is declared_in_profile).
+const FIXTURE_WC4 = {
   month: "2025-06",
   cycle_start: "2025-06-01",
   cycle_end: "2025-06-30",
@@ -873,13 +1024,14 @@ const FIXTURE_F5 = {
   },
   actual_spend_kd: "100.000",
   remaining_budget_kd: "900.000",
-  daily_rate_kd: "900.000",
+  daily_rate_kd: "900.000",    // 900 / max(0,1) = 900
   data_complete: true,
   warnings: ["debts_not_set_optional", "savings_goals_unscheduled_optional"],
 } as const
 
 // Helper: sequential DB mock for R9 — covers budgets, savings_goals, debt, expense queries.
 // Sequences assume resolveIncomeForPeriod and monthlyPaceFromDeposits are separately mocked.
+// For F2 (today < cycle_start), expense query is NOT called — use makeSequentialDb with 3 seqs.
 function makeR9Db(
   budgetRows: unknown[],
   goalRows: unknown[],
@@ -896,9 +1048,11 @@ describe("GET /api/analytics/safe-to-spend", () => {
     vi.mocked(cacheGet).mockResolvedValue(null)
     vi.mocked(cacheSet).mockResolvedValue(true)
   })
+  // Restore any vi.spyOn on currentLocalDate after each test.
+  afterEach(() => vi.restoreAllMocks())
 
   it("returns 401 without auth", async () => {
-    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06")
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-11")
     expect(res.status).toBe(401)
   })
 
@@ -917,7 +1071,7 @@ describe("GET /api/analytics/safe-to-spend", () => {
     vi.mocked(withAnalyticsTimeout).mockImplementation((_db, _seconds, fn) => fn())
     vi.mocked(cacheGet).mockRejectedValue(new CacheBackendUnavailableError())
     vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
-    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-11", {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(503)
@@ -930,7 +1084,7 @@ describe("GET /api/analytics/safe-to-spend", () => {
       throw new AnalyticsComputationTimeoutError()
     })
     vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
-    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-11", {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(503)
@@ -938,22 +1092,23 @@ describe("GET /api/analytics/safe-to-spend", () => {
     expect(body.code).toBe("analytics_timeout")
   })
 
-  // ── F1: baseline — detected income, budget+debt set, no goals ─────────────
-  it("F1: baseline — full Hono response matches Flask-captured fixture", async () => {
-    // Seed: income=1500 detected, budget=500, debt=75 (1 account), actual_spend=120
+  // ── F1: today WITHIN cycle ────────────────────────────────────────────────
+  // today=2025-11-10: days_elapsed=10, days_remaining=20, spend_window_end=today
+  it("F1: today within cycle — full Hono response matches Flask-captured fixture", async () => {
+    vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(new Date(Date.UTC(2025, 10, 10)))
     vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
       amountKd: new Decimal("1500.000"),
       source: "detected_from_transactions",
     })
     vi.mocked(getDb).mockReturnValue(
       makeR9Db(
-        [{ amount: "500.000", catName: "Groceries" }],      // budgets
-        [],                                                   // savings goals (none)
-        [{ total: "75.000", count: "1" }],                   // debt: 1 account
-        [{ total: "120.000" }],                              // expense sum
+        [{ amount: "500.000", catName: "Food" }],    // budgets (Nov 2025)
+        [],                                           // savings goals (none)
+        [{ total: "75.000", count: "1" }],            // debt: 1 account
+        [{ total: "120.000" }],                       // expense Nov 1–10
       ),
     )
-    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-11", {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(200)
@@ -962,50 +1117,60 @@ describe("GET /api/analytics/safe-to-spend", () => {
     expect(body.data).toEqual(FIXTURE_F1)
   })
 
-  // ── F2: income_not_set ────────────────────────────────────────────────────
-  it("F2: income_not_set — full Hono response matches Flask-captured fixture", async () => {
-    vi.mocked(resolveIncomeForPeriod).mockResolvedValue({ amountKd: null, source: "not_set" })
+  // ── F2: today BEFORE cycle start ─────────────────────────────────────────
+  // today=2025-11-30 < Dec 1: days_elapsed=0, days_remaining=31, actual_spend=0 (no expense query)
+  it("F2: today before cycle start — full Hono response matches Flask-captured fixture", async () => {
+    vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(new Date(Date.UTC(2025, 10, 30)))
+    vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
+      amountKd: new Decimal("1500.000"),
+      source: "declared_in_profile",
+    })
+    // Only 3 sequences: expense query is NOT called when spend_window_end=null.
     vi.mocked(getDb).mockReturnValue(
-      makeR9Db(
-        [{ amount: "500.000", catName: "Groceries" }],
-        [],
-        [{ total: "75.000", count: "1" }],
-        [{ total: "0.000" }],
-      ),
+      makeSequentialDb([
+        [{ amount: "500.000", catName: "Food" }],    // budgets (Dec 2025)
+        [],                                           // savings goals (none)
+        [{ total: "75.000", count: "1" }],            // debt: 1 account
+      ]),
     )
-    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-12", {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(200)
     const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(true)
     expect(body.data).toEqual(FIXTURE_F2)
   })
 
-  // ── F3: budgets_not_set ───────────────────────────────────────────────────
-  it("F3: budgets_not_set — full Hono response matches Flask-captured fixture", async () => {
+  // ── F3: today AFTER cycle end ─────────────────────────────────────────────
+  // today=2025-12-01 > Nov 30: days_elapsed=30, days_remaining=0, daily_rate=805/1=805
+  it("F3: today after cycle end — full Hono response matches Flask-captured fixture", async () => {
+    vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(new Date(Date.UTC(2025, 11, 1)))
     vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
-      amountKd: new Decimal("1200.000"),
-      source: "declared_in_profile",
+      amountKd: new Decimal("1500.000"),
+      source: "detected_from_transactions",
     })
     vi.mocked(getDb).mockReturnValue(
       makeR9Db(
-        [],                                                   // no budgets
-        [],
-        [{ total: "75.000", count: "1" }],
-        [{ total: "0.000" }],
+        [{ amount: "500.000", catName: "Food" }],    // budgets (Nov 2025)
+        [],                                           // savings goals (none)
+        [{ total: "75.000", count: "1" }],            // debt: 1 account
+        [{ total: "120.000" }],                       // expense Nov 1–30
       ),
     )
-    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-11", {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(200)
     const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(true)
     expect(body.data).toEqual(FIXTURE_F3)
   })
 
   // ── F4: commitments_over_40pct_cap ────────────────────────────────────────
-  // Boundary: income=1000, committed=350+100=450, 40%*1000=400. 450>400 → cap.
+  // today=2025-11-10; income=1000, budget=350, debt=100 → committed=450>40%*1000=400
   it("F4: commitments_over_40pct_cap — full Hono response matches Flask-captured fixture", async () => {
+    vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(new Date(Date.UTC(2025, 10, 10)))
     vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
       amountKd: new Decimal("1000.000"),
       source: "detected_from_transactions",
@@ -1018,39 +1183,128 @@ describe("GET /api/analytics/safe-to-spend", () => {
         [{ total: "50.000" }],
       ),
     )
-    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-11", {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(200)
     const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(true)
     expect(body.data).toEqual(FIXTURE_F4)
   })
 
-  // ── F5: debts_not_set_optional + savings_goals_unscheduled_optional ────────
-  // 1 active goal, no target_date, no deposit history → pace=0 → source="unscheduled".
-  // Mutual-exclusivity: commitments_over_40pct_cap absent (500 < 40%*1500=600);
-  // income_not_set absent (income is declared_in_profile).
-  it("F5: debts_not_set_optional + savings_goals_unscheduled_optional — full Hono response matches Flask-captured fixture", async () => {
-    vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
-      amountKd: new Decimal("1500.000"),
-      source: "declared_in_profile",
-    })
-    // monthlyPaceFromDeposits returns 0 → source="unscheduled"
+  // ── F5: 4-warning scenario ────────────────────────────────────────────────
+  // today=2025-11-10; no income, no budget, no debt, 1 unscheduled goal.
+  // Flask income_source=null → Hono "not_set" (income-lib.ts deliberate deviation).
+  it("F5: 4-warning scenario — full Hono response matches Flask-captured fixture", async () => {
+    vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(new Date(Date.UTC(2025, 10, 10)))
+    vi.mocked(resolveIncomeForPeriod).mockResolvedValue({ amountKd: null, source: "not_set" })
     vi.mocked(monthlyPaceFromDeposits).mockResolvedValue(new Decimal("0"))
     vi.mocked(getDb).mockReturnValue(
-      makeSequentialDb([
-        [{ amount: "500.000", catName: "Groceries" }],       // budgets
-        // goal row: no target_date, no linked category
-        [{ id: 10, userId: 1, targetKd: "300.000", currentKd: "0.000", targetDate: null, catName: null }],
-        [{ total: "0.000", count: "0" }],                    // debt: 0 accounts
-        [{ total: "100.000" }],                              // expense sum
-      ]),
+      makeR9Db(
+        [],                                           // no budgets → budgets_not_set
+        [{ id: 1, userId: 1, targetKd: "1000.000", currentKd: "0.000", targetDate: null, catName: null }],
+        [{ total: "0.000", count: "0" }],             // no debt → debts_not_set_optional
+        [{ total: "0.000" }],                         // expense (today within cycle → query called)
+      ),
     )
-    const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-11", {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(200)
     const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(true)
     expect(body.data).toEqual(FIXTURE_F5)
+  })
+
+  // ── Warning-state combinations (stable past month 2025-06) ────────────────
+  // real currentLocalDate() — today 2026-05-10 > 2025-06-30 always
+  // → days_elapsed=30, days_remaining=0, spendWindowEnd=cycleEnd, daily_rate=X/max(0,1)
+
+  describe("warning-state combinations (stable past month 2025-06)", () => {
+    // WC1: income_not_set standalone — budget+debt set, income absent.
+    it("WC1: income_not_set — remaining and daily_rate both zero", async () => {
+      vi.mocked(resolveIncomeForPeriod).mockResolvedValue({ amountKd: null, source: "not_set" })
+      vi.mocked(getDb).mockReturnValue(
+        makeR9Db(
+          [{ amount: "500.000", catName: "Groceries" }],
+          [],
+          [{ total: "75.000", count: "1" }],
+          [{ total: "0.000" }],
+        ),
+      )
+      const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+        headers: { Authorization: await authHeader() },
+      })
+      expect(res.status).toBe(200)
+      const body = (await res.json()) as Record<string, unknown>
+      expect(body.data).toEqual(FIXTURE_WC1)
+    })
+
+    // WC2: budgets_not_set — income declared, no budgets.
+    it("WC2: budgets_not_set — remaining=1125, daily_rate=1125", async () => {
+      vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
+        amountKd: new Decimal("1200.000"),
+        source: "declared_in_profile",
+      })
+      vi.mocked(getDb).mockReturnValue(
+        makeR9Db(
+          [],                                         // no budgets
+          [],
+          [{ total: "75.000", count: "1" }],
+          [{ total: "0.000" }],
+        ),
+      )
+      const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+        headers: { Authorization: await authHeader() },
+      })
+      expect(res.status).toBe(200)
+      const body = (await res.json()) as Record<string, unknown>
+      expect(body.data).toEqual(FIXTURE_WC2)
+    })
+
+    // WC3: commitments_over_40pct_cap — stable-month path; daily_rate=500/1=500.
+    it("WC3: commitments_over_40pct_cap (stable-month) — daily_rate=500", async () => {
+      vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
+        amountKd: new Decimal("1000.000"),
+        source: "detected_from_transactions",
+      })
+      vi.mocked(getDb).mockReturnValue(
+        makeR9Db(
+          [{ amount: "350.000", catName: "Food" }],
+          [],
+          [{ total: "100.000", count: "1" }],
+          [{ total: "50.000" }],
+        ),
+      )
+      const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+        headers: { Authorization: await authHeader() },
+      })
+      expect(res.status).toBe(200)
+      const body = (await res.json()) as Record<string, unknown>
+      expect(body.data).toEqual(FIXTURE_WC3)
+    })
+
+    // WC4: debts_not_set_optional + savings_goals_unscheduled_optional.
+    it("WC4: debts_not_set_optional + savings_goals_unscheduled_optional", async () => {
+      vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
+        amountKd: new Decimal("1500.000"),
+        source: "declared_in_profile",
+      })
+      vi.mocked(monthlyPaceFromDeposits).mockResolvedValue(new Decimal("0"))
+      vi.mocked(getDb).mockReturnValue(
+        makeSequentialDb([
+          [{ amount: "500.000", catName: "Groceries" }],
+          [{ id: 10, userId: 1, targetKd: "300.000", currentKd: "0.000", targetDate: null, catName: null }],
+          [{ total: "0.000", count: "0" }],            // debt: 0 accounts
+          [{ total: "100.000" }],                      // expense sum
+        ]),
+      )
+      const res = await app.request("/api/analytics/safe-to-spend?month=2025-06", {
+        headers: { Authorization: await authHeader() },
+      })
+      expect(res.status).toBe(200)
+      const body = (await res.json()) as Record<string, unknown>
+      expect(body.data).toEqual(FIXTURE_WC4)
+    })
   })
 })
