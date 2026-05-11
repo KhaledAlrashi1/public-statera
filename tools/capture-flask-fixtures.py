@@ -286,9 +286,123 @@ def cmd_income_pattern(args: argparse.Namespace) -> None:
     Fixtures I1-I6 (six scenarios: income detection, confidence classification,
     bi-weekly multiplier, and not-detected paths).
 
-    Implemented in 5c-1. See the 5c-1 proposal for the full fixture map.
+    All fixtures use today_date=2025-11-10 and current_month="2025-11".
+    90-day cutoff = 2025-08-12. DB is left unmodified (rollback at end).
     """
-    print("income-pattern: 5c-1 will populate this capture. See the 5c-1 proposal.")
+    import json as _json
+    from backend.routes.analytics.income import _build_income_pattern_payload  # type: ignore[import]
+
+    def _capture(db: Any) -> None:
+        # ── I1: detected, high confidence ─────────────────────────────────────
+        # today_date=2025-11-10, current_month=2025-11
+        # 3 × "Salary" 1000.000 on Sep-01, Oct-01, Nov-01 (monthly, 31-day gaps)
+        # evidence_months=3, max_deviation=0.0 → high confidence
+        # detect_monthly_income("2025-11") = 1000 → detected_from_transactions
+        # multiplier=1 (median_gap=31 > 18), suggested=1000.000, payday_day=1
+        print("--- Seeding I1 ---", flush=True)
+        u1 = make_user(db, "i1")
+        cat1_inc = make_category(db, u1, "Income", is_income=True)
+        make_transaction(db, u1, date(2025, 9, 1), "Salary", "1000.000", cat1_inc)
+        make_transaction(db, u1, date(2025, 10, 1), "Salary", "1000.000", cat1_inc)
+        make_transaction(db, u1, date(2025, 11, 1), "Salary", "1000.000", cat1_inc)
+        db.session.flush()
+        r1 = _build_income_pattern_payload(
+            user_id=u1, current_month="2025-11", today_date=date(2025, 11, 10)
+        )
+        print("=== I1 (detected, high confidence: 3 months, zero variance) ===")
+        print(_json.dumps(r1, default=str, indent=2))
+
+        # ── I2: detected, medium confidence ───────────────────────────────────
+        # 2 × "Salary" on Oct-05 (1000) and Nov-05 (1050)
+        # evidence_months=2, max_deviation≈0.0244 (> 0.02) → medium
+        # detect_monthly_income("2025-11") = 1050 → detected_from_transactions
+        # median_gap=31 > 18 → multiplier=1, suggested=average=1025.000
+        print("\n--- Seeding I2 ---", flush=True)
+        u2 = make_user(db, "i2")
+        cat2_inc = make_category(db, u2, "Income", is_income=True)
+        make_transaction(db, u2, date(2025, 10, 5), "Salary", "1000.000", cat2_inc)
+        make_transaction(db, u2, date(2025, 11, 5), "Salary", "1050.000", cat2_inc)
+        db.session.flush()
+        r2 = _build_income_pattern_payload(
+            user_id=u2, current_month="2025-11", today_date=date(2025, 11, 10)
+        )
+        print("=== I2 (detected, medium confidence: 2 months, deviation≈0.0244) ===")
+        print(_json.dumps(r2, default=str, indent=2))
+
+        # ── I3: detected, low confidence ──────────────────────────────────────
+        # 2 × "Salary" on Oct-01 (1000) and Nov-01 (1600)
+        # evidence_months=2, max_deviation≈0.2308 (> 0.05) → low
+        # detect_monthly_income("2025-11") = 1600 → detected_from_transactions
+        # median_gap=31 > 18 → multiplier=1, suggested=average=1300.000
+        print("\n--- Seeding I3 ---", flush=True)
+        u3 = make_user(db, "i3")
+        cat3_inc = make_category(db, u3, "Income", is_income=True)
+        make_transaction(db, u3, date(2025, 10, 1), "Salary", "1000.000", cat3_inc)
+        make_transaction(db, u3, date(2025, 11, 1), "Salary", "1600.000", cat3_inc)
+        db.session.flush()
+        r3 = _build_income_pattern_payload(
+            user_id=u3, current_month="2025-11", today_date=date(2025, 11, 10)
+        )
+        print("=== I3 (detected, low confidence: 2 months, deviation≈0.2308) ===")
+        print(_json.dumps(r3, default=str, indent=2))
+
+        # ── I4: not detected — 1 overall month, declared_in_profile ───────────
+        # Profile: monthly_income_kd=1800.000
+        # 1 × "Salary" on Oct-15 only (no Nov transaction → detect_monthly_income=0)
+        # overall_months=1 < 2 → early return: detected=false
+        # resolve_income_for_period falls to profile → declared_in_profile
+        print("\n--- Seeding I4 ---", flush=True)
+        u4 = make_user(db, "i4")
+        cat4_inc = make_category(db, u4, "Income", is_income=True)
+        make_profile(db, u4, monthly_income_kd="1800.000")
+        make_transaction(db, u4, date(2025, 10, 15), "Salary", "1800.000", cat4_inc)
+        db.session.flush()
+        r4 = _build_income_pattern_payload(
+            user_id=u4, current_month="2025-11", today_date=date(2025, 11, 10)
+        )
+        print("=== I4 (not detected: 1 month, source=declared_in_profile) ===")
+        print(_json.dumps(r4, default=str, indent=2))
+
+        # ── I5: not detected — 2 months, no candidates (all singletons) ───────
+        # "Salary" Oct-01 and "Bonus" Sep-15 — each name_key appears only once
+        # overall_months=2 ≥ 2, but every group has len < 2 → D5 filters all
+        # candidates=[] → D8 fires: detected=false
+        # No profile, no Nov income → resolve_income_for_period returns source=None
+        # (Flask null; Hono maps to "not_set")
+        print("\n--- Seeding I5 ---", flush=True)
+        u5 = make_user(db, "i5")
+        cat5_inc = make_category(db, u5, "Income", is_income=True)
+        make_transaction(db, u5, date(2025, 10, 1), "Salary", "2000.000", cat5_inc)
+        make_transaction(db, u5, date(2025, 9, 15), "Bonus", "500.000", cat5_inc)
+        db.session.flush()
+        r5 = _build_income_pattern_payload(
+            user_id=u5, current_month="2025-11", today_date=date(2025, 11, 10)
+        )
+        print("=== I5 (not detected: 2 months but all groups singleton, source=null) ===")
+        print(_json.dumps(r5, default=str, indent=2))
+
+        # ── I6: detected, bi-weekly multiplier ────────────────────────────────
+        # 5 × "Salary" 700.000: Sep-01, Sep-15, Oct-01, Oct-15, Nov-01
+        # gaps=[14,16,14,17], sorted=[14,14,16,17], median=sorted[2]=16 ≤ 18 → multiplier=2
+        # evidence_months=3 (Sep,Oct,Nov), max_deviation=0.0 → high confidence
+        # detect_monthly_income("2025-11") = 700 → detected_from_transactions
+        # suggested = 700 × 2 = 1400.000; payday_day=1 (appears 3 times vs 15 twice)
+        print("\n--- Seeding I6 ---", flush=True)
+        u6 = make_user(db, "i6")
+        cat6_inc = make_category(db, u6, "Income", is_income=True)
+        make_transaction(db, u6, date(2025, 9, 1),  "Salary", "700.000", cat6_inc)
+        make_transaction(db, u6, date(2025, 9, 15), "Salary", "700.000", cat6_inc)
+        make_transaction(db, u6, date(2025, 10, 1), "Salary", "700.000", cat6_inc)
+        make_transaction(db, u6, date(2025, 10, 15), "Salary", "700.000", cat6_inc)
+        make_transaction(db, u6, date(2025, 11, 1), "Salary", "700.000", cat6_inc)
+        db.session.flush()
+        r6 = _build_income_pattern_payload(
+            user_id=u6, current_month="2025-11", today_date=date(2025, 11, 10)
+        )
+        print("=== I6 (detected, bi-weekly: median_gap=16, multiplier=2, suggested=1400) ===")
+        print(_json.dumps(r6, default=str, indent=2))
+
+    _run_with_session(_capture)
 
 
 def cmd_recurring_patterns(args: argparse.Namespace) -> None:

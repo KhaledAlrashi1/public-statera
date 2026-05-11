@@ -54,7 +54,7 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 **Remaining modules (in order):**
 - 5c Intelligence/detection routes (algorithmic; fixture-based equivalence tests required)
   - 5c-0 Fixture capture infrastructure ✓
-  - 5c-1 income-pattern
+  - 5c-1 income-pattern ✓
   - 5c-2 recurring-patterns
   - 5c-3 snapshot
 - Module 6: Maintenance jobs (non-bank-sync Celery beat jobs → BullMQ)
@@ -113,6 +113,7 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - `lib/analytics-helpers.ts` — `currentLocalDate`, `currentMonthKey`, `calendarMonthBounds`, `buildMonthWindow`, `ymExpr`, `roundedKd`
 - `lib/payday-lib.ts` — `incomeCategoryFilter`, `expenseCategoryFilter`, `currentPayPeriod`
 - `lib/income-lib.ts` — `detectMonthlyIncome`, `resolveIncomeForPeriod` (typed `IncomeSource` / `IncomeResolution`)
+- `lib/intelligence-lib.ts` — `buildIncomePatternPayload`, `confidenceFromVariance`, `confidenceFromIntervalVariance`, `classifyRecurringFrequency`, `intervalVarianceRatio`, `classifyRecurringGroup`
 - `db/sql-helpers.ts` — `nullsLast` helper
 - Rate limit middleware from transactions — reuse for new endpoints
 - Worker task tracking from 1c — `markWorkerTaskStarted`, `markWorkerTaskFinished` (call once at batch start/end, not per-user)
@@ -134,3 +135,6 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - POST `/api/budgets` is a full atomic replace for the given month. Frontend must send the complete list of budgets for the month.
 - Categories `remap` does not delete the source. Merchants `remap` merges (deletes the source). This asymmetry is documented in code; preserve it.
 - Memorized POST/PATCH does name lookup only — does not create categories or merchants. Differs from transactions CRUD intentionally.
+- `confidence` stable enum (R11 income-pattern, R12 recurring-patterns): `"high" | "medium" | "low"`. Do not change values.
+- `income_source` stable enum (R11, R9, R10 safe-to-spend, weekly-digest): Hono returns `"detected_from_transactions" | "declared_in_profile" | "not_set"`. Flask returns `null` instead of `"not_set"` — this is a documented deviation. **Module 9 must update `apps/web/src/types/api.ts` (lines 138, 176, 265) and `sections.tsx:249` from `null` to `"not_set"` before frontend parity testing.**
+- Analytics routes URL prefix: all analytics routes mount at `/api/analytics/*` (Hono) vs Flask's `/api/*` root paths. Module 9 verifies frontend URL parity.
