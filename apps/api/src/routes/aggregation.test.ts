@@ -1,15 +1,16 @@
 /**
- * Tests for aggregation routes: R1–R7 (5b-2), R3+R4 (5b-3a).
+ * Tests for aggregation routes: R1–R7 (5b-2), R3+R4 (5b-3a), R9 (5b-3b),
+ * R10+R8 (5b-3c).
  *
  * Uses the flat self-referential proxy pattern (CLAUDE.md: "Drizzle proxy-mock
- * pattern") for single-query routes, and makeSequentialDb for R7/R4 which make
+ * pattern") for single-query routes, and makeSequentialDb for routes that make
  * multiple sequential DB calls.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import Decimal from "decimal.js"
 import { Hono } from "hono"
-import { aggregationRouter } from "./aggregation"
+import { aggregationRouter, _weekBounds, _daysUntilPayday, _deltaPercent } from "./aggregation"
 import { createSessionToken } from "../middleware/auth"
 
 // ── DB mock helpers ───────────────────────────────────────────────────────────
@@ -110,6 +111,22 @@ vi.mock("../lib/savings-goals-lib", () => ({
   monthlyPaceFromDeposits: vi.fn(),
 }))
 import { monthlyPaceFromDeposits } from "../lib/savings-goals-lib"
+
+// ── R8 sub-builder mocks ──────────────────────────────────────────────────────
+// buildDebtSummaryPayload and buildBudgetPayload are imported by aggregation.ts
+// for the dashboard-bundle route. Mocked here so R8 tests control their output
+// without triggering their internal DB queries.
+vi.mock("./debt", () => ({
+  buildDebtSummaryPayload: vi.fn(),
+  debtRouter: new Hono(),
+}))
+import { buildDebtSummaryPayload } from "./debt"
+
+vi.mock("./budgets", () => ({
+  buildBudgetPayload: vi.fn(),
+  budgetsRouter: new Hono(),
+}))
+import { buildBudgetPayload } from "./budgets"
 
 // Namespace import so vi.spyOn can patch currentLocalDate per-fixture-test.
 import * as analyticsHelpers from "../lib/analytics-helpers"
@@ -1295,6 +1312,7 @@ describe("GET /api/analytics/safe-to-spend", () => {
         makeSequentialDb([
           [{ amount: "500.000", catName: "Groceries" }],
           [{ id: 10, userId: 1, targetKd: "300.000", currentKd: "0.000", targetDate: null, catName: null }],
+
           [{ total: "0.000", count: "0" }],            // debt: 0 accounts
           [{ total: "100.000" }],                      // expense sum
         ]),
@@ -1306,5 +1324,238 @@ describe("GET /api/analytics/safe-to-spend", () => {
       const body = (await res.json()) as Record<string, unknown>
       expect(body.data).toEqual(FIXTURE_WC4)
     })
+  })
+})
+
+// ── R10/R8: _deltaPercent unit tests ─────────────────────────────────────────
+// Boundary cases captured from Flask's _rounded_percent via
+// /tmp/capture_r10_fixtures.py on 2026-05-10. All 5 cases cover each distinct
+// code path: both-zero, last=0/this>0, positive delta, negative delta, rounding.
+
+describe("_deltaPercent (R10 helper) — Flask-captured boundary fixtures", () => {
+  it("D1: both zero → 0.0", () => {
+    expect(_deltaPercent(new Decimal("0.000"), new Decimal("0.000"))).toBe(0.0)
+  })
+
+  it("D2: last=0, this>0 → 100.0", () => {
+    expect(_deltaPercent(new Decimal("10.000"), new Decimal("0.000"))).toBe(100.0)
+  })
+
+  it("D3: positive delta (this=15, last=10) → 50.0", () => {
+    expect(_deltaPercent(new Decimal("15.000"), new Decimal("10.000"))).toBe(50.0)
+  })
+
+  it("D4: negative delta (this=5, last=10) → -50.0", () => {
+    expect(_deltaPercent(new Decimal("5.000"), new Decimal("10.000"))).toBe(-50.0)
+  })
+
+  it("D5: ROUND_HALF_UP (this=11.555, last=10) → 15.6", () => {
+    expect(_deltaPercent(new Decimal("11.555"), new Decimal("10.000"))).toBe(15.6)
+  })
+})
+
+// ── R10: _weekBounds unit tests ───────────────────────────────────────────────
+// Captured from Flask's _week_bounds via /tmp/capture_r10_fixtures.py 2026-05-10.
+// Verifies the getUTCDay() Monday-shift: (dow===0?6:dow-1).
+
+describe("_weekBounds (R10 helper) — Flask-captured fixtures", () => {
+  it("WB1: Monday 2025-11-10 → start=2025-11-10, end=2025-11-16", () => {
+    const result = _weekBounds(new Date(Date.UTC(2025, 10, 10)))
+    expect(result.start).toBe("2025-11-10")
+    expect(result.end).toBe("2025-11-16")
+  })
+
+  it("WB2: Sunday 2025-11-09 → start=2025-11-03 (previous Monday)", () => {
+    const result = _weekBounds(new Date(Date.UTC(2025, 10, 9)))
+    expect(result.start).toBe("2025-11-03")
+    expect(result.end).toBe("2025-11-09")
+  })
+})
+
+// ── R10: _daysUntilPayday unit tests ─────────────────────────────────────────
+// Captured from Flask's _days_until_payday via /tmp/capture_r10_fixtures.py 2026-05-10.
+// Includes normal case and Feb clamp (paydayDay=31 → clamped to Feb 28).
+
+describe("_daysUntilPayday (R10 helper) — Flask-captured fixtures", () => {
+  it("PD1: today=2025-11-10, paydayDay=25 → 15", () => {
+    expect(_daysUntilPayday(new Date(Date.UTC(2025, 10, 10)), 25)).toBe(15)
+  })
+
+  it("PD2: today=2025-02-15, paydayDay=31 (Feb clamp → Feb 28) → 13", () => {
+    expect(_daysUntilPayday(new Date(Date.UTC(2025, 1, 15)), 31)).toBe(13)
+  })
+})
+
+// ── R10: weekly-digest route integration test ─────────────────────────────────
+// today=2025-11-12 (Wednesday): weekStart=2025-11-10, weekEnd=2025-11-16,
+// effectiveEnd=2025-11-12, daysObserved=3. cacheGet returns cached safe-to-spend
+// (cache hit) so no _buildSafeToSpendPayload DB calls needed.
+// DB sequences: thisWeekExpense, lastWeekExpense, topCategories (3), profile (1).
+
+describe("GET /api/analytics/weekly-digest", () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    vi.mocked(withAnalyticsTimeout).mockImplementation((_db, _seconds, fn) => fn())
+    vi.mocked(cacheGet).mockResolvedValue(null)
+    vi.mocked(cacheSet).mockResolvedValue(true)
+  })
+  afterEach(() => vi.restoreAllMocks())
+
+  it("returns 401 without auth", async () => {
+    const res = await app.request("/api/analytics/weekly-digest")
+    expect(res.status).toBe(401)
+  })
+
+  it("R10: full weekly-digest — Flask-helper-verified arithmetic", async () => {
+    vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(
+      new Date(Date.UTC(2025, 10, 12)), // 2025-11-12 Wednesday
+    )
+    // cache hit for safe-to-spend → daily_rate_kd="40.250"
+    vi.mocked(cacheGet).mockResolvedValue(JSON.stringify({ daily_rate_kd: "40.250" }))
+    vi.mocked(getDb).mockReturnValue(
+      makeSequentialDb([
+        [{ total: "150.000" }],  // thisWeekExpense: Nov 10–12
+        [{ total: "100.000" }],  // lastWeekExpense: Nov 03–09
+        [                        // top 3 categories this week
+          { name: "Food", total: "80.000" },
+          { name: "Transport", total: "70.000" },
+        ],
+        [{ paydayDay: 25 }],     // profile: paydayDay=25 → days_until_payday=13
+      ]),
+    )
+    const res = await app.request("/api/analytics/weekly-digest", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(true)
+    const data = body.data as Record<string, unknown>
+    expect(data.week_start).toBe("2025-11-10")
+    expect(data.week_end).toBe("2025-11-16")
+    expect(data.this_week_expense_kd).toBe("150.000")
+    expect(data.last_week_expense_kd).toBe("100.000")
+    expect(data.delta_pct).toBe(50.0)           // (150-100)/100*100 = 50.0 — Flask-captured
+    expect(data.top_categories).toEqual([
+      { name: "Food", amount_kd: "80.000" },
+      { name: "Transport", amount_kd: "70.000" },
+    ])
+    expect(data.days_until_payday).toBe(13)     // 25-12=13 — Flask-captured
+    expect(data.safe_to_spend_today_kd).toBe("40.250")
+    expect(data.days_observed).toBe(3)          // Nov 10–12 inclusive
+    expect((body.meta as Record<string, unknown>).count).toBe(2)
+  })
+
+  it("CacheBackendUnavailableError → 503 analytics_cache_unavailable", async () => {
+    vi.mocked(withAnalyticsTimeout).mockImplementation(() => {
+      throw new CacheBackendUnavailableError()
+    })
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/weekly-digest", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(503)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.code).toBe("analytics_cache_unavailable")
+  })
+})
+
+// ── R8: dashboard-bundle route tests ─────────────────────────────────────────
+// Sequential-then-parallel: cacheGet returns cached safe-to-spend (hit), then
+// buildDebtSummaryPayload + buildBudgetPayload are mocked, leaving only
+// _buildAccountOverviewPayload (6 queries) and _snapshotComputedAt (1 query)
+// to consume DB sequences. Interleave order in Promise.all is deterministic:
+//   sequences[0] → accountOverview Q1 (spendMtd)
+//   sequences[1] → snapshotComputedAt Q1
+//   sequences[2–6] → accountOverview Q2–Q6
+
+describe("GET /api/analytics/dashboard-bundle", () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    vi.mocked(withAnalyticsTimeout).mockImplementation((_db, _seconds, fn) => fn())
+    vi.mocked(cacheGet).mockResolvedValue(null)
+    vi.mocked(cacheSet).mockResolvedValue(true)
+  })
+  afterEach(() => vi.restoreAllMocks())
+
+  it("returns 401 without auth", async () => {
+    const res = await app.request("/api/analytics/dashboard-bundle")
+    expect(res.status).toBe(401)
+  })
+
+  it("R8: happy path — shape + key field assertions", async () => {
+    vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(
+      new Date(Date.UTC(2026, 4, 10)), // 2026-05-10 → currentMonth="2026-05"
+    )
+    // cache hit for safe-to-spend
+    vi.mocked(cacheGet).mockResolvedValue(JSON.stringify({ daily_rate_kd: "40.250" }))
+    vi.mocked(buildDebtSummaryPayload).mockResolvedValue({
+      total_balance_kd: "5000.000",
+      total_minimum_kd: "200.000",
+      account_count: 2,
+    })
+    vi.mocked(buildBudgetPayload).mockResolvedValue({
+      month: "2026-05",
+      items: [{ id: 1, month: "2026-05", category: "Food", amount_kd: "300.000" }],
+      profile_context: {
+        budget_total_kd: "300.000",
+        monthly_income_kd: "2000.000",
+        income_source: "declared_in_profile",
+        budget_to_income_pct: "15.0",
+        payday_day: 25,
+      },
+    })
+    // DB sequences for _buildAccountOverviewPayload (Q1–Q6) + _snapshotComputedAt (Q1),
+    // interleaved in Promise.all resolution order.
+    vi.mocked(getDb).mockReturnValue(
+      makeSequentialDb([
+        [{ total: "500.000" }],   // accountOverview Q1: total expense MTD
+        [{ computedAt: new Date("2026-05-09T10:00:00.000Z") }], // snapshotComputedAt
+        [{ total: "2000.000" }],  // accountOverview Q2: total income MTD
+        [{ count: "5" }],         // accountOverview Q3: manual count MTD
+        [{ total: "300.000" }],   // accountOverview Q4: manual spend MTD
+        [{ category: "Food", total: "500.000" }], // accountOverview Q5: top cats
+        [{ ym: "2026-05", incomeTotal: "2000.000", spendTotal: "500.000" }], // Q6: trend
+      ]),
+    )
+    const res = await app.request("/api/analytics/dashboard-bundle", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(true)
+    const data = body.data as Record<string, unknown>
+    expect(data.month).toBe("2026-05")
+    expect(data.snapshot_computed_at).toBe("2026-05-09T10:00:00+00:00")
+    expect((data.safe_to_spend as Record<string, unknown>).daily_rate_kd).toBe("40.250")
+    expect((data.debt_summary as Record<string, unknown>).account_count).toBe(2)
+    expect(data.budget_alerts).toEqual({ month: "2026-05", items: [] })
+    expect((data.account_overview as Record<string, unknown>).total_spend_mtd).toBe("500.000")
+    expect(body.meta).toEqual({ budget_count: 1, alert_count: 0 })
+  })
+
+  it("CacheBackendUnavailableError → 503 analytics_cache_unavailable", async () => {
+    vi.mocked(withAnalyticsTimeout).mockImplementation(() => {
+      throw new CacheBackendUnavailableError()
+    })
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/dashboard-bundle", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(503)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.code).toBe("analytics_cache_unavailable")
+  })
+
+  it("AnalyticsComputationTimeoutError → 503 analytics_timeout", async () => {
+    vi.mocked(withAnalyticsTimeout).mockImplementation(() => {
+      throw new AnalyticsComputationTimeoutError()
+    })
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/dashboard-bundle", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(503)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.code).toBe("analytics_timeout")
   })
 })

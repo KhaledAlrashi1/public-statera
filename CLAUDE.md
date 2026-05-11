@@ -49,9 +49,9 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - 5b-2 Pure aggregation routes (R1 spend-by-category, R2 spend-by-month, R5 expense-breakdown, R6 expense-merchant-trend, R7 budget-metrics)
 - 5b-3a Cached routes (R3 dashboard-metrics, R4 account-overview)
 - 5b-3b Safe-to-spend route (R9) with F1-F5 fixtures
+- 5b-3c Weekly-digest (R10) + dashboard-bundle (R8)
 
 **Remaining modules (in order):**
-- 5b-3c Weekly-digest (R10) + dashboard-bundle (R8)
 - 5c Intelligence/detection routes (algorithmic; fixture-based equivalence tests required)
 - Module 6: Maintenance jobs (non-bank-sync Celery beat jobs → BullMQ)
 - Module 7: TOTP 2FA

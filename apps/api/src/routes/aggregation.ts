@@ -24,6 +24,23 @@
  *   called only when required_monthly is null or lte(0). Flask's
  *   _goal_projection_snapshot always computes pace unconditionally. Output is
  *   functionally identical because pace is only used in the current_pace branch.
+ * - R10 _weekBounds uses Date.UTC() arithmetic and getUTCDay() shift
+ *   (dow===0?6:dow-1) instead of Python's date.weekday() — same Mon=0…Sun=6 result.
+ * - R10 _daysUntilPayday month-end clamp via new Date(Date.UTC(y,m,0)).getUTCDate()
+ *   instead of Python's calendar.monthrange().
+ * - R10 _deltaPercent rounds to 1dp with Decimal.ROUND_HALF_UP, matching Flask's
+ *   _rounded_percent / to_display_float(…, places=Decimal("0.1"), ROUND_HALF_UP).
+ * - R10 wrapped in withAnalyticsTimeout(hardFail:true); Flask R10 has no timeout
+ *   guard. Added for MySQL DoS prevention consistency with R8/R9.
+ * - R8 sequential-then-parallel: _getSafeToSpendPayloadCached awaited first
+ *   (fail-fast on CacheBackendUnavailableError before spawning 4 concurrent DB
+ *   connections), then the other 4 sub-builders in Promise.all. Flask executes all
+ *   sub-builders sequentially. Trade-off: ~4 concurrent short queries vs 4 sequential
+ *   against MySQL pool (default 10 connections, waitForConnections queueing) — safe
+ *   for typical loads.
+ * - R8 budget_alerts.items always []: list_active_budget_alerts not yet ported.
+ *   TODO(module-budget-alerts): port when budget alerts module is implemented.
+ * - R8 cache_warning absent: no partial-failure path in Hono (Redis degradation → 503).
  */
 
 import { Hono } from "hono"
@@ -60,6 +77,9 @@ import {
 } from "../lib/analytics-cache"
 import { resolveIncomeForPeriod } from "../lib/income-lib"
 import { monthlyPaceFromDeposits } from "../lib/savings-goals-lib"
+import { dashboardSnapshots } from "../db/schema/dashboard-snapshots"
+import { buildDebtSummaryPayload } from "./debt"
+import { buildBudgetPayload } from "./budgets"
 import { Sentry } from "../lib/sentry"
 import { searchRateLimit } from "../lib/rate-limit"
 import { env } from "../lib/env"
@@ -871,31 +891,21 @@ async function _getSafeToSpendPayloadCached(
   return payload
 }
 
-// ── R4: GET /api/analytics/account-overview ──────────────────────────────────
-// Deviation from Flask: connected_accounts always [] — bank sync deferred
-// (BankConnection/RawBankTransaction queries not ported; see Module 8 for bank sync scope).
-// Monetary serialization: KWD amounts use formatKd() (string, 3dp), matching Flask's
-// format_kd() contract. pct is a JS number (float), delta matches Python float behavior.
-// The 0 vs 0.0 float serialization difference (JSON.stringify(0) vs json.dumps(0.0))
-// is documented in the 5b-1 deviation block and verified in Module 9.
+// ── R4: account-overview payload builder ─────────────────────────────────────
+// Extracted so R8 (dashboard-bundle) can reuse all 6 DB queries without
+// re-implementing them. Deviation: connected_accounts always [] — bank sync
+// deferred. See file header deviation block for full R4 notes.
 
-aggregationRouter.get("/account-overview", requireAuth, searchRateLimit, async (c) => {
-  const { userId } = c.get("session")
-
-  let month = (c.req.query("month") ?? "").trim()
-  if (!month) {
-    month = currentMonthKey()
-  } else if (!MONTH_RE.test(month)) {
-    return c.json({ ok: false, data: null, error: "month must be in YYYY-MM format", code: "validation_error" }, 400)
-  }
-
-  const db = getDb()
+async function _buildAccountOverviewPayload(
+  userId: number,
+  month: string,
+  db: ReturnType<typeof getDb>,
+): Promise<Record<string, unknown>> {
   const year = parseInt(month.slice(0, 4), 10)
   const monthNumber = parseInt(month.slice(5, 7), 10)
   const { start: monthStart, end: monthEnd } = calendarMonthBounds(year, monthNumber)
   const monthKeys = buildMonthWindow(year, monthNumber, 6)
 
-  // Q1: total expense spend MTD
   const [spendRow] = await db
     .select({ total: sql<string>`COALESCE(SUM(${transactions.amountKd}), '0')` })
     .from(transactions)
@@ -908,7 +918,6 @@ aggregationRouter.get("/account-overview", requireAuth, searchRateLimit, async (
     ))
   const totalSpendMtd = new Decimal(spendRow?.total ?? "0")
 
-  // Q2: total income MTD
   const [incomeRow] = await db
     .select({ total: sql<string>`COALESCE(SUM(${transactions.amountKd}), '0')` })
     .from(transactions)
@@ -921,7 +930,6 @@ aggregationRouter.get("/account-overview", requireAuth, searchRateLimit, async (
     ))
   const totalIncomeMtd = new Decimal(incomeRow?.total ?? "0")
 
-  // Q3: manual transaction count MTD (all transactions, not expense-filtered)
   const [manualCountRow] = await db
     .select({ count: sql<string>`COUNT(*)` })
     .from(transactions)
@@ -933,7 +941,6 @@ aggregationRouter.get("/account-overview", requireAuth, searchRateLimit, async (
     ))
   const manualTransactionsMtd = parseInt(manualCountRow?.count ?? "0", 10)
 
-  // Q4: manual expense spend MTD
   const [manualSpendRow] = await db
     .select({ total: sql<string>`COALESCE(SUM(${transactions.amountKd}), '0')` })
     .from(transactions)
@@ -947,7 +954,6 @@ aggregationRouter.get("/account-overview", requireAuth, searchRateLimit, async (
     ))
   const manualSpendMtd = new Decimal(manualSpendRow?.total ?? "0")
 
-  // Q5: top 5 expense categories MTD
   const topCatExpr = sql<string>`COALESCE(${categories.name}, ${UNCAT})`
   const topRows = await db
     .select({
@@ -972,15 +978,10 @@ aggregationRouter.get("/account-overview", requireAuth, searchRateLimit, async (
     const pct = totalSpendForPct.gt(0)
       ? Number(amount.div(totalSpendForPct).mul(100).toDecimalPlaces(1))
       : 0
-    return {
-      category: r.category,
-      amount_kd: formatKd(amount),
-      pct,
-    }
+    return { category: r.category, amount_kd: formatKd(amount), pct }
   })
 
-  // Q6: 6-month income/expense trend — single CASE WHEN dual-column query
-  // Flask overview.py:171-189: func.sum(case((income_filter, amount), else_=0))
+  // Single CASE WHEN dual-column query — Flask overview.py:171-189.
   const trendRows = await db
     .select({
       ym: ymExpr,
@@ -999,30 +1000,41 @@ aggregationRouter.get("/account-overview", requireAuth, searchRateLimit, async (
       spend: formatKd(new Decimal(row.spendTotal || "0")),
     }
   }
-  // Zero-fill all 6 months (sparse months get 0.000)
   const monthTrend = monthKeys.map((mk) => ({
     month: mk,
     spend: trendMap[mk]?.spend ?? formatKd(new Decimal(0)),
     income: trendMap[mk]?.income ?? formatKd(new Decimal(0)),
   }))
 
-  return c.json({
-    ok: true,
-    data: {
-      month,
-      total_spend_mtd: formatKd(totalSpendMtd),
-      total_income_mtd: formatKd(totalIncomeMtd),
-      connected_accounts: [], // bank sync deferred — always empty
-      manual_entry_summary: {
-        transactions_mtd: manualTransactionsMtd,
-        spend_mtd: formatKd(manualSpendMtd),
-      },
-      top_categories: topCategories,
-      month_trend: monthTrend,
+  return {
+    month,
+    total_spend_mtd: formatKd(totalSpendMtd),
+    total_income_mtd: formatKd(totalIncomeMtd),
+    connected_accounts: [],
+    manual_entry_summary: {
+      transactions_mtd: manualTransactionsMtd,
+      spend_mtd: formatKd(manualSpendMtd),
     },
-    error: null,
-    meta: { connected_accounts_count: 0 },
-  })
+    top_categories: topCategories,
+    month_trend: monthTrend,
+  }
+}
+
+// ── R4: GET /api/analytics/account-overview ──────────────────────────────────
+
+aggregationRouter.get("/account-overview", requireAuth, searchRateLimit, async (c) => {
+  const { userId } = c.get("session")
+
+  let month = (c.req.query("month") ?? "").trim()
+  if (!month) {
+    month = currentMonthKey()
+  } else if (!MONTH_RE.test(month)) {
+    return c.json({ ok: false, data: null, error: "month must be in YYYY-MM format", code: "validation_error" }, 400)
+  }
+
+  const db = getDb()
+  const data = await _buildAccountOverviewPayload(userId, month, db)
+  return c.json({ ok: true, data, error: null, meta: { connected_accounts_count: 0 } })
 })
 
 // ── R9: GET /api/analytics/safe-to-spend ─────────────────────────────────────
@@ -1051,6 +1063,221 @@ aggregationRouter.get("/safe-to-spend", requireAuth, searchRateLimit, async (c) 
       () => _getSafeToSpendPayloadCached(userId, month, today, db),
     )
     return c.json({ ok: true, data: payload, error: null, meta: {} })
+  } catch (err) {
+    if (err instanceof CacheBackendUnavailableError) {
+      return c.json({ ok: false, data: null, error: "Dashboard analytics are temporarily unavailable while Redis recovers. Please try again shortly.", code: "analytics_cache_unavailable" }, 503)
+    }
+    if (err instanceof AnalyticsComputationTimeoutError) {
+      return c.json({ ok: false, data: null, error: "Analytics are taking longer than expected. Please try again shortly.", code: "analytics_timeout" }, 503)
+    }
+    throw err
+  }
+})
+
+// ── R10/R8: shared helpers ────────────────────────────────────────────────────
+//
+// Captured from Flask's shared.py (_week_bounds, _days_until_payday) and
+// digest.py route (_delta_pct logic) via /tmp/capture_r10_fixtures.py on 2026-05-10.
+// Exported with @internal tag for fixture-based unit tests.
+
+/** @internal For test use only. */
+export function _weekBounds(today: Date): { start: string; end: string } {
+  const dow = today.getUTCDay() // 0=Sun, 1=Mon, ..., 6=Sat
+  const daysSinceMonday = dow === 0 ? 6 : dow - 1
+  const startMs = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - daysSinceMonday)
+  return {
+    start: new Date(startMs).toISOString().slice(0, 10),
+    end: new Date(startMs + 6 * 86400_000).toISOString().slice(0, 10),
+  }
+}
+
+/** @internal For test use only. */
+export function _daysUntilPayday(today: Date, paydayDay: number | null): number | null {
+  if (paydayDay === null || paydayDay === undefined) return null
+  const y = today.getUTCFullYear()
+  const m = today.getUTCMonth() + 1 // 1-12
+  const clamp = (year: number, month: number): number =>
+    Math.max(1, Math.min(paydayDay, new Date(Date.UTC(year, month, 0)).getUTCDate()))
+  const todayMs = Date.UTC(y, m - 1, today.getUTCDate())
+  const thisPaydayMs = Date.UTC(y, m - 1, clamp(y, m))
+  if (todayMs <= thisPaydayMs) return (thisPaydayMs - todayMs) / 86400_000
+  const nextY = m === 12 ? y + 1 : y
+  const nextM = m === 12 ? 1 : m + 1
+  return (Date.UTC(nextY, nextM - 1, clamp(nextY, nextM)) - todayMs) / 86400_000
+}
+
+/** @internal For test use only. */
+export function _deltaPercent(thisWeek: Decimal, lastWeek: Decimal): number {
+  if (lastWeek.gt(0)) {
+    return Number(
+      thisWeek.minus(lastWeek).div(lastWeek).mul(100).toDecimalPlaces(1, Decimal.ROUND_HALF_UP),
+    )
+  }
+  if (thisWeek.gt(0)) return 100.0
+  return 0.0
+}
+
+// ── R10: GET /api/analytics/weekly-digest ────────────────────────────────────
+// Weekly expense summary: this-week vs last-week spend, top 3 categories, days
+// until payday, and safe-to-spend daily rate for today's month.
+// Deviation: wrapped in withAnalyticsTimeout(hardFail:true) — Flask R10 has no
+// timeout guard; added for MySQL DoS prevention consistency with R8/R9.
+
+aggregationRouter.get("/weekly-digest", requireAuth, searchRateLimit, async (c) => {
+  const { userId } = c.get("session")
+  const today = currentLocalDate()
+  const { start: weekStart, end: weekEnd } = _weekBounds(today)
+  const todayStr = today.toISOString().slice(0, 10)
+  const effectiveEnd = todayStr < weekEnd ? todayStr : weekEnd
+  const weekStartMs = new Date(weekStart + "T00:00:00Z").getTime()
+  const lastWeekStart = new Date(weekStartMs - 7 * 86400_000).toISOString().slice(0, 10)
+  const lastWeekEnd = new Date(weekStartMs - 86400_000).toISOString().slice(0, 10)
+  const daysObserved =
+    Math.round((new Date(effectiveEnd + "T00:00:00Z").getTime() - weekStartMs) / 86400_000) + 1
+  const month = currentMonthKey()
+  const db = getDb()
+
+  try {
+    const payload = await withAnalyticsTimeout(
+      db,
+      env.analyticsComputeTimeoutSeconds,
+      async () => {
+        const thisWeekExpense = await _sumExpenseBetween(userId, weekStart, effectiveEnd, db)
+        const lastWeekExpense = await _sumExpenseBetween(userId, lastWeekStart, lastWeekEnd, db)
+        const delta = _deltaPercent(thisWeekExpense, lastWeekExpense)
+
+        const catExpr = sql<string>`COALESCE(${categories.name}, ${UNCAT})`
+        const topRows = await db
+          .select({
+            name: catExpr,
+            total: sql<string>`COALESCE(SUM(${transactions.amountKd}), '0')`,
+          })
+          .from(transactions)
+          .leftJoin(categories, eq(transactions.categoryId, categories.id))
+          .where(and(
+            eq(transactions.userId, userId),
+            sql`${transactions.date} >= ${weekStart}`,
+            sql`${transactions.date} <= ${effectiveEnd}`,
+            expenseCategoryFilter(),
+          ))
+          .groupBy(catExpr)
+          .orderBy(desc(sql`SUM(${transactions.amountKd})`), asc(catExpr))
+          .limit(3)
+
+        const topCategories = topRows.map((r: { name: string; total: string }) => ({
+          name: r.name,
+          amount_kd: formatKd(new Decimal(r.total || "0")),
+        }))
+
+        const [profile] = await db
+          .select({ paydayDay: userProfiles.paydayDay })
+          .from(userProfiles)
+          .where(eq(userProfiles.userId, userId))
+          .limit(1)
+
+        const safeToSpendPayload = await _getSafeToSpendPayloadCached(userId, month, today, db)
+
+        return {
+          week_start: weekStart,
+          week_end: weekEnd,
+          this_week_expense_kd: formatKd(thisWeekExpense),
+          last_week_expense_kd: formatKd(lastWeekExpense),
+          delta_pct: delta,
+          top_categories: topCategories,
+          days_until_payday: _daysUntilPayday(today, profile?.paydayDay ?? null),
+          safe_to_spend_today_kd: String(safeToSpendPayload.daily_rate_kd ?? "0.000"),
+          days_observed: daysObserved,
+        }
+      },
+    )
+    return c.json({
+      ok: true,
+      data: payload,
+      error: null,
+      meta: { count: payload.top_categories.length },
+    })
+  } catch (err) {
+    if (err instanceof CacheBackendUnavailableError) {
+      return c.json({ ok: false, data: null, error: "Dashboard analytics are temporarily unavailable while Redis recovers. Please try again shortly.", code: "analytics_cache_unavailable" }, 503)
+    }
+    if (err instanceof AnalyticsComputationTimeoutError) {
+      return c.json({ ok: false, data: null, error: "Analytics are taking longer than expected. Please try again shortly.", code: "analytics_timeout" }, 503)
+    }
+    throw err
+  }
+})
+
+// ── R8: GET /api/analytics/dashboard-bundle ──────────────────────────────────
+// Bundles safe_to_spend, debt_summary, budget, account_overview, and
+// snapshot_computed_at into one response to reduce round trips.
+// Sequential-then-parallel: _getSafeToSpendPayloadCached awaited before Promise.all
+// for the other 4 sub-builders. See file header deviation block for trade-offs.
+
+async function _snapshotComputedAt(
+  userId: number,
+  db: ReturnType<typeof getDb>,
+  windowEndMonth: string,
+): Promise<string | null> {
+  const [row] = await db
+    .select({ computedAt: dashboardSnapshots.computedAt })
+    .from(dashboardSnapshots)
+    .where(and(
+      eq(dashboardSnapshots.userId, userId),
+      eq(dashboardSnapshots.monthsCount, env.dashboardSnapshotMonths),
+      eq(dashboardSnapshots.windowEndMonth, windowEndMonth),
+    ))
+    .orderBy(desc(dashboardSnapshots.computedAt), desc(dashboardSnapshots.id))
+    .limit(1)
+  if (!row?.computedAt) return null
+  return (row.computedAt as Date).toISOString().replace(/\.\d{3}Z$/, "+00:00")
+}
+
+aggregationRouter.get("/dashboard-bundle", requireAuth, searchRateLimit, async (c) => {
+  const { userId } = c.get("session")
+  const today = currentLocalDate()
+  const currentMonth = currentMonthKey()
+
+  let month = (c.req.query("month") ?? "").trim()
+  if (!month) {
+    month = currentMonth
+  } else if (!MONTH_RE.test(month)) {
+    return c.json({ ok: false, data: null, error: "month must be in YYYY-MM format", code: "validation_error" }, 400)
+  }
+
+  const db = getDb()
+
+  try {
+    const payload = await withAnalyticsTimeout(
+      db,
+      env.analyticsComputeTimeoutSeconds,
+      async () => {
+        const safeToSpend = await _getSafeToSpendPayloadCached(userId, month, today, db)
+        const [debtSummary, budget, accountOverview, snapshotComputedAt] = await Promise.all([
+          buildDebtSummaryPayload(userId, db),
+          buildBudgetPayload(userId, month, db),
+          _buildAccountOverviewPayload(userId, month, db),
+          _snapshotComputedAt(userId, db, currentMonth),
+        ])
+        return {
+          month,
+          snapshot_computed_at: snapshotComputedAt,
+          safe_to_spend: safeToSpend,
+          debt_summary: debtSummary,
+          budget,
+          budget_alerts: {
+            month,
+            items: [] as unknown[], // TODO(module-budget-alerts): port list_active_budget_alerts
+          },
+          account_overview: accountOverview,
+        }
+      },
+    )
+    return c.json({
+      ok: true,
+      data: payload,
+      error: null,
+      meta: { budget_count: payload.budget.items.length, alert_count: 0 },
+    })
   } catch (err) {
     if (err instanceof CacheBackendUnavailableError) {
       return c.json({ ok: false, data: null, error: "Dashboard analytics are temporarily unavailable while Redis recovers. Please try again shortly.", code: "analytics_cache_unavailable" }, 503)
