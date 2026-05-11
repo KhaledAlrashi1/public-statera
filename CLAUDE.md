@@ -53,6 +53,10 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 
 **Remaining modules (in order):**
 - 5c Intelligence/detection routes (algorithmic; fixture-based equivalence tests required)
+  - 5c-0 Fixture capture infrastructure ✓
+  - 5c-1 income-pattern
+  - 5c-2 recurring-patterns
+  - 5c-3 snapshot
 - Module 6: Maintenance jobs (non-bank-sync Celery beat jobs → BullMQ)
 - Module 7: TOTP 2FA
 - Module 8: Deployment (host selection between Railway/Hetzner/similar, secrets management, TLS, CI/CD, backups, monitoring, staging environment)
@@ -112,6 +116,7 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - `db/sql-helpers.ts` — `nullsLast` helper
 - Rate limit middleware from transactions — reuse for new endpoints
 - Worker task tracking from 1c — `markWorkerTaskStarted`, `markWorkerTaskFinished` (call once at batch start/end, not per-user)
+- `tools/capture-flask-fixtures.py` — Flask fixture capture tool (subcommands: income-pattern, recurring-patterns, snapshot). Seeds deterministic data into the live PostgreSQL container, calls Flask payload builders, prints JSON, rolls back. Run before implementing each 5c sub-commit to capture expected values for equivalence tests.
 
 ## Test conventions
 
