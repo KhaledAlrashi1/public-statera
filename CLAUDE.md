@@ -50,13 +50,9 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - 5b-3a Cached routes (R3 dashboard-metrics, R4 account-overview)
 - 5b-3b Safe-to-spend route (R9) with F1-F5 fixtures
 - 5b-3c Weekly-digest (R10) + dashboard-bundle (R8)
+- 5c Intelligence/detection routes (algorithmic; fixture-based equivalence tests) — R11 income-pattern, R12 recurring-patterns, R13 snapshot
 
 **Remaining modules (in order):**
-- 5c Intelligence/detection routes (algorithmic; fixture-based equivalence tests required)
-  - 5c-0 Fixture capture infrastructure ✓
-  - 5c-1 income-pattern ✓
-  - 5c-2 recurring-patterns ✓
-  - 5c-3 snapshot
 - Module 6: Maintenance jobs (non-bank-sync Celery beat jobs → BullMQ)
 - Module 7: TOTP 2FA
 - Module 8: Deployment (host selection between Railway/Hetzner/similar, secrets management, TLS, CI/CD, backups, monitoring, staging environment)
@@ -113,11 +109,12 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - `lib/analytics-helpers.ts` — `currentLocalDate`, `currentMonthKey`, `calendarMonthBounds`, `buildMonthWindow`, `ymExpr`, `roundedKd`
 - `lib/payday-lib.ts` — `incomeCategoryFilter`, `expenseCategoryFilter`, `currentPayPeriod`
 - `lib/income-lib.ts` — `detectMonthlyIncome`, `resolveIncomeForPeriod` (typed `IncomeSource` / `IncomeResolution`)
-- `lib/intelligence-lib.ts` — `buildIncomePatternPayload`, `confidenceFromVariance`, `confidenceFromIntervalVariance`, `classifyRecurringFrequency`, `intervalVarianceRatio`, `classifyRecurringGroup`
+- `lib/intelligence-lib.ts` — `buildIncomePatternPayload`, `buildRecurringPatternsPayload`, `buildSnapshotPayload`, `confidenceFromVariance`, `confidenceFromIntervalVariance`, `classifyRecurringFrequency`, `intervalVarianceRatio`, `classifyRecurringGroup`
 - `db/sql-helpers.ts` — `nullsLast` helper
 - Rate limit middleware from transactions — reuse for new endpoints
 - Worker task tracking from 1c — `markWorkerTaskStarted`, `markWorkerTaskFinished` (call once at batch start/end, not per-user)
 - `tools/capture-flask-fixtures.py` — Flask fixture capture tool (subcommands: income-pattern, recurring-patterns, snapshot). Seeds deterministic data into the live PostgreSQL container, calls Flask payload builders, prints JSON, rolls back. Run before implementing each 5c sub-commit to capture expected values for equivalence tests.
+- `routes/route-helpers.ts` — `parseIntParam` (consolidated from aggregation.ts and intelligence.ts local copies in 5c-3)
 
 ## Test conventions
 
@@ -139,3 +136,4 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - `income_source` stable enum (R11, R9, R10 safe-to-spend, weekly-digest): Hono returns `"detected_from_transactions" | "declared_in_profile" | "not_set"`. Flask returns `null` instead of `"not_set"` — this is a documented deviation. **Module 9 must update `apps/web/src/types/api.ts` (lines 138, 176, 265) and `sections.tsx:249` from `null` to `"not_set"` before frontend parity testing.**
 - Analytics routes URL prefix: all analytics routes mount at `/api/analytics/*` (Hono) vs Flask's `/api/*` root paths. Module 9 verifies frontend URL parity.
 - R12 recurring-patterns feature flag: `ENABLE_RECURRING_PATTERNS=false` returns HTTP 200 with `{ ok: true, data: { patterns: [] }, meta: { count: 0, enabled: false } }`. This is a client-observable behaviour: frontend must handle `enabled: false` in meta without rendering a missing-data error. Do not change the response shape or the HTTP status code.
+- R13 snapshot: all KWD amount fields (`income_total_kd`, `expense_total_kd`, `net_kd`, `total_debt_kd`, `total_savings_kd`, and per-window `income_kd`/`expense_kd`/`net_kd`) return as 3-decimal strings (e.g., `"500.000"`). Flask R13 returns floats via `_rounded_number`/`to_display_float`; Hono normalizes to strings via `formatKd` to match the project-wide KWD-as-string convention used by R3/R4/R9/R10/R11/R12. Module 9 frontend types must treat these fields as `string`, not `number`.

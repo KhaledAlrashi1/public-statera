@@ -89,11 +89,7 @@ export const aggregationRouter = new Hono()
 const UNCAT = "Uncategorized"
 const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/
 
-function parseIntParam(v: string | undefined, defaultVal: number): number {
-  if (!v) return defaultVal
-  const n = parseInt(v, 10)
-  return isNaN(n) ? defaultVal : n
-}
+import { parseIntParam } from "./route-helpers"
 
 function parseBoolParam(v: string | undefined): boolean {
   return ["1", "true", "yes", "on"].includes((v ?? "").trim().toLowerCase())

@@ -1,6 +1,6 @@
 /**
- * Tests for intelligence routes: R11 income-pattern (5c-1), R12 recurring-patterns (5c-2).
- * R13 snapshot will be added in 5c-3.
+ * Tests for intelligence routes: R11 income-pattern (5c-1), R12 recurring-patterns (5c-2),
+ * R13 snapshot (5c-3).
  *
  * Route tests focus on auth, envelope shape, and error handling.
  * Algorithm correctness is covered by intelligence-lib.test.ts.
@@ -35,8 +35,9 @@ import { withAnalyticsTimeout, AnalyticsComputationTimeoutError } from "../lib/a
 vi.mock("../lib/intelligence-lib", () => ({
   buildIncomePatternPayload: vi.fn(),
   buildRecurringPatternsPayload: vi.fn(),
+  buildSnapshotPayload: vi.fn(),
 }))
-import { buildIncomePatternPayload, buildRecurringPatternsPayload } from "../lib/intelligence-lib"
+import { buildIncomePatternPayload, buildRecurringPatternsPayload, buildSnapshotPayload } from "../lib/intelligence-lib"
 
 const app = new Hono().route("/api/analytics", intelligenceRouter)
 
@@ -207,5 +208,64 @@ describe("GET /api/analytics/recurring-patterns", () => {
     expect(body.ok).toBe(false)
     expect(body.error).toBe("days must be between 30 and 365")
     expect(body.code).toBe("validation_error")
+  })
+})
+
+// ── R13: snapshot ─────────────────────────────────────────────────────────────
+
+describe("GET /api/analytics/snapshot", () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    vi.mocked(withAnalyticsTimeout).mockImplementation((_db, _sec, fn) => fn())
+  })
+
+  it("returns 401 without auth", async () => {
+    const res = await app.request("/api/analytics/snapshot")
+    expect(res.status).toBe(401)
+  })
+
+  it("returns snapshot payload in ok envelope with correct field forwarding", async () => {
+    vi.mocked(buildSnapshotPayload).mockResolvedValue({
+      net_position: {
+        income_total_kd: "500.000",
+        expense_total_kd: "175.000",
+        net_kd: "325.000",
+        total_debt_kd: "200.000",
+        total_savings_kd: "150.000",
+      },
+      cash_flow: {
+        "30d": { income_kd: "500.000", expense_kd: "100.000", net_kd: "400.000" },
+        "60d": { income_kd: "500.000", expense_kd: "150.000", net_kd: "350.000" },
+        "90d": { income_kd: "500.000", expense_kd: "175.000", net_kd: "325.000" },
+      },
+      accounts: [],
+      generated_at: "2025-11-10T12:00:00.000+00:00",
+    })
+
+    const res = await app.request("/api/analytics/snapshot", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.ok).toBe(true)
+    expect(body.error).toBeNull()
+    expect(body.meta).toEqual({})
+    expect(body.data.net_position.income_total_kd).toBe("500.000")
+    expect(body.data.cash_flow["30d"].expense_kd).toBe("100.000")
+    expect(body.data.accounts).toEqual([])
+  })
+
+  it("returns 503 on AnalyticsComputationTimeoutError", async () => {
+    vi.mocked(withAnalyticsTimeout).mockRejectedValue(
+      new AnalyticsComputationTimeoutError("timed out"),
+    )
+
+    const res = await app.request("/api/analytics/snapshot", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(503)
+    const body = await res.json()
+    expect(body.ok).toBe(false)
+    expect(body.code).toBe("analytics_timeout")
   })
 })

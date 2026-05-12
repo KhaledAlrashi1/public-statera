@@ -1,7 +1,7 @@
 /**
  * Intelligence/detection analytics payload builders for Module 5c.
  *
- * Deliberate deviations from Flask (routes/analytics/income.py, shared.py):
+ * Deliberate deviations from Flask (routes/analytics/income.py, overview.py, shared.py):
  * - currentLocalDate() uses fixed UTC+3 (Kuwait, no DST) instead of Flask's
  *   per-user IANA timezone from profile. All users fixed to Kuwait time.
  *   TODO(module-analytics-tz-per-user): switch when timezone UI is added.
@@ -19,6 +19,17 @@
  * - Hint lists ported verbatim from Flask (shared.py:25–68); no Shahid/Anghami
  *   added — they are absent from Flask. Kuwaiti operators covered by the
  *   ooredoo/stc/viva/zain entries in UTILITY_HINTS.
+ * - R13 buildSnapshotPayload: Flask's _build_snapshot_payload (overview.py) returns
+ *   all KWD amount fields as floats via to_display_float/_rounded_number. Flask R4
+ *   (_build_account_overview_payload, same file) returns strings via format_kd. Hono
+ *   normalizes R13 to strings via formatKd — matching the project-wide KWD-as-string
+ *   convention used by R3/R4/R9/R10/R11/R12. Module 9 frontend types must treat
+ *   R13 money fields as string, not number.
+ * - R13 generated_at: Hono uses new Date().toISOString().replace('Z', '+00:00') which
+ *   preserves milliseconds (3 decimal places). Flask uses datetime.now().isoformat()
+ *   which includes microseconds (6 decimal places). Deviation: ms precision only.
+ *   Rationale: Node's Date does not expose sub-millisecond precision; the suffix
+ *   change (+00:00) matches Flask's UTC offset shape for consumers parsing for ordering.
  */
 
 import Decimal from "decimal.js"
@@ -27,6 +38,8 @@ import type { getDb } from "../db/connection"
 import { categories } from "../db/schema/categories"
 import { merchants } from "../db/schema/merchants"
 import { transactions } from "../db/schema/transactions"
+import { debtAccounts } from "../db/schema/debt-accounts"
+import { savingsGoals } from "../db/schema/savings-goals"
 import { formatKd } from "./transaction-lib"
 import { currentLocalDate } from "./analytics-helpers"
 import { incomeCategoryFilter, expenseCategoryFilter } from "./payday-lib"
@@ -500,5 +513,118 @@ export async function buildIncomePatternPayload(
     confidence: best.confidence,
     evidence_months: best.evidenceMonths,
     largest_income_name: best.largestIncomeName,
+  }
+}
+
+// ── Snapshot payload (R13) ────────────────────────────────────────────────────
+
+export type WindowResult = {
+  income_kd: string
+  expense_kd: string
+  net_kd: string
+}
+
+export type SnapshotPayload = {
+  net_position: {
+    income_total_kd: string
+    expense_total_kd: string
+    net_kd: string
+    total_debt_kd: string
+    total_savings_kd: string
+  }
+  cash_flow: {
+    "30d": WindowResult
+    "60d": WindowResult
+    "90d": WindowResult
+  }
+  accounts: never[]
+  generated_at: string
+}
+
+export type BuildSnapshotOpts = {
+  todayDate?: string // YYYY-MM-DD; defaults to Kuwait-local today
+}
+
+export async function buildSnapshotPayload(
+  userId: number,
+  db: Db,
+  opts?: BuildSnapshotOpts,
+): Promise<SnapshotPayload> {
+  const todayStr = opts?.todayDate ?? currentLocalDate().toISOString().slice(0, 10)
+
+  // D11: generated_at captured at call time.
+  // Per-field deviation: uses .replace('Z', '+00:00') to preserve milliseconds.
+  // See deviation block at file head for rationale.
+  const generatedAt = new Date().toISOString().replace("Z", "+00:00")
+
+  // D2/D3: All-time income and expense totals — CASE expressions, no COALESCE.
+  // SUM over zero rows returns null (SQL standard); D4 fallback handles it below.
+  const [totalsRow] = await db
+    .select({
+      income: sql<string | null>`SUM(CASE WHEN ${incomeCategoryFilter()} THEN ${transactions.amountKd} ELSE 0 END)`,
+      expense: sql<string | null>`SUM(CASE WHEN ${expenseCategoryFilter()} THEN ${transactions.amountKd} ELSE 0 END)`,
+    })
+    .from(transactions)
+    .leftJoin(categories, eq(transactions.categoryId, categories.id))
+    .where(eq(transactions.userId, userId))
+
+  // D4: null fallback — SUM returns null when no rows match.
+  const incomeTotal = new Decimal(totalsRow?.income ?? "0")
+  const expenseTotal = new Decimal(totalsRow?.expense ?? "0")
+
+  // D5: Active debt balance sum — COALESCE for zero active-debt case.
+  const [debtRow] = await db
+    .select({ total: sql<string>`COALESCE(SUM(${debtAccounts.balanceKd}), '0')` })
+    .from(debtAccounts)
+    .where(and(eq(debtAccounts.userId, userId), eq(debtAccounts.isActive, true)))
+  const debtTotal = new Decimal(debtRow?.total ?? "0")
+
+  // D6: Active savings goal current_kd sum — COALESCE for zero active-goals case.
+  const [savingsRow] = await db
+    .select({ total: sql<string>`COALESCE(SUM(${savingsGoals.currentKd}), '0')` })
+    .from(savingsGoals)
+    .where(and(eq(savingsGoals.userId, userId), eq(savingsGoals.isActive, true)))
+  const savingsTotal = new Decimal(savingsRow?.total ?? "0")
+
+  // D7/D8: Three window queries matching Flask's _window() structure.
+  // Sequential (not Promise.all) to keep mock ordering deterministic.
+  async function window(days: number): Promise<WindowResult> {
+    const cutoff = cutoffDateStr(todayStr, days)
+    const [row] = await db
+      .select({
+        income: sql<string | null>`SUM(CASE WHEN ${incomeCategoryFilter()} THEN ${transactions.amountKd} ELSE 0 END)`,
+        expense: sql<string | null>`SUM(CASE WHEN ${expenseCategoryFilter()} THEN ${transactions.amountKd} ELSE 0 END)`,
+      })
+      .from(transactions)
+      .leftJoin(categories, eq(transactions.categoryId, categories.id))
+      .where(and(eq(transactions.userId, userId), sql`${transactions.date} >= ${cutoff}`))
+    const inc = new Decimal(row?.income ?? "0")
+    const exp = new Decimal(row?.expense ?? "0")
+    return {
+      income_kd: formatKd(inc),
+      expense_kd: formatKd(exp),
+      net_kd: formatKd(inc.minus(exp)),
+    }
+  }
+
+  const w30 = await window(30)
+  const w60 = await window(60)
+  const w90 = await window(90)
+
+  return {
+    net_position: {
+      income_total_kd: formatKd(incomeTotal),
+      expense_total_kd: formatKd(expenseTotal),
+      net_kd: formatKd(incomeTotal.minus(expenseTotal)),
+      total_debt_kd: formatKd(debtTotal),
+      total_savings_kd: formatKd(savingsTotal),
+    },
+    cash_flow: {
+      "30d": w30,
+      "60d": w60,
+      "90d": w90,
+    },
+    accounts: [],
+    generated_at: generatedAt,
   }
 }

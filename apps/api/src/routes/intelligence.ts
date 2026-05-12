@@ -11,6 +11,9 @@
  *   /income-pattern or /recurring-patterns. Added for MySQL DoS prevention.
  * - R12 feature-flag disabled returns success envelope { patterns: [] } with
  *   meta: { count: 0, enabled: false } — matching Flask exactly.
+ * - R13 KWD fields returned as strings (not floats). See intelligence-lib.ts deviation block.
+ * - R13 generated_at uses ms precision. See intelligence-lib.ts deviation block.
+ * - R13 is intentionally uncached. Bounded by user transaction count.
  */
 
 import { Hono } from "hono"
@@ -20,13 +23,8 @@ import { searchRateLimit } from "../lib/rate-limit"
 import { Sentry } from "../lib/sentry"
 import { withAnalyticsTimeout, AnalyticsComputationTimeoutError } from "../lib/analytics-cache"
 import { env } from "../lib/env"
-import { buildIncomePatternPayload, buildRecurringPatternsPayload } from "../lib/intelligence-lib"
-
-function parseIntParam(v: string | undefined, defaultVal: number): number {
-  if (!v) return defaultVal
-  const n = parseInt(v, 10)
-  return isNaN(n) ? defaultVal : n
-}
+import { buildIncomePatternPayload, buildRecurringPatternsPayload, buildSnapshotPayload } from "../lib/intelligence-lib"
+import { parseIntParam } from "./route-helpers"
 
 export const intelligenceRouter = new Hono()
 
@@ -108,6 +106,38 @@ intelligenceRouter.get("/recurring-patterns", requireAuth, searchRateLimit, asyn
       )
     }
     Sentry.captureException(err, { tags: { handler: "GET /api/analytics/recurring-patterns", userId } })
+    throw err
+  }
+})
+
+// ── R13: GET /api/analytics/snapshot ────────────────────────────────────────
+// Financial position snapshot. No query params. Auth + search rate limit.
+// Flask: routes/analytics/__init__.py api_snapshot()
+
+intelligenceRouter.get("/snapshot", requireAuth, searchRateLimit, async (c) => {
+  const { userId } = c.get("session")
+  const db = getDb()
+
+  try {
+    const payload = await withAnalyticsTimeout(
+      db,
+      env.analyticsComputeTimeoutSeconds,
+      () => buildSnapshotPayload(userId, db),
+    )
+    return c.json({ ok: true, data: payload, error: null, meta: {} })
+  } catch (err) {
+    if (err instanceof AnalyticsComputationTimeoutError) {
+      return c.json(
+        {
+          ok: false,
+          data: null,
+          error: "Analytics are taking longer than expected. Please try again shortly.",
+          code: "analytics_timeout",
+        },
+        503,
+      )
+    }
+    Sentry.captureException(err, { tags: { handler: "GET /api/analytics/snapshot", userId } })
     throw err
   }
 })

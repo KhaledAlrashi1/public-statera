@@ -552,12 +552,80 @@ def cmd_recurring_patterns(args: argparse.Namespace) -> None:
 
 def cmd_snapshot(args: argparse.Namespace) -> None:
     """
-    Fixtures S1-S4 (four scenarios: all-time aggregations, active/inactive
-    debt and savings filtering, multi-window cash flow, window boundary inclusivity).
+    Fixtures S1-S4 (four scenarios: rich user, empty user, inactive-only,
+    boundary inclusivity).
 
-    Implemented in 5c-3. See the 5c-3 proposal for the full fixture map.
+    All fixtures use today_date=2025-11-10.
+    30d cutoff = 2025-10-11, 60d cutoff = 2025-09-11, 90d cutoff = 2025-08-12.
+    DB is left unmodified (rollback at end).
     """
-    print("snapshot: 5c-3 will populate this capture. See the 5c-3 proposal.")
+    import json as _json
+
+    def _capture(db: Any) -> None:
+        from backend.routes.analytics.overview import _build_snapshot_payload  # type: ignore[import]
+        TODAY = date(2025, 11, 10)
+
+        # ── S1: rich user — three distinct window expense sums ─────────────────
+        # today=2025-11-10
+        # 30d cutoff=2025-10-11: Groceries (2025-11-01, 100) + Salary income (500)
+        # 60d cutoff=2025-09-11: above + Restaurant (2025-09-20, 50) → expense=150
+        # 90d cutoff=2025-08-12: above + Coffee (2025-08-15, 25) → expense=175
+        # Active debt 200.000 + inactive 300.000 (excluded) → debt_total=200
+        # Active savings 150.000 + inactive 100.000 (excluded) → savings_total=150
+        print("--- Seeding S1 ---", flush=True)
+        u1 = make_user(db, "s1")
+        cat1_exp = make_category(db, u1, "Food", is_income=False)
+        cat1_inc = make_category(db, u1, "Income", is_income=True)
+        make_transaction(db, u1, date(2025, 11, 1),  "Groceries",  "100.000", cat1_exp)
+        make_transaction(db, u1, date(2025, 9,  20), "Restaurant", "50.000",  cat1_exp)
+        make_transaction(db, u1, date(2025, 8,  15), "Coffee",     "25.000",  cat1_exp)
+        make_transaction(db, u1, date(2025, 11, 1),  "Salary",     "500.000", cat1_inc)
+        make_debt(db, u1, "Car Loan",  balance="200.000", is_active=True)
+        make_debt(db, u1, "Old Debt",  balance="300.000", is_active=False)
+        make_goal(db, u1, "Emergency", target="1000.000", current="150.000", is_active=True)
+        make_goal(db, u1, "Vacation",  target="500.000",  current="100.000", is_active=False)
+        db.session.flush()
+        r1 = _build_snapshot_payload(user_id=u1, today_date=TODAY)
+        print("=== S1 (rich user: 30d-exp=100, 60d-exp=150, 90d-exp=175; debt=200, savings=150) ===")
+        print(_json.dumps(r1, default=str, indent=2))
+
+        # ── S2: empty user — no transactions, no debt, no savings ─────────────
+        print("\n--- Seeding S2 ---", flush=True)
+        u2 = make_user(db, "s2")
+        db.session.flush()
+        r2 = _build_snapshot_payload(user_id=u2, today_date=TODAY)
+        print("=== S2 (empty user: all totals zero) ===")
+        print(_json.dumps(r2, default=str, indent=2))
+
+        # ── S3: inactive-only debt and savings — excluded from totals ──────────
+        # Transactions present; only inactive debt/savings → both sum to 0
+        print("\n--- Seeding S3 ---", flush=True)
+        u3 = make_user(db, "s3")
+        cat3 = make_category(db, u3, "Food", is_income=False)
+        make_transaction(db, u3, date(2025, 11, 1), "Groceries", "50.000", cat3)
+        make_debt(db, u3, "Old Loan", balance="500.000", is_active=False)
+        make_goal(db, u3, "Old Goal", target="1000.000", current="200.000", is_active=False)
+        db.session.flush()
+        r3 = _build_snapshot_payload(user_id=u3, today_date=TODAY)
+        print("=== S3 (inactive-only: debt_total=0, savings_total=0) ===")
+        print(_json.dumps(r3, default=str, indent=2))
+
+        # ── S4: boundary — cutoff date itself is in-window (date >= cutoff) ───
+        # today=2025-11-10, 30d cutoff=2025-10-11
+        # On-Cutoff  (2025-10-11, 60.000) → in 30d/60d/90d windows
+        # Before-Cutoff (2025-10-10, 40.000) → in 60d/90d only, NOT 30d
+        # Verifies: 30d expense=60, 60d expense=100, 90d expense=100
+        print("\n--- Seeding S4 ---", flush=True)
+        u4 = make_user(db, "s4")
+        cat4 = make_category(db, u4, "Food", is_income=False)
+        make_transaction(db, u4, date(2025, 10, 11), "On-Cutoff",     "60.000", cat4)
+        make_transaction(db, u4, date(2025, 10, 10), "Before-Cutoff", "40.000", cat4)
+        db.session.flush()
+        r4 = _build_snapshot_payload(user_id=u4, today_date=TODAY)
+        print("=== S4 (boundary: 2025-10-11 in 30d window, 2025-10-10 excluded from 30d) ===")
+        print(_json.dumps(r4, default=str, indent=2))
+
+    _run_with_session(_capture)
 
 
 # ── CLI wiring ────────────────────────────────────────────────────────────────

@@ -21,6 +21,7 @@ import {
   classifyRecurringGroup,
   buildIncomePatternPayload,
   buildRecurringPatternsPayload,
+  buildSnapshotPayload,
 } from "./intelligence-lib"
 
 // ── Proxy mock (flat self-referential) ───────────────────────────────────────
@@ -526,5 +527,141 @@ describe("buildRecurringPatternsPayload — Flask fixture equivalence", () => {
     expect(result.patterns[1].name).toBe("Netflix")
     expect(result.patterns[1].avg_amount_kd).toBe("15.000")
     expect(result.patterns[1].group).toBe("Subscriptions")
+  })
+})
+
+// ── Fixture equivalence tests: buildSnapshotPayload ──────────────────────────
+//
+// Expected values captured from Flask via:
+//   python3 tools/capture-flask-fixtures.py snapshot
+//
+// Flask returns floats; Hono returns strings (formatKd). See deviation block in
+// intelligence-lib.ts. All fixture values converted to 3-decimal strings.
+//
+// All fixtures use today_date=2025-11-10.
+// Cutoffs: 30d=2025-10-11, 60d=2025-09-11, 90d=2025-08-12.
+//
+// Sequence layout per test (6 sequential db awaits):
+//   seq[0] = all-time totals row { income, expense } (null when no rows — D4)
+//   seq[1] = debt total row { total } (COALESCE — "0" when no active debt)
+//   seq[2] = savings total row { total } (COALESCE — "0" when no active savings)
+//   seq[3] = 30d window row { income, expense } (null when no rows — D4)
+//   seq[4] = 60d window row { income, expense }
+//   seq[5] = 90d window row { income, expense }
+
+describe("buildSnapshotPayload — Flask fixture equivalence", () => {
+  const OPTS = { todayDate: "2025-11-10" }
+  const ISO_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}\+00:00$/
+
+  it("S1: rich user — three distinct window expense sums, active-only debt/savings", async () => {
+    // today=2025-11-10
+    // All-time: income=500, expense=175 (3 expense txs)
+    // Active debt=200 (inactive 300 excluded), active savings=150 (inactive 100 excluded)
+    // 30d (>=2025-10-11): income=500 (Nov-01 salary), expense=100 (Nov-01 groceries)
+    // 60d (>=2025-09-11): income=500, expense=150 (+Sep-20 restaurant 50)
+    // 90d (>=2025-08-12): income=500, expense=175 (+Aug-15 coffee 25)
+    const db = makeSequentialDb([
+      [{ income: "500.000", expense: "175.000" }],  // totals
+      [{ total: "200.000" }],                        // debt
+      [{ total: "150.000" }],                        // savings
+      [{ income: "500.000", expense: "100.000" }],  // 30d
+      [{ income: "500.000", expense: "150.000" }],  // 60d
+      [{ income: "500.000", expense: "175.000" }],  // 90d
+    ])
+    const result = await buildSnapshotPayload(1, db, OPTS)
+
+    expect(result.net_position.income_total_kd).toBe("500.000")
+    expect(result.net_position.expense_total_kd).toBe("175.000")
+    expect(result.net_position.net_kd).toBe("325.000")
+    expect(result.net_position.total_debt_kd).toBe("200.000")
+    expect(result.net_position.total_savings_kd).toBe("150.000")
+    expect(result.cash_flow["30d"].income_kd).toBe("500.000")
+    expect(result.cash_flow["30d"].expense_kd).toBe("100.000")
+    expect(result.cash_flow["30d"].net_kd).toBe("400.000")
+    expect(result.cash_flow["60d"].expense_kd).toBe("150.000")
+    expect(result.cash_flow["60d"].net_kd).toBe("350.000")
+    expect(result.cash_flow["90d"].expense_kd).toBe("175.000")
+    expect(result.cash_flow["90d"].net_kd).toBe("325.000")
+    expect(result.accounts).toEqual([])
+    expect(result.generated_at).toMatch(ISO_RE)
+  })
+
+  it("S2: empty user — D4 null fallback exercised, all totals zero", async () => {
+    // No transactions, no debt, no savings.
+    // SUM over zero rows = null (MySQL standard) — D4 fallback: ?? "0" → Decimal("0")
+    const db = makeSequentialDb([
+      [{ income: null, expense: null }],  // totals — null SUM, exercising D4
+      [{ total: "0" }],                   // debt — COALESCE returns "0"
+      [{ total: "0" }],                   // savings
+      [{ income: null, expense: null }],  // 30d window — null SUM
+      [{ income: null, expense: null }],  // 60d
+      [{ income: null, expense: null }],  // 90d
+    ])
+    const result = await buildSnapshotPayload(1, db, OPTS)
+
+    expect(result.net_position.income_total_kd).toBe("0.000")
+    expect(result.net_position.expense_total_kd).toBe("0.000")
+    expect(result.net_position.net_kd).toBe("0.000")
+    expect(result.net_position.total_debt_kd).toBe("0.000")
+    expect(result.net_position.total_savings_kd).toBe("0.000")
+    expect(result.cash_flow["30d"].income_kd).toBe("0.000")
+    expect(result.cash_flow["30d"].expense_kd).toBe("0.000")
+    expect(result.cash_flow["30d"].net_kd).toBe("0.000")
+    expect(result.cash_flow["60d"].expense_kd).toBe("0.000")
+    expect(result.cash_flow["90d"].expense_kd).toBe("0.000")
+    expect(result.accounts).toEqual([])
+    expect(result.generated_at).toMatch(ISO_RE)
+  })
+
+  it("S3: inactive-only debt and savings — totals zero, negative net_kd", async () => {
+    // One expense tx (Groceries 50 on Nov-01). Debt 500 inactive, savings 200 inactive.
+    // All-time: income=0 (CASE returns 0 for expense rows), expense=50.
+    // net_kd = 0 - 50 = -50 → formatKd("-50.000")
+    // All windows include the Nov-01 tx. Windows: income=0, expense=50, net=-50.
+    const db = makeSequentialDb([
+      [{ income: "0.000", expense: "50.000" }],  // totals (rows exist, income CASE = 0)
+      [{ total: "0" }],                           // debt — inactive only, COALESCE → "0"
+      [{ total: "0" }],                           // savings — inactive only
+      [{ income: "0.000", expense: "50.000" }],  // 30d
+      [{ income: "0.000", expense: "50.000" }],  // 60d
+      [{ income: "0.000", expense: "50.000" }],  // 90d
+    ])
+    const result = await buildSnapshotPayload(1, db, OPTS)
+
+    expect(result.net_position.income_total_kd).toBe("0.000")
+    expect(result.net_position.expense_total_kd).toBe("50.000")
+    expect(result.net_position.net_kd).toBe("-50.000")
+    expect(result.net_position.total_debt_kd).toBe("0.000")
+    expect(result.net_position.total_savings_kd).toBe("0.000")
+    expect(result.cash_flow["30d"].net_kd).toBe("-50.000")
+    expect(result.cash_flow["60d"].net_kd).toBe("-50.000")
+    expect(result.cash_flow["90d"].net_kd).toBe("-50.000")
+    expect(result.accounts).toEqual([])
+    expect(result.generated_at).toMatch(ISO_RE)
+  })
+
+  it("S4: boundary — 2025-10-11 is in 30d window (date >= cutoff), 2025-10-10 is not", async () => {
+    // today=2025-11-10, 30d cutoff=2025-10-11.
+    // On-Cutoff (2025-10-11, 60) → in 30d/60d/90d. Before-Cutoff (2025-10-10, 40) → NOT in 30d.
+    // All-time expense=100. 30d expense=60, 60d/90d expense=100.
+    const db = makeSequentialDb([
+      [{ income: "0.000", expense: "100.000" }],  // totals
+      [{ total: "0" }],                            // debt
+      [{ total: "0" }],                            // savings
+      [{ income: "0.000", expense: "60.000" }],   // 30d: only on-cutoff tx included
+      [{ income: "0.000", expense: "100.000" }],  // 60d: both txs
+      [{ income: "0.000", expense: "100.000" }],  // 90d: both txs
+    ])
+    const result = await buildSnapshotPayload(1, db, OPTS)
+
+    expect(result.net_position.expense_total_kd).toBe("100.000")
+    expect(result.net_position.net_kd).toBe("-100.000")
+    expect(result.cash_flow["30d"].expense_kd).toBe("60.000")
+    expect(result.cash_flow["30d"].net_kd).toBe("-60.000")
+    expect(result.cash_flow["60d"].expense_kd).toBe("100.000")
+    expect(result.cash_flow["60d"].net_kd).toBe("-100.000")
+    expect(result.cash_flow["90d"].expense_kd).toBe("100.000")
+    expect(result.accounts).toEqual([])
+    expect(result.generated_at).toMatch(ISO_RE)
   })
 })
