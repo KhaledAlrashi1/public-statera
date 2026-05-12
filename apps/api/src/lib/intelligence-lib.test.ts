@@ -20,6 +20,7 @@ import {
   intervalVarianceRatio,
   classifyRecurringGroup,
   buildIncomePatternPayload,
+  buildRecurringPatternsPayload,
 } from "./intelligence-lib"
 
 // ── Proxy mock (flat self-referential) ───────────────────────────────────────
@@ -344,5 +345,186 @@ describe("buildIncomePatternPayload — Flask fixture equivalence", () => {
     expect(result.confidence).toBe("high")
     expect(result.evidence_months).toBe(3)
     expect(result.largest_income_name).toBe("Salary")
+  })
+})
+
+// ── Fixture equivalence tests: buildRecurringPatternsPayload ─────────────────
+//
+// Expected values captured from Flask via:
+//   PYTHONPATH=/path/to/personal-finance python3 tools/capture-flask-fixtures.py recurring-patterns
+//
+// All fixtures use today_date=2025-11-10, days=90.
+// 90-day cutoff = 2025-08-12.
+//
+// Row format: { txDate, displayName, amountKd, categoryName, merchantName }
+// The sequential mock provides ONE await result (the expense-transaction query).
+
+describe("buildRecurringPatternsPayload — Flask fixture equivalence", () => {
+  const OPTS = { todayDate: "2025-11-10" }
+
+  function row(
+    txDate: string,
+    displayName: string,
+    amountKd: string,
+    categoryName: string | null = null,
+    merchantName: string | null = null,
+  ) {
+    return { txDate, displayName, amountKd, categoryName, merchantName }
+  }
+
+  it("P1: monthly, high confidence, Subscriptions", async () => {
+    // 3 × Netflix 15.000: Sep-01, Oct-01, Nov-01
+    // intervals=[30,31], median=sorted[1]=31 → monthly; max_dev≈0.0164 ≤ 0.10 → high
+    const db = makeDbReturning([
+      row("2025-09-01", "Netflix", "15.000", "Subscriptions"),
+      row("2025-10-01", "Netflix", "15.000", "Subscriptions"),
+      row("2025-11-01", "Netflix", "15.000", "Subscriptions"),
+    ])
+    const result = await buildRecurringPatternsPayload(1, db, 90, OPTS)
+
+    expect(result.patterns).toHaveLength(1)
+    const p = result.patterns[0]
+    expect(p.name).toBe("Netflix")
+    expect(p.frequency).toBe("monthly")
+    expect(p.avg_amount_kd).toBe("15.000")
+    expect(p.last_seen).toBe("2025-11-01")
+    expect(p.confidence).toBe("high")
+    expect(p.occurrences).toBe(3)
+    expect(p.group).toBe("Subscriptions")
+  })
+
+  it("P2: bi-weekly, high confidence, Utilities", async () => {
+    // 5 × Electricity Bill 25.000: Aug-15, Aug-29, Sep-12, Sep-26, Oct-10
+    // intervals=[14,14,14,14], median=sorted[2]=14 → bi-weekly; max_dev=0 → high
+    const db = makeDbReturning([
+      row("2025-08-15", "Electricity Bill", "25.000", "Utilities"),
+      row("2025-08-29", "Electricity Bill", "25.000", "Utilities"),
+      row("2025-09-12", "Electricity Bill", "25.000", "Utilities"),
+      row("2025-09-26", "Electricity Bill", "25.000", "Utilities"),
+      row("2025-10-10", "Electricity Bill", "25.000", "Utilities"),
+    ])
+    const result = await buildRecurringPatternsPayload(1, db, 90, OPTS)
+
+    expect(result.patterns).toHaveLength(1)
+    const p = result.patterns[0]
+    expect(p.name).toBe("Electricity Bill")
+    expect(p.frequency).toBe("bi-weekly")
+    expect(p.avg_amount_kd).toBe("25.000")
+    expect(p.last_seen).toBe("2025-10-10")
+    expect(p.confidence).toBe("high")
+    expect(p.occurrences).toBe(5)
+    expect(p.group).toBe("Utilities")
+  })
+
+  it("P3: weekly, medium confidence, Other", async () => {
+    // 4 × Lunch 5.000: Sep-01, Sep-07, Sep-14, Sep-22
+    // intervals=[6,7,8], median=sorted[1]=7 → weekly; max_dev=|8-7|/7≈0.1429 ≤ 0.20 → medium
+    const db = makeDbReturning([
+      row("2025-09-01", "Lunch", "5.000", "Food"),
+      row("2025-09-07", "Lunch", "5.000", "Food"),
+      row("2025-09-14", "Lunch", "5.000", "Food"),
+      row("2025-09-22", "Lunch", "5.000", "Food"),
+    ])
+    const result = await buildRecurringPatternsPayload(1, db, 90, OPTS)
+
+    expect(result.patterns).toHaveLength(1)
+    const p = result.patterns[0]
+    expect(p.name).toBe("Lunch")
+    expect(p.frequency).toBe("weekly")
+    expect(p.avg_amount_kd).toBe("5.000")
+    expect(p.last_seen).toBe("2025-09-22")
+    expect(p.confidence).toBe("medium")
+    expect(p.occurrences).toBe(4)
+    expect(p.group).toBe("Other")
+  })
+
+  it("P4: irregular, high→medium cap fires", async () => {
+    // 4 × Gym Fee 30.000: Sep-01, Sep-21, Oct-12, Nov-03
+    // intervals=[20,21,22], median=sorted[1]=21 → irregular
+    // max_dev=|22-21|/21≈0.0476 ≤ 0.10 → raw high; cap: irregular+high → medium
+    const db = makeDbReturning([
+      row("2025-09-01",  "Gym Fee", "30.000", "Health"),
+      row("2025-09-21",  "Gym Fee", "30.000", "Health"),
+      row("2025-10-12",  "Gym Fee", "30.000", "Health"),
+      row("2025-11-03",  "Gym Fee", "30.000", "Health"),
+    ])
+    const result = await buildRecurringPatternsPayload(1, db, 90, OPTS)
+
+    expect(result.patterns).toHaveLength(1)
+    const p = result.patterns[0]
+    expect(p.name).toBe("Gym Fee")
+    expect(p.frequency).toBe("irregular")
+    expect(p.avg_amount_kd).toBe("30.000")
+    expect(p.last_seen).toBe("2025-11-03")
+    expect(p.confidence).toBe("medium")
+    expect(p.occurrences).toBe(4)
+    expect(p.group).toBe("Other")
+  })
+
+  it("P5: monthly, high confidence, Loan Payments", async () => {
+    // 3 × Car Installment 150.000: Sep-05, Oct-05, Nov-05
+    // intervals=[30,31], median=sorted[1]=31 → monthly; max_dev≈0.0164 → high
+    // group: "installment" in display_name → Loan Payments
+    const db = makeDbReturning([
+      row("2025-09-05", "Car Installment", "150.000", "Loans"),
+      row("2025-10-05", "Car Installment", "150.000", "Loans"),
+      row("2025-11-05", "Car Installment", "150.000", "Loans"),
+    ])
+    const result = await buildRecurringPatternsPayload(1, db, 90, OPTS)
+
+    expect(result.patterns).toHaveLength(1)
+    const p = result.patterns[0]
+    expect(p.name).toBe("Car Installment")
+    expect(p.frequency).toBe("monthly")
+    expect(p.avg_amount_kd).toBe("150.000")
+    expect(p.last_seen).toBe("2025-11-05")
+    expect(p.confidence).toBe("high")
+    expect(p.occurrences).toBe(3)
+    expect(p.group).toBe("Loan Payments")
+  })
+
+  it("P6: same-day filter — two entries same date counted in occurrences but not intervals", async () => {
+    // 3 × Coffee 3.000: Sep-01, Sep-01, Sep-08
+    // sorted=[Sep-01,Sep-01,Sep-08]; gap(Sep-01→Sep-01)=0 filtered; gap(Sep-01→Sep-08)=7 kept
+    // intervals=[7]; _interval_variance_ratio([7])=Decimal("0") → high; median=7 → weekly
+    // occurrences=3 (all entries, not intervals)
+    const db = makeDbReturning([
+      row("2025-09-01", "Coffee", "3.000", "Food"),
+      row("2025-09-01", "Coffee", "3.000", "Food"),
+      row("2025-09-08", "Coffee", "3.000", "Food"),
+    ])
+    const result = await buildRecurringPatternsPayload(1, db, 90, OPTS)
+
+    expect(result.patterns).toHaveLength(1)
+    const p = result.patterns[0]
+    expect(p.name).toBe("Coffee")
+    expect(p.frequency).toBe("weekly")
+    expect(p.avg_amount_kd).toBe("3.000")
+    expect(p.last_seen).toBe("2025-09-08")
+    expect(p.confidence).toBe("high")
+    expect(p.occurrences).toBe(3)
+    expect(p.group).toBe("Other")
+  })
+
+  it("P7: multi-pattern — Car Installment (150) sorts before Netflix (15) by -avg_amount", async () => {
+    // Same user: Netflix 15.000 × 3 (Sep/Oct/Nov-01) + Car Installment 150.000 × 3 (Sep/Oct/Nov-05)
+    // Both monthly, high confidence. Sort key: -avg_amount → 150 first, then 15.
+    const db = makeDbReturning([
+      row("2025-09-01", "Netflix",         "15.000",  "Subscriptions"),
+      row("2025-09-05", "Car Installment", "150.000", "Loans"),
+      row("2025-10-01", "Netflix",         "15.000",  "Subscriptions"),
+      row("2025-10-05", "Car Installment", "150.000", "Loans"),
+      row("2025-11-01", "Netflix",         "15.000",  "Subscriptions"),
+      row("2025-11-05", "Car Installment", "150.000", "Loans"),
+    ])
+    const result = await buildRecurringPatternsPayload(1, db, 90, OPTS)
+
+    expect(result.patterns).toHaveLength(2)
+    expect(result.patterns[0].name).toBe("Car Installment")
+    expect(result.patterns[0].avg_amount_kd).toBe("150.000")
+    expect(result.patterns[0].group).toBe("Loan Payments")
+    expect(result.patterns[1].name).toBe("Netflix")
+    expect(result.patterns[1].avg_amount_kd).toBe("15.000")
+    expect(result.patterns[1].group).toBe("Subscriptions")
   })
 })

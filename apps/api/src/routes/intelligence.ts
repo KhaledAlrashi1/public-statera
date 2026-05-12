@@ -7,8 +7,10 @@
  *   TODO(module-analytics-tz-per-user): switch when timezone UI is added.
  * - income_source: Flask null → Hono "not_set" (see intelligence-lib.ts).
  *   Module 9 verifies frontend compatibility.
- * - R11 wrapped in withAnalyticsTimeout (hardFail:false); Flask has no timeout
- *   guard on /income-pattern. Added for MySQL DoS prevention consistency.
+ * - R11/R12 wrapped in withAnalyticsTimeout; Flask has no timeout guard on
+ *   /income-pattern or /recurring-patterns. Added for MySQL DoS prevention.
+ * - R12 feature-flag disabled returns success envelope { patterns: [] } with
+ *   meta: { count: 0, enabled: false } — matching Flask exactly.
  */
 
 import { Hono } from "hono"
@@ -18,7 +20,13 @@ import { searchRateLimit } from "../lib/rate-limit"
 import { Sentry } from "../lib/sentry"
 import { withAnalyticsTimeout, AnalyticsComputationTimeoutError } from "../lib/analytics-cache"
 import { env } from "../lib/env"
-import { buildIncomePatternPayload } from "../lib/intelligence-lib"
+import { buildIncomePatternPayload, buildRecurringPatternsPayload } from "../lib/intelligence-lib"
+
+function parseIntParam(v: string | undefined, defaultVal: number): number {
+  if (!v) return defaultVal
+  const n = parseInt(v, 10)
+  return isNaN(n) ? defaultVal : n
+}
 
 export const intelligenceRouter = new Hono()
 
@@ -50,6 +58,56 @@ intelligenceRouter.get("/income-pattern", requireAuth, searchRateLimit, async (c
       )
     }
     Sentry.captureException(err, { tags: { handler: "GET /api/analytics/income-pattern", userId } })
+    throw err
+  }
+})
+
+// ── R12: GET /api/analytics/recurring-patterns ──────────────────────────────
+// Recurring expense detection. Query param: days (30–365, default 90).
+// Feature-flagged via ENABLE_RECURRING_PATTERNS (default true).
+// Flask: routes/analytics/__init__.py api_recurring_patterns()
+
+intelligenceRouter.get("/recurring-patterns", requireAuth, searchRateLimit, async (c) => {
+  if (!env.enableRecurringPatterns) {
+    return c.json({ ok: true, data: { patterns: [] }, error: null, meta: { count: 0, enabled: false } })
+  }
+
+  const days = parseIntParam(c.req.query("days"), 90)
+  if (days < 30 || days > 365) {
+    return c.json(
+      { ok: false, data: null, error: "days must be between 30 and 365", code: "validation_error" },
+      400,
+    )
+  }
+
+  const { userId } = c.get("session")
+  const db = getDb()
+
+  try {
+    const payload = await withAnalyticsTimeout(
+      db,
+      env.analyticsComputeTimeoutSeconds,
+      () => buildRecurringPatternsPayload(userId, db, days),
+    )
+    return c.json({
+      ok: true,
+      data: payload,
+      error: null,
+      meta: { count: payload.patterns.length, days },
+    })
+  } catch (err) {
+    if (err instanceof AnalyticsComputationTimeoutError) {
+      return c.json(
+        {
+          ok: false,
+          data: null,
+          error: "Analytics are taking longer than expected. Please try again shortly.",
+          code: "analytics_timeout",
+        },
+        503,
+      )
+    }
+    Sentry.captureException(err, { tags: { handler: "GET /api/analytics/recurring-patterns", userId } })
     throw err
   }
 })

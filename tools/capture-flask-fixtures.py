@@ -407,12 +407,147 @@ def cmd_income_pattern(args: argparse.Namespace) -> None:
 
 def cmd_recurring_patterns(args: argparse.Namespace) -> None:
     """
-    Fixtures P1-P6 (six scenarios: frequency classification, confidence
-    downgrades, group classification priority, and the same-day-filter edge case).
+    Fixtures P1-P7 (seven scenarios: frequency classification, confidence
+    cap, group classification priority, same-day-filter edge case, and
+    multi-pattern sort order by avg_amount descending).
 
-    Implemented in 5c-2. See the 5c-2 proposal for the full fixture map.
+    All fixtures use today_date=2025-11-10 and days=90.
+    90-day cutoff = 2025-08-12. DB is left unmodified (rollback at end).
     """
-    print("recurring-patterns: 5c-2 will populate this capture. See the 5c-2 proposal.")
+    import json as _json
+    from backend.routes.analytics.income import _build_recurring_patterns_payload  # type: ignore[import]
+
+    def _capture(db: Any) -> None:
+        TODAY = date(2025, 11, 10)
+        DAYS = 90
+
+        # ── P1: monthly, high confidence, Subscriptions ────────────────────────
+        # 3 × "Netflix" 15.000 KD on Sep-01, Oct-01, Nov-01
+        # intervals=[30,31], sorted=[30,31], median=sorted[1]=31 → monthly
+        # avg_gap=30.5, max_dev=|30-30.5|/30.5≈0.0164 ≤ 0.10 → high
+        # group: category="Subscriptions" → "subscription" in "subscriptions" → Subscriptions
+        print("--- Seeding P1 ---", flush=True)
+        u1 = make_user(db, "p1")
+        cat1 = make_category(db, u1, "Subscriptions", is_income=False)
+        make_transaction(db, u1, date(2025, 9,  1), "Netflix", "15.000", cat1)
+        make_transaction(db, u1, date(2025, 10, 1), "Netflix", "15.000", cat1)
+        make_transaction(db, u1, date(2025, 11, 1), "Netflix", "15.000", cat1)
+        db.session.flush()
+        r1 = _build_recurring_patterns_payload(user_id=u1, days=DAYS, today_date=TODAY)
+        print("=== P1 (monthly, high, Subscriptions) ===")
+        print(_json.dumps(r1, default=str, indent=2))
+
+        # ── P2: bi-weekly, high confidence, Utilities ──────────────────────────
+        # 5 × "Electricity Bill" 25.000 KD on Aug-15, Aug-29, Sep-12, Sep-26, Oct-10
+        # intervals=[14,14,14,14], sorted=[14,14,14,14], median=sorted[2]=14 → bi-weekly
+        # avg_gap=14, max_dev=0 ≤ 0.10 → high
+        # group: display_name="electricity bill" → "electricity" in it → Utilities
+        print("\n--- Seeding P2 ---", flush=True)
+        u2 = make_user(db, "p2")
+        cat2 = make_category(db, u2, "Utilities", is_income=False)
+        make_transaction(db, u2, date(2025, 8, 15), "Electricity Bill", "25.000", cat2)
+        make_transaction(db, u2, date(2025, 8, 29), "Electricity Bill", "25.000", cat2)
+        make_transaction(db, u2, date(2025, 9, 12), "Electricity Bill", "25.000", cat2)
+        make_transaction(db, u2, date(2025, 9, 26), "Electricity Bill", "25.000", cat2)
+        make_transaction(db, u2, date(2025, 10, 10), "Electricity Bill", "25.000", cat2)
+        db.session.flush()
+        r2 = _build_recurring_patterns_payload(user_id=u2, days=DAYS, today_date=TODAY)
+        print("=== P2 (bi-weekly, high, Utilities) ===")
+        print(_json.dumps(r2, default=str, indent=2))
+
+        # ── P3: weekly, medium confidence, Other ───────────────────────────────
+        # 4 × "Lunch" 5.000 KD on Sep-01, Sep-07, Sep-14, Sep-22
+        # intervals=[6,7,8], sorted=[6,7,8], median=sorted[1]=7 → weekly
+        # avg_gap=7, max_dev=|8-7|/7≈0.1429 > 0.10 and ≤ 0.20 → medium
+        # (not irregular, so no cap fires)
+        # group: category="Food" → no loan/utility/subscription hint → Other
+        print("\n--- Seeding P3 ---", flush=True)
+        u3 = make_user(db, "p3")
+        cat3 = make_category(db, u3, "Food", is_income=False)
+        make_transaction(db, u3, date(2025, 9,  1), "Lunch", "5.000", cat3)
+        make_transaction(db, u3, date(2025, 9,  7), "Lunch", "5.000", cat3)
+        make_transaction(db, u3, date(2025, 9, 14), "Lunch", "5.000", cat3)
+        make_transaction(db, u3, date(2025, 9, 22), "Lunch", "5.000", cat3)
+        db.session.flush()
+        r3 = _build_recurring_patterns_payload(user_id=u3, days=DAYS, today_date=TODAY)
+        print("=== P3 (weekly, medium, Other) ===")
+        print(_json.dumps(r3, default=str, indent=2))
+
+        # ── P4: irregular + high→medium confidence cap ─────────────────────────
+        # 4 × "Gym Fee" 30.000 KD on Sep-01, Sep-21, Oct-12, Nov-03
+        # intervals=[20,21,22], sorted=[20,21,22], median=sorted[1]=21 → irregular
+        # avg_gap=21, max_dev=|20-21|/21≈0.0476 ≤ 0.10 → raw high
+        # cap fires: frequency=="irregular" and confidence=="high" → confidence="medium"
+        # group: category="Health" → no hints → Other
+        print("\n--- Seeding P4 ---", flush=True)
+        u4 = make_user(db, "p4")
+        cat4 = make_category(db, u4, "Health", is_income=False)
+        make_transaction(db, u4, date(2025, 9,  1), "Gym Fee", "30.000", cat4)
+        make_transaction(db, u4, date(2025, 9, 21), "Gym Fee", "30.000", cat4)
+        make_transaction(db, u4, date(2025, 10, 12), "Gym Fee", "30.000", cat4)
+        make_transaction(db, u4, date(2025, 11,  3), "Gym Fee", "30.000", cat4)
+        db.session.flush()
+        r4 = _build_recurring_patterns_payload(user_id=u4, days=DAYS, today_date=TODAY)
+        print("=== P4 (irregular, medium via cap: intervals=[20,21,22]) ===")
+        print(_json.dumps(r4, default=str, indent=2))
+
+        # ── P5: monthly, high confidence, Loan Payments ────────────────────────
+        # 3 × "Car Installment" 150.000 KD on Sep-05, Oct-05, Nov-05
+        # intervals=[30,31], sorted=[30,31], median=sorted[1]=31 → monthly
+        # avg_gap=30.5, max_dev≈0.0164 ≤ 0.10 → high
+        # group: display_name="car installment" → "installment" in it → Loan Payments
+        print("\n--- Seeding P5 ---", flush=True)
+        u5 = make_user(db, "p5")
+        cat5 = make_category(db, u5, "Loans", is_income=False)
+        make_transaction(db, u5, date(2025, 9,  5), "Car Installment", "150.000", cat5)
+        make_transaction(db, u5, date(2025, 10, 5), "Car Installment", "150.000", cat5)
+        make_transaction(db, u5, date(2025, 11, 5), "Car Installment", "150.000", cat5)
+        db.session.flush()
+        r5 = _build_recurring_patterns_payload(user_id=u5, days=DAYS, today_date=TODAY)
+        print("=== P5 (monthly, high, Loan Payments) ===")
+        print(_json.dumps(r5, default=str, indent=2))
+
+        # ── P6: same-day filter — two transactions same date, one 7 days later ─
+        # 3 × "Coffee" 3.000 KD: Sep-01, Sep-01, Sep-08
+        # sorted_dates = [Sep-01, Sep-01, Sep-08]
+        # interval (Sep-01→Sep-01).days=0 → FILTERED (> 0 check in Flask)
+        # interval (Sep-08→Sep-01).days=7 → included
+        # intervals=[7], len=1 → _interval_variance_ratio([7])=Decimal("0")
+        # median=ordered[0//1]=ordered[0]=7 → weekly (6≤7≤8)
+        # confidence: 0 ≤ 0.10 → high; not irregular, no cap
+        # occurrences=3 (all entries counted, not intervals)
+        print("\n--- Seeding P6 ---", flush=True)
+        u6 = make_user(db, "p6")
+        cat6 = make_category(db, u6, "Food", is_income=False)
+        make_transaction(db, u6, date(2025, 9, 1), "Coffee", "3.000", cat6)
+        make_transaction(db, u6, date(2025, 9, 1), "Coffee", "3.000", cat6)
+        make_transaction(db, u6, date(2025, 9, 8), "Coffee", "3.000", cat6)
+        db.session.flush()
+        r6 = _build_recurring_patterns_payload(user_id=u6, days=DAYS, today_date=TODAY)
+        print("=== P6 (same-day filter: intervals=[7], weekly, high, occurrences=3) ===")
+        print(_json.dumps(r6, default=str, indent=2))
+
+        # ── P7: multi-pattern sort — Car Installment (150) before Netflix (15) ──
+        # Same user with two patterns; verifies sort key (-avg_amount, -occurrences, name).
+        # Netflix 15.000 × 3: Sep-01, Oct-01, Nov-01 → monthly, high, Subscriptions
+        # Car Installment 150.000 × 3: Sep-05, Oct-05, Nov-05 → monthly, high, Loan Payments
+        # Sort: -150 < -15 → Car Installment first
+        print("\n--- Seeding P7 ---", flush=True)
+        u7 = make_user(db, "p7")
+        cat7_sub = make_category(db, u7, "Subscriptions", is_income=False)
+        cat7_loan = make_category(db, u7, "Loans", is_income=False)
+        make_transaction(db, u7, date(2025, 9,  1), "Netflix", "15.000", cat7_sub)
+        make_transaction(db, u7, date(2025, 10, 1), "Netflix", "15.000", cat7_sub)
+        make_transaction(db, u7, date(2025, 11, 1), "Netflix", "15.000", cat7_sub)
+        make_transaction(db, u7, date(2025, 9,  5), "Car Installment", "150.000", cat7_loan)
+        make_transaction(db, u7, date(2025, 10, 5), "Car Installment", "150.000", cat7_loan)
+        make_transaction(db, u7, date(2025, 11, 5), "Car Installment", "150.000", cat7_loan)
+        db.session.flush()
+        r7 = _build_recurring_patterns_payload(user_id=u7, days=DAYS, today_date=TODAY)
+        print("=== P7 (multi-pattern: Car Installment 150 sorts before Netflix 15) ===")
+        print(_json.dumps(r7, default=str, indent=2))
+
+    _run_with_session(_capture)
 
 
 def cmd_snapshot(args: argparse.Namespace) -> None:
@@ -433,7 +568,7 @@ _SUBCOMMANDS: dict[str, tuple[str, Callable[[argparse.Namespace], None]]] = {
         cmd_income_pattern,
     ),
     "recurring-patterns": (
-        "Capture P1-P6 fixtures for /api/analytics/recurring-patterns (5c-2)",
+        "Capture P1-P7 fixtures for /api/analytics/recurring-patterns (5c-2)",
         cmd_recurring_patterns,
     ),
     "snapshot": (

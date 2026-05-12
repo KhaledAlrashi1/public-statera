@@ -144,6 +144,168 @@ export function classifyRecurringGroup(
   return "Other"
 }
 
+// ── Recurring patterns payload ───────────────────────────────────────────────
+
+export type RecurringPattern = {
+  name: string
+  frequency: string
+  avg_amount_kd: string
+  last_seen: string
+  confidence: string
+  occurrences: number
+  group: string
+}
+
+export type RecurringPatternsPayload = {
+  patterns: RecurringPattern[]
+}
+
+export type BuildRecurringPatternsOpts = {
+  todayDate?: string // YYYY-MM-DD; defaults to Kuwait-local today
+}
+
+export async function buildRecurringPatternsPayload(
+  userId: number,
+  db: Db,
+  days: number,
+  opts?: BuildRecurringPatternsOpts,
+): Promise<RecurringPatternsPayload> {
+  const todayStr = opts?.todayDate ?? currentLocalDate().toISOString().slice(0, 10)
+  const cutoff = cutoffDateStr(todayStr, days)
+
+  const rows = await db
+    .select({
+      txDate: transactions.date,
+      displayName: sql<string>`COALESCE(NULLIF(TRIM(${transactions.name}), ''), 'Unnamed')`,
+      amountKd: transactions.amountKd,
+      categoryName: categories.name,
+      merchantName: merchants.name,
+    })
+    .from(transactions)
+    .leftJoin(categories, eq(transactions.categoryId, categories.id))
+    .leftJoin(merchants, eq(transactions.merchantId, merchants.id))
+    .where(and(
+      eq(transactions.userId, userId),
+      sql`${transactions.date} >= ${cutoff}`,
+      expenseCategoryFilter(),
+    ))
+    .orderBy(asc(transactions.date), asc(transactions.id))
+
+  type Entry = {
+    txDate: string
+    displayName: string
+    amount: Decimal
+    categoryName: string | null
+    merchantName: string | null
+  }
+
+  const grouped = new Map<string, Entry[]>()
+  for (const row of rows) {
+    const amount = new Decimal(row.amountKd ?? "0")
+    if (amount.lte(0)) continue
+    const normalized =
+      (row.displayName ?? "").split(/\s+/).filter(Boolean).join(" ") || "Unnamed"
+    const key = normalized.toLowerCase()
+    const entry: Entry = {
+      txDate: normDateStr(row.txDate),
+      displayName: normalized,
+      amount,
+      categoryName: row.categoryName ?? null,
+      merchantName: row.merchantName ?? null,
+    }
+    const group = grouped.get(key) ?? []
+    group.push(entry)
+    grouped.set(key, group)
+  }
+
+  type PatternWithSort = RecurringPattern & { _sortAvgAmount: Decimal }
+  const patterns: PatternWithSort[] = []
+
+  for (const entries of grouped.values()) {
+    if (entries.length < 2) continue
+
+    const sortedDates = entries.map((e) => e.txDate).sort()
+    const intervals: number[] = []
+    for (let i = 1; i < sortedDates.length; i++) {
+      const gap = daysBetween(sortedDates[i - 1], sortedDates[i])
+      if (gap > 0) intervals.push(gap)
+    }
+    if (intervals.length === 0) continue
+
+    const sortedIntervals = [...intervals].sort((a, b) => a - b)
+    // Flask: ordered[len(ordered) // 2] — floor-division upper-median (income.py:215).
+    const medianInterval = sortedIntervals[Math.floor(sortedIntervals.length / 2)]
+    const frequency = classifyRecurringFrequency(medianInterval)
+    const variance = intervalVarianceRatio(intervals)
+    let confidence = confidenceFromIntervalVariance(variance)
+    // Flask: if frequency == "irregular" and confidence == "high": confidence = "medium" (income.py:219-220).
+    if (frequency === "irregular" && confidence === "high") confidence = "medium"
+
+    const amounts = entries.map((e) => e.amount)
+    const total = amounts.reduce((a, b) => a.plus(b), new Decimal(0))
+    const avgAmount = total.div(amounts.length)
+
+    // Canonical name: most frequent display_name; alphabetical tiebreaker (income.py:236).
+    const nameCounts = new Map<string, number>()
+    for (const e of entries) {
+      nameCounts.set(e.displayName, (nameCounts.get(e.displayName) ?? 0) + 1)
+    }
+    const canonicalName = [...nameCounts.entries()].sort((a, b) =>
+      b[1] !== a[1] ? b[1] - a[1] : a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0,
+    )[0][0]
+
+    // Dominant category: most frequent; alphabetical tiebreaker (income.py:237-240).
+    const catCounts = new Map<string, number>()
+    for (const e of entries) {
+      if (e.categoryName) catCounts.set(e.categoryName, (catCounts.get(e.categoryName) ?? 0) + 1)
+    }
+    const dominantCategory =
+      catCounts.size > 0
+        ? [...catCounts.entries()].sort((a, b) =>
+            b[1] !== a[1] ? b[1] - a[1] : a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0,
+          )[0][0]
+        : null
+
+    // Dominant merchant: most frequent; alphabetical tiebreaker (income.py:241-245).
+    const merchantCounts = new Map<string, number>()
+    for (const e of entries) {
+      if (e.merchantName)
+        merchantCounts.set(e.merchantName, (merchantCounts.get(e.merchantName) ?? 0) + 1)
+    }
+    const dominantMerchant =
+      merchantCounts.size > 0
+        ? [...merchantCounts.entries()].sort((a, b) =>
+            b[1] !== a[1] ? b[1] - a[1] : a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0,
+          )[0][0]
+        : null
+
+    const lastSeen = sortedDates[sortedDates.length - 1]
+
+    patterns.push({
+      name: canonicalName,
+      frequency,
+      avg_amount_kd: formatKd(avgAmount),
+      last_seen: lastSeen,
+      confidence,
+      occurrences: entries.length,
+      group: classifyRecurringGroup(dominantCategory, dominantMerchant, canonicalName),
+      _sortAvgAmount: avgAmount,
+    })
+  }
+
+  // Flask: sort by (-avg_amount, -occurrences, name) — income.py:266-272.
+  // Sort uses raw Decimal (_sortAvgAmount), not the formatted string.
+  patterns.sort((a, b) => {
+    const cmpAmount = b._sortAvgAmount.comparedTo(a._sortAvgAmount)
+    if (cmpAmount !== 0) return cmpAmount
+    if (a.occurrences !== b.occurrences) return b.occurrences - a.occurrences
+    return a.name < b.name ? -1 : a.name > b.name ? 1 : 0
+  })
+
+  const result: RecurringPattern[] = patterns.map(({ _sortAvgAmount: _sa, ...rest }) => rest)
+  return { patterns: result }
+}
+
 // ── Income pattern payload ────────────────────────────────────────────────────
 
 export type IncomePatternPayload = {

@@ -1,15 +1,16 @@
 /**
- * Tests for intelligence routes: R11 income-pattern (5c-1).
- * R12 recurring-patterns and R13 snapshot will be added in 5c-2 and 5c-3.
+ * Tests for intelligence routes: R11 income-pattern (5c-1), R12 recurring-patterns (5c-2).
+ * R13 snapshot will be added in 5c-3.
  *
  * Route tests focus on auth, envelope shape, and error handling.
  * Algorithm correctness is covered by intelligence-lib.test.ts.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { Hono } from "hono"
 import { intelligenceRouter } from "./intelligence"
 import { createSessionToken } from "../middleware/auth"
+import { env } from "../lib/env"
 
 vi.mock("../db/connection", () => ({ getDb: vi.fn() }))
 
@@ -33,8 +34,9 @@ import { withAnalyticsTimeout, AnalyticsComputationTimeoutError } from "../lib/a
 
 vi.mock("../lib/intelligence-lib", () => ({
   buildIncomePatternPayload: vi.fn(),
+  buildRecurringPatternsPayload: vi.fn(),
 }))
-import { buildIncomePatternPayload } from "../lib/intelligence-lib"
+import { buildIncomePatternPayload, buildRecurringPatternsPayload } from "../lib/intelligence-lib"
 
 const app = new Hono().route("/api/analytics", intelligenceRouter)
 
@@ -119,5 +121,91 @@ describe("GET /api/analytics/income-pattern", () => {
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.data.income_source).toBe("not_set")
+  })
+})
+
+// ── R12: recurring-patterns ───────────────────────────────────────────────────
+
+describe("GET /api/analytics/recurring-patterns", () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    vi.mocked(withAnalyticsTimeout).mockImplementation((_db, _sec, fn) => fn())
+    ;(env as Record<string, unknown>).enableRecurringPatterns = true
+  })
+
+  afterEach(() => {
+    ;(env as Record<string, unknown>).enableRecurringPatterns = true
+  })
+
+  it("returns 401 without auth", async () => {
+    const res = await app.request("/api/analytics/recurring-patterns")
+    expect(res.status).toBe(401)
+  })
+
+  it("returns patterns in ok envelope with count and days meta", async () => {
+    vi.mocked(buildRecurringPatternsPayload).mockResolvedValue({
+      patterns: [
+        {
+          name: "Netflix",
+          frequency: "monthly",
+          avg_amount_kd: "15.000",
+          last_seen: "2025-11-01",
+          confidence: "high",
+          occurrences: 3,
+          group: "Subscriptions",
+        },
+      ],
+    })
+
+    const res = await app.request("/api/analytics/recurring-patterns", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.ok).toBe(true)
+    expect(body.error).toBeNull()
+    expect(body.data.patterns).toHaveLength(1)
+    expect(body.data.patterns[0].name).toBe("Netflix")
+    expect(body.meta.count).toBe(1)
+    expect(body.meta.days).toBe(90)
+  })
+
+  it("returns 503 on AnalyticsComputationTimeoutError", async () => {
+    vi.mocked(withAnalyticsTimeout).mockRejectedValue(
+      new AnalyticsComputationTimeoutError("timed out"),
+    )
+
+    const res = await app.request("/api/analytics/recurring-patterns", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(503)
+    const body = await res.json()
+    expect(body.ok).toBe(false)
+    expect(body.code).toBe("analytics_timeout")
+  })
+
+  it("returns empty patterns when feature flag is disabled", async () => {
+    ;(env as Record<string, unknown>).enableRecurringPatterns = false
+
+    const res = await app.request("/api/analytics/recurring-patterns", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.ok).toBe(true)
+    expect(body.data.patterns).toEqual([])
+    expect(body.meta.count).toBe(0)
+    expect(body.meta.enabled).toBe(false)
+  })
+
+  it("returns 400 for days out of range", async () => {
+    const res = await app.request("/api/analytics/recurring-patterns?days=29", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = await res.json()
+    expect(body.ok).toBe(false)
+    expect(body.error).toBe("days must be between 30 and 365")
+    expect(body.code).toBe("validation_error")
   })
 })

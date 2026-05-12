@@ -55,7 +55,7 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - 5c Intelligence/detection routes (algorithmic; fixture-based equivalence tests required)
   - 5c-0 Fixture capture infrastructure ✓
   - 5c-1 income-pattern ✓
-  - 5c-2 recurring-patterns
+  - 5c-2 recurring-patterns ✓
   - 5c-3 snapshot
 - Module 6: Maintenance jobs (non-bank-sync Celery beat jobs → BullMQ)
 - Module 7: TOTP 2FA
@@ -138,3 +138,4 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - `confidence` stable enum (R11 income-pattern, R12 recurring-patterns): `"high" | "medium" | "low"`. Do not change values.
 - `income_source` stable enum (R11, R9, R10 safe-to-spend, weekly-digest): Hono returns `"detected_from_transactions" | "declared_in_profile" | "not_set"`. Flask returns `null` instead of `"not_set"` — this is a documented deviation. **Module 9 must update `apps/web/src/types/api.ts` (lines 138, 176, 265) and `sections.tsx:249` from `null` to `"not_set"` before frontend parity testing.**
 - Analytics routes URL prefix: all analytics routes mount at `/api/analytics/*` (Hono) vs Flask's `/api/*` root paths. Module 9 verifies frontend URL parity.
+- R12 recurring-patterns feature flag: `ENABLE_RECURRING_PATTERNS=false` returns HTTP 200 with `{ ok: true, data: { patterns: [] }, meta: { count: 0, enabled: false } }`. This is a client-observable behaviour: frontend must handle `enabled: false` in meta without rendering a missing-data error. Do not change the response shape or the HTTP status code.
