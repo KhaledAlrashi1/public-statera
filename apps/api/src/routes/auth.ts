@@ -1,7 +1,7 @@
 import { Hono } from "hono"
 import { deleteCookie, getCookie, setCookie } from "hono/cookie"
 import { SignJWT, jwtVerify } from "jose"
-import { and, eq } from "drizzle-orm"
+import { and, desc, eq, like } from "drizzle-orm"
 import { getDb } from "../db/connection"
 import { users, securityEvents } from "../db/schema"
 import { env } from "../lib/env"
@@ -537,6 +537,128 @@ router.post(
     }
 
     return c.json({ ok: true, data, error: null, meta: {} })
+  },
+)
+
+// ── Sessions ──────────────────────────────────────────────────────────────────
+
+// POST /api/auth/sessions/revoke-all
+// Bumps session_version in DB (new sessions issued after this carry newSv) and writes
+// a Redis deny-list key for oldSv (sv_revoked:{userId}:{oldSv}, 30-day TTL matching JWT
+// expiry) so existing tokens fail requireAuth immediately without a DB lookup.
+// Re-issues the caller's session cookie with newSv so they aren't locked out.
+// Rate: 10 per 60 s per authenticated user (RATE_LIMIT_AUTH).
+router.post(
+  "/sessions/revoke-all",
+  requireAuth,
+  createRateLimiter(10, 60),
+  async (c) => {
+    const { userId, externalId, authProvider } = c.var.session
+    const db = getDb()
+
+    const [user] = await db
+      .select({ sessionVersion: users.sessionVersion })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1)
+
+    const oldSv = user?.sessionVersion ?? 1
+    const newSv = oldSv + 1
+
+    await db.update(users).set({ sessionVersion: newSv }).where(eq(users.id, userId))
+
+    // Write the deny-list key for oldSv. TTL = 30 days = JWT expiry, so the key
+    // is guaranteed to outlive every token that carries the revoked sv value.
+    await revokeSessionVersion(userId, oldSv)
+
+    // Re-issue caller's cookie with newSv before returning — prevents self-lockout.
+    const newToken = await createSessionToken({ userId, externalId, authProvider, sv: newSv })
+    setCookie(c, "statera_session", newToken, {
+      httpOnly: true,
+      sameSite: "Lax",
+      secure: !env.isDev,
+      maxAge: 60 * 60 * 24 * 30,
+      path: "/",
+    })
+
+    auditSecurityEvent(db, "sessions.revoke_all", {
+      userId,
+      ipAddress: c.req.header("x-forwarded-for") ?? undefined,
+      userAgent: c.req.header("user-agent") ?? undefined,
+      details: { session_version: newSv },
+    })
+
+    return c.json({ ok: true, data: { session_version: newSv }, error: null, meta: {} })
+  },
+)
+
+// ── Profile security events ───────────────────────────────────────────────────
+
+// GET /api/auth/profile/security-events
+// Returns profile.* events for the authenticated user (profile settings changes).
+// Login, auth, and session events are written to security_events but not exposed here;
+// this endpoint is intentionally a profile-change audit trail, not a full security log.
+// Matches Flask's WHERE event_type LIKE 'profile.%' filter exactly.
+// Pagination: offset-based (matches Flask), default limit 20, max 50.
+// Rate: 10 per 60 s per authenticated user (RATE_LIMIT_AUTH).
+//
+// Deliberate deviation from Flask:
+// - created_at format: +00:00 (project convention) vs Flask's naive isoformat.
+router.get(
+  "/profile/security-events",
+  requireAuth,
+  createRateLimiter(10, 60),
+  async (c) => {
+    const { userId } = c.var.session
+    const db = getDb()
+
+    const rawLimit = c.req.query("limit") ?? "20"
+    const rawOffset = c.req.query("offset") ?? "0"
+    const parsedLimit = parseInt(rawLimit, 10)
+    const parsedOffset = parseInt(rawOffset, 10)
+    const limit = Math.max(1, Math.min(isNaN(parsedLimit) ? 20 : parsedLimit, 50))
+    const offset = Math.max(0, isNaN(parsedOffset) ? 0 : parsedOffset)
+
+    const rows = await db
+      .select({
+        id: securityEvents.id,
+        eventType: securityEvents.eventType,
+        ipAddress: securityEvents.ipAddress,
+        userAgent: securityEvents.userAgent,
+        createdAt: securityEvents.createdAt,
+        detailsJson: securityEvents.detailsJson,
+      })
+      .from(securityEvents)
+      .where(and(eq(securityEvents.userId, userId), like(securityEvents.eventType, "profile.%")))
+      .orderBy(desc(securityEvents.createdAt), desc(securityEvents.id))
+      .offset(offset)
+      .limit(limit + 1)
+
+    const hasMore = rows.length > limit
+    const items = rows.slice(0, limit).map((row) => {
+      let details: Record<string, unknown> = {}
+      if (row.detailsJson) {
+        try {
+          const parsed: unknown = JSON.parse(row.detailsJson)
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            details = parsed as Record<string, unknown>
+          }
+        } catch { /* malformed JSON: return {} */ }
+      }
+      return {
+        id: row.id,
+        event_type: row.eventType,
+        ip_address: row.ipAddress,
+        user_agent: row.userAgent,
+        created_at: row.createdAt
+          ? row.createdAt.toISOString().replace(/\.\d{3}Z$/, "+00:00")
+          : null,
+        details,
+      }
+    })
+
+    const payload = { items, has_more: hasMore, offset, limit }
+    return c.json({ ok: true, data: payload, error: null, meta: { has_more: hasMore, offset, limit } })
   },
 )
 
