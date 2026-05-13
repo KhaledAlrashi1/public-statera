@@ -1,7 +1,33 @@
+# Version control — never needed in the image
 .git
 .gitignore
+
+# Environment / secrets — secrets must not be baked into the image
 .env
-.env.prod
-apps/*/node_modules
-apps/web/dist
-logs
+.env.*
+!.env.example
+
+# Installed packages — reinstalled fresh in the deps stage
+node_modules/
+apps/*/node_modules/
+
+# Frontend — not used by the API image
+apps/web/src/
+apps/web/public/
+apps/web/index.html
+apps/web/dist/
+apps/web/*.config.*
+apps/web/tsconfig*.json
+
+# Deployment and tooling — not part of application runtime
+docker/
+docker-compose*.yml
+nginx/
+deploy/
+tools/
+
+# CI/CD
+.github/
+
+# Runtime logs
+logs/

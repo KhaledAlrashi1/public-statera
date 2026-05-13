@@ -61,9 +61,14 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - 7.5 Account deletion (GET /api/auth/delete-reauth → OIDC re-auth with prompt=login; statera_delete_intent JWT cookie Path=/api/account Max-Age=900; DELETE /api/account: verifies intent cookie + isActive, BullMQ async job (delete-account-data, jobId dedup) with sync transaction fallback Sentry-tracked; GET /api/account/deletion-status/:taskToken: encrypted status token; purgeUserAccountRows: tombstone-first then 13 table deletes then soft-delete; is_tombstone column on security_events migration 0003; hashEmail SHA-256 no-salt; 2FA re-verification: if totpEnabled, callback issues statera_pending_2fa with deleteIntent=true → /2fa/verify issues delete-intent cookie instead of session)
 - **TODO(module-7-smoke):** Module 7 + 7.5 must be smoke-tested against the running Docker stack before Module 8 deployment work begins. This is a precondition for Module 8 kickoff.
 
-**Remaining modules (in order):**
-- Module 8: Deployment (host selection between Railway/Hetzner/similar, secrets management, TLS, CI/CD, backups, monitoring, staging environment). **Precondition: complete Module 7+7.5 smoke test (TODO(module-7-smoke)).**
-- Module 9: Frontend parity verification (apps/web tested against the new Hono API end-to-end before any external sharing)
+**Module 8 — Deployment (Hetzner CX32, Falkenstein region):**
+- 8a Dockerfile hardening + prod Compose (DONE: pinned node:22.11.0-alpine digest, tini PID-1, non-root user node:1000, GIT_SHA build arg + ENV, npm-installed pnpm bypasses corepack key-verification issue, worker service added to prod Compose, one-shot migrate service, mysql:8.0.41 + redis:7.4.2-alpine pinned with digests, /health exposes version)
+- 8b Server bootstrap (deploy/bootstrap.sh committed, Debian 12, Hetzner Volume for MySQL data tested via server recreation)
+- 8c Secrets management (sops with age keys; secrets not in plaintext on host)
+- 8d CI/CD (GitHub Actions, test-gated deploy, drizzle-kit migrate in one-shot container abort-on-fail, GHCR image registry)
+- 8e TLS + reverse proxy (Caddy vs. nginx decision pending before starting)
+- 8f Backups + monitoring + smoke test (R2 off-site, UptimeRobot, restore-tested, deploy-rollback rehearsal)
+- Module 9: Frontend parity verification (apps/web tested against the new Hono API end-to-end before any external sharing). **Precondition: 8e produces staging environment.**
 
 **Deferred indefinitely:**
 - Bank sync (CBK Open Banking dependency; replaced future scope: bank statement PDF parsing for Kuwaiti banks)

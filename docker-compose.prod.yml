@@ -1,6 +1,22 @@
+# Production Docker Compose.
+#
+# Image pins: update all three digests together when upgrading base images.
+# To refresh a digest: docker buildx imagetools inspect <image> --format "{{json .Manifest}}"
+#
+# GIT_SHA must be set in the environment before running (e.g., GIT_SHA=$(git rev-parse HEAD)).
+# The deploy script (8d) sets this from $GITHUB_SHA automatically.
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up -d
+#   docker compose -f docker-compose.prod.yml run --rm migrate
+#
+# Reverse proxy (nginx) is configured in nginx/nginx.conf and will be replaced
+# or reconfigured in Module 8e (Caddy vs. nginx decision pending).
+
 services:
   redis:
-    image: redis:7-alpine
+    # redis:7.4.2-alpine
+    image: redis:7.4.2-alpine@sha256:02419de7eddf55aa5bcf49efb74e88fa8d931b4d77c07eff8a6b2144472b6952
     restart: unless-stopped
     command: redis-server --save "" --appendonly no
     healthcheck:
@@ -10,7 +26,8 @@ services:
       retries: 10
 
   mysql:
-    image: mysql:8.0
+    # mysql:8.0.41
+    image: mysql:8.0.41@sha256:bf577825b52ab281d6281fb281eabbfdc73507eda8f2c2745790251533ef0306
     restart: unless-stopped
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci
     environment:
@@ -31,6 +48,9 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.api
+      args:
+        GIT_SHA: ${GIT_SHA:-dev}
+    image: ${REGISTRY:-ghcr.io/khaledalrashidi1/statera-api}:${GIT_SHA:-dev}
     restart: unless-stopped
     environment: &api_env
       NODE_ENV: production
@@ -48,7 +68,8 @@ services:
       OAUTH_REDIRECT_URI: ${OAUTH_REDIRECT_URI}
       SENTRY_DSN: ${SENTRY_DSN}
       SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
-      SENTRY_RELEASE: ${SENTRY_RELEASE:-}
+      # SENTRY_RELEASE is set to GIT_SHA so Sentry links errors to the deployed commit.
+      SENTRY_RELEASE: ${GIT_SHA:-dev}
       POSTMARK_API_KEY: ${POSTMARK_API_KEY}
       MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
       ENABLE_OPEN_BANKING: ${ENABLE_OPEN_BANKING:-false}
@@ -70,7 +91,42 @@ services:
       retries: 8
       start_period: 30s
 
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+      args:
+        GIT_SHA: ${GIT_SHA:-dev}
+    image: ${REGISTRY:-ghcr.io/khaledalrashidi1/statera-api}:${GIT_SHA:-dev}
+    restart: unless-stopped
+    command: ["node_modules/.bin/tsx", "src/worker/index.ts"]
+    environment: *api_env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # One-shot migration runner. Exits after drizzle-kit migrate completes.
+  # Run before restarting api/worker: docker compose -f docker-compose.prod.yml run --rm migrate
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    image: ${REGISTRY:-ghcr.io/khaledalrashidi1/statera-api}:${GIT_SHA:-dev}
+    command: ["node_modules/.bin/drizzle-kit", "migrate"]
+    environment:
+      DATABASE_URL: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-0000000000000000000000000000000000000000000000000000000000000000}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    profiles:
+      - migrate
+
   nginx:
+    # nginx:1.27-alpine — reverse proxy and TLS termination.
+    # Will be replaced or reconfigured in Module 8e (Caddy vs. nginx decision pending).
     image: nginx:1.27-alpine
     restart: unless-stopped
     depends_on:
@@ -86,3 +142,6 @@ services:
 
 volumes:
   mysqldata:
+    # In production, bind this to the Hetzner Volume mount point.
+    # Override in a .env file: MYSQL_DATA_PATH=/mnt/mysql-data
+    # and add: driver_opts: { type: none, o: bind, device: "${MYSQL_DATA_PATH}" }

@@ -1,22 +1,62 @@
-FROM node:22-alpine AS deps
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+# syntax=docker/dockerfile:1
+#
+# Multi-stage build for statera-api.
+#
+# Base image pinned to an exact digest for reproducible builds.
+# To update: docker buildx imagetools inspect node:22.X.Y-alpine --format "{{json .Manifest}}"
+# Current: node:22.11.0-alpine
+ARG NODE_IMAGE=node:22.11.0-alpine@sha256:b64ced2e7cd0a4816699fe308ce6e8a08ccba463c757c00c14cd372e3d2c763e
+
+# ── Stage 1: install dependencies ────────────────────────────────────────────
+
+FROM ${NODE_IMAGE} AS deps
+
+# Install pnpm directly rather than via corepack to avoid corepack's key-verification
+# fetching behaviour, which is fragile in hermetic build environments.
+RUN npm install -g pnpm@9.15.9
+
 WORKDIR /app
-# Copy workspace manifests first for layer caching
+
+# Workspace manifests first — changes to source don't bust the install layer.
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/api/package.json ./apps/api/
+
 RUN pnpm install --frozen-lockfile
 
-FROM node:22-alpine AS runner
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+# ── Stage 2: production runtime ───────────────────────────────────────────────
+
+FROM ${NODE_IMAGE} AS runner
+
+# tini reaps zombie child processes. Node does not reap them, which causes
+# unclean shutdown and broken signal handling on long-running containers.
+RUN apk add --no-cache tini
+
 WORKDIR /app
+
+# Copy installed node_modules from deps stage.
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
+
+# Copy workspace root manifests and the full API source.
 COPY package.json pnpm-workspace.yaml ./
 COPY apps/api ./apps/api
+
+# GIT_SHA is stamped into the image at build time by CI (--build-arg GIT_SHA=$GITHUB_SHA).
+# Exposed via /health for version identification without SSH access.
+# Sentry release is derived from this value in docker-compose.prod.yml.
+ARG GIT_SHA=dev
+ENV GIT_SHA=${GIT_SHA}
+
+# Transfer ownership to the node user (uid=1000) before dropping privileges.
+# The node:alpine image ships this user; no adduser needed.
+RUN chown -R node:node /app
+
+USER node
+
 WORKDIR /app/apps/api
+
 EXPOSE 3000
-CMD ["pnpm", "start"]
+
+# tini as PID 1; CMD is overridable (worker uses a different entry point).
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["node_modules/.bin/tsx", "src/index.ts"]
