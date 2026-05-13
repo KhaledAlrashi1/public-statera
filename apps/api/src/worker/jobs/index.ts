@@ -1,10 +1,24 @@
 import type { Job } from "bullmq"
 import { handlePing } from "./ping"
 import { handleRebuildDashboardSnapshots } from "./rebuild-dashboard-snapshots"
+import {
+  TASK_CLEANUP_ACCOUNT_TOKENS,
+  TASK_CLEANUP_MEMORIZED,
+  TASK_CLEANUP_PRODUCT_EVENTS,
+  TASK_CLEANUP_SECURITY_DATA,
+  handleCleanupAccountTokens,
+  handleCleanupMemorizedTransactions,
+  handleCleanupProductEvents,
+  handleCleanupSecurityData,
+} from "./maintenance-jobs"
 
 type JobHandler = (job: Job) => Promise<unknown>
 
 export const jobHandlers: Record<string, JobHandler> = {
   ping: handlePing,
   "rebuild-dashboard-snapshots": handleRebuildDashboardSnapshots,
+  [TASK_CLEANUP_ACCOUNT_TOKENS]: handleCleanupAccountTokens,
+  [TASK_CLEANUP_SECURITY_DATA]: handleCleanupSecurityData,
+  [TASK_CLEANUP_PRODUCT_EVENTS]: handleCleanupProductEvents,
+  [TASK_CLEANUP_MEMORIZED]: handleCleanupMemorizedTransactions,
 }

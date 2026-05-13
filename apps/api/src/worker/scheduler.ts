@@ -1,6 +1,14 @@
 import type { Queue } from "bullmq"
+import { env } from "../lib/env"
+import {
+  TASK_CLEANUP_ACCOUNT_TOKENS,
+  TASK_CLEANUP_MEMORIZED,
+  TASK_CLEANUP_PRODUCT_EVENTS,
+  TASK_CLEANUP_SECURITY_DATA,
+} from "./jobs/maintenance-jobs"
 
 const MINUTE_MS = 60_000
+const HOUR_MS = 60 * MINUTE_MS
 
 export async function registerScheduledJobs(queue: Queue): Promise<void> {
   await queue.add("ping", {}, {
@@ -15,15 +23,23 @@ export async function registerScheduledJobs(queue: Queue): Promise<void> {
     repeat: { every: 15 * MINUTE_MS },
   })
 
-  // TODO (module 4a — budget alerts): budget-alert-check, daily
-  // TODO (module 4b — debt accounts): debt-payment-reminder, daily
-  // TODO (module 4c — savings goals): savings-goal-snapshot, daily
-  // TODO (module 5b — template suggestions): suggestion-model-refresh, daily
-  // TODO (module 5c — recurring patterns): recurring-pattern-scan, daily
-  // TODO (module 6a — bank sync): bank-sync-fetch, every 4 hours
-  // TODO (module 6b — bank sync): bank-sync-consent-check, every 30 minutes
-  // TODO (module 7a — TOTP): expired-backup-code-cleanup, weekly
-  // TODO (module 7b — sessions): stale-session-cleanup, daily
-  // TODO (module 8a — audit): audit-log-archive, weekly
-  // TODO (module 8b — metrics): metrics-rollup, daily
+  await queue.add(TASK_CLEANUP_ACCOUNT_TOKENS, {}, {
+    jobId: `scheduled:${TASK_CLEANUP_ACCOUNT_TOKENS}`,
+    repeat: { every: env.maintAccountTokensIntervalMinutes * MINUTE_MS },
+  })
+
+  await queue.add(TASK_CLEANUP_SECURITY_DATA, {}, {
+    jobId: `scheduled:${TASK_CLEANUP_SECURITY_DATA}`,
+    repeat: { every: env.maintSecurityDataIntervalHours * HOUR_MS },
+  })
+
+  await queue.add(TASK_CLEANUP_PRODUCT_EVENTS, {}, {
+    jobId: `scheduled:${TASK_CLEANUP_PRODUCT_EVENTS}`,
+    repeat: { every: env.maintProductEventsIntervalHours * HOUR_MS },
+  })
+
+  await queue.add(TASK_CLEANUP_MEMORIZED, {}, {
+    jobId: `scheduled:${TASK_CLEANUP_MEMORIZED}`,
+    repeat: { every: env.maintMemorizedIntervalHours * HOUR_MS },
+  })
 }

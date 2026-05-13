@@ -51,9 +51,10 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - 5b-3b Safe-to-spend route (R9) with F1-F5 fixtures
 - 5b-3c Weekly-digest (R10) + dashboard-bundle (R8)
 - 5c Intelligence/detection routes (algorithmic; fixture-based equivalence tests) — R11 income-pattern, R12 recurring-patterns, R13 snapshot
+- 6a Cleanup jobs (cleanup-account-tokens, cleanup-security-data, cleanup-product-events, cleanup-memorized-transactions)
 
 **Remaining modules (in order):**
-- Module 6: Maintenance jobs (non-bank-sync Celery beat jobs → BullMQ)
+- Module 6: Maintenance jobs (non-bank-sync Celery beat jobs → BullMQ) — 6b, 6c, 6d remaining
 - Module 7: TOTP 2FA
 - Module 8: Deployment (host selection between Railway/Hetzner/similar, secrets management, TLS, CI/CD, backups, monitoring, staging environment)
 - Module 9: Frontend parity verification (apps/web tested against the new Hono API end-to-end before any external sharing)

@@ -93,4 +93,12 @@ export const env = {
   dashboardSnapshotMonths: optionalInt("DASHBOARD_SNAPSHOT_MONTHS", 24),
   snapshotRebuildWindowDays: optionalInt("SNAPSHOT_REBUILD_WINDOW_DAYS", 14),
   snapshotRebuildConcurrency: optionalInt("SNAPSHOT_REBUILD_CONCURRENCY", 5),
+
+  // Maintenance job intervals
+  maintAccountTokensIntervalMinutes: optionalInt("MAINT_ACCOUNT_TOKENS_INTERVAL_MINUTES", 15),
+  maintSecurityDataIntervalHours: optionalInt("MAINT_SECURITY_DATA_INTERVAL_HOURS", 1),
+  maintProductEventsIntervalHours: optionalInt("MAINT_PRODUCT_EVENTS_INTERVAL_HOURS", 1),
+  maintMemorizedIntervalHours: optionalInt("MAINT_MEMORIZED_INTERVAL_HOURS", 6),
+  securityEventsRetentionDays: optionalInt("SECURITY_EVENTS_RETENTION_DAYS", 365),
+  productEventsRetentionDays: optionalInt("PRODUCT_EVENTS_RETENTION_DAYS", 90),
 }
