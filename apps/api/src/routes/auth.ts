@@ -8,6 +8,7 @@ import { env } from "../lib/env"
 import { generators, getOidcClient } from "../lib/oidc"
 import { createSessionToken, requireAuth } from "../middleware/auth"
 import { Sentry } from "../lib/sentry"
+import { recordEventOnce } from "../lib/product-events-lib"
 
 const router = new Hono()
 
@@ -132,6 +133,9 @@ router.get("/callback", async (c) => {
       })
       .$returningId()
     userId = inserted.id
+    recordEventOnce(userId, "signup_completed", {}, db).catch((err) =>
+      Sentry.captureException(err, { tags: { handler: "auth.callback.signup_completed", userId } }),
+    )
   } else {
     if (!existing.isActive) {
       return c.json({ error: "Account is deactivated" }, 403)

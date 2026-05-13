@@ -54,9 +54,9 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - 6a Cleanup jobs (cleanup-account-tokens, cleanup-security-data, cleanup-product-events, cleanup-memorized-transactions)
 - 6b Product-events lib (recordEvent, recordEventOnce, recordEventDaily, hasEvent, hasEventBetween; consolidates savings-goals/budgets local copies; wires app_opened on dashboard_metrics)
 - 6c Budget alerts + email templates (email-templates lib, budget-alerts-lib, check-budget-alerts BullMQ job, send-budget-alert-email job, send-goal-milestone-email job, GET /api/notifications/budget-alerts, POST /api/notifications/budget-alerts/dismiss, R8 budget_alerts.items wired, goal milestone email dispatch in savings-goals deposit)
+- 6d Activation report job (activation-reporting-lib with buildActivationReport, generate-activation-report BullMQ job with atomic write-to-tmp+rename, signup_completed event wired in auth callback, 3 env vars: ACTIVATION_REPORT_INTERVAL_HOURS/DAYS/PATH)
 
 **Remaining modules (in order):**
-- Module 6: Maintenance jobs — 6d activation report job still pending
 - Module 7: TOTP 2FA
 - Module 8: Deployment (host selection between Railway/Hetzner/similar, secrets management, TLS, CI/CD, backups, monitoring, staging environment)
 - Module 9: Frontend parity verification (apps/web tested against the new Hono API end-to-end before any external sharing)

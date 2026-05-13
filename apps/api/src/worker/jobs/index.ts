@@ -17,6 +17,10 @@ import {
   handleSendBudgetAlertEmail,
 } from "./budget-alerts-job"
 import { handleSendGoalMilestoneEmail } from "./goal-milestone-email-job"
+import {
+  TASK_GENERATE_ACTIVATION_REPORT,
+  handleGenerateActivationReport,
+} from "./activation-report-job"
 
 type JobHandler = (job: Job) => Promise<unknown>
 
@@ -30,4 +34,5 @@ export const jobHandlers: Record<string, JobHandler> = {
   [TASK_CHECK_BUDGET_ALERTS]: handleCheckBudgetAlerts,
   "send-budget-alert-email": handleSendBudgetAlertEmail,
   "send-goal-milestone-email": handleSendGoalMilestoneEmail,
+  [TASK_GENERATE_ACTIVATION_REPORT]: handleGenerateActivationReport,
 }

@@ -113,4 +113,9 @@ export const env = {
   // Budget alert threshold: send alert when spending reaches this fraction of budget.
   // Flask default: BUDGET_ALERT_THRESHOLD_RATIO = 0.9 (90%).
   budgetAlertThresholdRatio: optionalFloat("BUDGET_ALERT_THRESHOLD_RATIO", 0.9),
+
+  // Activation report job configuration
+  activationReportIntervalHours: optionalInt("ACTIVATION_REPORT_INTERVAL_HOURS", 1),
+  activationReportDays: optionalInt("ACTIVATION_REPORT_DAYS", 30),
+  activationReportPath: optional("ACTIVATION_REPORT_PATH", "reports/activation-report.latest.json"),
 }

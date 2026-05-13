@@ -7,6 +7,7 @@ import {
   TASK_CLEANUP_SECURITY_DATA,
 } from "./jobs/maintenance-jobs"
 import { TASK_CHECK_BUDGET_ALERTS } from "./jobs/budget-alerts-job"
+import { TASK_GENERATE_ACTIVATION_REPORT } from "./jobs/activation-report-job"
 
 const MINUTE_MS = 60_000
 const HOUR_MS = 60 * MINUTE_MS
@@ -48,5 +49,10 @@ export async function registerScheduledJobs(queue: Queue): Promise<void> {
   await queue.add(TASK_CHECK_BUDGET_ALERTS, {}, {
     jobId: `scheduled:${TASK_CHECK_BUDGET_ALERTS}`,
     repeat: { pattern: "0 9 * * *" },
+  })
+
+  await queue.add(TASK_GENERATE_ACTIVATION_REPORT, {}, {
+    jobId: `scheduled:${TASK_GENERATE_ACTIVATION_REPORT}`,
+    repeat: { every: env.activationReportIntervalHours * HOUR_MS },
   })
 }
