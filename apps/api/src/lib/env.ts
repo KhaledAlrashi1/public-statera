@@ -20,6 +20,14 @@ function optionalInt(key: string, fallback: number): number {
 
 // Accepts: "true"|"1"|"yes"|"on" → true; "false"|"0"|"no"|"off"|"" → false.
 // Throws on startup for any other value so misconfiguration surfaces immediately.
+function optionalFloat(key: string, fallback: number): number {
+  const val = process.env[key]
+  if (!val) return fallback
+  const n = parseFloat(val)
+  if (isNaN(n)) throw new Error(`Environment variable ${key} must be a number, got: "${val}"`)
+  return n
+}
+
 function optionalBool(key: string, fallback: boolean): boolean {
   const raw = process.env[key]
   if (raw === undefined) return fallback
@@ -101,4 +109,8 @@ export const env = {
   maintMemorizedIntervalHours: optionalInt("MAINT_MEMORIZED_INTERVAL_HOURS", 6),
   securityEventsRetentionDays: optionalInt("SECURITY_EVENTS_RETENTION_DAYS", 365),
   productEventsRetentionDays: optionalInt("PRODUCT_EVENTS_RETENTION_DAYS", 90),
+
+  // Budget alert threshold: send alert when spending reaches this fraction of budget.
+  // Flask default: BUDGET_ALERT_THRESHOLD_RATIO = 0.9 (90%).
+  budgetAlertThresholdRatio: optionalFloat("BUDGET_ALERT_THRESHOLD_RATIO", 0.9),
 }

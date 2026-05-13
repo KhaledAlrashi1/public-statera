@@ -11,6 +11,12 @@ import {
   handleCleanupProductEvents,
   handleCleanupSecurityData,
 } from "./maintenance-jobs"
+import {
+  TASK_CHECK_BUDGET_ALERTS,
+  handleCheckBudgetAlerts,
+  handleSendBudgetAlertEmail,
+} from "./budget-alerts-job"
+import { handleSendGoalMilestoneEmail } from "./goal-milestone-email-job"
 
 type JobHandler = (job: Job) => Promise<unknown>
 
@@ -21,4 +27,7 @@ export const jobHandlers: Record<string, JobHandler> = {
   [TASK_CLEANUP_SECURITY_DATA]: handleCleanupSecurityData,
   [TASK_CLEANUP_PRODUCT_EVENTS]: handleCleanupProductEvents,
   [TASK_CLEANUP_MEMORIZED]: handleCleanupMemorizedTransactions,
+  [TASK_CHECK_BUDGET_ALERTS]: handleCheckBudgetAlerts,
+  "send-budget-alert-email": handleSendBudgetAlertEmail,
+  "send-goal-milestone-email": handleSendGoalMilestoneEmail,
 }

@@ -6,6 +6,7 @@ import {
   TASK_CLEANUP_PRODUCT_EVENTS,
   TASK_CLEANUP_SECURITY_DATA,
 } from "./jobs/maintenance-jobs"
+import { TASK_CHECK_BUDGET_ALERTS } from "./jobs/budget-alerts-job"
 
 const MINUTE_MS = 60_000
 const HOUR_MS = 60 * MINUTE_MS
@@ -41,5 +42,11 @@ export async function registerScheduledJobs(queue: Queue): Promise<void> {
   await queue.add(TASK_CLEANUP_MEMORIZED, {}, {
     jobId: `scheduled:${TASK_CLEANUP_MEMORIZED}`,
     repeat: { every: env.maintMemorizedIntervalHours * HOUR_MS },
+  })
+
+  // 09:00 UTC = 12:00 noon Kuwait (UTC+3). Matches Flask's celery beat schedule.
+  await queue.add(TASK_CHECK_BUDGET_ALERTS, {}, {
+    jobId: `scheduled:${TASK_CHECK_BUDGET_ALERTS}`,
+    repeat: { pattern: "0 9 * * *" },
   })
 }

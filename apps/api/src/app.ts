@@ -16,6 +16,7 @@ import { savingsGoalsRouter } from "./routes/savings-goals"
 import { suggestionsRouter } from "./routes/suggestions"
 import { aggregationRouter } from "./routes/aggregation"
 import { intelligenceRouter } from "./routes/intelligence"
+import { notificationsRouter } from "./routes/notifications"
 
 export function createApp() {
   const app = new Hono()
@@ -49,6 +50,7 @@ export function createApp() {
   app.route("/api/transaction-suggestions", suggestionsRouter)
   app.route("/api/analytics", aggregationRouter)
   app.route("/api/analytics", intelligenceRouter)
+  app.route("/api/notifications", notificationsRouter)
 
   // 404 fallback for unmatched /api/* routes
   app.notFound((c) => {

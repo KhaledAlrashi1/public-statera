@@ -38,8 +38,6 @@
  *   sub-builders sequentially. Trade-off: ~4 concurrent short queries vs 4 sequential
  *   against MySQL pool (default 10 connections, waitForConnections queueing) — safe
  *   for typical loads.
- * - R8 budget_alerts.items always []: list_active_budget_alerts not yet ported.
- *   TODO(module-budget-alerts): port when budget alerts module is implemented.
  * - R8 cache_warning absent: no partial-failure path in Hono (Redis degradation → 503).
  */
 
@@ -84,6 +82,7 @@ import { Sentry } from "../lib/sentry"
 import { searchRateLimit } from "../lib/rate-limit"
 import { env } from "../lib/env"
 import { recordEventDaily } from "../lib/product-events-lib"
+import { listActiveBudgetAlerts } from "../lib/budget-alerts-lib"
 
 export const aggregationRouter = new Hono()
 
@@ -1262,7 +1261,7 @@ aggregationRouter.get("/dashboard-bundle", requireAuth, searchRateLimit, async (
           budget,
           budget_alerts: {
             month,
-            items: [] as unknown[], // TODO(module-budget-alerts): port list_active_budget_alerts
+            items: await listActiveBudgetAlerts(userId, month, db),
           },
           account_overview: accountOverview,
         }
@@ -1272,7 +1271,7 @@ aggregationRouter.get("/dashboard-bundle", requireAuth, searchRateLimit, async (
       ok: true,
       data: payload,
       error: null,
-      meta: { budget_count: payload.budget.items.length, alert_count: 0 },
+      meta: { budget_count: payload.budget.items.length, alert_count: payload.budget_alerts.items.length },
     })
   } catch (err) {
     if (err instanceof CacheBackendUnavailableError) {

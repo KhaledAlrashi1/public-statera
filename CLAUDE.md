@@ -53,9 +53,10 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - 5c Intelligence/detection routes (algorithmic; fixture-based equivalence tests) — R11 income-pattern, R12 recurring-patterns, R13 snapshot
 - 6a Cleanup jobs (cleanup-account-tokens, cleanup-security-data, cleanup-product-events, cleanup-memorized-transactions)
 - 6b Product-events lib (recordEvent, recordEventOnce, recordEventDaily, hasEvent, hasEventBetween; consolidates savings-goals/budgets local copies; wires app_opened on dashboard_metrics)
+- 6c Budget alerts + email templates (email-templates lib, budget-alerts-lib, check-budget-alerts BullMQ job, send-budget-alert-email job, send-goal-milestone-email job, GET /api/notifications/budget-alerts, POST /api/notifications/budget-alerts/dismiss, R8 budget_alerts.items wired, goal milestone email dispatch in savings-goals deposit)
 
 **Remaining modules (in order):**
-- Module 6: Maintenance jobs (non-bank-sync Celery beat jobs → BullMQ) — 6b, 6c, 6d remaining
+- Module 6: Maintenance jobs — 6d activation report job still pending
 - Module 7: TOTP 2FA
 - Module 8: Deployment (host selection between Railway/Hetzner/similar, secrets management, TLS, CI/CD, backups, monitoring, staging environment)
 - Module 9: Frontend parity verification (apps/web tested against the new Hono API end-to-end before any external sharing)
@@ -63,8 +64,7 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 **Deferred indefinitely:**
 - Bank sync (CBK Open Banking dependency; replaced future scope: bank statement PDF parsing for Kuwaiti banks)
 - Exports (3c)
-- Budget alerts
-- sendTemplatedEmail (until first caller module)
+- sendTemplatedEmail (until first caller module) — now implemented in 6c
 - transaction-template-suggestions (feature-flagged off in Flask; do not port)
 
 ## Standing rules for every module

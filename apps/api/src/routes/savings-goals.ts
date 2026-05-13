@@ -11,6 +11,7 @@ import { Sentry } from "../lib/sentry"
 import { goalProjection } from "../lib/savings-goals-lib"
 import { cacheBustSafeToSpend } from "../lib/analytics-cache"
 import { recordEvent, recordEventOnce } from "../lib/product-events-lib"
+import { getQueue } from "../worker/queue"
 
 export const savingsGoalsRouter = new Hono()
 
@@ -470,12 +471,26 @@ savingsGoalsRouter.post("/:id{[0-9]+}/deposit", requireAuth, searchRateLimit, as
           },
           db,
         )
+        // Fire-and-forget: dispatch milestone email. Errors must not block the response.
+        ;(async () => {
+          try {
+            await getQueue().add("send-goal-milestone-email", {
+              userId,
+              goalId: afterUpdateGoal.id,
+              goalName: afterUpdateGoal.name,
+              milestonePct: marker,
+              currentKd: formatKd(afterCurrentDec),
+              targetKd: formatKd(targetKdDec),
+            })
+          } catch (err) {
+            Sentry.captureException(err, {
+              tags: { handler: "savings-goals.deposit.milestone-email", userId, marker },
+            })
+          }
+        })()
       }
     }
   }
-
-  // Milestone emails are not wired. ProductEvent is the durable signal; add a
-  // dispatcher later if/when desired.
 
   const projection = await goalProjection(
     { id: afterUpdateGoal.id, userId: afterUpdateGoal.userId, targetKd: afterUpdateGoal.targetKd, currentKd: afterUpdateGoal.currentKd, targetDate: toTargetDateStr(afterUpdateGoal.targetDate) },
