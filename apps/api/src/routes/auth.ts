@@ -483,6 +483,8 @@ router.post(
       }
     } else {
       const decryptedSecret = user.totpSecret ? decrypt(user.totpSecret) : ""
+      // TODO(module-future-hardening): add Redis totp_used:{userId}:{code} cache (90s TTL)
+      // to reject replayed valid TOTP codes. Flask does not implement this; matching Flask for now.
       codeValid = verifyTotpCode(decryptedSecret, rawCode)
     }
 
