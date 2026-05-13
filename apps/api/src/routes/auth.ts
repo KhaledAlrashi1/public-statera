@@ -3,10 +3,10 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie"
 import { SignJWT, jwtVerify } from "jose"
 import { and, eq } from "drizzle-orm"
 import { getDb } from "../db/connection"
-import { users } from "../db/schema"
+import { users, securityEvents } from "../db/schema"
 import { env } from "../lib/env"
 import { generators, getOidcClient } from "../lib/oidc"
-import { createSessionToken, revokeSessionVersion, requireAuth } from "../middleware/auth"
+import { createSessionToken, revokeSessionVersion, requireAuth, getAuthRedis } from "../middleware/auth"
 import { Sentry } from "../lib/sentry"
 import { recordEventOnce } from "../lib/product-events-lib"
 import { createRateLimiter } from "../lib/rate-limit"
@@ -27,6 +27,11 @@ const router = new Hono()
 const OIDC_STATE_COOKIE = "oidc_state"
 const OIDC_STATE_TTL = 600 // 10 minutes
 
+// Short-lived cookie carries userId across the 2FA verify step (post-OIDC, pre-session).
+const PENDING_2FA_COOKIE = "statera_pending_2fa"
+const PENDING_2FA_TTL = 300 // 5 minutes
+const PENDING_2FA_MAX_FAILURES = 3
+
 function stateSecret(): Uint8Array {
   return new TextEncoder().encode(env.sessionSecret)
 }
@@ -43,6 +48,38 @@ async function unpackStateCookie(
 ): Promise<{ state: string; nonce: string }> {
   const { payload } = await jwtVerify(token, stateSecret())
   return { state: payload["state"] as string, nonce: payload["nonce"] as string }
+}
+
+async function packPending2faToken(userId: number): Promise<string> {
+  return new SignJWT({ userId, pendingAt: Date.now() })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime(`${PENDING_2FA_TTL}s`)
+    .sign(stateSecret())
+}
+
+async function verifyPending2faToken(token: string): Promise<{ userId: number }> {
+  const { payload } = await jwtVerify(token, stateSecret())
+  return { userId: payload["userId"] as number }
+}
+
+// Fire-and-forget security event write. Never throws — Sentry-captured on failure.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function auditSecurityEvent(
+  db: ReturnType<typeof getDb>,
+  eventType: string,
+  opts: { userId?: number | null; ipAddress?: string; userAgent?: string; details?: Record<string, unknown> } = {},
+): void {
+  db.insert(securityEvents)
+    .values({
+      userId: opts.userId ?? null,
+      eventType,
+      ipAddress: opts.ipAddress ?? null,
+      userAgent: opts.userAgent ?? null,
+      detailsJson: opts.details ? JSON.stringify(opts.details) : null,
+    })
+    .catch((err: unknown) =>
+      Sentry.captureException(err, { tags: { handler: "auditSecurityEvent", eventType } }),
+    )
 }
 
 // GET /api/auth/login
@@ -163,6 +200,27 @@ router.get("/callback", async (c) => {
         displayName: (claims["name"] as string | undefined) ?? existing.displayName,
       })
       .where(eq(users.id, userId))
+
+    // 7b: Gate on TOTP — issue a short-lived pending-2FA cookie and redirect to the
+    // verify page. lastLoginAt and the real session cookie are issued only after /2fa/verify
+    // succeeds, so an incomplete 2FA step leaves no authenticated session.
+    if (existing.totpEnabled) {
+      const pendingToken = await packPending2faToken(userId)
+      setCookie(c, PENDING_2FA_COOKIE, pendingToken, {
+        httpOnly: true,
+        sameSite: "Lax",
+        secure: !env.isDev,
+        maxAge: PENDING_2FA_TTL,
+        path: "/",
+      })
+      const frontendOriginFor2fa = env.corsOrigins[0] ?? "http://127.0.0.1:3002"
+      auditSecurityEvent(db, "login.pending_2fa", {
+        userId,
+        ipAddress: c.req.header("x-forwarded-for") ?? undefined,
+        userAgent: c.req.header("user-agent") ?? undefined,
+      })
+      return c.redirect(`${frontendOriginFor2fa}/auth/2fa-verify`)
+    }
   }
 
   // Non-blocking: failure must not delay the redirect or surface to the user.
@@ -331,6 +389,152 @@ router.post(
     })
 
     return c.json({ ok: true, data: null, error: null, meta: {} })
+  },
+)
+
+// POST /api/auth/2fa/verify
+// Pre-auth endpoint — no requireAuth. Verifies the TOTP/backup code after the OIDC callback
+// redirected to /auth/2fa-verify. On success, issues the real session cookie.
+//
+// Deliberate deviations from Flask:
+// - Flask uses server-side sessions for pending_2fa state; Hono uses a short-lived JWT cookie
+//   (statera_pending_2fa). The JWT carries only userId — no code or secret — so it cannot be
+//   used to bypass anything.
+// - Pre-check on failure counter (≥ PENDING_2FA_MAX_FAILURES) before processing the code is
+//   added as a safety net against replayed valid JWTs after cookie deletion on the 3rd failure.
+// - CSRF: SameSite=Lax + same-origin XHR is sufficient. No CSRF token needed — identical
+//   to Flask's session-cookie approach under SameSite semantics.
+// - Rate limit keyed by path (anonymous) rather than userId — userId is not yet established
+//   when the limiter runs.
+router.post(
+  "/2fa/verify",
+  createRateLimiter(5, 60),
+  async (c) => {
+    const db = getDb()
+    const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
+    const rawCode = String(body.code ?? "")
+    const codeType = (body.type === "backup" ? "backup" : "totp") as "totp" | "backup"
+    const ipAddress = c.req.header("x-forwarded-for") ?? undefined
+    const userAgent = c.req.header("user-agent") ?? undefined
+
+    // 1. Read and verify the pending-2FA JWT cookie.
+    const pendingCookieValue = getCookie(c, PENDING_2FA_COOKIE)
+    if (!pendingCookieValue) {
+      return c.json({ ok: false, data: null, error: "No pending 2FA session.", code: "PENDING_2FA_GONE" }, 410)
+    }
+
+    let userId: number
+    try {
+      ;({ userId } = await verifyPending2faToken(pendingCookieValue))
+    } catch {
+      return c.json({ ok: false, data: null, error: "Pending 2FA session expired or invalid.", code: "PENDING_2FA_GONE" }, 410)
+    }
+
+    // 2. Pre-check failure counter — safety net against replayed cookies after 3rd failure.
+    const redis = getAuthRedis()
+    const failureKey = `pending_2fa_failures:${userId}`
+    try {
+      const currentFailures = await redis.get(failureKey)
+      if (currentFailures !== null && parseInt(currentFailures, 10) >= PENDING_2FA_MAX_FAILURES) {
+        deleteCookie(c, PENDING_2FA_COOKIE, { path: "/" })
+        return c.json({ ok: false, data: null, error: "Too many failed attempts. Please sign in again.", code: "PENDING_2FA_RESTART" }, 401)
+      }
+    } catch { /* Redis error: fail open — proceed to code check */ }
+
+    // 3. Load user.
+    const [user] = await db
+      .select({
+        totpEnabled: users.totpEnabled,
+        totpSecret: users.totpSecret,
+        totpBackupCodesJson: users.totpBackupCodesJson,
+        sessionVersion: users.sessionVersion,
+        authProvider: users.authProvider,
+        externalId: users.externalId,
+        isActive: users.isActive,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1)
+
+    if (!user?.isActive) {
+      return c.json({ ok: false, data: null, error: "Account is deactivated.", code: "ACCOUNT_INACTIVE" }, 403)
+    }
+
+    if (!user?.totpEnabled) {
+      return c.json({ ok: false, data: null, error: "Two-factor authentication is not enabled.", code: "TOTP_NOT_ENABLED" }, 400)
+    }
+
+    // 4. Verify the supplied code.
+    let codeValid = false
+    let backupCodesLow = false
+    let remainingBackupHashes: string[] | null = null
+
+    if (codeType === "backup") {
+      const { consumed, remainingHashes } = await verifyAndConsumeBackupCode(rawCode, user.totpBackupCodesJson)
+      if (consumed) {
+        codeValid = true
+        remainingBackupHashes = remainingHashes
+        backupCodesLow = remainingHashes.length <= 2
+        // Persist consumed backup codes (fire-and-forget would risk race; await for correctness).
+        await db
+          .update(users)
+          .set({ totpBackupCodesJson: JSON.stringify(remainingHashes) })
+          .where(eq(users.id, userId))
+      }
+    } else {
+      const decryptedSecret = user.totpSecret ? decrypt(user.totpSecret) : ""
+      codeValid = verifyTotpCode(decryptedSecret, rawCode)
+    }
+
+    // 5. Handle failure — increment counter; restart if limit reached.
+    if (!codeValid) {
+      let newCount = PENDING_2FA_MAX_FAILURES // fail-safe default on Redis error
+      try {
+        const results = await redis.multi().incr(failureKey).expire(failureKey, 300).exec()
+        const raw = results?.[0]?.[1]
+        if (typeof raw === "number") newCount = raw
+      } catch { /* Redis error: treat as limit reached to avoid infinite retries */ }
+
+      auditSecurityEvent(db, "login.2fa.failed", { userId, ipAddress, userAgent, details: { type: codeType } })
+
+      if (newCount >= PENDING_2FA_MAX_FAILURES) {
+        deleteCookie(c, PENDING_2FA_COOKIE, { path: "/" })
+        return c.json({ ok: false, data: null, error: "Too many failed attempts. Please sign in again.", code: "PENDING_2FA_RESTART" }, 401)
+      }
+
+      return c.json({ ok: false, data: null, error: "Invalid authentication code.", code: "INVALID_TOTP_CODE" }, 401)
+    }
+
+    // 6. Success — clear counter, delete pending cookie, issue real session.
+    redis.del(failureKey).catch(() => {})
+    deleteCookie(c, PENDING_2FA_COOKIE, { path: "/" })
+
+    // Fire-and-forget: update lastLoginAt and record success event.
+    db.update(users)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(users.id, userId))
+      .catch((err: unknown) =>
+        Sentry.captureException(err, { tags: { handler: "auth.2fa.verify.lastLoginAt", userId } }),
+      )
+    auditSecurityEvent(db, "login.success", { userId, ipAddress, userAgent, details: { type: codeType } })
+
+    const { authProvider, externalId, sessionVersion } = user
+    const sessionToken = await createSessionToken({ userId, externalId, authProvider, sv: sessionVersion })
+    setCookie(c, "statera_session", sessionToken, {
+      httpOnly: true,
+      sameSite: "Lax",
+      secure: !env.isDev,
+      maxAge: 60 * 60 * 24 * 30,
+      path: "/",
+    })
+
+    const data: Record<string, unknown> = { user_id: userId }
+    if (backupCodesLow && remainingBackupHashes !== null) {
+      data.warning = "BACKUP_CODES_LOW"
+      data.backup_codes_remaining = remainingBackupHashes.length
+    }
+
+    return c.json({ ok: true, data, error: null, meta: {} })
   },
 )
 

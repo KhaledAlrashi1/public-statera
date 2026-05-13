@@ -56,9 +56,10 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - 6c Budget alerts + email templates (email-templates lib, budget-alerts-lib, check-budget-alerts BullMQ job, send-budget-alert-email job, send-goal-milestone-email job, GET /api/notifications/budget-alerts, POST /api/notifications/budget-alerts/dismiss, R8 budget_alerts.items wired, goal milestone email dispatch in savings-goals deposit)
 - 6d Activation report job (activation-reporting-lib with buildActivationReport, generate-activation-report BullMQ job with atomic write-to-tmp+rename, signup_completed event wired in auth callback, 3 env vars: ACTIVATION_REPORT_INTERVAL_HOURS/DAYS/PATH)
 - 7a TOTP enable/disable (totp-lib with otplib/bcryptjs/qrcode, POST /api/auth/2fa/setup + confirm + disable; sv claim added to JWT; sv deny-list revocation via Redis sv_revoked:{userId}:{sv} keys; session cookie re-issued on disable)
+- 7b TOTP verify-on-login (statera_pending_2fa short-lived JWT cookie; OIDC callback gates on totpEnabled → redirect /auth/2fa-verify; POST /api/auth/2fa/verify handles TOTP + backup-code; Redis pending_2fa_failures:{userId} counter with 5-min TTL; PENDING_2FA_MAX_FAILURES=3; BACKUP_CODES_LOW warning ≤2 remaining; auditSecurityEvent helper writing to security_events; login.pending_2fa / login.success / login.2fa.failed events)
 
 **Remaining modules (in order):**
-- Module 7: TOTP 2FA — 7b verify-on-login, 7c revoke-all + security events
+- Module 7: TOTP 2FA — 7c revoke-all + security events
 - Module 8: Deployment (host selection between Railway/Hetzner/similar, secrets management, TLS, CI/CD, backups, monitoring, staging environment)
 - Module 9: Frontend parity verification (apps/web tested against the new Hono API end-to-end before any external sharing)
 
@@ -118,6 +119,7 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - Worker task tracking from 1c — `markWorkerTaskStarted`, `markWorkerTaskFinished` (call once at batch start/end, not per-user)
 - `tools/capture-flask-fixtures.py` — Flask fixture capture tool (subcommands: income-pattern, recurring-patterns, snapshot). Seeds deterministic data into the live PostgreSQL container, calls Flask payload builders, prints JSON, rolls back. Run before implementing each 5c sub-commit to capture expected values for equivalence tests.
 - `routes/route-helpers.ts` — `parseIntParam` (consolidated from aggregation.ts and intelligence.ts local copies in 5c-3)
+- `routes/auth.ts` — `auditSecurityEvent(db, eventType, opts)` fire-and-forget helper writing to `security_events` table (use for all auth security events)
 
 ## Test conventions
 
@@ -141,3 +143,4 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - R12 recurring-patterns feature flag: `ENABLE_RECURRING_PATTERNS=false` returns HTTP 200 with `{ ok: true, data: { patterns: [] }, meta: { count: 0, enabled: false } }`. This is a client-observable behaviour: frontend must handle `enabled: false` in meta without rendering a missing-data error. Do not change the response shape or the HTTP status code.
 - R13 snapshot: all KWD amount fields (`income_total_kd`, `expense_total_kd`, `net_kd`, `total_debt_kd`, `total_savings_kd`, and per-window `income_kd`/`expense_kd`/`net_kd`) return as 3-decimal strings (e.g., `"500.000"`). Flask R13 returns floats via `_rounded_number`/`to_display_float`; Hono normalizes to strings via `formatKd` to match the project-wide KWD-as-string convention used by R3/R4/R9/R10/R11/R12. Module 9 frontend types must treat these fields as `string`, not `number`.
 - `sv` JWT claim (added in 7a): session version number embedded in the `statera_session` JWT. Module 9 must NOT decode the JWT client-side and rely on `sv`; session management is server-side. If the frontend ever decodes the JWT for UX purposes, add `sv: number` to the JWT type definition in `apps/web/src/types/`. Error code `session_invalidated` (HTTP 401) means the token's sv was explicitly revoked — frontend must clear local state and redirect to login.
+- `statera_pending_2fa` cookie (added in 7b): short-lived (5-min) JWT issued by the OIDC callback when `totpEnabled=true`. Carries only `{ userId, pendingAt }`. The real session cookie is NOT issued until POST `/api/auth/2fa/verify` succeeds. Frontend must handle the `/auth/2fa-verify` redirect from the callback. Error codes: `PENDING_2FA_GONE` (HTTP 410) = cookie absent or expired; `PENDING_2FA_RESTART` (HTTP 401) = 3 failures hit, must restart login. `BACKUP_CODES_LOW` warning in `data.warning` when ≤2 backup codes remain after successful backup-code login.
