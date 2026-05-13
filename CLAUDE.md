@@ -55,9 +55,10 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - 6b Product-events lib (recordEvent, recordEventOnce, recordEventDaily, hasEvent, hasEventBetween; consolidates savings-goals/budgets local copies; wires app_opened on dashboard_metrics)
 - 6c Budget alerts + email templates (email-templates lib, budget-alerts-lib, check-budget-alerts BullMQ job, send-budget-alert-email job, send-goal-milestone-email job, GET /api/notifications/budget-alerts, POST /api/notifications/budget-alerts/dismiss, R8 budget_alerts.items wired, goal milestone email dispatch in savings-goals deposit)
 - 6d Activation report job (activation-reporting-lib with buildActivationReport, generate-activation-report BullMQ job with atomic write-to-tmp+rename, signup_completed event wired in auth callback, 3 env vars: ACTIVATION_REPORT_INTERVAL_HOURS/DAYS/PATH)
+- 7a TOTP enable/disable (totp-lib with otplib/bcryptjs/qrcode, POST /api/auth/2fa/setup + confirm + disable; sv claim added to JWT; sv deny-list revocation via Redis sv_revoked:{userId}:{sv} keys; session cookie re-issued on disable)
 
 **Remaining modules (in order):**
-- Module 7: TOTP 2FA
+- Module 7: TOTP 2FA — 7b verify-on-login, 7c revoke-all + security events
 - Module 8: Deployment (host selection between Railway/Hetzner/similar, secrets management, TLS, CI/CD, backups, monitoring, staging environment)
 - Module 9: Frontend parity verification (apps/web tested against the new Hono API end-to-end before any external sharing)
 
@@ -139,3 +140,4 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 - Analytics routes URL prefix: all analytics routes mount at `/api/analytics/*` (Hono) vs Flask's `/api/*` root paths. Module 9 verifies frontend URL parity.
 - R12 recurring-patterns feature flag: `ENABLE_RECURRING_PATTERNS=false` returns HTTP 200 with `{ ok: true, data: { patterns: [] }, meta: { count: 0, enabled: false } }`. This is a client-observable behaviour: frontend must handle `enabled: false` in meta without rendering a missing-data error. Do not change the response shape or the HTTP status code.
 - R13 snapshot: all KWD amount fields (`income_total_kd`, `expense_total_kd`, `net_kd`, `total_debt_kd`, `total_savings_kd`, and per-window `income_kd`/`expense_kd`/`net_kd`) return as 3-decimal strings (e.g., `"500.000"`). Flask R13 returns floats via `_rounded_number`/`to_display_float`; Hono normalizes to strings via `formatKd` to match the project-wide KWD-as-string convention used by R3/R4/R9/R10/R11/R12. Module 9 frontend types must treat these fields as `string`, not `number`.
+- `sv` JWT claim (added in 7a): session version number embedded in the `statera_session` JWT. Module 9 must NOT decode the JWT client-side and rely on `sv`; session management is server-side. If the frontend ever decodes the JWT for UX purposes, add `sv: number` to the JWT type definition in `apps/web/src/types/`. Error code `session_invalidated` (HTTP 401) means the token's sv was explicitly revoked — frontend must clear local state and redirect to login.

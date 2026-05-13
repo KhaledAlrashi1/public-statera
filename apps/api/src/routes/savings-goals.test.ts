@@ -52,7 +52,7 @@ vi.mock("../lib/sentry", () => ({ Sentry: { captureException: vi.fn() } }))
 const app = new Hono().route("/api/savings-goals", savingsGoalsRouter)
 
 async function authHeader(userId = 1): Promise<string> {
-  const token = await createSessionToken({ userId, externalId: "test-ext", authProvider: "test" })
+  const token = await createSessionToken({ userId, externalId: "test-ext", authProvider: "test", sv: 1 })
   return `Bearer ${token}`
 }
 

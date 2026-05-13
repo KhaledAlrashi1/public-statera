@@ -136,7 +136,7 @@ import * as analyticsHelpers from "../lib/analytics-helpers"
 const app = new Hono().route("/api/analytics", aggregationRouter)
 
 async function authHeader(userId = 1): Promise<string> {
-  const token = await createSessionToken({ userId, externalId: "test-ext", authProvider: "test" })
+  const token = await createSessionToken({ userId, externalId: "test-ext", authProvider: "test", sv: 1 })
   return `Bearer ${token}`
 }
 

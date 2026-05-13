@@ -6,9 +6,20 @@ import { getDb } from "../db/connection"
 import { users } from "../db/schema"
 import { env } from "../lib/env"
 import { generators, getOidcClient } from "../lib/oidc"
-import { createSessionToken, requireAuth } from "../middleware/auth"
+import { createSessionToken, revokeSessionVersion, requireAuth } from "../middleware/auth"
 import { Sentry } from "../lib/sentry"
 import { recordEventOnce } from "../lib/product-events-lib"
+import { createRateLimiter } from "../lib/rate-limit"
+import { encrypt, decrypt } from "../lib/crypto"
+import {
+  generateTotpSecret,
+  generateTotpQrDataUri,
+  generateBackupCodes,
+  hashBackupCodes,
+  verifyTotpCode,
+  verifyAndConsumeBackupCode,
+  parseBackupCodeHashes,
+} from "../lib/totp-lib"
 
 const router = new Hono()
 
@@ -119,6 +130,7 @@ router.get("/callback", async (c) => {
     .limit(1)
 
   let userId: number
+  let sessionVersion: number
 
   if (!existing) {
     const [inserted] = await db
@@ -133,6 +145,7 @@ router.get("/callback", async (c) => {
       })
       .$returningId()
     userId = inserted.id
+    sessionVersion = 1 // DB default
     recordEventOnce(userId, "signup_completed", {}, db).catch((err) =>
       Sentry.captureException(err, { tags: { handler: "auth.callback.signup_completed", userId } }),
     )
@@ -141,6 +154,7 @@ router.get("/callback", async (c) => {
       return c.json({ error: "Account is deactivated" }, 403)
     }
     userId = existing.id
+    sessionVersion = existing.sessionVersion
     // Refresh email and display name in case they changed at the provider.
     await db
       .update(users)
@@ -157,7 +171,7 @@ router.get("/callback", async (c) => {
     .where(eq(users.id, userId))
     .catch((err) => Sentry.captureException(err, { tags: { handler: "auth.callback.lastLoginAt", userId } }))
 
-  const sessionToken = await createSessionToken({ userId, externalId, authProvider: provider })
+  const sessionToken = await createSessionToken({ userId, externalId, authProvider: provider, sv: sessionVersion })
   setCookie(c, "statera_session", sessionToken, {
     httpOnly: true,
     sameSite: "Lax",
@@ -180,5 +194,144 @@ router.post("/logout", (c) => {
 router.get("/me", requireAuth, (c) => {
   return c.json({ session: c.var.session })
 })
+
+// ── 2FA ───────────────────────────────────────────────────────────────────────
+
+// POST /api/auth/2fa/setup
+// Generates a new TOTP secret + backup codes and stores them (totp_enabled remains false
+// until the user confirms with a valid TOTP code via /confirm).
+// Rate: 5 per 60 s per authenticated user. Matches Flask's require_rate_limit(5, window_seconds=60).
+router.post(
+  "/2fa/setup",
+  requireAuth,
+  createRateLimiter(5, 60),
+  async (c) => {
+    const { userId } = c.var.session
+    const db = getDb()
+
+    const [user] = await db
+      .select({ totpEnabled: users.totpEnabled })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1)
+
+    if (user?.totpEnabled) {
+      return c.json({ ok: false, data: null, error: "Two-factor authentication is already enabled.", code: "TOTP_ALREADY_ENABLED" }, 400)
+    }
+
+    const secret = generateTotpSecret()
+    const backupCodes = generateBackupCodes()
+    const backupCodeHashes = await hashBackupCodes(backupCodes)
+
+    await db
+      .update(users)
+      .set({
+        totpSecret: encrypt(secret),
+        totpEnabled: false,
+        totpBackupCodesJson: JSON.stringify(backupCodeHashes),
+      })
+      .where(eq(users.id, userId))
+
+    const qrDataUri = await generateTotpQrDataUri(secret, c.var.session.externalId)
+
+    return c.json({
+      ok: true,
+      data: { qr_data_uri: qrDataUri, secret_b32: secret, backup_codes: backupCodes },
+      error: null,
+      meta: {},
+    })
+  },
+)
+
+// POST /api/auth/2fa/confirm
+// Verifies the TOTP code and activates 2FA (sets totp_enabled = true).
+// Rate: 5 per 60 s per authenticated user.
+router.post(
+  "/2fa/confirm",
+  requireAuth,
+  createRateLimiter(5, 60),
+  async (c) => {
+    const { userId } = c.var.session
+    const db = getDb()
+    const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
+    const rawCode = String(body.code ?? "")
+
+    const [user] = await db
+      .select({ totpSecret: users.totpSecret, totpEnabled: users.totpEnabled })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1)
+
+    if (!user?.totpSecret) {
+      return c.json({ ok: false, data: null, error: "2FA setup not initiated.", code: "TOTP_NOT_SETUP" }, 400)
+    }
+
+    const decryptedSecret = decrypt(user.totpSecret)
+    if (!verifyTotpCode(decryptedSecret, rawCode)) {
+      return c.json({ ok: false, data: null, error: "Invalid authentication code.", code: "INVALID_TOTP_CODE" }, 401)
+    }
+
+    await db.update(users).set({ totpEnabled: true }).where(eq(users.id, userId))
+
+    return c.json({ ok: true, data: null, error: null, meta: {} })
+  },
+)
+
+// POST /api/auth/2fa/disable
+// Requires a valid current TOTP code. Clears all TOTP fields and bumps session_version
+// to invalidate existing sessions (forces re-login on all devices).
+// Rate: 10 per 60 s per authenticated user (RATE_LIMIT_AUTH). Matches Flask.
+router.post(
+  "/2fa/disable",
+  requireAuth,
+  createRateLimiter(10, 60),
+  async (c) => {
+    const { userId } = c.var.session
+    const db = getDb()
+    const body = await c.req.json().catch(() => ({})) as Record<string, unknown>
+    const rawCode = String(body.code ?? "")
+
+    const [user] = await db
+      .select({
+        totpSecret: users.totpSecret,
+        totpEnabled: users.totpEnabled,
+        sessionVersion: users.sessionVersion,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1)
+
+    if (!user?.totpEnabled) {
+      return c.json({ ok: false, data: null, error: "Two-factor authentication is not enabled.", code: "TOTP_NOT_ENABLED" }, 400)
+    }
+
+    const decryptedSecret = user.totpSecret ? decrypt(user.totpSecret) : ""
+    if (!verifyTotpCode(decryptedSecret, rawCode)) {
+      return c.json({ ok: false, data: null, error: "Invalid authentication code.", code: "INVALID_TOTP_CODE" }, 401)
+    }
+
+    const oldSv = user.sessionVersion ?? 1
+    const newSv = oldSv + 1
+    await db
+      .update(users)
+      .set({ totpEnabled: false, totpSecret: null, totpBackupCodesJson: null, sessionVersion: newSv })
+      .where(eq(users.id, userId))
+
+    // Revoke all existing sessions by deny-listing the old sv value.
+    // Re-issue caller's cookie with the new sv so their current session survives.
+    await revokeSessionVersion(userId, oldSv)
+    const { externalId, authProvider } = c.var.session
+    const newToken = await createSessionToken({ userId, externalId, authProvider, sv: newSv })
+    setCookie(c, "statera_session", newToken, {
+      httpOnly: true,
+      sameSite: "Lax",
+      secure: !env.isDev,
+      maxAge: 60 * 60 * 24 * 30,
+      path: "/",
+    })
+
+    return c.json({ ok: true, data: null, error: null, meta: {} })
+  },
+)
 
 export { router as authRouter }

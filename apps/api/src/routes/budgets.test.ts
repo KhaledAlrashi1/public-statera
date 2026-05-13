@@ -49,7 +49,7 @@ vi.mock("../lib/sentry", () => ({
 const app = new Hono().route("/api/budgets", budgetsRouter)
 
 async function authHeader(userId = 1): Promise<string> {
-  const token = await createSessionToken({ userId, externalId: "test-ext", authProvider: "test" })
+  const token = await createSessionToken({ userId, externalId: "test-ext", authProvider: "test", sv: 1 })
   return `Bearer ${token}`
 }
 
