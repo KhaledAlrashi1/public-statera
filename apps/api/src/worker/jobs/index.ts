@@ -21,6 +21,10 @@ import {
   TASK_GENERATE_ACTIVATION_REPORT,
   handleGenerateActivationReport,
 } from "./activation-report-job"
+import {
+  TASK_DELETE_ACCOUNT,
+  handleDeleteAccountData,
+} from "./delete-account-job"
 
 type JobHandler = (job: Job) => Promise<unknown>
 
@@ -35,4 +39,5 @@ export const jobHandlers: Record<string, JobHandler> = {
   "send-budget-alert-email": handleSendBudgetAlertEmail,
   "send-goal-milestone-email": handleSendGoalMilestoneEmail,
   [TASK_GENERATE_ACTIVATION_REPORT]: handleGenerateActivationReport,
+  [TASK_DELETE_ACCOUNT]: handleDeleteAccountData,
 }

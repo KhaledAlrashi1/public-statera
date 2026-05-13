@@ -7,6 +7,7 @@ export type JobName =
   | "check-budget-alerts"
   | "send-budget-alert-email"
   | "send-goal-milestone-email"
+  | "delete-account-data"
 
 let _queue: Queue | null = null
 

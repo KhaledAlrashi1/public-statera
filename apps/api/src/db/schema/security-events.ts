@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm"
 import {
+  boolean,
   datetime,
   index,
   int,
@@ -19,6 +20,10 @@ export const securityEvents = mysqlTable(
     ipAddress: varchar("ip_address", { length: 64 }),
     userAgent: varchar("user_agent", { length: 255 }),
     detailsJson: text("details_json"),
+    // Marks an account.deleted audit record that must survive the user purge.
+    // Tombstone rows have user_id=NULL and is_tombstone=true; the purge DELETE
+    // targets WHERE user_id = uid AND is_tombstone = false, so they are never removed.
+    isTombstone: boolean("is_tombstone").notNull().default(false),
     createdAt: datetime("created_at", { fsp: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP(3)`),
