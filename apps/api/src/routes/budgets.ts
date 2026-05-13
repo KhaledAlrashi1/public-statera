@@ -10,13 +10,13 @@ import { getDb } from "../db/connection"
 import { budgets } from "../db/schema/budgets"
 import { categories } from "../db/schema/categories"
 import { transactions } from "../db/schema/transactions"
-import { productEvents } from "../db/schema/product-events"
 import { userProfiles } from "../db/schema/users"
 import { requireAuth } from "../middleware/auth"
 import { Sentry } from "../lib/sentry"
 import { getOrCreateCategory } from "../lib/transaction-lib"
 import { parseKd, formatKd } from "../lib/transaction-lib"
 import { cacheBustSafeToSpend } from "../lib/analytics-cache"
+import { recordEvent, recordEventOnce } from "../lib/product-events-lib"
 
 export const budgetsRouter = new Hono()
 
@@ -145,52 +145,6 @@ export async function buildBudgetPayload(userId: number, month: string, db: any)
   const profileContext = await buildProfileContext(userId, month, items, db)
 
   return { month, items, profile_context: profileContext }
-}
-
-// ── Product event helpers ─────────────────────────────────────────────────────
-
-async function recordProductEvent(
-  userId: number,
-  eventName: string,
-  properties: Record<string, unknown>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  db: any,
-): Promise<void> {
-  try {
-    await db.insert(productEvents).values({
-      userId,
-      eventName,
-      propertiesJson: JSON.stringify(properties),
-    })
-  } catch (err) {
-    Sentry.captureException(err, { tags: { handler: "recordProductEvent", eventName, userId } })
-    console.error("[recordProductEvent] failed eventName=%s userId=%d:", eventName, userId, err)
-  }
-}
-
-async function recordProductEventOnce(
-  userId: number,
-  eventName: string,
-  properties: Record<string, unknown>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  db: any,
-): Promise<void> {
-  try {
-    const [existing] = await db
-      .select({ id: productEvents.id })
-      .from(productEvents)
-      .where(and(eq(productEvents.userId, userId), eq(productEvents.eventName, eventName)))
-      .limit(1)
-    if (existing) return
-    await db.insert(productEvents).values({
-      userId,
-      eventName,
-      propertiesJson: JSON.stringify(properties),
-    })
-  } catch (err) {
-    Sentry.captureException(err, { tags: { handler: "recordProductEventOnce", eventName, userId } })
-    console.error("[recordProductEventOnce] failed eventName=%s userId=%d:", eventName, userId, err)
-  }
 }
 
 // ── GET /api/budgets/months ───────────────────────────────────────────────────
@@ -346,8 +300,8 @@ budgetsRouter.post("/", requireAuth, async (c) => {
   // ── Fire-and-forget product events (errors never block the response)
   if (validated.length > 0) {
     const props = { month, categories: validated.length }
-    await recordProductEvent(userId, "budget_saved", props, db)
-    await recordProductEventOnce(userId, "first_budget_set", props, db)
+    await recordEvent(userId, "budget_saved", props, db)
+    await recordEventOnce(userId, "first_budget_set", props, db)
   }
 
   const payload = await buildBudgetPayload(userId, month, db)

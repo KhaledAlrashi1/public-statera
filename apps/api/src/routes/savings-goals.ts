@@ -4,13 +4,13 @@ import Decimal from "decimal.js"
 import { getDb } from "../db/connection"
 import { savingsGoals } from "../db/schema/savings-goals"
 import { categories } from "../db/schema/categories"
-import { productEvents } from "../db/schema/product-events"
 import { requireAuth } from "../middleware/auth"
 import { searchRateLimit } from "../lib/rate-limit"
 import { formatKd } from "../lib/transaction-lib"
 import { Sentry } from "../lib/sentry"
 import { goalProjection } from "../lib/savings-goals-lib"
 import { cacheBustSafeToSpend } from "../lib/analytics-cache"
+import { recordEvent, recordEventOnce } from "../lib/product-events-lib"
 
 export const savingsGoalsRouter = new Hono()
 
@@ -145,47 +145,6 @@ async function resolveLinkedCategoryId(value: unknown, userId: number, db: any):
     .where(and(eq(categories.userId, userId), sql`LOWER(${categories.name}) = LOWER(${name})`))
     .limit(1)
   return (row as { id: number } | undefined)?.id ?? null
-}
-
-// ── ProductEvent helpers ──────────────────────────────────────────────────────
-// Same fire-and-forget pattern as budgets.ts.
-
-async function recordProductEvent(
-  userId: number,
-  eventName: string,
-  properties: Record<string, unknown>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  db: any,
-): Promise<void> {
-  try {
-    await db.insert(productEvents).values({ userId, eventName, propertiesJson: JSON.stringify(properties) })
-  } catch (err) {
-    Sentry.captureException(err, { tags: { handler: "recordProductEvent", eventName, userId } })
-    console.error("[recordProductEvent] failed eventName=%s userId=%d:", eventName, userId, err)
-  }
-}
-
-async function recordProductEventOnce(
-  userId: number,
-  eventName: string,
-  properties: Record<string, unknown>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  db: any,
-): Promise<boolean> {
-  try {
-    const [existing] = await db
-      .select({ id: productEvents.id })
-      .from(productEvents)
-      .where(and(eq(productEvents.userId, userId), eq(productEvents.eventName, eventName)))
-      .limit(1)
-    if (existing) return false
-    await db.insert(productEvents).values({ userId, eventName, propertiesJson: JSON.stringify(properties) })
-    return true
-  } catch (err) {
-    Sentry.captureException(err, { tags: { handler: "recordProductEventOnce", eventName, userId } })
-    console.error("[recordProductEventOnce] failed eventName=%s userId=%d:", eventName, userId, err)
-    return false
-  }
 }
 
 // ── GET /api/savings-goals ────────────────────────────────────────────────────
@@ -478,7 +437,7 @@ savingsGoalsRouter.post("/:id{[0-9]+}/deposit", requireAuth, searchRateLimit, as
     }
   })()
 
-  await recordProductEvent(
+  await recordEvent(
     userId,
     "savings_goal.deposit",
     {
@@ -499,7 +458,7 @@ savingsGoalsRouter.post("/:id{[0-9]+}/deposit", requireAuth, searchRateLimit, as
       const markerPct = new Decimal(marker)
       if (beforePct.lt(markerPct) && markerPct.lte(afterPct)) {
         const eventName = `goal_milestone_${afterUpdateGoal.id}_${marker}`.slice(0, 64)
-        await recordProductEventOnce(
+        await recordEventOnce(
           userId,
           eventName,
           {

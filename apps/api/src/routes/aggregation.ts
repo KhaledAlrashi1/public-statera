@@ -83,6 +83,7 @@ import { buildBudgetPayload } from "./budgets"
 import { Sentry } from "../lib/sentry"
 import { searchRateLimit } from "../lib/rate-limit"
 import { env } from "../lib/env"
+import { recordEventDaily } from "../lib/product-events-lib"
 
 export const aggregationRouter = new Hono()
 
@@ -492,11 +493,6 @@ aggregationRouter.get("/budget-metrics", requireAuth, async (c) => {
 // updated_at injected into miss-path payload before Redis write (analytics-cache.ts).
 // cache_warning always null — Hono's circuit breaker converts Redis degradation to
 // 503 with no partial-failure path. Module 9 verifies frontend handles both fields.
-//
-// TODO(module-6-product-events): record "app_opened" daily event on each
-// dashboard_metrics hit (all 3 cache paths). Requires porting record_event_daily
-// (once-per-day dedup logic). Only out-of-scope analytics pipelines read app_opened
-// rows; no functional behavior in the migration depends on it.
 
 aggregationRouter.get("/dashboard-metrics", requireAuth, searchRateLimit, async (c) => {
   const { userId } = c.get("session")
@@ -565,6 +561,10 @@ aggregationRouter.get("/dashboard-metrics", requireAuth, searchRateLimit, async 
     // Flask line 348 sets this after the cache write, so it is NOT stored in Redis.
     // We match by adding it at the route level (not in getDashboardMetricsWithCache).
     const data = { ...payload, cache_warning: null }
+
+    // Fire-and-forget: record once-per-UTC-day app_opened event across all 3 cache paths.
+    // recordEventDaily absorbs its own errors; must not block or fail the dashboard response.
+    void recordEventDaily(userId, "app_opened", null, db)
 
     // X-Cache-Status header matches Flask's response.headers["X-Cache-Status"].
     // Must be set before c.json() to be included in the response headers.
