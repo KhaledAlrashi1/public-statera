@@ -142,6 +142,12 @@ services:
 
 volumes:
   mysqldata:
-    # In production, bind this to the Hetzner Volume mount point.
-    # Override in a .env file: MYSQL_DATA_PATH=/mnt/mysql-data
-    # and add: driver_opts: { type: none, o: bind, device: "${MYSQL_DATA_PATH}" }
+    # Option A: named volume backed by a Hetzner Volume bind-mount.
+    # MYSQL_DATA_PATH must be set in .env.prod (e.g. /mnt/mysql-data).
+    # The mount point must be formatted (ext4) and chown'd to 999:999
+    # before first start — bootstrap.sh §3 handles this.
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${MYSQL_DATA_PATH:-/mnt/mysql-data}"

@@ -13,6 +13,9 @@ FROM ${NODE_IMAGE} AS deps
 
 # Install pnpm directly rather than via corepack to avoid corepack's key-verification
 # fetching behaviour, which is fragile in hermetic build environments.
+# Symptom: "Cannot find matching keyid" when node:22.11.0-alpine's bundled corepack
+# attempts to verify the pnpm@9.15.9 package signature against the public key set.
+# Workaround: npm install -g pnpm pins the exact version without signature verification.
 RUN npm install -g pnpm@9.15.9
 
 WORKDIR /app

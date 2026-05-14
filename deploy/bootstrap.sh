@@ -1,0 +1,457 @@
+#!/usr/bin/env bash
+# deploy/bootstrap.sh — Hetzner CX32 one-time server bootstrap
+#
+# Idempotent: safe to re-run. Each section checks state before acting.
+# Run as root on a fresh Debian 12 cloud image.
+#
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/KhaledAlrashidi1/statera/main/deploy/bootstrap.sh | sudo bash
+#   — or clone the repo and run: sudo bash deploy/bootstrap.sh
+#
+# Prerequisites:
+#   - Hetzner CX32 (Debian 12 "Bookworm") freshly provisioned
+#   - Hetzner Volume attached and device path known (set STATERA_VOLUME_DEVICE)
+#   - SSH key for deploy user added to Hetzner Cloud Console (or passed via DEPLOY_SSH_PUBKEY)
+#
+# Environment variables (all optional; defaults shown):
+#   DEPLOY_USER          — system user for deployments     (default: deploy)
+#   STATERA_VOLUME_DEVICE— block device for MySQL data     (default: prompt)
+#   DEPLOY_SSH_PUBKEY    — public key for deploy user      (default: copy from root)
+#   SKIP_FORMAT_CHECK    — set to "yes" to skip the       (default: unset)
+#                          interactive format confirmation
+
+set -euo pipefail
+
+# ── Constants ─────────────────────────────────────────────────────────────────
+
+DEPLOY_USER="${DEPLOY_USER:-deploy}"
+DEPLOY_HOME="/home/$DEPLOY_USER"
+MYSQL_MOUNT="/mnt/mysql-data"
+DOCKER_COMPOSE_VERSION="2.35.1"
+MIN_DISK_GB=20
+
+RED="\033[0;31m"
+YLW="\033[0;33m"
+GRN="\033[0;32m"
+RST="\033[0m"
+
+log()  { echo -e "${GRN}[bootstrap]${RST} $*"; }
+warn() { echo -e "${YLW}[bootstrap WARN]${RST} $*"; }
+die()  { echo -e "${RED}[bootstrap ERROR]${RST} $*" >&2; exit 1; }
+
+[[ $EUID -eq 0 ]] || die "Must run as root."
+
+# ── §1: System packages ───────────────────────────────────────────────────────
+
+log "§1 — updating system packages"
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -qq
+apt-get upgrade -y -qq
+apt-get install -y -qq \
+  ca-certificates \
+  curl \
+  gnupg \
+  lsb-release \
+  ufw \
+  fail2ban \
+  unattended-upgrades \
+  apt-listchanges \
+  chrony \
+  util-linux \
+  git \
+  jq \
+  htop
+
+# ── §2: Deploy user ───────────────────────────────────────────────────────────
+
+log "§2 — deploy user"
+
+if ! id "$DEPLOY_USER" &>/dev/null; then
+  useradd -m -s /bin/bash "$DEPLOY_USER"
+  log "  created user $DEPLOY_USER (home: $DEPLOY_HOME)"
+else
+  log "  user $DEPLOY_USER already exists — skipping creation"
+fi
+
+# SSH key for deploy user
+DEPLOY_SSH_DIR="$DEPLOY_HOME/.ssh"
+mkdir -p "$DEPLOY_SSH_DIR"
+chmod 700 "$DEPLOY_SSH_DIR"
+
+if [[ -n "${DEPLOY_SSH_PUBKEY:-}" ]]; then
+  echo "$DEPLOY_SSH_PUBKEY" >> "$DEPLOY_SSH_DIR/authorized_keys"
+  log "  added DEPLOY_SSH_PUBKEY to $DEPLOY_USER"
+elif [[ -f /root/.ssh/authorized_keys ]]; then
+  cp /root/.ssh/authorized_keys "$DEPLOY_SSH_DIR/authorized_keys"
+  log "  copied root's authorized_keys to $DEPLOY_USER"
+else
+  warn "  no SSH key found — add one manually to $DEPLOY_SSH_DIR/authorized_keys"
+fi
+
+chmod 600 "$DEPLOY_SSH_DIR/authorized_keys" 2>/dev/null || true
+chown -R "$DEPLOY_USER:$DEPLOY_USER" "$DEPLOY_SSH_DIR"
+
+# Docker group membership: usermod takes effect on next login, not this session.
+# After bootstrap completes, the deploy user must SSH in fresh (not su/sudo).
+# The deploy script (8d) is designed to be invoked over SSH as the deploy user.
+if ! groups "$DEPLOY_USER" | grep -q docker; then
+  # usermod runs below after Docker is installed (§4); placeholder marker here.
+  NEEDS_DOCKER_GROUP=1
+else
+  NEEDS_DOCKER_GROUP=0
+  log "  $DEPLOY_USER already in docker group"
+fi
+
+# ── §3: Hetzner Volume — attach and format ────────────────────────────────────
+
+log "§3 — Hetzner Volume mount ($MYSQL_MOUNT)"
+
+# Resolve the device path. Hetzner's persistent volumes appear as
+# /dev/disk/by-id/scsi-0HC_Volume_<numeric-id>
+VOLUME_DEVICE="${STATERA_VOLUME_DEVICE:-}"
+
+if [[ -z "$VOLUME_DEVICE" ]]; then
+  echo ""
+  echo "  Available block devices:"
+  lsblk -dpno NAME,SIZE,MODEL | grep -v loop | sed 's/^/    /'
+  echo ""
+  echo "  Hetzner Volumes appear as: /dev/disk/by-id/scsi-0HC_Volume_<id>"
+  read -rp "  Enter STATERA_VOLUME_DEVICE (e.g. /dev/disk/by-id/scsi-0HC_Volume_12345678): " VOLUME_DEVICE
+fi
+
+# Defense 1 (required): reject paths that don't match the Hetzner Volume pattern.
+# This prevents accidentally formatting the root disk or an ephemeral device.
+VOLUME_ID_PATTERN='^/dev/disk/by-id/scsi-0HC_Volume_[0-9]+$'
+if [[ ! "$VOLUME_DEVICE" =~ $VOLUME_ID_PATTERN ]]; then
+  die "STATERA_VOLUME_DEVICE must match pattern: $VOLUME_ID_PATTERN
+  Got: $VOLUME_DEVICE
+  Obtain the path from: ls -la /dev/disk/by-id/ | grep HC_Volume"
+fi
+
+# Defense 2: verify the device exists
+[[ -e "$VOLUME_DEVICE" ]] || die "Device not found: $VOLUME_DEVICE — is the Hetzner Volume attached?"
+
+# Defense 3: verify this is not the root disk (root is typically /dev/sda on CX32)
+ROOT_DEVICE=$(lsblk -no PKNAME "$(findmnt -no SOURCE /)" 2>/dev/null || true)
+RESOLVED_DEVICE=$(readlink -f "$VOLUME_DEVICE")
+if [[ -n "$ROOT_DEVICE" && "$RESOLVED_DEVICE" == *"$ROOT_DEVICE"* ]]; then
+  die "Device $VOLUME_DEVICE resolves to root disk ($ROOT_DEVICE). Aborting."
+fi
+
+# Check if already formatted
+EXISTING_FS=$(blkid -s TYPE -o value "$VOLUME_DEVICE" 2>/dev/null || true)
+if [[ -z "$EXISTING_FS" ]]; then
+  echo ""
+  warn "Device $VOLUME_DEVICE appears unformatted."
+  warn "ALL DATA ON THIS DEVICE WILL BE DESTROYED."
+  if [[ "${SKIP_FORMAT_CHECK:-}" != "yes" ]]; then
+    read -rp "  Type 'format' to confirm: " FORMAT_CONFIRM
+    [[ "$FORMAT_CONFIRM" == "format" ]] || die "Format not confirmed. Exiting."
+  fi
+  mkfs.ext4 -L statera-mysql "$VOLUME_DEVICE"
+  log "  formatted $VOLUME_DEVICE as ext4 (label: statera-mysql)"
+elif [[ "$EXISTING_FS" != "ext4" ]]; then
+  die "Device $VOLUME_DEVICE has unexpected filesystem: $EXISTING_FS (expected ext4)"
+else
+  log "  device already formatted as ext4 — skipping format"
+fi
+
+# Mount
+mkdir -p "$MYSQL_MOUNT"
+VOLUME_UUID=$(blkid -s UUID -o value "$VOLUME_DEVICE")
+
+if ! grep -q "$VOLUME_UUID" /etc/fstab; then
+  echo "UUID=$VOLUME_UUID  $MYSQL_MOUNT  ext4  defaults,nofail  0  2" >> /etc/fstab
+  log "  added fstab entry (UUID=$VOLUME_UUID)"
+else
+  log "  fstab entry already exists — skipping"
+fi
+
+if ! mountpoint -q "$MYSQL_MOUNT"; then
+  mount "$MYSQL_MOUNT"
+  log "  mounted $MYSQL_MOUNT"
+else
+  log "  $MYSQL_MOUNT already mounted"
+fi
+
+# MySQL official image runs as uid 999 (the 'mysql' user inside the container)
+chown 999:999 "$MYSQL_MOUNT"
+chmod 750 "$MYSQL_MOUNT"
+log "  ownership set to 999:999 (MySQL container uid)"
+
+# ── §4: Docker ────────────────────────────────────────────────────────────────
+
+log "§4 — Docker CE"
+
+if ! command -v docker &>/dev/null; then
+  install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/debian/gpg \
+    | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  chmod a+r /etc/apt/keyrings/docker.gpg
+
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
+    > /etc/apt/sources.list.d/docker.list
+
+  apt-get update -qq
+  apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin
+  log "  Docker CE installed"
+else
+  log "  Docker already installed ($(docker --version))"
+fi
+
+# Docker Compose plugin (standalone binary — not the legacy docker-compose script)
+COMPOSE_BINARY="/usr/local/lib/docker/cli-plugins/docker-compose"
+if [[ ! -f "$COMPOSE_BINARY" ]] || \
+   ! docker compose version 2>/dev/null | grep -q "$DOCKER_COMPOSE_VERSION"; then
+  mkdir -p "$(dirname "$COMPOSE_BINARY")"
+  ARCH=$(dpkg --print-architecture)
+  curl -fsSL \
+    "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-linux-${ARCH}" \
+    -o "$COMPOSE_BINARY"
+  chmod +x "$COMPOSE_BINARY"
+  log "  Docker Compose v${DOCKER_COMPOSE_VERSION} installed"
+else
+  log "  Docker Compose already at v${DOCKER_COMPOSE_VERSION}"
+fi
+
+# Enable Docker to start on boot
+systemctl enable --now docker
+
+# Add deploy user to docker group (effective on next login — see §2 note)
+if [[ "${NEEDS_DOCKER_GROUP:-0}" -eq 1 ]]; then
+  usermod -aG docker "$DEPLOY_USER"
+  log "  added $DEPLOY_USER to docker group (takes effect on next SSH login — not this session)"
+fi
+
+# ── §5: Kernel parameters ─────────────────────────────────────────────────────
+
+log "§5 — kernel parameters"
+
+SYSCTL_FILE="/etc/sysctl.d/90-statera.conf"
+if [[ ! -f "$SYSCTL_FILE" ]]; then
+  cat > "$SYSCTL_FILE" << 'EOF'
+# vm.overcommit_memory=1: allow Redis to fork without ENOMEM under high RSS.
+# Prevents "MISCONF Redis is configured to save RDB snapshots" errors.
+vm.overcommit_memory = 1
+
+# vm.swappiness=10: keep swap mostly off; CX32 has enough RAM for this workload.
+# Lower value = kernel prefers RAM over swap, better latency on a low-traffic server.
+vm.swappiness = 10
+EOF
+  sysctl -p "$SYSCTL_FILE"
+  log "  sysctl configured"
+else
+  log "  sysctl file already exists — skipping"
+fi
+
+# ── §6: App directory skeleton ────────────────────────────────────────────────
+
+log "§6 — app directory"
+
+APP_DIR="$DEPLOY_HOME/statera"
+if [[ ! -d "$APP_DIR" ]]; then
+  mkdir -p "$APP_DIR"
+  chown "$DEPLOY_USER:$DEPLOY_USER" "$APP_DIR"
+  log "  created $APP_DIR"
+else
+  log "  $APP_DIR already exists"
+fi
+
+# Clone or update the repo
+# Note: `git fetch --force` (not --force reset) retrieves remote refs and
+# overwrites local refs that have diverged. It does NOT discard local uncommitted
+# changes or delete untracked files — it is safe to run idempotently.
+if [[ ! -d "$APP_DIR/.git" ]]; then
+  sudo -u "$DEPLOY_USER" git clone \
+    https://github.com/KhaledAlrashidi1/statera.git "$APP_DIR"
+  log "  repo cloned to $APP_DIR"
+else
+  sudo -u "$DEPLOY_USER" git -C "$APP_DIR" fetch --force origin
+  log "  repo fetched"
+fi
+
+# ── §7: fail2ban ──────────────────────────────────────────────────────────────
+
+log "§7 — fail2ban"
+
+FAIL2BAN_JAIL="/etc/fail2ban/jail.local"
+if [[ ! -f "$FAIL2BAN_JAIL" ]]; then
+  cat > "$FAIL2BAN_JAIL" << 'EOF'
+[DEFAULT]
+# Ban for 24 hours (86400s) on first offence; aggressive enough to deter
+# credential-stuffing bots without impacting legitimate users who fat-finger a password.
+bantime  = 86400
+findtime = 600
+maxretry = 5
+
+[sshd]
+enabled = true
+port    = ssh
+filter  = sshd
+logpath = %(sshd_log)s
+backend = %(sshd_backend)s
+EOF
+  systemctl enable --now fail2ban
+  log "  fail2ban configured (bantime=24h)"
+else
+  log "  fail2ban jail.local already exists — skipping"
+fi
+
+# ── §8: UFW firewall ──────────────────────────────────────────────────────────
+
+log "§8 — UFW firewall"
+
+# UFW default: deny all inbound, allow all outbound
+ufw --force reset
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow ssh      # port 22 — SSH
+ufw allow http     # port 80 — HTTP (Caddy redirect to HTTPS)
+ufw allow https    # port 443 — HTTPS (Caddy)
+# Port 3000 (API) is NOT opened — Caddy proxies on 127.0.0.1 only
+ufw --force enable
+log "  UFW enabled (ssh, http, https)"
+
+# ── §9: GHCR login ────────────────────────────────────────────────────────────
+
+log "§9 — GHCR registry login"
+
+# The deploy user needs pull access to ghcr.io/khaledalrashidi1/statera-api.
+# Credentials are stored via docker login (in $DEPLOY_HOME/.docker/config.json).
+# This step is interactive — CI tokens are configured in Module 8c (sops secrets).
+if [[ -f "$DEPLOY_HOME/.docker/config.json" ]] && \
+   grep -q "ghcr.io" "$DEPLOY_HOME/.docker/config.json" 2>/dev/null; then
+  log "  GHCR credentials already present — skipping"
+else
+  warn "  GHCR login not configured."
+  warn "  After bootstrap, run as $DEPLOY_USER:"
+  warn "    echo \$GITHUB_TOKEN | docker login ghcr.io -u KhaledAlrashidi1 --password-stdin"
+  warn "  Module 8c (sops) will automate this with a stored PAT."
+fi
+
+# ── §10: Unattended upgrades ──────────────────────────────────────────────────
+
+log "§10 — unattended-upgrades"
+
+AUTO_UPGRADES="/etc/apt/apt.conf.d/20auto-upgrades"
+UNATTENDED_CFG="/etc/apt/apt.conf.d/50unattended-upgrades"
+
+# Write the activation file explicitly (the package install alone does not enable
+# automatic daily runs — the APT::Periodic settings are what schedule them).
+cat > "$AUTO_UPGRADES" << 'EOF'
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "7";
+EOF
+log "  20auto-upgrades written (daily updates + weekly autoclean)"
+
+# Confirm security-only upgrades and enable email on error (if mail is configured)
+if [[ ! -f "$UNATTENDED_CFG" ]]; then
+  warn "  /etc/apt/apt.conf.d/50unattended-upgrades not found — using package default"
+else
+  # The package default enables Debian security updates; leave it intact.
+  log "  50unattended-upgrades exists — leaving package default in place"
+fi
+
+systemctl enable --now unattended-upgrades
+
+# ── §11: Time synchronisation ─────────────────────────────────────────────────
+
+log "§11 — time synchronisation"
+
+# chrony is more accurate than systemd-timesyncd on VPS kernels with interrupt coalescing.
+if systemctl is-active --quiet chrony; then
+  log "  chrony already running"
+else
+  systemctl enable --now chrony
+  log "  chrony enabled and started"
+fi
+
+echo ""
+warn "  Time-sync verification: chrony may take up to 5 minutes to reach"
+warn "  sync after a cold start. After bootstrap completes, verify with:"
+warn "    chronyc tracking | grep 'System time'"
+warn "  Expected: offset < 10ms. Larger offsets are normal for ~60s after boot."
+
+# ── §12: SSH hardening ────────────────────────────────────────────────────────
+
+log "§12 — SSH hardening"
+
+SSHD_OVERRIDE="/etc/ssh/sshd_config.d/90-statera.conf"
+if [[ ! -f "$SSHD_OVERRIDE" ]]; then
+  cat > "$SSHD_OVERRIDE" << 'EOF'
+# Disable password authentication — key-only access.
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+
+# Disable root login entirely (deploy user handles all operations).
+# Root is still accessible via Hetzner Rescue System if locked out.
+PermitRootLogin no
+
+# Limit auth attempts per connection to reduce brute-force window.
+MaxAuthTries 3
+
+# Idle session timeout: 30 min of no traffic → disconnect.
+ClientAliveInterval 300
+ClientAliveCountMax 6
+EOF
+  log "  SSH config written"
+else
+  log "  SSH override already exists — skipping"
+fi
+
+sshd -t || die "sshd_config syntax error — aborting before reload"
+systemctl reload sshd
+log "  sshd reloaded"
+
+# ── §13: Final checks and root lockout ───────────────────────────────────────
+
+log "§13 — final checks"
+
+# Verify deploy user can SSH to localhost before disabling root access.
+# This catches missing authorized_keys, wrong permissions, or sshd misconfiguration
+# that would otherwise lock you out of the server.
+echo ""
+log "  Verifying $DEPLOY_USER can SSH to localhost..."
+if sudo -u "$DEPLOY_USER" ssh \
+     -o BatchMode=yes \
+     -o StrictHostKeyChecking=no \
+     -o ConnectTimeout=10 \
+     "$DEPLOY_USER@localhost" 'echo ok' 2>/dev/null | grep -q ok; then
+  log "  SSH verification passed — $DEPLOY_USER can log in"
+else
+  echo ""
+  die "SSH verification FAILED for $DEPLOY_USER.
+  Root login is still enabled. Fix the problem before re-running bootstrap.
+  Common causes:
+    - No key in $DEPLOY_SSH_DIR/authorized_keys
+    - Wrong permissions on $DEPLOY_SSH_DIR (must be 700) or authorized_keys (must be 600)
+    - sshd AllowUsers/AllowGroups exclusion
+  To recover if already locked out:
+    - Use the Hetzner Cloud Console 'Rescue System' to boot into a recovery image
+    - Mount the root disk and fix $DEPLOY_SSH_DIR/authorized_keys
+    - Hetzner docs: https://docs.hetzner.com/cloud/servers/getting-started/rescue-system/"
+fi
+
+# §2 disk space sanity check
+ROOT_FREE_GB=$(df -BG / | awk 'NR==2 {gsub("G",""); print $4}')
+if (( ROOT_FREE_GB < MIN_DISK_GB )); then
+  warn "Root disk has only ${ROOT_FREE_GB}GB free (threshold: ${MIN_DISK_GB}GB). Consider resizing."
+fi
+
+echo ""
+log "══════════════════════════════════════════════════════════════════"
+log "  Bootstrap complete."
+log ""
+log "  Next steps:"
+log "  1. SSH in as $DEPLOY_USER (root login is now disabled):"
+log "       ssh $DEPLOY_USER@<server-ip>"
+log "  2. Verify GHCR login (see §9 output above if needed)"
+log "  3. Copy .env.prod to $APP_DIR/.env.prod  (see deploy/.env.prod.example)"
+log "  4. Run: cd $APP_DIR && docker compose -f docker-compose.prod.yml pull"
+log "  5. Proceed to Module 8c (sops secrets) then 8d (CI/CD deploy script)"
+log ""
+log "  Recovery procedure (if locked out):"
+log "  → Hetzner Cloud Console → Server → Rescue → Mount disk → fix authorized_keys"
+log "══════════════════════════════════════════════════════════════════"
