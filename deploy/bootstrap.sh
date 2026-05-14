@@ -431,10 +431,24 @@ MaxAuthTries 3
 # Idle session timeout: 30 min of no traffic → disconnect.
 ClientAliveInterval 300
 ClientAliveCountMax 6
+
+# Allow CI to pass DEPLOY_SHA via SSH SendEnv so deploy.sh knows which SHA to deploy.
+# The CI key's authorized_keys entry has command= restriction; AcceptEnv here lets
+# the env var through even when the forced command (deploy.sh) overrides the SSH client's
+# requested command. See deploy/DEPLOY.md for the full authorized_keys format.
+AcceptEnv DEPLOY_SHA
 EOF
-  log "  SSH config written"
+  log "  SSH config written (includes AcceptEnv DEPLOY_SHA for CI pipeline)"
 else
-  log "  SSH override already exists — skipping"
+  # Idempotently add AcceptEnv DEPLOY_SHA to an existing override file if missing.
+  # This handles servers bootstrapped before Module 8d.
+  if ! grep -q "AcceptEnv DEPLOY_SHA" "$SSHD_OVERRIDE"; then
+    echo "" >> "$SSHD_OVERRIDE"
+    echo "AcceptEnv DEPLOY_SHA" >> "$SSHD_OVERRIDE"
+    log "  added AcceptEnv DEPLOY_SHA to existing SSH override"
+  else
+    log "  SSH override already exists and has AcceptEnv — skipping"
+  fi
 fi
 
 sshd -t || die "sshd_config syntax error — aborting before reload"

@@ -1,0 +1,128 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Git SHA to deploy — leave blank to deploy HEAD. Use to trigger an explicit rollback to a previous commit.'
+        required: false
+
+# Serialize deploys: queue the second deploy rather than cancel it.
+# cancel-in-progress: false prevents a mid-deploy SSH session from being torn down.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+# DEPLOY_SHA is the commit being built and deployed.
+# On push: github.sha. On workflow_dispatch: caller-supplied sha (or github.sha if blank).
+env:
+  DEPLOY_SHA: ${{ inputs.sha || github.sha }}
+
+jobs:
+  # ── test ────────────────────────────────────────────────────────────────────
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        with:
+          ref: ${{ env.DEPLOY_SHA }}
+
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa  # v4
+        with:
+          version: '9.15.9'
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      # Type check — catches type errors before vitest runs
+      - run: pnpm --filter api exec tsc --noEmit
+
+      # Run vitest without watch mode
+      - run: pnpm --filter api test run
+
+  # ── build-push ──────────────────────────────────────────────────────────────
+  build-push:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write  # required for GHCR push via GITHUB_TOKEN
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        with:
+          ref: ${{ env.DEPLOY_SHA }}
+
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f  # v3
+
+      # GITHUB_TOKEN is sufficient for GHCR push; no PAT needed.
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9  # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8  # v6
+        with:
+          context: .
+          file: docker/Dockerfile.api
+          push: true
+          # Two tags: exact SHA (deployed by deploy.sh) and latest (human reference)
+          tags: |
+            ghcr.io/khaledalrashidi1/statera-api:${{ env.DEPLOY_SHA }}
+            ghcr.io/khaledalrashidi1/statera-api:latest
+          build-args: GIT_SHA=${{ env.DEPLOY_SHA }}
+          # OCI revision label: deploy.sh reads this to identify the running SHA for rollback
+          labels: |
+            org.opencontainers.image.revision=${{ env.DEPLOY_SHA }}
+          # BuildKit GHA cache: cache-hit runs skip all layers except source + chown (~20s)
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ── deploy ──────────────────────────────────────────────────────────────────
+  deploy:
+    needs: build-push
+    runs-on: ubuntu-latest
+    # environment: enables GitHub deployment audit log and protection rules
+    environment: production
+
+    steps:
+      # Set up the CI deploy key. The corresponding public key must be in
+      # ~deploy/.ssh/authorized_keys on the server with command= and no-* restrictions.
+      # See deploy/DEPLOY.md for the exact authorized_keys format.
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          # printf avoids echo interpreting escape sequences in key material
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/statera_deploy
+          chmod 600 ~/.ssh/statera_deploy
+          # TOFU for the host key. To harden: store server host key as a secret and
+          # use `echo "$SERVER_HOST_KEY" >> ~/.ssh/known_hosts` instead.
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+
+      # SSH to server with SendEnv so DEPLOY_SHA is available in deploy.sh via AcceptEnv.
+      # The server's authorized_keys has command=/home/deploy/statera/deploy/deploy.sh,
+      # so the SSH connection always runs deploy.sh regardless of any script we send —
+      # the `echo` here is ignored; it exists only to give appleboy-style runners a
+      # non-empty command. The env var is what matters.
+      - name: Deploy
+        run: |
+          ssh \
+            -i ~/.ssh/statera_deploy \
+            -o SendEnv=DEPLOY_SHA \
+            -o StrictHostKeyChecking=yes \
+            -o BatchMode=yes \
+            "$DEPLOY_USER@$DEPLOY_HOST"
+        env:
+          DEPLOY_SHA: ${{ env.DEPLOY_SHA }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
