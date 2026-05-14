@@ -1,0 +1,19 @@
+# .sops.yaml — sops encryption configuration
+#
+# Two recipients are required so that both the operator (locally) and the server
+# (at deploy time) can decrypt the secrets file independently.
+#
+# Setup (one-time — see deploy/8c-post-bootstrap.md for the full sequence):
+#   1. Generate operator keypair: age-keygen -o ~/.config/sops/age/operator.key
+#   2. Generate server keypair:   age-keygen -o /tmp/server.key
+#   3. Replace OPERATOR_PUBLIC_KEY and SERVER_PUBLIC_KEY below with the public
+#      keys printed by age-keygen (the "Public key: age1..." line).
+#   4. scp /tmp/server.key to the server; rm /tmp/server.key locally.
+#   5. Commit the updated .sops.yaml.
+#   6. Create the encrypted secrets file: see deploy/8c-post-bootstrap.md §5.
+
+creation_rules:
+  - path_regex: secrets/.*\.sops\.yaml$
+    age: >-
+      age1OPERATOR_PUBLIC_KEY_REPLACE_ME,
+      age1SERVER_PUBLIC_KEY_REPLACE_ME

@@ -47,6 +47,8 @@ log "§1 — updating system packages"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get upgrade -y -qq
+# chrony: preferred over Debian 12's default systemd-timesyncd on VPS kernels
+# because interrupt coalescing causes timesyncd to drift more than chrony handles.
 apt-get install -y -qq \
   ca-certificates \
   curl \
@@ -61,6 +63,40 @@ apt-get install -y -qq \
   git \
   jq \
   htop
+
+# age + sops: installed from GitHub releases to pin exact versions.
+# Not using apt — Debian 12's age package may lag behind; sops is not in Debian repos.
+# Verify latest releases: https://github.com/FiloSottile/age/releases
+#                         https://github.com/getsops/sops/releases
+AGE_VERSION="1.2.0"
+SOPS_VERSION="3.9.1"
+ARCH=$(uname -m)
+case "$ARCH" in
+  x86_64)  BIN_ARCH="amd64" ;;
+  aarch64) BIN_ARCH="arm64" ;;
+  *) die "Unsupported architecture: $ARCH" ;;
+esac
+
+if ! command -v age &>/dev/null || ! age --version 2>/dev/null | grep -qF "$AGE_VERSION"; then
+  curl -fsSL \
+    "https://github.com/FiloSottile/age/releases/download/v${AGE_VERSION}/age-v${AGE_VERSION}-linux-${BIN_ARCH}.tar.gz" \
+    | tar -xz -C /tmp
+  install /tmp/age/age /tmp/age/age-keygen /usr/local/bin/
+  rm -rf /tmp/age
+  log "  age v${AGE_VERSION} installed"
+else
+  log "  age already at v${AGE_VERSION}"
+fi
+
+if ! command -v sops &>/dev/null || ! sops --version 2>/dev/null | grep -qF "$SOPS_VERSION"; then
+  curl -fsSL \
+    "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.linux.${BIN_ARCH}" \
+    -o /usr/local/bin/sops
+  chmod +x /usr/local/bin/sops
+  log "  sops v${SOPS_VERSION} installed"
+else
+  log "  sops already at v${SOPS_VERSION}"
+fi
 
 # ── §2: Deploy user ───────────────────────────────────────────────────────────
 
@@ -440,6 +476,30 @@ if (( ROOT_FREE_GB < MIN_DISK_GB )); then
   warn "Root disk has only ${ROOT_FREE_GB}GB free (threshold: ${MIN_DISK_GB}GB). Consider resizing."
 fi
 
+# ── §14: age/sops key directory ──────────────────────────────────────────────
+
+log "§14 — age/sops key directory"
+
+SOPS_KEY_DIR="$DEPLOY_HOME/.config/sops/age"
+if [[ ! -d "$SOPS_KEY_DIR" ]]; then
+  mkdir -p "$SOPS_KEY_DIR"
+  # Ensure the whole .config tree is deploy-user-owned, not root-owned.
+  chown -R "$DEPLOY_USER:$DEPLOY_USER" "$DEPLOY_HOME/.config"
+  chmod 700 "$SOPS_KEY_DIR"
+  log "  created $SOPS_KEY_DIR (mode 700, $DEPLOY_USER-owned)"
+else
+  log "  $SOPS_KEY_DIR already exists — skipping"
+fi
+
+# The age private key (keys.txt) is NOT generated or placed here by bootstrap.
+# It is scp'd by the operator as a post-bootstrap step before the first deploy.
+# See deploy/8c-post-bootstrap.md for the complete setup sequence.
+echo ""
+warn "  Post-bootstrap (as operator, from your local machine):"
+warn "    scp /path/to/server-age-key.txt $DEPLOY_USER@<server-ip>:$SOPS_KEY_DIR/keys.txt"
+warn "    ssh $DEPLOY_USER@<server-ip> 'chmod 600 $SOPS_KEY_DIR/keys.txt'"
+warn "  Full sequence: deploy/8c-post-bootstrap.md"
+
 echo ""
 log "══════════════════════════════════════════════════════════════════"
 log "  Bootstrap complete."
@@ -447,10 +507,10 @@ log ""
 log "  Next steps:"
 log "  1. SSH in as $DEPLOY_USER (root login is now disabled):"
 log "       ssh $DEPLOY_USER@<server-ip>"
-log "  2. Verify GHCR login (see §9 output above if needed)"
-log "  3. Copy .env.prod to $APP_DIR/.env.prod  (see deploy/.env.prod.example)"
-log "  4. Run: cd $APP_DIR && docker compose -f docker-compose.prod.yml pull"
-log "  5. Proceed to Module 8c (sops secrets) then 8d (CI/CD deploy script)"
+log "  2. Follow deploy/8c-post-bootstrap.md to install the age private key"
+log "     and create the encrypted secrets file."
+log "  3. Verify GHCR login (see §9 output above if needed)"
+log "  4. Proceed to Module 8d (CI/CD deploy script)"
 log ""
 log "  Recovery procedure (if locked out):"
 log "  → Hetzner Cloud Console → Server → Rescue → Mount disk → fix authorized_keys"

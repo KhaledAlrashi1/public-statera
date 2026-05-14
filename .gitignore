@@ -1,6 +1,10 @@
-# Local environment and secrets
+# Local environment and secrets — never commit plaintext
 .env
 .env.prod
+.env.prod.filled       # temporary file used when creating the encrypted secrets file
+secrets/*.plaintext    # any accidentally-decrypted secrets files
+secrets/*.dec          # sops -d > file.dec output convention
+decrypted/             # directory sometimes used to hold decrypted output
 
 # Python (Phase 1 remnants — fully removed in Phase 2)
 .venv/

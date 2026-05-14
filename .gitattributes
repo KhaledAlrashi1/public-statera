@@ -1,0 +1,6 @@
+# .gitattributes
+
+# sops-encrypted files: use sopsdiffer so `git diff` shows a structured diff
+# of metadata changes rather than a raw ciphertext blob diff.
+# Requires: git config diff.sopsdiffer.textconv "sops -d --output-type yaml"
+secrets/*.sops.yaml diff=sopsdiffer
