@@ -27,7 +27,6 @@ set -euo pipefail
 DEPLOY_USER="${DEPLOY_USER:-deploy}"
 DEPLOY_HOME="/home/$DEPLOY_USER"
 MYSQL_MOUNT="/mnt/mysql-data"
-DOCKER_COMPOSE_VERSION="2.35.1"
 MIN_DISK_GB=20
 
 RED="\033[0;31m"
@@ -236,19 +235,15 @@ else
   log "  Docker already installed ($(docker --version))"
 fi
 
-# Docker Compose plugin (standalone binary — not the legacy docker-compose script)
-COMPOSE_BINARY="/usr/local/lib/docker/cli-plugins/docker-compose"
-if [[ ! -f "$COMPOSE_BINARY" ]] || \
-   ! docker compose version 2>/dev/null | grep -q "$DOCKER_COMPOSE_VERSION"; then
-  mkdir -p "$(dirname "$COMPOSE_BINARY")"
-  ARCH=$(dpkg --print-architecture)
-  curl -fsSL \
-    "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-linux-${ARCH}" \
-    -o "$COMPOSE_BINARY"
-  chmod +x "$COMPOSE_BINARY"
-  log "  Docker Compose v${DOCKER_COMPOSE_VERSION} installed"
+# Docker Compose plugin — installed via Docker's apt repo (added in §4).
+# Earlier versions of this script downloaded a pinned binary from GitHub
+# Releases, but Docker Compose v5+ broke the URL/version assumptions and
+# the apt-managed install tracks the Docker engine version automatically.
+if ! docker compose version &>/dev/null; then
+  apt-get install -y docker-compose-plugin
+  log "  Docker Compose plugin installed: $(docker compose version)"
 else
-  log "  Docker Compose already at v${DOCKER_COMPOSE_VERSION}"
+  log "  Docker Compose already installed: $(docker compose version)"
 fi
 
 # Enable Docker to start on boot
@@ -294,18 +289,9 @@ else
   log "  $APP_DIR already exists"
 fi
 
-# Clone or update the repo
-# Note: `git fetch --force` (not --force reset) retrieves remote refs and
-# overwrites local refs that have diverged. It does NOT discard local uncommitted
-# changes or delete untracked files — it is safe to run idempotently.
-if [[ ! -d "$APP_DIR/.git" ]]; then
-  sudo -u "$DEPLOY_USER" git clone \
-    https://github.com/KhaledAlrashi1/statera.git "$APP_DIR"
-  log "  repo cloned to $APP_DIR"
-else
-  sudo -u "$DEPLOY_USER" git -C "$APP_DIR" fetch --force origin
-  log "  repo fetched"
-fi
+# Repo checkout is deferred to the 8d deploy pipeline, not bootstrap.
+# This keeps bootstrap self-contained (no GitHub credentials required)
+# and matches the 8b scope agreed in the proposal.
 
 # ── §7: fail2ban ──────────────────────────────────────────────────────────────
 
