@@ -5,7 +5,7 @@
 # Run as root on a fresh Debian 12 cloud image.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/KhaledAlrashidi1/statera/main/deploy/bootstrap.sh | sudo bash
+#   curl -fsSL https://raw.githubusercontent.com/KhaledAlrashi1/statera/main/deploy/bootstrap.sh | sudo bash
 #   — or clone the repo and run: sudo bash deploy/bootstrap.sh
 #
 # Prerequisites:
@@ -300,7 +300,7 @@ fi
 # changes or delete untracked files — it is safe to run idempotently.
 if [[ ! -d "$APP_DIR/.git" ]]; then
   sudo -u "$DEPLOY_USER" git clone \
-    https://github.com/KhaledAlrashidi1/statera.git "$APP_DIR"
+    https://github.com/KhaledAlrashi1/statera.git "$APP_DIR"
   log "  repo cloned to $APP_DIR"
 else
   sudo -u "$DEPLOY_USER" git -C "$APP_DIR" fetch --force origin
@@ -353,7 +353,7 @@ log "  UFW enabled (ssh, http, https)"
 
 log "§9 — GHCR registry login"
 
-# The deploy user needs pull access to ghcr.io/khaledalrashidi1/statera-api.
+# The deploy user needs pull access to ghcr.io/khaledalrashi1/statera-api.
 # Credentials are stored via docker login (in $DEPLOY_HOME/.docker/config.json).
 # This step is interactive — CI tokens are configured in Module 8c (sops secrets).
 if [[ -f "$DEPLOY_HOME/.docker/config.json" ]] && \
@@ -362,7 +362,7 @@ if [[ -f "$DEPLOY_HOME/.docker/config.json" ]] && \
 else
   warn "  GHCR login not configured."
   warn "  After bootstrap, run as $DEPLOY_USER:"
-  warn "    echo \$GITHUB_TOKEN | docker login ghcr.io -u KhaledAlrashidi1 --password-stdin"
+  warn "    echo \$GITHUB_TOKEN | docker login ghcr.io -u KhaledAlrashi1 --password-stdin"
   warn "  Module 8c (sops) will automate this with a stored PAT."
 fi
 

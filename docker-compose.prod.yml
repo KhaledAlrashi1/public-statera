@@ -50,7 +50,7 @@ services:
       dockerfile: docker/Dockerfile.api
       args:
         GIT_SHA: ${GIT_SHA:-dev}
-    image: ${REGISTRY:-ghcr.io/khaledalrashidi1/statera-api}:${GIT_SHA:-dev}
+    image: ${REGISTRY:-ghcr.io/khaledalrashi1/statera-api}:${GIT_SHA:-dev}
     restart: unless-stopped
     environment: &api_env
       NODE_ENV: production
@@ -97,7 +97,7 @@ services:
       dockerfile: docker/Dockerfile.api
       args:
         GIT_SHA: ${GIT_SHA:-dev}
-    image: ${REGISTRY:-ghcr.io/khaledalrashidi1/statera-api}:${GIT_SHA:-dev}
+    image: ${REGISTRY:-ghcr.io/khaledalrashi1/statera-api}:${GIT_SHA:-dev}
     restart: unless-stopped
     command: ["node_modules/.bin/tsx", "src/worker/index.ts"]
     environment: *api_env
@@ -113,7 +113,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.api
-    image: ${REGISTRY:-ghcr.io/khaledalrashidi1/statera-api}:${GIT_SHA:-dev}
+    image: ${REGISTRY:-ghcr.io/khaledalrashi1/statera-api}:${GIT_SHA:-dev}
     command: ["node_modules/.bin/drizzle-kit", "migrate"]
     environment:
       DATABASE_URL: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}

@@ -75,8 +75,8 @@ jobs:
           push: true
           # Two tags: exact SHA (deployed by deploy.sh) and latest (human reference)
           tags: |
-            ghcr.io/khaledalrashidi1/statera-api:${{ env.DEPLOY_SHA }}
-            ghcr.io/khaledalrashidi1/statera-api:latest
+            ghcr.io/khaledalrashi1/statera-api:${{ env.DEPLOY_SHA }}
+            ghcr.io/khaledalrashi1/statera-api:latest
           build-args: GIT_SHA=${{ env.DEPLOY_SHA }}
           # OCI revision label: deploy.sh reads this to identify the running SHA for rollback
           labels: |

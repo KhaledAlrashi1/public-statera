@@ -21,7 +21,7 @@ GIT_SHA="${GIT_SHA:?GIT_SHA (or DEPLOY_SHA) is required}"
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 COMPOSE_FILE="$REPO_DIR/docker-compose.prod.yml"
 SECRETS_FILE="$REPO_DIR/secrets/.env.prod.sops.yaml"
-REGISTRY="${REGISTRY:-ghcr.io/khaledalrashidi1}"
+REGISTRY="${REGISTRY:-ghcr.io/khaledalrashi1}"
 IMAGE="${REGISTRY}/statera-api:${GIT_SHA}"
 
 # Set SOPS_AGE_KEY_FILE explicitly so it is not sensitive to $HOME on CI runners.
