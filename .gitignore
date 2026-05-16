@@ -4,6 +4,7 @@
 .env.prod.filled       # temporary file used when creating the encrypted secrets file
 secrets/*.plaintext    # any accidentally-decrypted secrets files
 secrets/*.dec          # sops -d > file.dec output convention
+secrets/smoke.sops.yaml # smoke-test artifact from 8c-post-bootstrap.md §4; intentional — do not remove
 decrypted/             # directory sometimes used to hold decrypted output
 
 # Python (Phase 1 remnants — fully removed in Phase 2)

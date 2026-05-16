@@ -12,13 +12,26 @@ On your local machine, generate two age keypairs: one for local editing, one for
 
 ```bash
 # Operator key — used locally to edit the encrypted secrets file.
-# Store at the standard sops path so sops finds it automatically.
+# Stored at the default sops path (~/.config/sops/age/keys.txt) so sops finds it
+# without any SOPS_AGE_KEY_FILE env var.
+#
+# Guard: refuse to overwrite an existing key. Overwriting destroys access to every
+# secrets file encrypted to that key — there is no recovery without a backup.
+if [ -f ~/.config/sops/age/keys.txt ]; then
+  echo "ERROR: ~/.config/sops/age/keys.txt already exists. Refusing to overwrite."
+  echo "If you intend to rotate, follow deploy/SECRETS.md → age key rotation instead."
+  exit 1
+fi
 mkdir -p ~/.config/sops/age
-age-keygen -o ~/.config/sops/age/operator.key
+chmod 700 ~/.config/sops/age
+age-keygen -o ~/.config/sops/age/keys.txt
+chmod 600 ~/.config/sops/age/keys.txt
 # Output: Public key: age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # Server key — used by the server to decrypt at deploy time.
 # Generate locally; scp to server; delete locally afterward.
+# Clean up any leftover from a previous aborted run before generating.
+rm -f /tmp/server.key
 age-keygen -o /tmp/server.key
 # Output: Public key: age1yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 ```
@@ -27,8 +40,8 @@ Note both public keys — you need them in §2.
 
 **Back up your operator private key.** If you lose it, you lose the ability to edit secrets.
 Recommended: store a copy in 1Password, an encrypted USB drive, or print the key material as
-a paper backup (`age-keygen -y /tmp/operator.key` prints only the public key — keep the private
-key in at least two physically separate locations).
+a paper backup (`age-keygen -y ~/.config/sops/age/keys.txt` prints only the public key — keep
+the private key in at least two physically separate locations).
 
 ---
 
@@ -68,29 +81,37 @@ machine. The only copy lives on the server.
 
 ## §4 — Verify the server can decrypt
 
-Before committing `.sops.yaml` with real keys, verify the chain works end-to-end.
+**Prerequisite:** §2 must be complete — `.sops.yaml` on disk must contain real recipient keys,
+not the placeholder `age1OPERATOR_PUBLIC_KEY_REPLACE_ME` values. If `.sops.yaml` still has
+placeholders, sops will fail with "no recipients found" when encrypting below.
+
 Encrypt a small test file with the real keys and confirm the server can decrypt it.
 
+`secrets/smoke.sops.yaml` is listed in `.gitignore` — the line is intentional and must not be
+removed. Do not `git add` it.
+
 ```bash
-# On local machine: create a small test file and encrypt it
-echo 'SMOKE_TEST=ok' | sops -e --input-type dotenv --output-type yaml /dev/stdin \
-  > /tmp/smoke.sops.yaml
+# On local machine: write plaintext to a path matching the creation rule regex
+# (secrets/.*\.sops\.yaml$), then encrypt in-place. sops uses the file path to
+# select recipients from .sops.yaml; /dev/stdin or non-matching paths will not work.
+echo 'SMOKE_TEST=ok' > secrets/smoke.sops.yaml
+sops --encrypt --input-type dotenv --in-place secrets/smoke.sops.yaml
 
-# scp the test file to the server
-scp /tmp/smoke.sops.yaml deploy@<server-ip>:/tmp/smoke.sops.yaml
+# scp the encrypted file to the server
+scp secrets/smoke.sops.yaml deploy@<server-ip>:/tmp/smoke.sops.yaml
 
-# On server: verify decryption
+# On server: verify decryption — expected output is exactly: SMOKE_TEST=ok
 ssh deploy@<server-ip> 'sops -d --output-type dotenv /tmp/smoke.sops.yaml'
-# Expected output: SMOKE_TEST=ok
 
-# Clean up
+# Clean up both sides
 ssh deploy@<server-ip> 'rm /tmp/smoke.sops.yaml'
-rm /tmp/smoke.sops.yaml
+rm secrets/smoke.sops.yaml
 ```
 
 If decryption succeeds, the age keypair is correctly installed. Proceed to §5.
-If it fails, check: `~/.config/sops/age/keys.txt` exists, mode 600, contains a valid age private
-key (starts with `AGE-SECRET-KEY-`), and the public key in `.sops.yaml` matches it.
+If it fails, check: `~/.config/sops/age/keys.txt` exists on the server, mode 600, contains a
+valid age private key (starts with `AGE-SECRET-KEY-`), and the public key in `.sops.yaml`
+matches it.
 
 ---
 
@@ -118,6 +139,10 @@ only be decrypted by holders of the operator or server private key.
 ---
 
 ## §6 — Verify the full deploy chain on the server
+
+**Note:** this is a manual pre-8d validation step. In production, 8d's deploy.sh handles the
+git pull and the full decrypt-and-compose invocation automatically. Run this once to confirm
+the keypair and secrets file are correctly wired before relying on 8d to do it.
 
 After pushing the committed encrypted file, pull on the server and verify the complete
 decrypt-and-compose chain:
@@ -176,20 +201,6 @@ A shell alias makes this ergonomic:
 # Add to ~/.bashrc or ~/.zshrc:
 alias edit-secrets='sops --input-type dotenv secrets/.env.prod.sops.yaml'
 ```
-
----
-
-## SOPS_AGE_KEY_FILE
-
-sops looks for age keys at `~/.config/sops/age/keys.txt` by default. In non-standard
-environments (CI runners with different home directories, or when managing multiple age keys),
-override the path:
-
-```bash
-export SOPS_AGE_KEY_FILE=/explicit/path/to/keys.txt
-```
-
-The 8d deploy script will set this explicitly so it is not sensitive to the CI runner's `$HOME`.
 
 ---
 
