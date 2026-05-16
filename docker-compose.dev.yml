@@ -1,0 +1,39 @@
+# Development overlay for docker-compose.yml.
+# Adds source-mounted hot-reload for api and worker, and a migrate service.
+#
+# Usage (explicit):
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Usage (automatic — add to .env so plain `docker compose up` picks up both):
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml
+#
+# First run — apply migrations before starting app services:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm migrate
+
+services:
+  api:
+    # Override prod CMD with tsx watch for hot-reload.
+    command: ["node_modules/.bin/tsx", "watch", "src/index.ts"]
+    volumes:
+      # Overlay local source onto the image's baked-in copy.
+      # node_modules stay from the image — no host install required.
+      - ./apps/api/src:/app/apps/api/src
+
+  worker:
+    command: ["node_modules/.bin/tsx", "watch", "src/worker/index.ts"]
+    volumes:
+      - ./apps/api/src:/app/apps/api/src
+
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    command: ["node_modules/.bin/drizzle-kit", "migrate"]
+    environment:
+      DATABASE_URL: mysql://${MYSQL_USER:-statera}:${MYSQL_PASSWORD:-statera}@mysql:3306/${MYSQL_DATABASE:-statera}
+      # Dev default; if dev DB contains real encrypted fields, set ENCRYPTION_KEY in .env
+      # to the production-shaped key.
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-0000000000000000000000000000000000000000000000000000000000000000}
+    depends_on:
+      mysql:
+        condition: service_healthy

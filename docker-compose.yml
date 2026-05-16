@@ -32,7 +32,6 @@ services:
       start_period: 30s
 
   api:
-    profiles: ["docker-app"]
     build:
       context: .
       dockerfile: docker/Dockerfile.api
@@ -77,7 +76,6 @@ services:
       start_period: 30s
 
   worker:
-    profiles: ["docker-app"]
     build:
       context: .
       dockerfile: docker/Dockerfile.api

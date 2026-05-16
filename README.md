@@ -75,6 +75,50 @@ make dev        # All four in one terminal
 | MySQL | `3306` |
 | Redis | `6379` |
 
+## Docker-based end-to-end stack
+
+Use this when you need the full stack running in containers — smoke testing, Module 7 auth flows, or when you prefer not to run the API natively.
+
+### First run
+
+1. Copy `.env.example` to `.env` and fill in OAuth credentials (see [OAuth Setup](#oauth-setup-google) below).
+2. Start data services:
+   ```bash
+   docker compose up -d mysql redis
+   ```
+3. Wait for MySQL to be healthy:
+   ```bash
+   docker compose ps   # mysql row should show (healthy)
+   ```
+4. Run migrations:
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm migrate
+   ```
+5. Start app services with hot-reload:
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+   ```
+6. Confirm the API is reachable:
+   ```bash
+   curl http://localhost:3000/health   # expect HTTP 200
+   ```
+
+### Shortcut via COMPOSE_FILE
+
+To avoid typing `-f` flags, add to your `.env`:
+
+```
+COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml
+```
+
+Then `docker compose up` picks up both files automatically.
+
+### How hot-reload works
+
+The dev overlay mounts `./apps/api/src` into the container over the image's baked-in copy. `tsx watch` detects file changes on the host and restarts the process automatically. `node_modules` stays from the image — no host `pnpm install` required to start the Docker stack.
+
+---
+
 ## OAuth Setup (Google)
 
 1. Create a project in [Google Cloud Console](https://console.cloud.google.com)
