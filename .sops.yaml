@@ -15,5 +15,5 @@
 creation_rules:
   - path_regex: secrets/.*\.sops\.yaml$
     age: >-
-      age1OPERATOR_PUBLIC_KEY_REPLACE_ME,
-      age1SERVER_PUBLIC_KEY_REPLACE_ME
+      age1wl979xgh88849kxm7q079cqxaaacg306n5pp2u3uuhkslpzln54q9wknq2,
+      age1xamnzw4tt58gltfcxpescj7k6jumts5x5c2dgc94t948gwlew4nspfjma9
