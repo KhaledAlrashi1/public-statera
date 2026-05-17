@@ -47,7 +47,7 @@ const isDev =
 export const env = {
   isDev,
   port: optionalInt("API_PORT", 3000),
-  host: optional("API_HOST", "127.0.0.1"),
+  host: optional("API_HOST", "0.0.0.0"),
 
   databaseUrl: isDev
     ? optional("DATABASE_URL", "mysql://statera:statera@127.0.0.1:3306/statera")
