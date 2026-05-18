@@ -82,6 +82,11 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 
 Fixes shipped after the original module commit, capturing real-world deployment findings.
 
+**module-7 smoke — 54527a2** `phase-3: module-7 fix-forward — backup code count drift Flask vs Hono`
+1. **Hono `BACKUP_CODE_COUNT` was 8**: `apps/api/src/lib/totp-lib.ts` shipped with `const BACKUP_CODE_COUNT = 8`, causing `POST /api/auth/2fa/setup` to return 8 backup codes. The inline comment and the `generateBackupCodes` default-count test both encoded the same wrong value.
+2. **Flask source of truth is 10**: the smoke test (`tools/module-7-smoke.sh:332, :437`) asserts 10 backup codes, which is the Flask contract. Phase 1.5 of the smoke test failed with the assertion `expected 10 backup codes, got 8`.
+3. **Fix**: `BACKUP_CODE_COUNT` set to 10; stale inline comment updated (`8 codes per setup event` → `10 codes per setup event`); test description updated (`generates 8 codes by default` → `generates 10 codes by default`). Existing users with 8 stored backup codes are unaffected — the JSON column stores whatever array length was issued; consumption counts dynamically via `JSON_LENGTH`.
+
 **module-7 smoke — 45f003d** `phase-3: module-7 fix-forward — smoke test OAuth state cookie host mismatch`
 1. **curl-to-browser cookie handoff bug**: `get_login_url()` called `curl -si http://localhost:3000/api/auth/login`, extracted the Google OAuth `Location` header, and discarded the response (including the `statera_oauth_state` Set-Cookie). The extracted Google URL was shown to the operator for browser paste. The browser reached `/api/auth/callback` with no state cookie and the callback rejected with HTTP 400 "Missing state cookie".
 2. **localhost/127.0.0.1 origin mismatch**: curl hit `localhost:3000` while the API's `redirect_uri` is `127.0.0.1:3000`. Browsers treat these as different cookie origins, so even if the cookie had reached a browser somehow, it would not have been sent on the callback request.
