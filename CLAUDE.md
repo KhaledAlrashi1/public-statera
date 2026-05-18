@@ -82,6 +82,17 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 
 Fixes shipped after the original module commit, capturing real-world deployment findings.
 
+**module-7 smoke — 45f003d** `phase-3: module-7 fix-forward — smoke test OAuth state cookie host mismatch`
+1. **curl-to-browser cookie handoff bug**: `get_login_url()` called `curl -si http://localhost:3000/api/auth/login`, extracted the Google OAuth `Location` header, and discarded the response (including the `statera_oauth_state` Set-Cookie). The extracted Google URL was shown to the operator for browser paste. The browser reached `/api/auth/callback` with no state cookie and the callback rejected with HTTP 400 "Missing state cookie".
+2. **localhost/127.0.0.1 origin mismatch**: curl hit `localhost:3000` while the API's `redirect_uri` is `127.0.0.1:3000`. Browsers treat these as different cookie origins, so even if the cookie had reached a browser somehow, it would not have been sent on the callback request.
+3. **Fix**: deleted `get_login_url()`. Replaced both call sites (`interactive_pending_login()` and the P3 block) with a direct constant `LOGIN_URL="http://127.0.0.1:3000/api/auth/login"`. Operator prompts updated to "navigate to this URL" with the short stable endpoint URL. The browser hits the API directly, receives the state cookie on `127.0.0.1`, follows the 302 to Google, completes OAuth, and returns to the callback with the state cookie present on the same origin. No `apps/api/` change.
+
+**module-7 smoke phase-4 deferral — 45f003d** `design decision pending`
+1. **Phase 4 calls `/api/auth/delete-reauth` which requires `requireAuth`**: the endpoint sets a `statera_oauth_state` cookie and redirects to Google. For this to work from a browser, the browser must present a valid `statera_session` cookie on the initial request.
+2. **The smoke harness has no frontend**: all post-TOTP sessions are obtained via `curl POST /api/auth/2fa/verify`, which puts the resulting `statera_session` cookie on the curl process — never on the operator's browser. There is no point in the test flow where the operator's browser holds the current `SESSION_MAIN`.
+3. **Fixing this requires a design decision**: options include a dev-only test-helper endpoint in `apps/api/` (e.g., `GET /api/test/set-session-redirect` gated on `env.isDev`), manual DevTools cookie injection (rejected as brittle — JWT values are long and a single typo causes a silent failure), or an alternative test-harness pattern. Decision deferred to its own proposal cycle; no `apps/api/` change is made in this commit.
+4. **Phase 4 currently fails at step 4.1 with HTTP 400 "Missing state cookie"**: this is expected and acknowledged. A runtime banner was added to the smoke script at the phase-4 start to alert the operator. Phases 1, 2, and 3 passing is the definition of a successful run until this is resolved.
+
 **8c — phase-3: 8c** `runbook bugs found in proposal review (not a production failure)`
 1. **Operator key filename**: `age-keygen -o ~/.config/sops/age/operator.key` named the file `operator.key`, but sops defaults to `keys.txt`. Every local decrypt step would silently fail without `SOPS_AGE_KEY_FILE` being set. Fixed: key now generated as `keys.txt`; no env var needed.
 2. **Missing existence guard**: `age-keygen -o keys.txt` overwrites silently, destroying the key and access to all encrypted files. Fixed: guard added that hard-errors if `keys.txt` already exists; rotation must follow the age key rotation procedure in SECRETS.md.
