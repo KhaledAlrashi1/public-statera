@@ -16,8 +16,8 @@ import { randomBytes } from "node:crypto"
 // Match Flask: TOTP_DIGITS=6, TOTP_PERIOD_SECONDS=30, valid_window=1 (±1 period = ±30 s).
 authenticator.options = { digits: 6, step: 30, window: 1 }
 
-const BACKUP_CODE_COUNT = 8
-// Cost 12 matches Python bcrypt's default. Infrequent (8 codes per setup event).
+const BACKUP_CODE_COUNT = 10
+// Cost 12 matches Python bcrypt's default. Infrequent (10 codes per setup event).
 const BCRYPT_ROUNDS = 12
 const ISSUER = "Statera"
 

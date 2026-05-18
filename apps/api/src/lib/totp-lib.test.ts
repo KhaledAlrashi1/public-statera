@@ -94,9 +94,9 @@ describe("verifyTotpCode", () => {
 // ── generateBackupCodes ───────────────────────────────────────────────────────
 
 describe("generateBackupCodes", () => {
-  it("generates 8 codes by default", () => {
+  it("generates 10 codes by default", () => {
     const codes = generateBackupCodes()
-    expect(codes).toHaveLength(8)
+    expect(codes).toHaveLength(10)
   })
 
   it("generates codes in xxxx-xxxx format (4 lower-hex + dash + 4 lower-hex)", () => {
