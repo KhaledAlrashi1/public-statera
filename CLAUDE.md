@@ -174,6 +174,8 @@ Fixes shipped after the original module commit, capturing real-world deployment 
 - **Atomicity tests:** required for any route that uses `db.transaction()`. Mock transactions always commit; use real DB to verify rollback behavior.
 - **Decimal assertions:** assert string equality on amounts (`expect(tx.amount_kd).toBe("12.500")`), not numeric equality.
 
+- **Module 7 smoke test:** `tools/module-7-smoke.sh` — interactive end-to-end smoke against the local Docker dev stack. Covers 7a/7b/7c/7.5. Runs once per session (account deletion destroys the test user; next run creates a fresh one). Requires jq, oathtool, docker, curl, and the dev stack up. Operator pastes `statera_session` and `statera_pending_2fa` cookies from browser DevTools at five interactive points; rest is automated.
+
 ## Public API contracts (do not change without coordination)
 
 - Error codes are part of the API: e.g., `PAYMENT_TOO_LOW`, `category_name_exists`, `merchant_name_exists`, `debt_name_conflict`, `goal_inactive`, `goal_fully_funded`, `budget_duplicate_category`. Match Flask exactly.
