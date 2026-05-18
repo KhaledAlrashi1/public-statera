@@ -47,7 +47,6 @@ SESSION_B=""          # second session (created in 3.1)
 REVOKED_SESSION_A=""  # session A before revoke-all (for 3.3 assertion)
 REVOKED_SESSION_B=""  # session B before revoke-all (for 3.3 assertion)
 DELETE_INTENT_COOKIE="" # statera_delete_intent (captured from 2FA verify in 4.2)
-LOGIN_URL=""          # Google OAuth URL (set by get_login_url)
 
 PASS_COUNT=0
 
@@ -125,22 +124,13 @@ redis_exec() {
   docker exec public_statera-redis-1 redis-cli -n 1 "$@"
 }
 
-# Call GET /api/auth/login, extract the OIDC redirect URL, store in $LOGIN_URL.
-get_login_url() {
-  local resp
-  resp=$(curl -si http://localhost:3000/api/auth/login 2>/dev/null)
-  LOGIN_URL=$(printf '%s' "$resp" | grep -im1 "^location:" | awk '{print $2}' | tr -d '\r')
-  if [[ -z "$LOGIN_URL" ]]; then
-    fail "No Location header from GET /api/auth/login — is OAUTH_CLIENT_ID set and the API running?"
-  fi
-}
 
-# Print a fresh OIDC login URL and instruct the operator to paste statera_pending_2fa.
+# Direct the operator to the OIDC login endpoint and collect statera_pending_2fa.
 # TOTP must be enabled. Sets global PENDING_COOKIE.
 interactive_pending_login() {
-  get_login_url
+  LOGIN_URL="http://127.0.0.1:3000/api/auth/login"
   printf "\n"
-  prompt "Open an INCOGNITO browser window and paste this URL:"
+  prompt "Open an INCOGNITO browser window and navigate to this URL:"
   info "$LOGIN_URL"
   prompt "Complete Google sign-in. The browser will redirect to /auth/2fa-verify"
   prompt "(a 'connection refused' is expected if the frontend is not running — the cookie is already set)."
@@ -249,9 +239,9 @@ redis_exec FLUSHDB >/dev/null
 pass "P2: Redis DB 1 flushed"
 
 step "P3: Initial OIDC handshake (TOTP not yet enabled)"
-get_login_url
+LOGIN_URL="http://127.0.0.1:3000/api/auth/login"
 printf "\n"
-prompt "Open a browser and paste this URL:"
+prompt "Open an INCOGNITO browser window and navigate to this URL:"
 info "$LOGIN_URL"
 prompt "Complete Google sign-in. When redirected (connection refused is OK — cookie is set):"
 prompt "Open DevTools → Application → Cookies → http://127.0.0.1:3000"
@@ -572,6 +562,20 @@ pass "3.5: security-events items=[] (profile.* not emitted until Module 9)"
 
 # ── PHASE 4: Module 7.5 — Account deletion ───────────────────────────────────
 header "PHASE 4 — Module 7.5: Account deletion"
+
+printf "\n${YELLOW}━━━ PHASE 4 IS A KNOWN-FAILING DEFERRED STEP ━━━${NC}\n"
+printf "${YELLOW}The smoke test will fail at step 4.1 with HTTP 400 'Missing state cookie'.${NC}\n"
+printf "${YELLOW}This is expected. See TODO(module-7-smoke-phase-4-browser-session) below.${NC}\n"
+printf "${YELLOW}Phases 1, 2, 3 pass = success for this run.${NC}\n\n"
+
+# TODO(module-7-smoke-phase-4-browser-session): Phase 4 has a structural
+# bug independent of the get_login_url fix in this commit. /api/auth/delete-reauth
+# requires a statera_session cookie on the browser, but the test harness has no
+# frontend — all post-2FA sessions are obtained via curl POST to /2fa/verify, so
+# the cookie lives on curl, never on the browser. Fixing this requires a design
+# decision (dev-only test endpoint in apps/api/, manual DevTools cookie injection,
+# or alternative test-harness pattern). Deferred to a separate fix-forward proposal.
+# In the meantime, expect phase 4 to fail at step 4.1 with HTTP 400 "Missing state cookie".
 
 step "4.1: GET /api/auth/delete-reauth → 302 to OIDC provider"
 REAUTH_RESP=$(curl -si \
