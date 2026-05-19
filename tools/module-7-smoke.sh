@@ -77,12 +77,16 @@ extract_cookie() {
     sed "s/.*${name}=\([^;]*\).*/\1/" | tr -d '\r'
 }
 
-# Assert HTTP status code.
+# Assert HTTP status code. Third arg is the full curl -si response; status and
+# body are extracted internally so the body can be printed on mismatch.
 assert_status() {
-  local desc="$1" expected="$2" actual="$3"
+  local desc="$1" expected="$2" resp="$3"
+  local actual
+  actual=$(http_status "$resp")
   if [[ "$actual" == "$expected" ]]; then
     pass "${desc} (HTTP ${actual})"
   else
+    printf "    response body: %s\n" "$(body "$resp")"
     fail "${desc} — expected HTTP ${expected}, got HTTP ${actual}"
   fi
 }
@@ -195,12 +199,17 @@ fi
 pass "P0: .env sourced, MYSQL_PASSWORD present"
 
 step "P0: Stack health check"
-HEALTH=$(curl -sf http://localhost:3000/healthz 2>/dev/null || true)
-if [[ -z "$HEALTH" ]]; then
-  printf "${RED}  ABORT${NC}: API not reachable at http://localhost:3000/healthz\n"
-  printf "    Start the stack: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d\n"
-  exit 1
-fi
+HEALTH=""
+for i in $(seq 1 30); do
+  HEALTH=$(curl -sf http://localhost:3000/healthz 2>/dev/null || true)
+  [[ -n "$HEALTH" ]] && break
+  if [[ "$i" -eq 30 ]]; then
+    printf "${RED}  ABORT${NC}: API not reachable at http://localhost:3000/healthz after 30s\n"
+    printf "    Start the stack: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d\n"
+    exit 1
+  fi
+  sleep 1
+done
 if ! printf '%s' "$HEALTH" | jq -e '.ok == true' &>/dev/null; then
   printf "${RED}  ABORT${NC}: API healthcheck not-ok: %s\n" "$HEALTH"
   exit 1
@@ -254,7 +263,7 @@ if [[ -z "$SESSION_MAIN" ]]; then
   fail "No session cookie provided."
 fi
 ME_P3=$(curl -si -b "statera_session=$SESSION_MAIN" http://localhost:3000/api/auth/me 2>/dev/null)
-assert_status "P3: GET /api/auth/me with initial session" "200" "$(http_status "$ME_P3")"
+assert_status "P3: GET /api/auth/me with initial session" "200" "$ME_P3"
 USER_ID=$(body "$ME_P3" | jq -r '.session.userId')
 if [[ -z "$USER_ID" || "$USER_ID" == "null" ]]; then
   fail "P3: could not extract userId from /api/auth/me"
@@ -269,7 +278,7 @@ SETUP1_RESP=$(curl -si \
   -b "statera_session=$SESSION_MAIN" \
   -X POST -H "Content-Type: application/json" \
   http://localhost:3000/api/auth/2fa/setup 2>/dev/null)
-assert_status "1.1: setup returns 200" "200" "$(http_status "$SETUP1_RESP")"
+assert_status "1.1: setup returns 200" "200" "$SETUP1_RESP"
 SETUP1_BODY=$(body "$SETUP1_RESP")
 assert_json "1.1: ok=true" ".ok" "true" "$SETUP1_BODY"
 SECRET_1=$(printf '%s' "$SETUP1_BODY" | jq -r '.data.secret_b32')
@@ -286,7 +295,7 @@ CONFIRM1_RESP=$(curl -si \
   -X POST -H "Content-Type: application/json" \
   -d "{\"code\":\"${TOTP1}\"}" \
   http://localhost:3000/api/auth/2fa/confirm 2>/dev/null)
-assert_status "1.2: confirm returns 200" "200" "$(http_status "$CONFIRM1_RESP")"
+assert_status "1.2: confirm returns 200" "200" "$CONFIRM1_RESP"
 assert_json "1.2: ok=true" ".ok" "true" "$(body "$CONFIRM1_RESP")"
 assert_db "1.2: totp_enabled=1 in DB" \
   "SELECT totp_enabled FROM users WHERE id=${USER_ID}" "1"
@@ -300,7 +309,7 @@ DISABLE_RESP=$(curl -si \
   -X POST -H "Content-Type: application/json" \
   -d "{\"code\":\"${TOTP_DISABLE}\"}" \
   http://localhost:3000/api/auth/2fa/disable 2>/dev/null)
-assert_status "1.4: disable returns 200" "200" "$(http_status "$DISABLE_RESP")"
+assert_status "1.4: disable returns 200" "200" "$DISABLE_RESP"
 assert_json "1.4: ok=true" ".ok" "true" "$(body "$DISABLE_RESP")"
 NEW_SESSION_DISABLE=$(extract_cookie "$DISABLE_RESP" "statera_session")
 if [[ -z "$NEW_SESSION_DISABLE" ]]; then
@@ -319,7 +328,7 @@ SETUP2_RESP=$(curl -si \
   -b "statera_session=$SESSION_MAIN" \
   -X POST -H "Content-Type: application/json" \
   http://localhost:3000/api/auth/2fa/setup 2>/dev/null)
-assert_status "1.5a: second setup returns 200" "200" "$(http_status "$SETUP2_RESP")"
+assert_status "1.5a: second setup returns 200" "200" "$SETUP2_RESP"
 SETUP2_BODY=$(body "$SETUP2_RESP")
 assert_json "1.5a: ok=true" ".ok" "true" "$SETUP2_BODY"
 SECRET_2=$(printf '%s' "$SETUP2_BODY" | jq -r '.data.secret_b32')
@@ -327,7 +336,10 @@ if [[ -z "$SECRET_2" || "$SECRET_2" == "null" ]]; then
   fail "1.5: no secret_b32 in second setup response"
 fi
 # Store all 10 plaintext backup codes for later use in phase 2
-mapfile -t BACKUP_CODES_2 < <(printf '%s' "$SETUP2_BODY" | jq -r '.data.backup_codes[]')
+BACKUP_CODES_2=()
+while IFS= read -r line; do
+  BACKUP_CODES_2+=("$line")
+done < <(printf '%s' "$SETUP2_BODY" | jq -r '.data.backup_codes[]')
 if [[ ${#BACKUP_CODES_2[@]} -ne 10 ]]; then
   fail "1.5: expected 10 backup codes, got ${#BACKUP_CODES_2[@]}"
 fi
@@ -339,7 +351,7 @@ CONFIRM2_RESP=$(curl -si \
   -X POST -H "Content-Type: application/json" \
   -d "{\"code\":\"${TOTP2}\"}" \
   http://localhost:3000/api/auth/2fa/confirm 2>/dev/null)
-assert_status "1.5b: second confirm returns 200" "200" "$(http_status "$CONFIRM2_RESP")"
+assert_status "1.5b: second confirm returns 200" "200" "$CONFIRM2_RESP"
 assert_json "1.5b: ok=true" ".ok" "true" "$(body "$CONFIRM2_RESP")"
 assert_db "1.5b: totp_enabled=1 in DB after re-enable" \
   "SELECT totp_enabled FROM users WHERE id=${USER_ID}" "1"
@@ -357,7 +369,7 @@ VERIFY1_RESP=$(curl -si \
   -X POST -H "Content-Type: application/json" \
   -d "{\"code\":\"${TOTP_VERIFY1}\",\"type\":\"totp\"}" \
   http://localhost:3000/api/auth/2fa/verify 2>/dev/null)
-assert_status "2.1: verify returns 200" "200" "$(http_status "$VERIFY1_RESP")"
+assert_status "2.1: verify returns 200" "200" "$VERIFY1_RESP"
 assert_json "2.1: ok=true" ".ok" "true" "$(body "$VERIFY1_RESP")"
 SESSION_FROM_VERIFY=$(extract_cookie "$VERIFY1_RESP" "statera_session")
 if [[ -z "$SESSION_FROM_VERIFY" ]]; then
@@ -368,7 +380,7 @@ pass "2.1: TOTP verified — real session cookie issued"
 
 step "2.2: Verify session is valid"
 ME2_RESP=$(curl -si -b "statera_session=$SESSION_MAIN" http://localhost:3000/api/auth/me 2>/dev/null)
-assert_status "2.2: GET /api/auth/me returns 200" "200" "$(http_status "$ME2_RESP")"
+assert_status "2.2: GET /api/auth/me returns 200" "200" "$ME2_RESP"
 pass "2.2: session valid after TOTP-gated login"
 
 step "2.3: Lockout — 3 consecutive wrong codes → PENDING_2FA_RESTART on 3rd"
@@ -379,7 +391,7 @@ FAIL1_RESP=$(curl -si \
   -X POST -H "Content-Type: application/json" \
   -d '{"code":"000000","type":"totp"}' \
   http://localhost:3000/api/auth/2fa/verify 2>/dev/null)
-assert_status "2.3: 1st wrong code → 401" "401" "$(http_status "$FAIL1_RESP")"
+assert_status "2.3: 1st wrong code → 401" "401" "$FAIL1_RESP"
 assert_json "2.3: 1st wrong → INVALID_TOTP_CODE" ".code" "INVALID_TOTP_CODE" "$(body "$FAIL1_RESP")"
 
 FAIL2_RESP=$(curl -si \
@@ -387,7 +399,7 @@ FAIL2_RESP=$(curl -si \
   -X POST -H "Content-Type: application/json" \
   -d '{"code":"000000","type":"totp"}' \
   http://localhost:3000/api/auth/2fa/verify 2>/dev/null)
-assert_status "2.3: 2nd wrong code → 401" "401" "$(http_status "$FAIL2_RESP")"
+assert_status "2.3: 2nd wrong code → 401" "401" "$FAIL2_RESP"
 assert_json "2.3: 2nd wrong → INVALID_TOTP_CODE" ".code" "INVALID_TOTP_CODE" "$(body "$FAIL2_RESP")"
 
 FAIL3_RESP=$(curl -si \
@@ -395,7 +407,7 @@ FAIL3_RESP=$(curl -si \
   -X POST -H "Content-Type: application/json" \
   -d '{"code":"000000","type":"totp"}' \
   http://localhost:3000/api/auth/2fa/verify 2>/dev/null)
-assert_status "2.3: 3rd wrong code → 401" "401" "$(http_status "$FAIL3_RESP")"
+assert_status "2.3: 3rd wrong code → 401" "401" "$FAIL3_RESP"
 assert_json "2.3: 3rd wrong → PENDING_2FA_RESTART" ".code" "PENDING_2FA_RESTART" "$(body "$FAIL3_RESP")"
 pass "2.3: lockout confirmed on 3rd failure"
 
@@ -415,7 +427,7 @@ BACKUP1_RESP=$(curl -si \
   -X POST -H "Content-Type: application/json" \
   -d "{\"code\":\"${BACKUP_CODE_0}\",\"type\":\"backup\"}" \
   http://localhost:3000/api/auth/2fa/verify 2>/dev/null)
-assert_status "2.4: backup code verify returns 200" "200" "$(http_status "$BACKUP1_RESP")"
+assert_status "2.4: backup code verify returns 200" "200" "$BACKUP1_RESP"
 BACKUP1_BODY=$(body "$BACKUP1_RESP")
 assert_json "2.4: ok=true" ".ok" "true" "$BACKUP1_BODY"
 BACKUP1_WARN=$(printf '%s' "$BACKUP1_BODY" | jq -r '.data.warning // "none"')
@@ -449,7 +461,7 @@ BACKUP2_RESP=$(curl -si \
   -X POST -H "Content-Type: application/json" \
   -d "{\"code\":\"${BACKUP_CODE_9}\",\"type\":\"backup\"}" \
   http://localhost:3000/api/auth/2fa/verify 2>/dev/null)
-assert_status "2.5: last backup code verify returns 200" "200" "$(http_status "$BACKUP2_RESP")"
+assert_status "2.5: last backup code verify returns 200" "200" "$BACKUP2_RESP"
 BACKUP2_BODY=$(body "$BACKUP2_RESP")
 assert_json "2.5: ok=true" ".ok" "true" "$BACKUP2_BODY"
 assert_json "2.5: warning=BACKUP_CODES_LOW" ".data.warning" "BACKUP_CODES_LOW" "$BACKUP2_BODY"
@@ -466,7 +478,7 @@ header "PHASE 3 — Module 7c: revoke-all + security events"
 
 step "3.1: Capture current sv; create second session via fresh OIDC + TOTP"
 ME3_RESP=$(curl -si -b "statera_session=$SESSION_MAIN" http://localhost:3000/api/auth/me 2>/dev/null)
-assert_status "3.1: GET /api/auth/me" "200" "$(http_status "$ME3_RESP")"
+assert_status "3.1: GET /api/auth/me" "200" "$ME3_RESP"
 OLD_SV=$(body "$ME3_RESP" | jq -r '.session.sv')
 USER_ID=$(body "$ME3_RESP" | jq -r '.session.userId')
 pass "3.1: userId=${USER_ID}, current sv=${OLD_SV}"
@@ -480,7 +492,7 @@ VERIFY_B_RESP=$(curl -si \
   -X POST -H "Content-Type: application/json" \
   -d "{\"code\":\"${TOTP_B}\",\"type\":\"totp\"}" \
   http://localhost:3000/api/auth/2fa/verify 2>/dev/null)
-assert_status "3.1: SESSION_B verify returns 200" "200" "$(http_status "$VERIFY_B_RESP")"
+assert_status "3.1: SESSION_B verify returns 200" "200" "$VERIFY_B_RESP"
 SESSION_B=$(extract_cookie "$VERIFY_B_RESP" "statera_session")
 if [[ -z "$SESSION_B" ]]; then
   fail "3.1: no statera_session in SESSION_B verify response"
@@ -494,7 +506,7 @@ REVOKE_RESP=$(curl -si \
   -b "statera_session=$SESSION_MAIN" \
   -X POST -H "Content-Type: application/json" \
   http://localhost:3000/api/auth/sessions/revoke-all 2>/dev/null)
-assert_status "3.2: revoke-all returns 200" "200" "$(http_status "$REVOKE_RESP")"
+assert_status "3.2: revoke-all returns 200" "200" "$REVOKE_RESP"
 REVOKE_BODY=$(body "$REVOKE_RESP")
 assert_json "3.2: ok=true" ".ok" "true" "$REVOKE_BODY"
 EXPECTED_NEW_SV=$((OLD_SV + 1))
@@ -514,7 +526,7 @@ step "3.3: Old sessions rejected; new session accepted"
 # There is no `code` field in the response. Assertions below check HTTP 401 + error message text.
 FAIL_A_RESP=$(curl -si -b "statera_session=$REVOKED_SESSION_A" \
   http://localhost:3000/api/auth/me 2>/dev/null)
-assert_status "3.3: old SESSION_A → 401" "401" "$(http_status "$FAIL_A_RESP")"
+assert_status "3.3: old SESSION_A → 401" "401" "$FAIL_A_RESP"
 if ! body "$FAIL_A_RESP" | grep -qi "invalidated"; then
   fail "3.3: old SESSION_A error body should contain 'invalidated' (got: $(body "$FAIL_A_RESP"))"
 fi
@@ -522,7 +534,7 @@ pass "3.3: old SESSION_A rejected — 401 + 'invalidated' in error body"
 
 FAIL_B_RESP=$(curl -si -b "statera_session=$REVOKED_SESSION_B" \
   http://localhost:3000/api/auth/me 2>/dev/null)
-assert_status "3.3: SESSION_B → 401" "401" "$(http_status "$FAIL_B_RESP")"
+assert_status "3.3: SESSION_B → 401" "401" "$FAIL_B_RESP"
 if ! body "$FAIL_B_RESP" | grep -qi "invalidated"; then
   fail "3.3: SESSION_B error body should contain 'invalidated' (got: $(body "$FAIL_B_RESP"))"
 fi
@@ -530,7 +542,7 @@ pass "3.3: SESSION_B rejected — 401 + 'invalidated' in error body"
 
 NEW_OK_RESP=$(curl -si -b "statera_session=$SESSION_MAIN" \
   http://localhost:3000/api/auth/me 2>/dev/null)
-assert_status "3.3: new SESSION_MAIN → 200" "200" "$(http_status "$NEW_OK_RESP")"
+assert_status "3.3: new SESSION_MAIN → 200" "200" "$NEW_OK_RESP"
 pass "3.3: new SESSION_MAIN accepted"
 
 step "3.4: Redis deny-list key present with ≥28-day TTL"
@@ -550,7 +562,7 @@ pass "3.4: TTL=${KEY_TTL}s (≥28 days)"
 step "3.5: GET /api/auth/profile/security-events → empty (no profile.* events yet)"
 SEC_RESP=$(curl -si -b "statera_session=$SESSION_MAIN" \
   http://localhost:3000/api/auth/profile/security-events 2>/dev/null)
-assert_status "3.5: security-events returns 200" "200" "$(http_status "$SEC_RESP")"
+assert_status "3.5: security-events returns 200" "200" "$SEC_RESP"
 SEC_BODY=$(body "$SEC_RESP")
 assert_json "3.5: ok=true" ".ok" "true" "$SEC_BODY"
 ITEMS_LEN=$(printf '%s' "$SEC_BODY" | jq '.data.items | length')
@@ -581,7 +593,7 @@ step "4.1: GET /api/auth/delete-reauth → 302 to OIDC provider"
 REAUTH_RESP=$(curl -si \
   -b "statera_session=$SESSION_MAIN" \
   http://localhost:3000/api/auth/delete-reauth 2>/dev/null)
-assert_status "4.1: delete-reauth returns 302" "302" "$(http_status "$REAUTH_RESP")"
+assert_status "4.1: delete-reauth returns 302" "302" "$REAUTH_RESP"
 DELETE_REAUTH_URL=$(printf '%s' "$REAUTH_RESP" | grep -im1 "^location:" | awk '{print $2}' | tr -d '\r')
 if [[ -z "$DELETE_REAUTH_URL" ]]; then
   fail "4.1: no Location header in delete-reauth response"
@@ -614,7 +626,7 @@ INTENT_RESP=$(curl -si \
   -X POST -H "Content-Type: application/json" \
   -d "{\"code\":\"${TOTP_DELETE}\",\"type\":\"totp\"}" \
   http://localhost:3000/api/auth/2fa/verify 2>/dev/null)
-assert_status "4.2: delete-intent 2FA verify returns 200" "200" "$(http_status "$INTENT_RESP")"
+assert_status "4.2: delete-intent 2FA verify returns 200" "200" "$INTENT_RESP"
 INTENT_BODY=$(body "$INTENT_RESP")
 assert_json "4.2: ok=true" ".ok" "true" "$INTENT_BODY"
 assert_json "4.2: delete_intent=true in response body" ".data.delete_intent" "true" "$INTENT_BODY"
@@ -630,7 +642,7 @@ DEL_RESP=$(curl -si \
   -b "statera_session=${SESSION_MAIN}; statera_delete_intent=${DELETE_INTENT_COOKIE}" \
   -X DELETE \
   http://localhost:3000/api/account 2>/dev/null)
-assert_status "4.3: DELETE /api/account returns 200" "200" "$(http_status "$DEL_RESP")"
+assert_status "4.3: DELETE /api/account returns 200" "200" "$DEL_RESP"
 DEL_BODY=$(body "$DEL_RESP")
 assert_json "4.3: ok=true" ".ok" "true" "$DEL_BODY"
 assert_json "4.3: deleted=true" ".data.deleted" "true" "$DEL_BODY"
