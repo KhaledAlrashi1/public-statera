@@ -6,8 +6,9 @@ function required(key: string): string {
   return val
 }
 
-function optional(key: string, fallback = ""): string {
-  return process.env[key] ?? fallback
+export function optional(key: string, fallback = ""): string {
+  const val = process.env[key]
+  return val !== undefined && val !== "" ? val : fallback
 }
 
 function optionalInt(key: string, fallback: number): number {
@@ -118,4 +119,10 @@ export const env = {
   activationReportIntervalHours: optionalInt("ACTIVATION_REPORT_INTERVAL_HOURS", 1),
   activationReportDays: optionalInt("ACTIVATION_REPORT_DAYS", 30),
   activationReportPath: optional("ACTIVATION_REPORT_PATH", "reports/activation-report.latest.json"),
+}
+
+if (isDev && env.encryptionKey === "0".repeat(64)) {
+  console.warn(
+    "[statera] WARNING: ENCRYPTION_KEY is unset or all zeros — using dev default. Never use this value in production.",
+  )
 }
