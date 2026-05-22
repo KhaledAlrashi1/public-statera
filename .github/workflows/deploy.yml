@@ -109,6 +109,15 @@ jobs:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
 
+      - name: Diagnose key fingerprint (TEMPORARY)
+        run: |
+          printf '%s\n' "$DEPLOY_SSH_KEY" > /tmp/k
+          chmod 600 /tmp/k
+          ssh-keygen -y -f /tmp/k | ssh-keygen -lf -
+          rm /tmp/k
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+
       # SSH to server with SendEnv so DEPLOY_SHA is available in deploy.sh via AcceptEnv.
       # The server's authorized_keys has command=/home/deploy/statera/deploy/deploy.sh,
       # so the SSH connection always runs deploy.sh regardless of any script we send —
