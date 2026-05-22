@@ -169,6 +169,15 @@ Fixes shipped after the original module commit, capturing real-world deployment 
 - **Update this file:** at the end of every module commit, update the "Migration status" section above to reflect the new state. This is part of the commit, not a follow-up.
 - **Sequential gates are sequential.** When a prompt requires a verification report (e.g., a status check on a previous module) before work on a new module proceeds, deliver the verification report and wait for explicit approval before starting the new work. An approval issued conditionally on a prior report being clean is not standing approval to ship in parallel. If a verification surfaces a problem, the new work pauses until the prior gap is resolved.
 
+## Operational work conventions
+
+Unplanned operational work that touches production state (key rotations, server config changes, incident recovery, etc.) must leave two artifacts before the session ends:
+
+1. A new entry under `## Module fix-forwards` in this file, dated, summarizing what was done and the durable lessons.
+2. A handoff document at `docs/recovery/YYYY-MM-DD-<slug>.md` capturing what was deliberately not done, open decisions for the next session, and a suggested opening prompt for the next Claude conversation.
+
+The fix-forward is the durable lesson record; the handoff is the operational continuity document. Both are required because they serve different readers and different time horizons. See `docs/recovery/2026-05-22-operator-key-rotation.md` as the precedent.
+
 ## Key architectural decisions (do not revisit)
 
 - **Auth:** provider-agnostic OIDC via openid-client; Google as initial provider. Users table has `(auth_provider, external_id)` composite unique. No password column.
