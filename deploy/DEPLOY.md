@@ -162,3 +162,5 @@ serving. The schema may need manual inspection before retrying.
 **migrate service image:** The `migrate` service in `docker-compose.prod.yml` uses the same
 image as `api` and `worker` (`${REGISTRY}:${GIT_SHA}`). `docker pull` in `deploy.sh §2` covers
 it; no separate pull needed for migrations.
+
+<!-- first operational pipeline run: 2026-05-22 -->
