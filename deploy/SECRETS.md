@@ -26,10 +26,16 @@ deploy/
 The plaintext content of `secrets/.env.prod.sops.yaml` is **dotenv** format (`KEY=value` lines),
 matching `deploy/.env.prod.example` exactly. The encrypted YAML envelope wraps this content.
 
-Encrypt (create or re-encrypt):
+Encrypt (create or re-encrypt). The `--filename-override` flag is required so sops matches
+the `secrets/.*\.sops\.yaml$` creation rule against the intended output filename rather than
+the input path; without it sops aborts with "no matching creation rules found." Keep the
+plaintext input in `/tmp/` (or another path outside the repo) to avoid any risk of staging
+plaintext into git.
 ```bash
-sops -e --input-type dotenv --output-type yaml .env.prod.filled \
-  > secrets/.env.prod.sops.yaml
+sops -e --input-type dotenv --output-type yaml \
+  --filename-override secrets/.env.prod.sops.yaml \
+  --output secrets/.env.prod.sops.yaml \
+  /tmp/.env.prod.filled
 ```
 
 Decrypt (inspect):
@@ -89,13 +95,19 @@ Compose prints the merged config with all `${VAR}` substitutions resolved. "Vari
 set" warnings indicate a variable referenced in the Compose file but absent from the secrets
 file.
 
-**SOPS_AGE_KEY_FILE:** sops finds the age key at `~/.config/sops/age/keys.txt` by default.
+**SOPS_AGE_KEY_FILE:** sops finds the age key at `~/.config/sops/age/keys.txt` by default
+on Linux, but **sops 3.13 on macOS does not auto-discover the default path** — the env var
+must be set explicitly on macOS operator machines. Add to shell rc (e.g., `~/.zshrc`):
+```bash
+export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
+```
+
 Override when the runner's `$HOME` differs from the deploy user's home:
 ```bash
 export SOPS_AGE_KEY_FILE=/home/deploy/.config/sops/age/keys.txt
 ```
 
-The 8d deploy script sets this explicitly.
+The 8d deploy script sets this explicitly regardless of platform.
 
 ---
 
