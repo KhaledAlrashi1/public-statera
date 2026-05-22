@@ -110,6 +110,16 @@ _rollback() {
 
 log "§1 — checkout $GIT_SHA"
 git -C "$REPO_DIR" fetch origin
+# Resolve short or abbreviated SHA to the full 40-char form.
+# Handles workflow_dispatch invocations passed a short SHA;
+# no-op when GIT_SHA is already a full SHA.
+if ! GIT_SHA=$(git -C "$REPO_DIR" rev-parse --verify "${GIT_SHA}^{commit}" 2>/dev/null); then
+  echo "[deploy] ERROR: GIT_SHA '${GIT_SHA}' does not resolve to a commit in $REPO_DIR" >&2
+  echo "[deploy]   - check that the SHA exists on the remote and was fetched" >&2
+  echo "[deploy]   - check for typos if invoked via workflow_dispatch" >&2
+  exit 1
+fi
+log "§1 — GIT_SHA resolved to $GIT_SHA"
 # Reset to the exact SHA being deployed so the repo, Compose file, and image
 # are all at the same commit. For rollback (workflow_dispatch with old SHA),
 # this ensures the Compose config and sops file match the image being deployed.
