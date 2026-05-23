@@ -165,3 +165,4 @@ it; no separate pull needed for migrations.
 
 <!-- first operational pipeline run: 2026-05-22 -->
 <!-- trigger: first exercise of d3c8e7c §4 fix -->
+<!-- trigger: post-credential-rotation deploy 2026-05-23 -->
