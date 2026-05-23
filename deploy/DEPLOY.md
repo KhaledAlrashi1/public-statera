@@ -25,7 +25,7 @@ The private key is stored in GitHub Actions secrets. Keep it out of the repo and
 SSH to the server as the deploy user and add the CI public key to `~/.ssh/authorized_keys`:
 
 ```
-command="/home/deploy/statera/deploy/deploy.sh",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ssh-ed25519 AAAA... statera-ci-deploy
+command="bash /home/deploy/statera/deploy/deploy-bootstrap.sh",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ssh-ed25519 AAAA... statera-ci-deploy
 ```
 
 All four restrictions in one `authorized_keys` line:
@@ -46,7 +46,7 @@ a stolen CI key can only run `deploy.sh` on the server, nothing else.
 **Shell command to append (replace `<pubkey>` with the output of `cat ~/.ssh/statera_ci_deploy.pub`):**
 
 ```bash
-echo 'command="/home/deploy/statera/deploy/deploy.sh",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty <pubkey>' \
+echo 'command="bash /home/deploy/statera/deploy/deploy-bootstrap.sh",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty <pubkey>' \
   >> ~/.ssh/authorized_keys
 ```
 

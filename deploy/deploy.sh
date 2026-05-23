@@ -1,20 +1,22 @@
 #!/usr/bin/env bash
 # deploy/deploy.sh — production deploy script
 #
-# Invoked by CI over SSH. The server's authorized_keys forces this script as the
-# command= for the CI deploy key, so it always runs regardless of what the SSH
-# client requests. GIT_SHA is passed via SSH AcceptEnv (client: SendEnv=DEPLOY_SHA;
-# server: AcceptEnv DEPLOY_SHA in sshd_config). See deploy/DEPLOY.md for setup.
+# Invoked by deploy-bootstrap.sh, which handles git fetch + SHA resolution and
+# exec's this script with the worktree already at the correct commit. The
+# authorized_keys command= restriction on the CI deploy key points at
+# deploy-bootstrap.sh, not this script directly. See deploy/DEPLOY.md for setup.
 #
-# Can also be run manually as the deploy user:
+# Normally invoked via deploy-bootstrap.sh:
+#   DEPLOY_SHA=<sha> bash ~/statera/deploy/deploy-bootstrap.sh
+# Or if the repo is already at the correct SHA (manual recovery):
 #   GIT_SHA=<sha> bash ~/statera/deploy/deploy.sh
 
 set -euo pipefail
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
-# GIT_SHA arrives as DEPLOY_SHA via SSH AcceptEnv; fall back to direct env for
-# manual runs.
+# GIT_SHA arrives pre-resolved from deploy-bootstrap.sh via export; fall back to
+# DEPLOY_SHA (SSH AcceptEnv) or direct env for manual runs.
 GIT_SHA="${GIT_SHA:-${DEPLOY_SHA:-}}"
 GIT_SHA="${GIT_SHA:?GIT_SHA (or DEPLOY_SHA) is required}"
 
@@ -37,21 +39,6 @@ warn() { echo -e "${YLW}[deploy WARN]${RST} $*"; }
 die()  { echo -e "${RED}[deploy ERROR]${RST} $*" >&2; exit 1; }
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
-
-# Decrypt secrets once into a temp file. Deleted by the EXIT trap.
-# /dev/shm is RAM-backed tmpfs — plaintext secrets stay in memory, never touch
-# the persistent filesystem. Falls back to /tmp if /dev/shm is unavailable.
-# Explicit if/die rather than VAR=$(cmd): bash silently swallows non-zero exit
-# codes in command substitution assignments under set -e. A sops failure would
-# leave ENV_FILE empty with no log output and no abort without this guard.
-log "decrypting secrets"
-ENV_FILE=$(mktemp --tmpdir=/dev/shm 2>/dev/null || mktemp)
-trap 'rm -f "$ENV_FILE"' EXIT
-if ! sops -d --output-type dotenv "$SECRETS_FILE" > "$ENV_FILE"; then
-  die "sops decryption failed — check SOPS_AGE_KEY_FILE and secrets file integrity"
-fi
-[[ -s "$ENV_FILE" ]] || die "sops produced empty output — secrets file may be corrupt"
-log "secrets decrypted ($(wc -l < "$ENV_FILE") vars)"
 
 # compose(): run docker compose with GIT_SHA + decrypted env vars pre-applied.
 compose() {
@@ -115,24 +102,22 @@ _rollback() {
   fi
 }
 
-# ── §1: Checkout deployed commit ──────────────────────────────────────────────
+# ── §1: Decrypt secrets ───────────────────────────────────────────────────────
 
-log "§1 — checkout $GIT_SHA"
-git -C "$REPO_DIR" fetch origin
-# Resolve short or abbreviated SHA to the full 40-char form.
-# Handles workflow_dispatch invocations passed a short SHA;
-# no-op when GIT_SHA is already a full SHA.
-if ! GIT_SHA=$(git -C "$REPO_DIR" rev-parse --verify "${GIT_SHA}^{commit}" 2>/dev/null); then
-  echo "[deploy] ERROR: GIT_SHA '${GIT_SHA}' does not resolve to a commit in $REPO_DIR" >&2
-  echo "[deploy]   - check that the SHA exists on the remote and was fetched" >&2
-  echo "[deploy]   - check for typos if invoked via workflow_dispatch" >&2
-  exit 1
+# Decrypt secrets once into a temp file. Deleted by the EXIT trap.
+# /dev/shm is RAM-backed tmpfs — plaintext secrets stay in memory, never touch
+# the persistent filesystem. Falls back to /tmp if /dev/shm is unavailable.
+# Explicit if/die rather than VAR=$(cmd): bash silently swallows non-zero exit
+# codes in command substitution assignments under set -e. A sops failure would
+# leave ENV_FILE empty with no log output and no abort without this guard.
+log "§1 — decrypting secrets"
+ENV_FILE=$(mktemp --tmpdir=/dev/shm 2>/dev/null || mktemp)
+trap 'rm -f "$ENV_FILE"' EXIT
+if ! sops -d --output-type dotenv "$SECRETS_FILE" > "$ENV_FILE"; then
+  die "sops decryption failed — check SOPS_AGE_KEY_FILE and secrets file integrity"
 fi
-log "§1 — GIT_SHA resolved to $GIT_SHA"
-# Reset to the exact SHA being deployed so the repo, Compose file, and image
-# are all at the same commit. For rollback (workflow_dispatch with old SHA),
-# this ensures the Compose config and sops file match the image being deployed.
-git -C "$REPO_DIR" reset --hard "$GIT_SHA"
+[[ -s "$ENV_FILE" ]] || die "sops produced empty output — secrets file may be corrupt"
+log "secrets decrypted ($(wc -l < "$ENV_FILE") vars)"
 
 # ── §2: Pull new image ────────────────────────────────────────────────────────
 
