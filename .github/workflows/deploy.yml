@@ -15,19 +15,55 @@ concurrency:
   group: deploy-production
   cancel-in-progress: false
 
-# DEPLOY_SHA is the commit being built and deployed.
-# On push: github.sha. On workflow_dispatch: caller-supplied sha (or github.sha if blank).
-env:
-  DEPLOY_SHA: ${{ inputs.sha || github.sha }}
-
 jobs:
+  # ── resolve-sha ─────────────────────────────────────────────────────────────
+  # Resolves inputs.sha (may be a short SHA) to a full 40-char commit SHA before
+  # any job checks out code or builds an image. All downstream jobs consume this
+  # output so the same SHA is used throughout the pipeline.
+  resolve-sha:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      full_sha: ${{ steps.resolve-sha.outputs.full_sha }}
+    steps:
+      - name: Resolve SHA to full form
+        id: resolve-sha
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          INPUT_SHA="${{ inputs.sha }}"
+          if [ -n "$INPUT_SHA" ]; then
+            # Reject non-SHA inputs (branch names, tags, whitespace) early.
+            # Only full or abbreviated hex commit SHAs are valid for rollback —
+            # accepting a branch name would silently rewrite the operator's intent
+            # into "deploy HEAD of that branch," which is not a rollback.
+            if ! [[ "$INPUT_SHA" =~ ^[0-9a-fA-F]{7,40}$ ]]; then
+              echo "Input SHA '${INPUT_SHA}' is not a valid hex string (7-40 chars)" >&2
+              echo "Supply a full or abbreviated commit SHA, not a branch or tag name." >&2
+              exit 1
+            fi
+            FULL_SHA=$(gh api "repos/${{ github.repository }}/commits/${INPUT_SHA}" --jq '.sha')
+            if [ -z "$FULL_SHA" ] || [ "${#FULL_SHA}" -ne 40 ]; then
+              echo "Could not resolve '${INPUT_SHA}' to a full 40-char SHA" >&2
+              exit 1
+            fi
+            echo "Resolved ${INPUT_SHA} -> ${FULL_SHA}"
+          else
+            FULL_SHA="${{ github.sha }}"
+            echo "Using github.sha: ${FULL_SHA}"
+          fi
+          echo "full_sha=${FULL_SHA}" >> "$GITHUB_OUTPUT"
+
   # ── test ────────────────────────────────────────────────────────────────────
   test:
+    needs: resolve-sha
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
         with:
-          ref: ${{ env.DEPLOY_SHA }}
+          ref: ${{ needs.resolve-sha.outputs.full_sha }}
 
       - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa  # v4
         with:
@@ -48,7 +84,7 @@ jobs:
 
   # ── build-push ──────────────────────────────────────────────────────────────
   build-push:
-    needs: test
+    needs: [test, resolve-sha]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -57,7 +93,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
         with:
-          ref: ${{ env.DEPLOY_SHA }}
+          ref: ${{ needs.resolve-sha.outputs.full_sha }}
 
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f  # v3
 
@@ -75,19 +111,19 @@ jobs:
           push: true
           # Two tags: exact SHA (deployed by deploy.sh) and latest (human reference)
           tags: |
-            ghcr.io/khaledalrashi1/statera-api:${{ env.DEPLOY_SHA }}
+            ghcr.io/khaledalrashi1/statera-api:${{ needs.resolve-sha.outputs.full_sha }}
             ghcr.io/khaledalrashi1/statera-api:latest
-          build-args: GIT_SHA=${{ env.DEPLOY_SHA }}
+          build-args: GIT_SHA=${{ needs.resolve-sha.outputs.full_sha }}
           # OCI revision label: deploy.sh reads this to identify the running SHA for rollback
           labels: |
-            org.opencontainers.image.revision=${{ env.DEPLOY_SHA }}
+            org.opencontainers.image.revision=${{ needs.resolve-sha.outputs.full_sha }}
           # BuildKit GHA cache: cache-hit runs skip all layers except source + chown (~20s)
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   # ── deploy ──────────────────────────────────────────────────────────────────
   deploy:
-    needs: build-push
+    needs: [build-push, resolve-sha]
     runs-on: ubuntu-latest
     # environment: enables GitHub deployment audit log and protection rules
     environment: production
@@ -123,6 +159,7 @@ jobs:
             -o BatchMode=yes \
             "$DEPLOY_USER@$DEPLOY_HOST"
         env:
-          DEPLOY_SHA: ${{ env.DEPLOY_SHA }}
+          # DEPLOY_SHA name is contractual: SendEnv → AcceptEnv → deploy-bootstrap.sh reads $DEPLOY_SHA.
+          DEPLOY_SHA: ${{ needs.resolve-sha.outputs.full_sha }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
