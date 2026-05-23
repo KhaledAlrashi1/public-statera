@@ -38,16 +38,25 @@ die()  { echo -e "${RED}[deploy ERROR]${RST} $*" >&2; exit 1; }
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-# Decrypt secrets once into a variable. Never written to disk.
-# printf '%s' avoids echo interpreting escape sequences that may appear in secret values.
+# Decrypt secrets once into a temp file. Deleted by the EXIT trap.
+# /dev/shm is RAM-backed tmpfs — plaintext secrets stay in memory, never touch
+# the persistent filesystem. Falls back to /tmp if /dev/shm is unavailable.
+# Explicit if/die rather than VAR=$(cmd): bash silently swallows non-zero exit
+# codes in command substitution assignments under set -e. A sops failure would
+# leave ENV_FILE empty with no log output and no abort without this guard.
 log "decrypting secrets"
-ENV_VARS=$(sops -d --output-type dotenv "$SECRETS_FILE")
+ENV_FILE=$(mktemp --tmpdir=/dev/shm 2>/dev/null || mktemp)
+trap 'rm -f "$ENV_FILE"' EXIT
+if ! sops -d --output-type dotenv "$SECRETS_FILE" > "$ENV_FILE"; then
+  die "sops decryption failed — check SOPS_AGE_KEY_FILE and secrets file integrity"
+fi
+[[ -s "$ENV_FILE" ]] || die "sops produced empty output — secrets file may be corrupt"
+log "secrets decrypted ($(wc -l < "$ENV_FILE") vars)"
 
 # compose(): run docker compose with GIT_SHA + decrypted env vars pre-applied.
-# Uses printf '%s' rather than echo to protect secret values with escape sequences.
 compose() {
   GIT_SHA="$GIT_SHA" docker compose \
-    --env-file <(printf '%s' "$ENV_VARS") \
+    --env-file "$ENV_FILE" \
     -f "$COMPOSE_FILE" \
     "$@"
 }
@@ -87,7 +96,7 @@ _rollback() {
     || die "rollback image pull failed for ${PREV_SHA} — manual recovery required"
 
   GIT_SHA="$PREV_SHA" docker compose \
-    --env-file <(printf '%s' "$ENV_VARS") \
+    --env-file "$ENV_FILE" \
     -f "$COMPOSE_FILE" \
     up -d api worker
 

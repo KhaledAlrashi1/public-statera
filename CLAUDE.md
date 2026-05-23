@@ -82,6 +82,12 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 
 Fixes shipped after the original module commit, capturing real-world deployment findings.
 
+**8d — §4 secrets plumbing** `VAR=$(cmd) silently swallows sops failure under set -e; fixed by decrypting to temp file`
+1. **Root cause (Layer 1, confirmed)**: `ENV_VARS=$(sops -d --output-type dotenv ...)` does not trigger `set -e` on sops failure — in bash, `VAR=$(cmd)` command substitutions always exit 0 regardless of the substituted command's exit code. A sops failure silently sets `ENV_VARS=""`, execution continues, all `${VAR}` interpolations in the Compose YAML resolve to empty strings, and MySQL refuses to start with empty `MYSQL_ROOT_PASSWORD`.
+2. **Layer 2 (latent, not confirmed)**: `--env-file <(printf '%s' "$ENV_VARS")` passes a process substitution pipe FD to docker compose. Even when ENV_VARS is populated, a pipe FD leaves no artifact if something goes wrong. The temp file approach improves debuggability (an operator can inspect it during a paused execution) and incidentally hardens against process-substitution edge cases on specific Docker Compose versions.
+3. **Fix**: decrypt sops output to a temp file (`mktemp --tmpdir=/dev/shm` for RAM-backed tmpfs, fallback `/tmp`); use `if ! sops ...; then die; fi` to catch failure explicitly; validate non-empty output; `compose()` and `_rollback()` use `--env-file "$ENV_FILE"`; EXIT trap deletes the file on all exit paths including `set -e` exits and signals.
+4. **Lesson**: never use `VAR=$(cmd)` when the command's failure must abort the script under `set -e`. Use `if ! cmd > file; then die; fi` instead.
+
 **8d — bootstrap §6 repo clone gap** `manual git clone required on production server before first deploy`
 1. **Root cause**: bootstrap.sh §6 (repo clone) was removed in daec3d1 — repo checkout was declared deploy.sh's responsibility. However, deploy.sh §1 calls `git fetch` on an *existing* repo; it does not clone. The production server's `~/statera/` directory existed but was empty (created by bootstrap), so `git fetch` aborted immediately on the first deploy attempt.
 2. **Fix**: manual `git clone https://github.com/KhaledAlrashi1/public-statera.git ~/statera` as the deploy user (2026-05-22). One-time operation per server.
