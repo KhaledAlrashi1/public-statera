@@ -114,7 +114,7 @@ jobs:
             ghcr.io/khaledalrashi1/statera-api:${{ needs.resolve-sha.outputs.full_sha }}
             ghcr.io/khaledalrashi1/statera-api:latest
           build-args: GIT_SHA=${{ needs.resolve-sha.outputs.full_sha }}
-          # OCI revision label: deploy.sh reads this to identify the running SHA for rollback
+          # OCI revision label: deploy-bootstrap.sh reads this to identify the running SHA for rollback
           labels: |
             org.opencontainers.image.revision=${{ needs.resolve-sha.outputs.full_sha }}
           # BuildKit GHA cache: cache-hit runs skip all layers except source + chown (~20s)
@@ -145,11 +145,10 @@ jobs:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
 
-      # SSH to server with SendEnv so DEPLOY_SHA is available in deploy.sh via AcceptEnv.
-      # The server's authorized_keys has command=/home/deploy/statera/deploy/deploy.sh,
-      # so the SSH connection always runs deploy.sh regardless of any script we send —
-      # the `echo` here is ignored; it exists only to give appleboy-style runners a
-      # non-empty command. The env var is what matters.
+      # SSH to server with SendEnv so DEPLOY_SHA is available in deploy-bootstrap.sh
+      # via AcceptEnv. The server's authorized_keys has command= pointing at
+      # deploy-bootstrap.sh, so the connection always runs the bootstrap regardless
+      # of any script we send — the env var is what carries the target SHA.
       - name: Deploy
         run: |
           ssh \
