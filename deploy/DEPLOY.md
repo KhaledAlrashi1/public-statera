@@ -164,3 +164,4 @@ image as `api` and `worker` (`${REGISTRY}:${GIT_SHA}`). `docker pull` in `deploy
 it; no separate pull needed for migrations.
 
 <!-- first operational pipeline run: 2026-05-22 -->
+<!-- trigger: first exercise of d3c8e7c §4 fix -->
