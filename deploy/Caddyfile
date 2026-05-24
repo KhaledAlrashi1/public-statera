@@ -19,12 +19,11 @@ staterafinance.app {
 		Content-Security-Policy-Report-Only "default-src 'self'; img-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
 	}
 
-	# API routes — proxy to Hono, preserving forwarded-for headers.
+	# API routes — proxy to Hono. X-Real-IP is set explicitly;
+	# Caddy passes X-Forwarded-Proto and X-Forwarded-For automatically.
 	handle /api/* {
 		reverse_proxy api:3000 {
-			header_up X-Forwarded-Proto {scheme}
-			header_up X-Forwarded-For  {remote_host}
-			header_up X-Real-IP        {remote_host}
+			header_up X-Real-IP {remote_host}
 		}
 	}
 
@@ -32,9 +31,7 @@ staterafinance.app {
 	@probes path /healthz /readyz
 	handle @probes {
 		reverse_proxy api:3000 {
-			header_up X-Forwarded-Proto {scheme}
-			header_up X-Forwarded-For  {remote_host}
-			header_up X-Real-IP        {remote_host}
+			header_up X-Real-IP {remote_host}
 		}
 	}
 
