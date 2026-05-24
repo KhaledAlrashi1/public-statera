@@ -165,7 +165,7 @@ describe("transactions/helpers", () => {
     test("fills category from suggestion when current category is empty", () => {
       const s = makeSetters()
       applyTransactionSuggestion(
-        { name: "KFC", category: "Dining", merchant: "KFC Kuwait" },
+        { name: "KFC", category: { id: 1, name: "Dining" }, merchant: { id: 1, name: "KFC Kuwait" } },
         s.setName, s.setCategory, s.setMerchant, "", ""
       )
       expect(s.name.value).toBe("KFC")
@@ -223,7 +223,7 @@ describe("transactions/helpers", () => {
     test("suggestion merchant takes precedence over currentMerchant", () => {
       const s = makeSetters()
       applyTransactionSuggestion(
-        { name: "KFC", category: "Dining", merchant: "KFC Kuwait" },
+        { name: "KFC", category: { id: 1, name: "Dining" }, merchant: { id: 1, name: "KFC Kuwait" } },
         s.setName, s.setCategory, s.setMerchant, "Old Merchant", ""
       )
       expect(s.merchant.value).toBe("KFC Kuwait")

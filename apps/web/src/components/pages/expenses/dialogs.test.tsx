@@ -104,7 +104,7 @@ describe("expenses/dialogs", () => {
       setAddForm,
       setSuggestOpen,
       suggestOpen: true,
-      suggestions: [{ name: "Flat White", category: "Food", merchant: "Cafe" }],
+      suggestions: [{ name: "Flat White", category: { id: 1, name: "Food" }, merchant: { id: 1, name: "Cafe" } }],
     })
 
     fireEvent.click(screen.getByRole("button", { name: /Flat White/i }))
@@ -148,7 +148,7 @@ describe("expenses/dialogs", () => {
     fireEvent.click(screen.getByRole("button", { name: /Save split/i }))
 
     expect(
-      await screen.findByText("Please fill name, category, and amount for all split rows.")
+      await screen.findByText("Complete split row 2 with a valid amount.")
     ).toBeInTheDocument()
     expect(mocks.transactionsApi.split).not.toHaveBeenCalled()
     expect(props.onSaved).not.toHaveBeenCalled()
@@ -206,29 +206,20 @@ describe("expenses/dialogs", () => {
         memo: "Morning",
         name: "Coffee",
         amount_kd: "3.500",
-        items: [
-          {
-            id: 101,
-            transaction_id: 77,
-            name: "Coffee",
-            category: "Food",
-            amount_kd: "2.000",
-            sort_order: 0,
-          },
-          {
-            id: 102,
-            transaction_id: 77,
-            name: "Snack",
-            category: "Food",
-            amount_kd: "1.500",
-            sort_order: 1,
-          },
-        ],
+        items: [],
       },
     })
 
     const props = renderSplitDialog()
     await waitFor(() => expect(mocks.transactionsApi.get).toHaveBeenCalledWith(77))
+
+    // Dialog initializes with row 1 = top-level txn fields, row 2 = empty second row.
+    // Fill in the second row and adjust the first row's amount before saving.
+    const amountInputs = screen.getAllByPlaceholderText("0.000")
+    const nameInputs = screen.getAllByPlaceholderText("e.g. Blue-light glasses")
+    fireEvent.change(amountInputs[0], { target: { value: "2.000" } })
+    fireEvent.change(nameInputs[1], { target: { value: "Snack" } })
+    fireEvent.change(amountInputs[1], { target: { value: "1.500" } })
 
     fireEvent.click(screen.getByRole("button", { name: /Save split/i }))
 

@@ -38,8 +38,8 @@ describe("DebtSummaryPanel", () => {
     )
 
     expect(screen.getByText("Debt Summary")).toBeInTheDocument()
-    expect(screen.getByText(/KD 3650.000/)).toBeInTheDocument()
-    expect(screen.getByText(/KD 145.000/)).toBeInTheDocument()
+    expect(screen.getByText("KD 3.6K")).toBeInTheDocument()
+    expect(screen.getByText("KD 145")).toBeInTheDocument()
     expect(screen.getByText("2")).toBeInTheDocument()
   })
 
@@ -53,7 +53,7 @@ describe("DebtSummaryPanel", () => {
       />
     )
 
-    expect(screen.getByText(/No debt accounts tracked yet/i)).toBeInTheDocument()
+    expect(screen.getByText(/You haven.*added any debts/i)).toBeInTheDocument()
     fireEvent.click(screen.getByRole("button", { name: "Track your debts" }))
     expect(onOpenProfile).toHaveBeenCalledTimes(1)
   })

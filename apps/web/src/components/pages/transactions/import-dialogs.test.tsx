@@ -107,7 +107,6 @@ describe("PreviewImportDialog", () => {
     await waitFor(() => {
       expect(mocks.uploadApi.importCommit).toHaveBeenCalledWith(
         expect.any(Array),
-        [],
         { replaceDemoData: true, atomic: true, fileHash: undefined }
       )
     })
@@ -223,7 +222,6 @@ describe("PreviewImportDialog", () => {
             name: "Bread",
           }),
         ],
-        [],
         { replaceDemoData: false, atomic: true, fileHash: undefined }
       )
     })
@@ -314,7 +312,6 @@ describe("PreviewImportDialog", () => {
     await waitFor(() => {
       expect(mocks.uploadApi.importCommit).toHaveBeenCalledWith(
         expect.any(Array),
-        [],
         { replaceDemoData: false, atomic: true, fileHash: "preview-file-hash" }
       )
     })

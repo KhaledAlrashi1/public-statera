@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import InsightsPage from "./InsightsPage"
 
@@ -128,6 +128,8 @@ function renderPage() {
 
 describe("InsightsPage", () => {
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] })
+    vi.setSystemTime(new Date("2026-03-15"))
     vi.clearAllMocks()
     window.localStorage.clear()
     Object.defineProperty(HTMLElement.prototype, "hasPointerCapture", {
@@ -167,6 +169,10 @@ describe("InsightsPage", () => {
       actual_spend_kd: "100.000",
     })
     mocks.analyticsApi.weeklyDigest.mockResolvedValue(null)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   it("persists dismissed recurring commitments per user across revisits", async () => {

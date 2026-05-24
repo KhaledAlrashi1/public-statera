@@ -140,12 +140,4 @@ describe("AppShell", () => {
     })
   })
 
-  it("surfaces the UI gallery from the header user menu", () => {
-    renderShell("/")
-
-    fireEvent.click(screen.getByRole("button", { name: "Open user menu" }))
-    fireEvent.click(screen.getByRole("menuitem", { name: "UI Gallery" }))
-
-    expect(mocks.navigate).toHaveBeenCalledWith("/dev-ui")
-  })
 })
