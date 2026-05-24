@@ -10,8 +10,9 @@
 #   docker compose -f docker-compose.prod.yml up -d
 #   docker compose -f docker-compose.prod.yml run --rm migrate
 #
-# Reverse proxy (nginx) is configured in nginx/nginx.conf and will be replaced
-# or reconfigured in Module 8e (Caddy vs. nginx decision pending).
+# Reverse proxy: Caddy (configured in deploy/Caddyfile, baked into the
+# statera-web image). Caddy terminates TLS via Let's Encrypt ACME on
+# staterafinance.app and reverse-proxies /api/* to the api service.
 
 services:
   redis:
@@ -124,21 +125,25 @@ services:
     profiles:
       - migrate
 
-  nginx:
-    # nginx:1.27-alpine — reverse proxy and TLS termination.
-    # Will be replaced or reconfigured in Module 8e (Caddy vs. nginx decision pending).
-    image: nginx:1.27-alpine
+  # ── web ─────────────────────────────────────────────────────────────────────
+  # Caddy reverse proxy + frontend asset serving.
+  # Caddyfile baked into image; dist/ baked into /srv.
+  # TLS via Let's Encrypt ACME (Caddy-managed, auto-renewing).
+  web:
+    image: ${REGISTRY:-ghcr.io/khaledalrashi1}/statera-web:${GIT_SHA:-dev}
     restart: unless-stopped
     depends_on:
       api:
         condition: service_healthy
     ports:
-      - "${NGINX_HTTP_PORT:-80}:80"
-      - "${NGINX_HTTPS_PORT:-443}:443"
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./apps/web/dist:/usr/share/nginx/html:ro
-      - ./nginx/certs:/etc/nginx/certs:ro
+      # ACME state and certs — must persist across container restarts to
+      # avoid Let's Encrypt rate limits on re-provisioning.
+      - caddy_data:/data
+      # Caddy runtime config cache — conventional, not strictly required.
+      - caddy_config:/config
 
 volumes:
   mysqldata:
@@ -151,3 +156,7 @@ volumes:
       type: none
       o: bind
       device: "${MYSQL_DATA_PATH:-/mnt/mysql-data}"
+  # Caddy ACME state — Docker-managed volume, not bind-mount. Persistence
+  # is required (Let's Encrypt rate limits); host filesystem layout doesn't matter.
+  caddy_data:
+  caddy_config:
