@@ -78,9 +78,11 @@ jobs:
 
       # Type check — catches type errors before vitest runs
       - run: pnpm --filter api exec tsc --noEmit
+      - run: pnpm --filter statera-frontend exec tsc --noEmit
 
       # Run vitest without watch mode
       - run: pnpm --filter api test run
+      - run: pnpm --filter statera-frontend run test:unit
 
   # ── build-push ──────────────────────────────────────────────────────────────
   build-push:
