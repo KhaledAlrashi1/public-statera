@@ -11,19 +11,21 @@
 node_modules/
 apps/*/node_modules/
 
-# Frontend — not used by the API image
-apps/web/src/
-apps/web/public/
-apps/web/index.html
+# Frontend — dist is never needed (api ignores it; web
+# image rebuilds it from source). Other apps/web files
+# (src/, public/, index.html, *.config.*, tsconfig*.json)
+# are kept in build context because the web image's
+# build stage needs them; the api Dockerfile doesn't COPY
+# them, so their presence in api's build context is
+# harmless.
 apps/web/dist/
-apps/web/*.config.*
-apps/web/tsconfig*.json
 
 # Deployment and tooling — not part of application runtime
 docker/
 docker-compose*.yml
 nginx/
 deploy/
+!deploy/Caddyfile
 tools/
 
 # CI/CD

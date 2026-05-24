@@ -1,0 +1,54 @@
+{
+	email ops@staterafinance.app
+}
+
+staterafinance.app {
+	# Body size limit — applies to API uploads via
+	# reverse_proxy. Static file routes don't read bodies,
+	# so this is a no-op there.
+	# Matches nginx client_max_body_size 25m.
+	request_body {
+		max_size 25MB
+	}
+
+	# Security headers on all responses.
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		# Report-Only: collect violations before enforcing.
+		# Switch to Content-Security-Policy after ≥1 week of production data shows no violations.
+		Content-Security-Policy-Report-Only "default-src 'self'; img-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+	}
+
+	# API routes — proxy to Hono, preserving forwarded-for headers.
+	handle /api/* {
+		reverse_proxy api:3000 {
+			header_up X-Forwarded-Proto {scheme}
+			header_up X-Forwarded-For  {remote_host}
+			header_up X-Real-IP        {remote_host}
+		}
+	}
+
+	# Health and readiness probes — root-level, not under /api/.
+	@probes path /healthz /readyz
+	handle @probes {
+		reverse_proxy api:3000 {
+			header_up X-Forwarded-Proto {scheme}
+			header_up X-Forwarded-For  {remote_host}
+			header_up X-Real-IP        {remote_host}
+		}
+	}
+
+	# Immutable assets — 1-year cache. Matches nginx "expires 1y; Cache-Control public, immutable".
+	handle /assets/* {
+		root * /srv
+		header Cache-Control "public, immutable, max-age=31536000"
+		file_server
+	}
+
+	# SPA fallback — all other paths serve index.html.
+	handle {
+		root * /srv
+		try_files {path} {path}/ /index.html
+		file_server
+	}
+}
