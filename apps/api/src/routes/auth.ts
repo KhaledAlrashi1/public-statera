@@ -322,8 +322,37 @@ router.post("/logout", (c) => {
 })
 
 // GET /api/auth/me
-router.get("/me", requireAuth, (c) => {
-  return c.json({ session: c.var.session })
+router.get("/me", requireAuth, async (c) => {
+  const { userId } = c.var.session
+  const db = getDb()
+  const [found] = await db
+    .select({
+      id: users.id,
+      email: users.email,
+      display_name: users.displayName,
+      first_name: users.firstName,
+      last_name: users.lastName,
+      totp_enabled: users.totpEnabled,
+      created_at: users.createdAt,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1)
+
+  if (!found) {
+    return c.json({ ok: false, data: null, error: "User not found.", code: "user_not_found" }, 401)
+  }
+
+  return c.json({
+    ok: true,
+    user: {
+      ...found,
+      created_at: found.created_at.toISOString().replace(/\.\d{3}Z$/, "+00:00"),
+    },
+    // template_suggestions and open_banking have no Hono routes (deferred indefinitely).
+    // TODO(module-9-feature-flags-audit): wire up when features are ported.
+    flags: { template_suggestions: false, open_banking: false },
+  })
 })
 
 // ── Account deletion re-auth ──────────────────────────────────────────────────
