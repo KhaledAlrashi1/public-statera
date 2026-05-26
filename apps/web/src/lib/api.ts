@@ -680,7 +680,7 @@ async function downloadTransactionExport(
 
 export const analyticsApi = {
   spendByCategory: async () => {
-    const payload = await apiFetch<unknown>("/api/spend-by-category")
+    const payload = await apiFetch<unknown>("/api/analytics/spend-by-category")
     const data = readApiData<{ items?: SpendByCategory } | SpendByCategory>(payload)
     if (data && typeof data === "object" && !Array.isArray(data) && "items" in data) {
       return (data as { items?: SpendByCategory }).items || {}
@@ -688,7 +688,7 @@ export const analyticsApi = {
     return (data || {}) as SpendByCategory
   },
   spendByMonth: async () => {
-    const payload = await apiFetch<unknown>("/api/spend-by-month")
+    const payload = await apiFetch<unknown>("/api/analytics/spend-by-month")
     const data = readApiData<{ items?: SpendByMonth[] } | SpendByMonth[]>(payload)
     if (Array.isArray(data)) return data
     return Array.isArray(data.items) ? data.items : []
@@ -698,22 +698,22 @@ export const analyticsApi = {
     if (params?.months !== undefined) p.set("months", String(params.months))
     if (params?.until) p.set("until", params.until)
     const suffix = p.toString()
-    return apiFetch<DashboardMetricsResponse>(`/api/dashboard-metrics${suffix ? `?${suffix}` : ""}`)
+    return apiFetch<DashboardMetricsResponse>(`/api/analytics/dashboard-metrics${suffix ? `?${suffix}` : ""}`)
   },
   budgetMetrics: (month: string, range: "month" | "30" | "90" | "365" | "all") => {
     const p = new URLSearchParams({ month, range })
-    return apiFetch<BudgetMetricsResponse>(`/api/budget-metrics?${p}`)
+    return apiFetch<BudgetMetricsResponse>(`/api/analytics/budget-metrics?${p}`)
   },
   safeToSpend: (month: string) => {
     const p = new URLSearchParams({ month })
-    return apiFetch<SafeToSpendResponse>(`/api/safe-to-spend?${p}`)
+    return apiFetch<SafeToSpendResponse>(`/api/analytics/safe-to-spend?${p}`)
   },
   dashboardBundle: async (month: string) => {
     const p = new URLSearchParams({ month })
-    const payload = await apiFetch<unknown>(`/api/dashboard-bundle?${p}`)
+    const payload = await apiFetch<unknown>(`/api/analytics/dashboard-bundle?${p}`)
     return readApiData<DashboardBundleResponse>(payload)
   },
-  incomePattern: () => apiFetch<IncomePatternResponse>("/api/income-pattern"),
+  incomePattern: () => apiFetch<IncomePatternResponse>("/api/analytics/income-pattern"),
   expenseBreakdown: (params: {
     dimension: "category" | "merchant" | "transaction"
     range: "month" | "12m" | "all"
@@ -727,7 +727,7 @@ export const analyticsApi = {
     if (params.month) p.set("month", params.month)
     if (params.limit !== undefined) p.set("limit", String(params.limit))
     if (params.source) p.set("source", params.source)
-    return apiFetch<ExpenseBreakdownResponse>(`/api/expense-breakdown?${p}`)
+    return apiFetch<ExpenseBreakdownResponse>(`/api/analytics/expense-breakdown?${p}`)
   },
   accountOverview: (params?: { month?: string }) => {
     const p = new URLSearchParams()
@@ -744,17 +744,17 @@ export const analyticsApi = {
     p.set("merchant", params.merchant)
     if (params.months !== undefined) p.set("months", String(params.months))
     if (params.until) p.set("until", params.until)
-    return apiFetch<ExpenseMerchantTrendResponse>(`/api/expense-merchant-trend?${p}`)
+    return apiFetch<ExpenseMerchantTrendResponse>(`/api/analytics/expense-merchant-trend?${p}`)
   },
   recurringPatterns: (params?: { days?: number }) => {
     const p = new URLSearchParams()
     if (params?.days !== undefined) p.set("days", String(params.days))
     const suffix = p.toString()
-    return apiFetch<RecurringPatternsResponse>(`/api/recurring-patterns${suffix ? `?${suffix}` : ""}`)
+    return apiFetch<RecurringPatternsResponse>(`/api/analytics/recurring-patterns${suffix ? `?${suffix}` : ""}`)
   },
-  weeklyDigest: () => apiFetch<WeeklyDigestResponse>("/api/weekly-digest"),
+  weeklyDigest: () => apiFetch<WeeklyDigestResponse>("/api/analytics/weekly-digest"),
   snapshot: async () => {
-    const payload = await apiFetch<unknown>("/api/snapshot")
+    const payload = await apiFetch<unknown>("/api/analytics/snapshot")
     return readApiData<SnapshotResponse>(payload)
   },
   spendingIntelligence: async (month?: string) => {
