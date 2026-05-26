@@ -1,3 +1,5 @@
+> (Historical — rename pass completed 2026-04-24. Retained for reference.)
+
 # DinarTrack → Personal Statera Rename Inventory
 
 Generated: 2026-04-24. This document is the authoritative working record for the rename pass.
