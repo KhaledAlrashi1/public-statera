@@ -54,9 +54,6 @@ import type {
   ApiPagedMeta,
 } from "@/types/api"
 
-// CSRF token management
-let csrfToken: string | null = null
-
 export class ApiError extends Error {
   status: number
   code?: string
@@ -71,40 +68,7 @@ export class ApiError extends Error {
   }
 }
 
-export function __resetApiClientStateForTests() {
-  csrfToken = null
-}
-
-async function getCsrfToken(): Promise<string> {
-  // Try cookie first
-  const cookies = document.cookie.split(";")
-  for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split("=")
-    if (name === "csrf_token") {
-      csrfToken = decodeURIComponent(value)
-      return csrfToken
-    }
-  }
-  if (csrfToken) return csrfToken
-  // Fall back to API
-  const res = await fetch("/api/csrf-token")
-  const data = await res.json()
-  csrfToken = data.csrf_token
-  return csrfToken!
-}
-
-async function refreshCsrfToken(): Promise<string> {
-  const res = await fetch("/api/csrf-token", {
-    credentials: "include",
-    headers: {
-      Accept: "application/json",
-      "X-Requested-With": "fetch",
-    },
-  })
-  const data = await res.json()
-  csrfToken = data.csrf_token
-  return csrfToken!
-}
+export function __resetApiClientStateForTests() {}
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value !== null && typeof value === "object" ? (value as Record<string, unknown>) : null
@@ -158,12 +122,6 @@ function readErrorCode(payload: unknown): string | undefined {
   const error = asRecord(rec.error)
   const nested = error?.code
   return typeof nested === "string" && nested.trim() ? nested : undefined
-}
-
-function isCsrfFailure(payload: unknown, status: number): boolean {
-  if (status !== 403) return false
-  const message = readErrorMessage(payload, status).toLowerCase()
-  return message.includes("csrf")
 }
 
 function readNumber(value: unknown, fallback: number): number {
@@ -302,51 +260,29 @@ async function collectPagedItems<T>(
   return out
 }
 
-// Generic fetch wrapper with CSRF and error handling
+// Generic fetch wrapper with error handling
 async function apiFetch<T>(
   url: string,
   options: RequestInit = {}
 ): Promise<T> {
   const method = (options.method || "GET").toUpperCase()
-  const isMutating = method !== "GET"
 
-  const buildHeaders = async (csrfOverride?: string) => {
-    const headers: Record<string, string> = {
-      Accept: "application/json",
-      "X-Requested-With": "fetch",
-      ...(options.headers as Record<string, string>),
-    }
-
-    if (isMutating) {
-      headers["X-CSRFToken"] = csrfOverride ?? await getCsrfToken()
-    }
-
-    if (options.body && typeof options.body === "string") {
-      headers["Content-Type"] = "application/json"
-    }
-
-    return headers
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    "X-Requested-With": "fetch",
+    ...(options.headers as Record<string, string>),
   }
 
-  const request = async (csrfOverride?: string) =>
-    fetch(url, {
-      ...options,
-      method,
-      headers: await buildHeaders(csrfOverride),
-      credentials: "include",
-    })
-
-  let res = await request()
-  let errorPayload: unknown = null
-
-  if (!res.ok && isMutating) {
-    errorPayload = await res.json().catch(() => null)
-    if (isCsrfFailure(errorPayload, res.status)) {
-      const freshToken = await refreshCsrfToken()
-      res = await request(freshToken)
-      errorPayload = null
-    }
+  if (options.body && typeof options.body === "string") {
+    headers["Content-Type"] = "application/json"
   }
+
+  const res = await fetch(url, {
+    ...options,
+    method,
+    headers,
+    credentials: "include",
+  })
 
   // Handle 401 — dispatch event for AuthContext to catch
   if (res.status === 401 && !url.startsWith("/api/auth/")) {
@@ -355,7 +291,7 @@ async function apiFetch<T>(
   }
 
   if (!res.ok) {
-    const data = errorPayload ?? await res.json().catch(() => null)
+    const data = await res.json().catch(() => null)
     throw new ApiError(
       readErrorMessage(data, res.status),
       res.status,
@@ -641,13 +577,11 @@ async function downloadTransactionExport(
       format === "csv"
         ? "text/csv"
         : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    const csrf = await getCsrfToken()
     const res = await fetch(`/api/transactions/export-${extension}`, {
       method: "GET",
       headers: {
         Accept: accept,
         "X-Requested-With": "fetch",
-        "X-CSRFToken": csrf,
       },
       credentials: "include",
     })
@@ -1188,15 +1122,13 @@ export const bankApi = {
 
 export const uploadApi = {
   preview: async (file: File, columnMap?: Record<string, string>) => {
-    const csrf = await getCsrfToken()
     const fd = new FormData()
     fd.append("file", file)
-    fd.append("csrf_token", csrf)
     if (columnMap) fd.append("column_map", JSON.stringify(columnMap))
 
     const res = await fetch("/api/transactions/upload-preview", {
       method: "POST",
-      headers: { Accept: "application/json", "X-Requested-With": "fetch", "X-CSRFToken": csrf },
+      headers: { Accept: "application/json", "X-Requested-With": "fetch" },
       credentials: "include",
       body: fd,
     })
@@ -1293,12 +1225,6 @@ export const authApi = {
       flags?: Partial<FeatureFlags>
     }>("/api/auth/me"),
 
-  login: (email: string, password: string) =>
-    apiFetch<AuthResponse>("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    }),
-
   twoFactorSetup: () =>
     apiFetch<{
       ok: boolean
@@ -1321,7 +1247,7 @@ export const authApi = {
       body: JSON.stringify(payload),
     }),
 
-  twoFactorDisable: (payload: { password: string; code: string }) =>
+  twoFactorDisable: (payload: { code: string }) =>
     apiFetch<{ ok: boolean; code?: string; error?: string }>("/api/auth/2fa/disable", {
       method: "POST",
       body: JSON.stringify(payload),
@@ -1341,12 +1267,6 @@ export const authApi = {
     }>("/api/account", {
       method: "DELETE",
       body: JSON.stringify(payload),
-    }),
-
-  register: (email: string, password: string, first_name?: string, last_name?: string) =>
-    apiFetch<AuthResponse>("/api/auth/register", {
-      method: "POST",
-      body: JSON.stringify({ email, password, first_name, last_name }),
     }),
 
   logout: () =>
@@ -1420,12 +1340,6 @@ export const authApi = {
       body: JSON.stringify(data),
     }),
 
-  changePassword: (data: { current_password: string; new_password: string; confirm_password: string }) =>
-    apiFetch<{ ok: boolean; errors?: string[] }>("/api/auth/profile/change-password", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-
   requestEmailChangeLink: (data: { new_email: string; current_password: string }) =>
     apiFetch<{ ok: boolean; message?: string; preview_url?: string; errors?: string[] }>(
       "/api/auth/profile/request-email-change-link",
@@ -1434,12 +1348,6 @@ export const authApi = {
         body: JSON.stringify(data),
       }
     ),
-
-  confirmEmailChange: (data: { token: string }) =>
-    apiFetch<{ ok: boolean; error?: string }>("/api/auth/profile/confirm-email-change", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
 
   requestPasswordChangeLink: (data: { current_password: string }) =>
     apiFetch<{ ok: boolean; message?: string; preview_url?: string; errors?: string[] }>(
@@ -1450,24 +1358,4 @@ export const authApi = {
       }
     ),
 
-  confirmPasswordChange: (data: { token: string; new_password: string; confirm_password: string }) =>
-    apiFetch<{ ok: boolean; error?: string }>("/api/auth/profile/confirm-password-change", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-
-  requestPasswordReset: (data: { email: string }) =>
-    apiFetch<{ ok: boolean; message?: string; preview_url?: string; error?: string }>(
-      "/api/auth/forgot-password/request",
-      {
-        method: "POST",
-        body: JSON.stringify(data),
-      }
-    ),
-
-  confirmPasswordReset: (data: { token: string; new_password: string; confirm_password: string }) =>
-    apiFetch<{ ok: boolean; error?: string }>("/api/auth/forgot-password/confirm", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
 }

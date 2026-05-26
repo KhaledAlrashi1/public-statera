@@ -35,7 +35,6 @@ describe("transactionsApi pagination", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     __resetApiClientStateForTests()
-    document.cookie = "csrf_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
     vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch)
   })
 
@@ -148,7 +147,6 @@ describe("transactionsApi pagination", () => {
   })
 
   it("templateSuggestionFeedback posts outcome payload", async () => {
-    mockJsonResponse({ csrf_token: "csrf-token" })
     mockJsonResponse({
       ok: true,
       data: {
@@ -170,8 +168,8 @@ describe("transactionsApi pagination", () => {
       source: "manual_apply",
     })
 
-    expect(fetchMock).toHaveBeenCalledTimes(2)
-    const call = fetchMock.mock.calls[1]
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const call = fetchMock.mock.calls[0]
     expect(String(call[0])).toContain("/api/transaction-template-suggestions/feedback")
     const options = call[1] as RequestInit
     expect(options.method).toBe("POST")
@@ -189,7 +187,6 @@ describe("envelope parsing", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     __resetApiClientStateForTests()
-    document.cookie = "csrf_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
     vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch)
   })
 
@@ -253,7 +250,6 @@ describe("envelope parsing", () => {
   })
 
   it("memorizedApi.create reads item from envelope data", async () => {
-    mockJsonResponse({ csrf_token: "test-csrf-token" })
     mockJsonResponse({
       ok: true,
       data: {
@@ -311,7 +307,6 @@ describe("envelope parsing", () => {
   })
 
   it("notificationsApi.dismissBudgetAlert posts and parses response", async () => {
-    mockJsonResponse({ csrf_token: "csrf-token" })
     mockJsonResponse({
       ok: true,
       data: {
@@ -330,7 +325,7 @@ describe("envelope parsing", () => {
     expect(result.alert_id).toBe(5)
     expect(result.alert_key).toBe("2026-02:12")
 
-    const call = fetchMock.mock.calls[1]
+    const call = fetchMock.mock.calls[0]
     expect(String(call[0])).toContain("/api/notifications/budget-alerts/5/dismiss")
     const options = call[1] as RequestInit
     expect(options.method).toBe("POST")
@@ -413,80 +408,4 @@ describe("envelope parsing", () => {
     expect(result.account_overview.total_income_mtd).toBe("500.000")
   })
 
-  it("prefers the latest csrf cookie over a previously cached token", async () => {
-    document.cookie = "csrf_token=first-token"
-    mockJsonResponse({
-      ok: true,
-      data: {
-        dismissed: true,
-        already_dismissed: false,
-        alert_id: 5,
-        alert_key: "2026-02:12",
-        month: "2026-02",
-      },
-      error: null,
-      meta: {},
-    })
-    mockJsonResponse({
-      ok: true,
-      data: {
-        dismissed: true,
-        already_dismissed: false,
-        alert_id: 6,
-        alert_key: "2026-02:13",
-        month: "2026-02",
-      },
-      error: null,
-      meta: {},
-    })
-
-    await notificationsApi.dismissBudgetAlert(5)
-
-    document.cookie = "csrf_token=second-token"
-    await notificationsApi.dismissBudgetAlert(6)
-
-    const firstHeaders = (fetchMock.mock.calls[0][1] as RequestInit).headers as Record<string, string>
-    const secondHeaders = (fetchMock.mock.calls[1][1] as RequestInit).headers as Record<string, string>
-    expect(firstHeaders["X-CSRFToken"]).toBe("first-token")
-    expect(secondHeaders["X-CSRFToken"]).toBe("second-token")
-  })
-
-  it("refreshes csrf and retries once after a token mismatch", async () => {
-    document.cookie = "csrf_token=stale-token"
-    fetchMock.mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          ok: false,
-          error: "The CSRF tokens do not match.",
-        }),
-        {
-          status: 403,
-          headers: { "Content-Type": "application/json" },
-        }
-      )
-    )
-    mockJsonResponse({ csrf_token: "fresh-token" })
-    mockJsonResponse({
-      ok: true,
-      data: {
-        dismissed: true,
-        already_dismissed: false,
-        alert_id: 5,
-        alert_key: "2026-02:12",
-        month: "2026-02",
-      },
-      error: null,
-      meta: {},
-    })
-
-    const result = await notificationsApi.dismissBudgetAlert(5)
-
-    expect(result.dismissed).toBe(true)
-    expect(fetchMock).toHaveBeenCalledTimes(3)
-    const initialHeaders = (fetchMock.mock.calls[0][1] as RequestInit).headers as Record<string, string>
-    const retryHeaders = (fetchMock.mock.calls[2][1] as RequestInit).headers as Record<string, string>
-    expect(initialHeaders["X-CSRFToken"]).toBe("stale-token")
-    expect(String(fetchMock.mock.calls[1][0])).toBe("/api/csrf-token")
-    expect(retryHeaders["X-CSRFToken"]).toBe("fresh-token")
-  })
 })

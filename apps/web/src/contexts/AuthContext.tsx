@@ -11,12 +11,10 @@ interface AuthContextType {
   }
   isLoading: boolean
   refreshUser: () => Promise<void>
-  login: (email: string, password: string) => Promise<{ requires2FA: boolean }>
   verifyTwoFactor: (
     code: string,
     type?: "totp" | "backup"
   ) => Promise<{ warning?: string; backupCodesRemaining?: number }>
-  register: (email: string, password: string, firstName?: string, lastName?: string) => Promise<void>
   logout: () => Promise<void>
 }
 
@@ -87,20 +85,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("auth:unauthorized", handler)
   }, [])
 
-  const login = useCallback(
-    async (email: string, password: string) => {
-      const data = await authApi.login(email, password)
-      if (data.requires_2fa) {
-        setUser(null)
-        return { requires2FA: true }
-      }
-      setUser(data.user)
-      await refreshUser()
-      return { requires2FA: false }
-    },
-    [refreshUser]
-  )
-
   const verifyTwoFactor = useCallback(
     async (code: string, type: "totp" | "backup" = "totp") => {
       const data = await authApi.twoFactorVerify({ code, type })
@@ -114,15 +98,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [refreshUser]
   )
 
-  const register = useCallback(
-    async (email: string, password: string, firstName?: string, lastName?: string) => {
-      const data = await authApi.register(email, password, firstName, lastName)
-      setUser(data.user)
-      await refreshUser()
-    },
-    [refreshUser]
-  )
-
   const logout = useCallback(async () => {
     await authApi.logout()
     setUser(null)
@@ -132,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, flags, isLoading, refreshUser, login, verifyTwoFactor, register, logout }}
+      value={{ user, flags, isLoading, refreshUser, verifyTwoFactor, logout }}
     >
       {children}
     </AuthContext.Provider>

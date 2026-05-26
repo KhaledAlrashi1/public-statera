@@ -7,10 +7,6 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/toaster"
 import { getUserFirstName, useAuth } from "@/contexts/AuthContext"
 import { ApiError, authApi } from "@/lib/api"
-import {
-  clearPendingWorkspaceChoice,
-  hasPendingWorkspaceChoice,
-} from "@/lib/workspace-choice"
 
 export default function WorkspaceChoicePage() {
   const { user } = useAuth()
@@ -21,14 +17,13 @@ export default function WorkspaceChoicePage() {
   const [searchParams] = useSearchParams()
   const fromSignup = searchParams.get("source") === "signup"
 
-  if (!fromSignup && !hasPendingWorkspaceChoice()) {
+  if (!fromSignup) {
     return <Navigate to="/" replace />
   }
 
   const firstName = getUserFirstName(user) || "there"
 
   const continueEmpty = () => {
-    clearPendingWorkspaceChoice()
     navigate("/", { replace: true })
   }
 
@@ -36,7 +31,6 @@ export default function WorkspaceChoicePage() {
     setLoadingDemo(true)
     try {
       const summary = await authApi.loadDemoData()
-      clearPendingWorkspaceChoice()
       await queryClient.invalidateQueries()
       toast.success(
         `Loaded ${summary.transactions_created} demo transactions across ${summary.months_seeded} months.`
@@ -44,7 +38,6 @@ export default function WorkspaceChoicePage() {
       navigate("/", { replace: true })
     } catch (error) {
       if (error instanceof ApiError && error.code === "demo_data_not_empty") {
-        clearPendingWorkspaceChoice()
         navigate("/", { replace: true })
       }
       toast.error(error instanceof Error ? error.message : "We couldn't load the demo workspace right now.")

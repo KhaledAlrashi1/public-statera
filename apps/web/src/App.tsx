@@ -61,15 +61,10 @@ const TransactionsPage = lazyWithRetry("transactions", () => import("@/component
 const IncomePage = lazyWithRetry("income", () => import("@/components/pages/IncomePage"))
 const BudgetPage = lazyWithRetry("budget", () => import("@/components/pages/BudgetPage"))
 const LoginPage = lazyWithRetry("login", () => import("@/components/pages/LoginPage"))
-const RegisterPage = lazyWithRetry("register", () => import("@/components/pages/RegisterPage"))
 const WorkspaceChoicePage = lazyWithRetry("workspace-choice", () => import("@/components/pages/WorkspaceChoicePage"))
 const ProfilePage = lazyWithRetry("profile", () => import("@/components/pages/ProfilePage"))
 const InsightsPage = lazyWithRetry("insights", () => import("@/components/pages/InsightsPage"))
 const SpendingIntelligencePage = lazyWithRetry("spending-intelligence", () => import("@/components/pages/SpendingIntelligencePage"))
-const ConfirmEmailChangePage = lazyWithRetry("confirm-email-change", () => import("@/components/pages/ConfirmEmailChangePage"))
-const ConfirmPasswordChangePage = lazyWithRetry("confirm-password-change", () => import("@/components/pages/ConfirmPasswordChangePage"))
-const ForgotPasswordPage = lazyWithRetry("forgot-password", () => import("@/components/pages/ForgotPasswordPage"))
-const ResetPasswordPage = lazyWithRetry("reset-password", () => import("@/components/pages/ResetPasswordPage"))
 const NotFoundPage = lazyWithRetry("not-found", () => import("@/components/pages/NotFoundPage"))
 const TwoFactorVerifyPage = lazyWithRetry("2fa-verify", () => import("@/components/pages/TwoFactorVerifyPage"))
 
@@ -155,11 +150,6 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/auth/2fa-verify" element={<TwoFactorVerifyPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
-      <Route path="/security/email-change" element={<ConfirmEmailChangePage />} />
-      <Route path="/security/password-change" element={<ConfirmPasswordChangePage />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/welcome" element={<WorkspaceChoicePage />} />
         {/* /dev-ui HIDDEN — UI Gallery removed from app; do not re-add without owner instruction */}

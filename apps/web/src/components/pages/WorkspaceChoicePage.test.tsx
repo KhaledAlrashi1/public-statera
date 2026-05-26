@@ -4,7 +4,6 @@ import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import WorkspaceChoicePage from "./WorkspaceChoicePage"
-import { markPendingWorkspaceChoice } from "@/lib/workspace-choice"
 
 const mocks = vi.hoisted(() => ({
   loadDemoData: vi.fn(),
@@ -68,16 +67,15 @@ function renderPage(initialPath = "/welcome") {
 describe("WorkspaceChoicePage", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    window.sessionStorage.clear()
   })
 
-  it("redirects home when there is no pending workspace choice and no signup param", () => {
+  it("redirects home when source=signup param is absent", () => {
     renderPage()
 
     expect(screen.getByText("Home page")).toBeInTheDocument()
   })
 
-  it("allows access when source=signup param is present without sessionStorage flag", () => {
+  it("allows access when source=signup param is present", () => {
     renderPage("/welcome?source=signup")
 
     expect(screen.queryByText("Home page")).not.toBeInTheDocument()
@@ -85,13 +83,11 @@ describe("WorkspaceChoicePage", () => {
   })
 
   it("lets the user continue with an empty workspace", () => {
-    markPendingWorkspaceChoice()
-    renderPage()
+    renderPage("/welcome?source=signup")
 
     fireEvent.click(screen.getByRole("button", { name: "Start with my own data" }))
 
     expect(screen.getByText("Home page")).toBeInTheDocument()
-    expect(window.sessionStorage.getItem("pending-workspace-choice")).toBeNull()
   })
 
   it("loads the demo workspace and returns home", async () => {
@@ -99,8 +95,7 @@ describe("WorkspaceChoicePage", () => {
       transactions_created: 47,
       months_seeded: 6,
     })
-    markPendingWorkspaceChoice()
-    renderPage()
+    renderPage("/welcome?source=signup")
 
     fireEvent.click(screen.getByRole("button", { name: "Load demo workspace" }))
 
@@ -113,6 +108,5 @@ describe("WorkspaceChoicePage", () => {
     expect(mocks.success).toHaveBeenCalledWith(
       "Loaded 47 demo transactions across 6 months."
     )
-    expect(window.sessionStorage.getItem("pending-workspace-choice")).toBeNull()
   })
 })
