@@ -246,7 +246,7 @@ export function SafeToSpendHero({
     onClick: onOpenIncome ?? onOpenPlan,
   }
   const showIncomeNudge = Boolean(
-    safeToSpend && safeToSpend.income_source === null && !incomeNudgeDismissed
+    safeToSpend && safeToSpend.income_source === 'not_set' && !incomeNudgeDismissed
   )
 
   return (

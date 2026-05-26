@@ -135,7 +135,7 @@ export interface SafeToSpendResponse {
   days_remaining: number
   monthly_income_kd: string | null
   income_auto_detected: boolean
-  income_source: 'detected_from_transactions' | 'declared_in_profile' | null
+  income_source: 'detected_from_transactions' | 'declared_in_profile' | 'not_set'
   total_budget_kd: string
   debt_minimum_total_kd: string
   savings_goal_count: number
@@ -173,7 +173,7 @@ export interface DashboardBundleResponse {
 export interface IncomePatternResponse {
   detected: boolean
   monthly_income_kd: string | null
-  income_source: 'detected_from_transactions' | 'declared_in_profile' | null
+  income_source: 'detected_from_transactions' | 'declared_in_profile' | 'not_set'
   income_auto_detected: boolean
   suggested_monthly_income_kd: string | null
   suggested_payday_day: number | null
@@ -262,7 +262,7 @@ export interface BudgetResponse {
   profile_context?: {
     budget_total_kd: number
     monthly_income_kd: number | null
-    income_source: 'detected_from_transactions' | 'declared_in_profile' | null
+    income_source: 'detected_from_transactions' | 'declared_in_profile' | 'not_set'
     budget_to_income_pct: number | null
     payday_day: number | null
   }

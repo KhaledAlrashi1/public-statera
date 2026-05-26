@@ -15,6 +15,7 @@ function makeSafeToSpend(
     days_remaining: 18,
     monthly_income_kd: "1200.000",
     income_auto_detected: true,
+    income_source: "detected_from_transactions",
     total_budget_kd: "800.000",
     debt_minimum_total_kd: "75.000",
     savings_goal_count: 0,
@@ -134,5 +135,29 @@ describe("SafeToSpendHero", () => {
     )
 
     expect(screen.getByText("Set your income")).toBeInTheDocument()
+  })
+
+  it("shows income nudge when income_source is not_set", () => {
+    render(
+      <SafeToSpendHero
+        isLoading={false}
+        safeToSpend={makeSafeToSpend({ income_source: "not_set" })}
+        onOpenPlan={vi.fn()}
+      />
+    )
+    expect(screen.getByText(/Set your monthly income/i)).toBeInTheDocument()
+  })
+
+  it("does not show income nudge when income_source is detected_from_transactions", () => {
+    render(
+      <SafeToSpendHero
+        isLoading={false}
+        safeToSpend={makeSafeToSpend({ income_source: "detected_from_transactions" })}
+        onOpenPlan={vi.fn()}
+      />
+    )
+    expect(
+      screen.queryByText(/Set your monthly income/i)
+    ).not.toBeInTheDocument()
   })
 })
