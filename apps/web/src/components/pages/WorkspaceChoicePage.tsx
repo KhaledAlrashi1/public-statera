@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { ArrowRight, BarChart3, DatabaseZap, Sparkles, Scale } from "lucide-react"
-import { Navigate, useNavigate } from "react-router-dom"
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/toaster"
@@ -18,8 +18,10 @@ export default function WorkspaceChoicePage() {
   const queryClient = useQueryClient()
   const toast = useToast()
   const [loadingDemo, setLoadingDemo] = useState(false)
+  const [searchParams] = useSearchParams()
+  const fromSignup = searchParams.get("source") === "signup"
 
-  if (!hasPendingWorkspaceChoice()) {
+  if (!fromSignup && !hasPendingWorkspaceChoice()) {
     return <Navigate to="/" replace />
   }
 

@@ -71,6 +71,7 @@ const ConfirmPasswordChangePage = lazyWithRetry("confirm-password-change", () =>
 const ForgotPasswordPage = lazyWithRetry("forgot-password", () => import("@/components/pages/ForgotPasswordPage"))
 const ResetPasswordPage = lazyWithRetry("reset-password", () => import("@/components/pages/ResetPasswordPage"))
 const NotFoundPage = lazyWithRetry("not-found", () => import("@/components/pages/NotFoundPage"))
+const TwoFactorVerifyPage = lazyWithRetry("2fa-verify", () => import("@/components/pages/TwoFactorVerifyPage"))
 
 const ENABLE_PHASE2_LEGACY_REDIRECTS =
   String(import.meta.env.VITE_ENABLE_PHASE2_LEGACY_REDIRECTS ?? "").toLowerCase() === "true"
@@ -153,6 +154,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/auth/2fa-verify" element={<TwoFactorVerifyPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />

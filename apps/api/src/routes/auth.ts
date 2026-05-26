@@ -204,6 +204,7 @@ router.get("/callback", async (c) => {
 
   let userId: number
   let sessionVersion: number
+  let isNewUser = false
 
   if (!existing) {
     const [inserted] = await db
@@ -219,6 +220,7 @@ router.get("/callback", async (c) => {
       .$returningId()
     userId = inserted.id
     sessionVersion = 1 // DB default
+    isNewUser = true
     recordEventOnce(userId, "signup_completed", {}, db).catch((err) =>
       Sentry.captureException(err, { tags: { handler: "auth.callback.signup_completed", userId } }),
     )
@@ -310,7 +312,7 @@ router.get("/callback", async (c) => {
   })
 
   const frontendOrigin = env.corsOrigins[0] ?? "http://127.0.0.1:3002"
-  return c.redirect(`${frontendOrigin}/`)
+  return c.redirect(`${frontendOrigin}${isNewUser ? "/welcome?source=signup" : "/"}`)
 })
 
 // POST /api/auth/logout

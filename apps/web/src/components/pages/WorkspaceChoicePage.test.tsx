@@ -71,10 +71,17 @@ describe("WorkspaceChoicePage", () => {
     window.sessionStorage.clear()
   })
 
-  it("redirects home when there is no pending workspace choice", () => {
+  it("redirects home when there is no pending workspace choice and no signup param", () => {
     renderPage()
 
     expect(screen.getByText("Home page")).toBeInTheDocument()
+  })
+
+  it("allows access when source=signup param is present without sessionStorage flag", () => {
+    renderPage("/welcome?source=signup")
+
+    expect(screen.queryByText("Home page")).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Start with my own data" })).toBeInTheDocument()
   })
 
   it("lets the user continue with an empty workspace", () => {
