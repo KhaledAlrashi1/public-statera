@@ -70,10 +70,10 @@ export function BulkEditDialog({
       const results = await Promise.all(
         selectedIds.map(async (id) => {
           const response = await transactionsApi.get(id)
-          if (!response.ok || !response.transaction) {
+          if (!response.ok || !response.data) {
             throw new Error(`Transaction ${id} could not be loaded for bulk edit.`)
           }
-          return response.transaction
+          return response.data.item
         })
       )
       return results as Transaction[]

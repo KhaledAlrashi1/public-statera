@@ -121,25 +121,29 @@ describe("expenses/dialogs", () => {
   it("blocks split save when any row is incomplete", async () => {
     mocks.transactionsApi.get.mockResolvedValue({
       ok: true,
-      transaction: {
-        id: 77,
-        date: "2026-02-19",
-        merchant: "Cafe",
-        category: "Food",
-        memo: "Morning",
-        name: "Coffee",
-        amount_kd: "1.000",
-        items: [
-          {
-            id: 101,
-            transaction_id: 77,
-            name: "",
-            category: "Food",
-            amount_kd: "1.000",
-            sort_order: 0,
-          },
-        ],
+      data: {
+        item: {
+          id: 77,
+          date: "2026-02-19",
+          merchant: "Cafe",
+          category: "Food",
+          memo: "Morning",
+          name: "Coffee",
+          amount_kd: "1.000",
+          items: [
+            {
+              id: 101,
+              transaction_id: 77,
+              name: "",
+              category: "Food",
+              amount_kd: "1.000",
+              sort_order: 0,
+            },
+          ],
+        },
       },
+      error: null,
+      meta: {},
     })
 
     const props = renderSplitDialog()
@@ -157,25 +161,29 @@ describe("expenses/dialogs", () => {
   it("blocks split save when totals do not match the original transaction", async () => {
     mocks.transactionsApi.get.mockResolvedValue({
       ok: true,
-      transaction: {
-        id: 77,
-        date: "2026-02-19",
-        merchant: "Cafe",
-        category: "Food",
-        memo: "Morning",
-        name: "Coffee",
-        amount_kd: "2.000",
-        items: [
-          {
-            id: 101,
-            transaction_id: 77,
-            name: "Coffee",
-            category: "Food",
-            amount_kd: "2.000",
-            sort_order: 0,
-          },
-        ],
+      data: {
+        item: {
+          id: 77,
+          date: "2026-02-19",
+          merchant: "Cafe",
+          category: "Food",
+          memo: "Morning",
+          name: "Coffee",
+          amount_kd: "2.000",
+          items: [
+            {
+              id: 101,
+              transaction_id: 77,
+              name: "Coffee",
+              category: "Food",
+              amount_kd: "2.000",
+              sort_order: 0,
+            },
+          ],
+        },
       },
+      error: null,
+      meta: {},
     })
 
     renderSplitDialog()
@@ -198,16 +206,20 @@ describe("expenses/dialogs", () => {
   it("saves split rows by rewriting the transaction into atomic rows", async () => {
     mocks.transactionsApi.get.mockResolvedValue({
       ok: true,
-      transaction: {
-        id: 77,
-        date: "2026-02-19",
-        merchant: "Cafe",
-        category: "Food",
-        memo: "Morning",
-        name: "Coffee",
-        amount_kd: "3.500",
-        items: [],
+      data: {
+        item: {
+          id: 77,
+          date: "2026-02-19",
+          merchant: "Cafe",
+          category: "Food",
+          memo: "Morning",
+          name: "Coffee",
+          amount_kd: "3.500",
+          items: [],
+        },
       },
+      error: null,
+      meta: {},
     })
 
     const props = renderSplitDialog()

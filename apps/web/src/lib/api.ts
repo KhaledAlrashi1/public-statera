@@ -437,7 +437,7 @@ export const transactionsApi = {
   },
 
   get: (id: number) =>
-    apiFetch<{ ok: boolean; transaction: Transaction }>(`/api/transactions/${id}`),
+    apiFetch<ApiEnvelope<{ item: Transaction }>>(`/api/transactions/${id}`),
 
   create: (data: {
     date: string
@@ -447,7 +447,7 @@ export const transactionsApi = {
     amount_kd: string
     force?: string
   }) =>
-    apiFetch<{ ok: boolean; id: number }>("/api/transactions/create", {
+    apiFetch<ApiEnvelope<{ item: Transaction }>>("/api/transactions", {
       method: "POST",
       body: JSON.stringify(data),
     }),

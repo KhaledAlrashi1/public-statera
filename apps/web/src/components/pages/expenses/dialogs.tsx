@@ -253,7 +253,8 @@ export function SplitTransactionDialog({
       .get(txnId)
       .then((res) => {
         if (!active) return
-        const txn = res.transaction
+        if (!res.ok || !res.data) return
+        const txn = res.data.item
         const nextItems = [
           {
             name: txn.name || "",

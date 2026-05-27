@@ -973,8 +973,9 @@ export function EditTransactionDialog({
     setShowSplit(false)
     transactionsApi
       .get(txnId)
-      .then((data) => {
-        const txn = data.transaction
+      .then((res) => {
+        if (!res.ok || !res.data) return
+        const txn = res.data.item
         setDate(txn.date || "")
         setMerchant(txn.merchant || "")
         setMemo(txn.memo || "")
