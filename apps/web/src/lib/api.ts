@@ -453,8 +453,8 @@ export const transactionsApi = {
     }),
 
   update: (id: number, data: Record<string, unknown>) =>
-    apiFetch<{ ok: boolean }>(`/api/transactions/${id}/update`, {
-      method: "POST",
+    apiFetch<ApiEnvelope<{ item: Transaction }>>(`/api/transactions/${id}`, {
+      method: "PATCH",
       body: JSON.stringify(data),
     }),
 
@@ -465,8 +465,8 @@ export const transactionsApi = {
     }),
 
   delete: (id: number) =>
-    apiFetch<{ ok: boolean }>(`/api/transactions/${id}/delete`, {
-      method: "POST",
+    apiFetch<ApiEnvelope<{ deleted: true }>>(`/api/transactions/${id}`, {
+      method: "DELETE",
     }),
 
   bulkDelete: (ids: number[]) =>
