@@ -8,7 +8,6 @@ import InsightsPage from "./InsightsPage"
 const mocks = vi.hoisted(() => ({
   analyticsApi: {
     recurringPatterns: vi.fn(),
-    spendingIntelligence: vi.fn(),
     dashboardMetrics: vi.fn(),
     safeToSpend: vi.fn(),
     weeklyDigest: vi.fn(),
@@ -155,9 +154,6 @@ describe("InsightsPage", () => {
         },
       ],
     })
-    mocks.analyticsApi.spendingIntelligence.mockResolvedValue({
-      top_merchants: [],
-    })
     mocks.analyticsApi.dashboardMetrics.mockResolvedValue({
       months: ["2026-03", "2026-02"],
       monthly: [],
@@ -200,14 +196,12 @@ describe("InsightsPage", () => {
     renderPage()
 
     await waitFor(() => {
-      expect(mocks.analyticsApi.spendingIntelligence).toHaveBeenCalledWith("2026-03")
       expect(mocks.analyticsApi.safeToSpend).toHaveBeenCalledWith("2026-03")
     })
 
     fireEvent.click(await screen.findByRole("button", { name: "2026-02" }))
 
     await waitFor(() => {
-      expect(mocks.analyticsApi.spendingIntelligence).toHaveBeenCalledWith("2026-02")
       expect(mocks.analyticsApi.safeToSpend).toHaveBeenCalledWith("2026-02")
     })
   })
@@ -215,9 +209,6 @@ describe("InsightsPage", () => {
   it("shows an empty-state CTA when there is no insight data yet", async () => {
     mocks.analyticsApi.recurringPatterns.mockResolvedValue({
       patterns: [],
-    })
-    mocks.analyticsApi.spendingIntelligence.mockResolvedValue({
-      top_merchants: [],
     })
     mocks.analyticsApi.dashboardMetrics.mockResolvedValue({
       months: ["2026-03"],
@@ -237,9 +228,4 @@ describe("InsightsPage", () => {
     expect(screen.getByRole("button", { name: "Import activity" })).toBeInTheDocument()
   })
 
-  it("shows the spending intelligence entry point", async () => {
-    renderPage()
-
-    expect(await screen.findByRole("button", { name: "Spending intelligence" })).toBeInTheDocument()
-  })
 })

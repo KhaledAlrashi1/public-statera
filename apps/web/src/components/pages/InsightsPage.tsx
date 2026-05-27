@@ -20,10 +20,6 @@ import {
   RecurringCommitmentsCard,
   type RecurringCommitmentRow,
 } from "@/components/pages/insights/RecurringCommitmentsCard"
-import {
-  MerchantIntelligenceCard,
-  type MerchantInsightRow,
-} from "@/components/pages/insights/MerchantIntelligenceCard"
 import { MonthDeltaCard, type MonthDeltaRow } from "@/components/pages/insights/MonthDeltaCard"
 import { SpendForecastWidget } from "@/components/pages/insights/SpendForecastWidget"
 import { WeeklyDigestSection } from "@/components/pages/insights/WeeklyDigestSection"
@@ -127,18 +123,6 @@ export default function InsightsPage() {
   const recurringPatternsQuery = useQuery({
     queryKey: ["insights", "recurring-patterns", 120],
     queryFn: () => analyticsApi.recurringPatterns({ days: 120 }),
-  })
-
-  const merchantIntelligenceQuery = useQuery({
-    queryKey: ["insights", "merchant-intelligence", selectedMonth],
-    queryFn: async () => {
-      const data = await analyticsApi.spendingIntelligence(selectedMonth)
-      return data.top_merchants.map<MerchantInsightRow>((row) => ({
-        merchant: row.merchant?.trim() || "Unknown Merchant",
-        amount_kd: Number(row.total_kd ?? 0),
-        count: Number(row.transaction_count ?? 0),
-      }))
-    },
   })
 
   const monthDeltaQuery = useQuery({
@@ -249,7 +233,6 @@ export default function InsightsPage() {
   const hasInsightsErrors = Boolean(
     monthOptionsQuery.error
       || recurringPatternsQuery.error
-      || merchantIntelligenceQuery.error
       || monthDeltaQuery.error
       || readinessQuery.error
       || safeToSpendQuery.error
@@ -258,7 +241,6 @@ export default function InsightsPage() {
   const hasAnyInsightsData = activeMonthsInReadinessWindow > 0
     || recurringRows.length > 0
     || monthDeltaRows.length > 0
-    || (merchantIntelligenceQuery.data || []).length > 0
     || Boolean(weeklyDigestQuery.data)
     || committedThisMonth > 0
     || actualSpend > 0
@@ -266,7 +248,6 @@ export default function InsightsPage() {
   const showInsightsEmptyState = !hasInsightsErrors
     && !monthOptionsQuery.isLoading
     && !recurringPatternsQuery.isLoading
-    && !merchantIntelligenceQuery.isLoading
     && !monthDeltaQuery.isLoading
     && !readinessQuery.isLoading
     && !safeToSpendQuery.isLoading
@@ -323,13 +304,6 @@ export default function InsightsPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate("/spending-intelligence")}
-            >
-              Spending intelligence
-            </Button>
           </div>
         )}
       />
@@ -417,18 +391,6 @@ export default function InsightsPage() {
         />
       </div>
 
-      <MerchantIntelligenceCard
-        rows={merchantIntelligenceQuery.data || []}
-        loading={merchantIntelligenceQuery.isLoading}
-        error={queryErrorMessage(merchantIntelligenceQuery.error)}
-        onMerchantClick={(merchant) => {
-          if (!merchant) {
-            navigate("/activity?type=expense")
-            return
-          }
-          navigate(`/activity?type=expense&q=${encodeURIComponent(merchant)}`)
-        }}
-      />
     </div>
   )
 }

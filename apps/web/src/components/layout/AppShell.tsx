@@ -41,8 +41,6 @@ const baseNavItems: NavItem[] = [
   { to: "/activity", icon: ArrowLeftRight, label: "Transactions" },
   { to: "/plan", icon: Wallet, label: "Plan" },
   { to: "/insights", icon: Sparkles, label: "Insights" },
-  // Hidden — Trends moved to Insights page. Restore by uncommenting.
-  // { to: "/spending-intelligence", icon: TrendingUp, label: "Trends" },
 ]
 
 const navActiveClass = "bg-primary/12 text-primary ring-1 ring-primary/20 shadow-none after:absolute after:bottom-0.5 after:left-4 after:right-4 after:h-0.5 after:rounded-full after:bg-primary"

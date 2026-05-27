@@ -691,13 +691,6 @@ export const analyticsApi = {
     const payload = await apiFetch<unknown>("/api/analytics/snapshot")
     return readApiData<SnapshotResponse>(payload)
   },
-  spendingIntelligence: async (month?: string) => {
-    const p = new URLSearchParams()
-    if (month) p.set("month", month)
-    const suffix = p.toString()
-    const payload = await apiFetch<unknown>(`/api/spending-intelligence${suffix ? `?${suffix}` : ""}`)
-    return readApiData<SpendingIntelligenceResponse>(payload)
-  },
 }
 
 // ============================================================

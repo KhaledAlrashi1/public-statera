@@ -64,7 +64,6 @@ const LoginPage = lazyWithRetry("login", () => import("@/components/pages/LoginP
 const WorkspaceChoicePage = lazyWithRetry("workspace-choice", () => import("@/components/pages/WorkspaceChoicePage"))
 const ProfilePage = lazyWithRetry("profile", () => import("@/components/pages/ProfilePage"))
 const InsightsPage = lazyWithRetry("insights", () => import("@/components/pages/InsightsPage"))
-const SpendingIntelligencePage = lazyWithRetry("spending-intelligence", () => import("@/components/pages/SpendingIntelligencePage"))
 const NotFoundPage = lazyWithRetry("not-found", () => import("@/components/pages/NotFoundPage"))
 const TwoFactorVerifyPage = lazyWithRetry("2fa-verify", () => import("@/components/pages/TwoFactorVerifyPage"))
 
@@ -160,8 +159,6 @@ function AppRoutes() {
           <Route path="activity" element={<TransactionsPage />} />
           <Route path="plan" element={<BudgetPage />} />
           <Route path="insights" element={<InsightsPage />} />
-          <Route path="spending" element={<Navigate to="/spending-intelligence" replace />} />
-          <Route path="spending-intelligence" element={<SpendingIntelligencePage />} />
           <Route
             path="transactions"
             element={ENABLE_PHASE2_LEGACY_REDIRECTS ? <Navigate to="/activity?type=all" replace /> : <TransactionsPage />}

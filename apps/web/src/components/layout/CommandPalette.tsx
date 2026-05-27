@@ -89,14 +89,6 @@ export default function CommandPalette({
         keywords: ["alerts", "trends", "opportunities", "insights", "analysis", "recurring", "budget"],
       },
       {
-        id: "spending-intelligence",
-        label: "Spending Intelligence",
-        description: "Category trends and spend forecasts",
-        icon: TrendingUp,
-        action: () => go("/spending-intelligence"),
-        keywords: ["spending", "trends", "forecast", "categories", "intelligence", "analysis"],
-      },
-      {
         id: "profile",
         label: "Profile",
         description: "Account & preferences",
