@@ -58,7 +58,7 @@ export default function DashboardPage() {
   const [categoryRowsSource, setCategoryRowsSource] = useState<Transaction[]>([])
   const [categoryHasMore, setCategoryHasMore] = useState(false)
   const [categoryRowsTotal, setCategoryRowsTotal] = useState(0)
-  const [dismissingAlertId, setDismissingAlertId] = useState<number | null>(null)
+  const [dismissingAlertId, setDismissingAlertId] = useState<string | null>(null)
   const [loadingDemoData, setLoadingDemoData] = useState(false)
   const [clearingDemoData, setClearingDemoData] = useState(false)
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false)
@@ -450,11 +450,11 @@ export default function DashboardPage() {
   }, [queryClient])
 
   const dismissBudgetAlert = useCallback(
-    async (alertId: number) => {
-      if (!alertId || dismissingAlertId === alertId) return
-      setDismissingAlertId(alertId)
+    async (alertKey: string) => {
+      if (!alertKey || dismissingAlertId === alertKey) return
+      setDismissingAlertId(alertKey)
       try {
-        await notificationsApi.dismissBudgetAlert(alertId)
+        await notificationsApi.dismissBudgetAlert(alertKey)
         await queryClient.invalidateQueries({ queryKey: ["budget-alerts"] })
       } finally {
         setDismissingAlertId(null)

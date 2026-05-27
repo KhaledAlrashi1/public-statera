@@ -1108,9 +1108,9 @@ export function HomeAttentionCenter({
   risingCategory: { name: string; deltaAmount: number; deltaPct: number } | null
   budgetAlerts: BudgetAlertNotification[]
   alertsLoading: boolean
-  dismissingAlertId: number | null
+  dismissingAlertId: string | null
   budgetPressureItems: Array<{ category: string; allocated: number; spent: number; usedPct: number; over: number }>
-  onDismissBudgetAlert: (alertId: number) => void
+  onDismissBudgetAlert: (alertKey: string) => void
   onOpenPlan: () => void
   onOpenActivity: () => void
 }) {
@@ -1198,11 +1198,11 @@ export function HomeAttentionCenter({
                     variant="ghost"
                     size="sm"
                     className="h-7 px-2 text-[11px]"
-                    loading={dismissingAlertId === topAlert.id}
-                    onClick={() => onDismissBudgetAlert(topAlert.id)}
-                    disabled={dismissingAlertId === topAlert.id}
+                    loading={dismissingAlertId === topAlert.alert_key}
+                    onClick={() => onDismissBudgetAlert(topAlert.alert_key)}
+                    disabled={dismissingAlertId === topAlert.alert_key}
                   >
-                    {dismissingAlertId === topAlert.id ? "Dismissing..." : "Dismiss top alert"}
+                    {dismissingAlertId === topAlert.alert_key ? "Dismissing..." : "Dismiss top alert"}
                   </Button>
                 ) : null}
               </div>

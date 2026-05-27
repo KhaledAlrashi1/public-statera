@@ -306,29 +306,23 @@ describe("envelope parsing", () => {
     expect(result.items[0].category).toBe("Food")
   })
 
-  it("notificationsApi.dismissBudgetAlert posts and parses response", async () => {
+  it("notificationsApi.dismissBudgetAlert posts alert_key to dismiss endpoint", async () => {
     mockJsonResponse({
       ok: true,
-      data: {
-        dismissed: true,
-        already_dismissed: false,
-        alert_id: 5,
-        alert_key: "2026-02:12",
-        month: "2026-02",
-      },
+      data: { dismissed: true },
       error: null,
       meta: {},
     })
 
-    const result = await notificationsApi.dismissBudgetAlert(5)
-    expect(result.dismissed).toBe(true)
-    expect(result.alert_id).toBe(5)
-    expect(result.alert_key).toBe("2026-02:12")
+    const result = await notificationsApi.dismissBudgetAlert("2026-02:12")
+    expect(result.data?.dismissed).toBe(true)
 
     const call = fetchMock.mock.calls[0]
-    expect(String(call[0])).toContain("/api/notifications/budget-alerts/5/dismiss")
+    expect(String(call[0])).toContain("/api/notifications/budget-alerts/dismiss")
+    expect(String(call[0])).not.toContain("/5/")
     const options = call[1] as RequestInit
     expect(options.method).toBe("POST")
+    expect(JSON.parse(options.body as string)).toEqual({ alert_key: "2026-02:12" })
   })
 
   it("analyticsApi.dashboardBundle reads nested dashboard data from envelope data", async () => {

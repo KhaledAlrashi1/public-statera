@@ -713,26 +713,14 @@ export const notificationsApi = {
     }
   },
 
-  dismissBudgetAlert: async (alertId: number) => {
-    const payload = await apiFetch<unknown>(`/api/notifications/budget-alerts/${alertId}/dismiss`, {
-      method: "POST",
-      body: JSON.stringify({}),
-    })
-    const data = readApiData<{
-      dismissed?: boolean
-      already_dismissed?: boolean
-      alert_id?: number
-      alert_key?: string
-      month?: string
-    }>(payload)
-    return {
-      dismissed: Boolean(data.dismissed),
-      already_dismissed: Boolean(data.already_dismissed),
-      alert_id: typeof data.alert_id === "number" ? data.alert_id : alertId,
-      alert_key: typeof data.alert_key === "string" ? data.alert_key : "",
-      month: typeof data.month === "string" ? data.month : null,
-    }
-  },
+  dismissBudgetAlert: (alertKey: string) =>
+    apiFetch<ApiEnvelope<{ dismissed: boolean }>>(
+      "/api/notifications/budget-alerts/dismiss",
+      {
+        method: "POST",
+        body: JSON.stringify({ alert_key: alertKey }),
+      }
+    ),
 }
 
 // ============================================================
