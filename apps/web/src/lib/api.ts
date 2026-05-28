@@ -627,28 +627,34 @@ export const analyticsApi = {
     if (Array.isArray(data)) return data
     return Array.isArray(data.items) ? data.items : []
   },
-  dashboardMetrics: (params?: { months?: number; until?: string }) => {
+  dashboardMetrics: async (params?: { months?: number; until?: string }) => {
     const p = new URLSearchParams()
     if (params?.months !== undefined) p.set("months", String(params.months))
     if (params?.until) p.set("until", params.until)
     const suffix = p.toString()
-    return apiFetch<DashboardMetricsResponse>(`/api/analytics/dashboard-metrics${suffix ? `?${suffix}` : ""}`)
+    const payload = await apiFetch<unknown>(`/api/analytics/dashboard-metrics${suffix ? `?${suffix}` : ""}`)
+    return readApiData<DashboardMetricsResponse>(payload)
   },
-  budgetMetrics: (month: string, range: "month" | "30" | "90" | "365" | "all") => {
+  budgetMetrics: async (month: string, range: "month" | "30" | "90" | "365" | "all") => {
     const p = new URLSearchParams({ month, range })
-    return apiFetch<BudgetMetricsResponse>(`/api/analytics/budget-metrics?${p}`)
+    const payload = await apiFetch<unknown>(`/api/analytics/budget-metrics?${p}`)
+    return readApiData<BudgetMetricsResponse>(payload)
   },
-  safeToSpend: (month: string) => {
+  safeToSpend: async (month: string) => {
     const p = new URLSearchParams({ month })
-    return apiFetch<SafeToSpendResponse>(`/api/analytics/safe-to-spend?${p}`)
+    const payload = await apiFetch<unknown>(`/api/analytics/safe-to-spend?${p}`)
+    return readApiData<SafeToSpendResponse>(payload)
   },
   dashboardBundle: async (month: string) => {
     const p = new URLSearchParams({ month })
     const payload = await apiFetch<unknown>(`/api/analytics/dashboard-bundle?${p}`)
     return readApiData<DashboardBundleResponse>(payload)
   },
-  incomePattern: () => apiFetch<IncomePatternResponse>("/api/analytics/income-pattern"),
-  expenseBreakdown: (params: {
+  incomePattern: async () => {
+    const payload = await apiFetch<unknown>("/api/analytics/income-pattern")
+    return readApiData<IncomePatternResponse>(payload)
+  },
+  expenseBreakdown: async (params: {
     dimension: "category" | "merchant" | "transaction"
     range: "month" | "12m" | "all"
     month?: string
@@ -661,15 +667,17 @@ export const analyticsApi = {
     if (params.month) p.set("month", params.month)
     if (params.limit !== undefined) p.set("limit", String(params.limit))
     if (params.source) p.set("source", params.source)
-    return apiFetch<ExpenseBreakdownResponse>(`/api/analytics/expense-breakdown?${p}`)
+    const payload = await apiFetch<unknown>(`/api/analytics/expense-breakdown?${p}`)
+    return readApiData<ExpenseBreakdownResponse>(payload)
   },
-  accountOverview: (params?: { month?: string }) => {
+  accountOverview: async (params?: { month?: string }) => {
     const p = new URLSearchParams()
     if (params?.month) p.set("month", params.month)
     const suffix = p.toString()
-    return apiFetch<AccountOverviewResponse>(`/api/analytics/account-overview${suffix ? `?${suffix}` : ""}`)
+    const payload = await apiFetch<unknown>(`/api/analytics/account-overview${suffix ? `?${suffix}` : ""}`)
+    return readApiData<AccountOverviewResponse>(payload)
   },
-  expenseMerchantTrend: (params: {
+  expenseMerchantTrend: async (params: {
     merchant: string
     months?: number
     until?: string
@@ -678,15 +686,20 @@ export const analyticsApi = {
     p.set("merchant", params.merchant)
     if (params.months !== undefined) p.set("months", String(params.months))
     if (params.until) p.set("until", params.until)
-    return apiFetch<ExpenseMerchantTrendResponse>(`/api/analytics/expense-merchant-trend?${p}`)
+    const payload = await apiFetch<unknown>(`/api/analytics/expense-merchant-trend?${p}`)
+    return readApiData<ExpenseMerchantTrendResponse>(payload)
   },
-  recurringPatterns: (params?: { days?: number }) => {
+  recurringPatterns: async (params?: { days?: number }) => {
     const p = new URLSearchParams()
     if (params?.days !== undefined) p.set("days", String(params.days))
     const suffix = p.toString()
-    return apiFetch<RecurringPatternsResponse>(`/api/analytics/recurring-patterns${suffix ? `?${suffix}` : ""}`)
+    const payload = await apiFetch<unknown>(`/api/analytics/recurring-patterns${suffix ? `?${suffix}` : ""}`)
+    return readApiData<RecurringPatternsResponse>(payload)
   },
-  weeklyDigest: () => apiFetch<WeeklyDigestResponse>("/api/analytics/weekly-digest"),
+  weeklyDigest: async () => {
+    const payload = await apiFetch<unknown>("/api/analytics/weekly-digest")
+    return readApiData<WeeklyDigestResponse>(payload)
+  },
   snapshot: async () => {
     const payload = await apiFetch<unknown>("/api/analytics/snapshot")
     return readApiData<SnapshotResponse>(payload)

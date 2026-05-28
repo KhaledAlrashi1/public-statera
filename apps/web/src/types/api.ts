@@ -70,7 +70,6 @@ export interface SpendByCategory {
 }
 
 export interface BudgetMetricsResponse {
-  ok: boolean
   month: string
   range: "month" | "30" | "90" | "365" | "all"
   spent_by_category: Record<string, number>
@@ -82,7 +81,6 @@ export interface BudgetMetricsResponse {
 }
 
 export interface DashboardMetricsResponse {
-  ok: boolean
   months: string[]
   monthly: Array<{
     month: string
@@ -197,7 +195,6 @@ export interface BudgetAlertNotification {
 }
 
 export interface ExpenseBreakdownResponse {
-  ok: boolean
   dimension: "category" | "merchant" | "transaction"
   range: "month" | "12m" | "all"
   month: string
@@ -210,7 +207,6 @@ export interface ExpenseBreakdownResponse {
 }
 
 export interface ExpenseMerchantTrendResponse {
-  ok: boolean
   merchant: string
   months: string[]
   series: Array<{
