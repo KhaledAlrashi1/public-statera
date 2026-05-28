@@ -363,8 +363,8 @@ export const merchantsApi = {
     return readApiData<{ deleted?: boolean; dependent_counts?: MerchantDependentCounts }>(payload)
   },
   update: async (id: number, name: string) => {
-    const payload = await apiFetch<unknown>(`/api/merchants/${id}/update`, {
-      method: "POST",
+    const payload = await apiFetch<ApiEnvelope<{ item?: Merchant }>>(`/api/merchants/${id}`, {
+      method: "PATCH",
       body: JSON.stringify({ name }),
     })
     return readApiData<{ item?: Merchant }>(payload)
@@ -805,8 +805,8 @@ export const debtApi = {
       notes?: string | null
     }
   ) => {
-    const payload = await apiFetch<unknown>(`/api/debt-accounts/${accountId}/update`, {
-      method: "POST",
+    const payload = await apiFetch<ApiEnvelope<{ account?: DebtAccount }>>(`/api/debt-accounts/${accountId}`, {
+      method: "PATCH",
       body: JSON.stringify(data),
     })
     const body = readApiData<{ account?: DebtAccount }>(payload)
@@ -904,8 +904,8 @@ export const goalsApi = {
       notes?: string | null
     }
   ) => {
-    const payload = await apiFetch<unknown>(`/api/savings-goals/${goalId}/update`, {
-      method: "POST",
+    const payload = await apiFetch<ApiEnvelope<{ goal?: SavingsGoal }>>(`/api/savings-goals/${goalId}`, {
+      method: "PATCH",
       body: JSON.stringify(data),
     })
     const body = readApiData<{ goal?: SavingsGoal }>(payload)
@@ -965,9 +965,9 @@ export const memorizedApi = {
   },
 
   update: async (id: number, data: { canonical: string; category_id?: number | null; merchant_id?: number | null }) => {
-    const payload = await apiFetch<unknown>(
-      `/api/memorized-transactions/${id}/update`,
-      { method: "POST", body: JSON.stringify(data) }
+    const payload = await apiFetch<ApiEnvelope<{ item?: MemorizedTransaction }>>(
+      `/api/memorized-transactions/${id}`,
+      { method: "PATCH", body: JSON.stringify(data) }
     )
     return parseMemorizedItemResult(payload)
   },
