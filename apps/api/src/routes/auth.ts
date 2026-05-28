@@ -11,6 +11,7 @@ import { Sentry } from "../lib/sentry"
 import { recordEventOnce } from "../lib/product-events-lib"
 import { createRateLimiter } from "../lib/rate-limit"
 import { encrypt, decrypt } from "../lib/crypto"
+import { formatKd } from "../lib/kd"
 import {
   generateTotpSecret,
   generateTotpQrDataUri,
@@ -767,6 +768,69 @@ router.post(
 // ── Profile security events ───────────────────────────────────────────────────
 
 // GET /api/auth/profile/security-events
+// Returns combined user + profile fields for the authenticated user.
+//
+// Deliberate deviation from standard envelope convention:
+// Returns { ok, user, profile, demo_workspace } at top level (NOT under data) to match
+// the Flask contract that authApi.profile() consumers already expect.
+// demo_workspace: always null — DemoWorkspace feature not ported to Hono.
+// country: always null — no country column in users schema.
+router.get("/profile", requireAuth, async (c) => {
+  const { userId } = c.var.session
+  const db = getDb()
+
+  const [found] = await db
+    .select({
+      id: users.id,
+      email: users.email,
+      displayName: users.displayName,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      totpEnabled: users.totpEnabled,
+      createdAt: users.createdAt,
+      monthlyIncomeKd: users.monthlyIncomeKd,
+      paydayDay: users.paydayDay,
+      timezone: users.timezone,
+      emailNotificationsEnabled: users.emailNotificationsEnabled,
+      hasDebtChoice: users.hasDebtChoice,
+      setupGuideSeen: users.setupGuideSeen,
+      setupGuideDismissed: users.setupGuideDismissed,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1)
+
+  if (!found) {
+    return c.json({ ok: false, data: null, error: "User not found.", code: "user_not_found" }, 401)
+  }
+
+  return c.json({
+    ok: true,
+    user: {
+      id: found.id,
+      email: found.email,
+      display_name: found.displayName,
+      first_name: found.firstName,
+      last_name: found.lastName,
+      totp_enabled: found.totpEnabled,
+      created_at: found.createdAt instanceof Date
+        ? found.createdAt.toISOString().replace(/\.\d{3}Z$/, "+00:00")
+        : String(found.createdAt),
+    },
+    profile: {
+      monthly_income_kd: found.monthlyIncomeKd != null ? formatKd(found.monthlyIncomeKd) : null,
+      payday_day: found.paydayDay ?? null,
+      country: null,
+      timezone: found.timezone,
+      email_notifications_enabled: found.emailNotificationsEnabled,
+      has_debt_choice: found.hasDebtChoice ?? null,
+      setup_guide_seen: found.setupGuideSeen,
+      setup_guide_dismissed: found.setupGuideDismissed,
+    },
+    demo_workspace: null,
+  })
+})
+
 // Returns profile.* events for the authenticated user (profile settings changes).
 // Login, auth, and session events are written to security_events but not exposed here;
 // this endpoint is intentionally a profile-change audit trail, not a full security log.
