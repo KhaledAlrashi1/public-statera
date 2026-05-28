@@ -3,7 +3,7 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie"
 import { SignJWT, jwtVerify } from "jose"
 import { and, desc, eq, like } from "drizzle-orm"
 import { getDb } from "../db/connection"
-import { users, securityEvents } from "../db/schema"
+import { users, userProfiles, securityEvents } from "../db/schema"
 import { env } from "../lib/env"
 import { generators, getOidcClient } from "../lib/oidc"
 import { createSessionToken, revokeSessionVersion, requireAuth, getAuthRedis } from "../middleware/auth"
@@ -779,53 +779,64 @@ router.get("/profile", requireAuth, async (c) => {
   const { userId } = c.var.session
   const db = getDb()
 
-  const [found] = await db
-    .select({
-      id: users.id,
-      email: users.email,
-      displayName: users.displayName,
-      firstName: users.firstName,
-      lastName: users.lastName,
-      totpEnabled: users.totpEnabled,
-      createdAt: users.createdAt,
-      monthlyIncomeKd: users.monthlyIncomeKd,
-      paydayDay: users.paydayDay,
-      timezone: users.timezone,
-      emailNotificationsEnabled: users.emailNotificationsEnabled,
-      hasDebtChoice: users.hasDebtChoice,
-      setupGuideSeen: users.setupGuideSeen,
-      setupGuideDismissed: users.setupGuideDismissed,
-    })
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1)
+  const [[foundUser], [foundProfile]] = await Promise.all([
+    db
+      .select({
+        id: users.id,
+        email: users.email,
+        displayName: users.displayName,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        totpEnabled: users.totpEnabled,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1),
+    db
+      .select({
+        monthlyIncomeKd: userProfiles.monthlyIncomeKd,
+        paydayDay: userProfiles.paydayDay,
+        country: userProfiles.country,
+        timezone: userProfiles.timezone,
+        emailNotificationsEnabled: userProfiles.emailNotificationsEnabled,
+        hasDebtChoice: userProfiles.hasDebtChoice,
+        setupGuideSeen: userProfiles.setupGuideSeen,
+        setupGuideDismissed: userProfiles.setupGuideDismissed,
+      })
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, userId))
+      .limit(1),
+  ])
 
-  if (!found) {
+  if (!foundUser) {
     return c.json({ ok: false, data: null, error: "User not found.", code: "user_not_found" }, 401)
   }
 
   return c.json({
     ok: true,
     user: {
-      id: found.id,
-      email: found.email,
-      display_name: found.displayName,
-      first_name: found.firstName,
-      last_name: found.lastName,
-      totp_enabled: found.totpEnabled,
-      created_at: found.createdAt instanceof Date
-        ? found.createdAt.toISOString().replace(/\.\d{3}Z$/, "+00:00")
-        : String(found.createdAt),
+      id: foundUser.id,
+      email: foundUser.email,
+      display_name: foundUser.displayName,
+      first_name: foundUser.firstName,
+      last_name: foundUser.lastName,
+      totp_enabled: foundUser.totpEnabled,
+      created_at: foundUser.createdAt instanceof Date
+        ? foundUser.createdAt.toISOString().replace(/\.\d{3}Z$/, "+00:00")
+        : String(foundUser.createdAt),
     },
     profile: {
-      monthly_income_kd: found.monthlyIncomeKd != null ? formatKd(found.monthlyIncomeKd) : null,
-      payday_day: found.paydayDay ?? null,
-      country: null,
-      timezone: found.timezone,
-      email_notifications_enabled: found.emailNotificationsEnabled,
-      has_debt_choice: found.hasDebtChoice ?? null,
-      setup_guide_seen: found.setupGuideSeen,
-      setup_guide_dismissed: found.setupGuideDismissed,
+      monthly_income_kd: foundProfile?.monthlyIncomeKd != null
+        ? formatKd(foundProfile.monthlyIncomeKd)
+        : null,
+      payday_day: foundProfile?.paydayDay ?? null,
+      country: foundProfile?.country ?? null,
+      timezone: foundProfile?.timezone ?? "Asia/Kuwait",
+      email_notifications_enabled: foundProfile?.emailNotificationsEnabled ?? true,
+      has_debt_choice: foundProfile?.hasDebtChoice ?? null,
+      setup_guide_seen: foundProfile?.setupGuideSeen ?? false,
+      setup_guide_dismissed: foundProfile?.setupGuideDismissed ?? false,
     },
     demo_workspace: null,
   })
