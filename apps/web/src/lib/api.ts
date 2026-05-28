@@ -117,11 +117,8 @@ function readErrorMessage(payload: unknown, status: number): string {
 function readErrorCode(payload: unknown): string | undefined {
   const rec = asRecord(payload)
   if (!rec) return undefined
-  const direct = rec.error_code
-  if (typeof direct === "string" && direct.trim()) return direct
-  const error = asRecord(rec.error)
-  const nested = error?.code
-  return typeof nested === "string" && nested.trim() ? nested : undefined
+  const direct = rec.code
+  return typeof direct === "string" && direct.trim() ? direct : undefined
 }
 
 function readNumber(value: unknown, fallback: number): number {
@@ -322,10 +319,11 @@ export const categoriesApi = {
     return data.item || (payload as Category)
   },
   delete: async (id: number, reassignTo?: number) => {
-    const payload = await apiFetch<unknown>(`/api/categories/${id}/delete`, {
-      method: "POST",
-      body: JSON.stringify(reassignTo != null ? { reassign_to: reassignTo } : {}),
-    })
+    const p = reassignTo != null ? new URLSearchParams({ reassign_to: String(reassignTo) }) : null
+    const payload = await apiFetch<unknown>(
+      p ? `/api/categories/${id}?${p}` : `/api/categories/${id}`,
+      { method: "DELETE" },
+    )
     return readApiData<{ deleted?: boolean; dependent_counts?: CategoryDependentCounts; conflicting_periods?: string[] }>(payload)
   },
   remap: async (sourceId: number, targetId: number) => {
@@ -356,10 +354,11 @@ export const merchantsApi = {
     return data.item || (payload as Merchant)
   },
   delete: async (id: number, reassignTo?: number) => {
-    const payload = await apiFetch<unknown>(`/api/merchants/${id}/delete`, {
-      method: "POST",
-      body: JSON.stringify(reassignTo != null ? { reassign_to: reassignTo } : {}),
-    })
+    const p = reassignTo != null ? new URLSearchParams({ reassign_to: String(reassignTo) }) : null
+    const payload = await apiFetch<unknown>(
+      p ? `/api/merchants/${id}?${p}` : `/api/merchants/${id}`,
+      { method: "DELETE" },
+    )
     return readApiData<{ deleted?: boolean; dependent_counts?: MerchantDependentCounts }>(payload)
   },
   update: async (id: number, name: string) => {
@@ -815,9 +814,8 @@ export const debtApi = {
   },
 
   delete: async (accountId: number) => {
-    const payload = await apiFetch<unknown>(`/api/debt-accounts/${accountId}/delete`, {
-      method: "POST",
-      body: JSON.stringify({}),
+    const payload = await apiFetch<unknown>(`/api/debt-accounts/${accountId}`, {
+      method: "DELETE",
     })
     const body = readApiData<{ account?: DebtAccount }>(payload)
     if (!body.account) throw new Error("Missing debt account in response.")
@@ -924,9 +922,8 @@ export const goalsApi = {
   },
 
   delete: async (goalId: number) => {
-    const payload = await apiFetch<unknown>(`/api/savings-goals/${goalId}/delete`, {
-      method: "POST",
-      body: JSON.stringify({}),
+    const payload = await apiFetch<unknown>(`/api/savings-goals/${goalId}`, {
+      method: "DELETE",
     })
     const body = readApiData<{ goal?: SavingsGoal }>(payload)
     if (!body.goal) throw new Error("Missing savings goal in response.")
@@ -973,8 +970,8 @@ export const memorizedApi = {
   },
 
   delete: async (id: number) => {
-    await apiFetch<unknown>(`/api/memorized-transactions/${id}/delete`, {
-      method: "POST",
+    await apiFetch<unknown>(`/api/memorized-transactions/${id}`, {
+      method: "DELETE",
     })
     return { ok: true }
   },
