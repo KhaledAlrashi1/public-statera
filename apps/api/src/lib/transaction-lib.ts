@@ -313,14 +313,14 @@ export type TransactionItem = {
   date: string
   name: string
   memo: string | null
-  amountKd: string
+  amount_kd: string
   category: string | null
-  categoryId: number | null
+  category_id: number | null
   merchant: string | null
-  merchantId: number | null
+  merchant_id: number | null
   source: string
-  sourceLabel: string
-  importBatchId: string | null
+  source_label: string
+  import_batch_id: string | null
 }
 
 export function normalizeSource(source: string | null | undefined): string {
@@ -354,14 +354,14 @@ export function serializeTransaction(row: {
     date: row.date instanceof Date ? row.date.toISOString().slice(0, 10) : String(row.date),
     name: row.name,
     memo: row.memo ?? null,
-    amountKd: formatKd(row.amountKd),
+    amount_kd: formatKd(row.amountKd),
     category: row.categoryName ?? null,
-    categoryId: row.categoryId ?? null,
+    category_id: row.categoryId ?? null,
     merchant: row.merchantName ?? null,
-    merchantId: row.merchantId ?? null,
+    merchant_id: row.merchantId ?? null,
     source: src,
-    sourceLabel: sourceLabel(src),
-    importBatchId: row.importBatchId ?? null,
+    source_label: sourceLabel(src),
+    import_batch_id: row.importBatchId ?? null,
   }
 }
 

@@ -115,10 +115,10 @@ describe("GET /api/transactions/:id", () => {
     const item = (body.data as Record<string, unknown>).item as Record<string, unknown>
     expect(item.id).toBe(5)
     expect(item.name).toBe("Coffee")
-    expect(item.amountKd).toBe("3.500")
+    expect(item.amount_kd).toBe("3.500")
     expect(item.category).toBe("Food")
     expect(item.source).toBe("manual")
-    expect(item.sourceLabel).toBe("Manual")
+    expect(item.source_label).toBe("Manual")
   })
 })
 
