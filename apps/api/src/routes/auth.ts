@@ -11,7 +11,7 @@ import { Sentry } from "../lib/sentry"
 import { recordEventOnce } from "../lib/product-events-lib"
 import { createRateLimiter } from "../lib/rate-limit"
 import { encrypt, decrypt } from "../lib/crypto"
-import { formatKd } from "../lib/kd"
+import { formatKd, parseKd } from "../lib/kd"
 import {
   generateTotpSecret,
   generateTotpQrDataUri,
@@ -837,6 +837,175 @@ router.get("/profile", requireAuth, async (c) => {
       has_debt_choice: foundProfile?.hasDebtChoice ?? null,
       setup_guide_seen: foundProfile?.setupGuideSeen ?? false,
       setup_guide_dismissed: foundProfile?.setupGuideDismissed ?? false,
+    },
+    demo_workspace: null,
+  })
+})
+
+// Callers: ProfilePage.saveName (first_name, last_name), updateEmailNotificationPreference
+// (email_notifications_enabled), saveTimezonePreference (timezone); DashboardPage.syncSetupGuideProfile
+// (setup_guide_seen, setup_guide_dismissed); DebtAccountsSection.setDebtChoice (has_debt_choice).
+// Silently strips email and current_password — OIDC-only, no password column.
+// display_name intentionally omitted — no current caller; add when first needed.
+// errors[] never populated on success (all-or-nothing; validation failure → 400).
+// SET objects typed against Drizzle $inferInsert to catch column typos at compile time (lesson from 9.6).
+router.post("/profile/update", requireAuth, async (c) => {
+  const { userId } = c.var.session
+  const db = getDb()
+
+  let body: Record<string, unknown>
+  try {
+    body = await c.req.json() as Record<string, unknown>
+  } catch {
+    body = {}
+  }
+
+  const errors: string[] = []
+  const usersSet: Partial<typeof users.$inferInsert> = {}
+  const profileSet: Partial<typeof userProfiles.$inferInsert> = {}
+
+  // ── users table fields ────────────────────────────────────────────────────
+  if (body.first_name !== undefined) {
+    usersSet.firstName = body.first_name === null
+      ? null
+      : String(body.first_name ?? "").trim().slice(0, 64) || null
+  }
+  if (body.last_name !== undefined) {
+    usersSet.lastName = body.last_name === null
+      ? null
+      : String(body.last_name ?? "").trim().slice(0, 64) || null
+  }
+
+  // ── userProfiles table fields ─────────────────────────────────────────────
+  if (body.monthly_income_kd !== undefined) {
+    if (body.monthly_income_kd === null) {
+      profileSet.monthlyIncomeKd = null
+    } else {
+      try {
+        profileSet.monthlyIncomeKd = formatKd(parseKd(String(body.monthly_income_kd)))
+      } catch {
+        errors.push("monthly_income_kd: invalid decimal value.")
+      }
+    }
+  }
+  if (body.payday_day !== undefined) {
+    if (body.payday_day === null) {
+      profileSet.paydayDay = null
+    } else {
+      const n = Number(body.payday_day)
+      if (!Number.isInteger(n) || n < 1 || n > 31) {
+        errors.push("payday_day: must be an integer between 1 and 31.")
+      } else {
+        profileSet.paydayDay = n
+      }
+    }
+  }
+  if (body.country !== undefined) {
+    profileSet.country = body.country === null
+      ? null
+      : String(body.country ?? "").trim().slice(0, 64) || null
+  }
+  if (body.timezone !== undefined && body.timezone !== null) {
+    // timezone column is NOT NULL — silently drop null to preserve the DB default (Asia/Kuwait).
+    const tz = String(body.timezone ?? "").trim().slice(0, 64)
+    if (tz) profileSet.timezone = tz
+  }
+  if (body.email_notifications_enabled !== undefined) {
+    profileSet.emailNotificationsEnabled = Boolean(body.email_notifications_enabled)
+  }
+  if (body.has_debt_choice !== undefined) {
+    profileSet.hasDebtChoice = body.has_debt_choice === null ? null : Boolean(body.has_debt_choice)
+  }
+  if (body.setup_guide_seen !== undefined) {
+    profileSet.setupGuideSeen = Boolean(body.setup_guide_seen)
+  }
+  if (body.setup_guide_dismissed !== undefined) {
+    profileSet.setupGuideDismissed = Boolean(body.setup_guide_dismissed)
+  }
+
+  if (errors.length) {
+    return c.json({ ok: false, data: null, error: errors.join("; "), code: "validation_error" }, 400)
+  }
+
+  const hasUsersUpdate = Object.keys(usersSet).length > 0
+  const hasProfileUpdate = Object.keys(profileSet).length > 0
+
+  if (hasUsersUpdate && hasProfileUpdate) {
+    await db.transaction(async (tx) => {
+      await tx.update(users).set(usersSet).where(eq(users.id, userId))
+      await tx
+        .insert(userProfiles)
+        .values({ userId, ...profileSet })
+        .onDuplicateKeyUpdate({ set: profileSet })
+    })
+  } else if (hasUsersUpdate) {
+    await db.update(users).set(usersSet).where(eq(users.id, userId))
+  } else if (hasProfileUpdate) {
+    await db
+      .insert(userProfiles)
+      .values({ userId, ...profileSet })
+      .onDuplicateKeyUpdate({ set: profileSet })
+  }
+  // else: no recognized fields — no-op; re-fetch and return current state
+
+  const [[updatedUser], [updatedProfile]] = await Promise.all([
+    db
+      .select({
+        id: users.id,
+        email: users.email,
+        displayName: users.displayName,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        totpEnabled: users.totpEnabled,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1),
+    db
+      .select({
+        monthlyIncomeKd: userProfiles.monthlyIncomeKd,
+        paydayDay: userProfiles.paydayDay,
+        country: userProfiles.country,
+        timezone: userProfiles.timezone,
+        emailNotificationsEnabled: userProfiles.emailNotificationsEnabled,
+        hasDebtChoice: userProfiles.hasDebtChoice,
+        setupGuideSeen: userProfiles.setupGuideSeen,
+        setupGuideDismissed: userProfiles.setupGuideDismissed,
+      })
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, userId))
+      .limit(1),
+  ])
+
+  if (!updatedUser) {
+    return c.json({ ok: false, data: null, error: "User not found.", code: "user_not_found" }, 401)
+  }
+
+  return c.json({
+    ok: true,
+    user: {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      display_name: updatedUser.displayName,
+      first_name: updatedUser.firstName,
+      last_name: updatedUser.lastName,
+      totp_enabled: updatedUser.totpEnabled,
+      created_at: updatedUser.createdAt instanceof Date
+        ? updatedUser.createdAt.toISOString().replace(/\.\d{3}Z$/, "+00:00")
+        : String(updatedUser.createdAt),
+    },
+    profile: {
+      monthly_income_kd: updatedProfile?.monthlyIncomeKd != null
+        ? formatKd(updatedProfile.monthlyIncomeKd)
+        : null,
+      payday_day: updatedProfile?.paydayDay ?? null,
+      country: updatedProfile?.country ?? null,
+      timezone: updatedProfile?.timezone ?? "Asia/Kuwait",
+      email_notifications_enabled: updatedProfile?.emailNotificationsEnabled ?? true,
+      has_debt_choice: updatedProfile?.hasDebtChoice ?? null,
+      setup_guide_seen: updatedProfile?.setupGuideSeen ?? false,
+      setup_guide_dismissed: updatedProfile?.setupGuideDismissed ?? false,
     },
     demo_workspace: null,
   })
