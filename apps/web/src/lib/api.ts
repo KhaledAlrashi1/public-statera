@@ -1246,17 +1246,6 @@ export const authApi = {
       method: "POST",
     }),
 
-  deleteAccount: (payload: { password: string; totp_code?: string; confirmation_token?: string }) =>
-    apiFetch<{
-      ok: boolean
-      data?: { confirmation_token?: string; expires_in?: number; deleted?: boolean }
-      code?: string
-      error?: string
-    }>("/api/account", {
-      method: "DELETE",
-      body: JSON.stringify(payload),
-    }),
-
   logout: () =>
     apiFetch<{ ok: boolean }>("/api/auth/logout", {
       method: "POST",

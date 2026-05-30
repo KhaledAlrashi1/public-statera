@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { ApiError } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToast } from "@/components/ui/toaster"
@@ -12,12 +12,9 @@ export default function TwoFactorVerifyPage() {
   const [codeType, setCodeType] = useState<"totp" | "backup">("totp")
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { verifyTwoFactor } = useAuth()
   const toast = useToast()
-
-  const intent = searchParams.get("intent")
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -31,7 +28,7 @@ export default function TwoFactorVerifyPage() {
           `Only ${n} backup code${n === 1 ? "" : "s"} remaining — generate new ones from Profile.`,
         )
       }
-      navigate(intent === "delete" ? "/delete-account/confirm" : "/")
+      navigate("/")
     } catch (err) {
       if (err instanceof ApiError && (err.status === 410 || err.code === "PENDING_2FA_RESTART")) {
         navigate("/login")

@@ -116,17 +116,6 @@ export default function ProfilePage() {
   const [twoFactorLoading, setTwoFactorLoading] = useState(false)
   const [twoFactorError, setTwoFactorError] = useState("")
 
-  // ── Account deletion ──
-  const [dangerZoneOpen, setDangerZoneOpen] = useState(false)
-  const [deleteEmailConfirm, setDeleteEmailConfirm] = useState("")
-  const [deletePassword, setDeletePassword] = useState("")
-  const [deleteTotpCode, setDeleteTotpCode] = useState("")
-  const [deleteTotpError, setDeleteTotpError] = useState("")
-  const [deleteConfirmationToken, setDeleteConfirmationToken] = useState<string | null>(null)
-  const [deleteConfirmationExpiresAt, setDeleteConfirmationExpiresAt] = useState<number | null>(null)
-  const [deleteSecondsRemaining, setDeleteSecondsRemaining] = useState(0)
-  const [deletingAccount, setDeletingAccount] = useState(false)
-
   // ── Export ──
   const [exportingFormat, setExportingFormat] = useState<null | "csv" | "xlsx">(null)
   const browserTimezone = useMemo(() => detectBrowserTimezone(), [])
@@ -180,29 +169,6 @@ export default function ProfilePage() {
     run()
     return () => { cancelled = true }
   }, [user])
-
-  useEffect(() => {
-    if (!deleteConfirmationToken || !deleteConfirmationExpiresAt) {
-      setDeleteSecondsRemaining(0)
-      return
-    }
-
-    const updateRemaining = () => {
-      const seconds = Math.max(0, Math.ceil((deleteConfirmationExpiresAt - Date.now()) / 1000))
-      setDeleteSecondsRemaining(seconds)
-    }
-
-    updateRemaining()
-    const timer = window.setInterval(updateRemaining, 250)
-    return () => window.clearInterval(timer)
-  }, [deleteConfirmationExpiresAt, deleteConfirmationToken])
-
-  useEffect(() => {
-    if (!deleteConfirmationToken || !deleteConfirmationExpiresAt || deleteSecondsRemaining > 0) return
-    setDeleteConfirmationToken(null)
-    setDeleteConfirmationExpiresAt(null)
-    toast.error("Deletion confirmation expired. Start again.")
-  }, [deleteConfirmationExpiresAt, deleteConfirmationToken, deleteSecondsRemaining, toast])
 
   // ─── Handlers ─────────────────────────────────────────────────────────────
 
@@ -329,82 +295,6 @@ export default function ProfilePage() {
       toast.error(msg)
     } finally {
       setTwoFactorLoading(false)
-    }
-  }
-
-  const requestAccountDeletion = async () => {
-    if (!user) return
-    setDeleteTotpError("")
-    if (deleteEmailConfirm.trim().toLowerCase() !== user.email.toLowerCase()) {
-      toast.error("Type your exact account email to continue.")
-      return
-    }
-    if (!deletePassword.trim()) {
-      toast.error("Current password is required.")
-      return
-    }
-    const normalizedTotpCode = deleteTotpCode.replace(/\D/g, "").slice(0, 6)
-    if (twoFactorEnabled && normalizedTotpCode.length !== 6) {
-      setDeleteTotpError("Enter your 6-digit authentication code.")
-      return
-    }
-    setDeletingAccount(true)
-    try {
-      const res = await authApi.deleteAccount({
-        password: deletePassword,
-        totp_code: normalizedTotpCode || undefined,
-      })
-      const token = res.data?.confirmation_token?.trim()
-      const expiresIn = Number(res.data?.expires_in ?? 30)
-      if (!token) {
-        toast.error("We couldn't start account deletion right now.")
-        return
-      }
-      const safeExpiresIn = Number.isFinite(expiresIn) ? expiresIn : 30
-      setDeleteConfirmationToken(token)
-      setDeleteConfirmationExpiresAt(Date.now() + safeExpiresIn * 1000)
-      setDeleteSecondsRemaining(safeExpiresIn)
-      toast.warning(`Deletion confirmation issued. Click Delete Permanently within ${safeExpiresIn} seconds.`)
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "We couldn't start account deletion right now."
-      toast.error(msg)
-    } finally {
-      setDeletingAccount(false)
-    }
-  }
-
-  const confirmAccountDeletion = async () => {
-    if (!deleteConfirmationToken) return
-    setDeleteTotpError("")
-    const normalizedTotpCode = deleteTotpCode.replace(/\D/g, "").slice(0, 6)
-    if (twoFactorEnabled && normalizedTotpCode.length !== 6) {
-      setDeleteTotpError("Enter your 6-digit authentication code.")
-      return
-    }
-    setDeletingAccount(true)
-    try {
-      const res = await authApi.deleteAccount({
-        password: deletePassword,
-        totp_code: normalizedTotpCode || undefined,
-        confirmation_token: deleteConfirmationToken,
-      })
-      if (res.data?.deleted) {
-        await logout()
-        navigate("/register", { replace: true })
-        toast.success("Account deleted permanently.")
-      } else {
-        toast.error("We couldn't delete your account right now.")
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "We couldn't delete your account right now."
-      if (msg.toLowerCase().includes("confirmation token")) {
-        setDeleteConfirmationToken(null)
-        setDeleteConfirmationExpiresAt(null)
-        setDeleteSecondsRemaining(0)
-      }
-      toast.error(msg)
-    } finally {
-      setDeletingAccount(false)
     }
   }
 
@@ -728,114 +618,6 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      {/* ── 7. Danger Zone ──────────────────────────────────────────────── */}
-      <section className={panelSection({ animated: true, stagger: "7", className: "p-5" })}>
-        <h2 className="text-lg font-semibold text-destructive">Danger Zone</h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Permanently delete your account and all associated data. This cannot be undone.
-        </p>
-        <div className="mt-4">
-          {!dangerZoneOpen ? (
-            <Button
-              variant="outline"
-              className="text-destructive hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
-              onClick={() => setDangerZoneOpen(true)}
-            >
-              Delete my account
-            </Button>
-          ) : (
-            <div className="status-card status-card-danger grid gap-3 p-4">
-              <p className="text-xs font-medium text-destructive">
-                This action is permanent. Type your email and password to confirm.
-              </p>
-              <div className="grid gap-2">
-                <Label htmlFor="delete-account-email">Type your email to confirm</Label>
-                <Input
-                  id="delete-account-email"
-                  value={deleteEmailConfirm}
-                  onChange={(e) => setDeleteEmailConfirm(e.target.value)}
-                  placeholder={user?.email || "you@example.com"}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="delete-account-password">Current password</Label>
-                <Input
-                  id="delete-account-password"
-                  type="password"
-                  value={deletePassword}
-                  onChange={(e) => setDeletePassword(e.target.value)}
-                  placeholder="Current password"
-                />
-              </div>
-              {twoFactorEnabled && (
-                <div className="grid gap-2">
-                  <Label htmlFor="delete-account-totp">2FA code</Label>
-                  <Input
-                    id="delete-account-totp"
-                    value={deleteTotpCode}
-                    onChange={(e) => {
-                      setDeleteTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))
-                      if (deleteTotpError) setDeleteTotpError("")
-                    }}
-                    inputMode="numeric"
-                    maxLength={6}
-                    placeholder="123456"
-                  />
-                  {deleteTotpError ? (
-                    <p className="text-xs text-destructive">{deleteTotpError}</p>
-                  ) : null}
-                </div>
-              )}
-              {deleteConfirmationToken ? (
-                <p className="text-xs font-medium text-destructive">
-                  Confirmation expires in {deleteSecondsRemaining}s.
-                </p>
-              ) : null}
-              <div className="flex flex-wrap gap-2">
-                {!deleteConfirmationToken ? (
-                  <>
-                    <Button
-                      variant="outline"
-                      className="text-destructive hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
-                      loading={deletingAccount}
-                      disabled={deletingAccount}
-                      onClick={requestAccountDeletion}
-                    >
-                      {deletingAccount ? "Preparing..." : "Delete My Account"}
-                    </Button>
-                    <Button variant="outline" onClick={() => setDangerZoneOpen(false)} disabled={deletingAccount}>
-                      Cancel
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button
-                      variant="outline"
-                      className="text-destructive hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
-                      loading={deletingAccount}
-                      disabled={deletingAccount}
-                      onClick={confirmAccountDeletion}
-                    >
-                      {deletingAccount ? "Deleting..." : `Delete Permanently${deleteSecondsRemaining > 0 ? ` (${deleteSecondsRemaining}s)` : ""}`}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      disabled={deletingAccount}
-                      onClick={() => {
-                        setDeleteConfirmationToken(null)
-                        setDeleteConfirmationExpiresAt(null)
-                        setDeleteSecondsRemaining(0)
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
     </div>
   )
 }
