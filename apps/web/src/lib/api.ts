@@ -1216,15 +1216,10 @@ export const authApi = {
       flags?: Partial<FeatureFlags>
     }>("/api/auth/me"),
 
-  twoFactorSetup: () =>
-    apiFetch<{
-      ok: boolean
-      qr_data_uri: string
-      secret_b32: string
-      backup_codes: string[]
-    }>("/api/auth/2fa/setup", {
-      method: "POST",
-    }),
+  twoFactorSetup: async (): Promise<{ qr_data_uri: string; secret_b32: string; backup_codes: string[] }> => {
+    const payload = await apiFetch<unknown>("/api/auth/2fa/setup", { method: "POST" })
+    return readApiData<{ qr_data_uri: string; secret_b32: string; backup_codes: string[] }>(payload)
+  },
 
   twoFactorConfirm: (code: string) =>
     apiFetch<{ ok: boolean; code?: string; error?: string }>("/api/auth/2fa/confirm", {
@@ -1232,11 +1227,13 @@ export const authApi = {
       body: JSON.stringify({ code }),
     }),
 
-  twoFactorVerify: (payload: { code: string; type?: "totp" | "backup" }) =>
-    apiFetch<AuthResponse>("/api/auth/2fa/verify", {
+  twoFactorVerify: async (payload: { code: string; type?: "totp" | "backup" }): Promise<{ user_id?: number; warning?: string; backup_codes_remaining?: number }> => {
+    const envelope = await apiFetch<unknown>("/api/auth/2fa/verify", {
       method: "POST",
       body: JSON.stringify(payload),
-    }),
+    })
+    return readApiData<{ user_id?: number; warning?: string; backup_codes_remaining?: number }>(envelope)
+  },
 
   twoFactorDisable: (payload: { code: string }) =>
     apiFetch<{ ok: boolean; code?: string; error?: string }>("/api/auth/2fa/disable", {
