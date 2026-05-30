@@ -16,7 +16,7 @@ interface TwoFactorSetupProps {
   error: string
   onSetupStart: () => Promise<void>
   onSetupConfirm: (code: string) => Promise<void>
-  onDisable: (payload: { password: string; code: string }) => Promise<void>
+  onDisable: (payload: { code: string }) => Promise<void>
 }
 
 export function TwoFactorSetup({
@@ -29,7 +29,6 @@ export function TwoFactorSetup({
   onDisable,
 }: TwoFactorSetupProps) {
   const [confirmCode, setConfirmCode] = useState("")
-  const [disablePassword, setDisablePassword] = useState("")
   const [disableCode, setDisableCode] = useState("")
   const [backupCodesSaved, setBackupCodesSaved] = useState(false)
   const [copyFeedback, setCopyFeedback] = useState("")
@@ -47,8 +46,7 @@ export function TwoFactorSetup({
 
   async function submitDisable(e: FormEvent) {
     e.preventDefault()
-    await onDisable({ password: disablePassword, code: disableCode })
-    setDisablePassword("")
+    await onDisable({ code: disableCode })
     setDisableCode("")
   }
 
@@ -155,16 +153,6 @@ export function TwoFactorSetup({
         <div className="space-y-3 rounded-xl border border-border/60 bg-background/60 p-4">
           <p className="text-sm font-medium text-foreground">2FA is enabled.</p>
           <form onSubmit={submitDisable} className="space-y-3">
-            <div>
-              <Label htmlFor="disable-2fa-password">Current password</Label>
-              <Input
-                id="disable-2fa-password"
-                type="password"
-                value={disablePassword}
-                onChange={(e) => setDisablePassword(e.target.value)}
-                className="mt-1"
-              />
-            </div>
             <div>
               <Label htmlFor="disable-2fa-code">Current 6-digit code</Label>
               <Input

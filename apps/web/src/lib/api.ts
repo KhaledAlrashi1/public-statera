@@ -1331,22 +1331,4 @@ export const authApi = {
       body: JSON.stringify(data),
     }),
 
-  requestEmailChangeLink: (data: { new_email: string; current_password: string }) =>
-    apiFetch<{ ok: boolean; message?: string; preview_url?: string; errors?: string[] }>(
-      "/api/auth/profile/request-email-change-link",
-      {
-        method: "POST",
-        body: JSON.stringify(data),
-      }
-    ),
-
-  requestPasswordChangeLink: (data: { current_password: string }) =>
-    apiFetch<{ ok: boolean; message?: string; preview_url?: string; errors?: string[] }>(
-      "/api/auth/profile/request-password-change-link",
-      {
-        method: "POST",
-        body: JSON.stringify(data),
-      }
-    ),
-
 }

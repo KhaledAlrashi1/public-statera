@@ -16,7 +16,6 @@ import PageHeader from "@/components/layout/PageHeader"
 import { panelSection } from "@/components/ui/patterns"
 import type { IncomePatternResponse } from "@/types/api"
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PROFILE_NAME_MAX_LENGTH = 64
 const DEFAULT_PROFILE_TIMEZONE = "Asia/Kuwait"
 const COMMON_TIMEZONE_SUGGESTIONS = [
@@ -99,12 +98,6 @@ export default function ProfilePage() {
   const [lastName, setLastName] = useState("")
   const [savingName, setSavingName] = useState(false)
 
-  // ── Email change ──
-  const [emailChangeVisible, setEmailChangeVisible] = useState(false)
-  const [newEmail, setNewEmail] = useState("")
-  const [currentPasswordForEmail, setCurrentPasswordForEmail] = useState("")
-  const [sendingEmailLink, setSendingEmailLink] = useState(false)
-
   // ── Income pattern ──
   const [incomePattern, setIncomePattern] = useState<IncomePatternResponse | null>(null)
   const [loadingIncomePattern, setLoadingIncomePattern] = useState(false)
@@ -119,8 +112,6 @@ export default function ProfilePage() {
   const [savingTimezone, setSavingTimezone] = useState(false)
 
   // ── Security / 2FA ──
-  const [currentPassword, setCurrentPassword] = useState("")
-  const [savingPassword, setSavingPassword] = useState(false)
   const [twoFactorSetupData, setTwoFactorSetupData] = useState<TwoFactorSetupData | null>(null)
   const [twoFactorLoading, setTwoFactorLoading] = useState(false)
   const [twoFactorError, setTwoFactorError] = useState("")
@@ -249,40 +240,6 @@ export default function ProfilePage() {
     }
   }
 
-  const requestEmailChangeLink = async () => {
-    if (!user) return
-    const trimmed = newEmail.trim().toLowerCase()
-    if (!trimmed) {
-      toast.error("Enter a new email address.")
-      return
-    }
-    if (!EMAIL_RE.test(trimmed)) {
-      toast.error("Enter a valid email address.")
-      return
-    }
-    if (trimmed === user.email.toLowerCase()) {
-      toast.error("That's already your current email.")
-      return
-    }
-    if (!currentPasswordForEmail.trim()) {
-      toast.error("Current password is required.")
-      return
-    }
-    setSendingEmailLink(true)
-    try {
-      await authApi.requestEmailChangeLink({ new_email: trimmed, current_password: currentPasswordForEmail })
-      setNewEmail("")
-      setCurrentPasswordForEmail("")
-      setEmailChangeVisible(false)
-      toast.success("Email change link sent. Check your inbox.")
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "We couldn't send that email change link right now."
-      toast.error(msg)
-    } finally {
-      setSendingEmailLink(false)
-    }
-  }
-
   const updateEmailNotificationPreference = async (enabled: boolean, previous: boolean) => {
     setSavingEmailNotifications(true)
     setEmailNotificationsEnabled(enabled)
@@ -318,20 +275,6 @@ export default function ProfilePage() {
       toast.error(msg)
     } finally {
       setSavingTimezone(false)
-    }
-  }
-
-  const requestPasswordChangeLink = async () => {
-    setSavingPassword(true)
-    try {
-      await authApi.requestPasswordChangeLink({ current_password: currentPassword })
-      setCurrentPassword("")
-      toast.success("Password change link sent. Check your inbox or spam folder. The link expires in 30 minutes.")
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "We couldn't send that password change link right now."
-      toast.error(msg)
-    } finally {
-      setSavingPassword(false)
     }
   }
 
@@ -372,7 +315,7 @@ export default function ProfilePage() {
     }
   }
 
-  const disableTwoFactor = async (payload: { password: string; code: string }) => {
+  const disableTwoFactor = async (payload: { code: string }) => {
     setTwoFactorError("")
     setTwoFactorLoading(true)
     try {
@@ -567,53 +510,10 @@ export default function ProfilePage() {
 
         {/* Email */}
         <div className="mt-5 border-t border-border/60 pt-4">
-          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-medium">Email address</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{user?.email}</p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setEmailChangeVisible((v) => !v)
-                setNewEmail("")
-                setCurrentPasswordForEmail("")
-              }}
-            >
-              {emailChangeVisible ? "Cancel" : "Change"}
-            </Button>
+          <div>
+            <p className="text-sm font-medium">Email address</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{user?.email}</p>
           </div>
-          {emailChangeVisible && (
-            <div className="mt-3 grid gap-3">
-              <div className="grid gap-2">
-                <Label htmlFor="profile-new-email">New email address</Label>
-                <Input
-                  id="profile-new-email"
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="new@example.com"
-                  autoComplete="email"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="profile-email-password">Current password</Label>
-                <Input
-                  id="profile-email-password"
-                  type="password"
-                  value={currentPasswordForEmail}
-                  onChange={(e) => setCurrentPasswordForEmail(e.target.value)}
-                  placeholder="Your current password"
-                />
-              </div>
-              <div>
-                <Button onClick={requestEmailChangeLink} loading={sendingEmailLink} disabled={sendingEmailLink}>
-                  {sendingEmailLink ? "Sending..." : "Send confirmation link"}
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
@@ -665,27 +565,7 @@ export default function ProfilePage() {
         <p className="mt-1 text-xs text-muted-foreground">
           Protect your account with a strong password and two-factor authentication.
         </p>
-        <div className="mt-4 grid gap-3">
-          <div className="grid gap-2">
-            <Label htmlFor="profile-current-password">Current password</Label>
-            <Input
-              id="profile-current-password"
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="Current password"
-            />
-          </div>
-          <div>
-            <Button onClick={requestPasswordChangeLink} loading={savingPassword} disabled={savingPassword}>
-              {savingPassword ? "Sending..." : "Send password change link"}
-            </Button>
-            <p className="mt-2 text-xs text-muted-foreground">
-              We&apos;ll email a secure link that expires in 30 minutes. If you don&apos;t see it, check your spam folder.
-            </p>
-          </div>
-        </div>
-        <div className="mt-5 border-t border-border/60 pt-4">
+        <div className="mt-4 border-t border-border/60 pt-4">
           <h3 className="text-sm font-semibold">Two-Factor Authentication</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             {twoFactorEnabled
