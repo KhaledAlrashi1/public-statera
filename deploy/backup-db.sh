@@ -9,6 +9,10 @@
 # age recipients derived from .sops.yaml at runtime — no hardcoded copy here.
 set -euo pipefail
 
+# rclone installed to ~/bin on this server (no system-wide sudo at install time).
+# Systemd does not source login-shell PATH, so prepend explicitly.
+export PATH="${HOME}/bin:${PATH}"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "${SCRIPT_DIR}")"
 
