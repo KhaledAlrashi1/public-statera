@@ -125,13 +125,22 @@ for prefix in ${PREFIXES}; do
   echo "[backup] rclone copy: OK (${prefix}/)"
 
   # Explicit size verification.
+  # rclone size on a scoped Object Read+Write token may return {"count":0,"bytes":0}
+  # without a non-zero exit code when the token lacks ListObjects/HeadObject access.
+  # Treat count=0 the same as an error exit: log a warning and trust rclone copy.
   REMOTE_JSON=$(rclone size "R2:${R2_BUCKET}/${prefix}/${OBJECT_NAME}" --json 2>&1) || {
     echo "[backup] WARN: rclone size failed for ${prefix}/ (token may lack stat permission) — trusting rclone copy exit code"
     REMOTE_JSON=""
   }
   if [[ -n "${REMOTE_JSON}" ]]; then
-    REMOTE_BYTES=$(echo "${REMOTE_JSON}" | python3 -c "import sys,json; print(json.load(sys.stdin)['bytes'])" 2>/dev/null || echo "0")
-    if [[ "${REMOTE_BYTES}" == "${BACKUP_BYTES}" ]]; then
+    REMOTE_BYTES=$(echo "${REMOTE_JSON}" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+print('SKIP' if d.get('count', 0) == 0 else d['bytes'])
+" 2>/dev/null || echo "0")
+    if [[ "${REMOTE_BYTES}" == "SKIP" ]]; then
+      echo "[backup] WARN: rclone size returned count=0 for ${prefix}/ (scoped token lacks stat permission) — trusting rclone copy exit code"
+    elif [[ "${REMOTE_BYTES}" == "${BACKUP_BYTES}" ]]; then
       echo "[backup] rclone size: OK — remote=${REMOTE_BYTES} bytes matches local"
     else
       echo "ERROR: size mismatch — remote=${REMOTE_BYTES} local=${BACKUP_BYTES}" >&2; exit 1
