@@ -101,6 +101,11 @@ This file is read by Claude Code at the start of every session. Keep it accurate
 
 Fixes shipped after the original module commit, capturing real-world deployment findings.
 
+**8f-1 — EU-jurisdiction R2 endpoint** `bucket in EU jurisdiction requires .eu. S3 endpoint; standard-host endpoint returns empty-body 403 indistinguishable from an auth failure`
+1. **Root cause**: the R2 bucket `statera-prod-db-backups` was created in the EU jurisdiction. Cloudflare R2 EU buckets require the `.eu.` S3 endpoint (`<account>.eu.r2.cloudflarestorage.com`); the default/standard endpoint (`<account>.r2.cloudflarestorage.com`) returns HTTP 403 with an empty body and empty RequestID/HostID headers. This looks identical to an authentication failure or invalid credentials — not a routing error — making it hard to diagnose.
+2. **Fix**: updated `R2_S3_ENDPOINT` in `secrets/.env.prod.sops.yaml` to `https://afce8d0ab0e452a1bcf73e4ed5146760.eu.r2.cloudflarestorage.com`.
+3. **Lesson**: when creating an R2 bucket, the jurisdiction (Standard vs EU vs APAC) determines the required S3 endpoint. Standard buckets use `<account>.r2.cloudflarestorage.com`; EU buckets require `<account>.eu.r2.cloudflarestorage.com`. Always verify the bucket jurisdiction and match the endpoint when provisioning R2 access tokens.
+
 **8d — §4 secrets plumbing** `VAR=$(cmd) silently swallows sops failure under set -e; fixed by decrypting to temp file`
 1. **Root cause (Layer 1, confirmed)**: `ENV_VARS=$(sops -d --output-type dotenv ...)` does not trigger `set -e` on sops failure — in bash, `VAR=$(cmd)` command substitutions always exit 0 regardless of the substituted command's exit code. A sops failure silently sets `ENV_VARS=""`, execution continues, all `${VAR}` interpolations in the Compose YAML resolve to empty strings, and MySQL refuses to start with empty `MYSQL_ROOT_PASSWORD`.
 2. **Layer 2 (latent, not confirmed)**: `--env-file <(printf '%s' "$ENV_VARS")` passes a process substitution pipe FD to docker compose. Even when ENV_VARS is populated, a pipe FD leaves no artifact if something goes wrong. The temp file approach improves debuggability (an operator can inspect it during a paused execution) and incidentally hardens against process-substitution edge cases on specific Docker Compose versions.
