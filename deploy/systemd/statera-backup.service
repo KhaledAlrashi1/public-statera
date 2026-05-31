@@ -1,0 +1,21 @@
+[Unit]
+Description=Statera encrypted DB backup to Cloudflare R2
+Documentation=https://github.com/KhaledAlrashi1/public-statera/blob/main/docs/runbooks/backups.md
+After=network-online.target docker.service
+# Wants= not Requires=: if docker.service momentarily fails to start (e.g. during
+# a docker daemon restart), the backup unit still attempts to run rather than
+# being held in a failed dependency state. mysqldump runs inside an already-running
+# container via docker compose exec — docker.service state doesn't gate that.
+Wants=docker.service
+
+[Service]
+Type=oneshot
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/statera
+ExecStart=/bin/bash /home/deploy/statera/deploy/backup-db.sh
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=statera-backup
+# Fail if the backup takes longer than 30 minutes.
+TimeoutStartSec=1800

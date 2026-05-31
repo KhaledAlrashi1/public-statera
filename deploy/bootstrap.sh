@@ -97,6 +97,26 @@ else
   log "  sops already at v${SOPS_VERSION}"
 fi
 
+# rclone: installed from GitHub releases to pin exact version + verify checksum.
+# Used by deploy/backup-db.sh to upload encrypted DB backups to Cloudflare R2.
+RCLONE_VERSION="1.74.2"
+RCLONE_SHA256="72a806370072015ccbe4d81bcd348cc5eaf3beca6c65ba693fd43fb31fcca5b1"
+RCLONE_ZIP="rclone-v${RCLONE_VERSION}-linux-${BIN_ARCH}.zip"
+RCLONE_URL="https://github.com/rclone/rclone/releases/download/v${RCLONE_VERSION}/${RCLONE_ZIP}"
+
+if ! command -v rclone &>/dev/null || ! rclone --version 2>/dev/null | grep -qF "${RCLONE_VERSION}"; then
+  curl -fsSL -o "/tmp/${RCLONE_ZIP}" "${RCLONE_URL}"
+  echo "${RCLONE_SHA256}  /tmp/${RCLONE_ZIP}" | sha256sum -c -
+  unzip -q "/tmp/${RCLONE_ZIP}" -d /tmp/rclone_extract
+  install -m 755 \
+    "/tmp/rclone_extract/rclone-v${RCLONE_VERSION}-linux-${BIN_ARCH}/rclone" \
+    /usr/local/bin/rclone
+  rm -rf "/tmp/${RCLONE_ZIP}" /tmp/rclone_extract
+  log "  rclone v${RCLONE_VERSION} installed"
+else
+  log "  rclone already at v${RCLONE_VERSION}"
+fi
+
 # ── §2: Deploy user ───────────────────────────────────────────────────────────
 
 log "§2 — deploy user"

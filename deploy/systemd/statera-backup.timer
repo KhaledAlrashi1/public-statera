@@ -1,0 +1,16 @@
+[Unit]
+Description=Daily Statera DB backup at 02:30 UTC
+Documentation=https://github.com/KhaledAlrashi1/public-statera/blob/main/docs/runbooks/backups.md
+
+[Timer]
+# 02:30 UTC daily — low-traffic window, before apt-daily-upgrade at ~06:43 UTC.
+OnCalendar=*-*-* 02:30:00 UTC
+# If the server was down at fire time, run the missed backup on next boot.
+Persistent=true
+# Small jitter — defense against clock-synchronised thundering herd if we ever
+# run multiple servers. Does not affect the 02:30 window meaningfully.
+RandomizedDelaySec=300
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
