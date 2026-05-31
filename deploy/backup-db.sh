@@ -128,7 +128,7 @@ for prefix in ${PREFIXES}; do
   # rclone size on a scoped Object Read+Write token may return {"count":0,"bytes":0}
   # without a non-zero exit code when the token lacks ListObjects/HeadObject access.
   # Treat count=0 the same as an error exit: log a warning and trust rclone copy.
-  REMOTE_JSON=$(rclone size "R2:${R2_BUCKET}/${prefix}/${OBJECT_NAME}" --json 2>&1) || {
+  REMOTE_JSON=$(rclone size "R2:${R2_BUCKET}/${prefix}/${OBJECT_NAME}" --json 2>/dev/null) || {
     echo "[backup] WARN: rclone size failed for ${prefix}/ (token may lack stat permission) — trusting rclone copy exit code"
     REMOTE_JSON=""
   }
