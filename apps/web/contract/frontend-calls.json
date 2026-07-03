@@ -1,0 +1,310 @@
+[
+  {
+    "method": "DELETE",
+    "path": "/api/categories/1"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/debt-accounts/1"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/memorized-transactions/1"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/merchants/1"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/savings-goals/1"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/transactions/1"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/transactions/import-batch/batch-1"
+  },
+  {
+    "method": "GET",
+    "path": "/api/analytics/account-overview"
+  },
+  {
+    "method": "GET",
+    "path": "/api/analytics/budget-metrics"
+  },
+  {
+    "method": "GET",
+    "path": "/api/analytics/dashboard-bundle"
+  },
+  {
+    "method": "GET",
+    "path": "/api/analytics/dashboard-metrics"
+  },
+  {
+    "method": "GET",
+    "path": "/api/analytics/expense-breakdown"
+  },
+  {
+    "method": "GET",
+    "path": "/api/analytics/expense-merchant-trend"
+  },
+  {
+    "method": "GET",
+    "path": "/api/analytics/income-pattern"
+  },
+  {
+    "method": "GET",
+    "path": "/api/analytics/recurring-patterns"
+  },
+  {
+    "method": "GET",
+    "path": "/api/analytics/safe-to-spend"
+  },
+  {
+    "method": "GET",
+    "path": "/api/analytics/snapshot"
+  },
+  {
+    "method": "GET",
+    "path": "/api/analytics/spend-by-category"
+  },
+  {
+    "method": "GET",
+    "path": "/api/analytics/spend-by-month"
+  },
+  {
+    "method": "GET",
+    "path": "/api/analytics/weekly-digest"
+  },
+  {
+    "method": "GET",
+    "path": "/api/auth/me"
+  },
+  {
+    "method": "GET",
+    "path": "/api/auth/profile"
+  },
+  {
+    "method": "GET",
+    "path": "/api/auth/profile/security-events"
+  },
+  {
+    "method": "GET",
+    "path": "/api/budgets"
+  },
+  {
+    "method": "GET",
+    "path": "/api/budgets/months"
+  },
+  {
+    "method": "GET",
+    "path": "/api/categories"
+  },
+  {
+    "method": "GET",
+    "path": "/api/debt-accounts"
+  },
+  {
+    "method": "GET",
+    "path": "/api/debt-accounts/payoff-plan"
+  },
+  {
+    "method": "GET",
+    "path": "/api/debt-accounts/summary"
+  },
+  {
+    "method": "GET",
+    "path": "/api/memorized-transactions"
+  },
+  {
+    "method": "GET",
+    "path": "/api/merchants"
+  },
+  {
+    "method": "GET",
+    "path": "/api/notifications/budget-alerts"
+  },
+  {
+    "method": "GET",
+    "path": "/api/savings-goals"
+  },
+  {
+    "method": "GET",
+    "path": "/api/savings-goals/1/projection"
+  },
+  {
+    "method": "GET",
+    "path": "/api/transaction-suggestions"
+  },
+  {
+    "method": "GET",
+    "path": "/api/transaction-template-suggestions"
+  },
+  {
+    "method": "GET",
+    "path": "/api/transactions/1"
+  },
+  {
+    "method": "GET",
+    "path": "/api/transactions/by-category"
+  },
+  {
+    "method": "GET",
+    "path": "/api/transactions/dup-check"
+  },
+  {
+    "method": "GET",
+    "path": "/api/transactions/export-csv"
+  },
+  {
+    "method": "GET",
+    "path": "/api/transactions/export-xlsx"
+  },
+  {
+    "method": "GET",
+    "path": "/api/transactions/search"
+  },
+  {
+    "method": "GET",
+    "path": "/api/transactions/summary"
+  },
+  {
+    "method": "GET",
+    "path": "/api/transactions/top-patterns"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/debt-accounts/1"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/memorized-transactions/1"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/merchants/1"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/savings-goals/1"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/transactions/1"
+  },
+  {
+    "method": "POST",
+    "path": "/api/auth/2fa/confirm"
+  },
+  {
+    "method": "POST",
+    "path": "/api/auth/2fa/disable"
+  },
+  {
+    "method": "POST",
+    "path": "/api/auth/2fa/setup"
+  },
+  {
+    "method": "POST",
+    "path": "/api/auth/2fa/verify"
+  },
+  {
+    "method": "POST",
+    "path": "/api/auth/demo-data"
+  },
+  {
+    "method": "POST",
+    "path": "/api/auth/demo-data/clear"
+  },
+  {
+    "method": "POST",
+    "path": "/api/auth/logout"
+  },
+  {
+    "method": "POST",
+    "path": "/api/auth/profile/update"
+  },
+  {
+    "method": "POST",
+    "path": "/api/auth/sessions/revoke-all"
+  },
+  {
+    "method": "POST",
+    "path": "/api/budgets"
+  },
+  {
+    "method": "POST",
+    "path": "/api/categories"
+  },
+  {
+    "method": "POST",
+    "path": "/api/categories/1/remap"
+  },
+  {
+    "method": "POST",
+    "path": "/api/debt-accounts"
+  },
+  {
+    "method": "POST",
+    "path": "/api/memorized-transactions"
+  },
+  {
+    "method": "POST",
+    "path": "/api/memorized-transactions/1/pin"
+  },
+  {
+    "method": "POST",
+    "path": "/api/memorized-transactions/bulk-delete"
+  },
+  {
+    "method": "POST",
+    "path": "/api/merchants"
+  },
+  {
+    "method": "POST",
+    "path": "/api/merchants/1/remap"
+  },
+  {
+    "method": "POST",
+    "path": "/api/notifications/budget-alerts/dismiss"
+  },
+  {
+    "method": "POST",
+    "path": "/api/savings-goals"
+  },
+  {
+    "method": "POST",
+    "path": "/api/savings-goals/1/deposit"
+  },
+  {
+    "method": "POST",
+    "path": "/api/transaction-template-suggestions/feedback"
+  },
+  {
+    "method": "POST",
+    "path": "/api/transactions"
+  },
+  {
+    "method": "POST",
+    "path": "/api/transactions/1/split"
+  },
+  {
+    "method": "POST",
+    "path": "/api/transactions/bulk-delete"
+  },
+  {
+    "method": "POST",
+    "path": "/api/transactions/bulk-update"
+  },
+  {
+    "method": "POST",
+    "path": "/api/transactions/import-commit"
+  },
+  {
+    "method": "POST",
+    "path": "/api/transactions/upload-preview"
+  }
+]

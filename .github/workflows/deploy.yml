@@ -77,12 +77,24 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       # Type check — catches type errors before vitest runs
+      # NOTE(phase4-api-suite-rehab): the api package is named `statera-api`, so
+      # `--filter api` matches NO project — this step and the `--filter api test`
+      # step below have been silent no-ops. Fixing the filter surfaces ~39
+      # pre-existing tsc errors (Hono RPC testClient typing in *.test.ts) and 172
+      # failing api tests (many DB-dependent; this job has no MySQL service).
+      # Rehabilitating the full api typecheck + suite is deferred to its own effort;
+      # Module 10a deliberately does not bundle it. Left unchanged to avoid turning
+      # the pipeline red on unrelated pre-existing breakage.
       - run: pnpm --filter api exec tsc --noEmit
       - run: pnpm --filter statera-frontend exec tsc --noEmit
 
       # Run vitest without watch mode
       - run: pnpm --filter api test run
       - run: pnpm --filter statera-frontend run test:unit
+      # Module 10a — frontend↔backend route contract. DB-free (checks 404-vs-not
+      # via app.request), correctly filtered to statera-api so it actually gates:
+      # a frontend api.ts call to an unmounted Hono route fails CI here.
+      - run: pnpm --filter statera-api exec vitest run src/contract
 
   # ── build-push ──────────────────────────────────────────────────────────────
   build-push:
