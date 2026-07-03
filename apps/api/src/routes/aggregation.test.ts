@@ -1517,7 +1517,10 @@ describe("GET /api/analytics/dashboard-bundle", () => {
         [{ ym: "2026-05", incomeTotal: "2000.000", spendTotal: "500.000" }], // Q6: trend
       ]),
     )
-    const res = await app.request("/api/analytics/dashboard-bundle", {
+    // Pin the month explicitly — the fixtures above are all 2026-05, and a
+    // no-param request defaults to currentMonthKey() (wall-clock dependent). See
+    // the "default month (no param)" test above for the currentMonthKey() case.
+    const res = await app.request("/api/analytics/dashboard-bundle?month=2026-05", {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(200)

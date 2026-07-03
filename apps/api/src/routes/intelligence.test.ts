@@ -11,6 +11,7 @@ import { Hono } from "hono"
 import { intelligenceRouter } from "./intelligence"
 import { createSessionToken } from "../middleware/auth"
 import { env } from "../lib/env"
+import { readJson } from "../test/json"
 
 vi.mock("../db/connection", () => ({ getDb: vi.fn() }))
 
@@ -77,7 +78,7 @@ describe("GET /api/analytics/income-pattern", () => {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await readJson(res)
     expect(body.ok).toBe(true)
     expect(body.error).toBeNull()
     expect(body.meta).toEqual({})
@@ -98,7 +99,7 @@ describe("GET /api/analytics/income-pattern", () => {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(503)
-    const body = await res.json()
+    const body = await readJson(res)
     expect(body.ok).toBe(false)
     expect(body.code).toBe("analytics_timeout")
   })
@@ -120,7 +121,7 @@ describe("GET /api/analytics/income-pattern", () => {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await readJson(res)
     expect(body.data.income_source).toBe("not_set")
   })
 })
@@ -162,7 +163,7 @@ describe("GET /api/analytics/recurring-patterns", () => {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await readJson(res)
     expect(body.ok).toBe(true)
     expect(body.error).toBeNull()
     expect(body.data.patterns).toHaveLength(1)
@@ -180,7 +181,7 @@ describe("GET /api/analytics/recurring-patterns", () => {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(503)
-    const body = await res.json()
+    const body = await readJson(res)
     expect(body.ok).toBe(false)
     expect(body.code).toBe("analytics_timeout")
   })
@@ -192,7 +193,7 @@ describe("GET /api/analytics/recurring-patterns", () => {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await readJson(res)
     expect(body.ok).toBe(true)
     expect(body.data.patterns).toEqual([])
     expect(body.meta.count).toBe(0)
@@ -204,7 +205,7 @@ describe("GET /api/analytics/recurring-patterns", () => {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(400)
-    const body = await res.json()
+    const body = await readJson(res)
     expect(body.ok).toBe(false)
     expect(body.error).toBe("days must be between 30 and 365")
     expect(body.code).toBe("validation_error")
@@ -246,7 +247,7 @@ describe("GET /api/analytics/snapshot", () => {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await readJson(res)
     expect(body.ok).toBe(true)
     expect(body.error).toBeNull()
     expect(body.meta).toEqual({})
@@ -264,7 +265,7 @@ describe("GET /api/analytics/snapshot", () => {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(503)
-    const body = await res.json()
+    const body = await readJson(res)
     expect(body.ok).toBe(false)
     expect(body.code).toBe("analytics_timeout")
   })

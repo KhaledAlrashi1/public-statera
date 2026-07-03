@@ -76,25 +76,20 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Type check — catches type errors before vitest runs
-      # NOTE(phase4-api-suite-rehab): the api package is named `statera-api`, so
-      # `--filter api` matches NO project — this step and the `--filter api test`
-      # step below have been silent no-ops. Fixing the filter surfaces ~39
-      # pre-existing tsc errors (Hono RPC testClient typing in *.test.ts) and 172
-      # failing api tests (many DB-dependent; this job has no MySQL service).
-      # Rehabilitating the full api typecheck + suite is deferred to its own effort;
-      # Module 10a deliberately does not bundle it. Left unchanged to avoid turning
-      # the pipeline red on unrelated pre-existing breakage.
-      - run: pnpm --filter api exec tsc --noEmit
+      # Type check — catches type errors before vitest runs.
+      # Module 10f: filter corrected `api` → `statera-api` (the package name);
+      # the old filter matched no project, so this step was a silent no-op.
+      - run: pnpm --filter statera-api exec tsc --noEmit
       - run: pnpm --filter statera-frontend exec tsc --noEmit
 
-      # Run vitest without watch mode
-      - run: pnpm --filter api test run
+      # Run vitest without watch mode. Module 10f: filter corrected and the stray
+      # `run` arg dropped (`test` already resolves to `vitest run`; `test run`
+      # became `vitest run run`). The api suite is hermetic — ioredis is mocked for
+      # the unit run (src/test/redis-mock.setup.ts), so no MySQL/Redis service is
+      # needed. This run includes src/contract (the 10a route contract), so the
+      # separate contract step is no longer required.
+      - run: pnpm --filter statera-api test
       - run: pnpm --filter statera-frontend run test:unit
-      # Module 10a — frontend↔backend route contract. DB-free (checks 404-vs-not
-      # via app.request), correctly filtered to statera-api so it actually gates:
-      # a frontend api.ts call to an unmounted Hono route fails CI here.
-      - run: pnpm --filter statera-api exec vitest run src/contract
 
   # ── build-push ──────────────────────────────────────────────────────────────
   build-push:
