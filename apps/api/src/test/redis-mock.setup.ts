@@ -21,6 +21,20 @@
 // every cache hit/miss test mocks lib/analytics-cache at the function level). So a
 // stub that returns "nothing revoked / cache empty" cannot defang an assertion —
 // it only unblocks the fail-open / cache-miss paths those tests already expect.
+//
+// INTENTIONAL FAIL-FAST (do not convert to a Proxy catch-all): this stub is a
+// concrete class, so a command it does NOT model is `undefined` and throws
+// `TypeError: <cmd> is not a function` loudly. That is a feature, not a gap — it
+// forces the stub to explicitly model every command production code legitimately
+// issues, and surfaces a real omission as a red run instead of silently returning
+// undefined into the caller's logic. It is exactly what caught 10f-fix: health.test.ts
+// builds the full app with the REAL rate-limiter, whose RedisStore calls
+// script("LOAD", ...) at construction — a command the original 10f stub did not
+// implement, producing 24 unhandled rejections. The three rate-limit commands below
+// (script / evalsha / decr) were added deliberately, per hono-rate-limiter's dist
+// protocol; a Proxy that no-oped everything would have hidden the omission and let
+// the rate limiter compute on garbage. Add a method here only when real code calls
+// it; never make unknown commands silently succeed.
 
 import { vi } from "vitest"
 
@@ -75,6 +89,22 @@ class RedisMock {
   }
   async eval(): Promise<unknown> {
     return null
+  }
+  // ── Rate-limit path (hono-rate-limiter RedisStore via lib/rate-limit.ts) ──────
+  // makeRedisClient() maps scriptLoad → script("LOAD", src); RedisStore's
+  // constructor eagerly loads its increment + get Lua scripts, so script() must
+  // resolve to a string sha or loadIncrementScript throws "unexpected reply from
+  // redis client". evalsha runs the loaded script per request; parseScriptResponse
+  // requires a 2-element [totalHits, timeToExpire] reply — [1, 60000] means "first
+  // hit this window", always under any limit, so the stub never rate-limits a test.
+  async script(): Promise<string> {
+    return "mock-sha"
+  }
+  async evalsha(): Promise<[number, number]> {
+    return [1, 60000]
+  }
+  async decr(): Promise<number> {
+    return 0
   }
   async quit(): Promise<string> {
     return "OK"
