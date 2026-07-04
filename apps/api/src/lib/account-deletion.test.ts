@@ -119,56 +119,7 @@ describe("purgeUserAccountRows — DB call sequence", () => {
     // The securityEvents delete IS called (non-tombstone rows are purged).
     expect(securityEventsDeleteCalled).toBe(true)
     // The tombstone itself is safe because the DELETE WHERE includes is_tombstone=false
-    // (tested at integration level; unit test verifies the call is made at all).
-  })
-})
-
-// ── Integration test (INTEGRATION=true only) ──────────────────────────────────
-
-const INTEGRATION = process.env.INTEGRATION === "true"
-
-describe.skipIf(!INTEGRATION)("purgeUserAccountRows — transaction rollback [integration]", () => {
-  it("rolls back all deletes if an error occurs mid-purge", async () => {
-    // This test requires a live MySQL connection and is gated on INTEGRATION=true.
-    // It creates a test user, starts a transaction, forces an error mid-purge,
-    // and verifies the user row is still present after rollback.
-    const { getDb } = await import("../db/connection")
-    const { users } = await import("../db/schema")
-    const { eq } = await import("drizzle-orm")
-
-    const db = getDb()
-
-    // Insert a test user.
-    const [inserted] = await db.insert(users).values({
-      authProvider: "test",
-      externalId: `test-${Date.now()}`,
-      email: `rollback-test-${Date.now()}@example.com`,
-    }).$returningId()
-    const testUserId = inserted.id
-
-    // Simulate mid-purge failure by overriding purgeUserAccountRows' internal
-    // savingsGoals delete to throw. We can't easily inject this, so instead
-    // we wrap the whole thing in a transaction that we abort.
-    try {
-      await db.transaction(async (tx) => {
-        // Insert tombstone.
-        await tx.insert(await import("../db/schema").then((s) => s.securityEvents)).values({
-          userId: null,
-          eventType: "account.deleted",
-          ipAddress: null,
-          userAgent: null,
-          detailsJson: "{}",
-          isTombstone: true,
-        })
-        throw new Error("simulated mid-purge failure")
-      })
-    } catch { /* expected */ }
-
-    // User row must still exist (transaction was rolled back).
-    const [still] = await db.select({ id: users.id }).from(users).where(eq(users.id, testUserId)).limit(1)
-    expect(still?.id).toBe(testUserId)
-
-    // Cleanup.
-    await db.delete(users).where(eq(users.id, testUserId))
+    // (verified at integration level in account-deletion.integration.test.ts; this unit
+    // test verifies the call is made at all).
   })
 })
