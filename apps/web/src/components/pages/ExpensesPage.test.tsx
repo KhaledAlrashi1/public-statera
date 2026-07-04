@@ -19,7 +19,6 @@ const mocks = vi.hoisted(() => ({
     byCategory: vi.fn(),
     create: vi.fn(),
     suggestions: vi.fn(),
-    templateSuggestions: vi.fn(),
   },
 }))
 

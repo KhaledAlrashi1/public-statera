@@ -141,10 +141,6 @@
   },
   {
     "method": "GET",
-    "path": "/api/transaction-template-suggestions"
-  },
-  {
-    "method": "GET",
     "path": "/api/transactions/1"
   },
   {
@@ -154,14 +150,6 @@
   {
     "method": "GET",
     "path": "/api/transactions/dup-check"
-  },
-  {
-    "method": "GET",
-    "path": "/api/transactions/export-csv"
-  },
-  {
-    "method": "GET",
-    "path": "/api/transactions/export-xlsx"
   },
   {
     "method": "GET",
@@ -278,10 +266,6 @@
   {
     "method": "POST",
     "path": "/api/savings-goals/1/deposit"
-  },
-  {
-    "method": "POST",
-    "path": "/api/transaction-template-suggestions/feedback"
   },
   {
     "method": "POST",

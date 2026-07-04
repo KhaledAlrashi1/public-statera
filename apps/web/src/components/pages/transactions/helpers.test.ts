@@ -2,7 +2,6 @@ import { vi, describe as viDescribe, it, beforeEach, afterEach } from "vitest"
 import { renderHook, act } from "@testing-library/react"
 
 import {
-  applyTemplateToPreviewRow,
   applyTransactionSuggestion,
   normalizeAmountForInput,
   normalizeDateForInput,
@@ -12,8 +11,6 @@ import {
 vi.mock("@/lib/api", () => ({
   transactionsApi: {
     suggestions: vi.fn(),
-    templateSuggestions: vi.fn(),
-    templateSuggestionFeedback: vi.fn(),
   },
 }))
 
@@ -83,58 +80,6 @@ viDescribe("useSuggestions error handling", () => {
 })
 
 describe("transactions/helpers", () => {
-  test("applyTemplateToPreviewRow fills blank fields from template", () => {
-    const base = {
-      date: "2026-02-18",
-      merchant: "",
-      name: "",
-      category: "",
-      amount_kd: "",
-      _key: 1,
-    }
-
-    const template = {
-      transaction_id: 9,
-      date: "2026-02-17",
-      name: "Transport",
-      merchant: "RideApp",
-      amount_kd: "4.000",
-      items: [{ name: "Taxi", category: "Transport", amount_kd: "4.000" }],
-    }
-
-    const filled = applyTemplateToPreviewRow(base, template)
-    expect(filled.merchant).toBe("RideApp")
-    expect(filled.name).toBe("Taxi")
-    expect(filled.category).toBe("Transport")
-    expect(filled.amount_kd).toBe("4.000")
-  })
-
-  test("applyTemplateToPreviewRow keeps user-entered fields", () => {
-    const base = {
-      date: "2026-02-18",
-      merchant: "Manual Merchant",
-      name: "My name",
-      category: "My category",
-      amount_kd: "1.000",
-      _key: 2,
-    }
-
-    const template = {
-      transaction_id: 9,
-      date: "2026-02-17",
-      name: "Transport",
-      merchant: "RideApp",
-      amount_kd: "4.000",
-      items: [{ name: "Taxi", category: "Transport", amount_kd: "4.000" }],
-    }
-
-    const result = applyTemplateToPreviewRow(base, template)
-    expect(result.merchant).toBe("Manual Merchant")
-    expect(result.name).toBe("My name")
-    expect(result.category).toBe("My category")
-    expect(result.amount_kd).toBe("1.000")
-  })
-
   test("normalizeDateForInput accepts date strings and unix fallback", () => {
     expect(normalizeDateForInput("2026-02-18")).toBe("2026-02-18")
     expect(normalizeDateForInput("2026-02-18T10:20:30Z")).toBe("2026-02-18")

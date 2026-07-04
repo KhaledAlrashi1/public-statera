@@ -27,14 +27,6 @@ import type {
   BudgetResponse,
   MemorizedTransaction,
   TransactionSuggestion,
-  TransactionTemplateSuggestion,
-  BankConnection,
-  BankAuthorizationStartResult,
-  BankProviderCatalogEntry,
-  BankConsentRecord,
-  DataAccessLogRecord,
-  BankSyncPreviewResult,
-  BankCommitResult,
   DemoDataClearResult,
   DemoDataLoadResult,
   DebtAccount,
@@ -530,25 +522,6 @@ export const transactionsApi = {
       `/api/transaction-suggestions?q=${encodeURIComponent(q)}&limit=${limit}`
     ),
 
-  templateSuggestions: (q: string, limit = 3) =>
-    apiFetch<{ items: TransactionTemplateSuggestion[] }>(
-      `/api/transaction-template-suggestions?q=${encodeURIComponent(q)}&limit=${limit}`
-    ),
-
-  templateSuggestionFeedback: (params: {
-    feedback_key: string
-    outcome: "accepted" | "rejected"
-    query?: string
-    source?: string
-  }) =>
-    apiFetch<{ ok: boolean }>(
-      "/api/transaction-template-suggestions/feedback",
-      {
-        method: "POST",
-        body: JSON.stringify(params),
-      }
-    ),
-
   summary: (month?: string) => {
     const p = new URLSearchParams()
     if (month) p.set("month", month)
@@ -562,49 +535,6 @@ export const transactionsApi = {
     apiFetch<{ ok: boolean; range: string; items: Array<{ name: string; count: number; sum_kd: string }> }>(
       `/api/transactions/top-patterns?range=${range}`
     ),
-
-  exportCsv: () => downloadTransactionExport("csv"),
-
-  exportXlsx: () => downloadTransactionExport("xlsx"),
-}
-
-async function downloadTransactionExport(
-  format: "csv" | "xlsx"
-): Promise<{ truncated: boolean; rowLimit: number }> {
-    const extension = format === "csv" ? "csv" : "xlsx"
-    const accept =
-      format === "csv"
-        ? "text/csv"
-        : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    const res = await fetch(`/api/transactions/export-${extension}`, {
-      method: "GET",
-      headers: {
-        Accept: accept,
-        "X-Requested-With": "fetch",
-      },
-      credentials: "include",
-    })
-    if (res.status === 401) {
-      window.dispatchEvent(new CustomEvent("auth:unauthorized"))
-      throw new Error("Authentication required")
-    }
-    if (!res.ok) {
-      throw new Error(`Export failed (HTTP ${res.status})`)
-    }
-    const truncated = res.headers.get("X-Export-Truncated") === "true"
-    const rowLimit = Number(res.headers.get("X-Export-Row-Limit") ?? "10000")
-
-    const blob = await res.blob()
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    const today = new Date().toISOString().slice(0, 10)
-    a.href = url
-    a.download = `my-finance-data-${today}.${extension}`
-    document.body.appendChild(a)
-    a.click()
-    URL.revokeObjectURL(url)
-    a.remove()
-    return { truncated, rowLimit }
 }
 
 // ============================================================
@@ -995,119 +925,6 @@ export const memorizedApi = {
 }
 
 // ============================================================
-// Open Banking
-// ============================================================
-
-export const bankApi = {
-  listProviders: async () => {
-    const payload = await apiFetch<unknown>("/api/bank/providers")
-    const data = readApiData<{ providers?: BankProviderCatalogEntry[] }>(payload)
-    return Array.isArray(data.providers) ? data.providers : []
-  },
-
-  beginAuthorization: async (params: {
-    provider: string
-    institution_name?: string
-    external_institution_id?: string
-    scopes?: string[]
-    purpose_of_use?: string
-  }) => {
-    const payload = await apiFetch<unknown>("/api/bank/connect/oauth-begin", {
-      method: "POST",
-      body: JSON.stringify(params),
-    })
-    const data = readApiData<Partial<BankAuthorizationStartResult>>(payload)
-    if (typeof data.authorization_url !== "string" || !data.authorization_url) {
-      throw new Error("Missing provider authorization URL.")
-    }
-    return {
-      provider: typeof data.provider === "string" ? data.provider : params.provider,
-      display_name: typeof data.display_name === "string" ? data.display_name : params.provider,
-      authorization_url: data.authorization_url,
-      redirect_uri: typeof data.redirect_uri === "string" ? data.redirect_uri : null,
-      state: typeof data.state === "string" ? data.state : "",
-      expires_in_seconds: typeof data.expires_in_seconds === "number" ? data.expires_in_seconds : 0,
-    } satisfies BankAuthorizationStartResult
-  },
-
-  connect: async (params: {
-    provider: string
-    institution_name?: string
-    external_institution_id?: string
-    scopes?: string[]
-    purpose_of_use?: string
-  }) => {
-    const payload = await apiFetch<unknown>("/api/bank/connect", {
-      method: "POST",
-      body: JSON.stringify(params),
-    })
-    const data = readApiData<{ connection?: BankConnection }>(payload)
-    if (!data.connection) throw new Error("Missing bank connection in response.")
-    return data.connection
-  },
-
-  listConnections: async () => {
-    const payload = await apiFetch<unknown>("/api/bank/connections")
-    const data = readApiData<{ connections?: BankConnection[] }>(payload)
-    return Array.isArray(data.connections) ? data.connections : []
-  },
-
-  listConsents: async () => {
-    const payload = await apiFetch<unknown>("/api/bank/consents")
-    const data = readApiData<{ consents?: BankConsentRecord[] }>(payload)
-    return Array.isArray(data.consents) ? data.consents : []
-  },
-
-  getConsent: async (consentId: number) => {
-    const payload = await apiFetch<unknown>(`/api/bank/consents/${consentId}`)
-    const data = readApiData<{ consent?: BankConsentRecord }>(payload)
-    if (!data.consent) throw new Error("Consent not found.")
-    return data.consent
-  },
-
-  getDataAccessLog: async (params?: { connection_id?: number; limit?: number }) => {
-    const q = new URLSearchParams()
-    if (params?.connection_id) q.set("connection_id", String(params.connection_id))
-    if (typeof params?.limit === "number") q.set("limit", String(params.limit))
-    const suffix = q.toString()
-    const payload = await apiFetch<unknown>(`/api/bank/data-access-log${suffix ? `?${suffix}` : ""}`)
-    const data = readApiData<{ log?: DataAccessLogRecord[] }>(payload)
-    return Array.isArray(data.log) ? data.log : []
-  },
-
-  syncPreview: async (connectionId: number, params?: { cursor?: string | null; limit?: number }) => {
-    const payload = await apiFetch<unknown>(`/api/bank/connections/${connectionId}/sync-preview`, {
-      method: "POST",
-      body: JSON.stringify({
-        cursor: params?.cursor ?? undefined,
-        limit: params?.limit ?? undefined,
-      }),
-    })
-    return readApiData<BankSyncPreviewResult>(payload)
-  },
-
-  commit: async (connectionId: number, syncRunId: number, params?: { default_category?: string }) => {
-    const payload = await apiFetch<unknown>(`/api/bank/connections/${connectionId}/sync-runs/${syncRunId}/commit`, {
-      method: "POST",
-      body: JSON.stringify(params || {}),
-    })
-    return readApiData<BankCommitResult>(payload)
-  },
-
-  revoke: async (connectionId: number) => {
-    const payload = await apiFetch<unknown>(`/api/bank/connections/${connectionId}/revoke`, {
-      method: "POST",
-      body: JSON.stringify({}),
-    })
-    const data = readApiData<{ connection_id?: number; status?: string }>(payload)
-    return {
-      connection_id: data.connection_id ?? connectionId,
-      status: data.status ?? "revoked",
-    }
-  },
-}
-
-// ============================================================
 // File Upload (special — uses FormData, not JSON)
 // ============================================================
 
@@ -1197,11 +1014,6 @@ export interface FeatureFlags {
   open_banking: boolean
   template_suggestions: boolean
   recurring_patterns: boolean
-}
-
-export const featuresApi = {
-  get: () =>
-    apiFetch<{ ok: boolean; flags: FeatureFlags }>("/api/features"),
 }
 
 // ============================================================

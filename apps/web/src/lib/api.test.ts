@@ -146,41 +146,6 @@ describe("transactionsApi pagination", () => {
     expect(String(fetchMock.mock.calls[0][0])).toContain("category=Groceries")
   })
 
-  it("templateSuggestionFeedback posts outcome payload", async () => {
-    mockJsonResponse({
-      ok: true,
-      data: {
-        feedback: {
-          feedback_key: "abc123",
-          accepted_count: 1,
-          rejected_count: 0,
-          score: 4,
-        },
-      },
-      error: null,
-      meta: {},
-    })
-
-    await transactionsApi.templateSuggestionFeedback({
-      feedback_key: "abc123",
-      outcome: "accepted",
-      query: "amer",
-      source: "manual_apply",
-    })
-
-    expect(fetchMock).toHaveBeenCalledTimes(1)
-    const call = fetchMock.mock.calls[0]
-    expect(String(call[0])).toContain("/api/transaction-template-suggestions/feedback")
-    const options = call[1] as RequestInit
-    expect(options.method).toBe("POST")
-    expect(JSON.parse(String(options.body))).toEqual({
-      feedback_key: "abc123",
-      outcome: "accepted",
-      query: "amer",
-      source: "manual_apply",
-    })
-  })
-
 })
 
 describe("envelope parsing", () => {

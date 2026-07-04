@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Download, LogOut } from "lucide-react"
-import { analyticsApi, authApi, transactionsApi } from "@/lib/api"
+import { LogOut } from "lucide-react"
+import { analyticsApi, authApi } from "@/lib/api"
 import { validateOptionalTextMaxLength } from "@/lib/validation"
 import { formatKD } from "@/lib/utils"
 import { useAuth } from "@/contexts/AuthContext"
@@ -116,8 +116,6 @@ export default function ProfilePage() {
   const [twoFactorLoading, setTwoFactorLoading] = useState(false)
   const [twoFactorError, setTwoFactorError] = useState("")
 
-  // ── Export ──
-  const [exportingFormat, setExportingFormat] = useState<null | "csv" | "xlsx">(null)
   const browserTimezone = useMemo(() => detectBrowserTimezone(), [])
   const timezoneSuggestions = useMemo(
     () => buildTimezoneSuggestions(browserTimezone),
@@ -295,26 +293,6 @@ export default function ProfilePage() {
       toast.error(msg)
     } finally {
       setTwoFactorLoading(false)
-    }
-  }
-
-  const handleExport = async (format: "csv" | "xlsx") => {
-    setExportingFormat(format)
-    try {
-      const result =
-        format === "csv"
-          ? await transactionsApi.exportCsv()
-          : await transactionsApi.exportXlsx()
-      toast.success("Your data has been downloaded.")
-      if (result.truncated) {
-        toast.warning(
-          `Export capped at ${result.rowLimit.toLocaleString()} rows. Use date filters to export smaller ranges.`
-        )
-      }
-    } catch {
-      toast.error("Export failed. Please try again.")
-    } finally {
-      setExportingFormat(null)
     }
   }
 
@@ -585,36 +563,6 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ── 6. Data & Privacy ───────────────────────────────────────────── */}
-      <section className={panelSection({ animated: true, stagger: "6", className: "p-5" })}>
-        <h2 className="text-lg font-semibold">Data & Privacy</h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Export all your transactions as a flat CSV or Excel file.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Button
-            variant="outline"
-            onClick={() => void handleExport("csv")}
-            loading={exportingFormat === "csv"}
-            disabled={exportingFormat !== null}
-            className="flex items-center gap-2"
-          >
-            {exportingFormat !== "csv" ? <Download className="h-4 w-4" /> : null}
-            {exportingFormat === "csv" ? "Preparing CSV…" : "Download CSV"}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => void handleExport("xlsx")}
-            loading={exportingFormat === "xlsx"}
-            disabled={exportingFormat !== null}
-            className="flex items-center gap-2"
-          >
-            {exportingFormat !== "xlsx" ? <Download className="h-4 w-4" /> : null}
-            {exportingFormat === "xlsx" ? "Preparing Excel…" : "Download Excel"}
-          </Button>
         </div>
       </section>
 

@@ -43,9 +43,8 @@ export const EXERCISED_APIS = {
   uploadApi,
 } as const
 
-// EXCLUDED (deliberately not in the contract net): bankApi, featuresApi.
-// These are dead code with no reachable UI caller and are removed in Phase 4 10b.
-// Adding them here would only grow allowlist lines for surfaces about to be deleted.
+// bankApi and featuresApi were dead code with no reachable UI caller; they were
+// deliberately kept out of the contract net and then deleted entirely in Phase 4 10b-1.
 
 type Invocation = { source: string; run: () => unknown }
 
@@ -90,15 +89,8 @@ export const INVOCATIONS: Invocation[] = [
   { source: "transactionsApi.byCategory", run: () => transactionsApi.byCategory({ category: "Food" }) },
   { source: "transactionsApi.byCategoryAll", run: () => transactionsApi.byCategoryAll({ category: "Food" }) },
   { source: "transactionsApi.suggestions", run: () => transactionsApi.suggestions("coffee") },
-  { source: "transactionsApi.templateSuggestions", run: () => transactionsApi.templateSuggestions("coffee") },
-  {
-    source: "transactionsApi.templateSuggestionFeedback",
-    run: () => transactionsApi.templateSuggestionFeedback({ feedback_key: "k", outcome: "accepted" }),
-  },
   { source: "transactionsApi.summary", run: () => transactionsApi.summary() },
   { source: "transactionsApi.topPatterns", run: () => transactionsApi.topPatterns("30") },
-  { source: "transactionsApi.exportCsv", run: () => transactionsApi.exportCsv() },
-  { source: "transactionsApi.exportXlsx", run: () => transactionsApi.exportXlsx() },
 
   // analyticsApi
   { source: "analyticsApi.spendByCategory", run: () => analyticsApi.spendByCategory() },

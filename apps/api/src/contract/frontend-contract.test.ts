@@ -52,12 +52,6 @@ const ALLOWLIST: Array<{ method: string; path: string; disposition: string }> = 
   // 10b: MOUNT — CSV import (port from Flask).
   { method: "POST", path: "/api/transactions/upload-preview", disposition: "10b-mount" },
   { method: "POST", path: "/api/transactions/import-commit", disposition: "10b-mount" },
-  // 10b: REMOVE UI buttons — CSV/XLSX export (backend 3c stays deferred).
-  { method: "GET", path: "/api/transactions/export-csv", disposition: "10b-remove" },
-  { method: "GET", path: "/api/transactions/export-xlsx", disposition: "10b-remove" },
-  // 10b: REMOVE plumbing — template-suggestions (Flask "do not port").
-  { method: "GET", path: "/api/transaction-template-suggestions", disposition: "10b-remove" },
-  { method: "POST", path: "/api/transaction-template-suggestions/feedback", disposition: "10b-remove" },
 ]
 
 const key = (c: { method: string; path: string }) => `${c.method.toUpperCase()} ${c.path}`
