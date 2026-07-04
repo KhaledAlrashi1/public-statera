@@ -37,8 +37,15 @@ export default function WorkspaceChoicePage() {
       )
       navigate("/", { replace: true })
     } catch (error) {
+      // Category C correction of a source bug: the demo_data_not_empty branch navigates but
+      // the original omitted the `return`, so a misleading error toast fired even on the
+      // benign "account already has data" outcome. Source refs: personal-finance has no
+      // WorkspaceChoicePage (its demo CTA lives on DashboardPage.tsx); personal_statera's
+      // frontend/src/components/pages/WorkspaceChoicePage.tsx:44-48 carries the same
+      // missing-return. Fixed here with an early return before the error toast.
       if (error instanceof ApiError && error.code === "demo_data_not_empty") {
         navigate("/", { replace: true })
+        return
       }
       toast.error(error instanceof Error ? error.message : "We couldn't load the demo workspace right now.")
     } finally {

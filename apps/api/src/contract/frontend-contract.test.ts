@@ -46,10 +46,7 @@ const FIXTURE = resolve(
 // (method, path) that are known-unmounted with a live UI caller. Delete a line
 // when its 10b disposition lands.
 const ALLOWLIST: Array<{ method: string; path: string; disposition: string }> = [
-  // 10b: MOUNT — demo-workspace onboarding (port from Flask).
-  { method: "POST", path: "/api/auth/demo-data", disposition: "10b-mount" },
-  { method: "POST", path: "/api/auth/demo-data/clear", disposition: "10b-mount" },
-  // 10b: MOUNT — CSV import (port from Flask).
+  // 10b: MOUNT — CSV import (port from Flask). 10b-2 mounted demo-workspace; these remain for 10b-3.
   { method: "POST", path: "/api/transactions/upload-preview", disposition: "10b-mount" },
   { method: "POST", path: "/api/transactions/import-commit", disposition: "10b-mount" },
 ]

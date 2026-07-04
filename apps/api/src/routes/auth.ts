@@ -10,6 +10,13 @@ import { createSessionToken, revokeSessionVersion, requireAuth, getAuthRedis } f
 import { Sentry } from "../lib/sentry"
 import { recordEventOnce } from "../lib/product-events-lib"
 import { createRateLimiter } from "../lib/rate-limit"
+import { cacheBustDashboardMetrics, cacheBustSafeToSpend } from "../lib/analytics-cache"
+import {
+  loadDemoWorkspace,
+  clearDemoWorkspace,
+  DemoDataConflictError,
+  DemoDataNotLoadedError,
+} from "../lib/demo-data-lib"
 import { encrypt, decrypt } from "../lib/crypto"
 import { formatKd, parseKd } from "../lib/kd"
 import {
@@ -1077,5 +1084,79 @@ router.get(
     return c.json({ ok: true, data: payload, error: null, meta: { has_more: hasMore, offset, limit } })
   },
 )
+
+// ── Demo workspace (Flask port of routes/auth.py:1085 / :1148) ───────────────
+// POST /api/auth/demo-data — seed a demo workspace into a brand-new (empty) account.
+// Rate: 10 per 60 s per authenticated user (RATE_LIMIT_AUTH). Seed-all-or-nothing.
+router.post("/demo-data", requireAuth, createRateLimiter(10, 60), async (c) => {
+  const { userId } = c.var.session
+  const db = getDb()
+  try {
+    const summary = await db.transaction(async (tx) => loadDemoWorkspace(tx, userId))
+    // Cache-bust after commit, fire-and-forget (matches transactions.ts).
+    ;(async () => {
+      try {
+        await Promise.all([cacheBustDashboardMetrics(userId, db), cacheBustSafeToSpend(userId)])
+      } catch (err) {
+        Sentry.captureException(err, { tags: { handler: "auth.demoData.load.cacheBust", userId } })
+      }
+    })()
+    return c.json({ ok: true, data: summary, error: null, meta: {} })
+  } catch (err) {
+    if (err instanceof DemoDataConflictError) {
+      return c.json(
+        {
+          ok: false,
+          data: null,
+          error: "Demo data can only be loaded into an empty account.",
+          code: "demo_data_not_empty",
+        },
+        409,
+      )
+    }
+    Sentry.captureException(err, { tags: { handler: "auth.demoData.load", userId } })
+    console.error("[demo-data] load failed for userId=%d:", userId, err)
+    return c.json(
+      { ok: false, data: null, error: "Failed to load demo data.", code: "demo_data_load_failed" },
+      500,
+    )
+  }
+})
+
+// POST /api/auth/demo-data/clear — remove the demo workspace without deleting the account.
+// Rate: 3 per 600 s per authenticated user (RATE_LIMIT_DEMO_DATA_CLEAR). Clear-all-or-nothing.
+router.post("/demo-data/clear", requireAuth, createRateLimiter(3, 600), async (c) => {
+  const { userId } = c.var.session
+  const db = getDb()
+  try {
+    const summary = await db.transaction(async (tx) => clearDemoWorkspace(tx, userId))
+    ;(async () => {
+      try {
+        await Promise.all([cacheBustDashboardMetrics(userId, db), cacheBustSafeToSpend(userId)])
+      } catch (err) {
+        Sentry.captureException(err, { tags: { handler: "auth.demoData.clear.cacheBust", userId } })
+      }
+    })()
+    return c.json({ ok: true, data: summary, error: null, meta: {} })
+  } catch (err) {
+    if (err instanceof DemoDataNotLoadedError) {
+      return c.json(
+        {
+          ok: false,
+          data: null,
+          error: "No active demo workspace was found.",
+          code: "demo_data_not_loaded",
+        },
+        409,
+      )
+    }
+    Sentry.captureException(err, { tags: { handler: "auth.demoData.clear", userId } })
+    console.error("[demo-data] clear failed for userId=%d:", userId, err)
+    return c.json(
+      { ok: false, data: null, error: "Failed to clear demo data.", code: "demo_data_clear_failed" },
+      500,
+    )
+  }
+})
 
 export { router as authRouter, DELETE_INTENT_COOKIE }
