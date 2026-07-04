@@ -46,6 +46,7 @@ export const DEMO_TRANSACTION_SOURCE = "demo"
 export const DEMO_DATA_EVENT = "demo_data_loaded"
 export const DEMO_MANIFEST_EVENT = "demo_workspace_manifest"
 export const DEMO_CLEARED_EVENT = "demo_data_cleared"
+export const DEMO_REPLACED_WITH_IMPORT_EVENT = "demo_data_replaced_with_import"
 
 // Flask _DEMO_PROFILE_DEFAULTS (demo_data.py:32-36).
 const DEMO_PROFILE_DEFAULTS = {
@@ -597,14 +598,30 @@ async function profileDemoFieldsRemaining(
 }
 
 // ── Demo workspace state (Flask get_demo_workspace_state, :505-542) ──
-// Used internally by clear; not exposed as its own endpoint in this port.
+// Full snake_case shape matches apps/web DemoWorkspaceState; consumed by clear,
+// GET /api/auth/profile (10b-3 D2), and import-commit's demo-replace guard.
 
-type DemoWorkspaceState = {
+export type DemoWorkspaceState = {
   active: boolean
-  profileSeededFields: string[]
+  clearable: boolean
+  loaded_at: string | null
+  month: string
+  months_seeded: number
+  transactions: number
+  budgets: number
+  debt_accounts: number
+  savings_goals: number
+  profile_seeded_fields: string[]
 }
 
-async function getDemoWorkspaceState(
+// getDemoWorkspaceState() — reads the latest manifest itself so callers can pass just
+// (tx, userId); load/clear that already hold the manifest use the internal variant.
+export async function getDemoWorkspaceState(tx: Tx, userId: number): Promise<DemoWorkspaceState> {
+  const manifest = await latestManifest(tx, userId)
+  return getDemoWorkspaceStateWithManifest(tx, userId, manifest)
+}
+
+async function getDemoWorkspaceStateWithManifest(
   tx: Tx,
   userId: number,
   manifest: DemoWorkspaceManifest | null,
@@ -628,14 +645,46 @@ async function getDemoWorkspaceState(
 
   const profileFields = await profileDemoFieldsRemaining(tx, userId, manifest)
 
+  const transactionCount = Number(txnCount?.n ?? 0)
+  const budgetCountN = Number(budgetCount?.n ?? 0)
+  const debtCountN = Number(debtCount?.n ?? 0)
+  const savingsCountN = Number(savingsCount?.n ?? 0)
+
   const active =
-    Number(txnCount?.n ?? 0) > 0 ||
-    Number(budgetCount?.n ?? 0) > 0 ||
-    Number(debtCount?.n ?? 0) > 0 ||
-    Number(savingsCount?.n ?? 0) > 0 ||
+    transactionCount > 0 ||
+    budgetCountN > 0 ||
+    debtCountN > 0 ||
+    savingsCountN > 0 ||
     profileFields.length > 0
 
-  return { active, profileSeededFields: profileFields }
+  // loaded_at: event_ts of the latest manifest (fallback: latest demo_data_loaded) event.
+  const [tsRow] = await tx
+    .select({ ts: productEvents.eventTs })
+    .from(productEvents)
+    .where(
+      and(
+        eq(productEvents.userId, userId),
+        inArray(productEvents.eventName, [DEMO_MANIFEST_EVENT, DEMO_DATA_EVENT]),
+      ),
+    )
+    .orderBy(sql`${productEvents.id} DESC`)
+    .limit(1)
+  const loadedAt = tsRow?.ts
+    ? new Date(tsRow.ts).toISOString().replace(/\.\d{3}Z$/, "+00:00")
+    : null
+
+  return {
+    active,
+    clearable: active,
+    loaded_at: loadedAt,
+    month: manifest ? manifest.month : currentMonthKey(),
+    months_seeded: manifest ? manifest.monthsSeeded : 6,
+    transactions: transactionCount,
+    budgets: budgetCountN,
+    debt_accounts: debtCountN,
+    savings_goals: savingsCountN,
+    profile_seeded_fields: profileFields,
+  }
 }
 
 // ── Public: clear (Flask clear_demo_workspace, :545-586) ──
@@ -650,7 +699,7 @@ export type DemoClearSummary = {
 
 export async function clearDemoWorkspace(tx: Tx, userId: number): Promise<DemoClearSummary> {
   const manifest = await latestManifest(tx, userId)
-  const state = await getDemoWorkspaceState(tx, userId, manifest)
+  const state = await getDemoWorkspaceStateWithManifest(tx, userId, manifest)
   if (!state.active) {
     throw new DemoDataNotLoadedError()
   }
@@ -669,9 +718,9 @@ export async function clearDemoWorkspace(tx: Tx, userId: number): Promise<DemoCl
   const savingsRows = await tx.delete(savingsGoals).where(demoSavingsWhere(userId, manifest))
 
   const profileClearedFields: string[] = []
-  if (state.profileSeededFields.length > 0) {
+  if (state.profile_seeded_fields.length > 0) {
     const set: Record<string, unknown> = {}
-    for (const field of state.profileSeededFields) {
+    for (const field of state.profile_seeded_fields) {
       if (field === "monthly_income_kd") {
         set.monthlyIncomeKd = null
         profileClearedFields.push(field)

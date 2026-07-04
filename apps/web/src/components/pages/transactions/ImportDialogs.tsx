@@ -87,7 +87,7 @@ async function inferImportLimitWarning(file: File): Promise<string | null> {
     return null
   }
 
-  if ((lowerName.endsWith(".xlsx") || lowerName.endsWith(".xls")) && file.size >= LARGE_SPREADSHEET_WARNING_BYTES) {
+  if (lowerName.endsWith(".xlsx") && file.size >= LARGE_SPREADSHEET_WARNING_BYTES) {
     return `This spreadsheet is large and may exceed the ${IMPORT_UPLOAD_MAX_ROWS.toLocaleString()}-row import limit. If preview fails, split it into smaller files before uploading.`
   }
 
@@ -1005,7 +1005,7 @@ function ImportCSVSection({
         <input
           ref={fileRef}
           type="file"
-          accept=".csv,.xlsx,.xls"
+          accept=".csv,.xlsx"
           onChange={handleFileChange}
           className="w-full text-sm text-muted-foreground file:mr-3 file:h-10 file:cursor-pointer file:rounded-md file:border file:border-border file:bg-muted file:px-4 file:text-sm file:font-medium file:text-foreground file:transition-colors hover:file:bg-accent"
         />

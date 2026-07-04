@@ -9,6 +9,7 @@ import { authRouter } from "./routes/auth"
 import { categoriesRouter } from "./routes/categories"
 import { merchantsRouter } from "./routes/merchants"
 import { transactionsRouter } from "./routes/transactions"
+import { uploadRouter } from "./routes/upload"
 import { memorizedRouter } from "./routes/memorized"
 import { budgetsRouter } from "./routes/budgets"
 import { debtRouter } from "./routes/debt"
@@ -44,6 +45,7 @@ export function createApp() {
   app.route("/api/categories", categoriesRouter)
   app.route("/api/merchants", merchantsRouter)
   app.route("/api/transactions", transactionsRouter)
+  app.route("/api/transactions", uploadRouter)
   app.route("/api/memorized-transactions", memorizedRouter)
   app.route("/api/budgets", budgetsRouter)
   app.route("/api/debt-accounts", debtRouter)

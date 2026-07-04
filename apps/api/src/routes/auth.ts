@@ -14,6 +14,7 @@ import { cacheBustDashboardMetrics, cacheBustSafeToSpend } from "../lib/analytic
 import {
   loadDemoWorkspace,
   clearDemoWorkspace,
+  getDemoWorkspaceState,
   DemoDataConflictError,
   DemoDataNotLoadedError,
 } from "../lib/demo-data-lib"
@@ -780,8 +781,7 @@ router.post(
 // Deliberate deviation from standard envelope convention:
 // Returns { ok, user, profile, demo_workspace } at top level (NOT under data) to match
 // the Flask contract that authApi.profile() consumers already expect.
-// demo_workspace: always null — DemoWorkspace feature not ported to Hono.
-// country: always null — no country column in users schema.
+// demo_workspace reflects the real demo-workspace state (10b-3 D2; demo-workspace ported in 10b-2).
 router.get("/profile", requireAuth, async (c) => {
   const { userId } = c.var.session
   const db = getDb()
@@ -820,6 +820,8 @@ router.get("/profile", requireAuth, async (c) => {
     return c.json({ ok: false, data: null, error: "User not found.", code: "user_not_found" }, 401)
   }
 
+  const demoWorkspace = await getDemoWorkspaceState(db, userId)
+
   return c.json({
     ok: true,
     user: {
@@ -845,7 +847,7 @@ router.get("/profile", requireAuth, async (c) => {
       setup_guide_seen: foundProfile?.setupGuideSeen ?? false,
       setup_guide_dismissed: foundProfile?.setupGuideDismissed ?? false,
     },
-    demo_workspace: null,
+    demo_workspace: demoWorkspace,
   })
 })
 
@@ -989,6 +991,8 @@ router.post("/profile/update", requireAuth, async (c) => {
     return c.json({ ok: false, data: null, error: "User not found.", code: "user_not_found" }, 401)
   }
 
+  const demoWorkspaceState = await getDemoWorkspaceState(db, userId)
+
   return c.json({
     ok: true,
     user: {
@@ -1014,7 +1018,7 @@ router.post("/profile/update", requireAuth, async (c) => {
       setup_guide_seen: updatedProfile?.setupGuideSeen ?? false,
       setup_guide_dismissed: updatedProfile?.setupGuideDismissed ?? false,
     },
-    demo_workspace: null,
+    demo_workspace: demoWorkspaceState,
   })
 })
 

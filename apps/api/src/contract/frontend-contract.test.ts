@@ -45,11 +45,9 @@ const FIXTURE = resolve(
 
 // (method, path) that are known-unmounted with a live UI caller. Delete a line
 // when its 10b disposition lands.
-const ALLOWLIST: Array<{ method: string; path: string; disposition: string }> = [
-  // 10b: MOUNT — CSV import (port from Flask). 10b-2 mounted demo-workspace; these remain for 10b-3.
-  { method: "POST", path: "/api/transactions/upload-preview", disposition: "10b-mount" },
-  { method: "POST", path: "/api/transactions/import-commit", disposition: "10b-mount" },
-]
+// Empty as of 10b-3: every frontend api.ts call now resolves to a mounted Hono route.
+// 10b closed the last two entries (CSV import upload-preview + import-commit).
+const ALLOWLIST: Array<{ method: string; path: string; disposition: string }> = []
 
 const key = (c: { method: string; path: string }) => `${c.method.toUpperCase()} ${c.path}`
 
