@@ -31,14 +31,30 @@
  *   exported transactions/budgets. No independent right-to-know value.
  * - account_action_tokens — short-lived authentication tokens (auth-infra, same rationale
  *   as external_id).
- * - template_suggestion_feedback — feature not present in this deployment (flagged off /
- *   never ported to Hono); the table is empty.
  * - security_events tombstone rows — account-deletion audit records (user_id=NULL,
  *   is_tombstone=true). Not tied to this user's identity; never exported.
  *
  * INCLUDED behavioral/audit data (per 10c-1 ruling 1): security_events (non-tombstone)
  * and product_events ARE exported. The export=purge rule holds for them — behavioral and
  * audit data held against the user's ID is in scope for a right-to-access export.
+ *
+ * INCLUDED but always empty in this deployment (per Phase A approval):
+ * template_suggestion_feedback IS exported as its own section. The suggestion-feedback
+ * feature is not present in Hono (flagged off / never ported), so the table is always
+ * empty and the section is always [] with a meta.counts entry of 0 — but the section is
+ * PRESENT, not omitted. This makes the export self-evidently complete: a reader sees the
+ * table exists and holds nothing, rather than having to trust an exclusion note.
+ *
+ * POST-APPROVAL SHAPE CHANGES (recorded 2026-07-05 in reconciliation — honesty of record):
+ * (a) meta.excluded / DATA_EXPORT_EXCLUSIONS was approved in Phase A as a 3-entry
+ *     table-level skeleton. It shipped enriched to also carry the FIELD-LEVEL entries
+ *     (external_id, the totp trio, transactions.name_key, transactions.import_row_hash).
+ *     This is an improvement (one findable place for every departure) and was retroactively
+ *     approved; flagged here because it was not proposed before implementation.
+ * (b) template_suggestion_feedback was briefly implemented as a table-level EXCLUDE
+ *     (flipping the approved INCLUDE-always-empty disposition) without that flip being
+ *     proposed or flagged. Caught in reconciliation and reverted to the approved
+ *     disposition (this file, the pinned exclusions test, and the export section).
  *
  * Read-consistency deviation (per proposal): the export runs as a sequence of independent
  * SELECTs, NOT inside a single serializable transaction. A concurrent write mid-export
@@ -62,6 +78,7 @@ import {
   debtAccounts,
   savingsGoals,
   memorizedTransactions,
+  templateSuggestionFeedback,
   securityEvents,
   productEvents,
 } from "../db/schema"
@@ -78,7 +95,6 @@ export const DATA_EXPORT_EXCLUSIONS: readonly string[] = [
   "transactions.import_row_hash — import-dedup infrastructure",
   "dashboard_snapshots — derived aggregation cache, reconstructable from transactions/budgets",
   "account_action_tokens — short-lived authentication tokens",
-  "template_suggestion_feedback — feature not present in this deployment",
   "security_events tombstone rows — account-deletion audit records not tied to the user",
 ] as const
 
@@ -104,6 +120,7 @@ export type UserDataExport = {
   debt_accounts: Record<string, unknown>[]
   savings_goals: Record<string, unknown>[]
   memorized_transactions: Record<string, unknown>[]
+  template_suggestion_feedback: Record<string, unknown>[]
   security_events: Record<string, unknown>[]
   product_events: Record<string, unknown>[]
 }
@@ -266,6 +283,25 @@ export async function buildUserDataExport(
     .where(eq(memorizedTransactions.userId, userId))
     .orderBy(asc(memorizedTransactions.id))
 
+  // ── template-suggestion feedback (INCLUDE-always-empty; feature not in Hono) ──
+  // Queried like every other section so the export is self-evidently complete. The
+  // suggestion-feedback feature was never ported, so no rows are ever written and this
+  // resolves to []; the section is present regardless (Phase A approved disposition).
+  const templateFeedbackRows = await db
+    .select({
+      id: templateSuggestionFeedback.id,
+      signatureKey: templateSuggestionFeedback.signatureKey,
+      acceptedCount: templateSuggestionFeedback.acceptedCount,
+      rejectedCount: templateSuggestionFeedback.rejectedCount,
+      lastAcceptedAt: templateSuggestionFeedback.lastAcceptedAt,
+      lastRejectedAt: templateSuggestionFeedback.lastRejectedAt,
+      createdAt: templateSuggestionFeedback.createdAt,
+      updatedAt: templateSuggestionFeedback.updatedAt,
+    })
+    .from(templateSuggestionFeedback)
+    .where(eq(templateSuggestionFeedback.userId, userId))
+    .orderBy(asc(templateSuggestionFeedback.id))
+
   // ── security events (non-tombstone only) ─────────────────────────────────────
   const securityRows = await db
     .select({
@@ -385,6 +421,16 @@ export async function buildUserDataExport(
       is_pinned: Boolean(r.isPinned),
       pinned_at: toIsoUtc(r.pinnedAt),
     })),
+    template_suggestion_feedback: templateFeedbackRows.map((r) => ({
+      id: r.id,
+      signature_key: r.signatureKey,
+      accepted_count: r.acceptedCount,
+      rejected_count: r.rejectedCount,
+      last_accepted_at: toIsoUtc(r.lastAcceptedAt),
+      last_rejected_at: toIsoUtc(r.lastRejectedAt),
+      created_at: toIsoUtc(r.createdAt),
+      updated_at: toIsoUtc(r.updatedAt),
+    })),
     security_events: securityRows.map((r) => ({
       id: r.id,
       event_type: r.eventType,
@@ -409,6 +455,7 @@ export async function buildUserDataExport(
     debt_accounts: exportData.debt_accounts.length,
     savings_goals: exportData.savings_goals.length,
     memorized_transactions: exportData.memorized_transactions.length,
+    template_suggestion_feedback: exportData.template_suggestion_feedback.length,
     security_events: exportData.security_events.length,
     product_events: exportData.product_events.length,
   }

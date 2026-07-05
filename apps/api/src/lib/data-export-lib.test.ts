@@ -19,6 +19,7 @@ import {
   debtAccounts,
   savingsGoals,
   memorizedTransactions,
+  templateSuggestionFeedback,
   securityEvents,
   productEvents,
 } from "../db/schema"
@@ -163,6 +164,23 @@ function fullRows(): Map<unknown, unknown[]> {
         },
       ],
     ],
+    // Seeded with one row to prove the section serializes rows when present, even
+    // though this feature produces no rows in the real deployment (always [] there).
+    [
+      templateSuggestionFeedback,
+      [
+        {
+          id: 12,
+          signatureKey: "sig-abc",
+          acceptedCount: 3,
+          rejectedCount: 1,
+          lastAcceptedAt: D,
+          lastRejectedAt: null,
+          createdAt: D,
+          updatedAt: D,
+        },
+      ],
+    ],
     [
       securityEvents,
       [
@@ -228,6 +246,11 @@ describe("buildUserDataExport — full data", () => {
     expect(ex.budgets[0]).toMatchObject({ month: "2026-05", amount_kd: "300.000" })
     expect(ex.debt_accounts[0]).toMatchObject({ balance_kd: "250.000", apr_pct: "18.500" })
     expect(ex.savings_goals[0]).toMatchObject({ target_kd: "1000.000", target_date: "2026-12-31" })
+    expect(ex.template_suggestion_feedback[0]).toMatchObject({
+      signature_key: "sig-abc",
+      accepted_count: 3,
+      rejected_count: 1,
+    })
     expect(ex.security_events[0]).toMatchObject({ event_type: "login.success", ip_address: "1.2.3.4" })
     expect(ex.product_events[0]).toMatchObject({ event_name: "app_opened" })
 
@@ -239,6 +262,7 @@ describe("buildUserDataExport — full data", () => {
       debt_accounts: 1,
       savings_goals: 1,
       memorized_transactions: 1,
+      template_suggestion_feedback: 1,
       security_events: 1,
       product_events: 1,
     })
@@ -312,6 +336,7 @@ describe("buildUserDataExport — empty state (new user, zero rows)", () => {
     expect(ex.debt_accounts).toEqual([])
     expect(ex.savings_goals).toEqual([])
     expect(ex.memorized_transactions).toEqual([])
+    expect(ex.template_suggestion_feedback).toEqual([])
     expect(ex.security_events).toEqual([])
     expect(ex.product_events).toEqual([])
 
@@ -334,18 +359,20 @@ describe("buildUserDataExport — user not found", () => {
 // ── Exclusions constant (feeds meta.excluded — see route test) ────────────────
 describe("DATA_EXPORT_EXCLUSIONS", () => {
   it("documents both field-level and table-level departures from export=purge", () => {
-    expect(DATA_EXPORT_EXCLUSIONS.length).toBe(8)
+    expect(DATA_EXPORT_EXCLUSIONS.length).toBe(7)
     const joined = DATA_EXPORT_EXCLUSIONS.join(" ")
     expect(joined).toContain("external_id")
     expect(joined).toContain("totp_secret")
     expect(joined).toContain("name_key")
     expect(joined).toContain("import_row_hash")
     expect(joined).toContain("dashboard_snapshots")
+    // template_suggestion_feedback is INCLUDED (always []), NOT excluded.
+    expect(joined).not.toContain("template_suggestion_feedback")
   })
 
   // Full deep-equal of the real list — the route test asserts pass-through against a
   // mocked stand-in, so this is the only place the exact meta.excluded content is pinned.
-  it("is exactly the eight documented exclusions, in order", () => {
+  it("is exactly the seven documented exclusions, in order", () => {
     expect(DATA_EXPORT_EXCLUSIONS).toEqual([
       "users.external_id — authentication-infrastructure (IdP-issued cross-service identifier)",
       "users.totp_secret / users.totp_backup_codes_json / users.session_version — authentication-infrastructure / credential material",
@@ -353,7 +380,6 @@ describe("DATA_EXPORT_EXCLUSIONS", () => {
       "transactions.import_row_hash — import-dedup infrastructure",
       "dashboard_snapshots — derived aggregation cache, reconstructable from transactions/budgets",
       "account_action_tokens — short-lived authentication tokens",
-      "template_suggestion_feedback — feature not present in this deployment",
       "security_events tombstone rows — account-deletion audit records not tied to the user",
     ])
   })
