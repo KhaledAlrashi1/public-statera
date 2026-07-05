@@ -22,6 +22,10 @@ vi.mock("../lib/account-deletion", () => ({
   hashEmail: vi.fn(() => "deadbeef".repeat(8)),
   purgeUserAccountRows: vi.fn().mockResolvedValue(undefined),
 }))
+vi.mock("../lib/data-export-lib", () => ({
+  buildUserDataExport: vi.fn(),
+  DATA_EXPORT_EXCLUSIONS: ["EX_FIELD", "EX_TABLE"],
+}))
 
 // BullMQ queue mock
 const mockQueueAdd = vi.fn()
@@ -79,6 +83,7 @@ import * as connection from "../db/connection"
 import { accountRouter } from "./account"
 import { Sentry } from "../lib/sentry"
 import { purgeUserAccountRows } from "../lib/account-deletion"
+import { buildUserDataExport, DATA_EXPORT_EXCLUSIONS } from "../lib/data-export-lib"
 
 const SESSION_SECRET = "test-session-secret-at-least-32-chars-long"
 
@@ -309,6 +314,46 @@ describe("GET /deletion-status/:taskToken — invalid token", () => {
     expect(res.status).toBe(400)
     const body = await res.json() as Record<string, unknown>
     expect(body.code).toBe("invalid_task_id")
+  })
+})
+
+// ── GET /data-export — envelope + meta ────────────────────────────────────────
+
+describe("GET /data-export — success envelope", () => {
+  it("wraps the export under data and attaches meta.counts + meta.excluded", async () => {
+    vi.spyOn(connection, "getDb").mockReturnValue(makeDbReturning([]))
+    const fakeExport = { generated_at: "2026-06-01T00:00:00+00:00", user: { id: 42 }, transactions: [] }
+    const fakeCounts = { transactions: 0, categories: 0 }
+    vi.mocked(buildUserDataExport).mockResolvedValue({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      export: fakeExport as any,
+      counts: fakeCounts,
+    })
+
+    // @ts-expect-error Hono testClient typing
+    const res = await client["data-export"].$get()
+    expect(res.status).toBe(200)
+    const body = await res.json() as Record<string, unknown>
+    expect(body.ok).toBe(true)
+    expect(body.data).toEqual(fakeExport)
+    const meta = body.meta as Record<string, unknown>
+    expect(meta.counts).toEqual(fakeCounts)
+    // Passed through unchanged — the exclusions list is data-independent.
+    expect(meta.excluded).toEqual(DATA_EXPORT_EXCLUSIONS)
+    expect(buildUserDataExport).toHaveBeenCalledWith(expect.anything(), 42)
+  })
+})
+
+describe("GET /data-export — user not found", () => {
+  it("returns 401 user_not_found when the builder returns null", async () => {
+    vi.spyOn(connection, "getDb").mockReturnValue(makeDbReturning([]))
+    vi.mocked(buildUserDataExport).mockResolvedValue(null)
+
+    // @ts-expect-error Hono testClient typing
+    const res = await client["data-export"].$get()
+    expect(res.status).toBe(401)
+    const body = await res.json() as Record<string, unknown>
+    expect(body.code).toBe("user_not_found")
   })
 })
 

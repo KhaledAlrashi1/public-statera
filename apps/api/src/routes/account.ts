@@ -29,6 +29,7 @@ import { Sentry } from "../lib/sentry"
 import { createRateLimiter } from "../lib/rate-limit"
 import { encrypt, decrypt } from "../lib/crypto"
 import { hashEmail, purgeUserAccountRows } from "../lib/account-deletion"
+import { buildUserDataExport, DATA_EXPORT_EXCLUSIONS } from "../lib/data-export-lib"
 import { getQueue } from "../worker/queue"
 import { TASK_DELETE_ACCOUNT } from "../worker/jobs/delete-account-job"
 import { verifyDeleteIntentToken, DELETE_INTENT_COOKIE } from "./auth"
@@ -180,6 +181,33 @@ router.get(
     } catch {
       return c.json({ ok: true, data: { status: "pending", task_id: rawToken }, error: null, meta: {} })
     }
+  },
+)
+
+// GET /api/account/data-export
+// GDPR right-to-access (Module 10c-1): returns a synchronous JSON snapshot of all
+// user-owned data whose scope mirrors the account-deletion purge, minus the deliberate
+// exclusions documented in lib/data-export-lib.ts. requireAuth-gated; no token needed.
+// Rate: 5 per hour (low-frequency, whole-account read; heavier than a normal CRUD call).
+router.get(
+  "/data-export",
+  requireAuth,
+  createRateLimiter(5, 3600),
+  async (c) => {
+    const { userId } = c.var.session
+    const db = getDb()
+
+    const result = await buildUserDataExport(db, userId)
+    if (!result) {
+      return c.json({ ok: false, data: null, error: "User not found.", code: "user_not_found" }, 401)
+    }
+
+    return c.json({
+      ok: true,
+      data: result.export,
+      error: null,
+      meta: { counts: result.counts, excluded: DATA_EXPORT_EXCLUSIONS },
+    })
   },
 )
 
