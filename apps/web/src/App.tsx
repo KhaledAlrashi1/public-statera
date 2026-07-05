@@ -66,6 +66,8 @@ const ProfilePage = lazyWithRetry("profile", () => import("@/components/pages/Pr
 const InsightsPage = lazyWithRetry("insights", () => import("@/components/pages/InsightsPage"))
 const NotFoundPage = lazyWithRetry("not-found", () => import("@/components/pages/NotFoundPage"))
 const TwoFactorVerifyPage = lazyWithRetry("2fa-verify", () => import("@/components/pages/TwoFactorVerifyPage"))
+const PrivacyPolicyPage = lazyWithRetry("privacy", () => import("@/components/pages/legal/PrivacyPolicyPage"))
+const TermsPage = lazyWithRetry("terms", () => import("@/components/pages/legal/TermsPage"))
 
 const ENABLE_PHASE2_LEGACY_REDIRECTS =
   String(import.meta.env.VITE_ENABLE_PHASE2_LEGACY_REDIRECTS ?? "").toLowerCase() === "true"
@@ -149,6 +151,9 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/auth/2fa-verify" element={<TwoFactorVerifyPage />} />
+      {/* Public (pre-auth) legal pages — reachable with no session. */}
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/welcome" element={<WorkspaceChoicePage />} />
         {/* /dev-ui HIDDEN — UI Gallery removed from app; do not re-add without owner instruction */}

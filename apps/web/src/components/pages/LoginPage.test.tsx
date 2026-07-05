@@ -23,4 +23,14 @@ describe("LoginPage", () => {
     )
     expect(screen.getByRole("heading", { name: /sign in/i })).toBeInTheDocument()
   })
+
+  it("renders public Privacy and Terms footer links", () => {
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>,
+    )
+    expect(screen.getByRole("link", { name: /^privacy$/i })).toHaveAttribute("href", "/privacy")
+    expect(screen.getByRole("link", { name: /^terms$/i })).toHaveAttribute("href", "/terms")
+  })
 })

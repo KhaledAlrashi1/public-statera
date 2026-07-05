@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { Scale, Sparkles, ShieldCheck } from "lucide-react"
 
 export default function LoginPage() {
@@ -58,6 +59,18 @@ export default function LoginPage() {
           >
             Continue with Google
           </a>
+
+          <p className="mt-6 text-center text-xs text-muted-foreground">
+            <Link to="/privacy" className="hover:underline">
+              Privacy
+            </Link>
+            <span className="mx-2" aria-hidden="true">
+              ·
+            </span>
+            <Link to="/terms" className="hover:underline">
+              Terms
+            </Link>
+          </p>
         </section>
       </div>
     </div>
