@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm --filter statera-api exec tsc --noEmit:*)",
+      "Bash(pnpm --filter statera-api test:*)",
+      "Bash(pnpm --filter statera-api exec vitest run:*)",
+      "Bash(pnpm --filter statera-frontend run test:unit:*)",
+      "Bash(pnpm --filter statera-frontend run typecheck:*)",
+      "Bash(pnpm --filter statera-frontend contract:generate:*)",
+      "Bash(rg:*)",
+      "Bash(INTEGRATION=true pnpm --filter statera-api test:*)"
+    ],
+    "deny": [
+      "Read(~/.config/sops/age/**)",
+      "Read(./secrets/**)",
+      "Read(~/.ssh/**)",
+      "Read(./.env)",
+      "Read(./.env.prod*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(sops:*)"
+    ]
+  }
+}

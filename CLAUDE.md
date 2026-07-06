@@ -368,6 +368,10 @@ Unplanned operational work that touches production state (key rotations, server 
 
 The fix-forward is the durable lesson record; the handoff is the operational continuity document. Both are required because they serve different readers and different time horizons. See `docs/recovery/2026-05-22-operator-key-rotation.md` as the precedent.
 
+## Tooling conventions
+
+- **Claude Code permission rules (added 2026-07-06):** committed `.claude/settings.json` is load-bearing — `permissions.allow` scopes the verification loop (api/frontend typecheck + test + contract:generate + INTEGRATION api suite + `rg`) to run prompt-free, and `permissions.deny` protects secret material (`Read` denies on `~/.config/sops/age/**`, `./secrets/**`, `~/.ssh/**`, `./.env`, `./.env.prod*`; `Bash` denies on `ssh`/`scp`/`sops`). Deny wins over allow at every scope, so the denies are a real guarantee; the config is a housekeeping change, not a Phase 4 module. Read-only git/grep/ls/cat need no allow rule (Claude Code built-in read-only set).
+
 ## Key architectural decisions (do not revisit)
 
 - **Auth:** provider-agnostic OIDC via openid-client; Google as initial provider. Users table has `(auth_provider, external_id)` composite unique. No password column.
