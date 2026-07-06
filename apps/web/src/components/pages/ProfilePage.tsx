@@ -12,6 +12,7 @@ import { FieldFeedback, validationInputClass } from "@/components/ui/field-feedb
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { TwoFactorSetup, type TwoFactorSetupData } from "@/components/auth/TwoFactorSetup"
+import DataPrivacySection from "@/components/pages/profile/DataPrivacySection"
 import PageHeader from "@/components/layout/PageHeader"
 import { panelSection } from "@/components/ui/patterns"
 import type { IncomePatternResponse } from "@/types/api"
@@ -565,6 +566,9 @@ export default function ProfilePage() {
           </div>
         </div>
       </section>
+
+      {/* ── 6. Data & privacy ───────────────────────────────────────────── */}
+      <DataPrivacySection />
 
     </div>
   )

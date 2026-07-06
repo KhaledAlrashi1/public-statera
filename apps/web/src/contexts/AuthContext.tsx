@@ -13,9 +13,17 @@ interface AuthContextType {
   refreshUser: () => Promise<void>
   verifyTwoFactor: (
     code: string,
-    type?: "totp" | "backup"
+    type?: "totp" | "backup",
+    opts?: { deleteIntent?: boolean }
   ) => Promise<{ warning?: string; backupCodesRemaining?: number }>
   logout: () => Promise<void>
+  /**
+   * Network-free client teardown. Used after DELETE /api/account succeeds — the
+   * server has already cleared the session cookie, so calling logout() (which
+   * POSTs /api/auth/logout) would be a pointless, 401-prone no-op. Clears the
+   * user, feature flags, and the TanStack Query cache.
+   */
+  resetAuthState: () => void
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -86,9 +94,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const verifyTwoFactor = useCallback(
-    async (code: string, type: "totp" | "backup" = "totp") => {
+    async (code: string, type: "totp" | "backup" = "totp", opts?: { deleteIntent?: boolean }) => {
       const data = await authApi.twoFactorVerify({ code, type })
-      await refreshUser()
+      // Delete-reauth 2FA issues a statera_delete_intent cookie, NOT a session —
+      // refreshUser() would 401 on /me. Skip it; the confirm page needs no user.
+      if (!opts?.deleteIntent) {
+        await refreshUser()
+      }
       return {
         warning: typeof data.warning === "string" ? data.warning : undefined,
         backupCodesRemaining:
@@ -105,9 +117,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryClient.clear()
   }, [queryClient])
 
+  const resetAuthState = useCallback(() => {
+    setUser(null)
+    setFlags(defaultFlags)
+    queryClient.clear()
+  }, [queryClient])
+
   return (
     <AuthContext.Provider
-      value={{ user, flags, isLoading, refreshUser, verifyTwoFactor, logout }}
+      value={{ user, flags, isLoading, refreshUser, verifyTwoFactor, logout, resetAuthState }}
     >
       {children}
     </AuthContext.Provider>

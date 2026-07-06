@@ -24,6 +24,7 @@ function renderPage(path = "/auth/2fa-verify") {
       <Routes>
         <Route path="/auth/2fa-verify" element={<TwoFactorVerifyPage />} />
         <Route path="/login" element={<div>Login page</div>} />
+        <Route path="/delete-account/confirm" element={<div>Confirm delete</div>} />
         <Route path="/" element={<div>Dashboard</div>} />
       </Routes>
     </MemoryRouter>,
@@ -52,6 +53,14 @@ describe("TwoFactorVerifyPage", () => {
     renderPage()
     enterCodeAndSubmit()
     await waitFor(() => expect(screen.getByText("Dashboard")).toBeInTheDocument())
+  })
+
+  it("on success with intent=delete, skips refresh and routes to /delete-account/confirm", async () => {
+    mockVerify.mockResolvedValue({ warning: undefined, backupCodesRemaining: undefined })
+    renderPage("/auth/2fa-verify?intent=delete")
+    enterCodeAndSubmit()
+    await waitFor(() => expect(screen.getByText("Confirm delete")).toBeInTheDocument())
+    expect(mockVerify).toHaveBeenCalledWith("123456", "totp", { deleteIntent: true })
   })
 
   it("on BACKUP_CODES_LOW, shows count toast then navigates to /", async () => {

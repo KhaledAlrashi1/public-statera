@@ -22,6 +22,7 @@ import {
   goalsApi,
   memorizedApi,
   authApi,
+  accountApi,
   uploadApi,
 } from "@/lib/api"
 
@@ -40,6 +41,7 @@ export const EXERCISED_APIS = {
   goalsApi,
   memorizedApi,
   authApi,
+  accountApi,
   uploadApi,
 } as const
 
@@ -166,6 +168,10 @@ export const INVOCATIONS: Invocation[] = [
   { source: "authApi.clearDemoData", run: () => authApi.clearDemoData() },
   { source: "authApi.profileSecurityEvents", run: () => authApi.profileSecurityEvents() },
   { source: "authApi.updateProfile", run: () => authApi.updateProfile({}) },
+
+  // accountApi
+  { source: "accountApi.dataExport", run: () => accountApi.dataExport() },
+  { source: "accountApi.deleteAccount", run: () => accountApi.deleteAccount() },
 
   // uploadApi
   { source: "uploadApi.preview", run: () => uploadApi.preview(csvFile()) },

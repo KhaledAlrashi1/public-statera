@@ -33,4 +33,22 @@ describe("LoginPage", () => {
     expect(screen.getByRole("link", { name: /^privacy$/i })).toHaveAttribute("href", "/privacy")
     expect(screen.getByRole("link", { name: /^terms$/i })).toHaveAttribute("href", "/terms")
   })
+
+  it("shows the deletion confirmation when ?deleted=1 is present", () => {
+    render(
+      <MemoryRouter initialEntries={["/login?deleted=1"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    )
+    expect(screen.getByText(/your account has been deleted/i)).toBeInTheDocument()
+  })
+
+  it("does not show the deletion confirmation without ?deleted=1", () => {
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    )
+    expect(screen.queryByText(/your account has been deleted/i)).not.toBeInTheDocument()
+  })
 })

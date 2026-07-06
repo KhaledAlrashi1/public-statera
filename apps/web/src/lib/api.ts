@@ -1130,3 +1130,55 @@ export const authApi = {
     }),
 
 }
+
+// ============================================================
+// Account — GDPR data export + account deletion (routes under /api/account/*)
+// ============================================================
+//
+// Separate object from authApi because these hit the /api/account router, not
+// /api/auth. delete-reauth is deliberately NOT here: it is a top-level browser
+// navigation (an <a href>/location change), not an XHR — the OIDC redirect chain
+// can't be driven from fetch. See ProfilePage's Data & privacy section.
+export const accountApi = {
+  // GET /api/account/data-export — right-to-access. Uses raw fetch (not apiFetch)
+  // because we want the exact response bytes for the file, not res.json(). Throws
+  // ApiError on !ok so callers can branch on 429 (rate limit 5/3600).
+  dataExport: async (): Promise<void> => {
+    const res = await fetch("/api/account/data-export", {
+      method: "GET",
+      headers: { Accept: "application/json", "X-Requested-With": "fetch" },
+      credentials: "include",
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => null)
+      throw new ApiError(
+        readErrorMessage(data, res.status),
+        res.status,
+        readErrorCode(data),
+        asRecord(data) ?? {},
+      )
+    }
+    const blob = await res.blob()
+    const objectUrl = URL.createObjectURL(blob)
+    const filename = `statera-data-export-${new Date().toISOString().slice(0, 10)}.json`
+    const anchor = document.createElement("a")
+    anchor.href = objectUrl
+    anchor.download = filename
+    document.body.appendChild(anchor)
+    anchor.click()
+    anchor.remove()
+    URL.revokeObjectURL(objectUrl)
+  },
+
+  // DELETE /api/account — consumes the statera_delete_intent cookie minted by the
+  // delete-reauth flow and purges the account. The session cookie is cleared on
+  // success. Error codes surface via ApiError: DELETE_INTENT_GONE (410),
+  // ACCOUNT_INACTIVE (403), deletion_failed (500). The response's task_id (async
+  // deletion-status token) is intentionally ignored — the client does not poll
+  // deletion-status (recorded 10c-3: no caller = no method).
+  deleteAccount: async (): Promise<{ deleted: boolean }> => {
+    const payload = await apiFetch<unknown>("/api/account", { method: "DELETE" })
+    const data = readApiData<{ deleted?: boolean; task_id?: string }>(payload)
+    return { deleted: Boolean(data.deleted) }
+  },
+}

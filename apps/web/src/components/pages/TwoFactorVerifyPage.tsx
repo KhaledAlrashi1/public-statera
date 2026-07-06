@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { ApiError } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToast } from "@/components/ui/toaster"
@@ -13,22 +13,28 @@ export default function TwoFactorVerifyPage() {
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { verifyTwoFactor } = useAuth()
   const toast = useToast()
+
+  // delete-reauth flows arrive here as /auth/2fa-verify?intent=delete (set by the
+  // OIDC callback). On success the backend issues a delete-intent cookie instead of
+  // a session, so we route onward to the deletion confirmation, not into the app.
+  const deleteIntent = searchParams.get("intent") === "delete"
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     setIsSubmitting(true)
     try {
-      const result = await verifyTwoFactor(code, codeType)
+      const result = await verifyTwoFactor(code, codeType, { deleteIntent })
       if (result.warning === "BACKUP_CODES_LOW" && result.backupCodesRemaining !== undefined) {
         const n = result.backupCodesRemaining
         toast.warning(
           `Only ${n} backup code${n === 1 ? "" : "s"} remaining — generate new ones from Profile.`,
         )
       }
-      navigate("/")
+      navigate(deleteIntent ? "/delete-account/confirm" : "/")
     } catch (err) {
       if (err instanceof ApiError && (err.status === 410 || err.code === "PENDING_2FA_RESTART")) {
         navigate("/login")

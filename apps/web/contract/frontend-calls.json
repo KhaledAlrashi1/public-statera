@@ -1,6 +1,10 @@
 [
   {
     "method": "DELETE",
+    "path": "/api/account"
+  },
+  {
+    "method": "DELETE",
     "path": "/api/categories/1"
   },
   {
@@ -26,6 +30,10 @@
   {
     "method": "DELETE",
     "path": "/api/transactions/import-batch/batch-1"
+  },
+  {
+    "method": "GET",
+    "path": "/api/account/data-export"
   },
   {
     "method": "GET",

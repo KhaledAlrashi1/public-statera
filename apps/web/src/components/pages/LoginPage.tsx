@@ -1,7 +1,10 @@
-import { Link } from "react-router-dom"
-import { Scale, Sparkles, ShieldCheck } from "lucide-react"
+import { Link, useSearchParams } from "react-router-dom"
+import { Scale, Sparkles, ShieldCheck, CheckCircle2 } from "lucide-react"
 
 export default function LoginPage() {
+  const [searchParams] = useSearchParams()
+  const accountDeleted = searchParams.get("deleted") === "1"
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
       <div className="pointer-events-none absolute inset-0 app-surface" />
@@ -47,6 +50,15 @@ export default function LoginPage() {
         </section>
 
         <section className="section-panel float-in stagger-2 w-full max-w-md p-7">
+          {accountDeleted && (
+            <div
+              role="status"
+              className="mb-6 flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/10 p-3 text-sm text-foreground"
+            >
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <span>Your account has been deleted.</span>
+            </div>
+          )}
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-foreground">Sign in</h2>
             <p className="mt-1 text-sm text-muted-foreground">
