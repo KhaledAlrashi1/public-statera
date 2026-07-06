@@ -20,21 +20,25 @@ describe("PrivacyPolicyPage", () => {
     expect(screen.getByRole("heading", { name: /privacy policy/i })).toBeInTheDocument()
   })
 
-  it("renders the section scaffolds with visible pending markers", () => {
+  it("renders final section content and no pending markers", () => {
     renderPage()
-    expect(screen.getByRole("heading", { name: /data handling/i })).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: /what we collect/i })).toBeInTheDocument()
     expect(screen.getByRole("heading", { name: /your rights/i })).toBeInTheDocument()
-    // Structure-only phase: content is deliberately not drafted yet.
-    expect(screen.getAllByText(/content pending operator review/i).length).toBeGreaterThan(0)
+    // Content-fill shipped: the structure-only pending markers must be gone.
+    expect(screen.queryAllByText(/content pending operator review/i)).toHaveLength(0)
   })
 
   // Durable guarantee: the two legally load-bearing factual-commitment slots
-  // (10c content-track facts — 365d backup retention, statement files never
-  // persisted) must always be present so future edits can't silently drop them.
-  it("renders both factual-commitment slots", () => {
+  // must carry their CONTENT (not just be present) so a future edit can't
+  // silently drop or weaken them.
+  it("renders both factual-commitment slots with their committed content", () => {
     renderPage()
-    expect(screen.getByTestId("commitment-backup-retention")).toBeInTheDocument()
-    expect(screen.getByTestId("commitment-statement-files")).toBeInTheDocument()
+    const backup = screen.getByTestId("commitment-backup-retention")
+    expect(backup).toHaveTextContent("365")
+    expect(backup).toHaveTextContent(/re-apply all account deletions/i)
+
+    const files = screen.getByTestId("commitment-statement-files")
+    expect(files).toHaveTextContent(/never stored/i)
   })
 
   it("links back to sign in", () => {

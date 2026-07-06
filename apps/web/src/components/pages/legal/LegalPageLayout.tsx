@@ -2,9 +2,8 @@
  * LegalPageLayout — shared frame for the public (pre-auth) legal pages
  * (/privacy, /terms). Standalone; deliberately NOT the auth-gated AppShell.
  *
- * Placeholder-structure phase (10c-2): the pages carry section scaffolds with
- * visible "content pending operator review" markers, not drafted legal copy.
- * Operator-owned content-track fills the copy in a follow-up.
+ * The pages carry the final operator-approved legal copy (10c-content). Each
+ * page passes its own effective date via the `lastUpdated` prop.
  *
  * Arabic fast-follow lands HERE: the RTL treatment and the language switch
  * (English/العربية) belong in this layout so both legal pages inherit them in

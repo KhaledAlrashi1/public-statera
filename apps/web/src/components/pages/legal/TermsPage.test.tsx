@@ -18,11 +18,12 @@ describe("TermsPage", () => {
     expect(screen.getByRole("heading", { name: /terms of service/i })).toBeInTheDocument()
   })
 
-  it("renders the section scaffolds with visible pending markers", () => {
+  it("renders final section content and no pending markers", () => {
     renderPage()
     expect(screen.getByRole("heading", { name: /acceptable use/i })).toBeInTheDocument()
     expect(screen.getByRole("heading", { name: /limitation of liability/i })).toBeInTheDocument()
-    expect(screen.getAllByText(/content pending operator review/i).length).toBeGreaterThan(0)
+    // Content-fill shipped: the structure-only pending markers must be gone.
+    expect(screen.queryAllByText(/content pending operator review/i)).toHaveLength(0)
   })
 
   it("links back to sign in", () => {
