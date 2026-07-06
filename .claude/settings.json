@@ -5,6 +5,7 @@
       "Bash(pnpm --filter statera-api test:*)",
       "Bash(pnpm --filter statera-api exec vitest run:*)",
       "Bash(pnpm --filter statera-frontend run test:unit:*)",
+      "Bash(pnpm --filter statera-frontend exec vitest run:*)",
       "Bash(pnpm --filter statera-frontend run typecheck:*)",
       "Bash(pnpm --filter statera-frontend contract:generate:*)",
       "Bash(rg:*)",
