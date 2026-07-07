@@ -20,7 +20,7 @@ vi.mock("../lib/rate-limit", () => ({ createRateLimiter: vi.fn(() => (_c: unknow
 vi.mock("../lib/sentry", () => ({ Sentry: { captureException: vi.fn() } }))
 vi.mock("../lib/account-deletion", () => ({
   hashEmail: vi.fn(() => "deadbeef".repeat(8)),
-  purgeUserAccountRows: vi.fn().mockResolvedValue(undefined),
+  purgeUserAccountRows: vi.fn().mockResolvedValue({ revokedSv: 5 }),
 }))
 vi.mock("../lib/data-export-lib", () => ({
   buildUserDataExport: vi.fn(),
@@ -82,6 +82,7 @@ import { testClient } from "hono/testing"
 import * as connection from "../db/connection"
 import { accountRouter } from "./account"
 import { Sentry } from "../lib/sentry"
+import { revokeSessionVersion } from "../middleware/auth"
 import { purgeUserAccountRows } from "../lib/account-deletion"
 import { buildUserDataExport, DATA_EXPORT_EXCLUSIONS } from "../lib/data-export-lib"
 
@@ -146,6 +147,8 @@ describe("DELETE /account — sync fallback when BullMQ enqueue fails", () => {
 
     // Sync purge was called.
     expect(purgeUserAccountRows).toHaveBeenCalled()
+    // Post-commit session revocation used the sessionVersion the purge returned.
+    expect(revokeSessionVersion).toHaveBeenCalledWith(42, 5)
     // Sentry tracked the enqueue failure.
     expect(Sentry.captureException).toHaveBeenCalledWith(
       expect.any(Error),
@@ -289,7 +292,7 @@ describe("GET /deletion-status/:taskToken — sync fallback token", () => {
   it("returns status:complete immediately for sync tokens", async () => {
     vi.spyOn(connection, "getDb").mockReturnValue(makeDbReturning([{ isActive: true, email: "user@example.com" }]))
     mockQueueAdd.mockRejectedValue(new Error("Redis down"))
-    vi.mocked(purgeUserAccountRows).mockResolvedValue(undefined)
+    vi.mocked(purgeUserAccountRows).mockResolvedValue({ revokedSv: 5 })
 
     const cookie = await makeDeleteIntentCookie(42)
     // @ts-expect-error Hono testClient typing

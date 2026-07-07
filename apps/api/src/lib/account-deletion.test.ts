@@ -39,48 +39,101 @@ describe("hashEmail", () => {
 // ── purgeUserAccountRows — call order and tombstone ───────────────────────────
 
 describe("purgeUserAccountRows — DB call sequence", () => {
-  it("inserts tombstone before any deletes", async () => {
+  it("reads sessionVersion, inserts tombstone, deletes, then soft-deletes last", async () => {
     const calls: string[] = []
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    function makeProxy(label: string): any {
+    function makeProxy(resolveValue: unknown[] = []): any {
       return new Proxy({}, {
         get(_t, prop: string) {
           if (prop === "then") {
-            return (resolve: (v: unknown) => unknown) => Promise.resolve([]).then(resolve)
+            return (resolve: (v: unknown) => unknown) => Promise.resolve(resolveValue).then(resolve)
           }
-          return (..._args: unknown[]) => makeProxy(label)
+          return (..._args: unknown[]) => makeProxy(resolveValue)
         },
       })
     }
 
     const mockDb = {
+      select: vi.fn((_cols: unknown) => {
+        calls.push("select")
+        return makeProxy([{ sessionVersion: 5 }])
+      }),
       insert: vi.fn((_table: unknown) => {
         calls.push("insert")
-        return makeProxy("insert")
+        return makeProxy()
       }),
       delete: vi.fn((_table: unknown) => {
         calls.push("delete")
-        return makeProxy("delete")
+        return makeProxy()
       }),
       update: vi.fn((_table: unknown) => {
         calls.push("update")
-        return makeProxy("update")
+        return makeProxy()
       }),
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await purgeUserAccountRows(1, "abc123", "1.2.3.4", "Mozilla", mockDb as any)
+    const result = await purgeUserAccountRows(1, "abc123", "1.2.3.4", "Mozilla", mockDb as any)
 
-    // Tombstone (insert) must be first.
-    expect(calls[0]).toBe("insert")
+    // sessionVersion read (select) must be first.
+    expect(calls[0]).toBe("select")
+    // Tombstone (insert) must follow.
+    expect(calls[1]).toBe("insert")
     // Soft-delete (update) must be last.
     expect(calls[calls.length - 1]).toBe("update")
-    // All intermediate operations are deletes.
-    const middle = calls.slice(1, -1)
+    // All operations between the tombstone and the soft-delete are deletes.
+    const middle = calls.slice(2, -1)
     expect(middle.every((c) => c === "delete")).toBe(true)
-    // Total: 1 insert + 13 deletes + 1 update = 15 calls
-    expect(calls).toHaveLength(15)
+    // Total: 1 select + 1 insert + 13 deletes + 1 update = 16 calls
+    expect(calls).toHaveLength(16)
+    // Returns the pre-purge sessionVersion for the caller's post-commit revoke.
+    expect(result).toEqual({ revokedSv: 5 })
+  })
+
+  it("soft-delete bumps sessionVersion and clears all three TOTP fields", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let updateSetArg: any = null
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function makeProxy(resolveValue: unknown[] = []): any {
+      return new Proxy({}, {
+        get(_t, prop: string) {
+          if (prop === "then") {
+            return (resolve: (v: unknown) => unknown) => Promise.resolve(resolveValue).then(resolve)
+          }
+          return (..._args: unknown[]) => makeProxy(resolveValue)
+        },
+      })
+    }
+
+    const mockDb = {
+      select: vi.fn(() => makeProxy([{ sessionVersion: 7 }])),
+      insert: vi.fn(() => makeProxy()),
+      delete: vi.fn(() => makeProxy()),
+      update: vi.fn(() =>
+        new Proxy({}, {
+          get(_t, prop: string) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if (prop === "set") return (arg: any) => { updateSetArg = arg; return makeProxy() }
+            if (prop === "then") return (resolve: (v: unknown) => unknown) => Promise.resolve([]).then(resolve)
+            return () => makeProxy()
+          },
+        }),
+      ),
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await purgeUserAccountRows(1, "h", "", "", mockDb as any)
+
+    expect(updateSetArg).toEqual({
+      isActive: false,
+      sessionVersion: 8, // oldSv (7) + 1
+      totpSecret: null,
+      totpEnabled: false,
+      totpBackupCodesJson: null,
+    })
+    expect(result).toEqual({ revokedSv: 7 })
   })
 
   it("tombstone survival: security_events delete is NOT called with the tombstone's conditions", async () => {
@@ -105,6 +158,7 @@ describe("purgeUserAccountRows — DB call sequence", () => {
     const { securityEvents } = await import("../db/schema") as any
 
     const mockDb = {
+      select: vi.fn(() => makeProxy()),
       insert: vi.fn(() => makeProxy()),
       delete: vi.fn((table: unknown) => {
         if (table === securityEvents) securityEventsDeleteCalled = true

@@ -313,6 +313,54 @@ describe("POST /2fa/verify — Redis pipeline shape on failure", () => {
   })
 })
 
+// ── POST /2fa/verify — inactive account (10d-0c) ──────────────────────────────
+
+describe("POST /2fa/verify — account deleted mid-flow", () => {
+  it("returns 403 ACCOUNT_INACTIVE envelope and audits login.failed", async () => {
+    // A pending-2FA cookie issued before deletion, completed after the purge soft-deleted
+    // the account (isActive=false). Must return the compliant envelope AND emit the audit.
+    const token = await makePending2faToken(42)
+
+    // Custom db: select chains resolve to the inactive user row; insert.values is captured
+    // so we can assert the login.failed audit was emitted.
+    const insertValues: Record<string, unknown>[] = []
+    const inactiveUser = {
+      totpEnabled: true, totpSecret: "enc1:FAKESECRET", totpBackupCodesJson: null,
+      sessionVersion: 1, authProvider: "google", externalId: "ext-42", isActive: false,
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function makeCapturingDb(rows: unknown[]): any {
+      return new Proxy({}, {
+        get(_t, prop: string) {
+          if (prop === "then") {
+            return (resolve: (v: unknown) => unknown) => Promise.resolve(rows).then(resolve)
+          }
+          if (prop === "insert") {
+            return () => ({
+              values: (arg: Record<string, unknown>) => {
+                insertValues.push(arg)
+                return { catch: () => Promise.resolve() }
+              },
+            })
+          }
+          return (..._args: unknown[]) => makeCapturingDb(rows)
+        },
+      })
+    }
+    vi.spyOn(connection, "getDb").mockReturnValue(makeCapturingDb([inactiveUser]))
+
+    const res = await postVerify(token, { code: "123456", type: "totp" })
+
+    expect(res.status).toBe(403)
+    const body = await res.json() as Record<string, unknown>
+    expect(body.ok).toBe(false)
+    expect(body.data).toBeNull()
+    expect(body.code).toBe("ACCOUNT_INACTIVE")
+    // Audit discipline: login.failed with reason account_disabled was emitted.
+    expect(insertValues.some((v) => v.eventType === "login.failed")).toBe(true)
+  })
+})
+
 // ── POST /2fa/verify — cross-user safety ─────────────────────────────────────
 
 describe("POST /2fa/verify — cross-user: userId comes from JWT, not request body", () => {

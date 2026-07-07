@@ -3,6 +3,8 @@ import { eq } from "drizzle-orm"
 import { getDb } from "../../db/connection"
 import { users } from "../../db/schema"
 import { purgeUserAccountRows } from "../../lib/account-deletion"
+import { revokeSessionVersion } from "../../middleware/auth"
+import { Sentry } from "../../lib/sentry"
 
 export const TASK_DELETE_ACCOUNT = "delete-account-data"
 
@@ -33,7 +35,15 @@ export async function handleDeleteAccountData(job: Job): Promise<void> {
     return
   }
 
-  await db.transaction(async (tx) => {
-    await purgeUserAccountRows(userId, emailHash, ipAddress, userAgent, tx)
+  const { revokedSv } = await db.transaction(async (tx) => {
+    return purgeUserAccountRows(userId, emailHash, ipAddress, userAgent, tx)
   })
+
+  // Defense-in-depth: revoke all sessions post-commit. Must not fail the job (data is
+  // already purged) — Sentry-capture on failure per the swallowed-error rule.
+  try {
+    await revokeSessionVersion(userId, revokedSv)
+  } catch (revokeErr) {
+    Sentry.captureException(revokeErr, { tags: { handler: "delete-account-job.revoke", userId } })
+  }
 }

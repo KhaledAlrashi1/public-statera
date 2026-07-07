@@ -233,10 +233,50 @@ router.get("/callback", async (c) => {
     recordEventOnce(userId, "signup_completed", {}, db).catch((err) =>
       Sentry.captureException(err, { tags: { handler: "auth.callback.signup_completed", userId } }),
     )
+  } else if (!existing.isActive) {
+    // ── Reactivate-as-fresh (10d-0b) ──────────────────────────────────────────
+    // Deliberate deviation from Flask: neither checkout ever reactivates. `is_active = True`
+    // appears only in Flask test fixtures/scripts; the production inactive-login handler
+    // (personal-finance auth.py:702-712, personal_statera auth.py:711-721) rejects with
+    //   if not user.is_active: _audit_security_event("login.failed", ... account_disabled)
+    //   return _legacy_api_error(error_code="auth_account_disabled", status=403, ...)
+    // We deviate on product grounds (approved 2026-07-07): a consumer app must let a deleted
+    // user return with the same Google account. The purge already emptied all data; the
+    // retained row is a stub; the composite (auth_provider, external_id) unique is never
+    // challenged. We treat this as a fresh registration.
+    userId = existing.id
+    // Read sessionVersion as-is: the purge that preceded this login already bumped it
+    // (10d-0a), so the new token issued below is not self-denied by the sv_revoked key.
+    sessionVersion = existing.sessionVersion
+
+    // Flip active, refresh email/displayName from the provider claims (mirrors the active
+    // path), and null the TOTP fields. The TOTP null is idempotent for post-10d-0a purges
+    // (already null) but heals legacy stubs purged before this fix — without it, their
+    // second and subsequent logins would hit the 2FA gate against a deleted-era secret.
+    await db
+      .update(users)
+      .set({
+        isActive: true,
+        email,
+        displayName: (claims["name"] as string | undefined) ?? existing.displayName,
+        totpSecret: null,
+        totpEnabled: false,
+        totpBackupCodesJson: null,
+      })
+      .where(eq(users.id, userId))
+
+    // Mirror the new-user branch: re-emit signup_completed (product_events were purged).
+    isNewUser = true
+    recordEventOnce(userId, "signup_completed", {}, db).catch((err) =>
+      Sentry.captureException(err, { tags: { handler: "auth.callback.reactivated.signup_completed", userId } }),
+    )
+    // Positive audit analog of Flask's login.failed/account_disabled rejection.
+    auditSecurityEvent(db, "account.reactivated", {
+      userId,
+      ipAddress: c.req.header("x-forwarded-for") ?? undefined,
+      userAgent: c.req.header("user-agent") ?? undefined,
+    })
   } else {
-    if (!existing.isActive) {
-      return c.json({ error: "Account is deactivated" }, 403)
-    }
     userId = existing.id
     sessionVersion = existing.sessionVersion
 
@@ -623,6 +663,11 @@ router.post(
       .limit(1)
 
     if (!user?.isActive) {
+      // (10d-0c) Surviving inactive-rejection path (e.g. a pending_2fa cookie issued before
+      // deletion, then completed after the purge). Envelope + code already compliant; add the
+      // audit event to match Flask's login.failed/account_disabled discipline. XHR endpoint —
+      // JSON is correct here (not a full-document nav), so no redirect-with-error-param.
+      auditSecurityEvent(db, "login.failed", { userId, ipAddress, userAgent, details: { reason: "account_disabled" } })
       return c.json({ ok: false, data: null, error: "Account is deactivated.", code: "ACCOUNT_INACTIVE" }, 403)
     }
 

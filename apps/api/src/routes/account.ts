@@ -24,7 +24,7 @@ import { eq } from "drizzle-orm"
 import { Job } from "bullmq"
 import { getDb } from "../db/connection"
 import { users } from "../db/schema"
-import { requireAuth } from "../middleware/auth"
+import { requireAuth, revokeSessionVersion } from "../middleware/auth"
 import { Sentry } from "../lib/sentry"
 import { createRateLimiter } from "../lib/rate-limit"
 import { encrypt, decrypt } from "../lib/crypto"
@@ -129,9 +129,16 @@ router.delete(
     if (!asyncOk) {
       // Sync fallback: transaction-wrapped for clean rollback on timeout or partial failure.
       try {
-        await db.transaction(async (tx) => {
-          await purgeUserAccountRows(userId, emailHash, ipAddress, userAgent, tx)
+        const { revokedSv } = await db.transaction(async (tx) => {
+          return purgeUserAccountRows(userId, emailHash, ipAddress, userAgent, tx)
         })
+        // Defense-in-depth: revoke all sessions post-commit. Must not fail the deletion
+        // (data is already purged) — Sentry-capture on failure per the swallowed-error rule.
+        try {
+          await revokeSessionVersion(userId, revokedSv)
+        } catch (revokeErr) {
+          Sentry.captureException(revokeErr, { tags: { handler: "account.delete.sync_fallback.revoke", userId } })
+        }
         taskStatusToken = packStatusToken("sync")
       } catch (syncErr) {
         Sentry.captureException(syncErr, { tags: { handler: "account.delete.sync_fallback", userId } })
