@@ -118,7 +118,10 @@ object (Stage 0 only) to prove long-retention objects are still readable.
 > rclone lsf R2:"$R2_BUCKET"/monthly/                                    # any monthly object (decrypt check)
 > ```
 > `restore-drill.sh` re-sources its own secrets, so this shell env is only for the manual `rclone`
-> listing; the `MYSQL_ROOT_PASSWORD` for Step 3 is sourced separately in 3a and `unset` in teardown.
+> listing and the Stage-3 tombstone export. Because the block above exports the **entire** prod
+> dotenv line-by-line, `MYSQL_ROOT_PASSWORD` is already in your shell — so if you sourced here,
+> **Step 3a is already satisfied** (its re-export is an idempotent no-op) and the whole set is
+> `unset`/torn down in teardown.
 
 ### Stage 0 + 1 — pull, decrypt, restore, verify (operator, on the server)
 
@@ -160,7 +163,9 @@ emails use the `.invalid` TLD so they can never collide with a real prod tombsto
 ### Stage 3 — real-data known-answer re-purge (operator)
 
 **3a — source the prod root password via sops** (needed for the read-only export; kept in an env
-var, never on a command line, and unset in teardown):
+var, never on a command line, and unset in teardown). **If you already sourced env for the
+object-listing seam block above, skip this** — that block exported the full prod dotenv line-by-line,
+so `MYSQL_ROOT_PASSWORD` is already set and the re-export below is a harmless no-op:
 
 ```bash
 cd ~/statera
