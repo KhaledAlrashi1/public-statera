@@ -82,55 +82,69 @@ production credentials, the server age key, and PII, which stay in operator hand
 guard + teardown), `deploy/restore-repurge.ts` (Stage 2 + Stage 3, a thin CLI over the tested
 `apps/api/src/lib/restore-repurge-lib.ts`).
 
-**Object selection (A1).** The full-drill `--object` MUST be a `daily/` backup dated **before
-2026-07-06** (the operator's real account deletion). That makes Stage 3 a **known-answer test**:
-exactly **one** real tombstone match (the operator's `email_hash`) must be found and re-purged
-— **zero or two-plus matches = drill failure**. Additionally decrypt-verify one `monthly/`
-object (Stage 0 only) to prove long-retention objects are still readable.
+**Object selection (A1).** The full-drill `--object` MUST be a backup dated **before 2026-07-06**
+(the operator's real account deletion). That makes Stage 3 a **known-answer test**: exactly **one**
+real tombstone match (the operator's `email_hash`) must be found and re-purged — **zero or two-plus
+matches = drill failure**. The `--object` / `--verify-only` argument accepts either a **bare name**
+(the mode default prefix — `daily/` for `--object`, `monthly/` for `--verify-only` — is prepended)
+or a **full prefix path** used verbatim (`weekly/…`, `monthly/…`, `daily/…`); a `/` in the value
+selects verbatim mode. That is how you point the drill at a non-default prefix.
 
-> **Operator-run seam — source env for the manual commands.** Three steps here need environment
-> that the *scripts* self-source via sops but an *interactive shell* does not: object listing
-> (rclone needs `RCLONE_CONFIG_R2_*` + R2 creds, below), the tombstone export (`MYSQL_ROOT_PASSWORD`,
-> Step 3a), and the UTC frame (Step 3b). Same class of gap, same seam — `restore-drill.sh`
-> decrypts secrets itself; your shell must be told explicitly. Source once before the manual
-> `rclone` object-listing commands (backup-db.sh env-sourcing pattern — temp file, non-evaluating
-> line-by-line export so secret values with shell metacharacters are never re-interpreted):
->
-> ```bash
-> cd ~/statera
-> export SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt"
-> ENVTMP="$(mktemp --tmpdir=/dev/shm 2>/dev/null || mktemp)"
-> trap 'shred -u "$ENVTMP" 2>/dev/null || rm -f "$ENVTMP"' EXIT
-> sops -d --output-type dotenv secrets/.env.prod.sops.yaml > "$ENVTMP"
-> while IFS= read -r line || [[ -n "$line" ]]; do
->   [[ -z "$line" || "$line" == \#* ]] && continue
->   key="${line%%=*}"; val="${line#*=}"
->   [[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
->   export "$key=$val"
-> done < "$ENVTMP"
-> export RCLONE_CONFIG_R2_TYPE=s3 RCLONE_CONFIG_R2_PROVIDER=Cloudflare \
->   RCLONE_CONFIG_R2_ENDPOINT="$R2_S3_ENDPOINT" \
->   RCLONE_CONFIG_R2_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID" \
->   RCLONE_CONFIG_R2_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY" \
->   RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true
-> # Now list candidates and pick the two objects:
-> rclone lsf R2:"$R2_BUCKET"/daily/ | grep -E 'statera-2026-07-0[1-5]'   # a daily object before 2026-07-06
-> rclone lsf R2:"$R2_BUCKET"/monthly/                                    # any monthly object (decrypt check)
-> ```
-> `restore-drill.sh` re-sources its own secrets, so this shell env is only for the manual `rclone`
-> listing and the Stage-3 tombstone export. Because the block above exports the **entire** prod
-> dotenv line-by-line, `MYSQL_ROOT_PASSWORD` is already in your shell — so if you sourced here,
-> **Step 3a is already satisfied** (its re-export is an idempotent no-op) and the whole set is
-> `unset`/torn down in teardown.
+> **2026-07-08 state.** The backup timer was not installed until 2026-07-08, so at first drill the
+> only object pre-dating the deletion is a **`weekly/`** one
+> (`weekly/statera-2026-05-31T21:13:56Z.sql.zst.age`). Run the full drill against that weekly object
+> (`--object weekly/…`), and `--verify-only` the fresh `daily/` object as the decrypt check. The
+> **`monthly/`-verify step is WAIVED until the first monthly object exists (1 Aug 2026)** — none
+> exist yet.
+
+**Operator-run seam — source env for the manual commands.** Three steps here need environment that
+the *scripts* self-source via sops but an *interactive shell* does not: object listing (rclone needs
+`RCLONE_CONFIG_R2_*` + R2 creds, below), the tombstone export (`MYSQL_ROOT_PASSWORD`, Step 3a), and
+the UTC frame (Step 3b). Same class of gap, same seam — `restore-drill.sh` decrypts secrets itself;
+your shell must be told explicitly. Source once before the manual `rclone` object-listing commands
+(backup-db.sh env-sourcing pattern — temp file, non-evaluating line-by-line export so secret values
+with shell metacharacters are never re-interpreted). **This is a plain fenced block on purpose — copy
+it straight into the terminal; there are no `> ` prefixes to strip:**
+
+```bash
+cd ~/statera
+export SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt"
+ENVTMP="$(mktemp --tmpdir=/dev/shm 2>/dev/null || mktemp)"
+trap 'shred -u "$ENVTMP" 2>/dev/null || rm -f "$ENVTMP"' EXIT
+sops -d --output-type dotenv secrets/.env.prod.sops.yaml > "$ENVTMP"
+while IFS= read -r line || [[ -n "$line" ]]; do
+  [[ -z "$line" || "$line" == \#* ]] && continue
+  key="${line%%=*}"; val="${line#*=}"
+  [[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
+  export "$key=$val"
+done < "$ENVTMP"
+export RCLONE_CONFIG_R2_TYPE=s3 RCLONE_CONFIG_R2_PROVIDER=Cloudflare \
+  RCLONE_CONFIG_R2_ENDPOINT="$R2_S3_ENDPOINT" \
+  RCLONE_CONFIG_R2_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID" \
+  RCLONE_CONFIG_R2_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY" \
+  RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true
+# List candidates across prefixes and pick your objects (pass the full prefix path to the drill):
+rclone lsf R2:"$R2_BUCKET"/weekly/    # known-answer object (before 2026-07-06)
+rclone lsf R2:"$R2_BUCKET"/daily/     # fresh daily (verify-only decrypt check)
+rclone lsf R2:"$R2_BUCKET"/monthly/   # (none until 1 Aug 2026)
+```
+
+`restore-drill.sh` re-sources its own secrets, so this shell env is only for the manual `rclone`
+listing and the Stage-3 tombstone export. Because the block above exports the **entire** prod dotenv
+line-by-line, `MYSQL_ROOT_PASSWORD` is already in your shell — so if you sourced here, **Step 3a is
+already satisfied** (its re-export is an idempotent no-op) and the whole set is `unset`/torn down in
+teardown.
 
 ### Stage 0 + 1 — pull, decrypt, restore, verify (operator, on the server)
 
 ```bash
 cd ~/statera
-# Full drill (daily object before 2026-07-06). --anchor-email optional (asserts your active user restored):
-bash deploy/restore-drill.sh --object statera-2026-07-05T02:30:00Z.sql.zst.age --anchor-email you@example.com
-# Long-retention decrypt check (Stage 0 only, no restore):
-bash deploy/restore-drill.sh --verify-only statera-2026-07-01T02:30:00Z.sql.zst.age
+# Full drill — known-answer object pre-dating the 2026-07-06 deletion. Pass the full prefix path
+# (weekly/, since the daily timer was only installed 2026-07-08). --anchor-email optional:
+bash deploy/restore-drill.sh --object weekly/statera-2026-05-31T21:13:56Z.sql.zst.age --anchor-email you@example.com
+# Decrypt check on the fresh daily object (Stage 0 only, no restore):
+bash deploy/restore-drill.sh --verify-only daily/statera-2026-07-08T15:23:03Z.sql.zst.age
+# The monthly/ decrypt check is WAIVED until the first monthly object exists (1 Aug 2026).
 ```
 
 `restore-drill.sh` asserts (fails loudly, never "completed without errors"): object + decrypted

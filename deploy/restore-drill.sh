@@ -8,12 +8,16 @@
 # against the scratch container this script leaves up; tear down with `--teardown`.
 #
 # Usage:
-#   bash deploy/restore-drill.sh --object statera-2026-07-05T02:30:00Z.sql.zst.age [--anchor-email you@example.com]
-#   bash deploy/restore-drill.sh --verify-only statera-2026-07-01T02:30:00Z.sql.zst.age   # Stage 0 only (monthly decrypt check)
+#   bash deploy/restore-drill.sh --object weekly/statera-2026-05-31T21:13:56Z.sql.zst.age [--anchor-email you@example.com]
+#   bash deploy/restore-drill.sh --verify-only daily/statera-2026-07-08T15:23:03Z.sql.zst.age   # Stage 0 only (decrypt check)
 #   bash deploy/restore-drill.sh --teardown
 #
-# A1: --object must be a daily/ backup dated BEFORE the operator's 2026-07-06 deletion, so Stage 3
-#     is a known-answer test (exactly one real tombstone match). Also --verify-only one monthly/ object.
+# Object arg: a bare name (statera-<ts>.sql.zst.age) gets the mode default prefix prepended —
+#     daily/ for --object, monthly/ for --verify-only. A value CONTAINING '/' is a full prefix path
+#     used VERBATIM (weekly/…, monthly/…, daily/…); that is how you reach a non-default prefix.
+# A1: the --object backup must pre-date the operator's 2026-07-06 deletion, so Stage 3 is a
+#     known-answer test (exactly one real tombstone match). The daily timer was only installed
+#     2026-07-08, so the known-answer object is a weekly/ one; --verify-only the fresh daily/ object.
 set -euo pipefail
 
 export PATH="${HOME}/bin:${PATH}"   # rclone installed to ~/bin (see backups.md)
@@ -128,17 +132,28 @@ export RCLONE_CONFIG_R2_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID}"
 export RCLONE_CONFIG_R2_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}"
 
 # ── Stage 0: pull + integrity ─────────────────────────────────────────────────
-# Args: <object-name> <r2-prefix>. Downloads, sha256s, decrypts, asserts a complete dump.
+# Args: <arg> <default-prefix>. <arg> is a bare object name (default-prefix prepended) or a full
+# prefix path containing '/' (used verbatim). Downloads, sha256s, decrypts, asserts a complete dump.
 # Sets DECRYPTED_SQL + BACKUP_TS globals on success.
 DECRYPTED_SQL=""
 BACKUP_TS=""
 stage0() {
-  local object="$1" prefix="$2"
-  echo "[drill] Stage 0: pulling R2:${R2_BUCKET}/${prefix}/${object} (read-only) …"
-  rclone copy "R2:${R2_BUCKET}/${prefix}/${object}" "${WORK_DIR}/" --no-traverse \
-    || die "rclone pull failed for ${prefix}/${object}"
+  local arg="$1" default_prefix="$2"
+  local rel_path object
+  if [[ "${arg}" == */* ]]; then
+    rel_path="${arg}"                    # explicit prefix supplied — use verbatim
+  else
+    rel_path="${default_prefix}/${arg}"  # bare name — apply the mode default (backwards-compatible)
+  fi
+  object="${arg##*/}"                     # local filename after rclone copy is always the leaf name
+  echo "[drill] Stage 0: pulling R2:${R2_BUCKET}/${rel_path} (read-only) …"
+  rclone copy "R2:${R2_BUCKET}/${rel_path}" "${WORK_DIR}/" --no-traverse \
+    || die "rclone pull failed for ${rel_path}"
   local enc="${WORK_DIR}/${object}"
-  [[ -s "${enc}" ]] || die "downloaded object is empty: ${object}"
+  # rclone copy of a nonexistent key silently copies nothing and exits 0, so a missing local file
+  # means not-found — distinct from a present-but-zero-byte object. Report the two differently.
+  [[ -e "${enc}" ]] || die "object not found in R2: ${rel_path} (rclone downloaded nothing — check the prefix/name; a bare name gets '${default_prefix}/', a name containing '/' is used verbatim)"
+  [[ -s "${enc}" ]] || die "downloaded object is zero bytes (corrupt/empty in R2): ${rel_path}"
   echo "[drill]   object sha256: $(sha256sum "${enc}" | cut -d' ' -f1)"
 
   local sqlout="${WORK_DIR}/${object%.zst.age}"   # strip .zst.age → …sql
