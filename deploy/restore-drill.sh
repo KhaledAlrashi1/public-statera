@@ -196,19 +196,46 @@ docker run -d --name "${SCRATCH_NAME}" \
   "${SCRATCH_IMAGE}" >/dev/null \
   || die "failed to start scratch container"
 
-echo "[drill]   waiting for MySQL to accept connections …"
+echo "[drill]   waiting for the FINAL MySQL server to accept TCP connections …"
+# mysql:8's entrypoint first starts a TEMPORARY init server that is SOCKET-ONLY (--skip-networking),
+# then restarts as the real server. A socket/exec ping can pass against that temp server, and the
+# subsequent dump load then lands in the restart gap (ERROR 2002 "can't connect through socket").
+# Probe over TCP instead: the init server has NO TCP listener at any address, so a TCP ping can only
+# ever succeed against the final server. (Deviation from the amendment's literal `-P3307` host form:
+# we run mysqladmin INSIDE the container over container-internal TCP so the drill needs no mysql
+# client on the host — the init-race immunity is identical, since --skip-networking closes TCP
+# everywhere, not just the published port.)
 READY=0
 for _ in $(seq 1 60); do
-  if docker exec "${SCRATCH_NAME}" mysqladmin ping -uroot -p"${SCRATCH_PW}" --silent >/dev/null 2>&1; then
+  if docker exec "${SCRATCH_NAME}" \
+       mysqladmin ping -h127.0.0.1 -P3306 --protocol=TCP -uroot -p"${SCRATCH_PW}" \
+       --connect-timeout=2 --silent >/dev/null 2>&1; then
     READY=1; break
   fi
   sleep 2
 done
-[[ "${READY}" == "1" ]] || die "scratch MySQL did not become ready within 120s"
+[[ "${READY}" == "1" ]] || die "scratch MySQL did not become ready (final server, TCP) in time"
 
-echo "[drill]   loading dump into scratch container …"
-docker exec -i "${SCRATCH_NAME}" mysql -uroot -p"${SCRATCH_PW}" < "${DECRYPTED_SQL}" \
-  || die "restore (mysql < dump) failed"
+echo "[drill]   loading dump into scratch container (over TCP) …"
+# Load over TCP as well (same init-race reason), and retry ONCE on a connection-class error to
+# absorb any residual gap. A connection refusal means nothing was loaded, and mysqldump emits
+# DROP TABLE IF EXISTS, so the retry is idempotent. On a genuine (non-connection) SQL error, fail
+# immediately — re-running a broken dump would only mask it.
+load_dump() {
+  docker exec -i "${SCRATCH_NAME}" \
+    mysql -h127.0.0.1 -P3306 --protocol=TCP -uroot -p"${SCRATCH_PW}" --connect-timeout=10 \
+    < "${DECRYPTED_SQL}" 2> "${WORK_DIR}/load.err"
+}
+if ! load_dump; then
+  if grep -qE 'ERROR (2002|2003|2013)|Can.t connect|Lost connection' "${WORK_DIR}/load.err"; then
+    echo "[drill]   dump load hit a connection-class error — retrying once after 5s (mysql:8 init-race guard) …" >&2
+    sleep 5
+    load_dump || { cat "${WORK_DIR}/load.err" >&2; die "restore (mysql < dump) failed after connection-error retry"; }
+  else
+    cat "${WORK_DIR}/load.err" >&2
+    die "restore (mysql < dump) failed (non-connection error — see above)"
+  fi
+fi
 
 # Decrypted PII is now inside the scratch DB — shred the on-disk copy immediately.
 shred -u "${DECRYPTED_SQL}" 2>/dev/null || rm -f "${DECRYPTED_SQL}"
