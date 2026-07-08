@@ -15,7 +15,7 @@
 # Object arg: a bare name (statera-<ts>.sql.zst.age) gets the mode default prefix prepended —
 #     daily/ for --object, monthly/ for --verify-only. A value CONTAINING '/' is a full prefix path
 #     used VERBATIM (weekly/…, monthly/…, daily/…); that is how you reach a non-default prefix.
-# A1: the --object backup must pre-date the operator's 2026-07-06 deletion, so Stage 3 is a
+# A1: the --object backup must pre-date the operator's 2026-07-07 14:13:42 UTC deletion, so Stage 3 is a
 #     known-answer test (exactly one real tombstone match). The daily timer was only installed
 #     2026-07-08, so the known-answer object is a weekly/ one; --verify-only the fresh daily/ object.
 set -euo pipefail
@@ -180,7 +180,7 @@ if [[ "${MODE}" == "verify-only" ]]; then
 fi
 
 # ── setup mode: full Stage 0 + Stage 1 ────────────────────────────────────────
-[[ -n "${OBJECT}" ]] || die "--object is required for the full drill (a daily/ backup before 2026-07-06 per A1)"
+[[ -n "${OBJECT}" ]] || die "--object is required for the full drill (a backup before the 2026-07-07 14:13:42 UTC deletion per A1)"
 stage0 "${OBJECT}" "daily"
 
 # Refuse to clobber a leftover scratch container from a prior run.
@@ -207,8 +207,8 @@ echo "[drill]   waiting for the FINAL MySQL server to accept TCP connections …
 # everywhere, not just the published port.)
 READY=0
 for _ in $(seq 1 60); do
-  if docker exec "${SCRATCH_NAME}" \
-       mysqladmin ping -h127.0.0.1 -P3306 --protocol=TCP -uroot -p"${SCRATCH_PW}" \
+  if docker exec -e MYSQL_PWD="${SCRATCH_PW}" "${SCRATCH_NAME}" \
+       mysqladmin ping -h127.0.0.1 -P3306 --protocol=TCP -uroot \
        --connect-timeout=2 --silent >/dev/null 2>&1; then
     READY=1; break
   fi
@@ -222,8 +222,8 @@ echo "[drill]   loading dump into scratch container (over TCP) …"
 # DROP TABLE IF EXISTS, so the retry is idempotent. On a genuine (non-connection) SQL error, fail
 # immediately — re-running a broken dump would only mask it.
 load_dump() {
-  docker exec -i "${SCRATCH_NAME}" \
-    mysql -h127.0.0.1 -P3306 --protocol=TCP -uroot -p"${SCRATCH_PW}" --connect-timeout=10 \
+  docker exec -i -e MYSQL_PWD="${SCRATCH_PW}" "${SCRATCH_NAME}" \
+    mysql -h127.0.0.1 -P3306 --protocol=TCP -uroot --connect-timeout=10 \
     < "${DECRYPTED_SQL}" 2> "${WORK_DIR}/load.err"
 }
 if ! load_dump; then
@@ -240,7 +240,7 @@ fi
 # Decrypted PII is now inside the scratch DB — shred the on-disk copy immediately.
 shred -u "${DECRYPTED_SQL}" 2>/dev/null || rm -f "${DECRYPTED_SQL}"
 
-sq() { docker exec "${SCRATCH_NAME}" mysql -uroot -p"${SCRATCH_PW}" -N -e "$1" "${MYSQL_DATABASE}"; }
+sq() { docker exec -e MYSQL_PWD="${SCRATCH_PW}" "${SCRATCH_NAME}" mysql -uroot -N -e "$1" "${MYSQL_DATABASE}"; }
 
 # Assert the declared table set exactly (A2), both directions.
 ACTUAL_TABLES=$(sq "SHOW TABLES" | sort)
@@ -280,26 +280,33 @@ if [[ -n "${ANCHOR_EMAIL}" ]]; then
   # any injection payload; a well-formed email cannot alter the query.
   [[ "${ANCHOR_EMAIL}" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]] \
     || die "invalid --anchor-email format: ${ANCHOR_EMAIL}"
-  ANCHOR_N=$(docker exec "${SCRATCH_NAME}" mysql -uroot -p"${SCRATCH_PW}" -N \
+  ANCHOR_N=$(docker exec -e MYSQL_PWD="${SCRATCH_PW}" "${SCRATCH_NAME}" mysql -uroot -N \
     -e "SELECT COUNT(*) FROM users WHERE email = '${ANCHOR_EMAIL}' AND is_active = 1" "${MYSQL_DATABASE}")
   [[ "${ANCHOR_N}" == "1" ]] || die "anchor assertion failed: expected exactly 1 active user with the anchor email, got ${ANCHOR_N}"
   echo "[drill]   anchor: OK — exactly one active user matches the anchor email."
 fi
 
+# The scratch root password appears in the URL printed below on purpose: it is a throwaway,
+# localhost-bound credential destroyed at teardown, not a production secret — so no redaction.
 cat <<EOF
 
 [drill] Stage 1 PASS — restore verified. Scratch container is LEFT RUNNING for Stage 2/3.
         T_backup     : ${BACKUP_TS}
         scratch URL  : mysql://root:${SCRATCH_PW}@${SCRATCH_HOSTPORT}/${MYSQL_DATABASE}
-        Next:
+        Next — this host runs Node only inside Docker, so drive the CLI via node:22-alpine.
+        NOTE the ABSOLUTE /repo path: pnpm exec chdirs to apps/api, so a relative deploy/… path breaks.
           # Stage 2 (deterministic gate check):
-          pnpm --filter statera-api exec tsx "${SCRIPT_DIR}/restore-repurge.ts" \\
-            --mode fixture --url 'mysql://root:${SCRATCH_PW}@${SCRATCH_HOSTPORT}/${MYSQL_DATABASE}' --t-backup '${BACKUP_TS}'
+          docker run --rm --network host -v ${REPO_DIR}:/repo -v /dev/shm:/dev/shm -w /repo node:22-alpine \\
+            sh -c "corepack enable && pnpm install --frozen-lockfile --filter statera-api && \\
+              pnpm --filter statera-api exec tsx /repo/deploy/restore-repurge.ts \\
+                --mode fixture --url 'mysql://root:${SCRATCH_PW}@${SCRATCH_HOSTPORT}/${MYSQL_DATABASE}' --t-backup '${BACKUP_TS}'"
           # Stage 3 (real-data known-answer, expect exactly 1 = operator):
-          #   export prod tombstones (read-only) with created_at > '${BACKUP_TS}' to a JSON file, then:
-          pnpm --filter statera-api exec tsx "${SCRIPT_DIR}/restore-repurge.ts" \\
-            --mode repurge --url 'mysql://root:${SCRATCH_PW}@${SCRATCH_HOSTPORT}/${MYSQL_DATABASE}' \\
-            --t-backup '${BACKUP_TS}' --tombstones /dev/shm/prod-tombstones.json --expect 1
+          #   export prod tombstones (read-only) with created_at >= '${BACKUP_TS}' to /dev/shm/prod-tombstones.json, then:
+          docker run --rm --network host -v ${REPO_DIR}:/repo -v /dev/shm:/dev/shm -w /repo node:22-alpine \\
+            sh -c "corepack enable && pnpm install --frozen-lockfile --filter statera-api && \\
+              pnpm --filter statera-api exec tsx /repo/deploy/restore-repurge.ts \\
+                --mode repurge --url 'mysql://root:${SCRATCH_PW}@${SCRATCH_HOSTPORT}/${MYSQL_DATABASE}' \\
+                --t-backup '${BACKUP_TS}' --tombstones /dev/shm/prod-tombstones.json --expect 1"
         Teardown when done:
           bash ${SCRIPT_DIR}/restore-drill.sh --teardown
 EOF

@@ -10,7 +10,7 @@ Daily encrypted MySQL backups to Cloudflare R2 (`statera-prod-db-backups`).
 | `weekly/` | 56 days | Sunday runs only |
 | `monthly/` | 365 days | 1st-of-month runs only |
 
-**Pipeline:** `mysqldump --single-transaction | zstd -T0 -12 | age -R .sops.yaml-recipients → /dev/shm → rclone copy → R2`
+**Pipeline:** `mysqldump --single-transaction --databases "${MYSQL_DATABASE}" | zstd -T0 -12 | age -R .sops.yaml-recipients → /dev/shm → rclone copy → R2` — the DB name is **env-sourced** (`${MYSQL_DATABASE}`; production value `statera_prod`), never a hardcoded literal (`backup-db.sh:101`).
 
 **Encryption:** age, recipients derived from `.sops.yaml` at runtime (both operator + server keys). Updating `.sops.yaml` for a key rotation automatically updates backup encryption on the next run — no change to this script needed.
 
@@ -82,8 +82,8 @@ production credentials, the server age key, and PII, which stay in operator hand
 guard + teardown), `deploy/restore-repurge.ts` (Stage 2 + Stage 3, a thin CLI over the tested
 `apps/api/src/lib/restore-repurge-lib.ts`).
 
-**Object selection (A1).** The full-drill `--object` MUST be a backup dated **before 2026-07-06**
-(the operator's real account deletion). That makes Stage 3 a **known-answer test**: exactly **one**
+**Object selection (A1).** The full-drill `--object` MUST be a backup dated **before 2026-07-07
+14:13:42 UTC** (the operator's real account-deletion tombstone). That makes Stage 3 a **known-answer test**: exactly **one**
 real tombstone match (the operator's `email_hash`) must be found and re-purged — **zero or two-plus
 matches = drill failure**. The `--object` / `--verify-only` argument accepts either a **bare name**
 (the mode default prefix — `daily/` for `--object`, `monthly/` for `--verify-only` — is prepended)
@@ -124,7 +124,7 @@ export RCLONE_CONFIG_R2_TYPE=s3 RCLONE_CONFIG_R2_PROVIDER=Cloudflare \
   RCLONE_CONFIG_R2_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY" \
   RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true
 # List candidates across prefixes and pick your objects (pass the full prefix path to the drill):
-rclone lsf R2:"$R2_BUCKET"/weekly/    # known-answer object (before 2026-07-06)
+rclone lsf R2:"$R2_BUCKET"/weekly/    # known-answer object (before 2026-07-07 14:13:42 UTC)
 rclone lsf R2:"$R2_BUCKET"/daily/     # fresh daily (verify-only decrypt check)
 rclone lsf R2:"$R2_BUCKET"/monthly/   # (none until 1 Aug 2026)
 ```
@@ -139,7 +139,7 @@ teardown.
 
 ```bash
 cd ~/statera
-# Full drill — known-answer object pre-dating the 2026-07-06 deletion. Pass the full prefix path
+# Full drill — known-answer object pre-dating the 2026-07-07 14:13:42 UTC deletion. Pass the full prefix path
 # (weekly/, since the daily timer was only installed 2026-07-08). --anchor-email optional:
 bash deploy/restore-drill.sh --object weekly/statera-2026-05-31T21:13:56Z.sql.zst.age --anchor-email you@example.com
 # Decrypt check on the fresh daily object (Stage 0 only, no restore):
@@ -164,9 +164,18 @@ below closes the loop.
 
 ### Stage 2 — deterministic gate check (operator, against the scratch container)
 
+This host runs Node **only inside Docker** (no host-level toolchain, by design), so the
+`restore-repurge.ts` CLI runs in a `node:22-alpine` container. `restore-drill.sh` already prints
+the fully-resolved command (scratch password, `${MYSQL_DATABASE}` = `statera_prod`, wrapper and
+all) in its Stage-1 PASS banner — **copy it from there.** Shown here for shape (replace `PW` with
+the printed scratch password; note the **absolute `/repo` path** — `pnpm exec` chdirs to `apps/api`,
+so a relative `deploy/…` path breaks):
+
 ```bash
-pnpm --filter statera-api exec tsx "$(git rev-parse --show-toplevel)/deploy/restore-repurge.ts" \
-  --mode fixture --url 'mysql://root:PW@127.0.0.1:3307/statera' --t-backup 'T_BACKUP'
+docker run --rm --network host -v ~/statera:/repo -v /dev/shm:/dev/shm -w /repo node:22-alpine \
+  sh -c "corepack enable && pnpm install --frozen-lockfile --filter statera-api && \
+    pnpm --filter statera-api exec tsx /repo/deploy/restore-repurge.ts \
+      --mode fixture --url 'mysql://root:PW@127.0.0.1:3307/statera_prod' --t-backup 'T_BACKUP'"
 ```
 
 Inserts a synthetic user A (tombstone at `T_backup+1s` → must purge) and user B (tombstone at
@@ -191,13 +200,13 @@ export MYSQL_ROOT_PASSWORD="$(sops -d --output-type dotenv secrets/.env.prod.sop
 **3b — UTC-consistency check** (confirm prod stores `created_at` in UTC, so the `>=` boundary
 compares like-for-like). This prints the server/session time zone and your own deletion
 tombstone's `created_at`; the tombstone time must equal the UTC wall-clock at which you deleted
-your account (2026-07-06/07). If it is off by whole hours, the DB is not in UTC — **stop** and
+your account (2026-07-07 14:13:42 UTC). If it is off by whole hours, the DB is not in UTC — **stop** and
 reconcile the frame before continuing (adjust `T_BACKUP_SQL` below to the server frame).
 
 ```bash
 docker compose -f ~/statera/docker-compose.yml exec -T -e MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql \
   mysql -uroot -N -e "SELECT @@global.time_zone, @@session.time_zone, UTC_TIMESTAMP(); \
-     SELECT created_at FROM security_events WHERE is_tombstone=1 ORDER BY created_at DESC LIMIT 3;" statera
+     SELECT created_at FROM security_events WHERE is_tombstone=1 ORDER BY created_at DESC LIMIT 3;" "$MYSQL_DATABASE"
 ```
 
 **3c — export production's at-or-after-backup tombstones read-only** (this is the only live-DB
@@ -214,13 +223,15 @@ docker compose -f ~/statera/docker-compose.yml exec -T -e MYSQL_PWD="$MYSQL_ROOT
   mysql -uroot -N -e "SET SESSION time_zone='+00:00'; \
     SELECT JSON_OBJECT('email_hash', JSON_UNQUOTE(JSON_EXTRACT(details_json,'\$.email_hash')), \
                        'created_at', CONCAT(DATE_FORMAT(created_at,'%Y-%m-%dT%H:%i:%s'),'Z')) \
-     FROM security_events WHERE is_tombstone=1 AND created_at >= '${T_BACKUP_SQL}'" statera \
+     FROM security_events WHERE is_tombstone=1 AND created_at >= '${T_BACKUP_SQL}'" "$MYSQL_DATABASE" \
   | python3 -c 'import sys,json; print(json.dumps([json.loads(l) for l in sys.stdin if l.strip()]))' \
   > /dev/shm/prod-tombstones.json
 
-pnpm --filter statera-api exec tsx "$(git rev-parse --show-toplevel)/deploy/restore-repurge.ts" \
-  --mode repurge --url 'mysql://root:PW@127.0.0.1:3307/statera' --t-backup "$T_BACKUP" \
-  --tombstones /dev/shm/prod-tombstones.json --expect 1
+docker run --rm --network host -v ~/statera:/repo -v /dev/shm:/dev/shm -w /repo node:22-alpine \
+  sh -c "corepack enable && pnpm install --frozen-lockfile --filter statera-api && \
+    pnpm --filter statera-api exec tsx /repo/deploy/restore-repurge.ts \
+      --mode repurge --url 'mysql://root:PW@127.0.0.1:3307/statera_prod' --t-backup '$T_BACKUP' \
+      --tombstones /dev/shm/prod-tombstones.json --expect 1"
 ```
 
 `--expect 1` enforces the known-answer test: the CLI fails unless exactly one restored user
@@ -248,12 +259,60 @@ If a real restore into the live DB is ever required:
 
 ### Execution record (fill on completion — closes 8f-1 + 8f-2)
 
-> TODO(8f-2): after the first drill run, append a dated record here: object used + its `sha256`,
-> `T_backup`, the Stage-1 row-count manifest, Stage-2 exact before/after counts, the Stage-3 named
-> tombstone match(es), and teardown confirmation. Add a `docs/recovery/YYYY-MM-DD-8f2-restore-drill.md`
-> handoff. That record is the artifact that flips 8f-1 from "backups exist" to "DR-confirmed".
-> Note separately: DR precondition #1 (operator age key escrowed offsite) is NOT proven by this
-> drill — Stage 0 only proves the key works today, not that it survives simultaneous laptop+server loss.
+**Executed 2026-07-08 — ALL STAGES PASS; teardown confirmed.** This record flips 8f-1 →
+"DR-confirmed" and closes 8f-2. Handoff: `docs/recovery/2026-07-08-8f2-restore-drill.md`.
+
+**Recorded deviations.** The full-drill target is a `weekly/` object, not a `daily/` one — the
+backup timer was not installed until 2026-07-08 (see fix-forward F1), so the only object
+pre-dating the 2026-07-07 14:13:42 UTC deletion was the 8f-1 smoke-run weekly. The `monthly/`
+decrypt-verify was **WAIVED** (no monthly objects exist until 2026-08-01); the fresh `daily/`
+object was substituted as the second-object readability check.
+
+**Stage 0 — full-drill object** `weekly/statera-2026-05-31T21:13:56Z.sql.zst.age`
+- object sha256 `212ce4f797da62caa197ad458315a9233fea04ee37bf0f259b9ac763072adfdb`
+- decrypted sha256 `7c4bdb1b95813007ba2b6a79c73ccea9417c5460b0eb6817bc2c0abf6a3d2dd3`, 45698 bytes
+- **identical sha256s across three independent pulls** → deterministic decrypt confirmed
+- `T_backup` = `2026-05-31T21:13:56Z`
+
+**Stage 0 — second-object readability (replaces the waived monthly check)**
+`daily/statera-2026-07-08T15:23:03Z.sql.zst.age`
+- object sha256 `efde78e1570fc5e100176aeabc5166335823229214ea422ba854506e6bab7d34`
+- decrypted sha256 `21c9075ba27ad8755b8d7ffeabe772d54dd9df12e92fe2a4947f2b39c9a643b6`, 51050 bytes
+- Stage 0 PASS — today's backup is **content-verified**, not merely present.
+
+**Stage 1 — restore + verify** (third attempt, on `dde1dfb`'s TCP probe): **PASS.**
+- Attempt history: **2002** (post-init restart gap) → **1045** (pre-password temp init server) →
+  **PASS** — both symptoms of the one mysql:8 init race, cured by the TCP probe (F4 / `dde1dfb`).
+- Declared **21-table set exact**, both directions. Row-count manifest:
+  `budgets 1, categories 5, dashboard_snapshots 3, debt_accounts 3, __drizzle_migrations 4`
+  (0000–0003 all present — schema-vintage question resolved),
+  `memorized_transactions 6, merchants 6, product_events 14, savings_goals 3, security_events 4,`
+  `transactions 5, user_profiles 1, users 3, worker_task_runs 8`; all bank/token/feedback tables 0.
+- FK-integrity probes: **0** orphaned owned rows. Anchor (`alrashidi.kha@gmail.com`) = **exactly 1**.
+
+**Stage 2 — deterministic gate check (fixture): PASS.** Post-backup fixture user purged
+(`categories` 1→0); pre-backup fixture untouched (`categories` 1→1). **Honestly:** the fixture
+populates only `categories`, so the other 12 purge tables were exercised **0→0 (vacuous)**. What
+Stage 2 tested was the timestamp **gate boundary** (the unit under test); `purgeUserAccountRows`
+itself carries its own unit + integration coverage (`account-deletion*.test.ts`).
+
+**Stage 3 — real-data known-answer re-purge: PASS.** Prod tombstone export (the only live-DB
+touch, read-only) returned **exactly 1** entry (`created_at 2026-07-07T14:13:42Z`, `email_hash
+47f9a50daf0ced9a2d84c31ab6298e1527cb1e1a29beb0334881607f59ef1a6c`). Re-purge matched **exactly 1**
+(`userId=1`). Owned rows before → after:
+`{transactions 5, budgets 1, dashboard_snapshots 1, debt_accounts 3, savings_goals 3,`
+`product_events 10, memorized_transactions 6, user_profiles 1, merchants 6, categories 5, rest 0}`
+**→ ALL 0** after; the tombstone **survived**. Privacy §7's re-deletion-on-restore commitment is now
+drilled with a known-answer proof.
+
+**UTC frame check:** `@@global.time_zone` / `@@session.time_zone` = `SYSTEM`; `UTC_TIMESTAMP()`
+matched wall-clock UTC; the `>=` gate compared same-frame.
+
+**Teardown:** confirmed — scratch container gone, `/dev/shm/prod-tombstones.json` shredded.
+
+> **Still open — DR precondition #1 (operator age key escrowed offsite) is NOT proven by this
+> drill.** Stage 0 proves the key works today, not that it survives simultaneous laptop+server
+> loss. Queued under Module 10d as an operator task.
 
 ---
 
