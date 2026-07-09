@@ -31,6 +31,66 @@ systemctl status statera-backup.timer
 systemctl list-timers statera-backup.timer
 ```
 
+### 8f-3 — Uptime + backup dead-man
+
+Two independent monitors watch two **different** failure classes. They are not redundant:
+
+| Monitor | Watches | Failure it catches | Would it have caught F1 (dead timer)? |
+|---|---|---|---|
+| **Healthchecks.io** (dead-man) | *absence* of a success ping | backup failed **or never ran** | **Yes** — no ping ⇒ alarm |
+| **UptimeRobot** (prober) | app liveness at the edge | site / API down | **No** — the app was healthy the whole 37 days |
+
+The F1 incident (backups dead 37 days, undetected) is exactly why the dead-man exists: a
+prober hitting `/healthz` shows all-green while the backup silently never runs. Only an
+**absence-alerting** check catches "the job never ran."
+
+#### Backup dead-man — Healthchecks.io
+
+`backup-db.sh` pings `${HEALTHCHECK_PING_URL}` **only at the very end**, after the encrypted
+object is verified in R2 (`backup-db.sh:151-161`). Any earlier failure — or the timer never
+firing — means **no ping**, which is what trips the check.
+
+- **Schedule mode:** cron (mirrors the timer exactly; not a bare "1 day" period).
+- **Cron:** `30 2 * * *` · **Timezone:** `UTC` · **Grace:** `60 min`.
+- **Schedule/grace math** (against `statera-backup.timer`: `OnCalendar=*-*-* 02:30:00 UTC`, `RandomizedDelaySec=300`, `.service` `TimeoutStartSec=1800`):
+  - Timer fires 02:30:00–02:35:00 UTC; success ping arrives ≈ **02:30–03:05 UTC** worst case (jitter + up-to-30-min runtime; today the dump completes in seconds).
+  - Expected ping 02:30, deadline **03:30 UTC**. Worst-case 03:05 < 03:30 ⇒ **25 min headroom**, no flapping.
+  - No ping by 03:30 (job failed after start, **or the timer is dead — F1**) ⇒ check DOWN ⇒ email. Next day's success re-arms the window.
+  - Grace is 60 (not 30) for margin as the DB grows + `curl --retry 3` + clock skew, while still tripping within ~1h of a miss (vs. 37 days).
+- **Telemetry, never a gate:** the ping runs under `|| WARN`, so a ping-service outage cannot fail a backup that already landed in R2. The success log line is **URL-free** ("Healthcheck pinged OK") — the ping URL embeds a secret UUID and must never reach journald.
+
+#### App uptime — UptimeRobot
+
+Two HTTP(S) monitors, probing **`/healthz` and `/readyz` only** — never `/health`, which
+falls through Caddy's SPA fallback to `index.html` and returns 200 even when the API is down
+(the 8e health-path trap; `Caddyfile:31` `@probes` excludes `/health`).
+
+- `https://staterafinance.app/healthz` — expect HTTP 200
+- `https://staterafinance.app/readyz` — expect HTTP 200
+- **Interval:** 5 min (free-tier floor; paid 1-min buys nothing at this scale).
+- **Alert threshold:** notify after **2 consecutive failed checks** (anti-flap: a single transient blip is ignored; a real outage alerts within ~5–10 min).
+- **Channel:** email to the operator.
+
+#### Operator account setup (operator-run — same seam as the drill)
+
+1. **Healthchecks.io** (free tier: 20 checks, cron schedules, email — need 1):
+   - Create a project → new check → **Schedule = Cron**, expression `30 2 * * *`, timezone `UTC`, grace `60 min`.
+   - Copy the check's ping URL and store it in sops as `HEALTHCHECK_PING_URL` (see the sops step below). Do **not** paste it into a ticket, chat, or commit — it is a bearer secret.
+   - Add the operator email as the notification channel.
+2. **UptimeRobot** (free tier: 50 monitors, 5-min, email — need 2):
+   - Two HTTP(S) monitors on `/healthz` and `/readyz` as above, 5-min interval, 2-fail threshold, email alert to the operator.
+3. **sops** — add `HEALTHCHECK_PING_URL=<the-hc-ping-url>` to `secrets/.env.prod.sops.yaml`, redeploy/re-source. The var is sourced automatically by `backup-db.sh:42-48`; it is deliberately **absent** from the required-var loop (`backup-db.sh:51-54`) so an unset value is a clean no-op. Confirm `deploy/.env.prod.example` carries a documented `HEALTHCHECK_PING_URL=` line (add if missing).
+
+#### Verification — both paths must actually fire (done-condition, not optional)
+
+An alert that has never fired is the 8e silent-rot lesson in a new hat. 8f-3 is not DONE until
+**both** induced-absence tests below have produced a real email.
+
+1. **Positive path:** after the first 02:30 UTC run (or a manual `bash backup-db.sh`), confirm the Healthchecks.io check is green and both UptimeRobot probes are up.
+2. **Dead-man induced-absence** (the F1 shape, without waiting 24h): temporarily set the check's schedule to a short period/grace (e.g. simple period 5 min / grace 1 min), **skip one ping** — confirm the DOWN email arrives within ~6 min — then restore cron `30 2 * * *` / grace 60 min.
+3. **Prober induced-absence:** temporarily point one UptimeRobot monitor at `https://staterafinance.app/api/nonexistent` for one cycle, confirm the DOWN email, then revert to `/healthz`.
+   - **Why this exact path (do not "simplify" back to `/healthz-nope`):** any non-`/api/*`, non-probe path — including `/healthz-nope` — is served by Caddy's SPA fallback and returns **HTTP 200** (`index.html`). A 200 can never trip a down-detection test. `/api/*` is proxied to Hono, which returns a genuine 404 for an unmounted route. (Keyword-mode on the `/healthz` JSON body is an equivalent alternative.)
+
 ---
 
 ## Manual run

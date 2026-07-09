@@ -148,10 +148,16 @@ print('SKIP' if d.get('count', 0) == 0 else d['bytes'])
   fi
 done
 
-# ── healthcheck ping (no-op if unset — wired in 8f-3) ────────────────────────
+# ── healthcheck dead-man ping (no-op if unset) ───────────────────────────────
+# Telemetry only, never a gate: this ping fires only after the backup is in R2,
+# so a ping failure must NOT fail the run under `set -e` — swallow curl's exit
+# with `|| WARN`. The URL embeds a secret UUID — never echo it into journald.
 if [[ -n "${HEALTHCHECK_PING_URL:-}" ]]; then
-  curl -fsS --retry 3 --max-time 10 "${HEALTHCHECK_PING_URL}" > /dev/null
-  echo "[backup] Healthcheck pinged: ${HEALTHCHECK_PING_URL}"
+  if curl -fsS --retry 3 --max-time 10 "${HEALTHCHECK_PING_URL}" > /dev/null; then
+    echo "[backup] Healthcheck pinged OK"
+  else
+    echo "[backup] WARN: healthcheck ping failed (telemetry only, backup succeeded)" >&2
+  fi
 fi
 
 echo "[backup] Complete."
