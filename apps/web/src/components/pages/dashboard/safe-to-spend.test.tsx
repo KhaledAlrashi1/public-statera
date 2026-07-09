@@ -93,7 +93,7 @@ describe("SafeToSpendHero", () => {
     )
 
     expect(screen.getByText("Goal reserve")).toBeInTheDocument()
-    expect(screen.getByText("KD 65")).toBeInTheDocument()
+    expect(screen.getByText("KD 65.000")).toBeInTheDocument()
     expect(screen.getByText(/KD 25.000 of goal funding is already covered/i)).toBeInTheDocument()
   })
 

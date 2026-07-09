@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { transactionsApi } from "@/lib/api"
+import { formatDisplayDate } from "@/lib/utils"
 import { useToast } from "@/components/ui/toaster"
 import type { Transaction } from "@/types/api"
 
@@ -282,7 +283,7 @@ export function BulkEditDialog({
                         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                           Transaction
                         </p>
-                        <p className="mt-1 text-sm text-muted-foreground tabular-nums">{row.date}</p>
+                        <p className="mt-1 text-sm text-muted-foreground tabular-nums">{formatDisplayDate(row.date)}</p>
                       </div>
                       <span className="rounded-full bg-muted px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                         #{row.id}
@@ -341,7 +342,7 @@ export function BulkEditDialog({
                   <tbody>
                     {rows.map((row) => (
                       <tr key={row.id} className="border-t border-border/40">
-                        <td className="px-4 py-3 text-sm text-muted-foreground tabular-nums">{row.date}</td>
+                        <td className="px-4 py-3 text-sm text-muted-foreground tabular-nums">{formatDisplayDate(row.date)}</td>
                         <td className="px-3 py-2">
                           <Input
                             value={row.name}

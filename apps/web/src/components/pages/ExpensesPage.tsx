@@ -16,7 +16,7 @@ import {
 } from "@/lib/recharts"
 import { analyticsApi, categoriesApi, transactionsApi } from "@/lib/api"
 import { CHART_STROKES, getExpenseColors } from "@/lib/chart-tokens"
-import { chartTooltipStyle, formatAmount, formatCompactKD, formatKD, formatDeltaLabel, prevMonth as prevMonthUtil, labelForYM } from "@/lib/utils"
+import { chartTooltipStyle, formatAmount, formatCompactKD, formatDisplayDate, formatKD, formatDeltaLabel, prevMonth as prevMonthUtil, labelForYM } from "@/lib/utils"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
@@ -437,7 +437,7 @@ function RecentExpenses({
                       </p>
                     ) : null}
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <span>{t.date}</span>
+                      <span>{formatDisplayDate(t.date)}</span>
                       <span className="inline-block h-1 w-1 rounded-full bg-border" />
                       <span>{t.category}</span>
                     </div>
@@ -503,7 +503,7 @@ function RecentExpenses({
               preparedRows.map((t) => {
                 return (
                   <tr key={t.id} className="border-b border-border/60 table-row-hover">
-                    <td className="px-4 py-3">{t.date}</td>
+                    <td className="px-4 py-3">{formatDisplayDate(t.date)}</td>
                     <td className="px-4 py-3">{t.merchant || "—"}</td>
                     <td className="px-4 py-3">
                       <CategoryBadge category={t.category} />

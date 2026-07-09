@@ -6,7 +6,7 @@ import { AlertTriangle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, Do
 // the mobile card view uses native scroll.
 
 import { ApiError, uploadApi } from "@/lib/api"
-import { cn, fmt3, today } from "@/lib/utils"
+import { cn, fmt3, formatDisplayDate, today } from "@/lib/utils"
 import { validatePositiveAmount, validateRequiredDate } from "@/lib/validation"
 import { useToast } from "@/components/ui/toaster"
 import { Button } from "@/components/ui/button"
@@ -1143,7 +1143,7 @@ function SplitRowEditor({
           Split transaction
         </p>
         <p className="mt-0.5 text-sm text-foreground">
-          {originalRow.name || "(no name)"} · KD {originalDisplay} · {originalRow.date}
+          {originalRow.name || "(no name)"} · KD {originalDisplay} · {formatDisplayDate(originalRow.date)}
         </p>
         <p className="mt-0.5 text-xs text-muted-foreground">
           Each split becomes a separate transaction after import.

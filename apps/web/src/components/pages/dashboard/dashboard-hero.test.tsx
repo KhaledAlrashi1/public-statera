@@ -62,7 +62,7 @@ describe("DashboardHero", () => {
       />
     )
 
-    expect(screen.getByText("KD 100")).toBeInTheDocument()
+    expect(screen.getByText("KD 100.000")).toBeInTheDocument()
 
     rerender(
       <DashboardHero
@@ -80,7 +80,7 @@ describe("DashboardHero", () => {
     act(() => {
       flushFrame(300)
     })
-    expect(screen.getByText("KD 188")).toBeInTheDocument()
+    expect(screen.getByText("KD 187.500")).toBeInTheDocument()
 
     rerender(
       <DashboardHero
@@ -98,7 +98,7 @@ describe("DashboardHero", () => {
     act(() => {
       flushFrame(100)
     })
-    expect(screen.getByText("KD 235")).toBeInTheDocument()
+    expect(screen.getByText("KD 234.896")).toBeInTheDocument()
   })
 
   it("shows a stale analytics warning when dashboard data is older than 30 minutes", () => {

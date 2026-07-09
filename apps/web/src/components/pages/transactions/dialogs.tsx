@@ -16,7 +16,7 @@ import {
 
 import { transactionsApi } from "@/lib/api"
 import { getDeletedRecordMessage } from "@/lib/error-recovery"
-import { cn, formatKD, fmt3, today } from "@/lib/utils"
+import { cn, formatDisplayDate, formatKD, fmt3, today } from "@/lib/utils"
 import {
   validatePositiveAmount,
   validateRequiredDate,
@@ -77,7 +77,7 @@ export function DuplicateWarningDialog({
           </div>
           <div className="text-sm">
             <AlertTitle className="text-foreground">
-              {meta.date} &middot; {meta.name} &middot; KD{" "}
+              {formatDisplayDate(meta.date)} &middot; {meta.name} &middot; KD{" "}
               {fmt3(meta.amount)}
             </AlertTitle>
             <AlertDescription>
@@ -811,7 +811,7 @@ export function SplitTransactionDialog({
         <div className="rounded-[var(--radius-card)] border border-border/50 bg-muted/20 px-4 py-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Original</p>
           <p className="mt-1 text-sm text-foreground">
-            {txnName || "(no name)"} · KD {fmt3(txnAmount)} · {txnDate}
+            {txnName || "(no name)"} · KD {fmt3(txnAmount)} · {formatDisplayDate(txnDate)}
           </p>
         </div>
 

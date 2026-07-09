@@ -38,8 +38,8 @@ describe("DebtSummaryPanel", () => {
     )
 
     expect(screen.getByText("Debt Summary")).toBeInTheDocument()
-    expect(screen.getByText("KD 3.6K")).toBeInTheDocument()
-    expect(screen.getByText("KD 145")).toBeInTheDocument()
+    expect(screen.getByText("KD 3,650.000")).toBeInTheDocument()
+    expect(screen.getByText("KD 145.000")).toBeInTheDocument()
     expect(screen.getByText("2")).toBeInTheDocument()
   })
 

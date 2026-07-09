@@ -345,12 +345,12 @@ export function SafeToSpendHero({
             <div className="flex flex-wrap gap-3">
               <div className="inner-card flex-1 min-w-[120px]">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Monthly runway</p>
-                <p className="mt-1 text-xl font-semibold leading-tight tabular-nums">{formatCompactKD(safeToSpend.remaining_budget_kd)}</p>
+                <p className="mt-1 text-xl font-semibold leading-tight tabular-nums">{formatKD(safeToSpend.remaining_budget_kd)}</p>
               </div>
               {debtMinimum > 0 ? (
                 <div className="inner-card flex-1 min-w-[120px]">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Debt minimums</p>
-                  <p className="mt-1 text-xl font-semibold leading-tight tabular-nums">{formatCompactKD(safeToSpend.debt_minimum_total_kd)}</p>
+                  <p className="mt-1 text-xl font-semibold leading-tight tabular-nums">{formatKD(safeToSpend.debt_minimum_total_kd)}</p>
                 </div>
               ) : null}
               {savingsGoalCount > 0 ? (
@@ -358,7 +358,7 @@ export function SafeToSpendHero({
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Goal reserve</p>
                   <div className="mt-1 flex items-center gap-2">
                     <PiggyBank className="h-4 w-4 text-primary" />
-                    <p className="text-xl font-semibold leading-tight tabular-nums">{formatCompactKD(safeToSpend.savings_goal_reserve_kd)}</p>
+                    <p className="text-xl font-semibold leading-tight tabular-nums">{formatKD(safeToSpend.savings_goal_reserve_kd)}</p>
                   </div>
                 </div>
               ) : null}
@@ -455,13 +455,13 @@ export function DebtSummaryPanel({
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Total Balance
               </p>
-              <p className="mt-1 text-2xl font-semibold leading-tight tabular-nums">{formatCompactKD(summary.total_balance_kd)}</p>
+              <p className="mt-1 text-2xl font-semibold leading-tight tabular-nums">{formatKD(summary.total_balance_kd)}</p>
             </div>
             <div className="inner-card">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Minimums / Month
               </p>
-              <p className="mt-1 text-2xl font-semibold leading-tight tabular-nums">{formatCompactKD(summary.total_minimum_kd)}</p>
+              <p className="mt-1 text-2xl font-semibold leading-tight tabular-nums">{formatKD(summary.total_minimum_kd)}</p>
             </div>
             <div className="inner-card">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -956,17 +956,17 @@ export function DashboardHero({
       <div className="relative z-10 mt-4 hero-kpi-grid">
         <div className="hero-kpi-card hero-kpi-card-warm">
           <div className="hero-kpi-label">Income</div>
-          <div className="hero-kpi-value"><AnimatedKD value={monthIncome} compact /></div>
+          <div className="hero-kpi-value"><AnimatedKD value={monthIncome} /></div>
           {deltas && <HeroDelta value={deltas.incomeDelta} />}
         </div>
         <div className="hero-kpi-card hero-kpi-card-warm">
           <div className="hero-kpi-label">Expenses</div>
-          <div className="hero-kpi-value"><AnimatedKD value={monthExpenses} compact /></div>
+          <div className="hero-kpi-value"><AnimatedKD value={monthExpenses} /></div>
           {deltas && <HeroDelta value={deltas.expensesDelta} inverted />}
         </div>
         <div className="hero-kpi-card hero-kpi-card-featured">
           <div className="hero-kpi-label">Remaining</div>
-          <div className="hero-kpi-value"><AnimatedKD value={monthRemaining} compact /></div>
+          <div className="hero-kpi-value"><AnimatedKD value={monthRemaining} /></div>
           {deltas && <HeroDelta value={deltas.remainingDelta} />}
         </div>
         <div className="hero-kpi-card hero-kpi-card-warm">
@@ -1067,7 +1067,7 @@ export function ConnectedAccountsPanel({
                       {account.status}
                     </span>
                   </div>
-                  <p className="mt-2 text-xl font-semibold tabular-nums">{formatCompactKD(account.spend_mtd)}</p>
+                  <p className="mt-2 text-xl font-semibold tabular-nums">{formatKD(account.spend_mtd)}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {account.transactions_mtd} transaction{account.transactions_mtd === 1 ? "" : "s"} this month
                   </p>
@@ -1696,21 +1696,21 @@ export function FinancialSnapshotHero({
               <div className="inner-card flex flex-col gap-1">
                 <span className="text-xs text-muted-foreground">Net Position</span>
                 <span className={`text-lg font-bold tabular-nums ${(np?.net_kd ?? 0) >= 0 ? "text-primary" : "text-destructive"}`}>
-                  {formatCompactKD(np?.net_kd ?? 0)}
+                  {formatKD(np?.net_kd ?? 0)}
                 </span>
                 <span className="text-[11px] text-muted-foreground">All-time tracked</span>
               </div>
               <div className="inner-card flex flex-col gap-1">
                 <span className="text-xs text-muted-foreground">Total Debt</span>
                 <span className="text-lg font-bold tabular-nums text-destructive/90">
-                  {formatCompactKD(np?.total_debt_kd ?? 0)}
+                  {formatKD(np?.total_debt_kd ?? 0)}
                 </span>
                 <span className="text-[11px] text-muted-foreground">Active balances</span>
               </div>
               <div className="inner-card flex flex-col gap-1">
                 <span className="text-xs text-muted-foreground">Savings Progress</span>
                 <span className="text-lg font-bold tabular-nums text-primary">
-                  {formatCompactKD(np?.total_savings_kd ?? 0)}
+                  {formatKD(np?.total_savings_kd ?? 0)}
                 </span>
                 <span className="text-[11px] text-muted-foreground">Across all goals</span>
               </div>
@@ -1741,7 +1741,7 @@ export function FinancialSnapshotHero({
                     <TrendingUp className="h-3 w-3" /> Income
                   </span>
                   <span className="text-base font-semibold tabular-nums text-primary">
-                    {formatCompactKD(cf?.income_kd ?? 0)}
+                    {formatKD(cf?.income_kd ?? 0)}
                   </span>
                 </div>
                 <div className="inner-card flex flex-col gap-1">
@@ -1749,13 +1749,13 @@ export function FinancialSnapshotHero({
                     <TrendingDown className="h-3 w-3" /> Expenses
                   </span>
                   <span className="text-base font-semibold tabular-nums text-destructive/90">
-                    {formatCompactKD(cf?.expense_kd ?? 0)}
+                    {formatKD(cf?.expense_kd ?? 0)}
                   </span>
                 </div>
                 <div className="inner-card flex flex-col gap-1">
                   <span className="text-xs text-muted-foreground">Net</span>
                   <span className={`text-base font-semibold tabular-nums ${(cf?.net_kd ?? 0) >= 0 ? "text-primary" : "text-destructive"}`}>
-                    {formatCompactKD(cf?.net_kd ?? 0)}
+                    {formatKD(cf?.net_kd ?? 0)}
                   </span>
                 </div>
               </div>

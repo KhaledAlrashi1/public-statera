@@ -1,4 +1,4 @@
-import { formatKD } from "@/lib/utils"
+import { formatDisplayDate, formatKD } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -146,7 +146,7 @@ export function CategoryDetailModal({
                               {secondaryLabel}
                             </p>
                           ) : null}
-                          <p className="mt-2 text-xs text-muted-foreground">{t.date}</p>
+                          <p className="mt-2 text-xs text-muted-foreground">{formatDisplayDate(t.date)}</p>
                         </div>
                         <div className="text-right text-base font-semibold tabular-nums">
                           {formatKD(t.amount_kd)}
@@ -169,7 +169,7 @@ export function CategoryDetailModal({
                   <tbody>
                     {categoryRows.map((t) => (
                       <tr key={t.id} className="border-b border-border/60 table-row-hover">
-                        <td className="px-4 py-3.5">{t.date}</td>
+                        <td className="px-4 py-3.5">{formatDisplayDate(t.date)}</td>
                         <td className="px-4 py-3.5">{t.merchant || "—"}</td>
                         <td className="px-4 py-3.5">{t.name || "—"}</td>
                         <td className="px-4 py-3.5 text-right font-medium tabular-nums">

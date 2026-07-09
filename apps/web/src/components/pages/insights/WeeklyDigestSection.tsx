@@ -1,6 +1,6 @@
 import { CalendarDays, TrendingDown, TrendingUp, Wallet } from "lucide-react"
 
-import { formatKD } from "@/lib/utils"
+import { formatDisplayDate, formatKD } from "@/lib/utils"
 import type { WeeklyDigestResponse } from "@/types/api"
 
 function deltaTone(deltaPct: number): string {
@@ -75,7 +75,7 @@ export function WeeklyDigestSection({
                 {weeklyHeadline(digest)}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {digest.week_start} to {digest.week_end}
+                {formatDisplayDate(digest.week_start)} to {formatDisplayDate(digest.week_end)}
               </p>
             </div>
 

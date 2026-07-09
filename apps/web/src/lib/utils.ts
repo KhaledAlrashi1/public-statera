@@ -19,7 +19,7 @@ export const chartTooltipStyle: React.CSSProperties = {
 export function formatKD(amount: number | string): string {
   const n = typeof amount === "string" ? parseFloat(amount) : amount
   if (isNaN(n)) return "KD 0.000"
-  return `KD ${n.toFixed(3)}`
+  return `KD ${n.toLocaleString("en-US", { minimumFractionDigits: 3, maximumFractionDigits: 3 })}`
 }
 
 export function formatCompactKD(amount: number | string): string {
@@ -40,6 +40,25 @@ export function formatCompactKD(amount: number | string): string {
 export function fmt3(n: number | string): string {
   const val = typeof n === "string" ? parseFloat(n) : n
   return (isNaN(val) ? 0 : val).toFixed(3)
+}
+
+const DISPLAY_MONTHS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+] as const
+
+/**
+ * Format an ISO date (YYYY-MM-DD, or an ISO timestamp) as a day-first display
+ * string: "28 Jul 2026". Deterministic — no locale, no Date parsing. Returns the
+ * input unchanged when it is not a YYYY-MM-DD-prefixed string.
+ */
+export function formatDisplayDate(isoDate: string): string {
+  if (!isoDate) return ""
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(isoDate)
+  if (!m) return isoDate
+  const monthIdx = parseInt(m[2], 10) - 1
+  if (monthIdx < 0 || monthIdx > 11) return isoDate
+  return `${parseInt(m[3], 10)} ${DISPLAY_MONTHS[monthIdx]} ${m[1]}`
 }
 
 export function formatAmount(

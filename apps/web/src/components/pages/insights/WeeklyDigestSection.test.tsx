@@ -43,7 +43,7 @@ describe("WeeklyDigestSection", () => {
   it("renders digest values", () => {
     render(<WeeklyDigestSection digest={makeDigest()} loading={false} />)
 
-    expect(screen.getByText("2026-02-23 to 2026-03-01")).toBeInTheDocument()
+    expect(screen.getByText("23 Feb 2026 to 1 Mar 2026")).toBeInTheDocument()
     expect(screen.getByText(/-27.1%/)).toBeInTheDocument()
     expect(screen.getByText("Food")).toBeInTheDocument()
     expect(screen.getByText("Transport")).toBeInTheDocument()

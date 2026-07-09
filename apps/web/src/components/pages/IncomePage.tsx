@@ -18,7 +18,7 @@ import {
   Tooltip as RechartsTooltip,
 } from "@/lib/recharts"
 import { analyticsApi, transactionsApi } from "@/lib/api"
-import { chartTooltipStyle, cn, formatAmount, formatCompactKD, formatKD, today, toYearMonth, prevMonth as prevMonthUtil, labelForYM } from "@/lib/utils"
+import { chartTooltipStyle, cn, formatAmount, formatCompactKD, formatDisplayDate, formatKD, today, toYearMonth, prevMonth as prevMonthUtil, labelForYM } from "@/lib/utils"
 import { validatePositiveAmount, validateRequiredDate } from "@/lib/validation"
 import {
   Dialog,
@@ -68,7 +68,7 @@ function DuplicateWarningDialog({
         <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-4 text-sm">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Date</span>
-            <span className="font-semibold">{meta.date}</span>
+            <span className="font-semibold">{formatDisplayDate(meta.date)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Name</span>
@@ -294,7 +294,7 @@ function RecentIncome({
                       {t.name}
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <span>{t.date}</span>
+                      <span>{formatDisplayDate(t.date)}</span>
                       <span className="inline-block h-1 w-1 rounded-full bg-border" />
                       <span>Income</span>
                     </div>
@@ -363,7 +363,7 @@ function RecentIncome({
                 const amountMeta = formatAmount(t.amount_kd, "income")
                 return (
                   <tr key={t.id} className="border-b border-border/60 table-row-hover">
-                    <td className="px-4 py-3">{t.date}</td>
+                    <td className="px-4 py-3">{formatDisplayDate(t.date)}</td>
                     <td className="px-4 py-3 truncate" title={t.name}>
                       {t.name}
                     </td>

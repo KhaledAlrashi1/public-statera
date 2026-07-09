@@ -6,7 +6,7 @@ import {
 } from "lucide-react"
 
 import { transactionsApi } from "@/lib/api"
-import { cn, formatAmount, formatKD, isIncome } from "@/lib/utils"
+import { cn, formatAmount, formatDisplayDate, formatKD, isIncome } from "@/lib/utils"
 import type { Transaction } from "@/types/api"
 import { CategoryBadge } from "@/components/ui/category-badge"
 import { FilterBar } from "@/components/ui/filter-bar"
@@ -322,7 +322,7 @@ function TransactionsTable({
                       </p>
                     ) : null}
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <span>{row.date}</span>
+                      <span>{formatDisplayDate(row.date)}</span>
                       <span className="inline-block h-1 w-1 rounded-full bg-border" />
                       <span>{row.category}</span>
                     </div>
@@ -456,7 +456,7 @@ function TransactionsTable({
                         )}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
-                        {row.date}
+                        {formatDisplayDate(row.date)}
                       </td>
                       <td className="px-4 py-3">
                         {row.merchant || (
