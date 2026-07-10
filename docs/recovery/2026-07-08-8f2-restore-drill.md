@@ -42,11 +42,15 @@ drill runner); the execution record lives in `docs/runbooks/backups.md §8f-2`.
 
 ## What was deliberately NOT done
 
-### 1. Operator age key offsite escrow — DR precondition #1 (STILL OPEN)
+### 1. Operator age key offsite escrow — DR precondition #1 (CLOSED 2026-07-09)
 The drill proves the **server** age key decrypts backups today; it does NOT prove the
-key survives simultaneous laptop + server loss. Offsite escrow of the operator age key
-is unaddressed. Queued under Module 10d as an operator task. Until done, a total-server
-loss is unrecoverable even though backups exist in R2.
+key survives simultaneous laptop + server loss. **Offsite escrow completed 2026-07-09:**
+the operator age key is stored in an end-to-end-encrypted locked note (device-passcode
+mode, syncs off-device), verified by re-open after locking. A paper copy in a physically
+separate building is recorded as the upgrade path (defense-in-depth), not a blocker — the
+E2E-encrypted off-device copy alone closes the simultaneous laptop+server-loss gap. A
+total-server loss is now recoverable: backups exist in R2 and the decryption key survives
+off both machines.
 
 ### 2. Deploy-user password remains unknown/unset
 The bootstrap-era (2026-05-15) deploy password was lost and not reset. The recorded
