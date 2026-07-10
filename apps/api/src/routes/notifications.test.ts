@@ -7,8 +7,9 @@
  * mocked at the module level so no real DB is needed.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { readJson } from "../test/json"
+import { RedisMock } from "../test/redis-mock.setup"
 
 vi.mock("../db/connection", () => ({ getDb: vi.fn() }))
 vi.mock("../middleware/auth", () => ({
@@ -120,5 +121,26 @@ describe("POST /budget-alerts/dismiss — success", () => {
       { alert_key: "2026-05:3" },
       undefined,
     )
+  })
+})
+
+// ── Rate limiting ─────────────────────────────────────────────────────────────
+// The base ioredis stub's evalsha returns [1, 60000] ("first hit"), so the real
+// createRateLimiter never trips. Spy evalsha to report an over-limit totalHits and
+// assert the writeRateLimit (30/min) on dismiss short-circuits with the standard
+// 429 envelope BEFORE the handler runs (recordEvent untouched).
+describe("POST /budget-alerts/dismiss — rate limit", () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  it("returns 429 with the standard envelope and never reaches the handler", async () => {
+    vi.spyOn(RedisMock.prototype, "evalsha").mockResolvedValue([9999, 60000])
+
+    const res = await postDismiss({ alert_key: "2026-05:3" })
+
+    expect(res.status).toBe(429)
+    const body = await readJson(res)
+    expect(body.ok).toBe(false)
+    expect(body.code).toBe("rate_limit_exceeded")
+    expect(recordEvent).not.toHaveBeenCalled()
   })
 })

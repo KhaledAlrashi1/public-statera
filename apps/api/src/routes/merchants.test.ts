@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { Hono } from "hono"
 import { merchantsRouter } from "./merchants"
 import { createSessionToken } from "../middleware/auth"
+import { RedisMock } from "../test/redis-mock.setup"
 
 // ── DB mock (same Proxy pattern as categories.test.ts) ────────────────────────
 
@@ -294,5 +295,32 @@ describe("POST /api/merchants/:id/remap", () => {
     expect(res.status).toBe(404)
     const body = (await res.json()) as Record<string, unknown>
     expect(body.code).toBe("not_found")
+  })
+})
+
+// ── Rate limiting ─────────────────────────────────────────────────────────────
+// The base ioredis stub's evalsha returns [1, 60000] ("first hit"), so the real
+// createRateLimiter never trips. Spy evalsha to report an over-limit totalHits and
+// assert writeRateLimit (30/min) on POST short-circuits with the standard 429
+// envelope BEFORE the handler runs (getDb untouched).
+describe("POST /api/merchants — rate limit", () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  it("returns 429 with the standard envelope and never reaches the handler", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    vi.mocked(getDb).mockClear()
+    vi.spyOn(RedisMock.prototype, "evalsha").mockResolvedValue([9999, 60000])
+
+    const res = await app.request("/api/merchants", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Lulu" }),
+    })
+
+    expect(res.status).toBe(429)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(false)
+    expect(body.code).toBe("rate_limit_exceeded")
+    expect(getDb).not.toHaveBeenCalled()
   })
 })

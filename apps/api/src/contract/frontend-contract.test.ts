@@ -31,6 +31,9 @@ vi.mock("../lib/rate-limit", () => {
     searchRateLimit: passthrough,
     importRateLimit: passthrough,
     exportRateLimit: passthrough,
+    readRateLimit: passthrough,
+    writeRateLimit: passthrough,
+    heavyWriteRateLimit: passthrough,
   }
 })
 

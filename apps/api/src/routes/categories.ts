@@ -24,6 +24,7 @@ import { budgets } from "../db/schema/budgets"
 import { savingsGoals } from "../db/schema/savings-goals"
 import { memorizedTransactions } from "../db/schema/memorized-transactions"
 import { requireAuth } from "../middleware/auth"
+import { readRateLimit, writeRateLimit, heavyWriteRateLimit } from "../lib/rate-limit"
 
 export const categoriesRouter = new Hono()
 
@@ -74,7 +75,7 @@ function serializeCategory(
 
 // ── GET /api/categories ───────────────────────────────────────────────────────
 
-categoriesRouter.get("/", requireAuth, async (c) => {
+categoriesRouter.get("/", requireAuth, readRateLimit, async (c) => {
   const { userId } = c.get("session")
   const db = getDb()
 
@@ -113,7 +114,7 @@ categoriesRouter.get("/", requireAuth, async (c) => {
 
 // ── POST /api/categories ──────────────────────────────────────────────────────
 
-categoriesRouter.post("/", requireAuth, async (c) => {
+categoriesRouter.post("/", requireAuth, writeRateLimit, async (c) => {
   const { userId } = c.get("session")
 
   const body = await c.req.json().catch(() => ({}))
@@ -166,7 +167,7 @@ categoriesRouter.post("/", requireAuth, async (c) => {
 // body. DELETE-with-body is silently dropped by some proxies and CDNs, and
 // query params are universally supported by HTTP clients and OpenAPI tooling.
 
-categoriesRouter.delete("/:id", requireAuth, async (c) => {
+categoriesRouter.delete("/:id", requireAuth, writeRateLimit, async (c) => {
   const id = Number(c.req.param("id"))
   if (!Number.isInteger(id) || id <= 0) {
     return c.json(
@@ -291,7 +292,7 @@ categoriesRouter.delete("/:id", requireAuth, async (c) => {
 
 // ── POST /api/categories/:id/remap ────────────────────────────────────────────
 
-categoriesRouter.post("/:id/remap", requireAuth, async (c) => {
+categoriesRouter.post("/:id/remap", requireAuth, heavyWriteRateLimit, async (c) => {
   const sourceId = Number(c.req.param("id"))
   if (!Number.isInteger(sourceId) || sourceId <= 0) {
     return c.json(

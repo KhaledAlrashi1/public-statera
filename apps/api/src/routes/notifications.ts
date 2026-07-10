@@ -1,6 +1,7 @@
 import { Hono } from "hono"
 import { getDb } from "../db/connection"
 import { requireAuth } from "../middleware/auth"
+import { readRateLimit, writeRateLimit } from "../lib/rate-limit"
 import {
   BUDGET_ALERT_DISMISSED_EVENT_NAME,
   listActiveBudgetAlerts,
@@ -13,7 +14,7 @@ const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/
 
 // ── GET /api/notifications/budget-alerts ──────────────────────────────────────
 
-notificationsRouter.get("/budget-alerts", requireAuth, async (c) => {
+notificationsRouter.get("/budget-alerts", requireAuth, readRateLimit, async (c) => {
   const month = (c.req.query("month") ?? "").trim()
   if (!month) {
     return c.json(
@@ -42,7 +43,7 @@ notificationsRouter.get("/budget-alerts", requireAuth, async (c) => {
 
 // ── POST /api/notifications/budget-alerts/dismiss ─────────────────────────────
 
-notificationsRouter.post("/budget-alerts/dismiss", requireAuth, async (c) => {
+notificationsRouter.post("/budget-alerts/dismiss", requireAuth, writeRateLimit, async (c) => {
   const { userId } = c.get("session")
   const body = (await c.req.json().catch(() => ({}))) as Record<string, unknown>
   const alertKey = String(body["alert_key"] ?? "").trim()

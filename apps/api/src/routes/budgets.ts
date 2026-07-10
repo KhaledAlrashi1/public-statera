@@ -12,6 +12,7 @@ import { categories } from "../db/schema/categories"
 import { transactions } from "../db/schema/transactions"
 import { userProfiles } from "../db/schema/users"
 import { requireAuth } from "../middleware/auth"
+import { readRateLimit, heavyWriteRateLimit } from "../lib/rate-limit"
 import { Sentry } from "../lib/sentry"
 import { getOrCreateCategory } from "../lib/transaction-lib"
 import { parseKd, formatKd } from "../lib/transaction-lib"
@@ -149,7 +150,7 @@ export async function buildBudgetPayload(userId: number, month: string, db: any)
 
 // ── GET /api/budgets/months ───────────────────────────────────────────────────
 
-budgetsRouter.get("/months", requireAuth, async (c) => {
+budgetsRouter.get("/months", requireAuth, readRateLimit, async (c) => {
   const { userId } = c.get("session")
   const db = getDb()
 
@@ -164,7 +165,7 @@ budgetsRouter.get("/months", requireAuth, async (c) => {
 
 // ── GET /api/budgets ──────────────────────────────────────────────────────────
 
-budgetsRouter.get("/", requireAuth, async (c) => {
+budgetsRouter.get("/", requireAuth, readRateLimit, async (c) => {
   const month = (c.req.query("month") ?? "").trim()
   if (!month) {
     return c.json({ ok: false, data: null, error: "month is required (YYYY-MM).", code: "validation_error" }, 400)
@@ -181,7 +182,7 @@ budgetsRouter.get("/", requireAuth, async (c) => {
 
 // ── POST /api/budgets ─────────────────────────────────────────────────────────
 
-budgetsRouter.post("/", requireAuth, async (c) => {
+budgetsRouter.post("/", requireAuth, heavyWriteRateLimit, async (c) => {
   const { userId } = c.get("session")
   const body = (await c.req.json().catch(() => ({}))) as Record<string, unknown>
 

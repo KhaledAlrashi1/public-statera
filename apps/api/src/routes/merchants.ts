@@ -20,6 +20,7 @@ import { merchants } from "../db/schema/merchants"
 import { transactions } from "../db/schema/transactions"
 import { memorizedTransactions } from "../db/schema/memorized-transactions"
 import { requireAuth } from "../middleware/auth"
+import { readRateLimit, writeRateLimit, heavyWriteRateLimit } from "../lib/rate-limit"
 
 export const merchantsRouter = new Hono()
 
@@ -47,7 +48,7 @@ function serializeMerchant(row: typeof merchants.$inferSelect): MerchantItem {
 
 // ── GET /api/merchants ────────────────────────────────────────────────────────
 
-merchantsRouter.get("/", requireAuth, async (c) => {
+merchantsRouter.get("/", requireAuth, readRateLimit, async (c) => {
   const { userId } = c.get("session")
   const db = getDb()
 
@@ -62,7 +63,7 @@ merchantsRouter.get("/", requireAuth, async (c) => {
 
 // ── POST /api/merchants ───────────────────────────────────────────────────────
 
-merchantsRouter.post("/", requireAuth, async (c) => {
+merchantsRouter.post("/", requireAuth, writeRateLimit, async (c) => {
   const { userId } = c.get("session")
 
   const body = await c.req.json().catch(() => ({}))
@@ -108,7 +109,7 @@ merchantsRouter.post("/", requireAuth, async (c) => {
 
 // ── PATCH /api/merchants/:id ──────────────────────────────────────────────────
 
-merchantsRouter.patch("/:id", requireAuth, async (c) => {
+merchantsRouter.patch("/:id", requireAuth, writeRateLimit, async (c) => {
   const id = Number(c.req.param("id"))
   if (!Number.isInteger(id) || id <= 0) {
     return c.json(
@@ -169,7 +170,7 @@ merchantsRouter.patch("/:id", requireAuth, async (c) => {
 // Dependent-row reassignment uses ?reassign_to=<id> query param — consistent
 // with DELETE /api/categories/:id.
 
-merchantsRouter.delete("/:id", requireAuth, async (c) => {
+merchantsRouter.delete("/:id", requireAuth, writeRateLimit, async (c) => {
   const id = Number(c.req.param("id"))
   if (!Number.isInteger(id) || id <= 0) {
     return c.json(
@@ -272,7 +273,7 @@ merchantsRouter.delete("/:id", requireAuth, async (c) => {
 // remap endpoint, which remaps only and leaves the source category in place.
 // Preserves Flask behavior; flagged here so the asymmetry is discoverable.
 
-merchantsRouter.post("/:id/remap", requireAuth, async (c) => {
+merchantsRouter.post("/:id/remap", requireAuth, heavyWriteRateLimit, async (c) => {
   const sourceId = Number(c.req.param("id"))
   if (!Number.isInteger(sourceId) || sourceId <= 0) {
     return c.json(

@@ -57,7 +57,10 @@ function makePipeline() {
   return pipeline
 }
 
-class RedisMock {
+// Exported so route/lib tests can spy on a single command (e.g. evalsha) to
+// exercise the rate-limiter's limit-exceeded path — the base stub's evalsha
+// returns [1, 60000] ("first hit"), which never trips a limit.
+export class RedisMock {
   // Accept any constructor args (url, options, or connection object).
   constructor(..._args: unknown[]) {}
   async get(): Promise<string | null> {

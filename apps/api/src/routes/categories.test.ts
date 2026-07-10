@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { Hono } from "hono"
 import { categoriesRouter } from "./categories"
 import { createSessionToken } from "../middleware/auth"
+import { RedisMock } from "../test/redis-mock.setup"
 
 // ── DB mock ───────────────────────────────────────────────────────────────────
 // A Proxy that makes any Drizzle query chain awaitable. Every method returns
@@ -284,5 +285,32 @@ describe("POST /api/categories/:id/remap", () => {
     expect(res.status).toBe(400)
     const body = (await res.json()) as Record<string, unknown>
     expect(body.code).toBe("validation_error")
+  })
+})
+
+// ── Rate limiting ─────────────────────────────────────────────────────────────
+// The base ioredis stub's evalsha returns [1, 60000] ("first hit"), so the real
+// createRateLimiter never trips. Spy evalsha to report an over-limit totalHits and
+// assert writeRateLimit (30/min) on POST short-circuits with the standard 429
+// envelope BEFORE the handler runs (getDb, the handler's first DB touch, untouched).
+describe("POST /api/categories — rate limit", () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  it("returns 429 with the standard envelope and never reaches the handler", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]) as ReturnType<typeof getDb>)
+    vi.mocked(getDb).mockClear()
+    vi.spyOn(RedisMock.prototype, "evalsha").mockResolvedValue([9999, 60000])
+
+    const res = await app.request("/api/categories", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Groceries" }),
+    })
+
+    expect(res.status).toBe(429)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(false)
+    expect(body.code).toBe("rate_limit_exceeded")
+    expect(getDb).not.toHaveBeenCalled()
   })
 })
