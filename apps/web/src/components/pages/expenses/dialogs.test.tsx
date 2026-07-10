@@ -2,7 +2,7 @@ import type { ComponentProps } from "react"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { AddExpenseDialog, SplitTransactionDialog } from "./dialogs"
+import { SplitTransactionDialog } from "./dialogs"
 
 const mocks = vi.hoisted(() => ({
   transactionsApi: {
@@ -29,35 +29,6 @@ vi.mock("@/components/ui/toaster", () => ({
   }),
 }))
 
-function renderAddDialog(
-  overrides: Partial<ComponentProps<typeof AddExpenseDialog>> = {}
-) {
-  const props: ComponentProps<typeof AddExpenseDialog> = {
-    open: true,
-    onOpenChange: vi.fn(),
-    addForm: {
-      date: "2026-02-19",
-      merchant: "",
-      category: "",
-      name: "",
-      amount_kd: "1.000",
-    },
-    setAddForm: vi.fn(),
-    addErr: null,
-    submitAddExpense: vi.fn(),
-    categories: ["Food", "Transport"],
-    suggestions: [],
-    suggestOpen: false,
-    setSuggestOpen: vi.fn(),
-    suggestLoading: false,
-    setSuggestOpenTimeout: vi.fn(),
-    ...overrides,
-  }
-
-  render(<AddExpenseDialog {...props} />)
-  return props
-}
-
 function renderSplitDialog(
   overrides: Partial<ComponentProps<typeof SplitTransactionDialog>> = {}
 ) {
@@ -77,45 +48,6 @@ describe("expenses/dialogs", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.transactionsApi.split.mockResolvedValue({ ok: true, transactions: [] })
-  })
-
-  it("submits add expense on Enter when suggestions are inactive", () => {
-    const props = renderAddDialog({
-      suggestions: [],
-      suggestOpen: false,
-    })
-
-    fireEvent.keyDown(screen.getByRole("dialog"), { key: "Enter", code: "Enter" })
-    expect(props.submitAddExpense).toHaveBeenCalledTimes(1)
-  })
-
-  it("applies suggestion values when a suggestion row is clicked", () => {
-    const setAddForm = vi.fn()
-    const setSuggestOpen = vi.fn()
-
-    renderAddDialog({
-      addForm: {
-        date: "2026-02-19",
-        merchant: "",
-        category: "",
-        name: "",
-        amount_kd: "1.000",
-      },
-      setAddForm,
-      setSuggestOpen,
-      suggestOpen: true,
-      suggestions: [{ name: "Flat White", category: { id: 1, name: "Food" }, merchant: { id: 1, name: "Cafe" } }],
-    })
-
-    fireEvent.click(screen.getByRole("button", { name: /Flat White/i }))
-    expect(setAddForm).toHaveBeenCalledWith({
-      date: "2026-02-19",
-      merchant: "Cafe",
-      category: "Food",
-      name: "Flat White",
-      amount_kd: "1.000",
-    })
-    expect(setSuggestOpen).toHaveBeenCalledWith(false)
   })
 
   it("blocks split save when any row is incomplete", async () => {

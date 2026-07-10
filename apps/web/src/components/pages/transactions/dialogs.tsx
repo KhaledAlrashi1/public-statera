@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 
 import { transactionsApi } from "@/lib/api"
+import type { TransactionSuggestion } from "@/types/api"
 import { getDeletedRecordMessage } from "@/lib/error-recovery"
 import { cn, formatDisplayDate, formatKD, fmt3, today } from "@/lib/utils"
 import {
@@ -51,6 +52,7 @@ import {
   tempId,
   useSuggestions,
 } from "./helpers"
+import { SuggestionCombobox } from "./suggestion-combobox"
 
 export function DuplicateWarningDialog({
   open,
@@ -274,8 +276,16 @@ export function AddTransactionDialog({
     name: string
     amount: string
   } | null>(null)
-  const { suggestions, fetchSuggestions, lookup } = useSuggestions()
-  const [suggestOpen, setSuggestOpen] = useState(false)
+  const { suggestions, fetchSuggestions } = useSuggestions()
+  const [keepOpen, setKeepOpen] = useState(false)
+  const amountRef = useRef<HTMLInputElement>(null)
+  const saveButtonRef = useRef<HTMLButtonElement>(null)
+  // Track open suggestion panels so Escape closes the panel (not the dialog) — Radix's
+  // Escape fires in the capture phase, so we gate it via onEscapeKeyDown below.
+  const openDropdownCount = useRef(0)
+  const trackDropdown = (dropdownOpen: boolean) => {
+    openDropdownCount.current = Math.max(0, openDropdownCount.current + (dropdownOpen ? 1 : -1))
+  }
   const expenseCategoriesBlocked = type === "expense" && (categoriesLoading || Boolean(categoriesError))
 
   const reset = (t: "expense" | "income" = initialType) => {
@@ -296,7 +306,23 @@ export function AddTransactionDialog({
     setError(null)
     setSaving(false)
     setDupMeta(null)
-    setSuggestOpen(false)
+    setKeepOpen(false)
+  }
+
+  // Keep-open reset: clear the entered fields but keep date + expense/income mode,
+  // return validation to a pristine state, and refocus Amount for the next entry.
+  const clearForNext = () => {
+    setMerchant("")
+    setCategory("")
+    setExpenseName("")
+    setExpenseAmount("")
+    setIncomeName("")
+    setIncomeAmount("")
+    setSubmitAttempted(false)
+    setTouched({ date: false, incomeName: false, incomeAmount: false })
+    setError(null)
+    setDupMeta(null)
+    requestAnimationFrame(() => amountRef.current?.focus())
   }
 
   useEffect(() => {
@@ -343,9 +369,10 @@ export function AddTransactionDialog({
         name: incomeName.trim(),
         amount_kd: amount.toFixed(3),
       })
-      onOpenChange(false)
       onSuccess()
       toast.success("Income added successfully.")
+      if (keepOpen) clearForNext()
+      else onOpenChange(false)
     } catch (err) {
       const msg = err instanceof Error ? err.message : "We couldn't add that income entry right now."
       setError(msg)
@@ -412,9 +439,10 @@ export function AddTransactionDialog({
         force: force ? "1" : undefined,
       })
 
-      onOpenChange(false)
       onSuccess()
       toast.success("Transaction added successfully.")
+      if (keepOpen) clearForNext()
+      else onOpenChange(false)
     } catch (err) {
       const msg = err instanceof Error ? err.message : "We couldn't add that transaction right now."
       setError(msg)
@@ -424,10 +452,28 @@ export function AddTransactionDialog({
     }
   }
 
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (type === "income") void handleIncomeSubmit()
+    else void handleSubmit(false)
+  }
+
+  const applyToForm = (s: TransactionSuggestion) =>
+    applyTransactionSuggestion(s, setExpenseName, setCategory, setMerchant, merchant, category)
+
   return (
     <>
       <Dialog open={open && !dupMeta} onOpenChange={onOpenChange}>
-        <DialogContent className="max-h-[92vh] w-[calc(100vw-1rem)] max-w-2xl space-y-5 overflow-y-auto sm:w-full">
+        <DialogContent
+          className="max-h-[92vh] w-[calc(100vw-1rem)] max-w-2xl space-y-5 overflow-y-auto sm:w-full"
+          onOpenAutoFocus={(e) => {
+            e.preventDefault()
+            requestAnimationFrame(() => amountRef.current?.focus())
+          }}
+          onEscapeKeyDown={(e) => {
+            if (openDropdownCount.current > 0) e.preventDefault()
+          }}
+        >
           <DialogHeader>
             <DialogTitle>
               {type === "income" ? "Add Income" : "Add Expense"}
@@ -472,218 +518,210 @@ export function AddTransactionDialog({
             </Button>
           </div>
 
-          <div className="space-y-5">
-            {type === "income" ? (
-              <div className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
+          <form onSubmit={onSubmit}>
+            <div className="space-y-5">
+              {type === "income" ? (
+                <div className="space-y-5">
+                  {/* Amount hero */}
                   <div className="space-y-2">
-                    <Label htmlFor="income-date">Date</Label>
-                    <Input
-                      id="income-date"
-                      type="date"
-                      value={date}
-                      max={today()}
-                      onChange={(e) => setDate(e.target.value)}
-                      onBlur={() => setTouched((prev) => ({ ...prev, date: true }))}
-                      aria-invalid={dateValidation?.tone === "error"}
-                      className={validationInputClass(dateValidation?.tone)}
+                    <Label htmlFor="income-amount">Amount (KD)</Label>
+                    <MoneyInput
+                      ref={amountRef}
+                      id="income-amount"
+                      value={incomeAmount}
+                      onValueChange={setIncomeAmount}
+                      onBlur={() => setTouched((prev) => ({ ...prev, incomeAmount: true }))}
+                      aria-invalid={incomeAmountValidation?.tone === "error"}
+                      currencyClassName="text-base"
+                      className={cn("h-14 text-xl", validationInputClass(incomeAmountValidation?.tone))}
                     />
-                    <FieldFeedback tone={dateValidation?.tone} message={dateValidation?.message} />
+                    <FieldFeedback tone={incomeAmountValidation?.tone} message={incomeAmountValidation?.message} />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="income-name">Name</Label>
-                    <Input
-                      id="income-name"
-                      placeholder="e.g., Salary"
-                      value={incomeName}
-                      onChange={(e) => setIncomeName(e.target.value)}
-                      onBlur={() => setTouched((prev) => ({ ...prev, incomeName: true }))}
-                      aria-invalid={incomeNameValidation?.tone === "error"}
-                      className={validationInputClass(incomeNameValidation?.tone)}
-                    />
-                    <FieldFeedback tone={incomeNameValidation?.tone} message={incomeNameValidation?.message} />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="income-name">Name</Label>
+                      <Input
+                        id="income-name"
+                        placeholder="e.g., Salary"
+                        value={incomeName}
+                        onChange={(e) => setIncomeName(e.target.value)}
+                        onBlur={() => setTouched((prev) => ({ ...prev, incomeName: true }))}
+                        aria-invalid={incomeNameValidation?.tone === "error"}
+                        className={validationInputClass(incomeNameValidation?.tone)}
+                      />
+                      <FieldFeedback tone={incomeNameValidation?.tone} message={incomeNameValidation?.message} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="income-date">Date</Label>
+                      <Input
+                        id="income-date"
+                        type="date"
+                        value={date}
+                        max={today()}
+                        onChange={(e) => setDate(e.target.value)}
+                        onBlur={() => setTouched((prev) => ({ ...prev, date: true }))}
+                        aria-invalid={dateValidation?.tone === "error"}
+                        className={validationInputClass(dateValidation?.tone)}
+                      />
+                      <FieldFeedback tone={dateValidation?.tone} message={dateValidation?.message} />
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="income-amount">Amount (KD)</Label>
-                  <MoneyInput
-                    id="income-amount"
-                    value={incomeAmount}
-                    onValueChange={setIncomeAmount}
-                    onBlur={() => setTouched((prev) => ({ ...prev, incomeAmount: true }))}
-                    aria-invalid={incomeAmountValidation?.tone === "error"}
-                    className={validationInputClass(incomeAmountValidation?.tone)}
-                  />
-                  <FieldFeedback tone={incomeAmountValidation?.tone} message={incomeAmountValidation?.message} />
-                </div>
-              </div>
-            ) : (
-              <>
-                {categoriesLoading ? (
-                  <Alert variant="warning">
-                    <AlertTitle>Loading categories</AlertTitle>
-                    <AlertDescription>
-                      Categories are still loading for quick add. Wait a moment before saving this expense.
-                    </AlertDescription>
-                  </Alert>
-                ) : null}
-                {categoriesError ? (
-                  <Alert variant="warning">
-                    <AlertTitle>Categories unavailable</AlertTitle>
-                    <AlertDescription className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <p>{categoriesError}</p>
-                      {onRetryCategories ? (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={onRetryCategories}
-                        >
-                          Retry categories
-                        </Button>
-                      ) : null}
-                    </AlertDescription>
-                  </Alert>
-                ) : null}
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="add-date">Date</Label>
-                    <Input
-                      id="add-date"
-                      type="date"
-                      value={date}
-                      max={today()}
-                      onChange={(e) => setDate(e.target.value)}
-                      onBlur={() => setTouched((prev) => ({ ...prev, date: true }))}
-                      aria-invalid={dateValidation?.tone === "error"}
-                      className={validationInputClass(dateValidation?.tone)}
-                    />
-                    <FieldFeedback tone={dateValidation?.tone} message={dateValidation?.message} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="add-merchant">Merchant</Label>
-                    <Input
-                      id="add-merchant"
-                      placeholder="e.g., Starbucks"
-                      value={merchant}
-                      onChange={(e) => setMerchant(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Category</Label>
-                    <Select value={category} onValueChange={setCategory}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select…" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((entry) => (
-                          <SelectItem key={entry} value={entry}>
-                            {entry}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+              ) : (
+                <>
+                  {categoriesLoading ? (
+                    <Alert variant="warning">
+                      <AlertTitle>Loading categories</AlertTitle>
+                      <AlertDescription>
+                        Categories are still loading for quick add. Wait a moment before saving this expense.
+                      </AlertDescription>
+                    </Alert>
+                  ) : null}
+                  {categoriesError ? (
+                    <Alert variant="warning">
+                      <AlertTitle>Categories unavailable</AlertTitle>
+                      <AlertDescription className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p>{categoriesError}</p>
+                        {onRetryCategories ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={onRetryCategories}
+                          >
+                            Retry categories
+                          </Button>
+                        ) : null}
+                      </AlertDescription>
+                    </Alert>
+                  ) : null}
+                  {/* Amount hero */}
                   <div className="space-y-2">
                     <Label htmlFor="expense-amount">Amount (KD)</Label>
                     <MoneyInput
+                      ref={amountRef}
                       id="expense-amount"
                       value={expenseAmount}
                       onValueChange={setExpenseAmount}
                       aria-invalid={expenseAmountValidation?.tone === "error"}
-                      className={validationInputClass(expenseAmountValidation?.tone)}
+                      currencyClassName="text-base"
+                      className={cn("h-14 text-xl", validationInputClass(expenseAmountValidation?.tone))}
                     />
                     <FieldFeedback tone={expenseAmountValidation?.tone} message={expenseAmountValidation?.message} />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="expense-name">What was this for?</Label>
-                  <div className="relative">
-                    <Input
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {/*
+                      The suggestions backend matches q against the transaction NAME
+                      (memorized norm/canonical), NOT merchant text — see
+                      apps/api/src/lib/suggestions-lib.ts. Merchant-field suggestions are
+                      therefore name-derived: typing "netf" surfaces the row named
+                      "Netflix subscription". Do not assume merchant-text matching here.
+                    */}
+                    <SuggestionCombobox
+                      id="add-merchant"
+                      label="Merchant"
+                      placeholder="e.g., Starbucks"
+                      value={merchant}
+                      onValueChange={setMerchant}
+                      suggestions={suggestions}
+                      onFetch={fetchSuggestions}
+                      onSelect={applyToForm}
+                      onAfterSelect={() => saveButtonRef.current?.focus()}
+                      onOpenChange={trackDropdown}
+                    />
+                    <SuggestionCombobox
                       id="expense-name"
+                      label="What was this for?"
                       placeholder="What did you buy?"
                       value={expenseName}
-                      onChange={(e) => {
-                        const next = e.target.value
-                        setExpenseName(next)
-                        if (next.length >= 2) {
-                          fetchSuggestions(next)
-                          setSuggestOpen(true)
-                        } else {
-                          setSuggestOpen(false)
-                        }
-                      }}
-                      onBlur={() => setTimeout(() => setSuggestOpen(false), 150)}
-                      onFocus={() => {
-                        if (suggestions.length) setSuggestOpen(true)
-                      }}
-                      aria-invalid={expenseNameValidation?.tone === "error"}
+                      onValueChange={setExpenseName}
+                      suggestions={suggestions}
+                      onFetch={fetchSuggestions}
+                      onSelect={applyToForm}
+                      onAfterSelect={() => saveButtonRef.current?.focus()}
+                      onOpenChange={trackDropdown}
+                      invalid={expenseNameValidation?.tone === "error"}
                       className={validationInputClass(expenseNameValidation?.tone)}
+                      feedback={<FieldFeedback tone={expenseNameValidation?.tone} message={expenseNameValidation?.message} />}
                     />
-                    <FieldFeedback tone={expenseNameValidation?.tone} message={expenseNameValidation?.message} />
-                    {suggestOpen ? (
-                      <div className="absolute z-50 mt-2 max-h-60 w-full overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
-                        {suggestions.length === 0 ? (
-                          <div className="px-3 py-2 text-sm text-muted-foreground">No suggestions</div>
-                        ) : (
-                          suggestions.map((suggestion) => (
-                            <Button
-                              key={`${suggestion.name}-${suggestion.merchant?.name ?? ""}`}
-                              type="button"
-                              variant="ghost"
-                              className="h-auto w-full flex-col items-start justify-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-muted"
-                              onClick={() => {
-                                applyTransactionSuggestion(suggestion, setExpenseName, setCategory, setMerchant, merchant, category)
-                                setSuggestOpen(false)
-                              }}
-                            >
-                              <span className="font-medium">{suggestion.name}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {suggestion.category?.name} · {suggestion.merchant?.name}
-                              </span>
-                            </Button>
-                          ))
-                        )}
-                      </div>
-                    ) : null}
                   </div>
-                </div>
-              </>
-            )}
-
-            {error && (
-              <div className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {error}
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="flex-col-reverse gap-2 pt-3 sm:flex-row">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={saving}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="default"
-              onClick={() => type === "income" ? handleIncomeSubmit() : handleSubmit(false)}
-              loading={saving}
-              disabled={saving || expenseCategoriesBlocked}
-              className={cn(
-                "w-full sm:w-auto",
-                type === "income"
-                  ? "bg-success text-white hover:bg-success"
-                  : ""
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Category</Label>
+                      <Select value={category} onValueChange={setCategory}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select…" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((entry) => (
+                            <SelectItem key={entry} value={entry}>
+                              {entry}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="add-date">Date</Label>
+                      <Input
+                        id="add-date"
+                        type="date"
+                        value={date}
+                        max={today()}
+                        onChange={(e) => setDate(e.target.value)}
+                        onBlur={() => setTouched((prev) => ({ ...prev, date: true }))}
+                        aria-invalid={dateValidation?.tone === "error"}
+                        className={validationInputClass(dateValidation?.tone)}
+                      />
+                      <FieldFeedback tone={dateValidation?.tone} message={dateValidation?.message} />
+                    </div>
+                  </div>
+                </>
               )}
-            >
-              {saving ? "Adding..." : type === "income" ? "Add Income" : "Add Expense"}
-            </Button>
-          </DialogFooter>
+
+              {error && (
+                <div className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {error}
+                </div>
+              )}
+            </div>
+
+            <DialogFooter className="mt-5 flex-col-reverse gap-2 pt-3 sm:flex-row sm:items-center">
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground sm:mr-auto">
+                <input
+                  type="checkbox"
+                  checked={keepOpen}
+                  onChange={(e) => setKeepOpen(e.target.checked)}
+                  className="h-4 w-4 cursor-pointer accent-primary"
+                />
+                Keep open for another
+              </label>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={saving}
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button
+                ref={saveButtonRef}
+                type="submit"
+                variant="default"
+                loading={saving}
+                disabled={saving || expenseCategoriesBlocked}
+                className={cn(
+                  "w-full sm:w-auto",
+                  type === "income"
+                    ? "bg-success text-white hover:bg-success"
+                    : ""
+                )}
+              >
+                {saving ? "Adding..." : type === "income" ? "Add Income" : "Add Expense"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -952,9 +990,14 @@ export function EditTransactionDialog({
   const [saveAttempted, setSaveAttempted] = useState(false)
   const [touched, setTouched] = useState({ date: false })
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const { suggestions, fetchSuggestions, lookup } = useSuggestions()
-  const [suggestOpen, setSuggestOpen] = useState(false)
+  const { suggestions, fetchSuggestions } = useSuggestions()
   const [showSplit, setShowSplit] = useState(false)
+  const nameRef = useRef<HTMLInputElement>(null)
+  const saveButtonRef = useRef<HTMLButtonElement>(null)
+  const openDropdownCount = useRef(0)
+  const trackDropdown = (dropdownOpen: boolean) => {
+    openDropdownCount.current = Math.max(0, openDropdownCount.current + (dropdownOpen ? 1 : -1))
+  }
 
   useEffect(() => {
     if (!open || !txnId) return
@@ -962,7 +1005,6 @@ export function EditTransactionDialog({
     setError(null)
     setSaveAttempted(false)
     setTouched({ date: false })
-    setSuggestOpen(false)
     setShowSplit(false)
     transactionsApi
       .get(txnId)
@@ -991,6 +1033,11 @@ export function EditTransactionDialog({
       })
       .finally(() => setLoading(false))
   }, [onOpenChange, onSuccess, open, toast, txnId])
+
+  // Editing intent differs from logging: focus the name field (not amount) once loaded.
+  useEffect(() => {
+    if (open && !loading) requestAnimationFrame(() => nameRef.current?.focus())
+  }, [open, loading])
 
   const dateValidation =
     touched.date || saveAttempted ? validateRequiredDate(date) : null
@@ -1073,10 +1120,24 @@ export function EditTransactionDialog({
     })
   }
 
+  const applyToForm = (s: TransactionSuggestion) =>
+    applyTransactionSuggestion(s, setName, setCategory, setMerchant, merchant, category)
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    void handleSave()
+  }
+
   return (
     <>
       <Dialog open={open && !confirmDelete && !showSplit} onOpenChange={onOpenChange}>
-        <DialogContent className="max-h-[92vh] w-[calc(100vw-1rem)] max-w-2xl space-y-5 overflow-y-auto sm:w-full">
+        <DialogContent
+          className="max-h-[92vh] w-[calc(100vw-1rem)] max-w-2xl space-y-5 overflow-y-auto sm:w-full"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => {
+            if (openDropdownCount.current > 0) e.preventDefault()
+          }}
+        >
           <DialogHeader>
             <DialogTitle>Edit Transaction</DialogTitle>
             <DialogDescription>
@@ -1084,171 +1145,153 @@ export function EditTransactionDialog({
             </DialogDescription>
           </DialogHeader>
 
-          {loading ? (
-            <div className="space-y-4 py-4">
-              <div className="h-10 animate-pulse rounded bg-muted" />
-              <div className="h-10 animate-pulse rounded bg-muted" />
-              <div className="h-10 animate-pulse rounded bg-muted" />
-            </div>
-          ) : (
-            <div className="space-y-5">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Date</Label>
-                  <Input
-                    type="date"
-                    value={date}
-                    max={today()}
-                    onChange={(e) => setDate(e.target.value)}
-                    onBlur={() => setTouched({ date: true })}
-                    aria-invalid={dateValidation?.tone === "error"}
-                    className={validationInputClass(dateValidation?.tone)}
-                  />
-                  <FieldFeedback tone={dateValidation?.tone} message={dateValidation?.message} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Merchant</Label>
-                  <Input
-                    placeholder="Optional"
-                    value={merchant}
-                    onChange={(e) => setMerchant(e.target.value)}
-                  />
-                </div>
+          <form onSubmit={onSubmit}>
+            {loading ? (
+              <div className="space-y-4 py-4">
+                <div className="h-10 animate-pulse rounded bg-muted" />
+                <div className="h-10 animate-pulse rounded bg-muted" />
+                <div className="h-10 animate-pulse rounded bg-muted" />
               </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
+            ) : (
+              <div className="space-y-5">
+                {/* Amount hero */}
                 <div className="space-y-2">
-                  <Label>Category</Label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select…" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((entry) => (
-                        <SelectItem key={entry} value={entry}>
-                          {entry}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Amount (KD)</Label>
+                  <Label htmlFor="edit-amount">Amount (KD)</Label>
                   <MoneyInput
+                    id="edit-amount"
                     value={amount}
                     onValueChange={setAmount}
                     aria-invalid={amountValidation?.tone === "error"}
-                    className={validationInputClass(amountValidation?.tone)}
+                    currencyClassName="text-base"
+                    className={cn("h-14 text-xl", validationInputClass(amountValidation?.tone))}
                   />
                   <FieldFeedback tone={amountValidation?.tone} message={amountValidation?.message} />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Transaction name</Label>
-                <div className="relative">
-                  <Input
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/*
+                    Suggestions match the transaction NAME, not merchant text — see
+                    apps/api/src/lib/suggestions-lib.ts. Merchant suggestions are name-derived.
+                  */}
+                  <SuggestionCombobox
+                    id="edit-merchant"
+                    label="Merchant"
+                    placeholder="Optional"
+                    value={merchant}
+                    onValueChange={setMerchant}
+                    suggestions={suggestions}
+                    onFetch={fetchSuggestions}
+                    onSelect={applyToForm}
+                    onAfterSelect={() => saveButtonRef.current?.focus()}
+                    onOpenChange={trackDropdown}
+                  />
+                  <SuggestionCombobox
+                    ref={nameRef}
+                    id="edit-name"
+                    label="Transaction name"
                     placeholder="What was this for?"
                     value={name}
-                    onChange={(e) => {
-                      const next = e.target.value
-                      setName(next)
-                      if (next.length >= 2) {
-                        fetchSuggestions(next)
-                        setSuggestOpen(true)
-                      } else {
-                        setSuggestOpen(false)
-                      }
-                    }}
-                    onBlur={() => setTimeout(() => setSuggestOpen(false), 150)}
-                    onFocus={() => {
-                      if (suggestions.length) setSuggestOpen(true)
-                    }}
-                    aria-invalid={nameValidation?.tone === "error"}
+                    onValueChange={setName}
+                    suggestions={suggestions}
+                    onFetch={fetchSuggestions}
+                    onSelect={applyToForm}
+                    onAfterSelect={() => saveButtonRef.current?.focus()}
+                    onOpenChange={trackDropdown}
+                    invalid={nameValidation?.tone === "error"}
                     className={validationInputClass(nameValidation?.tone)}
+                    feedback={<FieldFeedback tone={nameValidation?.tone} message={nameValidation?.message} />}
                   />
-                  <FieldFeedback tone={nameValidation?.tone} message={nameValidation?.message} />
-                  {suggestOpen ? (
-                    <div className="absolute z-50 mt-2 max-h-60 w-full overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
-                      {suggestions.length === 0 ? (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">No suggestions</div>
-                      ) : (
-                        suggestions.map((suggestion) => (
-                          <Button
-                            key={`${suggestion.name}-${suggestion.merchant?.name ?? ""}`}
-                            type="button"
-                            variant="ghost"
-                            className="h-auto w-full flex-col items-start justify-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-muted"
-                            onClick={() => {
-                              applyTransactionSuggestion(suggestion, setName, setCategory, setMerchant, merchant, category)
-                              setSuggestOpen(false)
-                            }}
-                          >
-                            <span className="font-medium">{suggestion.name}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {suggestion.category?.name} · {suggestion.merchant?.name}
-                            </span>
-                          </Button>
-                        ))
-                      )}
-                    </div>
-                  ) : null}
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Memo / Notes</Label>
-                <Input
-                  placeholder="Additional notes about this transaction"
-                  value={memo}
-                  onChange={(e) => setMemo(e.target.value)}
-                />
-              </div>
-
-              {error && (
-                <div className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  {error}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Category</Label>
+                    <Select value={category} onValueChange={setCategory}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((entry) => (
+                          <SelectItem key={entry} value={entry}>
+                            {entry}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-date">Date</Label>
+                    <Input
+                      id="edit-date"
+                      type="date"
+                      value={date}
+                      max={today()}
+                      onChange={(e) => setDate(e.target.value)}
+                      onBlur={() => setTouched({ date: true })}
+                      aria-invalid={dateValidation?.tone === "error"}
+                      className={validationInputClass(dateValidation?.tone)}
+                    />
+                    <FieldFeedback tone={dateValidation?.tone} message={dateValidation?.message} />
+                  </div>
                 </div>
-              )}
-            </div>
-          )}
 
-          <DialogFooter className="flex-col-reverse gap-2 pt-3 sm:flex-row">
-            <Button
-              variant="destructive"
-              onClick={() => setConfirmDelete(true)}
-              disabled={saving || loading}
-              className="w-full sm:mr-auto sm:w-auto"
-            >
-              <Trash2 className="mr-2 h-4 w-4" /> Delete
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={saving}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setShowSplit(true)}
-              disabled={saving || loading}
-              className="w-full sm:w-auto"
-            >
-              <Scissors className="mr-2 h-4 w-4" />
-              Split
-            </Button>
-            <Button
-              variant="default"
-              onClick={handleSave}
-              loading={saving}
-              disabled={saving || loading}
-              className="w-full sm:w-auto"
-            >
-              {saving ? "Saving..." : "Save Changes"}
-            </Button>
-          </DialogFooter>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-memo">Memo / Notes</Label>
+                  <Input
+                    id="edit-memo"
+                    placeholder="Additional notes about this transaction"
+                    value={memo}
+                    onChange={(e) => setMemo(e.target.value)}
+                  />
+                </div>
+
+                {error && (
+                  <div className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                    {error}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <DialogFooter className="mt-5 flex-col-reverse gap-2 pt-3 sm:flex-row">
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setConfirmDelete(true)}
+                disabled={saving || loading}
+                className="w-full sm:mr-auto sm:w-auto"
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={saving}
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowSplit(true)}
+                disabled={saving || loading}
+                className="w-full sm:w-auto"
+              >
+                <Scissors className="mr-2 h-4 w-4" />
+                Split
+              </Button>
+              <Button
+                ref={saveButtonRef}
+                type="submit"
+                variant="default"
+                loading={saving}
+                disabled={saving || loading}
+                className="w-full sm:w-auto"
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

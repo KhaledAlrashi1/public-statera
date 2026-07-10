@@ -70,6 +70,14 @@ function AppShellLayout() {
   const showQuickAddFab = true
   const navItems = useMemo(() => baseNavItems, [])
 
+  // Route-derived default type, shared by the desktop header button and mobile FAB.
+  const handleQuickAdd = () => {
+    const requestedType = new URLSearchParams(location.search).get("type")
+    const defaultType =
+      location.pathname === "/income" || requestedType === "income" ? "income" : "expense"
+    openQuickAdd(defaultType)
+  }
+
   const isNavItemActive = useCallback(
     (to: string, isActive: boolean) => {
       if (isActive) return true
@@ -230,6 +238,17 @@ function AppShellLayout() {
 
           {/* Right-side actions */}
           <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="default"
+              size="default"
+              onClick={handleQuickAdd}
+              className="hidden lg:inline-flex"
+            >
+              <Plus className="icon-inline" />
+              <span>Log transaction</span>
+            </Button>
+
             <Button
               type="button"
               variant="outline"
@@ -515,18 +534,10 @@ function AppShellLayout() {
       {showQuickAddFab ? (
         <Button
           type="button"
-          variant="gradient-primary"
+          variant="default"
           size="icon"
-          onClick={() => {
-            const searchParams = new URLSearchParams(location.search)
-            const requestedType = searchParams.get("type")
-            const defaultType =
-              location.pathname === "/income" || requestedType === "income"
-                ? "income"
-                : "expense"
-            openQuickAdd(defaultType)
-          }}
-          className="fixed bottom-20 right-4 z-50 h-14 w-14 rounded-[var(--radius-card)] shadow-elevation-3 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 lg:bottom-6 lg:right-6"
+          onClick={handleQuickAdd}
+          className="fixed bottom-20 right-4 z-50 h-14 w-14 rounded-[var(--radius-card)] bg-primary shadow-elevation-3 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 lg:hidden"
           aria-label="Add transaction"
         >
           <Plus className="icon-hero" />

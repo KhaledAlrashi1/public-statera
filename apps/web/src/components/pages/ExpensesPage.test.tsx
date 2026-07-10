@@ -51,8 +51,11 @@ vi.mock("@/contexts/PreferencesContext", () => ({
 }))
 
 vi.mock("./expenses/dialogs", () => ({
-  AddExpenseDialog: () => null,
   SplitTransactionDialog: () => null,
+}))
+
+vi.mock("@/contexts/QuickAddContext", () => ({
+  useQuickAdd: () => ({ openQuickAdd: vi.fn(), closeQuickAdd: vi.fn() }),
 }))
 
 vi.mock("@/components/ui/category-detail-modal", () => ({

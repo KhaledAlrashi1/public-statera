@@ -30,6 +30,10 @@ vi.mock("@/components/ui/toaster", () => ({
   }),
 }))
 
+vi.mock("@/contexts/QuickAddContext", () => ({
+  useQuickAdd: () => ({ openQuickAdd: vi.fn(), closeQuickAdd: vi.fn() }),
+}))
+
 vi.mock("@/lib/recharts", () => {
   const Container = ({ children }: { children?: unknown }) => children ?? null
   const Leaf = () => null

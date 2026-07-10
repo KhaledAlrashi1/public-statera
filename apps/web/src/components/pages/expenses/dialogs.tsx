@@ -2,11 +2,9 @@ import { useEffect, useState } from "react"
 import { Trash2 } from "lucide-react"
 
 import { transactionsApi } from "@/lib/api"
-import type { TransactionSuggestion } from "@/types/api"
-import { cn, formatKD, today } from "@/lib/utils"
+import { cn, formatKD } from "@/lib/utils"
 import {
   validatePositiveAmount,
-  validateRequiredDate,
   validateRequiredText,
 } from "@/lib/validation"
 import { useToast } from "@/components/ui/toaster"
@@ -19,7 +17,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { MoneyInput } from "@/components/ui/money-input"
 import { FieldFeedback, validationInputClass } from "@/components/ui/field-feedback"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -27,194 +24,6 @@ import { Button } from "@/components/ui/button"
 
 type SplitTouchedField = "name" | "category" | "amount"
 type SplitItem = { name: string; category: string; amount_kd: string }
-export function AddExpenseDialog({
-  open,
-  onOpenChange,
-  addForm,
-  setAddForm,
-  addErr,
-  submitAddExpense,
-  categories,
-  suggestions,
-  suggestOpen,
-  setSuggestOpen,
-  suggestLoading,
-  setSuggestOpenTimeout,
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  addForm: { date: string; merchant: string; category: string; name: string; amount_kd: string }
-  setAddForm: (v: { date: string; merchant: string; category: string; name: string; amount_kd: string }) => void
-  addErr: string | null
-  submitAddExpense: () => void
-  categories: string[]
-  suggestions: TransactionSuggestion[]
-  suggestOpen: boolean
-  setSuggestOpen: (v: boolean) => void
-  suggestLoading: boolean
-  setSuggestOpenTimeout: () => void
-}) {
-  const [touched, setTouched] = useState({ date: false, amount: false })
-
-  useEffect(() => {
-    if (open) {
-      setTouched({ date: false, amount: false })
-    }
-  }, [open])
-
-  const dateValidation =
-    touched.date || Boolean(addErr) ? validateRequiredDate(addForm.date) : null
-  const amountValidation =
-    touched.amount || Boolean(addErr)
-      ? validatePositiveAmount(addForm.amount_kd)
-      : null
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-1rem)] max-w-lg space-y-5 sm:w-full" onKeyDown={(e) => {
-        if (e.key === "Enter" && !e.shiftKey && !suggestOpen) {
-          e.preventDefault()
-          submitAddExpense()
-        }
-      }}>
-        <DialogHeader>
-          <DialogTitle>Add Expense</DialogTitle>
-          <DialogDescription>
-            Capture a new expense quickly. Suggestions appear as you type the transaction title.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="grid gap-5 pt-2">
-          <div className="grid gap-2">
-            <Label htmlFor="add-date">Date</Label>
-            <Input
-              id="add-date"
-              type="date"
-              value={addForm.date}
-              max={today()}
-              onChange={(e) => setAddForm({ ...addForm, date: e.target.value })}
-              onBlur={() => setTouched((prev) => ({ ...prev, date: true }))}
-              aria-invalid={dateValidation?.tone === "error"}
-              className={validationInputClass(dateValidation?.tone)}
-            />
-            <FieldFeedback tone={dateValidation?.tone} message={dateValidation?.message} />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="add-merchant">Merchant</Label>
-            <Input
-              id="add-merchant"
-              placeholder="e.g., Starbucks"
-              value={addForm.merchant}
-              onChange={(e) => {
-                setAddForm({ ...addForm, merchant: e.target.value })
-              }}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label>Category</Label>
-            <Select
-              value={addForm.category}
-              onValueChange={(value) => {
-                setAddForm({ ...addForm, category: value })
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select…" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="add-amount">Amount (KD)</Label>
-            <MoneyInput
-              id="add-amount"
-              value={addForm.amount_kd}
-              onValueChange={(v) => setAddForm({ ...addForm, amount_kd: v })}
-              onBlur={() => setTouched((prev) => ({ ...prev, amount: true }))}
-              aria-invalid={amountValidation?.tone === "error"}
-              className={validationInputClass(amountValidation?.tone)}
-            />
-            <FieldFeedback tone={amountValidation?.tone} message={amountValidation?.message} />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="add-name">What was this for?</Label>
-            <div className="relative">
-              <Input
-                id="add-name"
-                placeholder="What did you buy?"
-                value={addForm.name}
-                onChange={(e) => {
-                  const q = e.target.value
-                  setAddForm({ ...addForm, name: q })
-                }}
-                onFocus={() => {
-                  if (suggestions.length) setSuggestOpen(true)
-                }}
-                onBlur={setSuggestOpenTimeout}
-              />
-              {suggestOpen && (
-                <div className="absolute z-50 mt-2 max-h-60 w-full overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
-                  {suggestLoading ? (
-                    <div className="px-3 py-2 text-sm text-muted-foreground">Loading…</div>
-                  ) : suggestions.length === 0 ? (
-                    <div className="px-3 py-2 text-sm text-muted-foreground">No suggestions</div>
-                  ) : (
-                    suggestions.map((sug) => (
-                      <Button
-                        key={`${sug.name}-${sug.merchant?.name ?? ""}`}
-                        type="button"
-                        variant="ghost"
-                        className="h-auto w-full flex-col items-start justify-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-muted"
-                        onClick={() => {
-                          setAddForm({
-                            ...addForm,
-                            name: sug.name,
-                            category: addForm.category.trim() ? addForm.category : (sug.category?.name ?? ""),
-                            merchant: sug.merchant?.name || addForm.merchant,
-                          })
-                          setSuggestOpen(false)
-                        }}
-                      >
-                        <span className="font-medium">{sug.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {sug.category?.name} · {sug.merchant?.name}
-                        </span>
-                      </Button>
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          {addErr && (
-            <div className="rounded-xl border border-destructive/35 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {addErr}
-            </div>
-          )}
-        </div>
-
-        <DialogFooter className="flex-col-reverse gap-2 pt-3 sm:flex-row">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
-            Cancel
-          </Button>
-          <Button
-            variant="default"
-            className="w-full sm:w-auto"
-            onClick={submitAddExpense}
-          >
-            Add Expense
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
 export function SplitTransactionDialog({
   open,
   onOpenChange,

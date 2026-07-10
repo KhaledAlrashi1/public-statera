@@ -19,19 +19,6 @@ import {
 } from "@/lib/recharts"
 import { analyticsApi, transactionsApi } from "@/lib/api"
 import { chartTooltipStyle, cn, formatAmount, formatCompactKD, formatDisplayDate, formatKD, today, toYearMonth, prevMonth as prevMonthUtil, labelForYM } from "@/lib/utils"
-import { validatePositiveAmount, validateRequiredDate } from "@/lib/validation"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { MoneyInput } from "@/components/ui/money-input"
-import { FieldFeedback, validationInputClass } from "@/components/ui/field-feedback"
-import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -45,57 +32,8 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { FilterBar } from "@/components/ui/filter-bar"
 import { useToast } from "@/components/ui/toaster"
 import PageHeader from "@/components/layout/PageHeader"
+import { useQuickAdd } from "@/contexts/QuickAddContext"
 
-function DuplicateWarningDialog({
-  open,
-  onOpenChange,
-  meta,
-  onAddAnyway,
-}: {
-  open: boolean
-  onOpenChange: (v: boolean) => void
-  meta: { date: string; name: string; amount: string }
-  onAddAnyway: () => void
-}) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-1rem)] max-w-md space-y-5 sm:w-full">
-        <DialogHeader>
-          <DialogTitle>Possible Duplicate</DialogTitle>
-          <DialogDescription>
-            This entry looks similar to an existing income record.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-4 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Date</span>
-            <span className="font-semibold">{formatDisplayDate(meta.date)}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Name</span>
-            <span className="font-semibold">{meta.name}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Amount</span>
-            <span className="font-semibold">KD {meta.amount}</span>
-          </div>
-        </div>
-        <DialogFooter className="flex-col-reverse gap-2 pt-2 sm:flex-row">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
-            Cancel
-          </Button>
-          <Button
-            variant="default"
-            onClick={onAddAnyway}
-            className="w-full sm:w-auto"
-          >
-            Add Anyway
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
 
 function IncomeHero({
   label,
@@ -398,206 +336,6 @@ function RecentIncome({
   )
 }
 
-function AddIncomeDialog({
-  open,
-  onOpenChange,
-  onSuccess,
-}: {
-  open: boolean
-  onOpenChange: (v: boolean) => void
-  onSuccess: () => void
-}) {
-  const [date, setDate] = useState(today())
-  const [incomeName, setIncomeName] = useState("")
-  const [amount, setAmount] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [touched, setTouched] = useState({ date: false, amount: false })
-  const [dupMeta, setDupMeta] = useState<{
-    date: string
-    name: string
-    amount: string
-  } | null>(null)
-
-  const reset = () => {
-    setDate(today())
-    setIncomeName("")
-    setAmount("")
-    setError(null)
-    setSaving(false)
-    setTouched({ date: false, amount: false })
-    setDupMeta(null)
-  }
-
-  useEffect(() => {
-    if (open) reset()
-  }, [open])
-
-  const handleSubmit = async (force = false) => {
-    setError(null)
-
-    if (!date) {
-      setError("Date is required.")
-      return
-    }
-    if (!incomeName.trim()) {
-      setError("Name is required.")
-      return
-    }
-    const amountVal = parseFloat(amount)
-    if (Number.isNaN(amountVal) || amountVal <= 0) {
-      setError("Amount must be greater than zero.")
-      return
-    }
-
-    const amountFixed = amountVal.toFixed(3)
-
-    setSaving(true)
-
-    try {
-      if (!force) {
-        try {
-          const dup = await transactionsApi.dupCheck(
-            date,
-            incomeName.trim(),
-            amountFixed
-          )
-          if (dup.count > 0) {
-            setDupMeta({ date, name: incomeName.trim(), amount: amountFixed })
-            setSaving(false)
-            return
-          }
-        } catch {
-          /* proceed on dup-check failure */
-        }
-      }
-
-      await transactionsApi.create({
-        date,
-        category: "Income",
-        name: incomeName.trim(),
-        amount_kd: amountFixed,
-        force: force ? "1" : undefined,
-      })
-
-      onOpenChange(false)
-      onSuccess()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "We couldn't add that income entry right now.")
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const dateValidation = touched.date || Boolean(error) ? validateRequiredDate(date) : null
-  const amountValidation = touched.amount || Boolean(error) ? validatePositiveAmount(amount) : null
-
-  return (
-    <>
-      <Dialog open={open && !dupMeta} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[calc(100vw-1rem)] max-w-lg space-y-5 sm:w-full" onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault()
-            handleSubmit()
-          }
-        }}>
-          <DialogHeader>
-            <DialogTitle>Add Income</DialogTitle>
-            <DialogDescription>
-              Capture a new income entry with date, name, and amount.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-5 pt-2">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="income-date">Date</Label>
-                <Input
-                  id="income-date"
-                  type="date"
-                  value={date}
-                  max={today()}
-                  onChange={(e) => setDate(e.target.value)}
-                  onBlur={() => setTouched((prev) => ({ ...prev, date: true }))}
-                  aria-invalid={dateValidation?.tone === "error"}
-                  className={validationInputClass(dateValidation?.tone)}
-                />
-                <FieldFeedback tone={dateValidation?.tone} message={dateValidation?.message} />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="income-category">Category</Label>
-                <Input id="income-category" value="Income" readOnly />
-              </div>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="income-amount">Amount (KD)</Label>
-              <MoneyInput
-                id="income-amount"
-                value={amount}
-                onValueChange={setAmount}
-                onBlur={() => setTouched((prev) => ({ ...prev, amount: true }))}
-                aria-invalid={amountValidation?.tone === "error"}
-                className={validationInputClass(amountValidation?.tone)}
-              />
-              <FieldFeedback tone={amountValidation?.tone} message={amountValidation?.message} />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="income-name">Name</Label>
-              <Input
-                id="income-name"
-                placeholder="e.g., Salary, freelance payment"
-                value={incomeName}
-                onChange={(e) => setIncomeName(e.target.value)}
-              />
-            </div>
-
-            {error && (
-              <div className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {error}
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="flex-col-reverse gap-2 pt-3 sm:flex-row">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={saving}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="default"
-              onClick={() => handleSubmit(false)}
-              loading={saving}
-              disabled={saving}
-              className="w-full sm:w-auto"
-            >
-              {saving ? "Adding..." : "Add Income"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {dupMeta && (
-        <DuplicateWarningDialog
-          open={!!dupMeta}
-          onOpenChange={(v) => {
-            if (!v) setDupMeta(null)
-          }}
-          meta={dupMeta}
-          onAddAnyway={() => {
-            setDupMeta(null)
-            handleSubmit(true)
-          }}
-        />
-      )}
-    </>
-  )
-}
 
 export default function IncomePage() {
   const toast = useToast()
@@ -633,7 +371,7 @@ export default function IncomePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [range, setRange] = useState("30")
-  const [addOpen, setAddOpen] = useState(false)
+  const { openQuickAdd } = useQuickAdd()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null)
   const [animDone, setAnimDone] = useState(false)
@@ -809,7 +547,7 @@ export default function IncomePage() {
             <Button
               type="button"
               variant="default"
-              onClick={() => setAddOpen(true)}
+              onClick={() => openQuickAdd("income")}
               className="h-10 px-4 text-sm"
               aria-label="Add new income"
             >
@@ -876,7 +614,7 @@ export default function IncomePage() {
             </div>
             <Button
               variant="default"
-              onClick={() => setAddOpen(true)}
+              onClick={() => openQuickAdd("income")}
             >
               Add Income
             </Button>
@@ -900,20 +638,9 @@ export default function IncomePage() {
         range={range}
         setRange={setRange}
         onDelete={handleDelete}
-        onAdd={() => setAddOpen(true)}
+        onAdd={() => openQuickAdd("income")}
       />
 
-      <AddIncomeDialog
-        open={addOpen}
-        onOpenChange={setAddOpen}
-        onSuccess={() => {
-          queryClient.invalidateQueries({ queryKey: ["transactions", "income", "recent"] })
-          queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] })
-          queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
-          queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] })
-          toast.success("Income entry added.")
-        }}
-      />
 
       <ConfirmDialog
         open={deleteOpen}

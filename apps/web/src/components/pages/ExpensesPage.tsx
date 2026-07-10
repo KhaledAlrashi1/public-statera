@@ -27,11 +27,11 @@ import { FilterBar } from "@/components/ui/filter-bar"
 import { SegmentedControl } from "@/components/ui/segmented-control"
 import PageHeader from "@/components/layout/PageHeader"
 import { useToast } from "@/components/ui/toaster"
-import { AddExpenseDialog, SplitTransactionDialog } from "./expenses/dialogs"
+import { SplitTransactionDialog } from "./expenses/dialogs"
 import {
   usePagedTransactionRows,
 } from "./expenses/hooks"
-import type { TransactionSuggestion } from "@/types/api"
+import { useQuickAdd } from "@/contexts/QuickAddContext"
 
 const RECENT_ROWS_LIMIT = 50
 const CATEGORY_DETAIL_PAGE_SIZE = 100
@@ -544,22 +544,11 @@ export default function ExpensesPage() {
   const [selectedMonth, setSelectedMonth] = useState("")
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
-  const [addOpen, setAddOpen] = useState(false)
+  const { openQuickAdd } = useQuickAdd()
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [categoryOffset, setCategoryOffset] = useState(0)
   const [splitOpen, setSplitOpen] = useState(false)
   const [splitTxnId, setSplitTxnId] = useState<number | null>(null)
-  const [addForm, setAddForm] = useState({
-    date: "",
-    merchant: "",
-    category: "",
-    name: "",
-    amount_kd: "",
-  })
-  const [addErr, setAddErr] = useState<string | null>(null)
-  const [suggestions, setSuggestions] = useState<TransactionSuggestion[]>([])
-  const [suggestOpen, setSuggestOpen] = useState(false)
-  const [suggestLoading, setSuggestLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [filterCategory, setFilterCategory] = useState("all")
@@ -732,47 +721,6 @@ export default function ExpensesPage() {
     return () => clearTimeout(timer)
   }, [selectedMonth])
 
-  useEffect(() => {
-    if (!addOpen) return
-    const today = new Date().toISOString().slice(0, 10)
-    setAddForm((prev) => ({
-      ...prev,
-      date: prev.date || today,
-    }))
-  }, [addOpen])
-
-  useEffect(() => {
-    if (addOpen) return
-    setSuggestions([])
-    setSuggestOpen(false)
-    setSuggestLoading(false)
-    setAddErr(null)
-  }, [addOpen])
-
-  useEffect(() => {
-    if (!addOpen) return
-    const q = addForm.name.trim()
-    if (!q) {
-      setSuggestions([])
-      setSuggestOpen(false)
-      return
-    }
-    setSuggestLoading(true)
-    const t = setTimeout(async () => {
-      try {
-        const res = await transactionsApi.suggestions(q, 8)
-        setSuggestions(res.items || [])
-        setSuggestOpen(true)
-      } catch {
-        setSuggestions([])
-        setSuggestOpen(false)
-      } finally {
-        setSuggestLoading(false)
-      }
-    }, 250)
-    return () => clearTimeout(t)
-  }, [addForm.name, addOpen])
-
   const monthLabel = labelForYM(selectedMonth)
 
   const monthTotal = useMemo(
@@ -884,36 +832,6 @@ export default function ExpensesPage() {
     ])
   }, [queryClient])
 
-  async function submitAddExpense() {
-    setAddErr(null)
-    if (!addForm.date || !addForm.category || !addForm.name || !addForm.amount_kd) {
-      setAddErr("Please fill in date, category, transaction title, and amount.")
-      return
-    }
-    const amt = parseFloat(addForm.amount_kd)
-    if (Number.isNaN(amt) || amt <= 0) {
-      setAddErr("Amount must be greater than zero.")
-      return
-    }
-    try {
-      await transactionsApi.create({
-        date: addForm.date,
-        merchant: addForm.merchant || undefined,
-        category: addForm.category,
-        name: addForm.name,
-        amount_kd: addForm.amount_kd,
-      })
-      setAddOpen(false)
-      setAddForm({ date: "", merchant: "", category: "", name: "", amount_kd: "" })
-      await refreshExpenseData()
-      toast.success("Expense added successfully.")
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "We couldn't add that expense right now."
-      setAddErr(msg)
-      toast.error(msg)
-    }
-  }
-
   useEffect(() => {
     const id = setTimeout(() => setDebouncedSearch(searchQuery), 200)
     return () => clearTimeout(id)
@@ -990,7 +908,7 @@ export default function ExpensesPage() {
             <Button
               type="button"
               variant="default"
-              onClick={() => setAddOpen(true)}
+              onClick={() => openQuickAdd("expense")}
               className="h-10 px-4 text-sm"
               aria-label="Add new expense transaction"
             >
@@ -1075,7 +993,7 @@ export default function ExpensesPage() {
               <Button
                 type="button"
                 variant="default"
-                onClick={() => setAddOpen(true)}
+                onClick={() => openQuickAdd("expense")}
               >
                 Add Expense
               </Button>
@@ -1125,26 +1043,11 @@ export default function ExpensesPage() {
           filterRange={filterRange}
           setFilterRange={setFilterRange}
           categories={categories}
-          onAdd={() => setAddOpen(true)}
+          onAdd={() => openQuickAdd("expense")}
           onSplit={openSplit}
         />
       )}
       </div>
-
-      <AddExpenseDialog
-        open={addOpen}
-        onOpenChange={setAddOpen}
-        addForm={addForm}
-        setAddForm={setAddForm}
-        addErr={addErr}
-        submitAddExpense={submitAddExpense}
-        categories={categories}
-        suggestions={suggestions}
-        suggestOpen={suggestOpen}
-        setSuggestOpen={setSuggestOpen}
-        suggestLoading={suggestLoading}
-        setSuggestOpenTimeout={() => setTimeout(() => setSuggestOpen(false), 150)}
-      />
 
       <CategoryDetailModal
         open={Boolean(activeCategory)}

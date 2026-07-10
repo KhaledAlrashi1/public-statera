@@ -28,18 +28,23 @@ export interface MoneyInputProps
   onValueChange: (value: string) => void
   /** Render the muted "KD" prefix inside the field. Default true. */
   showCurrency?: boolean
+  /** Extra classes for the "KD" prefix span — e.g. scale it up on a hero field. */
+  currencyClassName?: string
 }
 
 const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(
   (
-    { value, onValueChange, showCurrency = true, className, placeholder = "0.000", onBlur, ...props },
+    { value, onValueChange, showCurrency = true, currencyClassName, className, placeholder = "0.000", onBlur, ...props },
     ref
   ) => (
     <div className="relative">
       {showCurrency ? (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-sm text-muted-foreground"
+          className={cn(
+            "pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-sm text-muted-foreground",
+            currencyClassName
+          )}
         >
           KD
         </span>
