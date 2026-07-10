@@ -99,7 +99,7 @@ export function CategoryDetailModal({
                 {categoryDelta >= 0 ? "+" : "-"}
                 {formatKD(Math.abs(categoryDelta))}
                 {categoryPrevTotal > 0 && (
-                  <span className="ml-2 text-sm font-medium text-muted-foreground">
+                  <span className="ms-2 text-sm font-medium text-muted-foreground">
                     ({categoryDeltaPct >= 0 ? "+" : "-"}
                     {Math.abs(categoryDeltaPct).toFixed(1)}%)
                   </span>

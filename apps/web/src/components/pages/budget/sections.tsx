@@ -40,6 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
+import { MoneyInput } from "@/components/ui/money-input"
 import { FieldFeedback, validationInputClass } from "@/components/ui/field-feedback"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -824,14 +825,10 @@ export function BudgetDialog({
 
           <div className="grid gap-2">
             <Label htmlFor="budget-amount">Amount (KD)</Label>
-            <Input
+            <MoneyInput
               id="budget-amount"
-              type="number"
-              step="0.001"
-              min="0"
-              placeholder="0.000"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onValueChange={setAmount}
               onBlur={() => setTouched((prev) => ({ ...prev, amount: true }))}
               aria-invalid={amountValidation?.tone === "error"}
               className={validationInputClass(amountValidation?.tone)}

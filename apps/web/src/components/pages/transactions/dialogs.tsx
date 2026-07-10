@@ -34,6 +34,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { FieldFeedback, validationInputClass } from "@/components/ui/field-feedback"
 import { Input } from "@/components/ui/input"
+import { MoneyInput } from "@/components/ui/money-input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -505,17 +506,13 @@ export function AddTransactionDialog({
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="income-amount">Amount (KD)</Label>
-                  <Input
+                  <MoneyInput
                     id="income-amount"
-                    type="number"
-                    min="0"
-                    step="0.001"
-                    placeholder="0.000"
                     value={incomeAmount}
-                    onChange={(e) => setIncomeAmount(e.target.value)}
+                    onValueChange={setIncomeAmount}
                     onBlur={() => setTouched((prev) => ({ ...prev, incomeAmount: true }))}
                     aria-invalid={incomeAmountValidation?.tone === "error"}
-                    className={cn("money-input h-11", validationInputClass(incomeAmountValidation?.tone))}
+                    className={validationInputClass(incomeAmountValidation?.tone)}
                   />
                   <FieldFeedback tone={incomeAmountValidation?.tone} message={incomeAmountValidation?.message} />
                 </div>
@@ -591,16 +588,12 @@ export function AddTransactionDialog({
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="expense-amount">Amount (KD)</Label>
-                    <Input
+                    <MoneyInput
                       id="expense-amount"
-                      type="number"
-                      min="0"
-                      step="0.001"
-                      placeholder="0.000"
                       value={expenseAmount}
-                      onChange={(e) => setExpenseAmount(e.target.value)}
+                      onValueChange={setExpenseAmount}
                       aria-invalid={expenseAmountValidation?.tone === "error"}
-                      className={cn("money-input h-11", validationInputClass(expenseAmountValidation?.tone))}
+                      className={validationInputClass(expenseAmountValidation?.tone)}
                     />
                     <FieldFeedback tone={expenseAmountValidation?.tone} message={expenseAmountValidation?.message} />
                   </div>
@@ -1141,15 +1134,11 @@ export function EditTransactionDialog({
                 </div>
                 <div className="space-y-2">
                   <Label>Amount (KD)</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.001"
-                    placeholder="0.000"
+                  <MoneyInput
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onValueChange={setAmount}
                     aria-invalid={amountValidation?.tone === "error"}
-                    className={cn("money-input h-11", validationInputClass(amountValidation?.tone))}
+                    className={validationInputClass(amountValidation?.tone)}
                   />
                   <FieldFeedback tone={amountValidation?.tone} message={amountValidation?.message} />
                 </div>

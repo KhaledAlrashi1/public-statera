@@ -29,6 +29,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { MoneyInput } from "@/components/ui/money-input"
 import { FieldFeedback, validationInputClass } from "@/components/ui/field-feedback"
 import { Label } from "@/components/ui/label"
 import {
@@ -531,17 +532,13 @@ function AddIncomeDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="income-amount">Amount (KD)</Label>
-              <Input
+              <MoneyInput
                 id="income-amount"
-                type="number"
-                step="0.001"
-                min="0"
-                placeholder="0.000"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onValueChange={setAmount}
                 onBlur={() => setTouched((prev) => ({ ...prev, amount: true }))}
                 aria-invalid={amountValidation?.tone === "error"}
-                className={cn("money-input h-11", validationInputClass(amountValidation?.tone))}
+                className={validationInputClass(amountValidation?.tone)}
               />
               <FieldFeedback tone={amountValidation?.tone} message={amountValidation?.message} />
             </div>

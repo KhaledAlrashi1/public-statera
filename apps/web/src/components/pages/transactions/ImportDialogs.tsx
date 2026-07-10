@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { MoneyInput } from "@/components/ui/money-input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -1179,12 +1180,10 @@ function SplitRowEditor({
               list={catListId}
               className="h-8 border-border/35 bg-background/70 text-sm shadow-none hover:border-border/60 focus:bg-background"
             />
-            <Input
-              type="text"
-              inputMode="decimal"
-              placeholder="0.000"
+            <MoneyInput
+              showCurrency={false}
               value={split.amount_kd}
-              onChange={(e) => updateSplit(idx, "amount_kd", e.target.value)}
+              onValueChange={(v) => updateSplit(idx, "amount_kd", v)}
               className="h-8 border-border/35 bg-background/70 text-right text-sm tabular-nums shadow-none hover:border-border/60 focus:bg-background"
             />
             <Button

@@ -38,7 +38,7 @@ export function DemoWorkspaceBanner({
             onClick={onOpenImport}
             className="border-warning/40 bg-background/70 hover:bg-background"
           >
-            <Upload className="mr-2 h-4 w-4" />
+            <Upload className="me-2 h-4 w-4" />
             Import real data
           </Button>
           <Button
@@ -47,7 +47,7 @@ export function DemoWorkspaceBanner({
             loading={Boolean(clearing)}
             disabled={Boolean(clearing)}
           >
-            {!clearing ? <Trash2 className="mr-2 h-4 w-4" /> : null}
+            {!clearing ? <Trash2 className="me-2 h-4 w-4" /> : null}
             {clearing ? "Clearing..." : "Clear demo workspace"}
           </Button>
         </div>

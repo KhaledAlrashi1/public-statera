@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { MoneyInput } from "@/components/ui/money-input"
 import { FieldFeedback, validationInputClass } from "@/components/ui/field-feedback"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -131,16 +132,13 @@ export function AddExpenseDialog({
           </div>
           <div className="grid gap-2">
             <Label htmlFor="add-amount">Amount (KD)</Label>
-            <Input
+            <MoneyInput
               id="add-amount"
-              type="number"
-              step="0.001"
-              min="0"
               value={addForm.amount_kd}
-              onChange={(e) => setAddForm({ ...addForm, amount_kd: e.target.value })}
+              onValueChange={(v) => setAddForm({ ...addForm, amount_kd: v })}
               onBlur={() => setTouched((prev) => ({ ...prev, amount: true }))}
               aria-invalid={amountValidation?.tone === "error"}
-              className={`money-input h-11 ${validationInputClass(amountValidation?.tone)}`}
+              className={validationInputClass(amountValidation?.tone)}
             />
             <FieldFeedback tone={amountValidation?.tone} message={amountValidation?.message} />
           </div>

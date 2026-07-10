@@ -11,7 +11,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { MoneyInput } from "@/components/ui/money-input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { validateNonNegativeAmount, validateOptionalIntegerRange } from "@/lib/validation"
 import type { DebtAccount } from "@/types/api"
 
@@ -175,30 +183,29 @@ export function DebtDialog({
 
           <div className="grid gap-2">
             <Label htmlFor="debt-type">Debt type</Label>
-            <select
-              id="debt-type"
+            <Select
               value={debtType}
-              onChange={(e) => setDebtType(e.target.value as DebtAccount["debt_type"])}
-              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              onValueChange={(v) => setDebtType(v as DebtAccount["debt_type"])}
             >
-              <option value="credit_card">Credit card</option>
-              <option value="personal_loan">Personal loan</option>
-              <option value="car_loan">Car loan</option>
-              <option value="other">Other</option>
-            </select>
+              <SelectTrigger id="debt-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="credit_card">Credit card</SelectItem>
+                <SelectItem value="personal_loan">Personal loan</SelectItem>
+                <SelectItem value="car_loan">Car loan</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="debt-balance">Balance (KD)</Label>
-              <Input
+              <MoneyInput
                 id="debt-balance"
-                type="number"
-                step="0.001"
-                min="0"
                 value={balance}
-                onChange={(e) => setBalance(e.target.value)}
-                placeholder="0.000"
+                onValueChange={setBalance}
                 onBlur={() => setTouched((prev) => ({ ...prev, balance: true }))}
                 aria-invalid={balanceValidation?.tone === "error"}
                 className={validationInputClass(balanceValidation?.tone)}
@@ -207,14 +214,10 @@ export function DebtDialog({
             </div>
             <div className="grid gap-2">
               <Label htmlFor="debt-minimum">Minimum / month (KD)</Label>
-              <Input
+              <MoneyInput
                 id="debt-minimum"
-                type="number"
-                step="0.001"
-                min="0"
                 value={minimumPayment}
-                onChange={(e) => setMinimumPayment(e.target.value)}
-                placeholder="0.000"
+                onValueChange={setMinimumPayment}
                 onBlur={() => setTouched((prev) => ({ ...prev, minimumPayment: true }))}
                 aria-invalid={minimumPaymentValidation?.tone === "error"}
                 className={validationInputClass(minimumPaymentValidation?.tone)}

@@ -3,15 +3,15 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const alertVariants = cva(
-  "relative w-full rounded-[var(--radius-inner)] border border-l-4 px-4 py-3 text-sm shadow-[var(--shadow-level-1)]",
+  "relative w-full rounded-[var(--radius-inner)] border border-s-4 px-4 py-3 text-sm shadow-[var(--shadow-level-1)]",
   {
     variants: {
       variant: {
-        default: "border-border/60 border-l-border bg-muted/30 text-foreground",
-        info: "border-primary/25 border-l-primary bg-primary/8 text-foreground",
-        success: "border-success/25 border-l-success bg-success/8 text-foreground",
-        warning: "border-warning/35 border-l-warning bg-warning/8 text-foreground",
-        destructive: "border-destructive/35 border-l-destructive bg-destructive/8 text-foreground",
+        default: "border-border/60 border-s-border bg-muted/30 text-foreground",
+        info: "border-primary/25 border-s-primary bg-primary/8 text-foreground",
+        success: "border-success/25 border-s-success bg-success/8 text-foreground",
+        warning: "border-warning/35 border-s-warning bg-warning/8 text-foreground",
+        destructive: "border-destructive/35 border-s-destructive bg-destructive/8 text-foreground",
       },
     },
     defaultVariants: {

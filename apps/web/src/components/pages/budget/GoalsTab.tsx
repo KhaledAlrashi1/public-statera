@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog"
 import { FieldFeedback, validationInputClass } from "@/components/ui/field-feedback"
 import { Input } from "@/components/ui/input"
+import { MoneyInput } from "@/components/ui/money-input"
 import { Label } from "@/components/ui/label"
 import { EmptyState } from "@/components/ui/empty-state"
 import {
@@ -308,36 +309,29 @@ export function GoalDialog({
           <div className="grid gap-4 sm:grid-cols-2 sm:items-start">
             <div className="grid gap-2">
               <Label htmlFor="goal-target">Target amount (KD)</Label>
-              <Input
+              <MoneyInput
                 id="goal-target"
-                type="number"
-                step="0.001"
-                min="0.001"
                 placeholder="1000.000"
                 value={targetAmount}
-                onChange={(e) => setTargetAmount(e.target.value)}
+                onValueChange={setTargetAmount}
                 onBlur={() => setTouched((prev) => ({ ...prev, target: true }))}
                 aria-invalid={targetValidation?.tone === "error"}
                 aria-describedby="goal-target-feedback"
-                className={cn("money-input", controlClassName, validationInputClass(targetValidation?.tone))}
+                className={validationInputClass(targetValidation?.tone)}
               />
               <GoalFieldNote id="goal-target-feedback" validation={targetValidation} />
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="goal-current">Starting balance (optional)</Label>
-              <Input
+              <MoneyInput
                 id="goal-current"
-                type="number"
-                step="0.001"
-                min="0"
-                placeholder="0.000"
                 value={currentAmount}
-                onChange={(e) => setCurrentAmount(e.target.value)}
+                onValueChange={setCurrentAmount}
                 onBlur={() => setTouched((prev) => ({ ...prev, current: true }))}
                 aria-invalid={currentValidation?.tone === "error"}
                 aria-describedby="goal-current-feedback"
-                className={cn("money-input", controlClassName, validationInputClass(currentValidation?.tone))}
+                className={validationInputClass(currentValidation?.tone)}
               />
               <GoalFieldNote
                 id="goal-current-feedback"
@@ -477,17 +471,14 @@ function DepositDialog({
 
         <div className="grid gap-2">
           <Label htmlFor="goal-deposit-amount">Amount (KD)</Label>
-          <Input
+          <MoneyInput
             id="goal-deposit-amount"
-            type="number"
-            step="0.001"
-            min="0.001"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onValueChange={setAmount}
             placeholder="50.000"
             onBlur={() => setTouched(true)}
             aria-invalid={amountValidation?.tone === "error"}
-            className={cn("money-input h-11", validationInputClass(amountValidation?.tone))}
+            className={validationInputClass(amountValidation?.tone)}
           />
           <FieldFeedback tone={amountValidation?.tone} message={amountValidation?.message} />
         </div>
