@@ -256,10 +256,13 @@ export interface BudgetResponse {
   month: string
   items: BudgetItem[]
   profile_context?: {
-    budget_total_kd: number
-    monthly_income_kd: number | null
+    // KWD/decimal fields are serialized as strings by the Hono backend
+    // (Decimal.toFixed — apps/api/src/routes/budgets.ts:120-123). See the
+    // typed-drift fix-forward (2026-07-10); coerce with Number(...) at use.
+    budget_total_kd: string
+    monthly_income_kd: string | null
     income_source: 'detected_from_transactions' | 'declared_in_profile' | 'not_set'
-    budget_to_income_pct: number | null
+    budget_to_income_pct: string | null
     payday_day: number | null
   }
 }

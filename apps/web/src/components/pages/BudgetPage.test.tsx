@@ -72,6 +72,9 @@ function renderPage() {
 describe("BudgetPage", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // BudgetPage persists the active tab to localStorage; clear it so tab state
+    // does not leak between tests (the goals-tab test would otherwise pin "goals").
+    window.localStorage.clear()
 
     mocks.analyticsApi.budgetMetrics.mockResolvedValue({
       spent_by_category: {},
@@ -121,6 +124,22 @@ describe("BudgetPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add your first budget" }))
 
     expect(screen.getByText("budget dialog")).toBeInTheDocument()
+  })
+
+  it("renders the Goals & Debt tab without crashing on an empty account", async () => {
+    // Both-tabs empty-account coverage (companion to the budget-tab empty-state
+    // test above). profileContext is null + budgets [] per the beforeEach fixture.
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <MemoryRouter initialEntries={["/plan?tab=goals"]}>
+        <QueryClientProvider client={queryClient}>
+          <BudgetPage />
+        </QueryClientProvider>
+      </MemoryRouter>
+    )
+
+    expect(await screen.findByText("goals tab")).toBeInTheDocument()
+    expect(screen.queryByText("Set your first budget plan")).not.toBeInTheDocument()
   })
 
   it("surfaces active-month query failures in the planning warning banner", async () => {

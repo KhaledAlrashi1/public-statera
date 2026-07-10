@@ -16,7 +16,11 @@ export const chartTooltipStyle: React.CSSProperties = {
 /**
  * Format a number as KD currency
  */
-export function formatKD(amount: number | string): string {
+export function formatKD(amount: number | string | null | undefined): string {
+  // Null-tolerant: isNaN(null) === false lets null slip a bare isNaN guard, then
+  // null.toLocaleString throws. Money fields arrive as strings (Drizzle/Decimal),
+  // and a nullable one is a real runtime shape — guard it. (2026-07-10 hardening.)
+  if (amount === null || amount === undefined) return "KD 0.000"
   const n = typeof amount === "string" ? parseFloat(amount) : amount
   if (isNaN(n)) return "KD 0.000"
   return `KD ${n.toLocaleString("en-US", { minimumFractionDigits: 3, maximumFractionDigits: 3 })}`
@@ -37,7 +41,9 @@ export function formatCompactKD(amount: number | string): string {
 /**
  * Format a number with 3 decimal places
  */
-export function fmt3(n: number | string): string {
+export function fmt3(n: number | string | null | undefined): string {
+  // Null-tolerant for the same reason as formatKD (isNaN(null) === false).
+  if (n === null || n === undefined) return "0.000"
   const val = typeof n === "string" ? parseFloat(n) : n
   return (isNaN(val) ? 0 : val).toFixed(3)
 }

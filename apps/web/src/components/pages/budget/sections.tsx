@@ -50,9 +50,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 export type BudgetRange = "month" | "30" | "90" | "365" | "all"
 export type BudgetProfileContext = {
-  budget_total_kd: number
-  monthly_income_kd: number | null
-  budget_to_income_pct: number | null
+  // KWD/decimal fields arrive as STRINGS from the Hono serializer
+  // (Decimal.toFixed — see apps/api/src/routes/budgets.ts:120-123). The
+  // earlier number|null annotation was a typed-drift lie that crashed the
+  // Plan page (`budget_to_income_pct.toFixed(1)` on a string). Keep these as
+  // strings and coerce with Number(...) at the point of arithmetic/formatting.
+  budget_total_kd: string
+  monthly_income_kd: string | null
+  budget_to_income_pct: string | null
   payday_day: number | null
 }
 const BUDGET_RANGES: BudgetRange[] = ["month", "30", "90", "365", "all"]
@@ -234,10 +239,10 @@ export function IncomePlanningCard({
 
   let toneClass = "text-success"
   let status = "within income"
-  if ((budgetPct || 0) > 100) {
+  if ((Number(budgetPct) || 0) > 100) {
     toneClass = "text-destructive"
     status = "above income"
-  } else if ((budgetPct || 0) > 85) {
+  } else if ((Number(budgetPct) || 0) > 85) {
     toneClass = "text-warning"
     status = "close to income"
   }
@@ -278,7 +283,7 @@ export function IncomePlanningCard({
           <div className="inner-card">
             <div className="text-xs text-muted-foreground">Budget / Income</div>
             <div className="mt-1 text-sm font-semibold">
-              {budgetPct !== null ? `${budgetPct.toFixed(1)}%` : "N/A"}
+              {budgetPct !== null ? `${Number(budgetPct).toFixed(1)}%` : "N/A"}
             </div>
           </div>
         </div>
