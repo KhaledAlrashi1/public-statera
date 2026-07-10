@@ -2,26 +2,26 @@
 
 @theme {
   /* Semantic color tokens — Statera warm precision brand. */
-  --bg: 220 16% 97.5%;
-  --surface: 0 0% 100%;
-  --surface-2: 220 12% 95%;
-  --text: 222 30% 11%;
-  --text-muted: 222 10% 44%;
-  --border: 220 10% 87%;
+  --bg: 40 24% 95%;
+  --surface: 42 33% 98.5%;
+  --surface-2: 40 18% 92%;
+  --text: 28 22% 13%;
+  --text-muted: 28 9% 40%;
+  --border: 38 15% 85%;
   --primary: 246 52% 44%;
   --primary-foreground: 0 0% 100%;
   --accent: 44 68% 52%;
   --accent-foreground: 26 44% 14%;
-  --danger: 4 70% 50%;
+  --danger: 8 68% 48%;
   --danger-foreground: 0 0% 98%;
-  --success: 152 50% 36%;
+  --success: 150 44% 34%;
   --success-foreground: 0 0% 98%;
-  --warning: 30 88% 50%;
+  --warning: 32 88% 36%;
   --warning-foreground: 26 40% 12%;
-  --info: 210 78% 52%;
+  --info: 212 70% 48%;
   --info-foreground: 0 0% 100%;
   --ring: 246 52% 44%;
-  --shadow: 248 28% 14%;
+  --shadow: 28 25% 12%;
 
   /* Tailwind/shadcn-compatible aliases */
   --color-background: hsl(var(--bg));
@@ -128,27 +128,44 @@
 
 /* Dark mode — activated by .dark class on <html> */
 .dark {
-  --bg: 222 20% 9%;
-  --surface: 222 18% 13%;
-  --surface-2: 222 16% 16%;
-  --text: 38 20% 95%;
-  --text-muted: 222 10% 68%;
-  --border: 222 12% 22%;
-  --primary: 247 70% 68%;
-  --primary-foreground: 0 0% 100%;
-  --accent: 44 76% 62%;
-  --accent-foreground: 26 40% 14%;
-  --danger: 4 76% 62%;
+  --bg: 28 14% 8%;
+  --surface: 28 12% 12%;
+  --surface-2: 28 10% 15.5%;
+  --text: 38 24% 94%;
+  --text-muted: 32 10% 68%;
+  --border: 28 10% 21%;
+  --primary: 247 68% 70%;
+  --primary-foreground: 248 30% 10%;
+  --accent: 42 80% 64%;
+  --accent-foreground: 26 40% 12%;
+  --danger: 8 74% 64%;
   --danger-foreground: 0 0% 98%;
-  --success: 152 46% 52%;
+  --success: 150 42% 54%;
   --success-foreground: 0 0% 98%;
-  --warning: 30 88% 58%;
+  --warning: 34 90% 60%;
   --warning-foreground: 26 40% 14%;
-  --info: 210 82% 64%;
+  --info: 212 82% 66%;
   --info-foreground: 0 0% 100%;
-  --ring: 247 70% 68%;
+  --ring: 247 68% 70%;
   --color-success: hsl(var(--success));
   --color-warning: hsl(var(--warning));
+}
+
+/* Hero surfaces set their own light indigo→amber gradient and force white text
+   (.page-hero { color: white }). In dark mode --primary-foreground flips to dark
+   ink (for solid primary buttons); keep hero eyebrows/frosted controls white so
+   they match the hero's white base instead of becoming dark-ink outliers. Kept
+   UNLAYERED so it outranks the unlayered .dark block above on specificity
+   (.dark .page-hero > .dark). Self-cleaning: dies when .page-hero is removed in
+   the Home pass. Both custom properties are set: --primary-foreground for direct
+   hsl(var(--primary-foreground)) consumers (.brand-gradient / .hero-gradient-warm
+   color), and --color-primary-foreground because Tailwind's text-/bg-primary-
+   foreground utilities read the theme alias, which the browser resolves to a
+   concrete color at html.dark and inherits down — so overriding the channel var
+   alone does not reach them. */
+.dark .page-hero {
+  --primary-foreground: 0 0% 100%;
+  --color-primary-foreground: hsl(0 0% 100%);
 }
 
 @layer base {
@@ -156,36 +173,36 @@
     @apply border-border;
   }
   :root {
-    --panel-accent-1: rgba(67, 56, 202, 0.08);
-    --panel-accent-2: rgba(217, 119, 6, 0.06);
-    --panel-accent-3: rgba(124, 58, 237, 0.05);
-    --panel-border: rgba(79, 70, 229, 0.16);
+    --panel-accent-1: rgba(120, 90, 60, 0.03);
+    --panel-accent-2: rgba(120, 90, 60, 0.025);
+    --panel-accent-3: rgba(120, 90, 60, 0.02);
+    --panel-border: rgba(120, 100, 70, 0.14);
     --card-line-1: #4338ca;
     --card-line-2: #d97706;
     --card-line-3: #f59e0b;
-    --card-glow-1: rgba(67, 56, 202, 0.06);
-    --card-glow-2: rgba(217, 119, 6, 0.05);
-    --card-glow-3: rgba(79, 70, 229, 0.12);
-    --card-glow-4: rgba(217, 119, 6, 0.1);
-    --card-wash-1: rgba(67, 56, 202, 0.1);
-    --card-wash-2: rgba(217, 119, 6, 0.08);
-    --card-wash-3: rgba(124, 58, 237, 0.06);
+    --card-glow-1: rgba(120, 90, 60, 0.03);
+    --card-glow-2: rgba(120, 90, 60, 0.025);
+    --card-glow-3: rgba(120, 90, 60, 0.03);
+    --card-glow-4: rgba(120, 90, 60, 0.025);
+    --card-wash-1: rgba(120, 90, 60, 0.03);
+    --card-wash-2: rgba(120, 90, 60, 0.025);
+    --card-wash-3: rgba(120, 90, 60, 0.02);
   }
   .dark {
-    --panel-accent-1: rgba(129, 140, 248, 0.08);
-    --panel-accent-2: rgba(251, 191, 36, 0.08);
-    --panel-accent-3: rgba(167, 139, 250, 0.05);
-    --panel-border: rgba(129, 140, 248, 0.14);
+    --panel-accent-1: rgba(240, 220, 180, 0.03);
+    --panel-accent-2: rgba(240, 220, 180, 0.025);
+    --panel-accent-3: rgba(240, 220, 180, 0.02);
+    --panel-border: rgba(240, 220, 180, 0.10);
     --card-line-1: #818cf8;
     --card-line-2: #fbbf24;
     --card-line-3: #f59e0b;
-    --card-glow-1: rgba(129, 140, 248, 0.08);
-    --card-glow-2: rgba(251, 191, 36, 0.06);
-    --card-glow-3: rgba(129, 140, 248, 0.14);
-    --card-glow-4: rgba(251, 191, 36, 0.1);
-    --card-wash-1: rgba(129, 140, 248, 0.08);
-    --card-wash-2: rgba(251, 191, 36, 0.06);
-    --card-wash-3: rgba(167, 139, 250, 0.05);
+    --card-glow-1: rgba(240, 220, 180, 0.03);
+    --card-glow-2: rgba(240, 220, 180, 0.025);
+    --card-glow-3: rgba(240, 220, 180, 0.03);
+    --card-glow-4: rgba(240, 220, 180, 0.025);
+    --card-wash-1: rgba(240, 220, 180, 0.03);
+    --card-wash-2: rgba(240, 220, 180, 0.025);
+    --card-wash-3: rgba(240, 220, 180, 0.02);
   }
   body {
     @apply bg-background text-foreground;

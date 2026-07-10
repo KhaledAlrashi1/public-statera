@@ -187,8 +187,8 @@ function safeToSpendTone(dailyRate: number) {
   if (dailyRate < 10) {
     return {
       label: "Watch pace",
-      cardClassName: "border-orange-500/20 bg-orange-500/6",
-      badgeClassName: "border-orange-500/20 bg-orange-500/10 text-orange-700 dark:text-orange-300",
+      cardClassName: "border-warning/20 bg-warning/6",
+      badgeClassName: "border-warning/20 bg-warning/10 text-warning",
       valueClassName: "text-primary",
       message: "You're still inside plan, but this month needs a careful daily pace.",
     }
@@ -260,8 +260,8 @@ export function SafeToSpendHero({
       </div>
       <div className="section-body">
         {showIncomeNudge ? (
-          <div className="mb-3 inner-card flex items-start gap-3 border-amber-500/20 bg-amber-500/6">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-300" />
+          <div className="mb-3 inner-card flex items-start gap-3 border-warning/20 bg-warning/6">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
             <div className="min-w-0 flex-1 text-sm">
               <span className="text-foreground">
                 Set your monthly income to see your full spending picture.

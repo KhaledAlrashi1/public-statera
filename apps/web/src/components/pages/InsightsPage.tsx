@@ -163,8 +163,8 @@ export default function InsightsPage() {
         const paidThisMonth = typeof lastSeen === "string" && lastSeen.startsWith(monthStart)
         const expectedThisMonth = clampDate(viewYear, Math.max(0, viewMonth - 1), expectedDay)
         const dueDateLabel = paidThisMonth
-          ? lastSeenDate.toLocaleDateString([], { month: "short", day: "numeric" })
-          : expectedThisMonth.toLocaleDateString([], { month: "short", day: "numeric" })
+          ? lastSeenDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+          : expectedThisMonth.toLocaleDateString("en-GB", { day: "numeric", month: "short" })
 
         let status: RecurringCommitmentRow["status"] = "Upcoming"
         if (paidThisMonth) {
