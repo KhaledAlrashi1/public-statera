@@ -64,14 +64,12 @@ vi.mock("./dashboard/sections", () => ({
       ))}
     </div>
   ),
-  PlanningShortcutsPanel: () => null,
+  PlanSummaryPanel: () => null,
   SafeToSpendHero: () => <div>safe to spend</div>,
   HomeAttentionCenter: () => <div>alerts</div>,
-  DebtSummaryPanel: () => null,
   IncomeExpensesChart: () => <div>income chart</div>,
   CategoryBreakdownChart: () => <div>category chart</div>,
   TopExpensesPanel: () => <div>top expenses</div>,
-  BudgetPanel: () => <div>budget panel</div>,
 }))
 
 vi.mock("@/components/ui/category-detail-modal", () => ({

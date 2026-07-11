@@ -15,13 +15,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/toaster"
 import type { Transaction } from "@/types/api"
 import {
-  BudgetPanel,
   CategoryBreakdownChart,
-  DebtSummaryPanel,
+  PlanSummaryPanel,
   DashboardHero,
   HomeAttentionCenter,
   IncomeExpensesChart,
-  PlanningShortcutsPanel,
   SafeToSpendHero,
   SetupGuideDialog,
   SetupProgressPanel,
@@ -662,11 +660,11 @@ export default function DashboardPage() {
 
   return (
     <div className={`space-y-8 ${isMounted ? "animations-complete" : ""}`}>
+      <h1 className="sr-only">Home</h1>
       <PageHeader
         badge="Home"
         badgeDotClassName="bg-primary"
         badgeSuffix={monthLabel}
-        title="Your monthly health and priorities"
         actions={(
           <Select
             value={selectedMonth}
@@ -813,6 +811,38 @@ export default function DashboardPage() {
           }`}
           style={{ minHeight: "400px" }}
         >
+          {/* Position 2: the app's most actionable number */}
+          <SafeToSpendHero
+            isLoading={safeToSpendLoading}
+            safeToSpend={safeToSpend}
+            onOpenPlan={() => navigate("/plan")}
+            onOpenIncome={() => openQuickAdd("income")}
+            onOpenProfile={() => navigate("/profile")}
+          />
+
+          {/* Position 3: the single "what needs attention" story */}
+          <HomeAttentionCenter
+            isLoading={isLoading}
+            monthLabel={monthLabel}
+            overBudgetCount={overBudgetCount}
+            overBudgetAmount={overBudgetAmount}
+            risingCategory={risingCategory}
+            budgetAlerts={budgetAlerts}
+            alertsLoading={budgetAlertsLoading}
+            dismissingAlertId={dismissingAlertId}
+            budgetPressureItems={budgetTop}
+            onDismissBudgetAlert={dismissBudgetAlert}
+            onOpenPlan={() => navigate("/plan")}
+            onOpenActivity={() => navigate("/activity?type=all")}
+          />
+
+          <TopExpensesPanel
+            isLoading={isLoading}
+            topExpenses={topExpensesWithSparklines}
+            selectedMonth={selectedMonth}
+            categoryDeltas={categoryTrendDeltas}
+          />
+
           <div className="grid gap-6 lg:grid-cols-2">
             <IncomeExpensesChart isLoading={isLoading} trendData={trendData} />
             <CategoryBreakdownChart
@@ -822,46 +852,12 @@ export default function DashboardPage() {
             />
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <TopExpensesPanel
-              isLoading={isLoading}
-              topExpenses={topExpensesWithSparklines}
-              selectedMonth={selectedMonth}
-              categoryDeltas={categoryTrendDeltas}
-            />
-
-            <BudgetPanel
-              isLoading={budgetLoading}
-              budgetTop={budgetTop}
-              selectedMonth={selectedMonth}
-              onOpenBudget={() => navigate("/plan")}
-            />
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <SafeToSpendHero
-              isLoading={safeToSpendLoading}
-              safeToSpend={safeToSpend}
-              onOpenPlan={() => navigate("/plan")}
-              onOpenIncome={() => openQuickAdd("income")}
-              onOpenProfile={() => navigate("/profile")}
-            />
-
-            <HomeAttentionCenter
-              isLoading={isLoading}
-              monthLabel={monthLabel}
-              overBudgetCount={overBudgetCount}
-              overBudgetAmount={overBudgetAmount}
-              risingCategory={risingCategory}
-              budgetAlerts={budgetAlerts}
-              alertsLoading={budgetAlertsLoading}
-              dismissingAlertId={dismissingAlertId}
-              budgetPressureItems={budgetTop}
-              onDismissBudgetAlert={dismissBudgetAlert}
-              onOpenPlan={() => navigate("/plan")}
-              onOpenActivity={() => navigate("/activity?type=all")}
-            />
-          </div>
+          <PlanSummaryPanel
+            isLoading={debtSummaryLoading}
+            summary={debtSummary}
+            onOpenDebt={() => navigate("/plan?tab=goals#debt-tracker")}
+            onOpenGoals={() => navigate("/plan?tab=goals#savings-goals")}
+          />
 
           <CategoryDetailModal
             open={Boolean(activeCategory)}
@@ -914,21 +910,6 @@ export default function DashboardPage() {
             setSetupGuideOpen(false)
             void syncSetupGuideProfile({ setup_guide_seen: true, setup_guide_dismissed: true })
           }}
-        />
-      )}
-
-      {!noDashboardData && (debtSummaryLoading || (debtSummary?.account_count ?? 0) > 0) && (
-        <DebtSummaryPanel
-          isLoading={debtSummaryLoading}
-          summary={debtSummary}
-          onOpenProfile={() => navigate("/plan?tab=goals")}
-        />
-      )}
-
-      {!noDashboardData && (
-        <PlanningShortcutsPanel
-          onOpenDebt={() => navigate("/plan?tab=goals#debt-tracker")}
-          onOpenGoals={() => navigate("/plan?tab=goals#savings-goals")}
         />
       )}
 

@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
 import type { DebtAccountSummary } from "@/types/api"
-import { DebtSummaryPanel } from "./sections"
+import { PlanSummaryPanel } from "./sections"
 
 function makeSummary(overrides: Partial<DebtAccountSummary> = {}): DebtAccountSummary {
   return {
@@ -13,13 +13,14 @@ function makeSummary(overrides: Partial<DebtAccountSummary> = {}): DebtAccountSu
   }
 }
 
-describe("DebtSummaryPanel", () => {
+describe("PlanSummaryPanel", () => {
   it("renders loading state", () => {
     render(
-      <DebtSummaryPanel
+      <PlanSummaryPanel
         isLoading
         summary={undefined}
-        onOpenProfile={vi.fn()}
+        onOpenDebt={vi.fn()}
+        onOpenGoals={vi.fn()}
       />
     )
 
@@ -28,12 +29,13 @@ describe("DebtSummaryPanel", () => {
     ).toBeInTheDocument()
   })
 
-  it("renders summary values when debt data exists", () => {
+  it("renders the Debt Summary group with values when debt data exists", () => {
     render(
-      <DebtSummaryPanel
+      <PlanSummaryPanel
         isLoading={false}
         summary={makeSummary()}
-        onOpenProfile={vi.fn()}
+        onOpenDebt={vi.fn()}
+        onOpenGoals={vi.fn()}
       />
     )
 
@@ -43,18 +45,19 @@ describe("DebtSummaryPanel", () => {
     expect(screen.getByText("2")).toBeInTheDocument()
   })
 
-  it("renders empty state and routes to profile", () => {
-    const onOpenProfile = vi.fn()
+  it("renders the empty state and routes to the debt tracker", () => {
+    const onOpenDebt = vi.fn()
     render(
-      <DebtSummaryPanel
+      <PlanSummaryPanel
         isLoading={false}
         summary={makeSummary({ account_count: 0 })}
-        onOpenProfile={onOpenProfile}
+        onOpenDebt={onOpenDebt}
+        onOpenGoals={vi.fn()}
       />
     )
 
     expect(screen.getByText(/You haven.*added any debts/i)).toBeInTheDocument()
     fireEvent.click(screen.getByRole("button", { name: "Track your debts" }))
-    expect(onOpenProfile).toHaveBeenCalledTimes(1)
+    expect(onOpenDebt).toHaveBeenCalledTimes(1)
   })
 })

@@ -10,6 +10,7 @@ import {
   TrendingDown,
   ArrowRightLeft,
   CheckCircle2,
+  ChevronDown,
   CircleDashed,
   Sparkles,
   X,
@@ -37,6 +38,7 @@ import {
 import { chartTooltipStyle, cn, fmt3, formatCompactKD, formatKD, getBudgetUtilizationTone } from "@/lib/utils"
 import { CHART_STROKES, getChartColors } from "@/lib/chart-tokens"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Dialog,
@@ -120,8 +122,8 @@ function HeroDelta({
     <div
       className={`mt-2 inline-flex flex-wrap items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
         positive
-          ? "border-emerald-200/20 bg-emerald-300/10 text-emerald-100"
-          : "border-amber-200/25 bg-amber-200/12 text-amber-100"
+          ? "border-success/25 bg-success/10 text-success"
+          : "border-warning/25 bg-warning/10 text-warning"
       }`}
     >
       <DeltaIcon className="h-4 w-4" />
@@ -248,6 +250,14 @@ export function SafeToSpendHero({
   const showIncomeNudge = Boolean(
     safeToSpend && safeToSpend.income_source === 'not_set' && !incomeNudgeDismissed
   )
+  const hasInfoNotes = Boolean(
+    (monthlyIncome > 0 &&
+      (safeToSpend?.income_source === 'detected_from_transactions' ||
+        safeToSpend?.income_source === 'declared_in_profile')) ||
+      savingsGoalBudgetCovered > 0 ||
+      warnings.includes("debts_not_set_optional") ||
+      warnings.includes("savings_goals_unscheduled_optional")
+  )
 
   return (
     <section className="section-panel panel-featured float-in stagger-1" aria-label="Safe to spend card">
@@ -363,34 +373,50 @@ export function SafeToSpendHero({
                 </div>
               ) : null}
             </div>
-            <div className="space-y-1 px-1">
-              {safeToSpend.monthly_income_kd && safeToSpend.income_source === 'detected_from_transactions' && (
-                <p className="text-xs text-muted-foreground">
-                  Income of {formatKD(safeToSpend.monthly_income_kd)} is automatically detected from your income transactions.
-                </p>
-              )}
-              {safeToSpend.monthly_income_kd && safeToSpend.income_source === 'declared_in_profile' && (
-                <p className="text-xs text-muted-foreground">
-                  Income of {formatKD(safeToSpend.monthly_income_kd)} is from your profile setting. Add income transactions to use auto-detection.
-                </p>
-              )}
-              {savingsGoalBudgetCovered > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {formatKD(safeToSpend.savings_goal_budget_covered_kd)} of goal funding is already covered by this month&apos;s budgets.
-                </p>
-              )}
-              {warnings.includes("debts_not_set_optional") && (
-                <p className="text-xs text-muted-foreground">{SAFE_TO_SPEND_WARNING_COPY.debts_not_set_optional}</p>
-              )}
-              {warnings.includes("savings_goals_unscheduled_optional") && (
-                <p className="text-xs text-muted-foreground">{SAFE_TO_SPEND_WARNING_COPY.savings_goals_unscheduled_optional}</p>
-              )}
-              {warnings.includes("commitments_over_40pct_cap") && (
-                <p className="text-xs font-medium text-warning">{SAFE_TO_SPEND_WARNING_COPY.commitments_over_40pct_cap}</p>
-              )}
+            <div className="space-y-2 px-1">
+              {/* One-line explanation — always visible */}
               <p className="text-xs text-muted-foreground">
                 {safeToSpendCommitmentNote({ debtMinimum, savingsGoalReserve })}
               </p>
+              {/* Actionable warning — kept as one visible line */}
+              {warnings.includes("commitments_over_40pct_cap") && (
+                <p className="flex items-start gap-2 text-xs font-medium text-warning">
+                  <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <span>{SAFE_TO_SPEND_WARNING_COPY.commitments_over_40pct_cap}</span>
+                </p>
+              )}
+              {/* Informational notes — collapsed into a keyboard-reachable disclosure */}
+              {hasInfoNotes && (
+                <details className="group">
+                  <summary className="inline-flex cursor-pointer list-none items-center gap-1 rounded text-xs font-medium text-muted-foreground underline-offset-2 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                    Details
+                    <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="mt-2 space-y-1">
+                    {safeToSpend.monthly_income_kd && safeToSpend.income_source === 'detected_from_transactions' && (
+                      <p className="text-xs text-muted-foreground">
+                        Income of {formatKD(safeToSpend.monthly_income_kd)} is automatically detected from your income transactions.
+                      </p>
+                    )}
+                    {safeToSpend.monthly_income_kd && safeToSpend.income_source === 'declared_in_profile' && (
+                      <p className="text-xs text-muted-foreground">
+                        Income of {formatKD(safeToSpend.monthly_income_kd)} is from your profile setting. Add income transactions to use auto-detection.
+                      </p>
+                    )}
+                    {savingsGoalBudgetCovered > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        {formatKD(safeToSpend.savings_goal_budget_covered_kd)} of goal funding is already covered by this month&apos;s budgets.
+                      </p>
+                    )}
+                    {warnings.includes("debts_not_set_optional") && (
+                      <p className="text-xs text-muted-foreground">{SAFE_TO_SPEND_WARNING_COPY.debts_not_set_optional}</p>
+                    )}
+                    {warnings.includes("savings_goals_unscheduled_optional") && (
+                      <p className="text-xs text-muted-foreground">{SAFE_TO_SPEND_WARNING_COPY.savings_goals_unscheduled_optional}</p>
+                    )}
+                  </div>
+                </details>
+              )}
             </div>
           </div>
         ) : incomeNeedsSetup ? (
@@ -419,58 +445,111 @@ export function SafeToSpendHero({
   )
 }
 
-export function DebtSummaryPanel({
+export function PlanSummaryPanel({
   isLoading,
   summary,
-  onOpenProfile,
+  onOpenDebt,
+  onOpenGoals,
 }: {
   isLoading: boolean
   summary: DebtAccountSummary | undefined
-  onOpenProfile: () => void
+  onOpenDebt: () => void
+  onOpenGoals: () => void
 }) {
+  const hasDebt = Boolean(summary && summary.account_count > 0)
   return (
-    <section className="section-panel float-in stagger-1" aria-label="Debt summary card">
+    <section className="section-panel float-in stagger-1" aria-label="Plan summary">
       <div className="section-header">
-        <div className="flex items-center gap-2 text-lg font-semibold">
-          <CreditCard className="h-4 w-4 text-primary" />
-          Debt Summary
+        <div>
+          <div className="flex items-center gap-2 text-lg font-semibold">
+            <Target className="h-4 w-4 text-primary" />
+            Plan
+          </div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            Debt tracking and savings goals live in Plan → Goals &amp; Debt.
+          </div>
         </div>
-        <div className="text-xs text-muted-foreground">Active debt obligations</div>
       </div>
-      <div className="section-body">
-        {isLoading ? (
-          <div className="skeleton h-24 w-full" role="status" aria-label="Loading debt summary" />
-        ) : !summary || summary.account_count === 0 ? (
-          <div className="inner-card space-y-3">
+      <div className="section-body space-y-4">
+        {/* Debt Summary group */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <CreditCard className="h-4 w-4 text-primary" />
+            Debt Summary
+          </div>
+          {isLoading ? (
+            <div className="skeleton h-20 w-full" role="status" aria-label="Loading debt summary" />
+          ) : !hasDebt ? (
+            <div className="inner-card space-y-3">
+              <p className="text-sm text-muted-foreground">
+                You haven&apos;t added any debts yet. Add credit cards or loans to include minimum payments in your plan.
+              </p>
+              <Button type="button" variant="outline" onClick={onOpenDebt}>
+                Track your debts
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="inner-card">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Total Balance
+                </p>
+                <p className="mt-1 text-2xl font-semibold leading-tight tabular-nums">{formatKD(summary!.total_balance_kd)}</p>
+              </div>
+              <div className="inner-card">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Minimums / Month
+                </p>
+                <p className="mt-1 text-2xl font-semibold leading-tight tabular-nums">{formatKD(summary!.total_minimum_kd)}</p>
+              </div>
+              <div className="inner-card">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Active Debts
+                </p>
+                <p className="mt-1 text-2xl font-semibold leading-tight tabular-nums">{summary!.account_count}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Plan shortcuts */}
+        <div className="grid gap-3 md:grid-cols-2">
+          <button
+            type="button"
+            onClick={onOpenDebt}
+            className="inner-card flex w-full flex-col items-start gap-3 text-left transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <CreditCard className="h-4 w-4 text-primary" />
+              Debt Tracker
+            </div>
             <p className="text-sm text-muted-foreground">
-              You haven&apos;t added any debts yet. Add credit cards or loans to include minimum payments in your plan.
+              Add credit cards and loans so minimum payments feed your monthly plan automatically.
             </p>
-            <Button type="button" variant="outline" onClick={onOpenProfile}>
-              Track your debts
-            </Button>
-          </div>
-        ) : (
-          <div className="grid gap-3 md:grid-cols-3">
-            <div className="inner-card">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Total Balance
-              </p>
-              <p className="mt-1 text-2xl font-semibold leading-tight tabular-nums">{formatKD(summary.total_balance_kd)}</p>
+            <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
+              Open debt tracker
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onOpenGoals}
+            className="inner-card flex w-full flex-col items-start gap-3 text-left transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <PiggyBank className="h-4 w-4 text-primary" />
+              Savings Goals
             </div>
-            <div className="inner-card">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Minimums / Month
-              </p>
-              <p className="mt-1 text-2xl font-semibold leading-tight tabular-nums">{formatKD(summary.total_minimum_kd)}</p>
-            </div>
-            <div className="inner-card">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Active Debts
-              </p>
-              <p className="mt-1 text-2xl font-semibold leading-tight tabular-nums">{summary.account_count}</p>
-            </div>
-          </div>
-        )}
+            <p className="text-sm text-muted-foreground">
+              Create targets for your emergency fund and future goals so the dashboard protects that money.
+            </p>
+            <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
+              Open savings goals
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          </button>
+        </div>
       </div>
     </section>
   )
@@ -791,67 +870,6 @@ export function SetupGuideDialog({
   )
 }
 
-export function PlanningShortcutsPanel({
-  onOpenDebt,
-  onOpenGoals,
-}: {
-  onOpenDebt: () => void
-  onOpenGoals: () => void
-}) {
-  return (
-    <section className="section-panel float-in stagger-2" aria-label="Planning shortcuts">
-      <div className="section-header">
-        <div>
-          <div className="flex items-center gap-2 text-lg font-semibold">
-            <Target className="h-4 w-4 text-primary" />
-            Long-Term Planning
-          </div>
-          <div className="mt-1 text-xs text-muted-foreground">
-            Debt tracking and savings goals live in Plan → Goals &amp; Debt.
-          </div>
-        </div>
-      </div>
-      <div className="section-body grid gap-3 md:grid-cols-2">
-        <button
-          type="button"
-          onClick={onOpenDebt}
-          className="inner-card flex w-full flex-col items-start gap-3 text-left transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <CreditCard className="h-4 w-4 text-primary" />
-            Debt Tracker
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Add credit cards and loans so minimum payments feed your monthly plan automatically.
-          </p>
-          <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
-            Open debt tracker
-            <ArrowRight className="h-4 w-4" />
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={onOpenGoals}
-          className="inner-card flex w-full flex-col items-start gap-3 text-left transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <PiggyBank className="h-4 w-4 text-primary" />
-            Savings Goals
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Create targets for your emergency fund and future goals so the dashboard protects that money.
-          </p>
-          <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
-            Open savings goals
-            <ArrowRight className="h-4 w-4" />
-          </span>
-        </button>
-      </div>
-    </section>
-  )
-}
-
 export function DashboardHero({
   isLoading,
   monthLabel,
@@ -908,105 +926,78 @@ export function DashboardHero({
   const momentum = dashboardMomentumState(monthRemaining, savingsRate)
 
   return (
-    <section className="page-hero hero-sheen hero-gradient-warm float-in gradient-flow stagger-1">
-      <div className="absolute -right-24 -top-20 h-72 w-72 rounded-full bg-warning/20 blur-2xl hero-orb-1" />
-      <div className="absolute -left-24 -bottom-24 h-64 w-64 rounded-full bg-primary/15 blur-3xl hero-orb-2" />
+    <section className="float-in stagger-1 space-y-4" aria-label="Monthly overview">
       {isLoading ? (
-        <div className="relative z-10 space-y-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="space-y-2">
-              <div className="skeleton h-8 w-40 rounded-full" />
-              <div className="skeleton h-4 w-72 max-w-full" />
-            </div>
-            <div className="skeleton h-12 w-12 rounded-full" />
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="skeleton h-6 w-80 max-w-full rounded" />
+            <div className="skeleton h-4 w-40 rounded" />
           </div>
-          <div className="hero-kpi-grid">
-            <div className="skeleton h-28 rounded-[var(--radius-xl)]" />
-            <div className="skeleton h-28 rounded-[var(--radius-xl)]" />
-            <div className="skeleton h-28 rounded-[var(--radius-xl)]" />
-            <div className="skeleton h-28 rounded-[var(--radius-xl)]" />
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="skeleton h-16 rounded" />
+            <div className="skeleton h-16 rounded" />
+            <div className="skeleton h-16 rounded" />
+            <div className="skeleton h-16 rounded" />
           </div>
         </div>
       ) : (
         <>
-      <div className="relative z-10 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex rounded-full border border-amber-200/25 bg-amber-200/12 px-3 py-1 text-sm font-semibold uppercase tracking-wide text-amber-50/95">
-              Overview for {monthLabel}
+          {/* Narration voice + status chip; freshness pinned top-right */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-lg leading-snug text-foreground">
+                {momentum
+                  ? momentum.detail
+                  : "Income, expenses, and remaining balance for the selected month."}
+              </p>
+              {momentum ? <Badge variant="success">{momentum.label}</Badge> : null}
             </div>
-            {momentum ? (
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/25 bg-emerald-300/12 px-3 py-1 text-sm font-semibold text-emerald-50/95">
-                <Sparkles className="h-3.5 w-3.5" />
-                {momentum.label}
+            {freshness ? (
+              <div className="shrink-0 text-xs sm:text-right">
+                {freshness.stale ? (
+                  <div className="inline-flex items-start gap-2 rounded-full border border-warning/25 bg-warning/10 px-3 py-1 text-warning">
+                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+                    <div>
+                      <div className="font-semibold">Data may be out of date</div>
+                      <div className="text-[11px] text-warning/80">{freshness.label}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">{freshness.label}</span>
+                )}
               </div>
             ) : null}
           </div>
-          <p className="mt-2 text-sm text-primary-foreground/80">
-            {momentum
-              ? momentum.detail
-              : "Income, expenses, and remaining balance for the selected month."}
-          </p>
-        </div>
-        <div className="hero-icon-shell h-10 w-10 text-lg text-amber-100 sm:h-12 sm:w-12">
-          <Wallet className="h-6 w-6" />
-        </div>
-      </div>
 
-      <div className="relative z-10 mt-4 hero-kpi-grid">
-        <div className="hero-kpi-card hero-kpi-card-warm">
-          <div className="hero-kpi-label">Income</div>
-          <div className="hero-kpi-value"><AnimatedKD value={monthIncome} /></div>
-          {deltas && <HeroDelta value={deltas.incomeDelta} />}
-        </div>
-        <div className="hero-kpi-card hero-kpi-card-warm">
-          <div className="hero-kpi-label">Expenses</div>
-          <div className="hero-kpi-value"><AnimatedKD value={monthExpenses} /></div>
-          {deltas && <HeroDelta value={deltas.expensesDelta} inverted />}
-        </div>
-        <div className="hero-kpi-card hero-kpi-card-featured">
-          <div className="hero-kpi-label">Remaining</div>
-          <div className="hero-kpi-value"><AnimatedKD value={monthRemaining} /></div>
-          {deltas && <HeroDelta value={deltas.remainingDelta} />}
-        </div>
-        <div className="hero-kpi-card hero-kpi-card-warm">
-          <div className="hero-kpi-label">Savings Rate</div>
-          <div className="hero-kpi-value"><AnimatedPercent value={savingsRate} /></div>
-          {deltas && <HeroDelta value={deltas.savingsRateDelta} unit="points" />}
-        </div>
-      </div>
+          {/* KPI row — plain stat blocks, logical border-s hairlines on sm+, 2×2 on mobile */}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="min-w-0">
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Income</div>
+              <div className="mt-1 font-mono text-xl font-semibold tabular-nums"><AnimatedKD value={monthIncome} /></div>
+              {deltas && <HeroDelta value={deltas.incomeDelta} />}
+            </div>
+            <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Expenses</div>
+              <div className="mt-1 font-mono text-xl font-semibold tabular-nums"><AnimatedKD value={monthExpenses} /></div>
+              {deltas && <HeroDelta value={deltas.expensesDelta} inverted />}
+            </div>
+            <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Remaining</div>
+              <div className="mt-1 font-mono text-xl font-semibold tabular-nums"><AnimatedKD value={monthRemaining} /></div>
+              {deltas && <HeroDelta value={deltas.remainingDelta} />}
+            </div>
+            <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Savings rate</div>
+              <div className="mt-1 font-mono text-xl font-semibold tabular-nums"><AnimatedPercent value={savingsRate} /></div>
+              {deltas && <HeroDelta value={deltas.savingsRateDelta} unit="points" />}
+            </div>
+          </div>
 
-      <div className="relative z-10 mt-3 flex items-end justify-between gap-2">
-        {dailyPace && monthExpenses > 0 ? (
-          <div className="text-sm text-primary-foreground/70">
-            On pace to spend {formatCompactKD(dailyPace.projected)} this month at {formatKD(dailyPace.avgDaily)}/day ({dailyPace.daysElapsed}/{dailyPace.daysInMonth} days)
-          </div>
-        ) : (
-          <div />
-        )}
-        {freshness && (
-          <div
-            className={cn(
-              "shrink-0 text-xs",
-              freshness.stale
-                ? "rounded-full border border-amber-200/35 bg-amber-200/12 px-3 py-1 text-amber-50"
-                : "text-primary-foreground/50"
-            )}
-          >
-            {freshness.stale ? (
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
-                <div>
-                  <div className="font-semibold">Data may be out of date</div>
-                  <div className="text-[11px] text-amber-100/80">{freshness.label}</div>
-                </div>
-              </div>
-            ) : (
-              freshness.label
-            )}
-          </div>
-        )}
-      </div>
+          {dailyPace && monthExpenses > 0 ? (
+            <p className="text-xs text-muted-foreground">
+              On pace to spend {formatCompactKD(dailyPace.projected)} this month at {formatKD(dailyPace.avgDaily)}/day ({dailyPace.daysElapsed}/{dailyPace.daysInMonth} days)
+            </p>
+          ) : null}
         </>
       )}
     </section>
@@ -1114,156 +1105,91 @@ export function HomeAttentionCenter({
   onOpenPlan: () => void
   onOpenActivity: () => void
 }) {
-  const topAlert = budgetAlerts[0] || null
-  const totalPressureCount =
+  const attentionRows =
     budgetAlerts.length > 0
-      ? budgetAlerts.length
-      : budgetPressureItems.filter((item) => item.usedPct >= 0.75).length
-  const pressureItems =
-    budgetAlerts.length > 0
-      ? budgetAlerts.slice(0, 1).map((alert) => ({
+      ? budgetAlerts.slice(0, 3).map((alert) => ({
           category: alert.category,
           allocated: Number(alert.budget_kd || 0),
           spent: Number(alert.spent_kd || 0),
           usedPct: alert.ratio || 0,
           over: Math.max(0, Number(alert.spent_kd || 0) - Number(alert.budget_kd || 0)),
         }))
-      : budgetPressureItems.filter((item) => item.usedPct >= 0.75).slice(0, 1)
+      : budgetPressureItems.filter((item) => item.usedPct >= 0.75).slice(0, 3)
+  const totalPressureCount =
+    budgetAlerts.length > 0
+      ? budgetAlerts.length
+      : budgetPressureItems.filter((item) => item.usedPct >= 0.75).length
 
   return (
-    <section className="section-panel float-in stagger-2">
+    <section className="section-panel float-in stagger-2" aria-label="Needs attention">
       <div className="section-header">
         <div className="flex items-center gap-2 text-lg font-semibold">
           <ShieldAlert className="h-4 w-4 text-primary" />
-          Alerts
+          Needs attention
         </div>
         <div className="text-xs text-muted-foreground">{monthLabel || "Selected month"}</div>
       </div>
-      <div className="section-body space-y-3">
-        <div className="inner-card space-y-4">
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <TrendingUp className="h-4 w-4 text-warning" />
-            Spend Movement
-          </div>
-          {isLoading ? (
-            <div className="skeleton h-28" />
-          ) : risingCategory ? (
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Largest month-over-month increase
-              </p>
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-warning">
-                <span className="inline-flex items-baseline gap-1.5">
-                  <span className="text-sm font-semibold opacity-70">+KD</span>
-                  <span className="text-2xl font-semibold leading-tight tabular-nums">{fmt3(risingCategory.deltaAmount)}</span>
-                </span>
-                <span className="text-lg font-semibold tabular-nums">({Math.abs(risingCategory.deltaPct).toFixed(1)}%)</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {risingCategory.name} is climbing faster than last month and is worth reviewing.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Spending is steady right now.</p>
-              <p className="text-2xl font-semibold leading-tight text-success">Stable</p>
-              <p className="text-xs text-muted-foreground">
-                No category is showing an unusual jump compared with last month.
-              </p>
-            </div>
-          )}
-          <Button type="button" variant="outline" className="mt-4 w-full" onClick={onOpenActivity}>
-            Review Activity
-          </Button>
-        </div>
-
-        <div className="inner-card space-y-4">
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <AlertTriangle className="h-4 w-4 text-warning" />
-            Budget Pressure
-          </div>
-          {isLoading || alertsLoading ? (
-            <div className="skeleton h-28" />
-          ) : pressureItems.length > 0 ? (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                <span>
-                  {budgetAlerts.length > 0
-                    ? `Top overspent category`
-                    : `Top category needing attention`}
-                </span>
-                {topAlert ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 px-2 text-[11px]"
-                    loading={dismissingAlertId === topAlert.alert_key}
-                    onClick={() => onDismissBudgetAlert(topAlert.alert_key)}
-                    disabled={dismissingAlertId === topAlert.alert_key}
-                  >
-                    {dismissingAlertId === topAlert.alert_key ? "Dismissing..." : "Dismiss top alert"}
-                  </Button>
-                ) : null}
-              </div>
-              {pressureItems.map((item) => {
-                const pctDisplay = Math.round(item.usedPct * 100)
-                const tone = getBudgetUtilizationTone(pctDisplay)
-                const remaining = Math.max(0, item.allocated - item.spent)
-
-                return (
-                  <div key={item.category} className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-2 text-sm">
-                      <span className="font-semibold">{item.category}</span>
-                      <span className={cn("text-xs font-semibold", tone.textClassName)}>{pctDisplay}%</span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-muted/70">
-                      <div
-                        className={cn("h-full rounded-full transition-[width] duration-300", tone.barClassName)}
-                        style={{ width: `${Math.min(100, pctDisplay)}%` }}
-                      />
-                    </div>
-                    <div className="flex items-baseline justify-between gap-2 text-xs">
-                      <span className="tabular-nums text-muted-foreground">{formatKD(item.spent)} spent</span>
-                      <span className={cn("shrink-0 tabular-nums font-semibold", item.over > 0 ? "text-destructive" : "text-success")}>
-                        {item.over > 0 ? `+${formatKD(item.over)} over` : `${formatKD(remaining)} left`}
-                      </span>
-                    </div>
+      <div className="section-body space-y-4">
+        {isLoading || alertsLoading ? (
+          <div className="skeleton h-28" />
+        ) : attentionRows.length > 0 ? (
+          <div className="space-y-4">
+            {attentionRows.map((item) => {
+              const pctDisplay = Math.round(item.usedPct * 100)
+              const tone = getBudgetUtilizationTone(pctDisplay)
+              const isRising = Boolean(risingCategory && risingCategory.name === item.category)
+              const story =
+                isRising && risingCategory
+                  ? `${item.category} is climbing faster than last month — +${formatKD(risingCategory.deltaAmount)} over the prior month.`
+                  : item.over > 0
+                    ? `${item.category} is over budget by ${formatKD(item.over)}.`
+                    : `${item.category} is at ${pctDisplay}% of its budget — worth watching.`
+              return (
+                <div key={item.category} className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-2 text-sm">
+                    <span className="font-semibold">{item.category}</span>
+                    <span className={cn("text-xs font-semibold", tone.textClassName)}>{pctDisplay}%</span>
                   </div>
-                )
-              })}
-              {totalPressureCount > 1 && (
-                <p className="text-xs text-muted-foreground">
-                  {totalPressureCount} categories over budget this month.
-                </p>
-              )}
-            </div>
-          ) : overBudgetCount > 0 ? (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                {overBudgetCount} categor{overBudgetCount === 1 ? "y is" : "ies are"} over budget.
-              </p>
-              <p className="text-2xl font-semibold leading-tight text-destructive tabular-nums">
-                {formatKD(overBudgetAmount)} over
-              </p>
+                  <div className="h-2 overflow-hidden rounded-full bg-muted/70">
+                    <div
+                      className={cn("h-full rounded-full transition-[width] duration-300", tone.barClassName)}
+                      style={{ width: `${Math.min(100, pctDisplay)}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">{story}</p>
+                </div>
+              )
+            })}
+            {totalPressureCount > attentionRows.length && (
               <p className="text-xs text-muted-foreground">
-                This is where your plan is under the most pressure right now.
+                {totalPressureCount} categories over budget this month.
               </p>
+            )}
+          </div>
+        ) : risingCategory ? (
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              {risingCategory.name} is climbing faster than last month.
+            </p>
+            <div className="flex flex-wrap items-baseline gap-x-2 text-warning">
+              <span className="inline-flex items-baseline gap-1.5">
+                <span className="text-sm font-semibold opacity-70">+KD</span>
+                <span className="text-2xl font-semibold leading-tight tabular-nums">{fmt3(risingCategory.deltaAmount)}</span>
+              </span>
+              <span className="text-lg font-semibold tabular-nums">({Math.abs(risingCategory.deltaPct).toFixed(1)}%)</span>
             </div>
-          ) : (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">You&apos;re on track. No categories are over budget right now.</p>
-              <p className="text-2xl font-semibold leading-tight text-success">On track</p>
-              <p className="text-xs text-muted-foreground">
-                Your current spending pace is staying inside plan.
-              </p>
-            </div>
-          )}
-          <Button type="button" variant="outline" className="mt-4 w-full" onClick={onOpenPlan}>
-            Open Plan
-          </Button>
-        </div>
-
+            <p className="text-xs text-muted-foreground">Worth a quick review before it grows.</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">You&apos;re on track. No categories are over budget right now.</p>
+            <p className="text-2xl font-semibold leading-tight text-success">On track</p>
+            <p className="text-xs text-muted-foreground">Your current spending pace is staying inside plan.</p>
+          </div>
+        )}
+        <Button type="button" variant="outline" className="w-full" onClick={onOpenPlan}>
+          Open Plan
+        </Button>
       </div>
     </section>
   )
@@ -1549,14 +1475,18 @@ export function TopExpensesPanel({
                       <span className="text-2xl font-semibold leading-tight tabular-nums">{fmt3(value)}</span>
                     </div>
                     {showDelta && (
-                      <div
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                          trendUp ? "bg-warning/10 text-warning" : "bg-success/10 text-success"
-                        }`}
-                      >
-                        <DeltaIcon className="h-3 w-3" />
-                        <span>{baseline > 0 ? `${Math.abs(deltaPct).toFixed(0)}%` : "New"}</span>
-                      </div>
+                      baseline > 0 ? (
+                        <div
+                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                            trendUp ? "bg-warning/10 text-warning" : "bg-success/10 text-success"
+                          }`}
+                        >
+                          <DeltaIcon className="h-3 w-3" />
+                          <span>{Math.abs(deltaPct).toFixed(0)}%</span>
+                        </div>
+                      ) : (
+                        <Badge variant="neutral">New</Badge>
+                      )
                     )}
                   </div>
                   {baseline > 0 && (
@@ -1567,82 +1497,6 @@ export function TopExpensesPanel({
                 </div>
               )
             })}
-          </div>
-        )}
-      </div>
-    </section>
-  )
-}
-
-export function BudgetPanel({
-  isLoading,
-  budgetTop,
-  selectedMonth,
-  onOpenBudget,
-}: {
-  isLoading: boolean
-  budgetTop: Array<{ category: string; allocated: number; spent: number; usedPct: number; over: number }>
-  selectedMonth: string
-  onOpenBudget: () => void
-}) {
-  return (
-    <section className="section-panel float-in stagger-7" aria-label="Budget usage">
-      <div className="section-header">
-        <div className="flex items-center gap-2 text-lg font-semibold">
-          <Target className="h-4 w-4 text-primary" />
-          Budget Usage
-        </div>
-        <div className="text-xs text-muted-foreground">
-          Top budget usage for {selectedMonth || "-"}
-        </div>
-      </div>
-      <div className="section-body">
-        {isLoading ? (
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="skeleton h-24" />
-            <div className="skeleton h-24" />
-          </div>
-        ) : budgetTop.length === 0 ? (
-          <div className="flex h-[180px] items-center justify-center rounded-xl border border-border bg-muted/40 text-sm text-muted-foreground">
-            Add a monthly budget to compare your spending against plan.
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              {budgetTop.map((b) => {
-                const pctDisplay = Math.round(b.usedPct * 100)
-                const tone = getBudgetUtilizationTone(pctDisplay)
-                return (
-                  <div key={b.category} className="inner-card">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="text-sm font-semibold truncate" title={b.category}>
-                        {b.category}
-                      </div>
-                      <div className={cn("text-sm font-semibold tabular-nums", tone.textClassName)}>
-                        {pctDisplay}%
-                      </div>
-                    </div>
-                    <div className="mt-2 h-2 rounded-full bg-muted/60 overflow-hidden">
-                      <div
-                        className={cn("h-full rounded-full transition-all duration-300", tone.barClassName)}
-                        style={{ width: `${Math.min(100, pctDisplay)}%` }}
-                      />
-                    </div>
-                    <div className="mt-2 flex items-baseline justify-between gap-2">
-                      <span className="text-xs text-muted-foreground tabular-nums">{formatKD(b.spent)} spent</span>
-                      {b.over > 0 ? (
-                        <span className="text-xs font-semibold text-destructive tabular-nums">+{formatKD(b.over)} over</span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground tabular-nums">{formatKD(b.allocated)} limit</span>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            <Button type="button" variant="outline" className="w-full" onClick={onOpenBudget}>
-              Open Plan
-            </Button>
           </div>
         )}
       </div>
