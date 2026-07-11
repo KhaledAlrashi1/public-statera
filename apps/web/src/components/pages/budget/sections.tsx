@@ -44,6 +44,7 @@ import { MoneyInput } from "@/components/ui/money-input"
 import { FieldFeedback, validationInputClass } from "@/components/ui/field-feedback"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterBar } from "@/components/ui/filter-bar"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -107,18 +108,18 @@ export function BudgetHero({
     : isOver
       ? {
           label: "Over budget",
-          className: "border-amber-200/25 bg-amber-200/12 text-amber-100",
+          variant: "warning" as const,
           detail: `You have spent ${formatCompactKD(Math.abs(remaining))} more than planned so far.`,
         }
       : percentUsed >= 85
         ? {
             label: "Close to limit",
-            className: "border-amber-200/25 bg-amber-200/12 text-amber-100",
+            variant: "warning" as const,
             detail: `You still have ${formatCompactKD(remaining)} left this month.`,
           }
         : {
             label: "On track",
-            className: "border-emerald-200/20 bg-emerald-300/10 text-emerald-100",
+            variant: "success" as const,
             detail: `You are spending below plan with ${formatCompactKD(remaining)} left this month.`,
           }
 
@@ -129,69 +130,55 @@ export function BudgetHero({
       : "Spending within plan"
 
   return (
-    <section className="page-hero hero-sheen hero-gradient-warm float-in gradient-flow">
-      <div className="absolute -right-24 -top-20 h-72 w-72 rounded-full bg-warning/22 blur-2xl hero-orb-1" />
-      <div className="absolute -left-24 -bottom-24 h-64 w-64 rounded-full bg-primary/15 blur-3xl hero-orb-2" />
-
-      {/* Header row */}
-      <div className="relative z-10 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex rounded-full border border-amber-200/25 bg-amber-200/12 px-3 py-1 text-sm font-semibold uppercase tracking-wide text-amber-50/95">
-              Total Budget — {monthLabel}
-            </div>
-            {status && (
-              <span className={cn("inline-flex items-center rounded-full border px-3 py-1 text-sm font-semibold", status.className)}>
-                {status.label}
-              </span>
-            )}
-          </div>
-          <p className="mt-2 text-sm text-primary-foreground/80">
+    <section className="float-in space-y-4" aria-label="Budget overview">
+      {/* Narration voice + status chip; month context pinned top-right */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-lg leading-snug text-foreground">
             {status
               ? status.detail
               : "Add a monthly budget to start tracking how your spending compares with plan."}
           </p>
+          {status ? <Badge variant={status.variant}>{status.label}</Badge> : null}
         </div>
-        <div className="hero-icon-shell h-10 w-10 text-amber-100 sm:h-12 sm:w-12">
-          <Target className="h-6 w-6" />
+        <div className="shrink-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:text-right">
+          Total Budget — {monthLabel}
         </div>
       </div>
 
-      {/* Uniform 4-card KPI grid */}
-      <div className="relative z-10 mt-4 hero-kpi-grid">
-        <div className="hero-kpi-card hero-kpi-card-featured">
-          <div className="hero-kpi-label">Planned total</div>
-          <div className="hero-kpi-value">{formatCompactKD(totalBudget)}</div>
-          <div className="hero-kpi-trend">{totalBudgetTrendLabel}</div>
+      {/* KPI row — plain stat blocks, logical border-s hairlines on sm+, 2×2 on mobile */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="min-w-0">
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Planned total</div>
+          <div className="mt-1 font-mono text-xl font-semibold tabular-nums">{formatCompactKD(totalBudget)}</div>
+          <div className="mt-1 text-xs text-muted-foreground">{totalBudgetTrendLabel}</div>
         </div>
-        <div className="hero-kpi-card hero-kpi-card-warm">
-          <div className="hero-kpi-label">Spent so far</div>
-          <div className="hero-kpi-value">{formatCompactKD(totalSpent)}</div>
-          <div className="hero-kpi-trend">{totalSpentTrendLabel}</div>
+        <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Spent so far</div>
+          <div className="mt-1 font-mono text-xl font-semibold tabular-nums">{formatCompactKD(totalSpent)}</div>
+          <div className="mt-1 text-xs text-muted-foreground">{totalSpentTrendLabel}</div>
         </div>
-        <div className="hero-kpi-card hero-kpi-card-warm">
-          <div className="hero-kpi-label">Remaining</div>
-          <div className="hero-kpi-value">
+        <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Remaining</div>
+          <div className="mt-1 font-mono text-xl font-semibold tabular-nums">
             {isOver ? `−${formatCompactKD(Math.abs(remaining))}` : formatCompactKD(remaining)}
           </div>
-          <div className="hero-kpi-trend">{remainingTrendLabel}</div>
+          <div className="mt-1 text-xs text-muted-foreground">{remainingTrendLabel}</div>
         </div>
-        <div className="hero-kpi-card hero-kpi-card-warm">
-          <div className="hero-kpi-label">% Used</div>
-          <div className="hero-kpi-value">{percentUsed.toFixed(1)}%</div>
-          <div className="hero-kpi-trend">{pctUsedTrendLabel}</div>
+        <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">% Used</div>
+          <div className="mt-1 font-mono text-xl font-semibold tabular-nums">{percentUsed.toFixed(1)}%</div>
+          <div className="mt-1 text-xs text-muted-foreground">{pctUsedTrendLabel}</div>
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="relative z-10 mt-3">
-        <div className="h-2.5 w-full rounded-full bg-primary-foreground/20">
+      {/* Progress bar — utilization tone (success/warning/destructive by pct), matching the table rows */}
+      <div>
+        <div className="h-2.5 w-full rounded-full bg-muted">
           <div
             className={cn(
               "h-2.5 rounded-full transition-all duration-500",
-              isOver
-                ? "bg-destructive/70"
-                : "bg-gradient-to-r from-amber-300 via-amber-400 to-amber-200"
+              getBudgetUtilizationTone(percentUsed).barClassName
             )}
             style={{ width: `${Math.min(100, percentUsed)}%` }}
           />

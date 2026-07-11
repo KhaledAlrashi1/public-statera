@@ -259,7 +259,7 @@ export function GoalDialog({
           : { tone: "valid" as const, message: "Target date looks good." }
       )
       : null
-  const controlClassName = "h-11 bg-background/80"
+  const controlClassName = "h-11 bg-card"
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
