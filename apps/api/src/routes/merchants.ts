@@ -16,6 +16,7 @@ import { Hono } from "hono"
 import { z } from "zod"
 import { and, eq, inArray, sql } from "drizzle-orm"
 import { getDb } from "../db/connection"
+import { zodErrorToEnvelope } from "./route-helpers"
 import { merchants } from "../db/schema/merchants"
 import { transactions } from "../db/schema/transactions"
 import { memorizedTransactions } from "../db/schema/memorized-transactions"
@@ -68,10 +69,7 @@ merchantsRouter.post("/", requireAuth, writeRateLimit, async (c) => {
 
   const body = await c.req.json().catch(() => ({}))
   const parsed = NameBody.safeParse(body)
-  if (!parsed.success) {
-    const msg = parsed.error.errors[0]?.message ?? "Validation error."
-    return c.json({ ok: false, data: null, error: msg, code: "validation_error" }, 400)
-  }
+  if (!parsed.success) return zodErrorToEnvelope(c, parsed.error)
   const { name } = parsed.data
 
   const db = getDb()
@@ -121,10 +119,7 @@ merchantsRouter.patch("/:id", requireAuth, writeRateLimit, async (c) => {
 
   const body = await c.req.json().catch(() => ({}))
   const parsed = NameBody.safeParse(body)
-  if (!parsed.success) {
-    const msg = parsed.error.errors[0]?.message ?? "Validation error."
-    return c.json({ ok: false, data: null, error: msg, code: "validation_error" }, 400)
-  }
+  if (!parsed.success) return zodErrorToEnvelope(c, parsed.error)
   const { name } = parsed.data
 
   const db = getDb()

@@ -89,7 +89,7 @@ export const aggregationRouter = new Hono()
 const UNCAT = "Uncategorized"
 const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/
 
-import { parseIntParam } from "./route-helpers"
+import { parseIntParam, zodErrorToEnvelope } from "./route-helpers"
 
 function parseBoolParam(v: string | undefined): boolean {
   return ["1", "true", "yes", "on"].includes((v ?? "").trim().toLowerCase())
@@ -182,9 +182,7 @@ aggregationRouter.get("/expense-breakdown", requireAuth, async (c) => {
     limit: c.req.query("limit"),
     source: c.req.query("source"),
   })
-  if (!parsed.success) {
-    return c.json({ ok: false, data: null, error: parsed.error.issues[0]?.message ?? "Validation error.", code: "validation_error" }, 400)
-  }
+  if (!parsed.success) return zodErrorToEnvelope(c, parsed.error)
   const { dimension, range: rangeKey, limit, source } = parsed.data
 
   let month = (c.req.query("month") ?? "").trim()
@@ -296,9 +294,7 @@ aggregationRouter.get("/expense-merchant-trend", requireAuth, async (c) => {
   const { userId } = c.get("session")
 
   const parsed = r6Schema.safeParse({ merchant: c.req.query("merchant"), months: c.req.query("months") })
-  if (!parsed.success) {
-    return c.json({ ok: false, data: null, error: parsed.error.issues[0]?.message ?? "Validation error.", code: "validation_error" }, 400)
-  }
+  if (!parsed.success) return zodErrorToEnvelope(c, parsed.error)
   const { merchant, months } = parsed.data
 
   const until = (c.req.query("until") ?? "").trim()
@@ -359,9 +355,7 @@ aggregationRouter.get("/budget-metrics", requireAuth, async (c) => {
   const { userId } = c.get("session")
 
   const parsed = r7Schema.safeParse({ range: c.req.query("range") })
-  if (!parsed.success) {
-    return c.json({ ok: false, data: null, error: parsed.error.issues[0]?.message ?? "Validation error.", code: "validation_error" }, 400)
-  }
+  if (!parsed.success) return zodErrorToEnvelope(c, parsed.error)
   const { range: rangeKey } = parsed.data
 
   let month = (c.req.query("month") ?? "").trim()

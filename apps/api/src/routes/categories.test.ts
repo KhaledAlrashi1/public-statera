@@ -105,6 +105,21 @@ describe("POST /api/categories", () => {
     expect(body.code).toBe("validation_error")
   })
 
+  // zod-adoption B0: locks issues[0] first-fail ordering (name before is_income).
+  // Expected message captured from the pre-conversion code (2026-07-11).
+  it("returns the first field's message on multiple invalid fields", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]) as ReturnType<typeof getDb>)
+    const res = await app.request("/api/categories", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "", is_income: "x" }),
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.code).toBe("validation_error")
+    expect(body.error).toBe("Name is required.")
+  })
+
   it("returns 409 category_name_exists with existing item when name is taken", async () => {
     const existingCat = { id: 7, userId: 1, name: "Food", isIncome: false, isSystem: false }
     // First query (duplicate check) returns the existing category

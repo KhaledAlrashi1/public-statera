@@ -104,6 +104,26 @@ describe("POST /api/merchants", () => {
     expect(body.code).toBe("validation_error")
   })
 
+  // zod-adoption B0: message-identity guard (NameBody is single-field, so no
+  // multi-field ordering case). Strings captured from the pre-conversion code.
+  it("preserves the exact validation messages via the shared helper", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]) as ReturnType<typeof getDb>)
+    const empty = await app.request("/api/merchants", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "" }),
+    })
+    expect(((await empty.json()) as Record<string, unknown>).error).toBe("Name is required.")
+    const long = await app.request("/api/merchants", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "X".repeat(129) }),
+    })
+    expect(((await long.json()) as Record<string, unknown>).error).toBe(
+      "Name too long (max 128 characters).",
+    )
+  })
+
   it("returns 409 merchant_name_exists with existing item on duplicate", async () => {
     const existing = { id: 3, userId: 1, name: "Starbucks" }
     vi.mocked(getDb).mockReturnValue(makeMockDb([existing]) as ReturnType<typeof getDb>)

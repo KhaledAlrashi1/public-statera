@@ -18,6 +18,7 @@ import { Hono } from "hono"
 import { z } from "zod"
 import { and, eq, inArray, sql } from "drizzle-orm"
 import { getDb } from "../db/connection"
+import { zodErrorToEnvelope } from "./route-helpers"
 import { categories } from "../db/schema/categories"
 import { transactions } from "../db/schema/transactions"
 import { budgets } from "../db/schema/budgets"
@@ -119,10 +120,7 @@ categoriesRouter.post("/", requireAuth, writeRateLimit, async (c) => {
 
   const body = await c.req.json().catch(() => ({}))
   const parsed = CreateBody.safeParse(body)
-  if (!parsed.success) {
-    const msg = parsed.error.errors[0]?.message ?? "Validation error."
-    return c.json({ ok: false, data: null, error: msg, code: "validation_error" }, 400)
-  }
+  if (!parsed.success) return zodErrorToEnvelope(c, parsed.error)
   const { name, is_income } = parsed.data
 
   const db = getDb()

@@ -349,6 +349,20 @@ describe("GET /api/analytics/expense-breakdown", () => {
     expect(body.error).toBe("source must be one of: manual, bank_import, csv_import")
   })
 
+  // zod-adoption B0: locks issues[0] first-fail ordering when every field is
+  // invalid (dimension precedes range/limit/source in the schema). Expected
+  // message captured from the pre-conversion code (2026-07-11).
+  it("returns the first field's message when all fields are invalid", async () => {
+    const res = await app.request(
+      "/api/analytics/expense-breakdown?dimension=bogus&range=bogus&limit=999999&source=bogus",
+      { headers: { Authorization: await authHeader() } },
+    )
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.code).toBe("validation_error")
+    expect(body.error).toBe("dimension must be one of: category, merchant, transaction")
+  })
+
   it("invalid month format returns 400", async () => {
     const res = await app.request(
       "/api/analytics/expense-breakdown?month=2024-13",
