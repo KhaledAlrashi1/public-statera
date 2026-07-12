@@ -95,7 +95,7 @@ export function RecurringCommitmentsCard({
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium">{row.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {formatKD(row.avg_amount_kd)} · Due {row.next_expected_date}
+                            <span className="whitespace-nowrap">{formatKD(row.avg_amount_kd)}</span> · Due {row.next_expected_date}
                           </p>
                         </div>
                         <div className="flex shrink-0 items-center gap-2">

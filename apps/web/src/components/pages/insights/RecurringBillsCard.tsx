@@ -51,7 +51,7 @@ export function RecurringBillsCard({
       ) : (
         <div className="mt-3 space-y-3">
           <p className="text-sm">
-            Total monthly commitment: <span className="font-semibold">{formatKD(monthlyCommitment)}</span>
+            Total monthly commitment: <span className="whitespace-nowrap font-semibold">{formatKD(monthlyCommitment)}</span>
           </p>
           <ul className="space-y-2">
             {topPatterns.map((pattern) => (
@@ -63,7 +63,7 @@ export function RecurringBillsCard({
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium tabular-nums">{formatKD(pattern.avg_amount_kd)}</p>
+                  <p className="whitespace-nowrap font-medium tabular-nums">{formatKD(pattern.avg_amount_kd)}</p>
                   <span className="inline-flex rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                     {frequencyLabel(pattern.frequency)}
                   </span>

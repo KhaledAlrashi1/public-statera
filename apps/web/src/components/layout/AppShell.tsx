@@ -22,6 +22,7 @@ import { useDarkMode } from "@/lib/useDarkMode"
 import { useAuth, getUserFirstName } from "@/contexts/AuthContext"
 import { QuickAddProvider, useQuickAdd } from "@/contexts/QuickAddContext"
 import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useToast } from "@/components/ui/toaster"
 import CommandPalette from "./CommandPalette"
 
@@ -70,13 +71,43 @@ function AppShellLayout() {
   const showQuickAddFab = true
   const navItems = useMemo(() => baseNavItems, [])
 
-  // Route-derived default type, shared by the desktop header button and mobile FAB.
-  const handleQuickAdd = () => {
+  // Route-derived default type, shared by the FAB and the "L" shortcut.
+  const handleQuickAdd = useCallback(() => {
     const requestedType = new URLSearchParams(location.search).get("type")
     const defaultType =
       location.pathname === "/income" || requestedType === "income" ? "income" : "expense"
     openQuickAdd(defaultType)
-  }
+  }, [location.search, location.pathname, openQuickAdd])
+
+  // Global "L" shortcut → same QuickAdd path as the FAB (item 2). Fires only when
+  // the authenticated shell is mounted (this component), no modifier is held, focus
+  // is not inside a text-entry control, and no dialog/drawer overlay is open.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      if (e.key.toLowerCase() !== "l") return
+      const el = document.activeElement as HTMLElement | null
+      const tag = el?.tagName
+      if (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        el?.isContentEditable ||
+        el?.getAttribute("role") === "combobox"
+      ) {
+        return
+      }
+      // Any OPEN dialog/drawer/command-palette suppresses the shortcut — prevents
+      // double-fire and firing over a modal. The nav drawer is always in the DOM
+      // (role="dialog") and hidden via aria-hidden when closed, so exclude
+      // aria-hidden="true"; open Radix dialogs never set that attribute.
+      if (document.querySelector('[role="dialog"]:not([aria-hidden="true"])')) return
+      e.preventDefault()
+      handleQuickAdd()
+    }
+    document.addEventListener("keydown", onKey)
+    return () => document.removeEventListener("keydown", onKey)
+  }, [handleQuickAdd])
 
   const isNavItemActive = useCallback(
     (to: string, isActive: boolean) => {
@@ -238,17 +269,6 @@ function AppShellLayout() {
 
           {/* Right-side actions */}
           <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="default"
-              size="default"
-              onClick={handleQuickAdd}
-              className="hidden lg:inline-flex"
-            >
-              <Plus className="icon-inline" />
-              <span>Log transaction</span>
-            </Button>
-
             <Button
               type="button"
               variant="outline"
@@ -531,17 +551,27 @@ function AppShellLayout() {
       </nav>
 
       {/* ==================== Quick Action FAB ==================== */}
+      {/* Single visible QuickAdd trigger at every breakpoint (operator ruling
+          2026-07-12, supersedes the design-3 dual-trigger layout). z-40 keeps it
+          below Radix dialog/drawer portals (z-50), so it never occludes a dialog
+          footer; bottom-20 clears the mobile bottom-tabs, lg:bottom-6 tightens on
+          desktop (no bottom-tabs). Tooltip is the shortcut's only visible hint. */}
       {showQuickAddFab ? (
-        <Button
-          type="button"
-          variant="default"
-          size="icon"
-          onClick={handleQuickAdd}
-          className="fixed bottom-20 right-4 z-50 h-14 w-14 rounded-[var(--radius-card)] bg-primary shadow-elevation-3 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 lg:hidden"
-          aria-label="Add transaction"
-        >
-          <Plus className="icon-hero" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="default"
+              size="icon"
+              onClick={handleQuickAdd}
+              className="fixed bottom-20 end-4 z-40 h-14 w-14 rounded-[var(--radius-card)] bg-primary shadow-elevation-3 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 lg:bottom-6 lg:end-8"
+              aria-label="Log transaction"
+            >
+              <Plus className="icon-hero" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Log transaction — L</TooltipContent>
+        </Tooltip>
       ) : null}
 
       <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />

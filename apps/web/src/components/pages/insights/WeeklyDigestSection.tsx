@@ -85,11 +85,11 @@ export function WeeklyDigestSection({
                   Weekly pace
                 </p>
                 <div>
-                  <p className="financial-number text-lg font-semibold">{formatKD(digest.this_week_expense_kd)}</p>
+                  <p className="financial-number whitespace-nowrap text-lg font-semibold">{formatKD(digest.this_week_expense_kd)}</p>
                   <p className="text-[11px] text-muted-foreground">This week</p>
                 </div>
                 <div className="flex items-baseline gap-2 border-t border-border/40 pt-2">
-                  <p className="financial-number text-sm font-semibold text-muted-foreground">{formatKD(digest.last_week_expense_kd)}</p>
+                  <p className="financial-number whitespace-nowrap text-sm font-semibold text-muted-foreground">{formatKD(digest.last_week_expense_kd)}</p>
                   <p className="text-[11px] text-muted-foreground">last week</p>
                 </div>
               </article>
@@ -112,8 +112,8 @@ export function WeeklyDigestSection({
                   <Wallet className="h-4 w-4" />
                   Safe-to-spend today
                 </div>
-                <p className="financial-number text-lg font-semibold">{formatKD(digest.safe_to_spend_today_kd)}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="financial-number whitespace-nowrap text-lg font-semibold">{formatKD(digest.safe_to_spend_today_kd)}</p>
+                <p className="whitespace-nowrap text-sm text-muted-foreground">
                   Days until payday: {digest.days_until_payday === null ? "N/A" : digest.days_until_payday}
                 </p>
               </article>
@@ -128,7 +128,7 @@ export function WeeklyDigestSection({
               {digest.top_categories.map((row) => (
                 <div key={row.name} className="flex items-center justify-between gap-3 text-sm">
                   <span className="font-medium text-foreground">{row.name}</span>
-                  <span className="tabular-nums text-sm font-semibold text-muted-foreground">{formatKD(row.amount_kd)}</span>
+                  <span className="whitespace-nowrap tabular-nums text-sm font-semibold text-muted-foreground">{formatKD(row.amount_kd)}</span>
                 </div>
               ))}
             </div>

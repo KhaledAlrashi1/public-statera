@@ -5,6 +5,7 @@ import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import AppShell from "./AppShell"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
@@ -79,19 +80,22 @@ function renderShell(initialEntry = "/") {
     },
   })
 
+  // TooltipProvider mirrors App.tsx — AppShell's FAB tooltip (Radix Root) needs it.
   return render(
     <MemoryRouter initialEntries={[initialEntry]}>
       <QueryClientProvider client={queryClient}>
-        <Routes>
-          <Route element={<AppShell />}>
-            <Route index element={<div>home screen</div>} />
-            <Route path="activity" element={<div>activity screen</div>} />
-            <Route path="plan" element={<div>plan screen</div>} />
-            <Route path="insights" element={<div>insights screen</div>} />
-            <Route path="bank" element={<div>bank screen</div>} />
-            <Route path="profile" element={<div>profile screen</div>} />
-          </Route>
-        </Routes>
+        <TooltipProvider>
+          <Routes>
+            <Route element={<AppShell />}>
+              <Route index element={<div>home screen</div>} />
+              <Route path="activity" element={<div>activity screen</div>} />
+              <Route path="plan" element={<div>plan screen</div>} />
+              <Route path="insights" element={<div>insights screen</div>} />
+              <Route path="bank" element={<div>bank screen</div>} />
+              <Route path="profile" element={<div>profile screen</div>} />
+            </Route>
+          </Routes>
+        </TooltipProvider>
       </QueryClientProvider>
     </MemoryRouter>
   )
@@ -108,7 +112,7 @@ describe("AppShell", () => {
     renderShell("/")
 
     expect(screen.getByText("home screen")).toBeInTheDocument()
-    fireEvent.click(screen.getByRole("button", { name: "Add transaction" }))
+    fireEvent.click(screen.getByRole("button", { name: "Log transaction" }))
 
     expect(mocks.openQuickAdd).toHaveBeenCalledWith("expense")
     expect(mocks.navigate).not.toHaveBeenCalled()
@@ -120,7 +124,7 @@ describe("AppShell", () => {
 
     renderShell("/activity?type=income")
 
-    fireEvent.click(screen.getByRole("button", { name: "Add transaction" }))
+    fireEvent.click(screen.getByRole("button", { name: "Log transaction" }))
 
     expect(mocks.openQuickAdd).toHaveBeenCalledWith("income")
     expect(screen.queryByText("Bank")).not.toBeInTheDocument()
@@ -138,6 +142,40 @@ describe("AppShell", () => {
       expect(mocks.logout).toHaveBeenCalledTimes(1)
       expect(mocks.navigate).toHaveBeenCalledWith("/login", { replace: true })
     })
+  })
+
+  it("opens quick add when the L shortcut fires with no modal and no text focus", () => {
+    renderShell("/")
+
+    fireEvent.keyDown(document.body, { key: "l" })
+
+    expect(mocks.openQuickAdd).toHaveBeenCalledWith("expense")
+  })
+
+  it("suppresses the L shortcut while focus is inside a text-entry control", () => {
+    renderShell("/")
+
+    const input = document.createElement("input")
+    document.body.appendChild(input)
+    input.focus()
+
+    fireEvent.keyDown(document.body, { key: "l" })
+
+    expect(mocks.openQuickAdd).not.toHaveBeenCalled()
+    input.remove()
+  })
+
+  it("suppresses the L shortcut while a dialog overlay is open", () => {
+    renderShell("/")
+
+    const dialog = document.createElement("div")
+    dialog.setAttribute("role", "dialog")
+    document.body.appendChild(dialog)
+
+    fireEvent.keyDown(document.body, { key: "l" })
+
+    expect(mocks.openQuickAdd).not.toHaveBeenCalled()
+    dialog.remove()
   })
 
 })

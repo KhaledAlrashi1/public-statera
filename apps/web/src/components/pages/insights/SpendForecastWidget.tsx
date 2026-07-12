@@ -53,15 +53,15 @@ export function SpendForecastWidget({
             <div className="grid gap-2 sm:grid-cols-3">
               <div className="inner-card">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Already spent</p>
-                <p className="financial-number text-lg font-semibold">{formatKD(spent_kd)}</p>
+                <p className="financial-number whitespace-nowrap text-lg font-semibold">{formatKD(spent_kd)}</p>
               </div>
               <div className="inner-card">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Committed</p>
-                <p className="financial-number text-lg font-semibold">{formatKD(committed_kd)}</p>
+                <p className="financial-number whitespace-nowrap text-lg font-semibold">{formatKD(committed_kd)}</p>
               </div>
               <div className="inner-card">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Free to spend</p>
-                <p className="financial-number text-lg font-semibold">{formatKD(remaining_kd)}</p>
+                <p className="financial-number whitespace-nowrap text-lg font-semibold">{formatKD(remaining_kd)}</p>
               </div>
             </div>
 

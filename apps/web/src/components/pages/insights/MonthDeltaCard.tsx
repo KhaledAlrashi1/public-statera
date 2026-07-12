@@ -96,9 +96,9 @@ export function MonthDeltaCard({
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{row.category}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    This month <span className="tabular-nums text-foreground">{formatKD(row.this_month_kd)}</span>
+                    This month <span className="whitespace-nowrap tabular-nums text-foreground">{formatKD(row.this_month_kd)}</span>
                     {" · "}
-                    Last month <span className="tabular-nums">{formatKD(row.last_month_kd)}</span>
+                    Last month <span className="whitespace-nowrap tabular-nums">{formatKD(row.last_month_kd)}</span>
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
@@ -106,7 +106,7 @@ export function MonthDeltaCard({
                   <div className="text-right">
                     <div className={`flex items-center justify-end gap-1 text-sm font-semibold ${deltaTone(row)}`}>
                       <DeltaIcon row={row} />
-                      <span>
+                      <span className="whitespace-nowrap">
                         {row.delta_kd >= 0 ? "+" : ""}
                         {formatKD(row.delta_kd)}
                       </span>

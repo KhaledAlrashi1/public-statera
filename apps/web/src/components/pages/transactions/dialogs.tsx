@@ -501,7 +501,11 @@ export function AddTransactionDialog({
           </div>
 
           <form onSubmit={onSubmit}>
-            <div className="space-y-5">
+            {/* Reserved height (sm+) so toggling expense↔income doesn't jump the
+                dialog: income has one fewer field row than expense; 240px floors
+                the shorter mode to the taller expense layout. Mobile stacks/scrolls,
+                so the floor is sm-only. */}
+            <div className="space-y-5 sm:min-h-[240px]">
               {type === "income" ? (
                 <div className="space-y-5">
                   {/* Amount hero */}
