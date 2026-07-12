@@ -91,9 +91,9 @@ function useAnimatedNumber(target: number, duration = 600): number {
   return display
 }
 
-function AnimatedKD({ value, compact = false }: { value: number; compact?: boolean }) {
+function AnimatedKD({ value }: { value: number }) {
   const animated = useAnimatedNumber(value)
-  return <>{compact ? formatCompactKD(animated) : formatKD(animated)}</>
+  return <>{formatKD(animated)}</>
 }
 
 function AnimatedKDNumber({ value }: { value: number }) {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useSearchParams } from "react-router-dom"
-import { ClipboardList, Plus, BarChart3, LineChart as LineChartIcon, TrendingDown } from "lucide-react"
+import { ClipboardList, Plus, BarChart3, LineChart as LineChartIcon } from "lucide-react"
 import {
   Cell,
   Tooltip as RechartsTooltip,
@@ -47,21 +47,16 @@ function ExpenseHero({
   deltaLabel: string
 }) {
   return (
-    <section className="page-hero hero-sheen brand-gradient float-in gradient-flow">
-      <div className="absolute -right-24 -top-20 h-72 w-72 rounded-full bg-primary-foreground/10 blur-2xl" />
-      <div className="absolute -left-24 -bottom-24 h-64 w-64 rounded-full bg-primary-foreground/10 blur-3xl" />
-      <div className="relative z-10 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div>
-          <div className="text-sm font-semibold uppercase tracking-wide text-primary-foreground/80">
-            Total Expenses — {monthLabel}
-          </div>
-          <div className="financial-number mt-2.5 text-3xl font-semibold">{formatCompactKD(monthTotal)}</div>
-          <div className="mt-2.5 inline-flex items-center gap-2 rounded-full border border-primary-foreground/25 bg-primary-foreground/10 px-3 py-1 text-xs font-semibold">
-            {deltaLabel}
-          </div>
+    <section className="float-in space-y-3" aria-label="Expense overview">
+      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Total Expenses — {monthLabel}
+      </div>
+      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+        <div className="font-mono text-3xl font-semibold tabular-nums text-foreground">
+          {formatCompactKD(monthTotal)}
         </div>
-        <div className="hero-icon-shell h-10 w-10 text-lg sm:h-12 sm:w-12">
-          <TrendingDown className="h-6 w-6" aria-hidden="true" />
+        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+          {deltaLabel}
         </div>
       </div>
     </section>

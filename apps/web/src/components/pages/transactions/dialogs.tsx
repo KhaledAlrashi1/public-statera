@@ -7,7 +7,6 @@ import React, {
 import { useQuery } from "@tanstack/react-query"
 import {
   AlertTriangle,
-  CreditCard,
   Plus,
   Scissors,
   Trash2,
@@ -140,96 +139,79 @@ export function TransactionsHero({
         : `Last ${kpiRange} days`
 
   return (
-    <section className="page-hero hero-sheen brand-gradient float-in gradient-flow">
-      <div className="absolute -right-24 -top-20 h-72 w-72 rounded-full bg-primary-foreground/10 blur-2xl" />
-      <div className="absolute -left-24 -bottom-24 h-64 w-64 rounded-full bg-primary-foreground/10 blur-3xl" />
-
-      <div className="relative z-10">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-primary-foreground/80">
-              Spending Patterns
-              <span className="font-normal opacity-80">
-                &mdash; {rangeLabel}
-              </span>
-            </div>
-            <p className="mt-1 max-w-md text-sm text-primary-foreground/70">
-              Your three most-repeated transactions. Useful for spotting
-              subscriptions and spending habits.
-            </p>
+    <section className="float-in space-y-4" aria-label="Spending patterns">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Spending Patterns
+            <span className="font-normal normal-case text-muted-foreground/80">
+              &mdash; {rangeLabel}
+            </span>
           </div>
-
-          <div className="flex items-center gap-3">
-            <Select value={kpiRange} onValueChange={onKpiRangeChange}>
-              <SelectTrigger className="h-9 w-[150px] border-primary-foreground/20 bg-primary-foreground/10 text-sm text-primary-foreground [&>svg]:text-primary-foreground">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="30">Last 30 days</SelectItem>
-                <SelectItem value="90">Last 90 days</SelectItem>
-                <SelectItem value="365">Last 12 months</SelectItem>
-                <SelectItem value="all">All time</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <div className="hero-icon-shell h-10 w-10 text-lg sm:h-12 sm:w-12">
-              <CreditCard className="h-6 w-6" />
-            </div>
-          </div>
+          <p className="mt-1 max-w-md text-sm text-muted-foreground">
+            Your three most-repeated transactions. Useful for spotting
+            subscriptions and spending habits.
+          </p>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {isLoading
-            ? [0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="h-24 animate-pulse rounded-xl bg-primary-foreground/10"
-                />
-              ))
-            : patternsErrorMessage
-              ? (
-                  <Alert variant="warning" className="col-span-full border-warning/35 bg-warning/10 text-left">
-                    <AlertTitle>Pattern insights unavailable</AlertTitle>
-                    <AlertDescription className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <p>{patternsErrorMessage}</p>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          void refetchPatterns()
-                        }}
-                        loading={isFetching}
-                        disabled={isFetching}
-                      >
-                        {isFetching ? "Retrying..." : "Retry"}
-                      </Button>
-                    </AlertDescription>
-                  </Alert>
-                )
-              : top3.length === 0
-              ? (
-                  <div className="col-span-full rounded-xl bg-primary-foreground/10 p-4 text-center text-sm text-primary-foreground/70">
-                    No activity matched this period yet.
+        <Select value={kpiRange} onValueChange={onKpiRangeChange}>
+          <SelectTrigger className="h-9 w-[150px] text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="30">Last 30 days</SelectItem>
+            <SelectItem value="90">Last 90 days</SelectItem>
+            <SelectItem value="365">Last 12 months</SelectItem>
+            <SelectItem value="all">All time</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {isLoading
+          ? [0, 1, 2].map((i) => (
+              <div key={i} className="skeleton h-24" />
+            ))
+          : patternsErrorMessage
+            ? (
+                <Alert variant="warning" className="col-span-full text-left">
+                  <AlertTitle>Pattern insights unavailable</AlertTitle>
+                  <AlertDescription className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p>{patternsErrorMessage}</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        void refetchPatterns()
+                      }}
+                      loading={isFetching}
+                      disabled={isFetching}
+                    >
+                      {isFetching ? "Retrying..." : "Retry"}
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              )
+            : top3.length === 0
+            ? (
+                <div className="col-span-full rounded-xl border border-border bg-muted/40 p-4 text-center text-sm text-muted-foreground">
+                  No activity matched this period yet.
+                </div>
+              )
+            : top3.map((t, i) => (
+                <div key={i} className="inner-card">
+                  <div className="truncate text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    {t.name}
                   </div>
-                )
-              : top3.map((t, i) => (
-                  <div
-                    key={i}
-                    className="rounded-xl border border-primary-foreground/15 bg-primary-foreground/12 p-4 backdrop-blur-sm transition-all hover:bg-primary-foreground/18"
-                  >
-                    <div className="truncate text-xs font-bold uppercase tracking-wider opacity-90">
-                      {t.name}
-                    </div>
-                    <div className="mt-2 text-3xl font-semibold tabular-nums tracking-tight">
-                      {t.count}&times;
-                    </div>
-                    <div className="mt-2 text-xs font-semibold opacity-85">
-                      {formatKD(t.sum_kd)} total
-                    </div>
+                  <div className="mt-2 font-mono text-3xl font-semibold tabular-nums tracking-tight text-foreground">
+                    {t.count}&times;
                   </div>
-                ))}
-        </div>
+                  <div className="mt-2 text-xs font-semibold text-muted-foreground">
+                    {formatKD(t.sum_kd)} total
+                  </div>
+                </div>
+              ))}
       </div>
     </section>
   )

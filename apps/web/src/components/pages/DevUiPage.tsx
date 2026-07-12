@@ -25,43 +25,6 @@ export default function DevUiPage() {
 
       <section className="section-panel">
         <div className="section-header">
-          <h2 className="text-sm font-semibold">Page Hero</h2>
-        </div>
-        <div className="section-body">
-          <p className="mb-3 text-xs text-muted-foreground">
-            Use <code>.page-hero</code> + a gradient bg for hero banners. KPI tiles use{" "}
-            <code>.hero-kpi-grid</code> / <code>.hero-kpi-card</code> / <code>.hero-kpi-label</code> /{" "}
-            <code>.hero-kpi-value</code>.
-          </p>
-          <div className="page-hero brand-gradient">
-            <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary-foreground/10 blur-2xl" />
-            <div className="relative z-10 text-sm font-semibold uppercase tracking-wide text-primary-foreground/80">
-              Section title
-            </div>
-            <div className="relative z-10 mt-4 hero-kpi-grid">
-              <div className="hero-kpi-card">
-                <div className="hero-kpi-label">Metric A</div>
-                <div className="hero-kpi-value">KD 1,240</div>
-              </div>
-              <div className="hero-kpi-card">
-                <div className="hero-kpi-label">Metric B</div>
-                <div className="hero-kpi-value">KD 890</div>
-              </div>
-              <div className="hero-kpi-card">
-                <div className="hero-kpi-label">Metric C</div>
-                <div className="hero-kpi-value">KD 350</div>
-              </div>
-              <div className="hero-kpi-card">
-                <div className="hero-kpi-label">Rate</div>
-                <div className="hero-kpi-value">28.2%</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="section-panel">
-        <div className="section-header">
           <h2 className="text-sm font-semibold">Buttons</h2>
         </div>
         <div className="section-body space-y-5">

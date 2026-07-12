@@ -151,23 +151,6 @@
   --color-warning: hsl(var(--warning));
 }
 
-/* Hero surfaces set their own light indigo→amber gradient and force white text
-   (.page-hero { color: white }). In dark mode --primary-foreground flips to dark
-   ink (for solid primary buttons); keep hero eyebrows/frosted controls white so
-   they match the hero's white base instead of becoming dark-ink outliers. Kept
-   UNLAYERED so it outranks the unlayered .dark block above on specificity
-   (.dark .page-hero > .dark). Self-cleaning: dies when .page-hero is removed in
-   the Home pass. Both custom properties are set: --primary-foreground for direct
-   hsl(var(--primary-foreground)) consumers (.brand-gradient / .hero-gradient-warm
-   color), and --color-primary-foreground because Tailwind's text-/bg-primary-
-   foreground utilities read the theme alias, which the browser resolves to a
-   concrete color at html.dark and inherits down — so overriding the channel var
-   alone does not reach them. */
-.dark .page-hero {
-  --primary-foreground: 0 0% 100%;
-  --color-primary-foreground: hsl(0 0% 100%);
-}
-
 @layer base {
   * {
     @apply border-border;
@@ -357,32 +340,11 @@
     color: hsl(var(--primary-foreground));
   }
 
-  .hero-gradient-warm {
-    background-image:
-      radial-gradient(circle at 82% 18%, hsl(var(--accent) / 0.34), transparent 34%),
-      radial-gradient(circle at 16% 88%, hsl(var(--accent) / 0.18), transparent 28%),
-      linear-gradient(138deg, hsl(var(--primary)) 0%, hsl(248 46% 28%) 42%, hsl(var(--accent)) 100%);
-    color: hsl(var(--primary-foreground));
-  }
-
   .brand-mark {
     border-radius: var(--radius-card);
     box-shadow:
       var(--shadow-level-2),
       0 0 0 1px hsl(var(--primary) / 0.16) inset;
-  }
-
-  .hero-icon-shell {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-card);
-    border: 1px solid rgb(255 255 255 / 0.18);
-    background: rgb(255 255 255 / 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: var(--shadow-level-1);
-    color: rgb(255 255 255 / 0.96);
   }
 
   .icon-shell {
@@ -554,19 +516,6 @@
       0 0 42px var(--card-glow-4);
   }
 
-  .hero-sheen {
-    position: relative;
-  }
-
-  .hero-sheen::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(120deg, rgba(255, 255, 255, 0.1), transparent 55%);
-    opacity: 0.22;
-    pointer-events: none;
-  }
-
   .float-in {
     animation: floatIn 420ms ease-out both;
   }
@@ -635,36 +584,11 @@
     }
   }
 
-  /* ── Hero orb breathing animations ─────────────────────────────────────── */
-  /* Applied to the absolute-positioned blur blobs inside page-hero banners.  */
-  /* Slow, subtle drift — the blur makes motion feel smooth and premium.      */
-  .hero-orb-1 {
-    animation: heroOrb1 9s ease-in-out infinite;
-  }
-
-  .hero-orb-2 {
-    animation: heroOrb2 12s ease-in-out infinite;
-  }
-
-  @keyframes heroOrb1 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33%       { transform: translate(-10px, 12px) scale(1.04); }
-    66%       { transform: translate(8px, -6px) scale(0.97); }
-  }
-
-  @keyframes heroOrb2 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    40%       { transform: translate(14px, -10px) scale(1.05); }
-    70%       { transform: translate(-6px, 8px) scale(0.98); }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .page-transition,
     .float-in,
     .gradient-flow,
-    .goal-complete-celebration,
-    .hero-orb-1,
-    .hero-orb-2 {
+    .goal-complete-celebration {
       animation: none;
     }
   }
@@ -785,97 +709,6 @@
     .loading-bar {
       animation: none;
     }
-  }
-
-  /* ── Page hero banner ──────────────────────────────────────────────────── */
-  /* Structural base — colour/gradient applied by each page's own class.    */
-  .page-hero {
-    position: relative;
-    overflow: hidden;
-    border-radius: var(--radius-hero);
-    padding: clamp(1.25rem, 1.05rem + 0.9vw, 1.625rem);
-    color: white;
-    box-shadow: var(--shadow-level-3);
-  }
-
-  .hero-kpi-grid {
-    display: grid;
-    gap: 0.75rem;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @media (min-width: 640px) {
-    .hero-kpi-grid {
-      gap: 0.875rem;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-  }
-
-  .hero-kpi-card {
-    border-radius: var(--radius-inner);
-    border: 1px solid rgb(255 255 255 / 0.16);
-    background: rgb(255 255 255 / 0.1);
-    backdrop-filter: blur(12px) saturate(135%);
-    -webkit-backdrop-filter: blur(12px) saturate(135%);
-    min-width: 0;
-    padding: 0.875rem;
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.08),
-      0 10px 24px hsl(var(--shadow) / 0.14);
-  }
-
-  @media (min-width: 640px) {
-    .hero-kpi-card {
-      padding: 1rem;
-    }
-  }
-
-  .hero-kpi-card-warm {
-    border-color: rgb(255 255 255 / 0.18);
-    background: rgb(255 255 255 / 0.12);
-  }
-
-  .hero-kpi-card-featured {
-    border-color: rgb(255 255 255 / 0.24);
-    background: rgb(255 255 255 / 0.16);
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.12),
-      0 14px 30px hsl(var(--shadow) / 0.18);
-  }
-
-  .hero-kpi-card .hero-kpi-label,
-  .hero-kpi-card-warm .hero-kpi-label,
-  .hero-kpi-card-featured .hero-kpi-label {
-    color: rgb(255 255 255 / 0.82);
-  }
-
-  .hero-kpi-label {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgb(255 255 255 / 0.85);
-    text-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
-  }
-
-  .hero-kpi-value {
-    margin-top: 0.375rem;
-    font-size: clamp(1.5rem, 4.8vw, 2.35rem);
-    font-weight: 700;
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-    color: rgb(255 255 255 / 0.97);
-    line-height: 1;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-  }
-
-  .hero-kpi-trend {
-    margin-top: 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    line-height: 1.35;
-    color: rgb(255 255 255 / 0.88);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
   }
 
   .scroll-panel-list {
