@@ -4,9 +4,11 @@
 // to exist for the month.
 
 import { Hono } from "hono"
+import { z } from "zod"
 import { and, eq, sql } from "drizzle-orm"
 import Decimal from "decimal.js"
 import { getDb } from "../db/connection"
+import { zodErrorToEnvelope } from "./route-helpers"
 import { budgets } from "../db/schema/budgets"
 import { categories } from "../db/schema/categories"
 import { transactions } from "../db/schema/transactions"
@@ -23,6 +25,34 @@ export const budgetsRouter = new Hono()
 
 const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/
 const MAX_AMOUNT = new Decimal("999999.999")
+
+// ── Input schemas (phase-4 10d zod-adoption B1, shape-only) ─────────────────────
+// Messages are byte-identical to the pre-existing hand-written checks (Hono wire
+// strings, incl. the trailing periods Hono added over Flask). Chaining .min(1)
+// before .regex() preserves the required-then-format first-fail ordering.
+const MonthQuerySchema = z
+  .string()
+  .trim()
+  .min(1, "month is required (YYYY-MM).")
+  .regex(MONTH_RE, "month must be in YYYY-MM format.")
+
+// POST presence is a combined cross-field check with one bespoke message, then a
+// month-format check. superRefine + early return reproduces that exact ordering
+// (presence message on issues[0] for any presence failure; format message only
+// when both are present). The permissive per-item reads + money/duplicate checks
+// downstream are intentionally left hand-rolled (out of B1 shape scope).
+const PostBudgetsShape = z
+  .object({ month: z.unknown(), items: z.unknown() })
+  .superRefine((b, ctx) => {
+    const month = typeof b.month === "string" ? b.month.trim() : ""
+    if (!month || !Array.isArray(b.items)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "month and items[] are required." })
+      return
+    }
+    if (!MONTH_RE.test(month)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "month must be in YYYY-MM format." })
+    }
+  })
 
 // ── Serializer ────────────────────────────────────────────────────────────────
 
@@ -166,13 +196,9 @@ budgetsRouter.get("/months", requireAuth, readRateLimit, async (c) => {
 // ── GET /api/budgets ──────────────────────────────────────────────────────────
 
 budgetsRouter.get("/", requireAuth, readRateLimit, async (c) => {
-  const month = (c.req.query("month") ?? "").trim()
-  if (!month) {
-    return c.json({ ok: false, data: null, error: "month is required (YYYY-MM).", code: "validation_error" }, 400)
-  }
-  if (!MONTH_RE.test(month)) {
-    return c.json({ ok: false, data: null, error: "month must be in YYYY-MM format.", code: "validation_error" }, 400)
-  }
+  const parsed = MonthQuerySchema.safeParse(c.req.query("month") ?? "")
+  if (!parsed.success) return zodErrorToEnvelope(c, parsed.error)
+  const month = parsed.data
 
   const { userId } = c.get("session")
   const db = getDb()
@@ -186,14 +212,13 @@ budgetsRouter.post("/", requireAuth, heavyWriteRateLimit, async (c) => {
   const { userId } = c.get("session")
   const body = (await c.req.json().catch(() => ({}))) as Record<string, unknown>
 
+  const parsed = PostBudgetsShape.safeParse(body)
+  if (!parsed.success) return zodErrorToEnvelope(c, parsed.error)
+  // The refine guarantees month is a non-empty YYYY-MM string and items is an
+  // array; re-derive from body so the permissive per-item reads below are
+  // byte-identical to the pre-B1 handler.
   const month = ((body["month"] as string) ?? "").trim()
   const itemsRaw = body["items"]
-  if (!month || !Array.isArray(itemsRaw)) {
-    return c.json({ ok: false, data: null, error: "month and items[] are required.", code: "validation_error" }, 400)
-  }
-  if (!MONTH_RE.test(month)) {
-    return c.json({ ok: false, data: null, error: "month must be in YYYY-MM format.", code: "validation_error" }, 400)
-  }
 
   // ── Pre-flight: normalize names and check for duplicates before any DB write
   // Names are trimmed + whitespace-collapsed + lowercased for comparison so that

@@ -475,3 +475,58 @@ describe("POST /api/budgets — rate limit", () => {
     expect(getDb).not.toHaveBeenCalled()
   })
 })
+
+// ── B1 zod shape-adoption: exact message identity + first-fail ordering ─────────
+// Pre-conversion captures. The existing GET/POST validation tests assert only
+// status+code; these pin the exact WIRE error string (byte-identical to the
+// pre-B1 hand-written checks) and the D1 combined-presence-then-format ordering.
+describe("budgets — B1 zod shape message identity + first-fail ordering", () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+  })
+
+  it("GET empty month → exact 'required' message", async () => {
+    const res = await app.request("/api/budgets", { headers: { Authorization: await authHeader() } })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.code).toBe("validation_error")
+    expect(body.error).toBe("month is required (YYYY-MM).")
+  })
+
+  it("GET malformed month → exact 'format' message", async () => {
+    const res = await app.request("/api/budgets?month=2026-13", { headers: { Authorization: await authHeader() } })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).error).toBe("month must be in YYYY-MM format.")
+  })
+
+  it("POST missing month & items → combined presence message", async () => {
+    const res = await app.request("/api/budgets", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).error).toBe("month and items[] are required.")
+  })
+
+  it("POST valid month but items absent → still combined presence message (D1 ordering)", async () => {
+    const res = await app.request("/api/budgets", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ month: "2026-05" }),
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).error).toBe("month and items[] are required.")
+  })
+
+  it("POST valid presence but bad month format → format message only after presence passes (D1 ordering)", async () => {
+    const res = await app.request("/api/budgets", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ month: "2026-13", items: [] }),
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).error).toBe("month must be in YYYY-MM format.")
+  })
+})

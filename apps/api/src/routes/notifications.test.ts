@@ -144,3 +144,35 @@ describe("POST /budget-alerts/dismiss — rate limit", () => {
     expect(recordEvent).not.toHaveBeenCalled()
   })
 })
+
+// ── B1 zod shape-adoption: exact message identity + D2 coercion preservation ────
+// Pre-conversion captures (exact wire strings) plus proof that the alert_key
+// String(... ?? "").trim() coercion is preserved by the normalize-then-zod
+// design (a non-string alert_key still coerces and passes).
+describe("notifications — B1 zod shape message identity + coercion (D2)", () => {
+  it("GET empty month → exact 'required' message", async () => {
+    const res = await notificationsRouter.request("/budget-alerts")
+    expect(res.status).toBe(400)
+    expect((await readJson(res)).error).toBe("month is required (YYYY-MM).")
+  })
+
+  it("GET malformed month → exact 'format' message", async () => {
+    const res = await notificationsRouter.request("/budget-alerts?month=26-5")
+    expect(res.status).toBe(400)
+    expect((await readJson(res)).error).toBe("month must be in YYYY-MM format.")
+  })
+
+  it("dismiss missing alert_key → exact 'required' message", async () => {
+    const res = await postDismiss({})
+    expect(res.status).toBe(400)
+    expect((await readJson(res)).error).toBe("alert_key is required.")
+  })
+
+  it("dismiss numeric alert_key coerces to string and is accepted (D2 coercion preserved)", async () => {
+    const res = await postDismiss({ alert_key: 123 })
+    expect(res.status).toBe(200)
+    const body = await readJson(res)
+    expect(body.data.dismissed).toBe(true)
+    expect(recordEvent).toHaveBeenCalledWith(1, "budget_alert_dismissed", { alert_key: "123" }, undefined)
+  })
+})
