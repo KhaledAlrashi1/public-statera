@@ -16,7 +16,10 @@
   --danger-foreground: 0 0% 98%;
   --success: 150 44% 34%;
   --success-foreground: 0 0% 98%;
-  --warning: 32 88% 36%;
+  /* Warning family = rust (design-5.4b). Amber (32 88% 36%) failed AA-normal
+     on the light bg (4.23); rust-18 passes both light surfaces (5.21/4.84)
+     and sits at max hue-separation from danger (hue 8) among true rusts. */
+  --warning: 18 70% 41%;
   --warning-foreground: 26 40% 12%;
   --info: 212 70% 48%;
   --info-foreground: 0 0% 100%;
@@ -142,7 +145,7 @@
   --danger-foreground: 0 0% 98%;
   --success: 150 42% 54%;
   --success-foreground: 0 0% 98%;
-  --warning: 34 90% 60%;
+  --warning: 18 74% 64%; /* rust-18 dark (design-5.4b); on-surface 6.35 / on-bg 7.05 */
   --warning-foreground: 26 40% 14%;
   --info: 212 82% 66%;
   --info-foreground: 0 0% 100%;
