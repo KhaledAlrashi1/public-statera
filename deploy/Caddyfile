@@ -15,14 +15,15 @@ staterafinance.app {
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		# ENFORCING as of 2026-07-10 (was Report-Only since 2026-05-24; see
-		# TODO(module-8e-csp-enforcement) close-out in CLAUDE.md). Report-Only
-		# never collected — the policy carried no report-uri/report-to, so the
-		# "observation window" was vacuous; evidence was a console-verified
-		# operator page-walk instead. style-src/font-src carry the Google Fonts
-		# hosts (index.html <link>); self-host + narrow-back-to-'self' is deferred
-		# to the UX-redesign theme work. Standing rule: any NEW external resource
-		# must be added here in the same commit that introduces it, or prod blocks it.
-		Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self'; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+		# TODO(module-8e-csp-enforcement) close-out in CLAUDE.md).
+		# NARROWED in design-5.4e (2026-07-13): fonts are now self-hosted via
+		# @fontsource, so the Google Fonts hosts were removed — style-src and
+		# font-src are back to 'self', and the queued img-src narrowing
+		# (https: -> 'self' data:) landed too. 'unsafe-inline' in style-src STAYS
+		# (Recharts inline styles; separate scoping). Standing rule: any NEW
+		# external resource must be added here in the same commit that
+		# introduces it, or prod blocks it.
+		Content-Security-Policy "default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
 	}
 
 	# API routes — proxy to Hono. X-Real-IP is set explicitly;
