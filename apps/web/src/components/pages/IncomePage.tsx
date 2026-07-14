@@ -596,7 +596,7 @@ export default function IncomePage() {
       {!metricsErrorMessage && !loadingMetrics && !hasData && (
         <section className="section-panel float-in">
           <div className="flex flex-col items-center gap-4 px-6 py-10 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl brand-gradient shadow-lg">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted text-primary shadow-lg">
               <TrendingUp className="h-8 w-8" />
             </div>
             <div>

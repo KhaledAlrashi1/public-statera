@@ -230,7 +230,7 @@ function AppShellLayout() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 sm:px-6 lg:px-8">
           {/* Logo / wordmark */}
           <div className="flex items-center gap-3">
-            <div className="brand-gradient brand-mark flex h-10 w-10 items-center justify-center transition-all duration-300">
+            <div className="bg-accent text-accent-foreground brand-mark flex h-10 w-10 items-center justify-center transition-all duration-300">
               <Scale className="icon-hero" />
             </div>
             <div className="leading-tight">
@@ -405,7 +405,7 @@ function AppShellLayout() {
         {/* Drawer header */}
         <div className="flex items-center justify-between border-b border-border bg-muted/40 px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="brand-gradient brand-mark flex h-10 w-10 items-center justify-center transition-all duration-300">
+            <div className="bg-accent text-accent-foreground brand-mark flex h-10 w-10 items-center justify-center transition-all duration-300">
               <Scale className="icon-hero" />
             </div>
             <div className="leading-tight">

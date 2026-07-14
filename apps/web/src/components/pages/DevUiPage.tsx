@@ -38,7 +38,6 @@ export default function DevUiPage() {
               <Button variant="link" size="default">link</Button>
               <Button variant="destructive" size="default">destructive</Button>
               <Button variant="pill" size="pill">pill</Button>
-              <Button variant="gradient-primary" size="default">gradient-primary</Button>
             </div>
           </div>
 

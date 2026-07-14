@@ -2286,12 +2286,12 @@ export function PreviewImportDialog({
                 </div>
               </div>
               <Button
-                variant="gradient-primary"
+                variant="default"
                 size="pill"
                 onClick={handleImport}
                 loading={importing}
                 disabled={importing || !allValid}
-                className="min-w-[13rem]"
+                className="min-w-[13rem] font-semibold"
               >
                 {importing
                   ? "Importing..."

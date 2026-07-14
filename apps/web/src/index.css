@@ -108,9 +108,12 @@
   --text-xl: 1.75rem;
   --text-xl--line-height: 2rem;
 
-  /* Global app accent — indigo to amber */
-  --color-app-accent: hsl(var(--accent));
-  --color-app-accent-to: hsl(40 62% 46%);
+  /* Loading-bar shimmer color — ink (design-5.4c-2, R5). A functional
+     progress indicator is not in the brass ration (mark/eyebrows/
+     free-to-spend), so it reads ink like the rest of the UI. The former
+     --color-app-accent-to (amber gradient endpoint) was deleted with the
+     retired .brand-gradient utility. */
+  --color-app-accent: hsl(var(--primary));
 
   --spacing-page-gap: 2rem;
   --spacing-section-px: 1.25rem;
@@ -344,15 +347,8 @@
 }
 
 @layer utilities {
-  .brand-gradient {
-    background-image: linear-gradient(
-      135deg,
-      var(--color-primary),
-      var(--color-app-accent) 72%,
-      var(--color-app-accent-to)
-    );
-    color: hsl(var(--primary-foreground));
-  }
+  /* .brand-gradient retired in design-5.4c-2 (flat ink & brass identity);
+     the flat brass mark uses bg-accent + brand-mark instead. */
 
   .brand-mark {
     border-radius: var(--radius-card);
@@ -636,11 +632,6 @@
     .panel-soft {
       background: hsl(var(--surface));
       box-shadow: none;
-    }
-
-    .brand-gradient {
-      background-image: none;
-      background-color: hsl(var(--primary));
     }
 
     .table-head {
