@@ -61,24 +61,30 @@ export function SpendForecastWidget({
               </div>
               <div className="inner-card">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Free to spend</p>
-                <p className="financial-number whitespace-nowrap text-lg font-semibold">{formatKD(remaining_kd)}</p>
+                {/* Free-to-spend is decision (i)'s brass slot. --accent-strong (brass TEXT
+                    token); enlarged to 1.25rem (20px) semibold so it clears the WCAG
+                    large-text threshold (>=18.66px bold-equiv) at accent-strong's 3.39
+                    contrast on the inner-card surface (R6). */}
+                <p className="financial-number whitespace-nowrap text-[1.25rem] font-semibold text-accent-strong">{formatKD(remaining_kd)}</p>
               </div>
             </div>
 
+            {/* decision (iii): the red/amber/green traffic light is retired.
+                Spent = ink, Committed = neutral, Free to spend = brass (i). */}
             <div className="mt-3 overflow-hidden rounded-full bg-muted/40">
               <div className="flex h-4">
                 <div
-                  className="bg-destructive/80"
+                  className="bg-primary/85"
                   style={{ width: segmentWidth(Math.max(0, spent_kd), total) }}
                   title="Spent"
                 />
                 <div
-                  className="bg-warning/80"
+                  className="bg-muted-foreground/45"
                   style={{ width: segmentWidth(Math.max(0, committed_kd), total) }}
                   title="Committed"
                 />
                 <div
-                  className="bg-success/80"
+                  className="bg-accent"
                   style={{ width: segmentWidth(Math.max(0, remaining_kd), total) }}
                   title="Free to spend"
                 />
@@ -86,15 +92,15 @@ export function SpendForecastWidget({
             </div>
             <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <span className="inline-block h-2 w-2 rounded-full bg-destructive/60" />
+                <span className="inline-block h-2 w-2 rounded-full bg-primary/85" />
                 Spent
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="inline-block h-2 w-2 rounded-full bg-warning/60" />
+                <span className="inline-block h-2 w-2 rounded-full bg-muted-foreground/45" />
                 Committed
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="inline-block h-2 w-2 rounded-full bg-success/60" />
+                <span className="inline-block h-2 w-2 rounded-full bg-accent" />
                 Free to spend
               </span>
             </div>
