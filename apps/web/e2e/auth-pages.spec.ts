@@ -39,14 +39,6 @@ test("register page validates mismatched passwords on client", async ({ page }) 
   await expect(page).toHaveURL(/\/login$/)
 })
 
-test("dev-ui route requires authentication", async ({ page }) => {
-  await page.goto("/dev-ui")
-
-  await expect(page).toHaveURL(/\/login$/)
-  await expect(page.getByRole("heading", { name: "Access your account" })).toBeVisible()
-  await expect(page.getByRole("heading", { name: "UI Guardrails Gallery" })).toHaveCount(0)
-})
-
 test("newly registered user can continue from workspace choice to the dashboard", async ({ page }) => {
   const email = `dashboard-${Date.now()}@example.com`
   await page.goto("/register")

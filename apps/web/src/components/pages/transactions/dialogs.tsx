@@ -4,7 +4,6 @@ import React, {
   useRef,
   useState,
 } from "react"
-import { useQuery } from "@tanstack/react-query"
 import {
   AlertTriangle,
   Plus,
@@ -16,7 +15,7 @@ import {
 import { transactionsApi } from "@/lib/api"
 import type { TransactionSuggestion } from "@/types/api"
 import { getDeletedRecordMessage } from "@/lib/error-recovery"
-import { cn, formatDisplayDate, formatKD, fmt3, today } from "@/lib/utils"
+import { cn, formatDisplayDate, fmt3, today } from "@/lib/utils"
 import {
   validatePositiveAmount,
   validateRequiredDate,
@@ -101,119 +100,6 @@ export function DuplicateWarningDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
-}
-
-export function TransactionsHero({
-  kpiRange,
-  onKpiRangeChange,
-}: {
-  kpiRange: string
-  onKpiRangeChange: (v: string) => void
-}) {
-  const rangeKey: "30" | "90" | "365" | "all" =
-    kpiRange === "90" || kpiRange === "365" || kpiRange === "all" ? kpiRange : "30"
-
-  const {
-    data: patternsResp,
-    isLoading,
-    isFetching,
-    error: patternsError,
-    refetch: refetchPatterns,
-  } = useQuery({
-    queryKey: ["transactions", "top-patterns", rangeKey],
-    queryFn: () => transactionsApi.topPatterns(rangeKey),
-  })
-  const top3 = patternsResp?.items || []
-  const patternsErrorMessage = patternsError instanceof Error
-    ? patternsError.message
-    : patternsError
-      ? "We couldn't load your top transaction patterns right now."
-      : null
-
-  const rangeLabel =
-    kpiRange === "all"
-      ? "All time"
-      : kpiRange === "365"
-        ? "Last 12 months"
-        : `Last ${kpiRange} days`
-
-  return (
-    <section className="float-in space-y-4" aria-label="Spending patterns">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Spending Patterns
-            <span className="font-normal normal-case text-muted-foreground/80">
-              &mdash; {rangeLabel}
-            </span>
-          </div>
-          <p className="mt-1 max-w-md text-sm text-muted-foreground">
-            Your three most-repeated transactions. Useful for spotting
-            subscriptions and spending habits.
-          </p>
-        </div>
-
-        <Select value={kpiRange} onValueChange={onKpiRangeChange}>
-          <SelectTrigger className="h-9 w-[150px] text-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="30">Last 30 days</SelectItem>
-            <SelectItem value="90">Last 90 days</SelectItem>
-            <SelectItem value="365">Last 12 months</SelectItem>
-            <SelectItem value="all">All time</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {isLoading
-          ? [0, 1, 2].map((i) => (
-              <div key={i} className="skeleton h-24" />
-            ))
-          : patternsErrorMessage
-            ? (
-                <Alert variant="warning" className="col-span-full text-left">
-                  <AlertTitle>Pattern insights unavailable</AlertTitle>
-                  <AlertDescription className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p>{patternsErrorMessage}</p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        void refetchPatterns()
-                      }}
-                      loading={isFetching}
-                      disabled={isFetching}
-                    >
-                      {isFetching ? "Retrying..." : "Retry"}
-                    </Button>
-                  </AlertDescription>
-                </Alert>
-              )
-            : top3.length === 0
-            ? (
-                <div className="col-span-full rounded-xl border border-border bg-muted/40 p-4 text-center text-sm text-muted-foreground">
-                  No activity matched this period yet.
-                </div>
-              )
-            : top3.map((t, i) => (
-                <div key={i} className="inner-card">
-                  <div className="truncate text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    {t.name}
-                  </div>
-                  <div className="mt-2 font-mono text-3xl font-semibold tabular-nums tracking-tight text-foreground">
-                    {t.count}&times;
-                  </div>
-                  <div className="mt-2 text-xs font-semibold text-muted-foreground">
-                    {formatKD(t.sum_kd)} total
-                  </div>
-                </div>
-              ))}
-      </div>
-    </section>
   )
 }
 

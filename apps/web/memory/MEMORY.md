@@ -31,7 +31,6 @@ Auth and security routes:
 
 Intentionally hidden or redirected routes:
 
-- `/dev-ui`
 - `/insights`
 - `/spending`
 - `/spending-intelligence`

@@ -439,7 +439,7 @@ export default function BudgetPage() {
     && budgets.length === 0
 
   return (
-    <div className={cn("theme-budget space-y-8", animDone && "animations-complete")}>
+    <div className={cn("space-y-8", animDone && "animations-complete")}>
       <PageHeader
         badge="Plan"
         badgeDotClassName="bg-primary"

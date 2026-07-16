@@ -160,8 +160,6 @@ function AppRoutes() {
       <Route path="/terms" element={<TermsPage />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/welcome" element={<WorkspaceChoicePage />} />
-        {/* /dev-ui HIDDEN — UI Gallery removed from app; do not re-add without owner instruction */}
-        <Route path="/dev-ui" element={<Navigate to="/" replace />} />
         <Route element={<AppShell />}>
           <Route index element={<DashboardPage />} />
           <Route path="home" element={<Navigate to="/" replace />} />

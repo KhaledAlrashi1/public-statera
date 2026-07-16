@@ -115,34 +115,6 @@ test.describe("visual regression", () => {
   test.describe.configure({ mode: "serial" })
   test.setTimeout(120_000)
 
-  test("dev-ui gallery light", async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 1600 })
-
-    await ensureAuthenticated(page, `visual-dev-ui-light-${Date.now()}@example.com`)
-    await page.goto("/dev-ui")
-    await setTheme(page, "light")
-    await page.waitForTimeout(250)
-
-    await expect(page).toHaveScreenshot("dev-ui-light.png", {
-      animations: "disabled",
-      fullPage: true,
-    })
-  })
-
-  test("dev-ui gallery dark", async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 1600 })
-
-    await ensureAuthenticated(page, `visual-dev-ui-dark-${Date.now()}@example.com`)
-    await page.goto("/dev-ui")
-    await setTheme(page, "dark")
-    await page.waitForTimeout(250)
-
-    await expect(page).toHaveScreenshot("dev-ui-dark.png", {
-      animations: "disabled",
-      fullPage: true,
-    })
-  })
-
   test("app shell pages light", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 })
     await ensureAuthenticated(page, `visual-theme-light-${Date.now()}@example.com`)

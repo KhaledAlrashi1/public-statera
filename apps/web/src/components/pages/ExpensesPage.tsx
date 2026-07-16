@@ -863,7 +863,7 @@ export default function ExpensesPage() {
       : null
 
   return (
-    <div className={`space-y-8 theme-expenses ${isMounted ? 'animations-complete' : ''}`}>
+    <div className={`space-y-8 ${isMounted ? 'animations-complete' : ''}`}>
       <PageHeader
         badge="Expenses"
         badgeDotClassName="bg-primary"

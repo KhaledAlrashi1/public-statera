@@ -9,7 +9,6 @@ import {
   User,
   Search,
   Lightbulb,
-  Palette,
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -95,14 +94,6 @@ export default function CommandPalette({
         icon: User,
         action: () => go("/profile"),
         keywords: ["account", "settings", "password", "email", "preferences"],
-      },
-      {
-        id: "ui-gallery",
-        label: "UI Gallery",
-        description: "Review shared page and component guardrails",
-        icon: Palette,
-        action: () => go("/dev-ui"),
-        keywords: ["design", "gallery", "ui", "components", "dev-ui", "patterns"],
       },
       {
         id: "add-expense",

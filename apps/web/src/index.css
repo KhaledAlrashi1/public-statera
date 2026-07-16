@@ -172,38 +172,6 @@
   * {
     @apply border-border;
   }
-  :root {
-    --panel-accent-1: rgba(120, 90, 60, 0.03);
-    --panel-accent-2: rgba(120, 90, 60, 0.025);
-    --panel-accent-3: rgba(120, 90, 60, 0.02);
-    --panel-border: rgba(120, 100, 70, 0.14);
-    --card-line-1: #4338ca;
-    --card-line-2: #d97706;
-    --card-line-3: #f59e0b;
-    --card-glow-1: rgba(120, 90, 60, 0.03);
-    --card-glow-2: rgba(120, 90, 60, 0.025);
-    --card-glow-3: rgba(120, 90, 60, 0.03);
-    --card-glow-4: rgba(120, 90, 60, 0.025);
-    --card-wash-1: rgba(120, 90, 60, 0.03);
-    --card-wash-2: rgba(120, 90, 60, 0.025);
-    --card-wash-3: rgba(120, 90, 60, 0.02);
-  }
-  .dark {
-    --panel-accent-1: rgba(240, 220, 180, 0.03);
-    --panel-accent-2: rgba(240, 220, 180, 0.025);
-    --panel-accent-3: rgba(240, 220, 180, 0.02);
-    --panel-border: rgba(240, 220, 180, 0.10);
-    --card-line-1: #818cf8;
-    --card-line-2: #fbbf24;
-    --card-line-3: #f59e0b;
-    --card-glow-1: rgba(240, 220, 180, 0.03);
-    --card-glow-2: rgba(240, 220, 180, 0.025);
-    --card-glow-3: rgba(240, 220, 180, 0.03);
-    --card-glow-4: rgba(240, 220, 180, 0.025);
-    --card-wash-1: rgba(240, 220, 180, 0.03);
-    --card-wash-2: rgba(240, 220, 180, 0.025);
-    --card-wash-3: rgba(240, 220, 180, 0.02);
-  }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01" 1, "ss02" 1;
@@ -328,22 +296,6 @@
   .skeleton {
     @apply animate-pulse rounded-[var(--radius-card)] bg-muted/40;
   }
-
-  .badge-success {
-    @apply bg-success/10 text-success;
-  }
-
-  .badge-warning {
-    @apply bg-warning/10 text-warning;
-  }
-
-  .badge-danger {
-    @apply bg-destructive/10 text-destructive;
-  }
-
-  .badge-neutral {
-    @apply bg-muted text-muted-foreground;
-  }
 }
 
 @layer utilities {
@@ -443,87 +395,6 @@
   .dark .panel-glass {
     background: hsl(var(--surface) / 0.75);
     border: 1px solid hsl(var(--border) / 0.22);
-  }
-
-  .panel-soft {
-    background:
-      linear-gradient(135deg, hsl(var(--surface) / 0.96), hsl(var(--surface-2) / 0.9)),
-      radial-gradient(420px 180px at 8% 0%, var(--panel-accent-1), transparent 70%),
-      radial-gradient(360px 200px at 90% 0%, var(--panel-accent-2), transparent 65%),
-      radial-gradient(280px 180px at 70% 100%, var(--panel-accent-3), transparent 70%);
-    box-shadow: var(--shadow-level-3);
-    border: 1px solid var(--panel-border);
-  }
-
-  .dark .panel-soft {
-    background:
-      linear-gradient(135deg, hsl(var(--surface) / 0.96), hsl(var(--surface-2) / 0.9)),
-      radial-gradient(420px 180px at 8% 0%, var(--panel-accent-1), transparent 70%),
-      radial-gradient(360px 200px at 90% 0%, var(--panel-accent-2), transparent 65%),
-      radial-gradient(280px 180px at 70% 100%, var(--panel-accent-3), transparent 70%);
-    box-shadow: var(--shadow-level-3);
-  }
-
-  .card-pop {
-    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
-  }
-
-  .card-pop:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 24px 50px hsl(var(--shadow) / 0.16),
-      0 6px 18px hsl(var(--shadow) / 0.1);
-    border-color: hsl(var(--primary) / 0.45);
-  }
-
-  .dark .card-pop:hover {
-    box-shadow:
-      0 24px 50px hsl(var(--shadow) / 0.34),
-      0 6px 18px hsl(var(--shadow) / 0.22);
-    border-color: hsl(var(--primary) / 0.25);
-  }
-
-  .card-accent {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card-accent::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(120deg, var(--card-wash-1), var(--card-wash-2), var(--card-wash-3));
-    opacity: 0;
-    transition: opacity 220ms ease;
-    pointer-events: none;
-  }
-
-  .card-accent::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 3px;
-    width: 100%;
-    background: linear-gradient(90deg, var(--card-line-1), var(--card-line-2), var(--card-line-3));
-    opacity: 0.75;
-  }
-
-  .card-accent:hover::before {
-    opacity: 0.2;
-  }
-
-  .card-edge {
-    box-shadow:
-      0 0 0 1px var(--card-glow-1) inset,
-      0 0 26px var(--card-glow-2);
-  }
-
-  .card-edge:hover {
-    box-shadow:
-      0 0 0 1px var(--card-glow-3) inset,
-      0 0 42px var(--card-glow-4);
   }
 
   .float-in {
@@ -627,11 +498,6 @@
     .table-head,
     .dialog-overlay {
       backdrop-filter: none;
-    }
-
-    .panel-soft {
-      background: hsl(var(--surface));
-      box-shadow: none;
     }
 
     .table-head {
@@ -753,27 +619,6 @@
   .sidebar-hover-dim {
     filter: blur(0.2px) saturate(0.9);
     opacity: 0.9;
-  }
-
-  /* Phase 1: unify all page theme wrappers to shared indigo accent values. */
-  .theme-transactions,
-  .theme-expenses,
-  .theme-budget,
-  .theme-income {
-    --panel-accent-1: rgba(67, 56, 202, 0.08);
-    --panel-accent-2: rgba(217, 119, 6, 0.06);
-    --panel-accent-3: rgba(124, 58, 237, 0.05);
-    --panel-border: rgba(79, 70, 229, 0.16);
-    --card-line-1: #4338ca;
-    --card-line-2: #d97706;
-    --card-line-3: #f59e0b;
-    --card-glow-1: rgba(67, 56, 202, 0.08);
-    --card-glow-2: rgba(217, 119, 6, 0.06);
-    --card-glow-3: rgba(79, 70, 229, 0.14);
-    --card-glow-4: rgba(217, 119, 6, 0.1);
-    --card-wash-1: rgba(67, 56, 202, 0.1);
-    --card-wash-2: rgba(217, 119, 6, 0.08);
-    --card-wash-3: rgba(124, 58, 237, 0.06);
   }
 
   .shadow-sm {

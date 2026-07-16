@@ -63,7 +63,6 @@ The current SPA exposes:
 
 Routes that currently redirect away and should not be documented as active UI pages:
 
-- `/dev-ui`
 - `/insights`
 - `/spending`
 - `/spending-intelligence`

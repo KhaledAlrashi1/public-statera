@@ -510,7 +510,7 @@ export default function IncomePage() {
       : null
 
   return (
-    <div className={cn("theme-income space-y-8", animDone && "animations-complete")}>
+    <div className={cn("space-y-8", animDone && "animations-complete")}>
       <PageHeader
         badge="Income"
         badgeDotClassName="bg-primary"

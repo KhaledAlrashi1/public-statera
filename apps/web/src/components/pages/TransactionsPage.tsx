@@ -256,7 +256,7 @@ export default function TransactionsPage() {
   return (
     <div
       className={cn(
-        "theme-transactions space-y-8",
+        "space-y-8",
         animDone && "animations-complete"
       )}
     >
