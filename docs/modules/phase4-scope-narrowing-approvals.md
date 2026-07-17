@@ -250,3 +250,43 @@ per standing rules with the deploy-report addendum (FF topology; `gh run watch`;
 `/healthz`+`/readyz` SHA-matched; `origin/main..HEAD` ride-along enumeration with
 per-commit CSP dispositions; worker restart C6). SC-3 review begins only after
 deploy 1 is proven live.
+
+---
+
+## Deploy record + module closure (2026-07-17)
+
+### Deploy 1 — SC-1/2 code removal (`0f27745`)
+GitHub Actions Deploy run **`29546090623` — green** (resolve-sha → test → build-push
+→ deploy). Ride-along `origin/main..HEAD` = 3 commits (`0f27745` SC-1/2 + riders
+`58d7f79` design-5.5 + `f779df5` design-5.4 deploy record); both riders **CSP-safe**
+(design-5.5 all-deletions, no new external URL; f779df5 CLAUDE.md-only). Probes
+`/healthz`+`/readyz` SHA-matched to `0f27745`. **Operator smoke PASSED** (dashboard /
+Plan single-view / category dependent-counts / demo copy / legal pages); **C6 worker
+recreate OBSERVED** (operator `docker ps`, worker at `0f27745`).
+
+### Deploy 2 — SC-3 schema DROPs (`88a157f`, DESTRUCTIVE)
+GitHub Actions Deploy run **`29592560536` — green** (`gh run watch --exit-status`
+exit 0). Ride-along `origin/main..HEAD` = **1 commit** (`88a157f`, SC-3 only; **no
+riders**); **CSP-neutral** (schema/migrations/docs only). Migrate step (verbatim):
+`§4 — running migrations` → `statera-migrate-run` container → `Reading config file
+'/app/apps/api/drizzle.config.ts'` → `[✓] migrations applied successfully!` — applied
+the three pending migrations `0004`→`0005`→`0006` (DB was at `0003` pre-deploy).
+Worker recreate (C6): `statera-worker-1 Recreate → Recreated → Started`;
+`*** complete — 88a157f… is live`. Probes `/healthz`+`/readyz` SHA-matched to
+`88a157f`. S5 (amended, non-gating): no pre-drop backup confirmed; proceeded on the
+nightly R2 backup as recovery point. Observation (non-failure): a stale pre-8e
+`statera-nginx-1` orphan container was logged; harmless, cleanup opportunity only.
+
+### Operator on-box post-drop verification — PASSED 2026-07-17 (relayed verbatim)
+```
+SHOW TABLES LIKE 'savings_goals';  → Empty set
+SHOW TABLES LIKE 'debt_accounts';  → Empty set
+DESCRIBE user_profiles;            → 10 columns, no has_debt_choice
+docker compose ps                  → api/web/worker recreated at 88a157f; mysql/redis untouched
+```
+
+**MODULE CLOSED 2026-07-17.** Both deploys proven live end-to-end. Two fix-forwards
+carried out, each its own future cycle: `TODO(integration-rate-limit-test-isolation)`
+(10d) and the C2 `SnapshotResponse` 12-field typed-drift (`TODO(module-9-contract-
+validation)`). Two standing rules earned and recorded in CLAUDE.md: persist-first for
+multi-session modules; relay/approval blocks must be self-contained.
