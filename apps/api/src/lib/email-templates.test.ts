@@ -37,29 +37,6 @@ describe("renderEmailTemplate — budget_alert", () => {
   })
 })
 
-describe("renderEmailTemplate — goal_milestone", () => {
-  const ctx = {
-    milestone_pct: 50,
-    goal_name: "Emergency Fund",
-    current_kd: "500.000",
-    target_kd: "1000.000",
-  }
-
-  it("interpolates all variables in html", () => {
-    const { html } = renderEmailTemplate("goal_milestone", ctx)
-    expect(html).toContain("50%")
-    expect(html).toContain("Emergency Fund")
-    expect(html).toContain("500.000")
-    expect(html).toContain("1000.000")
-  })
-
-  it("interpolates all variables in text", () => {
-    const { text } = renderEmailTemplate("goal_milestone", ctx)
-    expect(text).toContain("50%")
-    expect(text).toContain("Emergency Fund")
-  })
-})
-
 describe("renderEmailTemplate — error cases", () => {
   it("throws on unknown template name", () => {
     expect(() => renderEmailTemplate("nonexistent", {})).toThrow("Unknown email template")

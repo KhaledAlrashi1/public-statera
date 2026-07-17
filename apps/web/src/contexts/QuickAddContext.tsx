@@ -55,10 +55,8 @@ export function QuickAddProvider({ children }: { children: ReactNode }) {
       queryClient.invalidateQueries({ queryKey: ["budgets"] }),
       queryClient.invalidateQueries({ queryKey: ["budget-items"] }),
       queryClient.invalidateQueries({ queryKey: ["budget-metrics"] }),
-      queryClient.invalidateQueries({ queryKey: ["debt-accounts-summary"] }),
       queryClient.invalidateQueries({ queryKey: ["analytics-account-overview"] }),
       queryClient.invalidateQueries({ queryKey: ["snapshot"] }),
-      queryClient.invalidateQueries({ queryKey: ["savings-goals"] }),
       queryClient.invalidateQueries({ queryKey: ["insights"] }),
     ])
   }, [queryClient])

@@ -852,7 +852,6 @@ router.get("/profile", requireAuth, async (c) => {
         country: userProfiles.country,
         timezone: userProfiles.timezone,
         emailNotificationsEnabled: userProfiles.emailNotificationsEnabled,
-        hasDebtChoice: userProfiles.hasDebtChoice,
         setupGuideSeen: userProfiles.setupGuideSeen,
         setupGuideDismissed: userProfiles.setupGuideDismissed,
       })
@@ -888,7 +887,6 @@ router.get("/profile", requireAuth, async (c) => {
       country: foundProfile?.country ?? null,
       timezone: foundProfile?.timezone ?? "Asia/Kuwait",
       email_notifications_enabled: foundProfile?.emailNotificationsEnabled ?? true,
-      has_debt_choice: foundProfile?.hasDebtChoice ?? null,
       setup_guide_seen: foundProfile?.setupGuideSeen ?? false,
       setup_guide_dismissed: foundProfile?.setupGuideDismissed ?? false,
     },
@@ -898,7 +896,8 @@ router.get("/profile", requireAuth, async (c) => {
 
 // Callers: ProfilePage.saveName (first_name, last_name), updateEmailNotificationPreference
 // (email_notifications_enabled), saveTimezonePreference (timezone); DashboardPage.syncSetupGuideProfile
-// (setup_guide_seen, setup_guide_dismissed); DebtAccountsSection.setDebtChoice (has_debt_choice).
+// (setup_guide_seen, setup_guide_dismissed). (has_debt_choice write-path removed in phase4
+// SC-1/2 so the SC-3 column DROP is safe; the column is untouched by the running code.)
 // Silently strips email and current_password — OIDC-only, no password column.
 // display_name intentionally omitted — no current caller; add when first needed.
 // errors[] never populated on success (all-or-nothing; validation failure → 400).
@@ -967,9 +966,6 @@ router.post("/profile/update", requireAuth, async (c) => {
   if (body.email_notifications_enabled !== undefined) {
     profileSet.emailNotificationsEnabled = Boolean(body.email_notifications_enabled)
   }
-  if (body.has_debt_choice !== undefined) {
-    profileSet.hasDebtChoice = body.has_debt_choice === null ? null : Boolean(body.has_debt_choice)
-  }
   if (body.setup_guide_seen !== undefined) {
     profileSet.setupGuideSeen = Boolean(body.setup_guide_seen)
   }
@@ -1023,7 +1019,6 @@ router.post("/profile/update", requireAuth, async (c) => {
         country: userProfiles.country,
         timezone: userProfiles.timezone,
         emailNotificationsEnabled: userProfiles.emailNotificationsEnabled,
-        hasDebtChoice: userProfiles.hasDebtChoice,
         setupGuideSeen: userProfiles.setupGuideSeen,
         setupGuideDismissed: userProfiles.setupGuideDismissed,
       })
@@ -1059,7 +1054,6 @@ router.post("/profile/update", requireAuth, async (c) => {
       country: updatedProfile?.country ?? null,
       timezone: updatedProfile?.timezone ?? "Asia/Kuwait",
       email_notifications_enabled: updatedProfile?.emailNotificationsEnabled ?? true,
-      has_debt_choice: updatedProfile?.hasDebtChoice ?? null,
       setup_guide_seen: updatedProfile?.setupGuideSeen ?? false,
       setup_guide_dismissed: updatedProfile?.setupGuideDismissed ?? false,
     },

@@ -29,11 +29,6 @@ import type {
   TransactionSuggestion,
   DemoDataClearResult,
   DemoDataLoadResult,
-  DebtAccount,
-  DebtAccountSummary,
-  DebtPayoffPlansResponse,
-  SavingsGoal,
-  SavingsGoalProjection,
   SnapshotResponse,
   SpendingIntelligenceResponse,
   User,
@@ -691,184 +686,6 @@ export const budgetsApi = {
 }
 
 // ============================================================
-// Debt Accounts
-// ============================================================
-
-export const debtApi = {
-  list: async (params?: { include_inactive?: boolean }) => {
-    const p = new URLSearchParams()
-    if (params?.include_inactive) p.set("include_inactive", "true")
-    const suffix = p.toString()
-    const payload = await apiFetch<unknown>(`/api/debt-accounts${suffix ? `?${suffix}` : ""}`)
-    const data = readApiData<{ accounts?: DebtAccount[] }>(payload)
-    return Array.isArray(data.accounts) ? data.accounts : []
-  },
-
-  create: async (data: {
-    name: string
-    debt_type: DebtAccount["debt_type"]
-    balance_kd: string
-    minimum_payment_kd: string
-    due_day?: number | null
-    apr_pct?: string | null
-    notes?: string | null
-  }) => {
-    const payload = await apiFetch<unknown>("/api/debt-accounts", {
-      method: "POST",
-      body: JSON.stringify(data),
-    })
-    const body = readApiData<{ account?: DebtAccount }>(payload)
-    if (!body.account) throw new Error("Missing debt account in response.")
-    return body.account
-  },
-
-  update: async (
-    accountId: number,
-    data: {
-      name?: string
-      debt_type?: DebtAccount["debt_type"]
-      balance_kd?: string
-      minimum_payment_kd?: string
-      due_day?: number | null
-      apr_pct?: string | null
-      notes?: string | null
-    }
-  ) => {
-    const payload = await apiFetch<ApiEnvelope<{ account?: DebtAccount }>>(`/api/debt-accounts/${accountId}`, {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    })
-    const body = readApiData<{ account?: DebtAccount }>(payload)
-    if (!body.account) throw new Error("Missing debt account in response.")
-    return body.account
-  },
-
-  delete: async (accountId: number) => {
-    const payload = await apiFetch<unknown>(`/api/debt-accounts/${accountId}`, {
-      method: "DELETE",
-    })
-    const body = readApiData<{ account?: DebtAccount }>(payload)
-    if (!body.account) throw new Error("Missing debt account in response.")
-    return body.account
-  },
-
-  summary: async () => {
-    const payload = await apiFetch<unknown>("/api/debt-accounts/summary")
-    const data = readApiData<Partial<DebtAccountSummary>>(payload)
-    return {
-      total_balance_kd: typeof data.total_balance_kd === "string" ? data.total_balance_kd : "0.000",
-      total_minimum_kd: typeof data.total_minimum_kd === "string" ? data.total_minimum_kd : "0.000",
-      account_count: typeof data.account_count === "number" ? data.account_count : 0,
-    } satisfies DebtAccountSummary
-  },
-
-  payoffPlan: async (monthlyPayment: string) => {
-    const p = new URLSearchParams({ monthly_payment: monthlyPayment })
-    const payload = await apiFetch<unknown>(`/api/debt-accounts/payoff-plan?${p}`)
-    const data = readApiData<Partial<DebtPayoffPlansResponse>>(payload)
-    return {
-      avalanche: data.avalanche || {
-        strategy: "avalanche",
-        total_months: 0,
-        total_interest_paid: "0.000",
-        debt_free_date: "",
-        payoff_order: [],
-        debt_free_impossible: false,
-      },
-      snowball: data.snowball || {
-        strategy: "snowball",
-        total_months: 0,
-        total_interest_paid: "0.000",
-        debt_free_date: "",
-        payoff_order: [],
-        debt_free_impossible: false,
-      },
-      minimum_required: typeof data.minimum_required === "string" ? data.minimum_required : "0.000",
-    } satisfies DebtPayoffPlansResponse
-  },
-}
-
-// ============================================================
-// Savings Goals
-// ============================================================
-
-export const goalsApi = {
-  list: async (params?: { include_inactive?: boolean }) => {
-    const p = new URLSearchParams()
-    if (params?.include_inactive) p.set("include_inactive", "true")
-    const suffix = p.toString()
-    const payload = await apiFetch<unknown>(`/api/savings-goals${suffix ? `?${suffix}` : ""}`)
-    const data = readApiData<{ goals?: SavingsGoal[] }>(payload)
-    return Array.isArray(data.goals) ? data.goals : []
-  },
-
-  create: async (data: {
-    name: string
-    goal_type: SavingsGoal["goal_type"]
-    target_kd: string
-    current_kd?: string
-    target_date?: string | null
-    linked_category?: string | null
-    notes?: string | null
-  }) => {
-    const payload = await apiFetch<unknown>("/api/savings-goals", {
-      method: "POST",
-      body: JSON.stringify(data),
-    })
-    const body = readApiData<{ goal?: SavingsGoal }>(payload)
-    if (!body.goal) throw new Error("Missing savings goal in response.")
-    return body.goal
-  },
-
-  update: async (
-    goalId: number,
-    data: {
-      name?: string
-      goal_type?: SavingsGoal["goal_type"]
-      target_kd?: string
-      current_kd?: string
-      target_date?: string | null
-      linked_category?: string | null
-      notes?: string | null
-    }
-  ) => {
-    const payload = await apiFetch<ApiEnvelope<{ goal?: SavingsGoal }>>(`/api/savings-goals/${goalId}`, {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    })
-    const body = readApiData<{ goal?: SavingsGoal }>(payload)
-    if (!body.goal) throw new Error("Missing savings goal in response.")
-    return body.goal
-  },
-
-  deposit: async (goalId: number, amount_kd: string) => {
-    const payload = await apiFetch<unknown>(`/api/savings-goals/${goalId}/deposit`, {
-      method: "POST",
-      body: JSON.stringify({ amount_kd }),
-    })
-    const body = readApiData<{ goal?: SavingsGoal }>(payload)
-    if (!body.goal) throw new Error("Missing savings goal in response.")
-    return body.goal
-  },
-
-  delete: async (goalId: number) => {
-    const payload = await apiFetch<unknown>(`/api/savings-goals/${goalId}`, {
-      method: "DELETE",
-    })
-    const body = readApiData<{ goal?: SavingsGoal }>(payload)
-    if (!body.goal) throw new Error("Missing savings goal in response.")
-    return body.goal
-  },
-
-  projection: async (goalId: number) => {
-    const payload = await apiFetch<unknown>(`/api/savings-goals/${goalId}/projection`)
-    const body = readApiData<{ projection?: SavingsGoalProjection }>(payload)
-    if (!body.projection) throw new Error("Missing savings goal projection in response.")
-    return body.projection
-  },
-}
-
-// ============================================================
 // Memorized Transactions
 // ============================================================
 
@@ -1076,10 +893,6 @@ export const authApi = {
       month: typeof data.month === "string" ? data.month : "",
       transactions_created: typeof data.transactions_created === "number" ? data.transactions_created : 0,
       budgets_created: typeof data.budgets_created === "number" ? data.budgets_created : 0,
-      debt_accounts_created:
-        typeof data.debt_accounts_created === "number" ? data.debt_accounts_created : 0,
-      savings_goals_created:
-        typeof data.savings_goals_created === "number" ? data.savings_goals_created : 0,
       months_seeded: typeof data.months_seeded === "number" ? data.months_seeded : 0,
     } satisfies DemoDataLoadResult
   },
@@ -1094,10 +907,6 @@ export const authApi = {
       transactions_cleared:
         typeof data.transactions_cleared === "number" ? data.transactions_cleared : 0,
       budgets_cleared: typeof data.budgets_cleared === "number" ? data.budgets_cleared : 0,
-      debt_accounts_cleared:
-        typeof data.debt_accounts_cleared === "number" ? data.debt_accounts_cleared : 0,
-      savings_goals_cleared:
-        typeof data.savings_goals_cleared === "number" ? data.savings_goals_cleared : 0,
       profile_fields_cleared: Array.isArray(data.profile_fields_cleared)
         ? data.profile_fields_cleared.filter((field): field is string => typeof field === "string")
         : [],
@@ -1120,7 +929,6 @@ export const authApi = {
     country?: string
     timezone?: string | null
     email_notifications_enabled?: boolean
-    has_debt_choice?: boolean | null
     setup_guide_seen?: boolean
     setup_guide_dismissed?: boolean
   }) =>

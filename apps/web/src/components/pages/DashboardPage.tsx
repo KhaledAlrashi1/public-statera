@@ -16,7 +16,6 @@ import { useToast } from "@/components/ui/toaster"
 import type { Transaction } from "@/types/api"
 import {
   CategoryBreakdownChart,
-  PlanSummaryPanel,
   DashboardHero,
   HomeAttentionCenter,
   IncomeExpensesChart,
@@ -76,8 +75,6 @@ export default function DashboardPage() {
     refetchProfile,
     safeToSpend,
     safeToSpendLoading,
-    debtSummary,
-    debtSummaryLoading,
     categoryRowsPage,
     categoryRowsPageLoading,
     categoryRowsError,
@@ -435,12 +432,10 @@ export default function DashboardPage() {
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] }),
       queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] }),
       queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] }),
-      queryClient.invalidateQueries({ queryKey: ["debt-accounts-summary"] }),
       queryClient.invalidateQueries({ queryKey: ["budgets"] }),
       queryClient.invalidateQueries({ queryKey: ["analytics-account-overview"] }),
       queryClient.invalidateQueries({ queryKey: ["snapshot"] }),
       queryClient.invalidateQueries({ queryKey: ["auth-profile"] }),
-      queryClient.invalidateQueries({ queryKey: ["savings-goals"] }),
       queryClient.invalidateQueries({ queryKey: ["transactions"] }),
       queryClient.invalidateQueries({ queryKey: ["categories"] }),
       queryClient.invalidateQueries({ queryKey: ["merchants"] }),
@@ -497,20 +492,17 @@ export default function DashboardPage() {
     && !profileLoading
     && !safeToSpendLoading
     && !setupBudgetLoading
-    && !debtSummaryLoading
     && !accountOverviewLoading
     && !monthBundleFetching
     && !analyticsErrorMessage
     && !monthBundleErrorMessage
     && !hasRecordedTransactions
     && !setupBudgetResp?.items?.length
-    && ((debtSummary?.account_count ?? 0) === 0)
   const showDashboardEmptyState = noDashboardData && !showSetupProgress
   const canLoadDemoData = !loadingDemoData
     && !hasRecordedTransactions
     && monthIncome === 0
     && !setupBudgetResp?.items?.length
-    && ((debtSummary?.account_count ?? 0) === 0)
 
   const loadDemoData = useCallback(async () => {
     setLoadingDemoData(true)
@@ -527,7 +519,6 @@ export default function DashboardPage() {
       setLoadingDemoData(false)
     }
   }, [
-    debtSummary?.account_count,
     hasRecordedTransactions,
     monthIncome,
     invalidateFinancialQueries,
@@ -851,13 +842,6 @@ export default function DashboardPage() {
               onSliceClick={(name) => setActiveCategory(name)}
             />
           </div>
-
-          <PlanSummaryPanel
-            isLoading={debtSummaryLoading}
-            summary={debtSummary}
-            onOpenDebt={() => navigate("/plan?tab=goals#debt-tracker")}
-            onOpenGoals={() => navigate("/plan?tab=goals#savings-goals")}
-          />
 
           <CategoryDetailModal
             open={Boolean(activeCategory)}

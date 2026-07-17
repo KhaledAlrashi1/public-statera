@@ -231,8 +231,6 @@ describe("GET /api/analytics/snapshot", () => {
         income_total_kd: "500.000",
         expense_total_kd: "175.000",
         net_kd: "325.000",
-        total_debt_kd: "200.000",
-        total_savings_kd: "150.000",
       },
       cash_flow: {
         "30d": { income_kd: "500.000", expense_kd: "100.000", net_kd: "400.000" },

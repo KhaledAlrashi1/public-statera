@@ -6,10 +6,10 @@ import { getDeletedRecordMessage } from "./error-recovery"
 
 describe("getDeletedRecordMessage", () => {
   it("returns a stale-record message for API 404 errors", () => {
-    const error = new ApiError("Savings goal not found.", 404, "not_found")
+    const error = new ApiError("Budget not found.", 404, "not_found")
 
-    expect(getDeletedRecordMessage(error, "goal")).toBe(
-      "This goal was deleted. Please refresh the page."
+    expect(getDeletedRecordMessage(error, "budget")).toBe(
+      "This budget was deleted. Please refresh the page."
     )
   })
 

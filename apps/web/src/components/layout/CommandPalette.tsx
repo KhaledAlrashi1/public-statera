@@ -74,10 +74,10 @@ export default function CommandPalette({
       {
         id: "plan",
         label: "Plan",
-        description: "Budgets, debt, and savings goals",
+        description: "Monthly budgets",
         icon: Wallet,
         action: () => go("/plan"),
-        keywords: ["budget", "limits", "allocations", "planning", "plan", "debt", "goals"],
+        keywords: ["budget", "limits", "allocations", "planning", "plan"],
       },
       {
         id: "insights",

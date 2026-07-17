@@ -23,8 +23,6 @@ export const OWNED_TABLES = [
   "transactions",
   "budgets",
   "dashboard_snapshots",
-  "debt_accounts",
-  "savings_goals",
   "product_events",
   "memorized_transactions",
   "template_suggestion_feedback",

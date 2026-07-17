@@ -20,10 +20,9 @@
  *   R3 (dashboard-metrics) delegates to computeDashboardMetricsPayload which uses
  *   formatKd() strings, where Flask used floats (_rounded_number) — pre-existing
  *   5a-1 deviation, Module 9 verifies frontend compatibility.
- * - R9 _goalMonthlyCommitment: lazy pace computation — monthlyPaceFromDeposits is
- *   called only when required_monthly is null or lte(0). Flask's
- *   _goal_projection_snapshot always computes pace unconditionally. Output is
- *   functionally identical because pace is only used in the current_pace branch.
+ * - R9 committed obligations = budget allocations only (phase4 SC-1/2). The debt-minimum
+ *   and savings-goal-reserve contributions were removed with the debt/savings features;
+ *   the goal-commitment/pace helpers and their Flask-parity notes were deleted with them.
  * - R10 _weekBounds uses Date.UTC() arithmetic and getUTCDay() shift
  *   (dow===0?6:dow-1) instead of Python's date.weekday() — same Mon=0…Sun=6 result.
  * - R10 _daysUntilPayday month-end clamp via new Date(Date.UTC(y,m,0)).getUTCDate()
@@ -51,8 +50,6 @@ import { categories } from "../db/schema/categories"
 import { merchants } from "../db/schema/merchants"
 import { userProfiles } from "../db/schema/users"
 import { budgets } from "../db/schema/budgets"
-import { debtAccounts } from "../db/schema/debt-accounts"
-import { savingsGoals } from "../db/schema/savings-goals"
 import { requireAuth } from "../middleware/auth"
 import {
   currentLocalDate,
@@ -74,9 +71,7 @@ import {
   cacheSet,
 } from "../lib/analytics-cache"
 import { resolveIncomeForPeriod } from "../lib/income-lib"
-import { monthlyPaceFromDeposits } from "../lib/savings-goals-lib"
 import { dashboardSnapshots } from "../db/schema/dashboard-snapshots"
-import { buildDebtSummaryPayload } from "./debt"
 import { buildBudgetPayload } from "./budgets"
 import { Sentry } from "../lib/sentry"
 import { searchRateLimit } from "../lib/rate-limit"
@@ -581,10 +576,6 @@ aggregationRouter.get("/dashboard-metrics", requireAuth, searchRateLimit, async 
 
 // ── R9: safe-to-spend private helpers ────────────────────────────────────────
 
-function _q3(d: Decimal): Decimal {
-  return d.toDecimalPlaces(3, Decimal.ROUND_HALF_UP)
-}
-
 async function _sumExpenseBetween(
   userId: number,
   start: string,
@@ -628,125 +619,6 @@ async function _budgetAmountsForMonth(
   return [totalBudget, amountsByCategory]
 }
 
-// Inlined from savings-goals-lib (not exported) to keep _goalMonthlyCommitment self-contained.
-// Python: max(1, (days + 29) // 30) where days = (target_date - today).days
-function _monthsToTargetDate(today: string, targetDate: Date | string | null): number | null {
-  if (!targetDate) return null
-  const targetStr = targetDate instanceof Date ? targetDate.toISOString().slice(0, 10) : targetDate
-  if (targetStr <= today) return 0
-  const [ty, tm, td] = today.split("-").map(Number)
-  const [dy, dm, dd] = targetStr.split("-").map(Number)
-  const daysDiff = Math.round(
-    (Date.UTC(dy, dm - 1, dd) - Date.UTC(ty, tm - 1, td)) / 86400000,
-  )
-  return Math.max(1, Math.floor((daysDiff + 29) / 30))
-}
-
-type GoalCommitment = {
-  monthlyCommitmentKd: Decimal
-  source: "completed" | "required_monthly" | "current_pace" | "unscheduled"
-  remainingKd: Decimal
-}
-
-// Ports Flask's goal_monthly_commitment (lib/savings_goals.py:163).
-// Strict comparators per spec Item 8: lte(0) for completed, gt(0) for required_monthly and current_pace.
-async function _goalMonthlyCommitment(
-  goal: { id: number; userId: number; targetKd: string; currentKd: string; targetDate: Date | string | null },
-  db: ReturnType<typeof getDb>,
-  today: string, // YYYY-MM-DD (Kuwait date via UTC accessors on currentLocalDate())
-): Promise<GoalCommitment> {
-  const target = Decimal.max(new Decimal(goal.targetKd || "0"), new Decimal(0))
-  const current = Decimal.max(new Decimal(goal.currentKd || "0"), new Decimal(0))
-  const remaining = Decimal.max(target.minus(current), new Decimal(0))
-
-  if (remaining.lte(0)) {
-    return { monthlyCommitmentKd: new Decimal("0"), source: "completed", remainingKd: new Decimal("0") }
-  }
-
-  const monthsToTarget = _monthsToTargetDate(today, goal.targetDate)
-  let requiredMonthly: Decimal | null = null
-  if (monthsToTarget !== null && monthsToTarget > 0) {
-    requiredMonthly = _q3(remaining.div(new Decimal(monthsToTarget)))
-  } else if (monthsToTarget === 0) {
-    requiredMonthly = _q3(remaining)
-  }
-
-  if (requiredMonthly !== null && requiredMonthly.gt(0)) {
-    return { monthlyCommitmentKd: requiredMonthly, source: "required_monthly", remainingKd: _q3(remaining) }
-  }
-
-  const currentPace = await monthlyPaceFromDeposits(goal.id, goal.userId, db, today)
-  if (currentPace.gt(0)) {
-    return { monthlyCommitmentKd: currentPace, source: "current_pace", remainingKd: _q3(remaining) }
-  }
-
-  return { monthlyCommitmentKd: new Decimal("0"), source: "unscheduled", remainingKd: _q3(remaining) }
-}
-
-type SavingsGoalSummary = {
-  count: number
-  unscheduledCount: number
-  monthlyTotalKd: Decimal
-  budgetCoveredKd: Decimal
-  reserveKd: Decimal
-}
-
-async function _savingsGoalReserveForSafeToSpend(
-  userId: number,
-  today: string, // YYYY-MM-DD
-  budgetAmountsByCategory: Record<string, Decimal>,
-  db: ReturnType<typeof getDb>,
-): Promise<SavingsGoalSummary> {
-  const goalRows = await db
-    .select({
-      id: savingsGoals.id,
-      userId: savingsGoals.userId,
-      targetKd: savingsGoals.targetKd,
-      currentKd: savingsGoals.currentKd,
-      targetDate: savingsGoals.targetDate,
-      catName: categories.name,
-    })
-    .from(savingsGoals)
-    .leftJoin(categories, eq(savingsGoals.linkedCategoryId, categories.id))
-    .where(and(eq(savingsGoals.userId, userId), eq(savingsGoals.isActive, true)))
-
-  const goalMonthlyByCategory: Record<string, Decimal> = {}
-  let savingsGoalMonthlyTotal = new Decimal("0")
-  let savingsGoalUnlinkedTotal = new Decimal("0")
-  let savingsGoalUnscheduledCount = 0
-
-  for (const goal of goalRows) {
-    const commitment = await _goalMonthlyCommitment(goal, db, today)
-    const monthlyCommitment = commitment.monthlyCommitmentKd
-    savingsGoalMonthlyTotal = savingsGoalMonthlyTotal.plus(monthlyCommitment)
-    if (commitment.source === "unscheduled") savingsGoalUnscheduledCount++
-    if (monthlyCommitment.lte(0)) continue
-    const linkedCatKey = (goal.catName ?? "").trim().toLowerCase()
-    if (linkedCatKey) {
-      goalMonthlyByCategory[linkedCatKey] =
-        (goalMonthlyByCategory[linkedCatKey] ?? new Decimal("0")).plus(monthlyCommitment)
-    } else {
-      savingsGoalUnlinkedTotal = savingsGoalUnlinkedTotal.plus(monthlyCommitment)
-    }
-  }
-
-  let savingsGoalBudgetCovered = new Decimal("0")
-  let savingsGoalReserve = savingsGoalUnlinkedTotal
-  for (const [catKey, monthlyCommitment] of Object.entries(goalMonthlyByCategory)) {
-    const covered = Decimal.min(monthlyCommitment, budgetAmountsByCategory[catKey] ?? new Decimal("0"))
-    savingsGoalBudgetCovered = savingsGoalBudgetCovered.plus(covered)
-    savingsGoalReserve = savingsGoalReserve.plus(monthlyCommitment.minus(covered))
-  }
-
-  return {
-    count: goalRows.length,
-    unscheduledCount: savingsGoalUnscheduledCount,
-    monthlyTotalKd: savingsGoalMonthlyTotal,
-    budgetCoveredKd: savingsGoalBudgetCovered,
-    reserveKd: savingsGoalReserve,
-  }
-}
-
 async function _buildSafeToSpendPayload(
   userId: number,
   month: string,
@@ -787,21 +659,7 @@ async function _buildSafeToSpendPayload(
   const monthlyIncome = incomeResolution.amountKd
   const incomeSource = incomeResolution.source
 
-  const [totalBudget, budgetAmountsByCategory] = await _budgetAmountsForMonth(userId, month, db)
-
-  const goalSummary = await _savingsGoalReserveForSafeToSpend(
-    userId, todayStr, budgetAmountsByCategory, db,
-  )
-
-  const [debtRow] = await db
-    .select({
-      total: sql<string>`COALESCE(SUM(${debtAccounts.minimumPaymentKd}), '0')`,
-      count: sql<string>`COUNT(${debtAccounts.id})`,
-    })
-    .from(debtAccounts)
-    .where(and(eq(debtAccounts.userId, userId), eq(debtAccounts.isActive, true)))
-  const debtMinimumTotal = new Decimal(debtRow?.total ?? "0")
-  const debtAccountCount = parseInt(debtRow?.count ?? "0", 10)
+  const [totalBudget] = await _budgetAmountsForMonth(userId, month, db)
 
   let actualSpend = new Decimal("0")
   if (spendWindowEnd !== null) {
@@ -809,7 +667,10 @@ async function _buildSafeToSpendPayload(
   }
 
   const incomeForCalc = monthlyIncome ?? new Decimal("0")
-  const committed = totalBudget.plus(debtMinimumTotal).plus(goalSummary.reserveKd)
+  // phase4 SC-1/2: committed obligations = budget allocations only. Debt minimums and
+  // savings-goal reserves were removed with the debt/savings features (the Safe-to-Spend
+  // headline rises accordingly — operator-acknowledged, ruling (d)).
+  const committed = totalBudget
   const commitmentsOverCap =
     incomeForCalc.gt(0) && committed.gt(incomeForCalc.mul(new Decimal("0.40")))
 
@@ -820,8 +681,6 @@ async function _buildSafeToSpendPayload(
   const warnings: string[] = []
   if (monthlyIncome === null) warnings.push("income_not_set")
   if (totalBudget.lte(0)) warnings.push("budgets_not_set")
-  if (debtAccountCount === 0) warnings.push("debts_not_set_optional")
-  if (goalSummary.unscheduledCount > 0) warnings.push("savings_goals_unscheduled_optional")
   if (commitmentsOverCap) warnings.push("commitments_over_40pct_cap")
 
   return {
@@ -834,18 +693,9 @@ async function _buildSafeToSpendPayload(
     income_auto_detected: incomeSource === "detected_from_transactions",
     income_source: incomeSource,
     total_budget_kd: formatKd(totalBudget),
-    debt_minimum_total_kd: formatKd(debtMinimumTotal),
-    savings_goal_count: goalSummary.count,
-    savings_goal_unscheduled_count: goalSummary.unscheduledCount,
-    savings_goal_monthly_total_kd: formatKd(goalSummary.monthlyTotalKd),
-    savings_goal_budget_covered_kd: formatKd(goalSummary.budgetCoveredKd),
-    savings_goal_reserve_kd: formatKd(goalSummary.reserveKd),
     committed_kd: formatKd(committed),
     committed_breakdown_kd: {
       budget_allocations: formatKd(totalBudget),
-      debt_minimums: formatKd(debtMinimumTotal),
-      savings_goal_reserve: formatKd(goalSummary.reserveKd),
-      savings_goal_budget_covered: formatKd(goalSummary.budgetCoveredKd),
     },
     actual_spend_kd: formatKd(actualSpend),
     remaining_budget_kd: formatKd(remainingBudget),
@@ -1197,8 +1047,9 @@ aggregationRouter.get("/weekly-digest", requireAuth, searchRateLimit, async (c) 
 })
 
 // ── R8: GET /api/analytics/dashboard-bundle ──────────────────────────────────
-// Bundles safe_to_spend, debt_summary, budget, account_overview, and
+// Bundles safe_to_spend, budget, account_overview, and
 // snapshot_computed_at into one response to reduce round trips.
+// (debt_summary removed in phase4 SC-1/2 with the debt-accounts feature.)
 // Sequential-then-parallel: _getSafeToSpendPayloadCached awaited before Promise.all
 // for the other 4 sub-builders. See file header deviation block for trade-offs.
 
@@ -1241,8 +1092,7 @@ aggregationRouter.get("/dashboard-bundle", requireAuth, searchRateLimit, async (
       env.analyticsComputeTimeoutSeconds,
       async () => {
         const safeToSpend = await _getSafeToSpendPayloadCached(userId, month, today, db)
-        const [debtSummary, budget, accountOverview, snapshotComputedAt] = await Promise.all([
-          buildDebtSummaryPayload(userId, db),
+        const [budget, accountOverview, snapshotComputedAt] = await Promise.all([
           buildBudgetPayload(userId, month, db),
           _buildAccountOverviewPayload(userId, month, db),
           _snapshotComputedAt(userId, db, currentMonth),
@@ -1251,7 +1101,6 @@ aggregationRouter.get("/dashboard-bundle", requireAuth, searchRateLimit, async (
           month,
           snapshot_computed_at: snapshotComputedAt,
           safe_to_spend: safeToSpend,
-          debt_summary: debtSummary,
           budget,
           budget_alerts: {
             month,

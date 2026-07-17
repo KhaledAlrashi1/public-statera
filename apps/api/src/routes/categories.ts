@@ -22,7 +22,6 @@ import { zodErrorToEnvelope } from "./route-helpers"
 import { categories } from "../db/schema/categories"
 import { transactions } from "../db/schema/transactions"
 import { budgets } from "../db/schema/budgets"
-import { savingsGoals } from "../db/schema/savings-goals"
 import { memorizedTransactions } from "../db/schema/memorized-transactions"
 import { requireAuth } from "../middleware/auth"
 import { readRateLimit, writeRateLimit, heavyWriteRateLimit } from "../lib/rate-limit"
@@ -57,7 +56,6 @@ type CategoryItem = {
 type RemapCounts = {
   remapped_count: number
   budget_count: number
-  goal_count: number
   memorized_count: number
 }
 
@@ -258,10 +256,6 @@ categoriesRouter.delete("/:id", requireAuth, writeRateLimit, async (c) => {
           .set({ categoryId: reassignId })
           .where(and(eq(budgets.userId, userId), eq(budgets.categoryId, id)))
         await tx
-          .update(savingsGoals)
-          .set({ linkedCategoryId: reassignId })
-          .where(and(eq(savingsGoals.userId, userId), eq(savingsGoals.linkedCategoryId, id)))
-        await tx
           .update(memorizedTransactions)
           .set({ categoryId: reassignId })
           .where(and(eq(memorizedTransactions.userId, userId), eq(memorizedTransactions.categoryId, id)))
@@ -361,10 +355,9 @@ categoriesRouter.post("/:id/remap", requireAuth, heavyWriteRateLimit, async (c) 
       await _checkBudgetConflict(tx, sourceId, target_id, userId)
 
       // Count rows before updating so the response reflects actual changes.
-      const [[txnRow], [budRow], [goalRow], [memRow]] = await Promise.all([
+      const [[txnRow], [budRow], [memRow]] = await Promise.all([
         tx.select({ count: sql<number>`COUNT(*)` }).from(transactions).where(and(eq(transactions.userId, userId), eq(transactions.categoryId, sourceId))),
         tx.select({ count: sql<number>`COUNT(*)` }).from(budgets).where(and(eq(budgets.userId, userId), eq(budgets.categoryId, sourceId))),
-        tx.select({ count: sql<number>`COUNT(*)` }).from(savingsGoals).where(and(eq(savingsGoals.userId, userId), eq(savingsGoals.linkedCategoryId, sourceId))),
         tx.select({ count: sql<number>`COUNT(*)` }).from(memorizedTransactions).where(and(eq(memorizedTransactions.userId, userId), eq(memorizedTransactions.categoryId, sourceId))),
       ])
 
@@ -377,10 +370,6 @@ categoriesRouter.post("/:id/remap", requireAuth, heavyWriteRateLimit, async (c) 
         .set({ categoryId: target_id })
         .where(and(eq(budgets.userId, userId), eq(budgets.categoryId, sourceId)))
       await tx
-        .update(savingsGoals)
-        .set({ linkedCategoryId: target_id })
-        .where(and(eq(savingsGoals.userId, userId), eq(savingsGoals.linkedCategoryId, sourceId)))
-      await tx
         .update(memorizedTransactions)
         .set({ categoryId: target_id })
         .where(and(eq(memorizedTransactions.userId, userId), eq(memorizedTransactions.categoryId, sourceId)))
@@ -388,7 +377,6 @@ categoriesRouter.post("/:id/remap", requireAuth, heavyWriteRateLimit, async (c) 
       remapCounts = {
         remapped_count: Number(txnRow?.count ?? 0),
         budget_count: Number(budRow?.count ?? 0),
-        goal_count: Number(goalRow?.count ?? 0),
         memorized_count: Number(memRow?.count ?? 0),
       }
     })
@@ -420,17 +408,15 @@ async function _getDependentCounts(
   db: AnyDb,
   categoryId: number,
   userId: number,
-): Promise<{ transactions: number; budgets: number; goals: number; memorized: number }> {
-  const [[txnRow], [budRow], [goalRow], [memRow]] = await Promise.all([
+): Promise<{ transactions: number; budgets: number; memorized: number }> {
+  const [[txnRow], [budRow], [memRow]] = await Promise.all([
     db.select({ count: sql<number>`COUNT(*)` }).from(transactions).where(and(eq(transactions.userId, userId), eq(transactions.categoryId, categoryId))),
     db.select({ count: sql<number>`COUNT(*)` }).from(budgets).where(and(eq(budgets.userId, userId), eq(budgets.categoryId, categoryId))),
-    db.select({ count: sql<number>`COUNT(*)` }).from(savingsGoals).where(and(eq(savingsGoals.userId, userId), eq(savingsGoals.linkedCategoryId, categoryId))),
     db.select({ count: sql<number>`COUNT(*)` }).from(memorizedTransactions).where(and(eq(memorizedTransactions.userId, userId), eq(memorizedTransactions.categoryId, categoryId))),
   ])
   return {
     transactions: Number(txnRow?.count ?? 0),
     budgets: Number(budRow?.count ?? 0),
-    goals: Number(goalRow?.count ?? 0),
     memorized: Number(memRow?.count ?? 0),
   }
 }

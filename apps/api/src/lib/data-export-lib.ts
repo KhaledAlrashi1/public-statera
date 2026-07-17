@@ -45,6 +45,11 @@
  * PRESENT, not omitted. This makes the export self-evidently complete: a reader sees the
  * table exists and holds nothing, rather than having to trust an exclusion note.
  *
+ * REMOVED SECTIONS (phase4 SC-1/2): the debt_accounts and savings_goals sections and the
+ * profile.has_debt_choice field were removed here when the debt/savings features were
+ * removed. These are NOT exclusions (there is no longer any such data to omit), so they are
+ * intentionally absent from DATA_EXPORT_EXCLUSIONS below (C5: section removal, not exclusion).
+ *
  * POST-APPROVAL SHAPE CHANGES (recorded 2026-07-05 in reconciliation — honesty of record):
  * (a) meta.excluded / DATA_EXPORT_EXCLUSIONS was approved in Phase A as a 3-entry
  *     table-level skeleton. It shipped enriched to also carry the FIELD-LEVEL entries
@@ -75,8 +80,6 @@ import {
   merchants,
   transactions,
   budgets,
-  debtAccounts,
-  savingsGoals,
   memorizedTransactions,
   templateSuggestionFeedback,
   securityEvents,
@@ -117,8 +120,6 @@ export type UserDataExport = {
   merchants: Record<string, unknown>[]
   transactions: Record<string, unknown>[]
   budgets: Record<string, unknown>[]
-  debt_accounts: Record<string, unknown>[]
-  savings_goals: Record<string, unknown>[]
   memorized_transactions: Record<string, unknown>[]
   template_suggestion_feedback: Record<string, unknown>[]
   security_events: Record<string, unknown>[]
@@ -167,7 +168,6 @@ export async function buildUserDataExport(
       country: userProfiles.country,
       timezone: userProfiles.timezone,
       emailNotificationsEnabled: userProfiles.emailNotificationsEnabled,
-      hasDebtChoice: userProfiles.hasDebtChoice,
       setupGuideSeen: userProfiles.setupGuideSeen,
       setupGuideDismissed: userProfiles.setupGuideDismissed,
       createdAt: userProfiles.createdAt,
@@ -227,44 +227,6 @@ export async function buildUserDataExport(
     .from(budgets)
     .where(eq(budgets.userId, userId))
     .orderBy(asc(budgets.id))
-
-  // ── debt accounts ──────────────────────────────────────────────────────────
-  const debtRows = await db
-    .select({
-      id: debtAccounts.id,
-      name: debtAccounts.name,
-      debtType: debtAccounts.debtType,
-      balanceKd: debtAccounts.balanceKd,
-      aprPct: debtAccounts.aprPct,
-      minimumPaymentKd: debtAccounts.minimumPaymentKd,
-      dueDay: debtAccounts.dueDay,
-      isActive: debtAccounts.isActive,
-      notes: debtAccounts.notes,
-      createdAt: debtAccounts.createdAt,
-      updatedAt: debtAccounts.updatedAt,
-    })
-    .from(debtAccounts)
-    .where(eq(debtAccounts.userId, userId))
-    .orderBy(asc(debtAccounts.id))
-
-  // ── savings goals ──────────────────────────────────────────────────────────
-  const savingsRows = await db
-    .select({
-      id: savingsGoals.id,
-      name: savingsGoals.name,
-      goalType: savingsGoals.goalType,
-      targetKd: savingsGoals.targetKd,
-      currentKd: savingsGoals.currentKd,
-      targetDate: savingsGoals.targetDate,
-      linkedCategoryId: savingsGoals.linkedCategoryId,
-      isActive: savingsGoals.isActive,
-      notes: savingsGoals.notes,
-      createdAt: savingsGoals.createdAt,
-      updatedAt: savingsGoals.updatedAt,
-    })
-    .from(savingsGoals)
-    .where(eq(savingsGoals.userId, userId))
-    .orderBy(asc(savingsGoals.id))
 
   // ── memorized transactions (norm IS exported — see deliberate-asymmetry note) ─
   const memorizedRows = await db
@@ -350,7 +312,6 @@ export async function buildUserDataExport(
           country: profileRow.country ?? null,
           timezone: profileRow.timezone ?? "Asia/Kuwait",
           email_notifications_enabled: Boolean(profileRow.emailNotificationsEnabled),
-          has_debt_choice: profileRow.hasDebtChoice ?? null,
           setup_guide_seen: Boolean(profileRow.setupGuideSeen),
           setup_guide_dismissed: Boolean(profileRow.setupGuideDismissed),
           created_at: toIsoUtc(profileRow.createdAt),
@@ -382,32 +343,6 @@ export async function buildUserDataExport(
       month: r.month,
       category_id: r.categoryId,
       amount_kd: formatKd(r.amountKd),
-      updated_at: toIsoUtc(r.updatedAt),
-    })),
-    debt_accounts: debtRows.map((r) => ({
-      id: r.id,
-      name: r.name,
-      debt_type: r.debtType,
-      balance_kd: formatKd(r.balanceKd),
-      apr_pct: r.aprPct != null ? formatKd(r.aprPct) : null,
-      minimum_payment_kd: formatKd(r.minimumPaymentKd),
-      due_day: r.dueDay ?? null,
-      is_active: Boolean(r.isActive),
-      notes: r.notes ?? null,
-      created_at: toIsoUtc(r.createdAt),
-      updated_at: toIsoUtc(r.updatedAt),
-    })),
-    savings_goals: savingsRows.map((r) => ({
-      id: r.id,
-      name: r.name,
-      goal_type: r.goalType,
-      target_kd: formatKd(r.targetKd),
-      current_kd: formatKd(r.currentKd),
-      target_date: toDateOnly(r.targetDate),
-      linked_category_id: r.linkedCategoryId ?? null,
-      is_active: Boolean(r.isActive),
-      notes: r.notes ?? null,
-      created_at: toIsoUtc(r.createdAt),
       updated_at: toIsoUtc(r.updatedAt),
     })),
     memorized_transactions: memorizedRows.map((r) => ({
@@ -452,8 +387,6 @@ export async function buildUserDataExport(
     merchants: exportData.merchants.length,
     transactions: exportData.transactions.length,
     budgets: exportData.budgets.length,
-    debt_accounts: exportData.debt_accounts.length,
-    savings_goals: exportData.savings_goals.length,
     memorized_transactions: exportData.memorized_transactions.length,
     template_suggestion_feedback: exportData.template_suggestion_feedback.length,
     security_events: exportData.security_events.length,

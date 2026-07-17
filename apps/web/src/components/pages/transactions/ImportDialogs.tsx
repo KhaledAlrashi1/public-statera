@@ -2044,8 +2044,7 @@ export function PreviewImportDialog({
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-foreground">Replace demo workspace before import</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Removes {demoWorkspace.transactions} demo transactions, {demoWorkspace.budgets} budgets,{" "}
-                  {demoWorkspace.debt_accounts} debt account, and {demoWorkspace.savings_goals} savings goal
+                  Removes {demoWorkspace.transactions} demo transactions and {demoWorkspace.budgets} budgets
                   so your first real import starts from a clean account.
                 </p>
               </div>

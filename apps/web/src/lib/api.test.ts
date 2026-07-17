@@ -304,29 +304,15 @@ describe("envelope parsing", () => {
           monthly_income_kd: "1200.000",
           income_auto_detected: false,
           total_budget_kd: "800.000",
-          debt_minimum_total_kd: "75.000",
-          savings_goal_count: 0,
-          savings_goal_unscheduled_count: 0,
-          savings_goal_monthly_total_kd: "0.000",
-          savings_goal_budget_covered_kd: "0.000",
-          savings_goal_reserve_kd: "0.000",
-          committed_kd: "875.000",
+          committed_kd: "800.000",
           committed_breakdown_kd: {
             budget_allocations: "800.000",
-            debt_minimums: "75.000",
-            savings_goal_reserve: "0.000",
-            savings_goal_budget_covered: "0.000",
           },
           actual_spend_kd: "120.000",
-          remaining_budget_kd: "205.000",
+          remaining_budget_kd: "280.000",
           daily_rate_kd: "7.590",
           data_complete: true,
           warnings: [],
-        },
-        debt_summary: {
-          total_balance_kd: "400.000",
-          total_minimum_kd: "75.000",
-          account_count: 1,
         },
         budget: {
           month: "2026-02",
@@ -361,8 +347,7 @@ describe("envelope parsing", () => {
 
     const result = await analyticsApi.dashboardBundle("2026-02")
     expect(result.month).toBe("2026-02")
-    expect(result.safe_to_spend.committed_kd).toBe("875.000")
-    expect(result.debt_summary.account_count).toBe(1)
+    expect(result.safe_to_spend.committed_kd).toBe("800.000")
     expect(result.budget.items).toHaveLength(1)
     expect(result.account_overview.total_income_mtd).toBe("500.000")
   })

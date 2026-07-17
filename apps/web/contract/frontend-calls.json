@@ -9,19 +9,11 @@
   },
   {
     "method": "DELETE",
-    "path": "/api/debt-accounts/1"
-  },
-  {
-    "method": "DELETE",
     "path": "/api/memorized-transactions/1"
   },
   {
     "method": "DELETE",
     "path": "/api/merchants/1"
-  },
-  {
-    "method": "DELETE",
-    "path": "/api/savings-goals/1"
   },
   {
     "method": "DELETE",
@@ -113,18 +105,6 @@
   },
   {
     "method": "GET",
-    "path": "/api/debt-accounts"
-  },
-  {
-    "method": "GET",
-    "path": "/api/debt-accounts/payoff-plan"
-  },
-  {
-    "method": "GET",
-    "path": "/api/debt-accounts/summary"
-  },
-  {
-    "method": "GET",
     "path": "/api/memorized-transactions"
   },
   {
@@ -134,14 +114,6 @@
   {
     "method": "GET",
     "path": "/api/notifications/budget-alerts"
-  },
-  {
-    "method": "GET",
-    "path": "/api/savings-goals"
-  },
-  {
-    "method": "GET",
-    "path": "/api/savings-goals/1/projection"
   },
   {
     "method": "GET",
@@ -173,19 +145,11 @@
   },
   {
     "method": "PATCH",
-    "path": "/api/debt-accounts/1"
-  },
-  {
-    "method": "PATCH",
     "path": "/api/memorized-transactions/1"
   },
   {
     "method": "PATCH",
     "path": "/api/merchants/1"
-  },
-  {
-    "method": "PATCH",
-    "path": "/api/savings-goals/1"
   },
   {
     "method": "PATCH",
@@ -241,10 +205,6 @@
   },
   {
     "method": "POST",
-    "path": "/api/debt-accounts"
-  },
-  {
-    "method": "POST",
     "path": "/api/memorized-transactions"
   },
   {
@@ -266,14 +226,6 @@
   {
     "method": "POST",
     "path": "/api/notifications/budget-alerts/dismiss"
-  },
-  {
-    "method": "POST",
-    "path": "/api/savings-goals"
-  },
-  {
-    "method": "POST",
-    "path": "/api/savings-goals/1/deposit"
   },
   {
     "method": "POST",

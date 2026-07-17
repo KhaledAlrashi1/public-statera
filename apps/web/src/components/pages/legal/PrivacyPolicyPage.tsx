@@ -57,8 +57,8 @@ export default function PrivacyPolicyPage() {
             </li>
             <li>
               <span className="font-semibold text-foreground">Financial data you enter:</span>{" "}
-              transactions, categories, merchants, budgets, debt accounts, and savings goals.
-              Amounts are stored in Kuwaiti dinars exactly as you enter them.
+              transactions, categories, merchants, and budgets. Amounts are stored in
+              Kuwaiti dinars exactly as you enter them.
             </li>
             <li>
               <span className="font-semibold text-foreground">Learned suggestions:</span> when you

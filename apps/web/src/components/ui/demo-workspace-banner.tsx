@@ -27,8 +27,7 @@ export function DemoWorkspaceBanner({
               Replace the sample data on your first import so your real transactions do not mix with the demo history.
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
-              {demoWorkspace.transactions} demo transactions, {demoWorkspace.budgets} budgets,{" "}
-              {demoWorkspace.debt_accounts} debt account, and {demoWorkspace.savings_goals} savings goal are loaded.
+              {demoWorkspace.transactions} demo transactions and {demoWorkspace.budgets} budgets are loaded.
             </p>
           </div>
         </div>

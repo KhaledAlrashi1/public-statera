@@ -92,8 +92,6 @@ describe("PreviewImportDialog", () => {
           months_seeded: 6,
           transactions: 49,
           budgets: 7,
-          debt_accounts: 1,
-          savings_goals: 1,
           profile_seeded_fields: ["monthly_income_kd", "payday_day", "country"],
         }}
       />

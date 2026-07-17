@@ -51,7 +51,6 @@ import {
 import type {
   AccountOverviewConnectedAccount,
   BudgetAlertNotification,
-  DebtAccountSummary,
   SafeToSpendResponse,
   SnapshotResponse,
 } from "@/types/api"
@@ -151,29 +150,11 @@ function dashboardMomentumState(monthRemaining: number, savingsRate: number) {
 const SAFE_TO_SPEND_WARNING_COPY: Record<string, string> = {
   income_not_set: "Add income transactions (categorized as Income) to calculate this number.",
   budgets_not_set: "Add this month's budgets in Plan for a more detailed breakdown.",
-  debts_not_set_optional: "No debt payments are included right now. Add them in Plan if you have any.",
-  savings_goals_unscheduled_optional: "Some savings goals are missing a target date or recent deposit history, so they are not included yet.",
-  commitments_over_40pct_cap: "Your savings goals and debt payments exceed 40% of your income. Consider adjusting your targets.",
+  commitments_over_40pct_cap: "Your budgeted commitments exceed 40% of your income. Consider adjusting your budgets.",
 }
 
-function safeToSpendCommitmentNote({
-  debtMinimum,
-  savingsGoalReserve,
-}: {
-  debtMinimum: number
-  savingsGoalReserve: number
-}) {
-  if (debtMinimum > 0 && savingsGoalReserve > 0) {
-    return "This number already sets aside room for both debt payments and savings goals."
-  }
-  if (debtMinimum > 0) {
-    return "This number already accounts for your debt payments."
-  }
-  if (savingsGoalReserve > 0) {
-    return "This number already sets aside money for your savings goals."
-  }
-  return "Based on your detected income and spending so far this month."
-}
+const SAFE_TO_SPEND_COMMITMENT_NOTE =
+  "Based on your detected income and spending so far this month."
 
 function safeToSpendTone(dailyRate: number) {
   if (dailyRate <= 0) {
@@ -230,10 +211,6 @@ export function SafeToSpendHero({
 }) {
   const warnings = safeToSpend?.warnings || []
   const dailyRate = Number(safeToSpend?.daily_rate_kd || 0)
-  const debtMinimum = Number(safeToSpend?.debt_minimum_total_kd || 0)
-  const savingsGoalCount = safeToSpend?.savings_goal_count || 0
-  const savingsGoalReserve = Number(safeToSpend?.savings_goal_reserve_kd || 0)
-  const savingsGoalBudgetCovered = Number(safeToSpend?.savings_goal_budget_covered_kd || 0)
   const monthlyIncome = Number(safeToSpend?.monthly_income_kd || 0)
   const [incomeNudgeDismissed, setIncomeNudgeDismissed] = useState(
     () => typeof window !== "undefined" && window.localStorage.getItem("income_nudge_dismissed") === "1"
@@ -251,12 +228,9 @@ export function SafeToSpendHero({
     safeToSpend && safeToSpend.income_source === 'not_set' && !incomeNudgeDismissed
   )
   const hasInfoNotes = Boolean(
-    (monthlyIncome > 0 &&
+    monthlyIncome > 0 &&
       (safeToSpend?.income_source === 'detected_from_transactions' ||
-        safeToSpend?.income_source === 'declared_in_profile')) ||
-      savingsGoalBudgetCovered > 0 ||
-      warnings.includes("debts_not_set_optional") ||
-      warnings.includes("savings_goals_unscheduled_optional")
+        safeToSpend?.income_source === 'declared_in_profile')
   )
 
   return (
@@ -357,26 +331,11 @@ export function SafeToSpendHero({
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Monthly runway</p>
                 <p className="mt-1 text-xl font-semibold leading-tight tabular-nums">{formatKD(safeToSpend.remaining_budget_kd)}</p>
               </div>
-              {debtMinimum > 0 ? (
-                <div className="inner-card flex-1 min-w-[120px]">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Debt minimums</p>
-                  <p className="mt-1 text-xl font-semibold leading-tight tabular-nums">{formatKD(safeToSpend.debt_minimum_total_kd)}</p>
-                </div>
-              ) : null}
-              {savingsGoalCount > 0 ? (
-                <div className="inner-card flex-1 min-w-[120px]">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Goal reserve</p>
-                  <div className="mt-1 flex items-center gap-2">
-                    <PiggyBank className="h-4 w-4 text-primary" />
-                    <p className="text-xl font-semibold leading-tight tabular-nums">{formatKD(safeToSpend.savings_goal_reserve_kd)}</p>
-                  </div>
-                </div>
-              ) : null}
             </div>
             <div className="space-y-2 px-1">
               {/* One-line explanation — always visible */}
               <p className="text-xs text-muted-foreground">
-                {safeToSpendCommitmentNote({ debtMinimum, savingsGoalReserve })}
+                {SAFE_TO_SPEND_COMMITMENT_NOTE}
               </p>
               {/* Actionable warning — kept as one visible line */}
               {warnings.includes("commitments_over_40pct_cap") && (
@@ -402,17 +361,6 @@ export function SafeToSpendHero({
                       <p className="text-xs text-muted-foreground">
                         Income of {formatKD(safeToSpend.monthly_income_kd)} is from your profile setting. Add income transactions to use auto-detection.
                       </p>
-                    )}
-                    {savingsGoalBudgetCovered > 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        {formatKD(safeToSpend.savings_goal_budget_covered_kd)} of goal funding is already covered by this month&apos;s budgets.
-                      </p>
-                    )}
-                    {warnings.includes("debts_not_set_optional") && (
-                      <p className="text-xs text-muted-foreground">{SAFE_TO_SPEND_WARNING_COPY.debts_not_set_optional}</p>
-                    )}
-                    {warnings.includes("savings_goals_unscheduled_optional") && (
-                      <p className="text-xs text-muted-foreground">{SAFE_TO_SPEND_WARNING_COPY.savings_goals_unscheduled_optional}</p>
                     )}
                   </div>
                 </details>
@@ -440,116 +388,6 @@ export function SafeToSpendHero({
             </Button>
           </div>
         )}
-      </div>
-    </section>
-  )
-}
-
-export function PlanSummaryPanel({
-  isLoading,
-  summary,
-  onOpenDebt,
-  onOpenGoals,
-}: {
-  isLoading: boolean
-  summary: DebtAccountSummary | undefined
-  onOpenDebt: () => void
-  onOpenGoals: () => void
-}) {
-  const hasDebt = Boolean(summary && summary.account_count > 0)
-  return (
-    <section className="section-panel float-in stagger-1" aria-label="Plan summary">
-      <div className="section-header">
-        <div>
-          <div className="flex items-center gap-2 text-lg font-semibold">
-            <Target className="h-4 w-4 text-primary" />
-            Plan
-          </div>
-          <div className="mt-1 text-xs text-muted-foreground">
-            Debt tracking and savings goals live in Plan → Goals &amp; Debt.
-          </div>
-        </div>
-      </div>
-      <div className="section-body space-y-4">
-        {/* Debt Summary group */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <CreditCard className="h-4 w-4 text-primary" />
-            Debt Summary
-          </div>
-          {isLoading ? (
-            <div className="skeleton h-20 w-full" role="status" aria-label="Loading debt summary" />
-          ) : !hasDebt ? (
-            <div className="inner-card space-y-3">
-              <p className="text-sm text-muted-foreground">
-                You haven&apos;t added any debts yet. Add credit cards or loans to include minimum payments in your plan.
-              </p>
-              <Button type="button" variant="outline" onClick={onOpenDebt}>
-                Track your debts
-              </Button>
-            </div>
-          ) : (
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="inner-card">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Total Balance
-                </p>
-                <p className="mt-1 text-2xl font-semibold leading-tight tabular-nums">{formatKD(summary!.total_balance_kd)}</p>
-              </div>
-              <div className="inner-card">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Minimums / Month
-                </p>
-                <p className="mt-1 text-2xl font-semibold leading-tight tabular-nums">{formatKD(summary!.total_minimum_kd)}</p>
-              </div>
-              <div className="inner-card">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Active Debts
-                </p>
-                <p className="mt-1 text-2xl font-semibold leading-tight tabular-nums">{summary!.account_count}</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Plan shortcuts */}
-        <div className="grid gap-3 md:grid-cols-2">
-          <button
-            type="button"
-            onClick={onOpenDebt}
-            className="inner-card flex w-full flex-col items-start gap-3 text-left transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <CreditCard className="h-4 w-4 text-primary" />
-              Debt Tracker
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Add credit cards and loans so minimum payments feed your monthly plan automatically.
-            </p>
-            <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
-              Open debt tracker
-              <ArrowRight className="h-4 w-4" />
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onOpenGoals}
-            className="inner-card flex w-full flex-col items-start gap-3 text-left transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <PiggyBank className="h-4 w-4 text-primary" />
-              Savings Goals
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Create targets for your emergency fund and future goals so the dashboard protects that money.
-            </p>
-            <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
-              Open savings goals
-              <ArrowRight className="h-4 w-4" />
-            </span>
-          </button>
-        </div>
       </div>
     </section>
   )
@@ -1545,28 +1383,14 @@ export function FinancialSnapshotHero({
           </div>
         ) : (
           <>
-            {/* Net position KPIs */}
-            <div className="grid gap-3 sm:grid-cols-3">
+            {/* Net position KPI */}
+            <div className="grid gap-3 sm:grid-cols-1">
               <div className="inner-card flex flex-col gap-1">
                 <span className="text-xs text-muted-foreground">Net Position</span>
                 <span className={`text-lg font-bold tabular-nums ${(np?.net_kd ?? 0) >= 0 ? "text-primary" : "text-destructive"}`}>
                   {formatKD(np?.net_kd ?? 0)}
                 </span>
                 <span className="text-[11px] text-muted-foreground">All-time tracked</span>
-              </div>
-              <div className="inner-card flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground">Total Debt</span>
-                <span className="text-lg font-bold tabular-nums text-destructive/90">
-                  {formatKD(np?.total_debt_kd ?? 0)}
-                </span>
-                <span className="text-[11px] text-muted-foreground">Active balances</span>
-              </div>
-              <div className="inner-card flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground">Savings Progress</span>
-                <span className="text-lg font-bold tabular-nums text-primary">
-                  {formatKD(np?.total_savings_kd ?? 0)}
-                </span>
-                <span className="text-[11px] text-muted-foreground">Across all goals</span>
               </div>
             </div>
 

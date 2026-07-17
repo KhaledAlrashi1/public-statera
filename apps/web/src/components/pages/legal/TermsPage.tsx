@@ -28,13 +28,13 @@ export default function TermsPage() {
             2. What Statera is — and is not
           </h2>
           <p className="mt-2">
-            Statera is a personal finance tracking tool: you record your own transactions, budgets,
-            debts, and savings goals, and Statera organizes and summarizes them for you.
+            Statera is a personal finance tracking tool: you record your own transactions and budgets,
+            and Statera organizes and summarizes them for you.
           </p>
           <p className="mt-2">
             Statera is <span className="font-semibold text-foreground">not</span> financial,
             investment, tax, or legal advice. Numbers, projections, and suggestions shown in the app
-            (including &ldquo;safe to spend&rdquo; figures and debt payoff projections) are
+            (including &ldquo;safe to spend&rdquo; figures) are
             calculations based solely on the data you entered. They may be wrong if your data is
             incomplete, and they are not a recommendation to make any financial decision. You are
             responsible for your own financial choices.

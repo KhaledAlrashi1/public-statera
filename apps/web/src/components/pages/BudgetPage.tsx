@@ -1,7 +1,7 @@
 import { Target } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { analyticsApi } from "@/lib/api"
 import { cn, fmt3, formatDeltaLabel, today, toYearMonth, isIncome, isEditableMonth, labelForYM, prevMonth as prevMonthUtil } from "@/lib/utils"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -24,7 +24,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { SegmentedControl } from "@/components/ui/segmented-control"
 import PageHeader from "@/components/layout/PageHeader"
 import {
   BudgetChart,
@@ -34,7 +33,6 @@ import {
   IncomePlanningCard,
   type BudgetRange,
 } from "./budget/sections"
-import { GoalsTab } from "./budget/GoalsTab"
 import {
   type BudgetItem,
   findDuplicateCategory,
@@ -45,31 +43,11 @@ import {
   useBudgetPageQueries,
 } from "./budget/hooks"
 
-type PlanTab = "budget" | "goals"
-const PLAN_TAB_STORAGE_KEY = "plan-page-tab-v1"
-
-function normalizePlanTab(value: string | null): PlanTab | null {
-  if (value === "budget" || value === "goals") return value
-  return null
-}
-
 export default function BudgetPage() {
   const toast = useToast()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
   const [selectedMonth, setSelectedMonth] = useState(toYearMonth(today()))
-  const [activeTab, setActiveTab] = useState<PlanTab>(() => {
-    const tabFromUrl = normalizePlanTab(searchParams.get("tab"))
-    if (tabFromUrl) return tabFromUrl
-    if (typeof window === "undefined") return "budget"
-    try {
-      const saved = window.localStorage.getItem(PLAN_TAB_STORAGE_KEY)
-      return saved === "goals" ? "goals" : "budget"
-    } catch {
-      return "budget"
-    }
-  })
   const [addOpen, setAddOpen] = useState(false)
   const [editIndex, setEditIndex] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
@@ -106,23 +84,6 @@ export default function BudgetPage() {
     const timer = setTimeout(() => setAnimDone(true), 800)
     return () => clearTimeout(timer)
   }, [])
-
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    try {
-      window.localStorage.setItem(PLAN_TAB_STORAGE_KEY, activeTab)
-    } catch {
-      // ignore localStorage write issues
-    }
-  }, [activeTab])
-
-  useEffect(() => {
-    const tabFromUrl = normalizePlanTab(searchParams.get("tab"))
-    if (tabFromUrl && tabFromUrl !== activeTab) {
-      setActiveTab(tabFromUrl)
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams])
 
   const {
     monthOptions,
@@ -409,16 +370,6 @@ export default function BudgetPage() {
     URL.revokeObjectURL(link.href)
   }
 
-  const handleTabChange = (nextTab: string) => {
-    const normalized = normalizePlanTab(nextTab)
-    if (!normalized) return
-    setActiveTab(normalized)
-    const next = new URLSearchParams(searchParams)
-    if (normalized === "budget") next.delete("tab")
-    else next.set("tab", normalized)
-    setSearchParams(next, { replace: true })
-  }
-
   const budgetPageErrorMessage = useMemo(() => {
     const errors = [
       budgetsError,
@@ -432,8 +383,7 @@ export default function BudgetPage() {
     const first = errors[0]
     return first instanceof Error ? first.message : "We couldn't load the full planning view."
   }, [budgetsError, metricsError, categoriesError, activeMonthsError, comparisonBudgetDataError, comparisonBudgetMetricsError])
-  const showBudgetEmptyState = activeTab === "budget"
-    && !budgetPageErrorMessage
+  const showBudgetEmptyState = !budgetPageErrorMessage
     && !loadingBudgets
     && !loadingMetrics
     && budgets.length === 0
@@ -443,41 +393,28 @@ export default function BudgetPage() {
       <PageHeader
         badge="Plan"
         badgeDotClassName="bg-primary"
-        badgeSuffix={activeTab === "budget" ? labelForYM(selectedMonth) : "Goals & Debt"}
-        title="Plan budgets, debts, and savings goals"
+        badgeSuffix={labelForYM(selectedMonth)}
+        title="Plan your monthly budgets"
         actions={(
-          <>
-            <SegmentedControl
-              tabs={[
-                { id: "budget", label: "Budget" },
-                { id: "goals", label: "Goals & Debt" },
-              ]}
-              value={activeTab}
-              onChange={handleTabChange}
-              ariaLabel="Plan page tabs"
-            />
-            <div className={cn(activeTab !== "budget" && "invisible pointer-events-none")}>
-              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger
-                  className="h-10 w-[160px] rounded-full px-4 text-sm shadow-sm sm:w-[180px]"
-                  aria-label="Select month to view"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {monthOptions.map((m) => (
-                    <SelectItem key={m} value={m}>
-                      {m}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </>
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger
+              className="h-10 w-[160px] rounded-full px-4 text-sm shadow-sm sm:w-[180px]"
+              aria-label="Select month to view"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {monthOptions.map((m) => (
+                <SelectItem key={m} value={m}>
+                  {m}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
       />
 
-      {activeTab === "budget" && budgetPageErrorMessage ? (
+      {budgetPageErrorMessage ? (
         <Alert variant="warning">
           <AlertTitle>Planning data unavailable</AlertTitle>
           <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -507,8 +444,7 @@ export default function BudgetPage() {
         </Alert>
       ) : null}
 
-      {activeTab === "budget" ? (
-        <>
+      <>
           <BudgetHero
             monthLabel={labelForYM(selectedMonth)}
             totalBudget={totalBudget}
@@ -683,10 +619,7 @@ export default function BudgetPage() {
               <option key={c} value={c} />
             ))}
           </datalist>
-        </>
-      ) : (
-        <GoalsTab />
-      )}
+      </>
     </div>
   )
 }

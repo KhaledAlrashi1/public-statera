@@ -6,7 +6,9 @@
  * - Flask purge order: Transaction → Budget → DashboardSnapshot → DebtAccount → SavingsGoal →
  *   SecurityEvent → ProductEvent → MemorizedTransaction → TemplateSuggestionFeedback →
  *   AccountActionToken → UserProfile → Merchant → Category → soft-delete User.
- *   Hono matches this order exactly.
+ *   Hono matches this order exactly, MINUS DebtAccount and SavingsGoal: those features were
+ *   removed in phase4 scope-narrowing (SC-1/2), so the purge is now 11 tables, not 13. The
+ *   debt_accounts / savings_goals tables themselves are dropped in SC-3 (deploy 2).
  * - Tombstone: Flask relies on DELETE WHERE user_id=uid (NULL semantics for tombstone with
  *   user_id=NULL). Hono adds is_tombstone=true column and uses AND is_tombstone=false in the
  *   DELETE, so tombstone survival is explicit rather than implicit.
@@ -39,8 +41,6 @@ import {
   transactions,
   budgets,
   dashboardSnapshots,
-  debtAccounts,
-  savingsGoals,
   securityEvents,
   productEvents,
   memorizedTransactions,
@@ -98,8 +98,6 @@ export async function purgeUserAccountRows(
   await db.delete(transactions).where(eq(transactions.userId, userId))
   await db.delete(budgets).where(eq(budgets.userId, userId))
   await db.delete(dashboardSnapshots).where(eq(dashboardSnapshots.userId, userId))
-  await db.delete(debtAccounts).where(eq(debtAccounts.userId, userId))
-  await db.delete(savingsGoals).where(eq(savingsGoals.userId, userId))
   // SecurityEvent: exclude tombstone rows (is_tombstone=true has userId=NULL so the
   // eq() clause already misses them, but we make the exclusion explicit for clarity).
   await db.delete(securityEvents).where(

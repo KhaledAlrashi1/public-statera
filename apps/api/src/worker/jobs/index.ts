@@ -16,7 +16,6 @@ import {
   handleCheckBudgetAlerts,
   handleSendBudgetAlertEmail,
 } from "./budget-alerts-job"
-import { handleSendGoalMilestoneEmail } from "./goal-milestone-email-job"
 import {
   TASK_GENERATE_ACTIVATION_REPORT,
   handleGenerateActivationReport,
@@ -37,7 +36,6 @@ export const jobHandlers: Record<string, JobHandler> = {
   [TASK_CLEANUP_MEMORIZED]: handleCleanupMemorizedTransactions,
   [TASK_CHECK_BUDGET_ALERTS]: handleCheckBudgetAlerts,
   "send-budget-alert-email": handleSendBudgetAlertEmail,
-  "send-goal-milestone-email": handleSendGoalMilestoneEmail,
   [TASK_GENERATE_ACTIVATION_REPORT]: handleGenerateActivationReport,
   [TASK_DELETE_ACCOUNT]: handleDeleteAccountData,
 }

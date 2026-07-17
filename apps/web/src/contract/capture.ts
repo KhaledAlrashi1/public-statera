@@ -18,8 +18,6 @@ import {
   analyticsApi,
   notificationsApi,
   budgetsApi,
-  debtApi,
-  goalsApi,
   memorizedApi,
   authApi,
   accountApi,
@@ -37,8 +35,6 @@ export const EXERCISED_APIS = {
   analyticsApi,
   notificationsApi,
   budgetsApi,
-  debtApi,
-  goalsApi,
   memorizedApi,
   authApi,
   accountApi,
@@ -123,29 +119,6 @@ export const INVOCATIONS: Invocation[] = [
   { source: "budgetsApi.get", run: () => budgetsApi.get("2026-01") },
   { source: "budgetsApi.save", run: () => budgetsApi.save("2026-01", []) },
   { source: "budgetsApi.getMonths", run: () => budgetsApi.getMonths() },
-
-  // debtApi
-  { source: "debtApi.list", run: () => debtApi.list() },
-  {
-    source: "debtApi.create",
-    run: () =>
-      debtApi.create({ name: "Visa", debt_type: "credit_card", balance_kd: "100.000", minimum_payment_kd: "10.000" }),
-  },
-  { source: "debtApi.update", run: () => debtApi.update(1, { name: "Visa" }) },
-  { source: "debtApi.delete", run: () => debtApi.delete(1) },
-  { source: "debtApi.summary", run: () => debtApi.summary() },
-  { source: "debtApi.payoffPlan", run: () => debtApi.payoffPlan("50.000") },
-
-  // goalsApi
-  { source: "goalsApi.list", run: () => goalsApi.list() },
-  {
-    source: "goalsApi.create",
-    run: () => goalsApi.create({ name: "Buffer", goal_type: "starter_buffer", target_kd: "500.000" }),
-  },
-  { source: "goalsApi.update", run: () => goalsApi.update(1, { name: "Buffer" }) },
-  { source: "goalsApi.deposit", run: () => goalsApi.deposit(1, "10.000") },
-  { source: "goalsApi.delete", run: () => goalsApi.delete(1) },
-  { source: "goalsApi.projection", run: () => goalsApi.projection(1) },
 
   // memorizedApi
   { source: "memorizedApi.list", run: () => memorizedApi.list() },

@@ -12,8 +12,6 @@ import { transactionsRouter } from "./routes/transactions"
 import { uploadRouter } from "./routes/upload"
 import { memorizedRouter } from "./routes/memorized"
 import { budgetsRouter } from "./routes/budgets"
-import { debtRouter } from "./routes/debt"
-import { savingsGoalsRouter } from "./routes/savings-goals"
 import { suggestionsRouter } from "./routes/suggestions"
 import { aggregationRouter } from "./routes/aggregation"
 import { intelligenceRouter } from "./routes/intelligence"
@@ -48,8 +46,6 @@ export function createApp() {
   app.route("/api/transactions", uploadRouter)
   app.route("/api/memorized-transactions", memorizedRouter)
   app.route("/api/budgets", budgetsRouter)
-  app.route("/api/debt-accounts", debtRouter)
-  app.route("/api/savings-goals", savingsGoalsRouter)
   app.route("/api/transaction-suggestions", suggestionsRouter)
   app.route("/api/analytics", aggregationRouter)
   app.route("/api/analytics", intelligenceRouter)

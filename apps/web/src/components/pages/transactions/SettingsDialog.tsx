@@ -304,7 +304,6 @@ function ManageCategories({
                   <span className="font-medium">"{delState.name}"</span> has{" "}
                   {delState.counts.transactions} transaction{delState.counts.transactions === 1 ? "" : "s"}
                   {delState.counts.budgets > 0 && `, ${delState.counts.budgets} budget${delState.counts.budgets === 1 ? "" : "s"}`}
-                  {delState.counts.goals > 0 && `, ${delState.counts.goals} goal${delState.counts.goals === 1 ? "" : "s"}`}
                   . Choose a category to move them to, then delete.
                 </>
               ) : null}

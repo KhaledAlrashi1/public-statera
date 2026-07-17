@@ -26,8 +26,6 @@ import Decimal from "decimal.js"
 import { and, eq, inArray, sql } from "drizzle-orm"
 import { transactions } from "../db/schema/transactions"
 import { budgets } from "../db/schema/budgets"
-import { debtAccounts } from "../db/schema/debt-accounts"
-import { savingsGoals } from "../db/schema/savings-goals"
 import { userProfiles } from "../db/schema/users"
 import { productEvents } from "../db/schema/product-events"
 import {
@@ -227,8 +225,6 @@ type DemoWorkspaceManifest = {
   monthsSeeded: number
   transactionIds: number[]
   budgetIds: number[]
-  debtAccountIds: number[]
-  savingsGoalIds: number[]
   profileSeededFields: string[]
 }
 
@@ -238,8 +234,6 @@ function manifestToProperties(m: DemoWorkspaceManifest): Record<string, unknown>
     months_seeded: m.monthsSeeded,
     transaction_ids: m.transactionIds,
     budget_ids: m.budgetIds,
-    debt_account_ids: m.debtAccountIds,
-    savings_goal_ids: m.savingsGoalIds,
     profile_seeded_fields: m.profileSeededFields,
   }
 }
@@ -277,13 +271,15 @@ async function latestManifest(tx: Tx, userId: number): Promise<DemoWorkspaceMani
     (f): f is string => typeof f === "string" && f in DEMO_PROFILE_DEFAULTS,
   )
 
+  // phase4 SC-1/2 (C9): the retired snake_case keys `debt_account_ids` / `savings_goal_ids`
+  // may still be present on a LEGACY stored manifest written before the debt/savings features
+  // were removed. They are simply not read here — JSON.parse tolerates the extra keys, so a
+  // legacy manifest is handled without error and those ids are ignored.
   return {
     month: typeof payload.month === "string" && payload.month ? payload.month : currentMonthKey(),
     monthsSeeded: Math.max(1, Number(payload.months_seeded) || 6),
     transactionIds: coerceIdList(payload.transaction_ids),
     budgetIds: coerceIdList(payload.budget_ids),
-    debtAccountIds: coerceIdList(payload.debt_account_ids),
-    savingsGoalIds: coerceIdList(payload.savings_goal_ids),
     profileSeededFields,
   }
 }
@@ -305,20 +301,6 @@ function demoBudgetWhere(userId: number, manifest: DemoWorkspaceManifest | null)
   return and(eq(budgets.userId, userId), sql`1 = 0`)
 }
 
-function demoDebtWhere(userId: number, manifest: DemoWorkspaceManifest | null) {
-  if (manifest && manifest.debtAccountIds.length > 0) {
-    return and(eq(debtAccounts.userId, userId), inArray(debtAccounts.id, manifest.debtAccountIds))
-  }
-  return and(eq(debtAccounts.userId, userId), eq(debtAccounts.name, "Starter Card"))
-}
-
-function demoSavingsWhere(userId: number, manifest: DemoWorkspaceManifest | null) {
-  if (manifest && manifest.savingsGoalIds.length > 0) {
-    return and(eq(savingsGoals.userId, userId), inArray(savingsGoals.id, manifest.savingsGoalIds))
-  }
-  return and(eq(savingsGoals.userId, userId), eq(savingsGoals.name, "Emergency Buffer"))
-}
-
 // ── Empty-account guard (Flask _has_financial_data, :301-309; BankConnection omitted) ──
 
 async function hasFinancialData(tx: Tx, userId: number): Promise<boolean> {
@@ -332,8 +314,6 @@ async function hasFinancialData(tx: Tx, userId: number): Promise<boolean> {
   const checks: Array<Promise<Array<{ id: number }>>> = [
     tx.select({ id: transactions.id }).from(transactions).where(eq(transactions.userId, userId)).limit(1),
     tx.select({ id: budgets.id }).from(budgets).where(eq(budgets.userId, userId)).limit(1),
-    tx.select({ id: debtAccounts.id }).from(debtAccounts).where(eq(debtAccounts.userId, userId)).limit(1),
-    tx.select({ id: savingsGoals.id }).from(savingsGoals).where(eq(savingsGoals.userId, userId)).limit(1),
   ]
   const results = await Promise.all(checks)
   return results.some((rows) => rows.length > 0)
@@ -413,56 +393,6 @@ async function ensureBudget(
   return { id: existing.id, created: false }
 }
 
-// ── Debt seeding (Flask _ensure_debt_account, :342-357) ──
-
-async function ensureDebtAccount(tx: Tx, userId: number): Promise<{ id: number; created: boolean }> {
-  const [existing] = await tx
-    .select({ id: debtAccounts.id })
-    .from(debtAccounts)
-    .where(and(eq(debtAccounts.userId, userId), eq(debtAccounts.name, "Starter Card")))
-    .limit(1)
-  if (existing) return { id: existing.id, created: false }
-
-  const [{ id }] = await tx
-    .insert(debtAccounts)
-    .values({
-      userId,
-      name: "Starter Card",
-      debtType: "credit_card",
-      balanceKd: formatKd(new Decimal("420.000")),
-      minimumPaymentKd: formatKd(new Decimal("28.000")),
-      dueDay: 12,
-      aprPct: formatKd(new Decimal("18.900")),
-      notes: "Demo debt account for payoff planning.",
-    })
-    .$returningId()
-  return { id, created: true }
-}
-
-// ── Savings seeding (Flask _ensure_savings_goal, :360-373) ──
-
-async function ensureSavingsGoal(tx: Tx, userId: number): Promise<{ id: number; created: boolean }> {
-  const [existing] = await tx
-    .select({ id: savingsGoals.id })
-    .from(savingsGoals)
-    .where(and(eq(savingsGoals.userId, userId), eq(savingsGoals.name, "Emergency Buffer")))
-    .limit(1)
-  if (existing) return { id: existing.id, created: false }
-
-  const [{ id }] = await tx
-    .insert(savingsGoals)
-    .values({
-      userId,
-      name: "Emergency Buffer",
-      goalType: "starter_buffer",
-      targetKd: formatKd(new Decimal("1000.000")),
-      currentKd: formatKd(new Decimal("320.000")),
-      notes: "Demo savings goal to illustrate progress tracking.",
-    })
-    .$returningId()
-  return { id, created: true }
-}
-
 // ── Single demo transaction (Flask _create_demo_transaction, :376-392) ──
 // Faithful to Flask: create with force=false + source="demo", and on a non-dup success
 // prime memorized_transactions via learnTransaction (Flask does this inside
@@ -496,8 +426,6 @@ export type DemoLoadSummary = {
   month: string
   transactions_created: number
   budgets_created: number
-  debt_accounts_created: number
-  savings_goals_created: number
   months_seeded: number
 }
 
@@ -523,16 +451,11 @@ export async function loadDemoWorkspace(tx: Tx, userId: number): Promise<DemoLoa
     if (id != null) transactionIds.push(id)
   }
 
-  const debt = await ensureDebtAccount(tx, userId)
-  const savings = await ensureSavingsGoal(tx, userId)
-
   const manifest: DemoWorkspaceManifest = {
     month,
     monthsSeeded: 6,
     transactionIds,
     budgetIds,
-    debtAccountIds: [debt.id],
-    savingsGoalIds: [savings.id],
     profileSeededFields,
   }
 
@@ -552,8 +475,6 @@ export async function loadDemoWorkspace(tx: Tx, userId: number): Promise<DemoLoa
     month,
     transactions_created: transactionIds.length,
     budgets_created: budgetsCreated,
-    debt_accounts_created: debt.created ? 1 : 0,
-    savings_goals_created: savings.created ? 1 : 0,
     months_seeded: manifest.monthsSeeded,
   }
 }
@@ -609,8 +530,6 @@ export type DemoWorkspaceState = {
   months_seeded: number
   transactions: number
   budgets: number
-  debt_accounts: number
-  savings_goals: number
   profile_seeded_fields: string[]
 }
 
@@ -634,27 +553,15 @@ async function getDemoWorkspaceStateWithManifest(
     .select({ n: sql<number>`COUNT(*)` })
     .from(budgets)
     .where(demoBudgetWhere(userId, manifest))
-  const [debtCount] = await tx
-    .select({ n: sql<number>`COUNT(*)` })
-    .from(debtAccounts)
-    .where(demoDebtWhere(userId, manifest))
-  const [savingsCount] = await tx
-    .select({ n: sql<number>`COUNT(*)` })
-    .from(savingsGoals)
-    .where(demoSavingsWhere(userId, manifest))
 
   const profileFields = await profileDemoFieldsRemaining(tx, userId, manifest)
 
   const transactionCount = Number(txnCount?.n ?? 0)
   const budgetCountN = Number(budgetCount?.n ?? 0)
-  const debtCountN = Number(debtCount?.n ?? 0)
-  const savingsCountN = Number(savingsCount?.n ?? 0)
 
   const active =
     transactionCount > 0 ||
     budgetCountN > 0 ||
-    debtCountN > 0 ||
-    savingsCountN > 0 ||
     profileFields.length > 0
 
   // loaded_at: event_ts of the latest manifest (fallback: latest demo_data_loaded) event.
@@ -681,8 +588,6 @@ async function getDemoWorkspaceStateWithManifest(
     months_seeded: manifest ? manifest.monthsSeeded : 6,
     transactions: transactionCount,
     budgets: budgetCountN,
-    debt_accounts: debtCountN,
-    savings_goals: savingsCountN,
     profile_seeded_fields: profileFields,
   }
 }
@@ -692,8 +597,6 @@ async function getDemoWorkspaceStateWithManifest(
 export type DemoClearSummary = {
   transactions_cleared: number
   budgets_cleared: number
-  debt_accounts_cleared: number
-  savings_goals_cleared: number
   profile_fields_cleared: string[]
 }
 
@@ -713,9 +616,11 @@ export async function clearDemoWorkspace(tx: Tx, userId: number): Promise<DemoCl
     await tx.delete(transactions).where(demoTransactionWhere(userId, manifest))
   }
 
+  // phase4 SC-1/2 (C9): only transactions/budgets/profile are cleared. A LEGACY manifest may
+  // still carry debt_account_ids / savings_goal_ids, but those are no longer read (see
+  // latestManifest) and there is no debt/savings delete here — the guard ignores them without
+  // error. Any orphaned legacy debt/savings rows are removed when SC-3 drops the tables.
   const budgetRows = await tx.delete(budgets).where(demoBudgetWhere(userId, manifest))
-  const debtRows = await tx.delete(debtAccounts).where(demoDebtWhere(userId, manifest))
-  const savingsRows = await tx.delete(savingsGoals).where(demoSavingsWhere(userId, manifest))
 
   const profileClearedFields: string[] = []
   if (state.profile_seeded_fields.length > 0) {
@@ -740,8 +645,6 @@ export async function clearDemoWorkspace(tx: Tx, userId: number): Promise<DemoCl
   const summary: DemoClearSummary = {
     transactions_cleared: transactionsCleared,
     budgets_cleared: affectedRows(budgetRows),
-    debt_accounts_cleared: affectedRows(debtRows),
-    savings_goals_cleared: affectedRows(savingsRows),
     profile_fields_cleared: profileClearedFields,
   }
   await recordEvent(userId, DEMO_CLEARED_EVENT, { ...summary }, tx)

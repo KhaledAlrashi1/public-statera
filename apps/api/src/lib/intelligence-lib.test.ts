@@ -562,8 +562,6 @@ describe("buildSnapshotPayload — Flask fixture equivalence", () => {
     // 90d (>=2025-08-12): income=500, expense=175 (+Aug-15 coffee 25)
     const db = makeSequentialDb([
       [{ income: "500.000", expense: "175.000" }],  // totals
-      [{ total: "200.000" }],                        // debt
-      [{ total: "150.000" }],                        // savings
       [{ income: "500.000", expense: "100.000" }],  // 30d
       [{ income: "500.000", expense: "150.000" }],  // 60d
       [{ income: "500.000", expense: "175.000" }],  // 90d
@@ -573,8 +571,6 @@ describe("buildSnapshotPayload — Flask fixture equivalence", () => {
     expect(result.net_position.income_total_kd).toBe("500.000")
     expect(result.net_position.expense_total_kd).toBe("175.000")
     expect(result.net_position.net_kd).toBe("325.000")
-    expect(result.net_position.total_debt_kd).toBe("200.000")
-    expect(result.net_position.total_savings_kd).toBe("150.000")
     expect(result.cash_flow["30d"].income_kd).toBe("500.000")
     expect(result.cash_flow["30d"].expense_kd).toBe("100.000")
     expect(result.cash_flow["30d"].net_kd).toBe("400.000")
@@ -587,12 +583,10 @@ describe("buildSnapshotPayload — Flask fixture equivalence", () => {
   })
 
   it("S2: empty user — D4 null fallback exercised, all totals zero", async () => {
-    // No transactions, no debt, no savings.
+    // No transactions.
     // SUM over zero rows = null (MySQL standard) — D4 fallback: ?? "0" → Decimal("0")
     const db = makeSequentialDb([
       [{ income: null, expense: null }],  // totals — null SUM, exercising D4
-      [{ total: "0" }],                   // debt — COALESCE returns "0"
-      [{ total: "0" }],                   // savings
       [{ income: null, expense: null }],  // 30d window — null SUM
       [{ income: null, expense: null }],  // 60d
       [{ income: null, expense: null }],  // 90d
@@ -602,8 +596,6 @@ describe("buildSnapshotPayload — Flask fixture equivalence", () => {
     expect(result.net_position.income_total_kd).toBe("0.000")
     expect(result.net_position.expense_total_kd).toBe("0.000")
     expect(result.net_position.net_kd).toBe("0.000")
-    expect(result.net_position.total_debt_kd).toBe("0.000")
-    expect(result.net_position.total_savings_kd).toBe("0.000")
     expect(result.cash_flow["30d"].income_kd).toBe("0.000")
     expect(result.cash_flow["30d"].expense_kd).toBe("0.000")
     expect(result.cash_flow["30d"].net_kd).toBe("0.000")
@@ -613,15 +605,13 @@ describe("buildSnapshotPayload — Flask fixture equivalence", () => {
     expect(result.generated_at).toMatch(ISO_RE)
   })
 
-  it("S3: inactive-only debt and savings — totals zero, negative net_kd", async () => {
-    // One expense tx (Groceries 50 on Nov-01). Debt 500 inactive, savings 200 inactive.
+  it("S3: single expense tx — negative net_kd", async () => {
+    // One expense tx (Groceries 50 on Nov-01).
     // All-time: income=0 (CASE returns 0 for expense rows), expense=50.
     // net_kd = 0 - 50 = -50 → formatKd("-50.000")
     // All windows include the Nov-01 tx. Windows: income=0, expense=50, net=-50.
     const db = makeSequentialDb([
       [{ income: "0.000", expense: "50.000" }],  // totals (rows exist, income CASE = 0)
-      [{ total: "0" }],                           // debt — inactive only, COALESCE → "0"
-      [{ total: "0" }],                           // savings — inactive only
       [{ income: "0.000", expense: "50.000" }],  // 30d
       [{ income: "0.000", expense: "50.000" }],  // 60d
       [{ income: "0.000", expense: "50.000" }],  // 90d
@@ -631,8 +621,6 @@ describe("buildSnapshotPayload — Flask fixture equivalence", () => {
     expect(result.net_position.income_total_kd).toBe("0.000")
     expect(result.net_position.expense_total_kd).toBe("50.000")
     expect(result.net_position.net_kd).toBe("-50.000")
-    expect(result.net_position.total_debt_kd).toBe("0.000")
-    expect(result.net_position.total_savings_kd).toBe("0.000")
     expect(result.cash_flow["30d"].net_kd).toBe("-50.000")
     expect(result.cash_flow["60d"].net_kd).toBe("-50.000")
     expect(result.cash_flow["90d"].net_kd).toBe("-50.000")
@@ -646,8 +634,6 @@ describe("buildSnapshotPayload — Flask fixture equivalence", () => {
     // All-time expense=100. 30d expense=60, 60d/90d expense=100.
     const db = makeSequentialDb([
       [{ income: "0.000", expense: "100.000" }],  // totals
-      [{ total: "0" }],                            // debt
-      [{ total: "0" }],                            // savings
       [{ income: "0.000", expense: "60.000" }],   // 30d: only on-cutoff tx included
       [{ income: "0.000", expense: "100.000" }],  // 60d: both txs
       [{ income: "0.000", expense: "100.000" }],  // 90d: both txs

@@ -16,8 +16,6 @@ import {
   merchants,
   transactions,
   budgets,
-  debtAccounts,
-  savingsGoals,
   memorizedTransactions,
   templateSuggestionFeedback,
   securityEvents,
@@ -83,7 +81,6 @@ function fullRows(): Map<unknown, unknown[]> {
           country: "KW",
           timezone: "Asia/Kuwait",
           emailNotificationsEnabled: true,
-          hasDebtChoice: true,
           setupGuideSeen: true,
           setupGuideDismissed: false,
           createdAt: D,
@@ -112,42 +109,6 @@ function fullRows(): Map<unknown, unknown[]> {
       ],
     ],
     [budgets, [{ id: 5, month: "2026-05", categoryId: 1, amountKd: "300.000", updatedAt: D }]],
-    [
-      debtAccounts,
-      [
-        {
-          id: 3,
-          name: "Starter Card",
-          debtType: "credit_card",
-          balanceKd: "250.000",
-          aprPct: "18.500",
-          minimumPaymentKd: "25.000",
-          dueDay: 15,
-          isActive: true,
-          notes: null,
-          createdAt: D,
-          updatedAt: D,
-        },
-      ],
-    ],
-    [
-      savingsGoals,
-      [
-        {
-          id: 2,
-          name: "Emergency Buffer",
-          goalType: "emergency_fund",
-          targetKd: "1000.000",
-          currentKd: "150.000",
-          targetDate: "2026-12-31",
-          linkedCategoryId: null,
-          isActive: true,
-          notes: null,
-          createdAt: D,
-          updatedAt: D,
-        },
-      ],
-    ],
     [
       memorizedTransactions,
       [
@@ -228,7 +189,6 @@ describe("buildUserDataExport — full data", () => {
       country: "KW",
       timezone: "Asia/Kuwait",
       email_notifications_enabled: true,
-      has_debt_choice: true,
     })
 
     expect(ex.categories).toEqual([{ id: 1, name: "Groceries", is_income: false, is_system: false }])
@@ -244,8 +204,6 @@ describe("buildUserDataExport — full data", () => {
     })
 
     expect(ex.budgets[0]).toMatchObject({ month: "2026-05", amount_kd: "300.000" })
-    expect(ex.debt_accounts[0]).toMatchObject({ balance_kd: "250.000", apr_pct: "18.500" })
-    expect(ex.savings_goals[0]).toMatchObject({ target_kd: "1000.000", target_date: "2026-12-31" })
     expect(ex.template_suggestion_feedback[0]).toMatchObject({
       signature_key: "sig-abc",
       accepted_count: 3,
@@ -259,8 +217,6 @@ describe("buildUserDataExport — full data", () => {
       merchants: 1,
       transactions: 1,
       budgets: 1,
-      debt_accounts: 1,
-      savings_goals: 1,
       memorized_transactions: 1,
       template_suggestion_feedback: 1,
       security_events: 1,
@@ -333,8 +289,6 @@ describe("buildUserDataExport — empty state (new user, zero rows)", () => {
     expect(ex.merchants).toEqual([])
     expect(ex.transactions).toEqual([])
     expect(ex.budgets).toEqual([])
-    expect(ex.debt_accounts).toEqual([])
-    expect(ex.savings_goals).toEqual([])
     expect(ex.memorized_transactions).toEqual([])
     expect(ex.template_suggestion_feedback).toEqual([])
     expect(ex.security_events).toEqual([])

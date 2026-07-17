@@ -84,7 +84,7 @@ export default function WorkspaceChoicePage() {
                 <Sparkles className="h-5 w-5 text-primary" />
                 <p className="mt-3 text-sm font-semibold text-foreground">See value fast</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Demo mode shows six months of realistic spend, budgets, debt, and goals.
+                  Demo mode shows six months of realistic spend and budgets.
                 </p>
               </div>
               <div className="surface-muted-card p-4">
@@ -134,7 +134,7 @@ export default function WorkspaceChoicePage() {
               </p>
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                 <li>- 40+ realistic income and spending transactions</li>
-                <li>- Current-month budgets, starter debt, and a savings goal</li>
+                <li>- Current-month budgets across your spending categories</li>
                 <li>- Can be cleared or replaced when you import real data</li>
               </ul>
               <Button

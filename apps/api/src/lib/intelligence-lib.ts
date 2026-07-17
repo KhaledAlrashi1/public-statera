@@ -38,8 +38,6 @@ import type { getDb } from "../db/connection"
 import { categories } from "../db/schema/categories"
 import { merchants } from "../db/schema/merchants"
 import { transactions } from "../db/schema/transactions"
-import { debtAccounts } from "../db/schema/debt-accounts"
-import { savingsGoals } from "../db/schema/savings-goals"
 import { formatKd } from "./transaction-lib"
 import { currentLocalDate } from "./analytics-helpers"
 import { incomeCategoryFilter, expenseCategoryFilter } from "./payday-lib"
@@ -529,8 +527,6 @@ export type SnapshotPayload = {
     income_total_kd: string
     expense_total_kd: string
     net_kd: string
-    total_debt_kd: string
-    total_savings_kd: string
   }
   cash_flow: {
     "30d": WindowResult
@@ -572,19 +568,8 @@ export async function buildSnapshotPayload(
   const incomeTotal = new Decimal(totalsRow?.income ?? "0")
   const expenseTotal = new Decimal(totalsRow?.expense ?? "0")
 
-  // D5: Active debt balance sum — COALESCE for zero active-debt case.
-  const [debtRow] = await db
-    .select({ total: sql<string>`COALESCE(SUM(${debtAccounts.balanceKd}), '0')` })
-    .from(debtAccounts)
-    .where(and(eq(debtAccounts.userId, userId), eq(debtAccounts.isActive, true)))
-  const debtTotal = new Decimal(debtRow?.total ?? "0")
-
-  // D6: Active savings goal current_kd sum — COALESCE for zero active-goals case.
-  const [savingsRow] = await db
-    .select({ total: sql<string>`COALESCE(SUM(${savingsGoals.currentKd}), '0')` })
-    .from(savingsGoals)
-    .where(and(eq(savingsGoals.userId, userId), eq(savingsGoals.isActive, true)))
-  const savingsTotal = new Decimal(savingsRow?.total ?? "0")
+  // D5/D6 removed (phase4 SC-1/2): total_debt_kd / total_savings_kd fields dropped from the
+  // snapshot payload along with the debt-accounts / savings-goals features.
 
   // D7/D8: Three window queries matching Flask's _window() structure.
   // Sequential (not Promise.all) to keep mock ordering deterministic.
@@ -616,8 +601,6 @@ export async function buildSnapshotPayload(
       income_total_kd: formatKd(incomeTotal),
       expense_total_kd: formatKd(expenseTotal),
       net_kd: formatKd(incomeTotal.minus(expenseTotal)),
-      total_debt_kd: formatKd(debtTotal),
-      total_savings_kd: formatKd(savingsTotal),
     },
     cash_flow: {
       "30d": w30,

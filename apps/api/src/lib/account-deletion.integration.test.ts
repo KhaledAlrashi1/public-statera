@@ -30,8 +30,8 @@ describe.skipIf(!INTEGRATION)("purgeUserAccountRows — transaction rollback [in
     }).$returningId()
     const testUserId = inserted.id
 
-    // Simulate mid-purge failure by overriding purgeUserAccountRows' internal
-    // savingsGoals delete to throw. We can't easily inject this, so instead
+    // Simulate mid-purge failure by overriding one of purgeUserAccountRows' internal
+    // deletes to throw. We can't easily inject this, so instead
     // we wrap the whole thing in a transaction that we abort.
     let caughtMessage = ""
     try {

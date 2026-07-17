@@ -18,8 +18,6 @@ describe("DemoWorkspaceBanner", () => {
           months_seeded: 6,
           transactions: 49,
           budgets: 7,
-          debt_accounts: 1,
-          savings_goals: 1,
           profile_seeded_fields: ["monthly_income_kd"],
         }}
         onOpenImport={onOpenImport}
@@ -28,7 +26,7 @@ describe("DemoWorkspaceBanner", () => {
     )
 
     expect(screen.getByText("Demo workspace is still active")).toBeInTheDocument()
-    expect(screen.getByText(/49 demo transactions, 7 budgets, 1 debt account/)).toBeInTheDocument()
+    expect(screen.getByText(/49 demo transactions and 7 budgets are loaded/)).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole("button", { name: "Import real data" }))
     fireEvent.click(screen.getByRole("button", { name: "Clear demo workspace" }))

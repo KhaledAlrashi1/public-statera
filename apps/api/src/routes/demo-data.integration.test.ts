@@ -19,8 +19,6 @@ import { getDb } from "../db/connection"
 import { users, userProfiles } from "../db/schema/users"
 import { transactions } from "../db/schema/transactions"
 import { budgets } from "../db/schema/budgets"
-import { debtAccounts } from "../db/schema/debt-accounts"
-import { savingsGoals } from "../db/schema/savings-goals"
 import { memorizedTransactions } from "../db/schema/memorized-transactions"
 import { productEvents } from "../db/schema/product-events"
 import { categories } from "../db/schema/categories"
@@ -65,8 +63,6 @@ async function cleanupTestData(userId: number): Promise<void> {
   await db.delete(memorizedTransactions).where(eq(memorizedTransactions.userId, userId))
   await db.delete(transactions).where(eq(transactions.userId, userId))
   await db.delete(budgets).where(eq(budgets.userId, userId))
-  await db.delete(debtAccounts).where(eq(debtAccounts.userId, userId))
-  await db.delete(savingsGoals).where(eq(savingsGoals.userId, userId))
   await db.delete(categories).where(eq(categories.userId, userId))
   await db.delete(merchants).where(eq(merchants.userId, userId))
   await db.delete(userProfiles).where(eq(userProfiles.userId, userId))
@@ -80,7 +76,7 @@ afterEach(async () => {
 })
 
 describe.runIf(RUN)("demo-workspace — load seeds every table (real MySQL)", () => {
-  it("seeds transactions, budgets, debt, savings, profile, and product events", async () => {
+  it("seeds transactions, budgets, profile, and product events", async () => {
     const db = getDb()
     testUserId = await setupTestUser()
 
@@ -89,13 +85,9 @@ describe.runIf(RUN)("demo-workspace — load seeds every table (real MySQL)", ()
     expect(summary.months_seeded).toBe(6)
     expect(summary.budgets_created).toBe(7)
     expect(summary.transactions_created).toBe(81)
-    expect(summary.debt_accounts_created).toBe(1)
-    expect(summary.savings_goals_created).toBe(1)
 
     expect(await countFor(transactions, testUserId)).toBe(81)
     expect(await countFor(budgets, testUserId)).toBe(7)
-    expect(await countFor(debtAccounts, testUserId)).toBe(1)
-    expect(await countFor(savingsGoals, testUserId)).toBe(1)
 
     const [profile] = await db
       .select({ inc: userProfiles.monthlyIncomeKd, pay: userProfiles.paydayDay, country: userProfiles.country })
@@ -135,8 +127,6 @@ describe.runIf(RUN)("demo-workspace — all-or-nothing rollback (real MySQL)", (
 
     expect(await countFor(transactions, testUserId)).toBe(0)
     expect(await countFor(budgets, testUserId)).toBe(0)
-    expect(await countFor(debtAccounts, testUserId)).toBe(0)
-    expect(await countFor(savingsGoals, testUserId)).toBe(0)
     expect(await countFor(memorizedTransactions, testUserId)).toBe(0)
     expect(await countFor(productEvents, testUserId)).toBe(0)
   })
@@ -172,16 +162,12 @@ describe.runIf(RUN)("demo-workspace — clear removes seeded rows; memorized sur
 
     expect(summary.transactions_cleared).toBe(81)
     expect(summary.budgets_cleared).toBe(7)
-    expect(summary.debt_accounts_cleared).toBe(1)
-    expect(summary.savings_goals_cleared).toBe(1)
     expect(summary.profile_fields_cleared.sort()).toEqual(
       ["country", "monthly_income_kd", "payday_day"].sort(),
     )
 
     expect(await countFor(transactions, testUserId)).toBe(0)
     expect(await countFor(budgets, testUserId)).toBe(0)
-    expect(await countFor(debtAccounts, testUserId)).toBe(0)
-    expect(await countFor(savingsGoals, testUserId)).toBe(0)
 
     const [profile] = await db
       .select({ inc: userProfiles.monthlyIncomeKd, pay: userProfiles.paydayDay, country: userProfiles.country })

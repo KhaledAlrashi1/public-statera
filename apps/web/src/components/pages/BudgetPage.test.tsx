@@ -49,10 +49,6 @@ vi.mock("./budget/sections", () => ({
   BudgetDialog: ({ open }: { open: boolean }) => (open ? <div>budget dialog</div> : null),
 }))
 
-vi.mock("./budget/GoalsTab", () => ({
-  GoalsTab: () => <div>goals tab</div>,
-}))
-
 function renderPage() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -124,22 +120,6 @@ describe("BudgetPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add your first budget" }))
 
     expect(screen.getByText("budget dialog")).toBeInTheDocument()
-  })
-
-  it("renders the Goals & Debt tab without crashing on an empty account", async () => {
-    // Both-tabs empty-account coverage (companion to the budget-tab empty-state
-    // test above). profileContext is null + budgets [] per the beforeEach fixture.
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-    render(
-      <MemoryRouter initialEntries={["/plan?tab=goals"]}>
-        <QueryClientProvider client={queryClient}>
-          <BudgetPage />
-        </QueryClientProvider>
-      </MemoryRouter>
-    )
-
-    expect(await screen.findByText("goals tab")).toBeInTheDocument()
-    expect(screen.queryByText("Set your first budget plan")).not.toBeInTheDocument()
   })
 
   it("surfaces active-month query failures in the planning warning banner", async () => {

@@ -13,7 +13,6 @@ export interface Category {
 export interface CategoryRemapResult {
   remapped_count: number
   budget_count: number
-  goal_count: number
   memorized_count: number
 }
 
@@ -25,7 +24,6 @@ export interface MerchantRemapResult {
 export interface CategoryDependentCounts {
   transactions: number
   budgets: number
-  goals: number
   memorized: number
 }
 
@@ -135,18 +133,9 @@ export interface SafeToSpendResponse {
   income_auto_detected: boolean
   income_source: 'detected_from_transactions' | 'declared_in_profile' | 'not_set'
   total_budget_kd: string
-  debt_minimum_total_kd: string
-  savings_goal_count: number
-  savings_goal_unscheduled_count: number
-  savings_goal_monthly_total_kd: string
-  savings_goal_budget_covered_kd: string
-  savings_goal_reserve_kd: string
   committed_kd: string
   committed_breakdown_kd: {
     budget_allocations: string
-    debt_minimums: string
-    savings_goal_reserve: string
-    savings_goal_budget_covered: string
   }
   actual_spend_kd: string
   remaining_budget_kd: string
@@ -159,7 +148,6 @@ export interface DashboardBundleResponse {
   month: string
   snapshot_computed_at: string | null
   safe_to_spend: SafeToSpendResponse
-  debt_summary: DebtAccountSummary
   budget: BudgetResponse
   budget_alerts: {
     month: string | null
@@ -298,8 +286,6 @@ export interface DemoDataLoadResult {
   month: string
   transactions_created: number
   budgets_created: number
-  debt_accounts_created: number
-  savings_goals_created: number
   months_seeded: number
 }
 
@@ -311,86 +297,13 @@ export interface DemoWorkspaceState {
   months_seeded: number
   transactions: number
   budgets: number
-  debt_accounts: number
-  savings_goals: number
   profile_seeded_fields: string[]
 }
 
 export interface DemoDataClearResult {
   transactions_cleared: number
   budgets_cleared: number
-  debt_accounts_cleared: number
-  savings_goals_cleared: number
   profile_fields_cleared: string[]
-}
-
-export interface DebtAccount {
-  id: number
-  name: string
-  debt_type: "credit_card" | "personal_loan" | "car_loan" | "other" | string
-  balance_kd: string
-  minimum_payment_kd: string
-  apr_pct: string | null
-  due_day: number | null
-  is_active: boolean
-  notes: string | null
-  created_at: string | null
-  updated_at: string | null
-}
-
-export interface DebtAccountSummary {
-  total_balance_kd: string
-  total_minimum_kd: string
-  account_count: number
-}
-
-export interface DebtPayoffPlanItem {
-  debt_id: number
-  name: string
-  balance: string
-  rate: string
-  months_to_payoff: number
-  interest_paid: string
-  payoff_date: string
-}
-
-export interface DebtPayoffPlan {
-  strategy: "avalanche" | "snowball" | string
-  total_months: number
-  total_interest_paid: string
-  debt_free_date: string
-  payoff_order: DebtPayoffPlanItem[]
-  debt_free_impossible?: boolean
-}
-
-export interface DebtPayoffPlansResponse {
-  avalanche: DebtPayoffPlan
-  snowball: DebtPayoffPlan
-  minimum_required: string
-}
-
-export interface SavingsGoal {
-  id: number
-  name: string
-  goal_type: "starter_buffer" | "emergency_fund" | "custom" | string
-  target_kd: string
-  current_kd: string
-  target_date: string | null
-  linked_category: string | null
-  is_active: boolean
-  notes: string | null
-  created_at: string | null
-  updated_at: string | null
-  projection?: SavingsGoalProjection | null
-}
-
-export interface SavingsGoalProjection {
-  projected_date: string | null
-  months_remaining: number | null
-  required_monthly: string | null
-  current_pace_monthly: string
-  on_track: boolean
-  shortfall_per_month: string | null
 }
 
 // ============================================================
@@ -471,8 +384,6 @@ export interface SnapshotResponse {
     income_total_kd: number
     expense_total_kd: number
     net_kd: number
-    total_debt_kd: number
-    total_savings_kd: number
   }
   cash_flow: {
     "30d": SnapshotCashFlowWindow
@@ -524,7 +435,6 @@ export interface UserProfile {
   country: string | null
   timezone: string
   email_notifications_enabled: boolean
-  has_debt_choice: boolean | null
   setup_guide_seen?: boolean
   setup_guide_dismissed?: boolean
 }

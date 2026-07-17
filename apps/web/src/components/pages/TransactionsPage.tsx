@@ -157,10 +157,8 @@ export default function TransactionsPage() {
     queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
     queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] })
     queryClient.invalidateQueries({ queryKey: ["budgets"] })
-    queryClient.invalidateQueries({ queryKey: ["debt-accounts-summary"] })
     queryClient.invalidateQueries({ queryKey: ["analytics-account-overview"] })
     queryClient.invalidateQueries({ queryKey: ["snapshot"] })
-    queryClient.invalidateQueries({ queryKey: ["savings-goals"] })
     setRefreshSignal((v) => v + 1)
   }, [queryClient])
 
@@ -222,10 +220,8 @@ export default function TransactionsPage() {
         queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] }),
         queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] }),
         queryClient.invalidateQueries({ queryKey: ["budgets"] }),
-        queryClient.invalidateQueries({ queryKey: ["debt-accounts-summary"] }),
         queryClient.invalidateQueries({ queryKey: ["analytics-account-overview"] }),
         queryClient.invalidateQueries({ queryKey: ["snapshot"] }),
-        queryClient.invalidateQueries({ queryKey: ["savings-goals"] }),
       ])
       setPreviewOpen(false)
       setImportOpen(false)

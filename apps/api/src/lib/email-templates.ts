@@ -38,26 +38,6 @@ Spent: KD {{ spent_kd }} of KD {{ budget_kd }}.
 
 Open DinarTrack to review and adjust your plan.`,
   },
-  goal_milestone: {
-    html: `<!doctype html>
-<html>
-  <body style="font-family: Arial, sans-serif; color: #111827;">
-    <h2 style="margin: 0 0 12px;">Savings Goal Milestone</h2>
-    <p style="margin: 0 0 8px;">
-      You reached <strong>{{ milestone_pct }}%</strong> of your goal
-      <strong>{{ goal_name }}</strong>.
-    </p>
-    <p style="margin: 0 0 8px;">Progress: KD {{ current_kd }} of KD {{ target_kd }}</p>
-    <p style="margin: 0; color: #6b7280;">Keep the momentum going.</p>
-  </body>
-</html>`,
-    text: `Savings Goal Milestone
-
-You reached {{ milestone_pct }}% of your goal {{ goal_name }}.
-Progress: KD {{ current_kd }} of KD {{ target_kd }}.
-
-Keep the momentum going.`,
-  },
 }
 
 function interpolate(template: string, context: TemplateContext): string {

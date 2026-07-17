@@ -17,18 +17,9 @@ function makeSafeToSpend(
     income_auto_detected: true,
     income_source: "detected_from_transactions",
     total_budget_kd: "800.000",
-    debt_minimum_total_kd: "75.000",
-    savings_goal_count: 0,
-    savings_goal_unscheduled_count: 0,
-    savings_goal_monthly_total_kd: "0.000",
-    savings_goal_budget_covered_kd: "0.000",
-    savings_goal_reserve_kd: "0.000",
-    committed_kd: "75.000",
+    committed_kd: "800.000",
     committed_breakdown_kd: {
       budget_allocations: "800.000",
-      debt_minimums: "75.000",
-      savings_goal_reserve: "0.000",
-      savings_goal_budget_covered: "0.000",
     },
     actual_spend_kd: "120.000",
     remaining_budget_kd: "205.000",
@@ -59,42 +50,18 @@ describe("SafeToSpendHero", () => {
     render(
       <SafeToSpendHero
         isLoading={false}
-        safeToSpend={makeSafeToSpend({ warnings: ["debts_not_set_optional"] })}
+        safeToSpend={makeSafeToSpend()}
         onOpenPlan={onOpenPlan}
       />
     )
 
     expect(screen.getByText("Safe to Spend Today")).toBeInTheDocument()
     expect(screen.getByText(/KD 7.590 \/ day/)).toBeInTheDocument()
-    expect(screen.getByText(/No debt payments are included right now/i)).toBeInTheDocument()
 
     fireEvent.click(
       screen.getByRole("button", { name: /open plan from safe to spend daily rate/i })
     )
     expect(onOpenPlan).toHaveBeenCalledTimes(1)
-  })
-
-  it("shows savings-goal reserve details when goals affect the calculation", () => {
-    render(
-      <SafeToSpendHero
-        isLoading={false}
-        safeToSpend={makeSafeToSpend({
-          debt_minimum_total_kd: "0.000",
-          savings_goal_count: 2,
-          savings_goal_monthly_total_kd: "90.000",
-          savings_goal_budget_covered_kd: "25.000",
-          savings_goal_reserve_kd: "65.000",
-          committed_kd: "65.000",
-          remaining_budget_kd: "215.000",
-          warnings: ["debts_not_set_optional"],
-        })}
-        onOpenPlan={vi.fn()}
-      />
-    )
-
-    expect(screen.getByText("Goal reserve")).toBeInTheDocument()
-    expect(screen.getByText("KD 65.000")).toBeInTheDocument()
-    expect(screen.getByText(/KD 25.000 of goal funding is already covered/i)).toBeInTheDocument()
   })
 
   it("renders set-income prompt and routes to income entry when income is not detected", () => {

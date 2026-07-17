@@ -98,8 +98,6 @@ export function useDashboardPageQueries(
     refetchProfile,
     safeToSpend: dashboardBundle?.safe_to_spend,
     safeToSpendLoading: monthBundlePending || monthBundleFetching,
-    debtSummary: dashboardBundle?.debt_summary,
-    debtSummaryLoading: monthBundlePending || monthBundleFetching,
     categoryRowsPage,
     categoryRowsPageLoading,
     categoryRowsError,

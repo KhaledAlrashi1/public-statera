@@ -25,8 +25,6 @@ import { getDb } from "../db/connection"
 import { users, userProfiles } from "../db/schema/users"
 import { transactions } from "../db/schema/transactions"
 import { budgets } from "../db/schema/budgets"
-import { debtAccounts } from "../db/schema/debt-accounts"
-import { savingsGoals } from "../db/schema/savings-goals"
 import { memorizedTransactions } from "../db/schema/memorized-transactions"
 import { productEvents } from "../db/schema/product-events"
 import { categories } from "../db/schema/categories"
@@ -70,8 +68,6 @@ async function cleanup(userId: number): Promise<void> {
   await db.delete(memorizedTransactions).where(eq(memorizedTransactions.userId, userId))
   await db.delete(transactions).where(eq(transactions.userId, userId))
   await db.delete(budgets).where(eq(budgets.userId, userId))
-  await db.delete(debtAccounts).where(eq(debtAccounts.userId, userId))
-  await db.delete(savingsGoals).where(eq(savingsGoals.userId, userId))
   await db.delete(categories).where(eq(categories.userId, userId))
   await db.delete(merchants).where(eq(merchants.userId, userId))
   await db.delete(userProfiles).where(eq(userProfiles.userId, userId))
