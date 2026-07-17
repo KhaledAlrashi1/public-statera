@@ -47,7 +47,6 @@ export const userProfiles = mysqlTable("user_profiles", {
   paydayDay: int("payday_day"),
   country: varchar("country", { length: 64 }),
   emailNotificationsEnabled: boolean("email_notifications_enabled").notNull().default(true),
-  hasDebtChoice: boolean("has_debt_choice"),
   setupGuideSeen: boolean("setup_guide_seen").notNull().default(false),
   setupGuideDismissed: boolean("setup_guide_dismissed").notNull().default(false),
   timezone: varchar("timezone", { length: 64 }).notNull().default("Asia/Kuwait"),

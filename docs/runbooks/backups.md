@@ -209,9 +209,27 @@ bash deploy/restore-drill.sh --verify-only daily/statera-2026-07-08T15:23:03Z.sq
 
 `restore-drill.sh` asserts (fails loudly, never "completed without errors"): object + decrypted
 `sha256` recorded; a complete dump (`-- Dump completed` trailer, truncation guard); the restored
-table set equals the **declared 21-table set** exactly, both directions (A2 — no discover-and-accept);
+table set equals the **declared 19-table set** exactly, both directions (A2 — no discover-and-accept);
 a per-table row-count manifest; FK-integrity probes = 0 orphaned owned rows; and (if given) exactly
-one active anchor user. It leaves the scratch container **running** and prints `T_backup` + the
+one active anchor user.
+
+> **Table-count cutover: 21 → 19 tables (phase4 SC-3, DROP `savings_goals` + `debt_accounts`).**
+> The declared manifest was reduced from 21 to 19 tables when SC-3 dropped the debt/savings
+> tables (and the `user_profiles.has_debt_choice` column). Three facts govern restores across
+> this cutover:
+> 1. **Backups taken BEFORE the SC-3 deploy date carry 21 tables** and will FAIL the 19-table
+>    exact-match assertion (2 EXTRA: `debt_accounts`, `savings_goals`). This is an **expected
+>    finding, not a defect** — such backups age out of R2 within their lifecycle window (up to
+>    365d at the monthly tier). To drill a pre-SC-3 object during the overlap, temporarily
+>    re-add the two table names to `DECLARED_TABLES` for that run.
+> 2. **Restoring a pre-SC-3 backup resurrects `debt_accounts` / `savings_goals` /
+>    `has_debt_choice`.** This self-heals: the restored DB's `__drizzle_migrations` predates
+>    `0004`–`0006`, so the **next `migrate` run re-drops them automatically** in journal order.
+>    A real recovery-into-prod from a pre-SC-3 backup must run `migrate` immediately after restore.
+> 3. **That automatic re-drop also erases any legacy debt/savings rows of already-deleted users**
+>    carried in an old backup — preserving the "re-apply all deletions completed before the
+>    restore" commitment (Privacy §7) for those two tables, which the 11-table re-purge no longer
+>    covers (the re-purge scope shrank with the purge in SC-1/2). It leaves the scratch container **running** and prints `T_backup` + the
 scratch connection string for Stage 2/3. A **resource guard (A4)** aborts before creating the
 container if free memory/disk are below `MIN_FREE_MEM_MB` (512) / `MIN_FREE_DISK_MB` (2048).
 

@@ -45,12 +45,10 @@ budgets
 categories
 dashboard_snapshots
 data_access_logs
-debt_accounts
 memorized_transactions
 merchants
 product_events
 raw_bank_transactions
-savings_goals
 security_events
 template_suggestion_feedback
 transactions
@@ -252,7 +250,7 @@ if [[ -n "${MISSING}" || -n "${EXTRA}" ]]; then
   [[ -n "${EXTRA}"   ]] && echo "  unexpected tables: ${EXTRA}" >&2
   die "restored table set does not match the declared set"
 fi
-echo "[drill]   table set: OK — matches the declared 21-table set exactly."
+echo "[drill]   table set: OK — matches the declared 19-table set exactly."
 
 # Row-count manifest (recorded as the checksum of a good restore).
 echo "[drill]   row-count manifest:"

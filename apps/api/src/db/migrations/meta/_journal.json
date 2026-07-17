@@ -29,6 +29,27 @@
       "when": 1780133772432,
       "tag": "0003_add_security_events_is_tombstone",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1784301752858,
+      "tag": "0004_plain_omega_flight",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1784301875952,
+      "tag": "0005_parallel_the_watchers",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1784301966747,
+      "tag": "0006_illegal_rachel_grey",
+      "breakpoints": true
     }
   ]
 }

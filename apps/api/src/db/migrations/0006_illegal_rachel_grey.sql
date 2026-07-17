@@ -1,0 +1,1 @@
+ALTER TABLE `user_profiles` DROP COLUMN `has_debt_choice`;
