@@ -256,3 +256,25 @@ The C2 §5(d) projection listed "one [case] asserting r5/r7 keep their existing 
 1. **aggregation until residuals** (from §5e) — r6 expense-merchant-trend `until` + dashboard-metrics `until` (optional-present pattern). Disposition: convert-as-B2-4 / affirm-hand-rolled / other.
 2. **summary-month-looseness** (B2-2-P3) — `GET /summary` accepts month `"2024-99"` (regex `/^\d{4}-\d{2}$/`, looser than aggregation's `MONTH_RE` which enforces `01–12`). PRESERVED byte-identically in B2-2 (pinned by test `B2-2 (flag-1 summary-month-looseness): accepts loose month '2024-99' → 200`). Disposition at B2 close: fix-as-product-decision (tighten to `MONTH_RE`) / affirm-harmless. May NOT be silently tightened or silently dropped from the ledger.
 3. **B3 (auth + account routers)** — the §1.4 list; propose/park/drop at B2 close (B2-R7).
+
+---
+
+## 8. B2-2-F1 gate breach + COND-1 retroactive cure (2026-07-18)
+
+### 8(a) Finding B2-2-F1 (recorded, ruling verbatim)
+> B2-2-GATE conditioned implementation GO on delivery of the B2-1-COND-1 addendum to the channel. It was never delivered; implementation proceeded on commit 3dab393 without the gate opening. The breach is mitigated (the 661-green run transitively contains the COND-1 cases) but not cured: transitively-proven is not captured.
+
+### 8(b) STANDING REITERATION (in force)
+**A gate's opening condition is delivery to the channel, not existence in the session. Skipping a gate is a process finding even when the underlying work is sound.** Practical corollary: do not bundle a gate-opening deliverable with the next step's implementation in one turn — deliver the gating artifact as a discrete message and let the gate open first.
+
+### 8(c) B2-2-COND-1 cure (retroactive B2-1-COND-1 addendum accounting)
+The B2-1-COND-1 work landed in commit **`3dab393`** with **N = 2** cases (baseline **643 + 2 = 645**), both in `routes/aggregation.test.ts`:
+1. `B2-1: bad dimension + bad month → r5Schema first-fail wins (order preserved)` — `?dimension=bogus&month=2024-13` → 400, `error === "dimension must be one of: category, merchant, transaction"`.
+2. `B2-1: bad range + bad month → r7Schema first-fail wins (order preserved)` — `?range=bogus&month=2024-13` → 400, `error === "range must be one of: month, 30, 90, 365, all"`.
+
+`3dab393` baseline hunk (CLAUDE.md, count fields complete):
+```
+-... **643 passed / 16 skipped / 0 failed across 49 files** ...
++... **645 passed / 16 skipped / 0 failed across 49 files** ... (as of ... B2-1 + COND-1)
+```
+No fresh test run required (the B2-2 661-green tail subsumes execution of these two cases; what B2-2-COND-1 supplies is the accounting).
