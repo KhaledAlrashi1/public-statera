@@ -213,3 +213,31 @@ Identical defaulting (`currentMonthKey()`), identical no-period string, identica
 ### 5(e) Named follow-on (recorded, NOT parked-by-default)
 
 **"aggregation until residuals"** — the optional-present `until` checks in r6 expense-merchant-trend (295–296) and dashboard-metrics (496–497) are a distinct validation pattern (optional, no default) not modeled in the approved Phase A. Standing item, dispositioned at B2 close alongside B3: convert-as-B2-4 / affirm-hand-rolled / other. Must not be described as parked-by-default or silently dropped.
+
+---
+
+## 6. B2-1 close-out rulings — 2026-07-18
+
+### 6(a) Ruling block — B2-1-CO (close-out bounce, one cycle) — verbatim
+
+> B2-1-CO-1 (bounce): re-deliver the close-out with the three mandatory sections PASTED VERBATIM INSIDE the close-out document itself: (a) the `pnpm --filter statera-api test` tail including the `Test Files … passed` line and captured exit code; (b) `tsc --noEmit` output + exit code; (c) the baseline diff hunk from commit 0fc0535. "Shown above" / adjacent-context references are non-compliant regardless of whether the content existed in your session — this is the third report referencing evidence not present in the delivered document. STANDING FIX (record in bundle): every report crossing the channel is evaluated as a standalone document; evidence referenced but not embedded is treated as absent.
+>
+> B2-1-CO-2 (delta reconciliation): include an actual-vs-projection table — the C2-revised per-route case list vs the cases actually added — accounting for all +9 (634→643), each case named, incl. which B2-R6 obligations were met by pre-existing cases (account-overview "default month (no param)", recurring-patterns "count and days meta") vs new ones.
+>
+> B2-1-CO-3 (C1 evidence pointer): state where the C1 verbatim r5/r7 source excerpts live (bundle section + commit) and embed them in the re-delivered close-out.
+>
+> B2-1-CO-4 (ratification, conditional): the r5/r7 separate post-schema safeParse is an in-session implementer choice, PENDING RATIFICATION. It is RATIFIED automatically upon B2-1-CO-3's embedded excerpts confirming the existing first-fail order (B0 schema fields before month) is preserved byte-identically. Note for the record: this choice was C1-stage material and should have surfaced pre-implementation; disposition is ratify-on-evidence, not rework.
+>
+> B2-1-CO-5: no new commits for the re-delivery unless a finding requires one; 0fc0535 stands unless the embedded evidence contradicts the summary. B2-2 remains HELD until this close-out is accepted. The hold-not-auto-continue cadence is affirmed as correct.
+
+### 6(b) STANDING FIX (per B2-1-CO-1)
+
+**Every report crossing the review channel is evaluated as a standalone document; evidence referenced but not embedded is treated as absent.** No "shown above", "captured in session", or adjacent-context pointers substitute for pasting the verbatim evidence (test tail + exit code, tsc + exit code, diff hunk, source excerpts) inside the report itself. Applies to every future close-out and report.
+
+### 6(c) C1 evidence pointer
+
+The C1 verbatim r5/r7 month-block excerpts (pre-implementation, confirming the required-or-default shape) live in **§5(c) of this bundle**, committed in **`5364ed2`** (C2 amendment). The B2-1-CO-3 re-delivered close-out additionally embeds the **post-implementation** r5/r7 handler excerpts (from `0fc0535`) proving `r5Schema`/`r7Schema` parse + early-return runs BEFORE the `MonthFormatSchema.safeParse` — first-fail order preserved → B2-1-CO-4 ratified on evidence.
+
+### 6(d) Delta D-CO-a (recorded, surfaced in re-delivery per the no-new-in-close-out rule)
+
+The C2 §5(d) projection listed "one [case] asserting r5/r7 keep their existing schema's first-fail order (bad-schema-field wins over bad-month)." A dedicated NEW combined-invalid case was **not** added. Ordering preservation is instead established by (i) structural code order — `r5Schema`/`r7Schema` `safeParse` + `if (!parsed.success) return` precedes the month block (embedded post-impl excerpt) — and (ii) the pre-existing B0 r5 multi-invalid case ("dimension=bogus&range=bogus&limit=999999&source=bogus" → dimension message). If an explicit combined bad-dimension+bad-month case is required, it is a small additive test (offered in the close-out).
