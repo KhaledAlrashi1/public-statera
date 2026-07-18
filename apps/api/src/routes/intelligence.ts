@@ -17,6 +17,7 @@
  */
 
 import { Hono } from "hono"
+import { z } from "zod"
 import { getDb } from "../db/connection"
 import { requireAuth } from "../middleware/auth"
 import { searchRateLimit } from "../lib/rate-limit"
@@ -24,9 +25,20 @@ import { Sentry } from "../lib/sentry"
 import { withAnalyticsTimeout, AnalyticsComputationTimeoutError } from "../lib/analytics-cache"
 import { env } from "../lib/env"
 import { buildIncomePatternPayload, buildRecurringPatternsPayload, buildSnapshotPayload } from "../lib/intelligence-lib"
-import { parseIntParam } from "./route-helpers"
+import { parseIntParam, zodErrorToEnvelope } from "./route-helpers"
 
 export const intelligenceRouter = new Hono()
+
+// B2-1 (10d zod adoption): range-only schema for the R12 `days` param. The
+// absent → default 90 AND the non-numeric → 90 leniency stay hand-rolled in
+// parseIntParam (D2 split); this schema sees only the resolved integer and
+// validates the 30–365 bound, emitting the byte-identical combined message via
+// zodErrorToEnvelope regardless of over/under. Behavior is unchanged: a
+// non-numeric `days` still resolves to 90 and returns 200, never a 400.
+const DaysRangeSchema = z
+  .number()
+  .min(30, "days must be between 30 and 365")
+  .max(365, "days must be between 30 and 365")
 
 // ── R11: GET /api/analytics/income-pattern ───────────────────────────────────
 // Income detection payload. No query params. Auth + search rate limit.
@@ -71,12 +83,8 @@ intelligenceRouter.get("/recurring-patterns", requireAuth, searchRateLimit, asyn
   }
 
   const days = parseIntParam(c.req.query("days"), 90)
-  if (days < 30 || days > 365) {
-    return c.json(
-      { ok: false, data: null, error: "days must be between 30 and 365", code: "validation_error" },
-      400,
-    )
-  }
+  const parsedDays = DaysRangeSchema.safeParse(days)
+  if (!parsedDays.success) return zodErrorToEnvelope(c, parsedDays.error)
 
   const { userId } = c.get("session")
   const db = getDb()

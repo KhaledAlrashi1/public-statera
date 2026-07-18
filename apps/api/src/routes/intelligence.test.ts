@@ -210,6 +210,33 @@ describe("GET /api/analytics/recurring-patterns", () => {
     expect(body.error).toBe("days must be between 30 and 365")
     expect(body.code).toBe("validation_error")
   })
+
+  // B2-1 (10d zod days conversion). Absent-days → default 90 → 200 is covered by
+  // "returns patterns in ok envelope with count and days meta" above (asserts
+  // meta.days === 90). These two prove the D2 split's byte-identity: parseIntParam
+  // leniency (non-numeric → 90, never 400) is preserved, and the upper bound emits
+  // the same combined message as the lower bound.
+  it("B2-1: non-numeric days falls back to default 90 → 200 (parseIntParam leniency preserved)", async () => {
+    vi.mocked(buildRecurringPatternsPayload).mockResolvedValue({ patterns: [] })
+    const res = await app.request("/api/analytics/recurring-patterns?days=abc", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = await readJson(res)
+    expect(body.ok).toBe(true)
+    expect(body.meta.days).toBe(90)
+  })
+
+  it("B2-1: days above range → 400 same message (max bound)", async () => {
+    const res = await app.request("/api/analytics/recurring-patterns?days=366", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = await readJson(res)
+    expect(body.ok).toBe(false)
+    expect(body.error).toBe("days must be between 30 and 365")
+    expect(body.code).toBe("validation_error")
+  })
 })
 
 // ── R13: snapshot ─────────────────────────────────────────────────────────────

@@ -214,6 +214,18 @@ describe("GET /api/analytics/expense-breakdown", () => {
     expect(res.status).toBe(401)
   })
 
+  // B2-1 (10d zod month conversion). Malformed-month → 400 identity is covered by
+  // "invalid month format returns 400" below. r5 runs its existing r5Schema parse
+  // BEFORE the month check, so the month zod is a separate post-schema safeParse
+  // (ordering preserved — see the multi-invalid case for schema-field precedence).
+  it("B2-1: absent month uses hand-rolled default → 200 (D2 split)", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/expense-breakdown?dimension=category", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+  })
+
   it("dimension=category returns items with name/amount_kd", async () => {
     // Sequential: [scopeTotal], [category rows]
     vi.mocked(getDb).mockReturnValue(
@@ -452,6 +464,27 @@ describe("GET /api/analytics/budget-metrics", () => {
     expect(res.status).toBe(401)
   })
 
+  // B2-1 (10d zod month conversion). r7 runs r7Schema (range) BEFORE the month
+  // check; the month zod is a separate post-schema safeParse (ordering preserved).
+  it("B2-1: absent month uses hand-rolled default → 200 (D2 split)", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/budget-metrics", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+  })
+
+  it("B2-1: malformed month → 400 byte-identical no-period string", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/budget-metrics?month=2024-13", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("month must be in YYYY-MM format")
+    expect(body.code).toBe("validation_error")
+  })
+
   it("cycle=false, range=month — uses ym filter, no profile query", async () => {
     // 2 sequential DB calls: monthly, prev12
     vi.mocked(getDb).mockReturnValue(
@@ -653,6 +686,19 @@ describe("GET /api/analytics/account-overview", () => {
   it("returns 401 without auth", async () => {
     const res = await app.request("/api/analytics/account-overview?month=2024-06")
     expect(res.status).toBe(401)
+  })
+
+  // B2-1 (10d zod month conversion). Absent-month → default → 200 is covered by
+  // "default month (no param): data.month equals currentMonthKey()" below.
+  it("B2-1: malformed month → 400 byte-identical no-period string", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/account-overview?month=2024-13", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("month must be in YYYY-MM format")
+    expect(body.code).toBe("validation_error")
   })
 
   it("happy path: correct shape, pct calculation, zero-filled month_trend", async () => {
@@ -964,6 +1010,28 @@ describe("GET /api/analytics/safe-to-spend", () => {
   it("returns 401 without auth", async () => {
     const res = await app.request("/api/analytics/safe-to-spend?month=2025-11")
     expect(res.status).toBe(401)
+  })
+
+  // B2-1 (10d zod month conversion). Malformed-month → 400 identity is covered by
+  // "invalid month format returns 400" below. Absent month → hand-rolled
+  // currentMonthKey() default (D2 split); mirrors the F1 recompute setup minus
+  // the ?month= param (currentLocalDate pinned so the default resolves to 2025-11).
+  it("B2-1: absent month uses hand-rolled default → 200 (D2 split)", async () => {
+    vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(new Date(Date.UTC(2025, 10, 10)))
+    vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
+      amountKd: new Decimal("1500.000"),
+      source: "detected_from_transactions",
+    })
+    vi.mocked(getDb).mockReturnValue(
+      makeR9Db(
+        [{ amount: "500.000", catName: "Food" }],
+        [{ total: "120.000" }],
+      ),
+    )
+    const res = await app.request("/api/analytics/safe-to-spend", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
   })
 
   it("invalid month format returns 400", async () => {
@@ -1332,6 +1400,51 @@ describe("GET /api/analytics/dashboard-bundle", () => {
   it("returns 401 without auth", async () => {
     const res = await app.request("/api/analytics/dashboard-bundle")
     expect(res.status).toBe(401)
+  })
+
+  // B2-1 (10d zod month conversion).
+  it("B2-1: malformed month → 400 byte-identical no-period string", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/dashboard-bundle?month=2024-13", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("month must be in YYYY-MM format")
+    expect(body.code).toBe("validation_error")
+  })
+
+  it("B2-1: absent month uses hand-rolled default → 200 (D2 split)", async () => {
+    vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(
+      new Date(Date.UTC(2026, 4, 10)), // 2026-05-10 → currentMonth="2026-05"
+    )
+    vi.mocked(cacheGet).mockResolvedValue(JSON.stringify({ daily_rate_kd: "40.250" }))
+    vi.mocked(buildBudgetPayload).mockResolvedValue({
+      month: "2026-05",
+      items: [],
+      profile_context: {
+        budget_total_kd: "0.000",
+        monthly_income_kd: "0.000",
+        income_source: "not_set",
+        budget_to_income_pct: null,
+        payday_day: 25,
+      },
+    })
+    vi.mocked(getDb).mockReturnValue(
+      makeSequentialDb([
+        [{ total: "500.000" }],
+        [{ computedAt: new Date("2026-05-09T10:00:00.000Z") }],
+        [{ total: "2000.000" }],
+        [{ count: "5" }],
+        [{ total: "300.000" }],
+        [{ category: "Food", total: "500.000" }],
+        [{ ym: "2026-05", incomeTotal: "2000.000", spendTotal: "500.000" }],
+      ]),
+    )
+    const res = await app.request("/api/analytics/dashboard-bundle", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
   })
 
   it("R8: happy path — shape + key field assertions", async () => {

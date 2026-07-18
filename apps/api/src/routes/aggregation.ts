@@ -84,6 +84,13 @@ export const aggregationRouter = new Hono()
 const UNCAT = "Uncategorized"
 const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/
 
+// B2-1 (10d zod adoption): shape-only schema for a present, non-empty `month`
+// query value. The absent → currentMonthKey() default stays hand-rolled at each
+// call site (D2 split); this schema sees only present-but-malformed values and
+// emits the byte-identical no-period string via zodErrorToEnvelope. MONTH_RE stays
+// the single source of truth (still used directly by the out-of-scope `until` sites).
+const MonthFormatSchema = z.string().regex(MONTH_RE, "month must be in YYYY-MM format")
+
 import { parseIntParam, zodErrorToEnvelope } from "./route-helpers"
 
 function parseBoolParam(v: string | undefined): boolean {
@@ -183,8 +190,9 @@ aggregationRouter.get("/expense-breakdown", requireAuth, async (c) => {
   let month = (c.req.query("month") ?? "").trim()
   if (!month) {
     month = currentMonthKey()
-  } else if (!MONTH_RE.test(month)) {
-    return c.json({ ok: false, data: null, error: "month must be in YYYY-MM format", code: "validation_error" }, 400)
+  } else {
+    const parsedMonth = MonthFormatSchema.safeParse(month)
+    if (!parsedMonth.success) return zodErrorToEnvelope(c, parsedMonth.error)
   }
 
   const db = getDb()
@@ -356,8 +364,9 @@ aggregationRouter.get("/budget-metrics", requireAuth, async (c) => {
   let month = (c.req.query("month") ?? "").trim()
   if (!month) {
     month = currentMonthKey()
-  } else if (!MONTH_RE.test(month)) {
-    return c.json({ ok: false, data: null, error: "month must be in YYYY-MM format", code: "validation_error" }, 400)
+  } else {
+    const parsedMonth = MonthFormatSchema.safeParse(month)
+    if (!parsedMonth.success) return zodErrorToEnvelope(c, parsedMonth.error)
   }
 
   const cycleEnabled = parseBoolParam(c.req.query("cycle"))
@@ -867,8 +876,9 @@ aggregationRouter.get("/account-overview", requireAuth, searchRateLimit, async (
   let month = (c.req.query("month") ?? "").trim()
   if (!month) {
     month = currentMonthKey()
-  } else if (!MONTH_RE.test(month)) {
-    return c.json({ ok: false, data: null, error: "month must be in YYYY-MM format", code: "validation_error" }, 400)
+  } else {
+    const parsedMonth = MonthFormatSchema.safeParse(month)
+    if (!parsedMonth.success) return zodErrorToEnvelope(c, parsedMonth.error)
   }
 
   const db = getDb()
@@ -888,8 +898,9 @@ aggregationRouter.get("/safe-to-spend", requireAuth, searchRateLimit, async (c) 
   let month = (c.req.query("month") ?? "").trim()
   if (!month) {
     month = currentMonthKey()
-  } else if (!MONTH_RE.test(month)) {
-    return c.json({ ok: false, data: null, error: "month must be in YYYY-MM format", code: "validation_error" }, 400)
+  } else {
+    const parsedMonth = MonthFormatSchema.safeParse(month)
+    if (!parsedMonth.success) return zodErrorToEnvelope(c, parsedMonth.error)
   }
 
   const today = currentLocalDate()
@@ -1080,8 +1091,9 @@ aggregationRouter.get("/dashboard-bundle", requireAuth, searchRateLimit, async (
   let month = (c.req.query("month") ?? "").trim()
   if (!month) {
     month = currentMonth
-  } else if (!MONTH_RE.test(month)) {
-    return c.json({ ok: false, data: null, error: "month must be in YYYY-MM format", code: "validation_error" }, 400)
+  } else {
+    const parsedMonth = MonthFormatSchema.safeParse(month)
+    if (!parsedMonth.success) return zodErrorToEnvelope(c, parsedMonth.error)
   }
 
   const db = getDb()
