@@ -41,6 +41,8 @@ This file is the surviving source of truth for the B2 partition, its rulings, an
 - aggregation GET `/safe-to-spend`, `/account-overview`, `/weekly-digest`, `/dashboard-bundle` — shared `month`: empty/absent → default (stays hand-rolled), present-malformed → zod reject `"month must be in YYYY-MM format"` (**no period**).
 - intelligence GET `/recurring-patterns` — `days` 30–365, default 90, reject `"days must be between 30 and 365"`.
 
+> **SUPERSEDED for B2-1 scope by §5 (B2-1 STOP-1 R14 correction, 2026-07-18, Option C).** This originally-approved bullet is retained for the record; the corrected B2-1 scope is in §5.
+
 **B2-2 — transactions read-query shape** (shape-only, no money)
 - GET `/summary` — `month` reject `"month must be in YYYY-MM format."` (**WITH period — distinct string from B2-1; both preserved verbatim**).
 - GET `/top-patterns` — `range` enum `30|90|365|all`.
@@ -116,3 +118,98 @@ Each B2-1 month route shows an **absent-month → default → 200** case, and re
 1. Persist this bundle as B2's FIRST commit, with the D6 CLAUDE.md correction + the B2-R8 Module 11 queue-note line riding the same commit. ← *this commit*
 2. Implement B2-1 (analytics month family + intelligence days), carrying the B2-R6 obligation.
 3. B2-2, then B2-3, each with its own close-out per the three-section template.
+
+---
+
+## 5. B2-1 STOP-1 (R14) correction — 2026-07-18 (Option C)
+
+Implementation-time verification falsified the approved B2-1 "month family." A named R14 stop was raised, accepted as valid, and ruled Option C. This section supersedes §1.2's B2-1 bullet and corrects the §1b rows below.
+
+### 5(a) Ruling block — 2026-07-18 B2-1 STOP-1 (R14), Option C (verbatim)
+
+> STOP DISPOSITION: R14 stop accepted as valid and correctly raised. The approved B2-1 scope contained an enumeration error (phantom weekly-digest month param) and an under-report (residual hand-rolled date checks inside routes tabled as "B0 DONE").
+>
+> B2-1 CORRECTED SCOPE (Option C):
+> - IN: account-overview month, safe-to-spend month, dashboard-bundle month (required-or-default, no-period string, D2 split: absent → hand-rolled default, present-malformed → zod reject); r5 expense-breakdown month, r7 budget-metrics month (same pattern, same string — added to the existing B0 schemas' routes as the same D2-split mechanism); intelligence recurring-patterns days (unchanged from approval).
+> - OUT: weekly-digest — REMOVED from B2-1 as a phantom (no month query param; unconditional currentMonthKey()). Nothing to convert.
+> - OUT: r6 expense-merchant-trend until, dashboard-metrics until — optional-present is a distinct validation pattern not modeled in the approved Phase A; converting it here would introduce an unapproved deviation mid-module. NAMED FOLLOW-ON: "aggregation until residuals" is a standing item to be dispositioned at B2 close alongside B3 (convert-as-B2-4 / affirm-hand-rolled / other). It may not be described as parked-by-default or silently dropped.
+>
+> CONDITION C1 — pattern confirmation before implementing: confirm by pasted verbatim source excerpt that the r5 and r7 month checks follow the same required-or-default shape as the three named month routes (absent → default, present-malformed → 400 no-period string). If either differs in ANY respect (defaulting, string, ordering), that is a new R14 stop, not a silent adaptation.
+>
+> CONDITION C2 — bundle amendment (precedes implementation): amend the persisted docs/modules/ bundle in one commit recording: (a) this ruling block verbatim; (b) corrected §1b rows for weekly-digest, r5, r6, r7, dashboard-metrics (B0 DONE rows annotated with their residual hand-rolled checks; weekly-digest re-classed NONE for query input); (c) the pasted verbatim MONTH_RE/until enumeration grep with exit code as evidence — the summary that reached the channel is not the record; (d) revised B2-1 test projection from the corrected scope (the approved ~5 is void; state the new per-route case list including the B2-R6 absent→default→200 cases, now also covering r5 and r7, and recurring-patterns absent-days→90).
+>
+> CONDITION C3 — delta discipline unchanged: close-out reports exact counts from the 634 / 16 / 49 baseline with verbatim test tail + tsc output + exit codes per the three-section template. Projection changes; the evidence standard does not.
+>
+> SEQUENCE: C1 evidence → C2 amendment commit → implement corrected B2-1 → close-out. B2-2/B2-3 scopes are unaffected by this ruling.
+
+### 5(b) Corrected §1b rows
+
+| Router | Method + Path | Corrected classification |
+|---|---|---|
+| aggregation | GET `/expense-breakdown` (r5) | **B0 PARTIAL** — `dimension`/`range`/`limit`/`source` on `r5Schema` (B0 done); **`month` residual hand-rolled** (183–187, required-or-default, no-period string). → **B2-1 IN** (month only). |
+| aggregation | GET `/expense-merchant-trend` (r6) | **B0 PARTIAL** — `merchant`/`months` on `r6Schema` (B0 done); **`until` residual hand-rolled** (295–296, optional-present). → **B2-1 OUT** (named follow-on "aggregation until residuals"). |
+| aggregation | GET `/budget-metrics` (r7) | **B0 PARTIAL** — `range` on `r7Schema` (B0 done); **`month` residual hand-rolled** (356–360, required-or-default, no-period string). → **B2-1 IN** (month only). |
+| aggregation | GET `/dashboard-metrics` | HAND — **`until` residual hand-rolled** (496–497, optional-present); `months` is tolerant `parseIntParam`. → **B2-1 OUT** (named follow-on "aggregation until residuals"). |
+| aggregation | GET `/weekly-digest` | **NONE for query input** — no `month`/`until` query param; `month = currentMonthKey()` unconditional (977). Phantom. → **B2-1 OUT** (nothing to convert). |
+
+### 5(c) Evidence — enumeration grep (verbatim, with exit codes, captured 2026-07-18)
+
+```
+$ grep -nE "MONTH_RE\.test|c\.req\.query\(\"(month|until)\"\)|aggregationRouter\.get" aggregation.ts | grep -vE "^\s*//|const MONTH_RE"
+96:aggregationRouter.get("/spend-by-category", requireAuth, async (c) => {
+122:aggregationRouter.get("/spend-by-month", requireAuth, async (c) => {
+171:aggregationRouter.get("/expense-breakdown", requireAuth, async (c) => {
+183:  let month = (c.req.query("month") ?? "").trim()
+186:  } else if (!MONTH_RE.test(month)) {
+288:aggregationRouter.get("/expense-merchant-trend", requireAuth, async (c) => {
+295:  const until = (c.req.query("until") ?? "").trim()
+296:  if (until && !MONTH_RE.test(until)) {
+349:aggregationRouter.get("/budget-metrics", requireAuth, async (c) => {
+356:  let month = (c.req.query("month") ?? "").trim()
+359:  } else if (!MONTH_RE.test(month)) {
+485:aggregationRouter.get("/dashboard-metrics", requireAuth, searchRateLimit, async (c) => {
+496:  const until = (c.req.query("until") ?? "").trim()
+497:  if (until && !MONTH_RE.test(until)) {
+864:aggregationRouter.get("/account-overview", requireAuth, searchRateLimit, async (c) => {
+867:  let month = (c.req.query("month") ?? "").trim()
+870:  } else if (!MONTH_RE.test(month)) {
+885:aggregationRouter.get("/safe-to-spend", requireAuth, searchRateLimit, async (c) => {
+888:  let month = (c.req.query("month") ?? "").trim()
+891:  } else if (!MONTH_RE.test(month)) {
+965:aggregationRouter.get("/weekly-digest", requireAuth, searchRateLimit, async (c) => {
+1075:aggregationRouter.get("/dashboard-bundle", requireAuth, searchRateLimit, async (c) => {
+1080:  let month = (c.req.query("month") ?? "").trim()
+1083:  } else if (!MONTH_RE.test(month)) {
+---grep-exit:0---
+
+$ sed -n '965,1010p' aggregation.ts | grep -nE 'c\.req\.query'
+---weekly-digest-query-exit:1 (1 = none)---
+```
+
+**C1 confirmation (verbatim r5/r7 month blocks) — both byte-identical to the three named routes:**
+
+```
+r5 expense-breakdown (183–187):        r7 budget-metrics (356–360):
+  let month = (c.req.query("month") ?? "").trim()      let month = (c.req.query("month") ?? "").trim()
+  if (!month) {                                        if (!month) {
+    month = currentMonthKey()                            month = currentMonthKey()
+  } else if (!MONTH_RE.test(month)) {                  } else if (!MONTH_RE.test(month)) {
+    return c.json({ ok:false, ... "month must be in YYYY-MM format", code:"validation_error" }, 400)
+  }                                                    }
+```
+
+Identical defaulting (`currentMonthKey()`), identical no-period string, identical ordering. In r5/r7 the month check runs AFTER the existing `r5Schema`/`r7Schema` parse — the zod month conversion keeps month as a SEPARATE post-schema `safeParse`, preserving that first-fail order (D3). No difference in any respect → C1 PASS, no new R14 stop.
+
+### 5(d) Revised B2-1 mechanism + test projection (the approved ~5 is void)
+
+**Mechanism.** A single shared `z.string().regex(MONTH_RE, "month must be in YYYY-MM format")` schema replaces the 5 in-scope `else if (!MONTH_RE.test(month))` blocks (account-overview, safe-to-spend, dashboard-bundle, r5, r7) via `zodErrorToEnvelope` → byte-identical `{ ok:false, data:null, error:"month must be in YYYY-MM format", code:"validation_error" }` @ 400. `MONTH_RE` stays (still used by the two out-of-scope `until` sites). The `if (!month) default` branch stays hand-rolled (D2). For `recurring-patterns`: `parseIntParam(c.req.query("days"), 90)` stays hand-rolled (default + non-numeric leniency, D2); only the 30–365 range moves to a zod schema (`.min(30, msg).max(365, msg)`, msg = `"days must be between 30 and 365"`) — preserving current behavior exactly (absent/non-numeric → 90 → 200; out-of-range → 400).
+
+**Per-route test case list (added to existing files; no new files):**
+- `aggregation.test.ts` — for account-overview, safe-to-spend, dashboard-bundle, r5 expense-breakdown, r7 budget-metrics: (i) **absent-month → default → 200** (B2-R6, ×5); (ii) present-malformed month → 400 with the exact no-period string (message-identity), at least on a representative subset + one asserting r5/r7 keep their existing schema's first-fail order (bad-schema-field wins over bad-month).
+- `intelligence.test.ts` — recurring-patterns: (i) **absent-days → default-90 → 200** (B2-R6); (ii) out-of-range days → 400 `"days must be between 30 and 365"` (message-identity).
+
+**Projection:** ≈ **+8–10 hermetic passes → ~642–644 passed; files unchanged at 49; skipped unchanged at 16.** Exact counts reported in the B2-1 close-out per C3 (verbatim test tail incl. `Test Files N passed (N)`, `tsc --noEmit`, exit codes, baseline diff hunk from 634/16/49).
+
+### 5(e) Named follow-on (recorded, NOT parked-by-default)
+
+**"aggregation until residuals"** — the optional-present `until` checks in r6 expense-merchant-trend (295–296) and dashboard-metrics (496–497) are a distinct validation pattern (optional, no default) not modeled in the approved Phase A. Standing item, dispositioned at B2 close alongside B3: convert-as-B2-4 / affirm-hand-rolled / other. Must not be described as parked-by-default or silently dropped.
