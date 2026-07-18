@@ -463,6 +463,180 @@ describe("GET /api/transactions/search", () => {
   })
 })
 
+// ── B2-2 (10d zod adoption): read-query shape conversion ─────────────────────
+// Message-identity, D3 first-fail ordering, and the P4 branch pins. Byte-identical
+// wire strings; numeric coercion/defaults stay hand-rolled (D2).
+
+describe("B2-2 zod conversion — /summary month", () => {
+  it("B2-2: malformed month → 400 byte-identical string WITH period", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([{ count: 0 }]))
+    const res = await app.request("/api/transactions/summary?month=not-a-month", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("month must be in YYYY-MM format.")
+    expect(body.code).toBe("validation_error")
+  })
+
+  it("B2-2 (flag-1 summary-month-looseness): accepts loose month '2024-99' → 200", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([{ count: 0 }]))
+    const res = await app.request("/api/transactions/summary?month=2024-99", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect((body.data as Record<string, unknown>).month).toBe("2024-99")
+  })
+})
+
+describe("B2-2 zod conversion — /top-patterns range (P4 both branches)", () => {
+  it("B2-2 (P4): absent range defaults to '30' → 200", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/top-patterns", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect((body.data as Record<string, unknown>).range).toBe("30")
+  })
+
+  it("B2-2 (P4): empty range '' → 400 (NOT defaulted), byte-identical message", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/top-patterns?range=", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("range must be one of: 30, 90, 365, all")
+    expect(body.code).toBe("validation_error")
+  })
+})
+
+describe("B2-2 zod conversion — /by-category (D3 ordering + P4)", () => {
+  it("returns 401 without auth", async () => {
+    const res = await app.request("/api/transactions/by-category?category=Food")
+    expect(res.status).toBe(401)
+  })
+
+  it("B2-2: missing category → 400 'category is required.'", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/by-category", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("category is required.")
+    expect(body.code).toBe("validation_error")
+  })
+
+  it("B2-2 (P4): non-numeric limit → range message (not zod default)", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/by-category?category=Food&limit=abc", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("limit must be between 1 and 100.")
+    expect(body.code).toBe("validation_error")
+  })
+
+  it("B2-2: offset negative → 400 'offset must be >= 0.'", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/by-category?category=Food&offset=-1", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("offset must be >= 0.")
+  })
+
+  it("B2-2 (D3): missing category + bad limit → category-required wins (order)", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/by-category?limit=999", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).error).toBe("category is required.")
+  })
+
+  it("B2-2 (D3): bad limit + bad offset → limit wins (order)", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/by-category?category=Food&limit=999&offset=-1", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).error).toBe("limit must be between 1 and 100.")
+  })
+
+  it("B2-2: valid input passes validation → 200", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/by-category?category=Food", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+  })
+})
+
+describe("B2-2 zod conversion — /search (D3 ordering + D-B2-2-a)", () => {
+  it("B2-2: income_only+exclude_income → 400 byte-identical message", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/search?income_only=true&exclude_income=true", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("income_only and exclude_income cannot both be true.")
+    expect(body.code).toBe("validation_error")
+  })
+
+  it("B2-2 (P4): non-numeric limit → range message (not zod default)", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/search?limit=abc", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("limit must be between 1 and 100.")
+    expect(body.code).toBe("validation_error")
+  })
+
+  it("B2-2: bad date_from format → 400 byte-identical message", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/search?date_from=2026-4-1", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("date_from must be in YYYY-MM-DD format.")
+    expect(body.code).toBe("validation_error")
+  })
+
+  it("B2-2-P2(b): date_from>date_to only → code 'invalid_date_range', byte-identical", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request(
+      "/api/transactions/search?date_from=2026-04-30&date_to=2026-04-01",
+      { headers: { Authorization: await authHeader() } },
+    )
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("date_from must be on or before date_to.")
+    expect(body.code).toBe("invalid_date_range")
+  })
+
+  it("B2-2-P2(a): schema check + range check both fail → schema (limit) wins, NOT invalid_date_range", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request(
+      "/api/transactions/search?limit=999&date_from=2026-04-30&date_to=2026-04-01",
+      { headers: { Authorization: await authHeader() } },
+    )
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("limit must be between 1 and 100.")
+    expect(body.code).toBe("validation_error")
+  })
+})
+
 // ── GET /api/transactions/dup-check ──────────────────────────────────────────
 
 describe("GET /api/transactions/dup-check", () => {

@@ -241,3 +241,18 @@ The C1 verbatim r5/r7 month-block excerpts (pre-implementation, confirming the r
 ### 6(d) Delta D-CO-a (recorded, surfaced in re-delivery per the no-new-in-close-out rule)
 
 The C2 §5(d) projection listed "one [case] asserting r5/r7 keep their existing schema's first-fail order (bad-schema-field wins over bad-month)." A dedicated NEW combined-invalid case was **not** added. Ordering preservation is instead established by (i) structural code order — `r5Schema`/`r7Schema` `safeParse` + `if (!parsed.success) return` precedes the month block (embedded post-impl excerpt) — and (ii) the pre-existing B0 r5 multi-invalid case ("dimension=bogus&range=bogus&limit=999999&source=bogus" → dimension message). If an explicit combined bad-dimension+bad-month case is required, it is a small additive test (offered in the close-out).
+
+---
+
+## 7. B2-2 rulings + named follow-ons (2026-07-18)
+
+### 7(a) Ruling — B2-2 pre-implementation plan APPROVED WITH CONDITIONS (verbatim summary)
+- **B2-2-P1:** plan APPROVED for all four routes (/summary separate `SummaryMonthSchema`, period string + looser regex preserved; /top-patterns preprocess defaulting on `undefined` only; /by-category superRefine message-controlled ordering; /search checks (1)-(5) superRefine + check (6) hand-rolled post-schema).
+- **B2-2-P2 (D-B2-2-a):** APPROVED — /search `date_from>date_to` stays hand-rolled (distinct code `invalid_date_range`, Decision 2, D4-analogous). Required tests: (a) both a schema-layer check AND the range check fail → schema envelope wins (6-is-last); (b) range-only → code `invalid_date_range` byte-identical. **Both delivered** (`B2-2-P2(a)` / `B2-2-P2(b)` cases in `transactions.test.ts`).
+- **B2-2-P3:** the /summary regex looseness → recorded as named follow-on **"summary-month-looseness"** (see 7b).
+- **B2-2-P4:** absent-vs-empty on /top-patterns pinned by explicit test EACH branch; /by-category non-numeric limit/offset → range message pinned. **All delivered.**
+
+### 7(b) Named follow-ons — disposition at B2 close (none may be silently dropped or silently resolved)
+1. **aggregation until residuals** (from §5e) — r6 expense-merchant-trend `until` + dashboard-metrics `until` (optional-present pattern). Disposition: convert-as-B2-4 / affirm-hand-rolled / other.
+2. **summary-month-looseness** (B2-2-P3) — `GET /summary` accepts month `"2024-99"` (regex `/^\d{4}-\d{2}$/`, looser than aggregation's `MONTH_RE` which enforces `01–12`). PRESERVED byte-identically in B2-2 (pinned by test `B2-2 (flag-1 summary-month-looseness): accepts loose month '2024-99' → 200`). Disposition at B2 close: fix-as-product-decision (tighten to `MONTH_RE`) / affirm-harmless. May NOT be silently tightened or silently dropped from the ledger.
+3. **B3 (auth + account routers)** — the §1.4 list; propose/park/drop at B2 close (B2-R7).

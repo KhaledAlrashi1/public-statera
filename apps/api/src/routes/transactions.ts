@@ -15,6 +15,7 @@
 //   - GET  /export-xlsx → exportRateLimit (5/min)   [deferred to module 3c]
 
 import { Hono } from "hono"
+import { z } from "zod"
 import { and, eq, or, sql, inArray } from "drizzle-orm"
 import Decimal from "decimal.js"
 import { getDb } from "../db/connection"
@@ -41,8 +42,87 @@ import {
 // TODO(module-3b-memorized): import memorizedTransactions for learnTransaction in split
 import { Sentry } from "../lib/sentry"
 import { cacheBustDashboardMetrics, cacheBustSafeToSpend } from "../lib/analytics-cache"
+import { zodErrorToEnvelope } from "./route-helpers"
 
 export const transactionsRouter = new Hono()
+
+// ── B2-2 (10d zod adoption): shape-only schemas for the read-query routes ────
+// Byte-identical wire strings via zodErrorToEnvelope. Numeric coercion + defaults
+// stay hand-rolled at the call sites (D2); limit/offset accept NaN (union with
+// z.nan()) so a non-numeric value reaches the range check and emits the range
+// message — not zod's "Expected number" default.
+
+// GET /summary — distinct string ("… format." WITH period) and a LOOSER regex
+// than aggregation's MONTH_RE (accepts e.g. "2024-99"); preserved verbatim.
+// (Named follow-on "summary-month-looseness", disposition at B2 close.)
+const SummaryMonthSchema = z.string().regex(/^\d{4}-\d{2}$/, "month must be in YYYY-MM format.")
+
+// GET /top-patterns — range enum; defaults on UNDEFINED only (absent → "30"),
+// empty string "" must still 400 (distinct from r5/r7's !v default-on-empty).
+const TopPatternsRangeSchema = z.preprocess(
+  (v) => (v === undefined ? "30" : String(v).trim()),
+  z.enum(["30", "90", "365", "all"], {
+    errorMap: () => ({ message: "range must be one of: 30, 90, 365, all" }),
+  }),
+)
+
+// GET /by-category — ordered: category → limit → offset (D3, first-fail order
+// preserved via superRefine + early return; single issue → issues[0]).
+const ByCategorySchema = z
+  .object({
+    category: z.string(),
+    limit: z.union([z.number(), z.nan()]),
+    offset: z.union([z.number(), z.nan()]),
+  })
+  .superRefine((v, ctx) => {
+    if (!v.category) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "category is required." })
+      return
+    }
+    if (Number.isNaN(v.limit) || v.limit < 1 || v.limit > 100) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "limit must be between 1 and 100." })
+      return
+    }
+    if (Number.isNaN(v.offset) || v.offset < 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "offset must be >= 0." })
+      return
+    }
+  })
+
+// GET /search — ordered checks (1)-(5) (D3, superRefine + early return). Check
+// (6) date_from>date_to stays HAND-ROLLED after the schema (D-B2-2-a): it carries
+// the distinct code "invalid_date_range" the shared single-code envelope can't emit.
+const SearchQuerySchema = z
+  .object({
+    incomeOnly: z.boolean(),
+    excludeIncome: z.boolean(),
+    limit: z.union([z.number(), z.nan()]),
+    offset: z.union([z.number(), z.nan()]),
+    dateFromRaw: z.string(),
+    dateToRaw: z.string(),
+  })
+  .superRefine((v, ctx) => {
+    if (v.incomeOnly && v.excludeIncome) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "income_only and exclude_income cannot both be true." })
+      return
+    }
+    if (Number.isNaN(v.limit) || v.limit < 1 || v.limit > 100) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "limit must be between 1 and 100." })
+      return
+    }
+    if (Number.isNaN(v.offset) || v.offset < 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "offset must be >= 0." })
+      return
+    }
+    if (v.dateFromRaw && !/^\d{4}-\d{2}-\d{2}$/.test(v.dateFromRaw)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "date_from must be in YYYY-MM-DD format." })
+      return
+    }
+    if (v.dateToRaw && !/^\d{4}-\d{2}-\d{2}$/.test(v.dateToRaw)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "date_to must be in YYYY-MM-DD format." })
+      return
+    }
+  })
 
 // ── GET /api/transactions/:id ─────────────────────────────────────────────────
 
@@ -588,9 +668,8 @@ transactionsRouter.get("/summary", requireAuth, async (c) => {
     const now = new Date()
     month = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`
   }
-  if (!/^\d{4}-\d{2}$/.test(month)) {
-    return c.json({ ok: false, data: null, error: "month must be in YYYY-MM format.", code: "validation_error" }, 400)
-  }
+  const parsedMonth = SummaryMonthSchema.safeParse(month)
+  if (!parsedMonth.success) return zodErrorToEnvelope(c, parsedMonth.error)
 
   const { userId } = c.get("session")
   const db = getDb()
@@ -634,13 +713,9 @@ transactionsRouter.get("/summary", requireAuth, async (c) => {
 // ── GET /api/transactions/top-patterns ───────────────────────────────────────
 
 transactionsRouter.get("/top-patterns", requireAuth, searchRateLimit, async (c) => {
-  const rangeKey = (c.req.query("range") ?? "30").trim()
-  if (!["30", "90", "365", "all"].includes(rangeKey)) {
-    return c.json(
-      { ok: false, data: null, error: "range must be one of: 30, 90, 365, all", code: "validation_error" },
-      400,
-    )
-  }
+  const parsedRange = TopPatternsRangeSchema.safeParse(c.req.query("range"))
+  if (!parsedRange.success) return zodErrorToEnvelope(c, parsedRange.error)
+  const rangeKey = parsedRange.data
   const { userId } = c.get("session")
   const db = getDb()
 
@@ -706,28 +781,21 @@ transactionsRouter.get("/search", requireAuth, searchRateLimit, async (c) => {
   const rawOffset = c.req.query("offset")
   const includeTotal = argBool(c.req.query("include_total"), true)
 
-  if (incomeOnly && excludeIncome) {
-    return c.json(
-      { ok: false, data: null, error: "income_only and exclude_income cannot both be true.", code: "validation_error" },
-      400,
-    )
-  }
+  const limit = rawLimit !== undefined ? parseInt(rawLimit, 10) : 20
+  const offset = rawOffset !== undefined ? parseInt(rawOffset, 10) : 0
+  const parsedSearch = SearchQuerySchema.safeParse({
+    incomeOnly,
+    excludeIncome,
+    limit,
+    offset,
+    dateFromRaw,
+    dateToRaw,
+  })
+  if (!parsedSearch.success) return zodErrorToEnvelope(c, parsedSearch.error)
 
-  let limit = rawLimit !== undefined ? parseInt(rawLimit, 10) : 20
-  let offset = rawOffset !== undefined ? parseInt(rawOffset, 10) : 0
-  if (isNaN(limit) || limit < 1 || limit > 100) {
-    return c.json({ ok: false, data: null, error: "limit must be between 1 and 100.", code: "validation_error" }, 400)
-  }
-  if (isNaN(offset) || offset < 0) {
-    return c.json({ ok: false, data: null, error: "offset must be >= 0.", code: "validation_error" }, 400)
-  }
-
-  if (dateFromRaw && !/^\d{4}-\d{2}-\d{2}$/.test(dateFromRaw)) {
-    return c.json({ ok: false, data: null, error: "date_from must be in YYYY-MM-DD format.", code: "validation_error" }, 400)
-  }
-  if (dateToRaw && !/^\d{4}-\d{2}-\d{2}$/.test(dateToRaw)) {
-    return c.json({ ok: false, data: null, error: "date_to must be in YYYY-MM-DD format.", code: "validation_error" }, 400)
-  }
+  // D-B2-2-a: this cross-field range check stays hand-rolled after the schema —
+  // it carries the distinct code "invalid_date_range" the shared single-code
+  // envelope cannot emit, and is the last first-fail check (6-is-last preserved).
   if (dateFromRaw && dateToRaw && dateFromRaw > dateToRaw) {
     return c.json(
       { ok: false, data: null, error: "date_from must be on or before date_to.", code: "invalid_date_range" },
@@ -856,23 +924,16 @@ transactionsRouter.get("/search", requireAuth, searchRateLimit, async (c) => {
 
 transactionsRouter.get("/by-category", requireAuth, async (c) => {
   const category = (c.req.query("category") ?? "").trim()
-  if (!category) {
-    return c.json({ ok: false, data: null, error: "category is required.", code: "validation_error" }, 400)
-  }
   const q = (c.req.query("q") ?? "").trim()
   const month = (c.req.query("month") ?? "").trim() || null
   const rawLimit = c.req.query("limit")
   const rawOffset = c.req.query("offset")
   const includeTotal = argBool(c.req.query("include_total"), true)
 
-  let limit = rawLimit !== undefined ? parseInt(rawLimit, 10) : 20
-  let offset = rawOffset !== undefined ? parseInt(rawOffset, 10) : 0
-  if (isNaN(limit) || limit < 1 || limit > 100) {
-    return c.json({ ok: false, data: null, error: "limit must be between 1 and 100.", code: "validation_error" }, 400)
-  }
-  if (isNaN(offset) || offset < 0) {
-    return c.json({ ok: false, data: null, error: "offset must be >= 0.", code: "validation_error" }, 400)
-  }
+  const limit = rawLimit !== undefined ? parseInt(rawLimit, 10) : 20
+  const offset = rawOffset !== undefined ? parseInt(rawOffset, 10) : 0
+  const parsedByCategory = ByCategorySchema.safeParse({ category, limit, offset })
+  if (!parsedByCategory.success) return zodErrorToEnvelope(c, parsedByCategory.error)
 
   const { userId } = c.get("session")
   const db = getDb()
