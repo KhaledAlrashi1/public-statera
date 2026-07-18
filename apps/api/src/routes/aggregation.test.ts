@@ -226,6 +226,19 @@ describe("GET /api/analytics/expense-breakdown", () => {
     expect(res.status).toBe(200)
   })
 
+  // B2-1-COND-1 (D-CO-a cure): bad schema field + bad month → the r5Schema
+  // envelope wins, byte-identical (month zod is a separate post-schema safeParse).
+  it("B2-1: bad dimension + bad month → r5Schema first-fail wins (order preserved)", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/expense-breakdown?dimension=bogus&month=2024-13", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("dimension must be one of: category, merchant, transaction")
+    expect(body.code).toBe("validation_error")
+  })
+
   it("dimension=category returns items with name/amount_kd", async () => {
     // Sequential: [scopeTotal], [category rows]
     vi.mocked(getDb).mockReturnValue(
@@ -472,6 +485,19 @@ describe("GET /api/analytics/budget-metrics", () => {
       headers: { Authorization: await authHeader() },
     })
     expect(res.status).toBe(200)
+  })
+
+  // B2-1-COND-1 (D-CO-a cure): bad schema field + bad month → the r7Schema
+  // envelope wins, byte-identical (month zod is a separate post-schema safeParse).
+  it("B2-1: bad range + bad month → r7Schema first-fail wins (order preserved)", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/budget-metrics?range=bogus&month=2024-13", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("range must be one of: month, 30, 90, 365, all")
+    expect(body.code).toBe("validation_error")
   })
 
   it("B2-1: malformed month → 400 byte-identical no-period string", async () => {
