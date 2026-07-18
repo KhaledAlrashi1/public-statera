@@ -801,6 +801,79 @@ describe("POST /api/transactions/bulk-update", () => {
 
 // ── DELETE /api/transactions/import-batch/:batch_id ───────────────────────────
 
+// ── B2-3 (10d zod adoption): bulk-op body shape — message-identity + D3 ────────
+
+describe("B2-3 zod conversion — /bulk-delete + /bulk-update", () => {
+  it("B2-3: bulk-delete empty ids → 400 byte-identical message", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/bulk-delete", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [] }),
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("ids must be a non-empty list.")
+    expect(body.code).toBe("validation_error")
+  })
+
+  it("B2-3: bulk-delete non-array ids → custom message (not zod default)", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/bulk-delete", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: "nope" }),
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).error).toBe("ids must be a non-empty list.")
+  })
+
+  it("B2-3 (D5): bulk-delete >200 ids → '…200 transactions at once.' (distinct from memorized)", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const ids = Array.from({ length: 201 }, (_, i) => i + 1)
+    const res = await app.request("/api/transactions/bulk-delete", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids }),
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).error).toBe("Cannot delete more than 200 transactions at once.")
+  })
+
+  it("B2-3 (D3): bulk-update ids empty + changes empty → ids message wins (order)", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/bulk-update", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [], changes: {} }),
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).error).toBe("ids must be a non-empty list.")
+  })
+
+  it("B2-3: bulk-update changes empty → 400 byte-identical message", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/bulk-update", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [1], changes: {} }),
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).error).toBe("changes must be a non-empty object.")
+  })
+
+  it("B2-3: bulk-update unknown field → dynamic 'Unknown fields: …' message preserved", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/transactions/bulk-update", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [1], changes: { amount_kd: "5.000" } }),
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).error).toBe("Unknown fields: amount_kd.")
+  })
+})
+
 describe("DELETE /api/transactions/import-batch/:batch_id", () => {
   it("returns 401 without auth", async () => {
     const res = await app.request(

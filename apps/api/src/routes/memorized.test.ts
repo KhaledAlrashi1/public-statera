@@ -453,6 +453,42 @@ describe("POST /api/memorized-transactions/bulk-delete", () => {
     expect(res.status).toBe(400)
   })
 
+  it("B2-3: empty ids → 400 byte-identical message", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/memorized-transactions/bulk-delete", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [] }),
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("ids must be a non-empty list.")
+    expect(body.code).toBe("validation_error")
+  })
+
+  it("B2-3: non-array ids → custom message (not zod default)", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const res = await app.request("/api/memorized-transactions/bulk-delete", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: 5 }),
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).error).toBe("ids must be a non-empty list.")
+  })
+
+  it("B2-3 (D5): >200 ids → '…200 entries at once.' (distinct from transactions' '…transactions…')", async () => {
+    vi.mocked(getDb).mockReturnValue(makeMockDb([]))
+    const ids = Array.from({ length: 201 }, (_, i) => i + 1)
+    const res = await app.request("/api/memorized-transactions/bulk-delete", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ ids }),
+    })
+    expect(res.status).toBe(400)
+    expect(((await res.json()) as Record<string, unknown>).error).toBe("Cannot delete more than 200 entries at once.")
+  })
+
   it("returns 200 with deleted count", async () => {
     let callCount = 0
     vi.mocked(getDb).mockImplementation(() => {

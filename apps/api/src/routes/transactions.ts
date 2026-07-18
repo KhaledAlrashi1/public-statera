@@ -124,6 +124,45 @@ const SearchQuerySchema = z
     }
   })
 
+// B2-3 — bulk-op body shape. `ids`/`changes` are z.unknown() + superRefine so a
+// non-array/non-object emits the custom message (not zod's base-type default);
+// ordered first-fail via early return (D3). getOrCreate resolution stays
+// hand-rolled (D4). Distinct "…transactions…" message vs memorized's "…entries…" (D5).
+const BulkDeleteSchema = z.object({ ids: z.unknown() }).superRefine((v, ctx) => {
+  if (!Array.isArray(v.ids) || v.ids.length === 0) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "ids must be a non-empty list." })
+    return
+  }
+  if (v.ids.length > 200) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Cannot delete more than 200 transactions at once." })
+    return
+  }
+})
+
+const BULK_UPDATE_ALLOWED = new Set(["merchant", "category", "name"])
+const BulkUpdateSchema = z
+  .object({ ids: z.unknown(), changes: z.unknown() })
+  .superRefine((v, ctx) => {
+    if (!Array.isArray(v.ids) || v.ids.length === 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "ids must be a non-empty list." })
+      return
+    }
+    if (v.ids.length > 200) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Cannot update more than 200 transactions at once." })
+      return
+    }
+    const changes = v.changes
+    if (typeof changes !== "object" || changes === null || Array.isArray(changes) || Object.keys(changes).length === 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "changes must be a non-empty object." })
+      return
+    }
+    const unknown = Object.keys(changes as Record<string, unknown>).filter((k) => !BULK_UPDATE_ALLOWED.has(k))
+    if (unknown.length > 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Unknown fields: ${unknown.join(", ")}.` })
+      return
+    }
+  })
+
 // ── GET /api/transactions/:id ─────────────────────────────────────────────────
 
 transactionsRouter.get("/:id{[0-9]+}", requireAuth, async (c) => {
@@ -1095,13 +1134,9 @@ async function resolveNameFilterIds(
 
 transactionsRouter.post("/bulk-delete", requireAuth, async (c) => {
   const body = (await c.req.json().catch(() => ({}))) as Record<string, unknown>
-  const ids = body["ids"]
-  if (!Array.isArray(ids) || ids.length === 0) {
-    return c.json({ ok: false, data: null, error: "ids must be a non-empty list.", code: "validation_error" }, 400)
-  }
-  if (ids.length > 200) {
-    return c.json({ ok: false, data: null, error: "Cannot delete more than 200 transactions at once.", code: "validation_error" }, 400)
-  }
+  const parsedBulkDelete = BulkDeleteSchema.safeParse(body)
+  if (!parsedBulkDelete.success) return zodErrorToEnvelope(c, parsedBulkDelete.error)
+  const ids = body["ids"] as unknown[]
 
   const { userId } = c.get("session")
   const db = getDb()
@@ -1135,24 +1170,10 @@ transactionsRouter.post("/bulk-delete", requireAuth, async (c) => {
 
 transactionsRouter.post("/bulk-update", requireAuth, async (c) => {
   const body = (await c.req.json().catch(() => ({}))) as Record<string, unknown>
-  const ids = body["ids"]
-  const changes = body["changes"]
-  if (!Array.isArray(ids) || ids.length === 0) {
-    return c.json({ ok: false, data: null, error: "ids must be a non-empty list.", code: "validation_error" }, 400)
-  }
-  if (ids.length > 200) {
-    return c.json({ ok: false, data: null, error: "Cannot update more than 200 transactions at once.", code: "validation_error" }, 400)
-  }
-  if (typeof changes !== "object" || changes === null || Array.isArray(changes) || Object.keys(changes).length === 0) {
-    return c.json({ ok: false, data: null, error: "changes must be a non-empty object.", code: "validation_error" }, 400)
-  }
-
-  const changesObj = changes as Record<string, unknown>
-  const allowed = new Set(["merchant", "category", "name"])
-  const unknown = Object.keys(changesObj).filter((k) => !allowed.has(k))
-  if (unknown.length > 0) {
-    return c.json({ ok: false, data: null, error: `Unknown fields: ${unknown.join(", ")}.`, code: "validation_error" }, 400)
-  }
+  const parsedBulkUpdate = BulkUpdateSchema.safeParse(body)
+  if (!parsedBulkUpdate.success) return zodErrorToEnvelope(c, parsedBulkUpdate.error)
+  const ids = body["ids"] as unknown[]
+  const changesObj = body["changes"] as Record<string, unknown>
 
   const { userId } = c.get("session")
   const db = getDb()

@@ -4,6 +4,7 @@
 // creation intent. Silently creating categories here produces ghost categories.
 
 import { Hono } from "hono"
+import { z } from "zod"
 import { and, eq, ne, inArray, or, sql } from "drizzle-orm"
 import { getDb } from "../db/connection"
 import { memorizedTransactions } from "../db/schema/memorized-transactions"
@@ -14,8 +15,24 @@ import { searchRateLimit } from "../lib/rate-limit"
 import { Sentry } from "../lib/sentry"
 import { nullsLastDesc } from "../db/sql-helpers"
 import { txnNorm } from "../lib/transaction-lib"
+import { zodErrorToEnvelope } from "./route-helpers"
 
 export const memorizedRouter = new Hono()
+
+// B2-3 — bulk-delete body shape. `ids` is z.unknown() + superRefine (non-array →
+// custom message, not zod's default); ordered first-fail via early return (D3).
+// DISTINCT over-limit message "…entries…" vs transactions' "…transactions…" (D5) —
+// preserved verbatim, not unified.
+const MemorizedBulkDeleteSchema = z.object({ ids: z.unknown() }).superRefine((v, ctx) => {
+  if (!Array.isArray(v.ids) || v.ids.length === 0) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "ids must be a non-empty list." })
+    return
+  }
+  if (v.ids.length > 200) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Cannot delete more than 200 entries at once." })
+    return
+  }
+})
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -537,13 +554,9 @@ memorizedRouter.post("/:id{[0-9]+}/pin", requireAuth, async (c) => {
 
 memorizedRouter.post("/bulk-delete", requireAuth, async (c) => {
   const body = (await c.req.json().catch(() => ({}))) as Record<string, unknown>
-  const ids = body["ids"]
-  if (!Array.isArray(ids) || ids.length === 0) {
-    return c.json({ ok: false, data: null, error: "ids must be a non-empty list.", code: "validation_error" }, 400)
-  }
-  if (ids.length > 200) {
-    return c.json({ ok: false, data: null, error: "Cannot delete more than 200 entries at once.", code: "validation_error" }, 400)
-  }
+  const parsedBulkDelete = MemorizedBulkDeleteSchema.safeParse(body)
+  if (!parsedBulkDelete.success) return zodErrorToEnvelope(c, parsedBulkDelete.error)
+  const ids = body["ids"] as unknown[]
 
   const numericIds = ids.map(Number).filter((n) => Number.isInteger(n) && n > 0)
   if (!numericIds.length) {
