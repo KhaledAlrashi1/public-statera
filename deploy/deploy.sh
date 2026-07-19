@@ -156,7 +156,11 @@ compose run --rm migrate
 # ── §5: Deploy ────────────────────────────────────────────────────────────────
 
 log "§5 — deploying"
-compose up -d
+# --remove-orphans (DL-ORPHAN, 10d): prune containers for services no longer in
+# the compose file — removes the leftover statera-nginx-1 container orphaned by
+# the 8e nginx→Caddy cutover (service deleted from compose, container never
+# reaped). Safe: it only removes containers with no matching service definition.
+compose up -d --remove-orphans
 
 # ── §6: Health check ──────────────────────────────────────────────────────────
 
