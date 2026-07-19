@@ -88,8 +88,15 @@ const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/
 // query value. The absent → currentMonthKey() default stays hand-rolled at each
 // call site (D2 split); this schema sees only present-but-malformed values and
 // emits the byte-identical no-period string via zodErrorToEnvelope. MONTH_RE stays
-// the single source of truth (still used directly by the out-of-scope `until` sites).
+// the single source of truth (also referenced by UntilFormatSchema below).
 const MonthFormatSchema = z.string().regex(MONTH_RE, "month must be in YYYY-MM format")
+
+// B2-4 (10d zod adoption): shape-only schema for a present, non-empty optional
+// `until` query value (r6 expense-merchant-trend + dashboard-metrics). The
+// absent → currentMonthKey()/currentMonth default stays hand-rolled at each call
+// site (optional-present pattern); this schema sees only present-but-malformed
+// values and emits the byte-identical string via zodErrorToEnvelope.
+const UntilFormatSchema = z.string().regex(MONTH_RE, "until must be in YYYY-MM format")
 
 import { parseIntParam, zodErrorToEnvelope } from "./route-helpers"
 
@@ -301,8 +308,9 @@ aggregationRouter.get("/expense-merchant-trend", requireAuth, async (c) => {
   const { merchant, months } = parsed.data
 
   const until = (c.req.query("until") ?? "").trim()
-  if (until && !MONTH_RE.test(until)) {
-    return c.json({ ok: false, data: null, error: "until must be in YYYY-MM format", code: "validation_error" }, 400)
+  if (until) {
+    const parsedUntil = UntilFormatSchema.safeParse(until)
+    if (!parsedUntil.success) return zodErrorToEnvelope(c, parsedUntil.error)
   }
 
   const db = getDb()
@@ -503,8 +511,9 @@ aggregationRouter.get("/dashboard-metrics", requireAuth, searchRateLimit, async 
 
   // Validate until (optional YYYY-MM)
   const until = (c.req.query("until") ?? "").trim()
-  if (until && !MONTH_RE.test(until)) {
-    return c.json({ ok: false, data: null, error: "until must be in YYYY-MM format", code: "validation_error" }, 400)
+  if (until) {
+    const parsedUntil = UntilFormatSchema.safeParse(until)
+    if (!parsedUntil.success) return zodErrorToEnvelope(c, parsedUntil.error)
   }
 
   const cycleEnabled = parseBoolParam(c.req.query("cycle"))

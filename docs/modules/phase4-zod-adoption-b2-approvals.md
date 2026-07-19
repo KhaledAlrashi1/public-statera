@@ -252,10 +252,10 @@ The C2 §5(d) projection listed "one [case] asserting r5/r7 keep their existing 
 - **B2-2-P3:** the /summary regex looseness → recorded as named follow-on **"summary-month-looseness"** (see 7b).
 - **B2-2-P4:** absent-vs-empty on /top-patterns pinned by explicit test EACH branch; /by-category non-numeric limit/offset → range message pinned. **All delivered.**
 
-### 7(b) Named follow-ons — disposition at B2 close (none may be silently dropped or silently resolved)
-1. **aggregation until residuals** (from §5e) — r6 expense-merchant-trend `until` + dashboard-metrics `until` (optional-present pattern). Disposition: convert-as-B2-4 / affirm-hand-rolled / other.
-2. **summary-month-looseness** (B2-2-P3) — `GET /summary` accepts month `"2024-99"` (regex `/^\d{4}-\d{2}$/`, looser than aggregation's `MONTH_RE` which enforces `01–12`). PRESERVED byte-identically in B2-2 (pinned by test `B2-2 (flag-1 summary-month-looseness): accepts loose month '2024-99' → 200`). Disposition at B2 close: fix-as-product-decision (tighten to `MONTH_RE`) / affirm-harmless. May NOT be silently tightened or silently dropped from the ledger.
-3. **B3 (auth + account routers)** — the §1.4 list; propose/park/drop at B2 close (B2-R7).
+### 7(b) Named follow-ons — DISPOSITIONED at B2 close (2026-07-18, §9 ruling — no open entries)
+1. **aggregation until residuals** (from §5e) — r6 expense-merchant-trend `until` + dashboard-metrics `until` (optional-present pattern). **DISPOSITIONED: CONVERT — done as B2-4** (see §10). Both `until` checks now route through `UntilFormatSchema` + `zodErrorToEnvelope`, byte-identical, ordering preserved.
+2. **summary-month-looseness** (B2-2-P3) — `GET /summary` accepts month `"2024-99"` (regex `/^\d{4}-\d{2}$/`, looser than aggregation's `MONTH_RE` which enforces `01–12`). PRESERVED byte-identically in B2-2 (pinned by test `B2-2 (flag-1 summary-month-looseness): accepts loose month '2024-99' → 200`). **DISPOSITIONED: AFFIRMED-HARMLESS looseness (B2-CLOSE-2, 2026-07-18)** — deliberate and recorded (a nonsense month derives an empty summary from zero matching transactions). Not "pending fix," not "known bug." Any future tightening is a client-observable change requiring its own proposal.
+3. **B3 (auth + account routers)** — the §1.4 list. **DISPOSITIONED: DROPPED — CLOSED, no parked partition (B2-CLOSE-3, 2026-07-18).** Auth + account validation stays **hand-rolled by design** (entangled with cookies/OIDC state/crypto-token handling; shape-only zod extraction buys nothing there); Module 10e (email magic links) reworks the auth surface under its own charter. B2-R7 discharged. Not "pending," "deferred," or "parked."
 
 ---
 
@@ -278,3 +278,89 @@ The B2-1-COND-1 work landed in commit **`3dab393`** with **N = 2** cases (baseli
 +... **645 passed / 16 skipped / 0 failed across 49 files** ... (as of ... B2-1 + COND-1)
 ```
 No fresh test run required (the B2-2 661-green tail subsumes execution of these two cases; what B2-2-COND-1 supplies is the accounting).
+
+---
+
+## 9. B2 CLOSE dispositions + B2-4 charter (operator, 2026-07-18)
+
+### 9(a) Ruling block (verbatim)
+
+> **2026-07-18 — Ruling: B2 CLOSE dispositions (operator, 2026-07-18) — three follow-ons resolved; B2-4 chartered; B2 close conditional on B2-4**
+>
+> **B2-CLOSE-1 (until residuals):** CONVERT — B2-4 is chartered as the final B2 sub-commit. Scope: the two remaining hand-rolled `until` checks — r6 expense-merchant-trend and dashboard-metrics — move to zod via the established mechanism. Constraints: the optional-present pattern is preserved exactly (absent → whatever each handler does today, untouched and hand-rolled; present-malformed → zod reject, byte-identical string); verify-enumeration-first pass before implementing; any difference between the two sites' behavior, strings, or ordering is flagged pre-implementation, and any reorder is a named R14 stop; MONTH_RE may be deleted only if B2-4 leaves zero remaining consumers, proven by a pasted grep in the close-out. Close-out from 670/16/49, three sections embedded. After B2-4, the analytics/aggregation router is uniformly zod on its rejecting shape layer — reportable as such.
+>
+> **B2-CLOSE-2 (summary-month-looseness):** AFFIRMED HARMLESS (operator ruling, 2026-07-18). /summary's acceptance of loose months (e.g. "2024-99") is a known, deliberate, recorded looseness: a nonsense month derives an empty summary from zero matching transactions, consistent with "every number derivable from logged transactions." It is pinned by test (B2-2 flag-1 case) and PRESERVED. TERMINOLOGY GUARD: not "pending fix," not "known bug" — correct description: affirmed-harmless looseness (B2-CLOSE-2, 2026-07-18). Any future tightening is a client-observable behavior change requiring its own proposal.
+>
+> **B2-CLOSE-3 (B3):** DROPPED — CLOSED, no parked partition (operator ruling, 2026-07-18). There is no B3 and none is created. Auth + account router validation (the §1.4 list: 15 auth + 3 account routes) stays hand-rolled by design: it is entangled with cookies, OIDC state, and crypto-token handling where shape-only zod extraction buys nothing, and Module 10e (email magic links) will rework the auth surface under its own charter — any zod adoption there is 10e scope, proposed fresh, not inherited from 10d. TERMINOLOGY GUARD: after this ruling no report may describe auth/account validation as "pending zod migration," "deferred," or "parked." Correct description: hand-rolled by design (B2-CLOSE-3, 2026-07-18). B2-R7 is hereby discharged.
+>
+> **B2-CLOSE-4 (sequence):** implement B2-4 → B2-4 close-out → then deliver the B2 MODULE CLOSE report: this ruling block persisted to the bundle, the follow-on ledger (§7b) marked fully dispositioned (no open entries), the CLAUDE.md 10d zod-adoption line updated to record B2 complete (B0/B1/B2-1..4 done; money routes hand-rolled by design per B2-R8; auth/account hand-rolled by design per B2-CLOSE-3; summary-month looseness affirmed per B2-CLOSE-2), and the final baseline stated. TODO(phase4-zod-adoption) closes with that report. Remaining 10d items thereafter: Docker log retention cap; TODO(memorized-prune-rule-unification) (operator deliberation, not a stamp).
+
+### 9(b) B2-4 verify-enumeration-first pass (pre-implementation, per B2-CLOSE-1)
+
+Two `until` sites in `routes/aggregation.ts`, both optional-present:
+
+| | Site 1: `GET /expense-merchant-trend` (r6) | Site 2: `GET /dashboard-metrics` |
+|---|---|---|
+| read | `(c.req.query("until") ?? "").trim()` | `(c.req.query("until") ?? "").trim()` |
+| guard | `if (until && !MONTH_RE.test(until))` | `if (until && !MONTH_RE.test(until))` |
+| reject envelope | `{ ok:false, data:null, error:"until must be in YYYY-MM format", code:"validation_error" }` @400 | identical |
+| preceding validation | `r6Schema.safeParse` (merchant, months) | hand-rolled months range check (1–60) |
+| position of `until` check | last validation before business logic | last validation before business logic |
+| absent → default | `until || currentMonthKey()` (hand-rolled, untouched) | `if (until) {…} else {currentMonth}` (hand-rolled, untouched) |
+
+**Finding: the two `until` validations are byte-identical** — same read, same regex (`MONTH_RE`), same message string, same code, same 400, same absent→default fall-through. **No difference in behavior, strings, or ordering between the two sites. No R14 reorder.** Both convert uniformly: a separate post-schema `UntilFormatSchema.safeParse(until)` guarded by `if (until)` (matching the B2-1 r5/r7 SEPARATE-post-schema-safeParse precedent), routed through `zodErrorToEnvelope` (which emits `issues[0].message` + `code:"validation_error"` @400 — byte-identical to the hand-rolled envelope). The `until` variable stays in scope for the untouched downstream default logic. The check stays in its current position (after the preceding validation) → ordering preserved.
+
+**MONTH_RE deletion:** NOT deletable. After B2-4, aggregation's `MONTH_RE` is still consumed by `MonthFormatSchema` (line 92) and the new `UntilFormatSchema`. Grep proof in the B2-4 close-out.
+
+---
+
+## 10. B2-4 close-out + B2 MODULE CLOSE (2026-07-18)
+
+### 10(a) B2-4 implementation (the final B2 sub-commit)
+`routes/aggregation.ts`: added `UntilFormatSchema = z.string().regex(MONTH_RE, "until must be in YYYY-MM format")` (references the single-source `MONTH_RE`). Both hand-rolled `until` checks — r6 `GET /expense-merchant-trend` and `GET /dashboard-metrics` — replaced with a separate post-schema `if (until) { const p = UntilFormatSchema.safeParse(until); if (!p.success) return zodErrorToEnvelope(c, p.error) }` (the B2-1 r5/r7 SEPARATE-post-schema-safeParse precedent). `zodErrorToEnvelope` emits `{ ok:false, data:null, error:"until must be in YYYY-MM format", code:"validation_error" }` @400 — **byte-identical** to the replaced hand-rolled envelope. The `until` variable stays in scope; the absent→`currentMonthKey()`/`currentMonth` default logic is **untouched** (optional-present pattern). Check position unchanged (after the preceding validation) → **ordering preserved, no R14 reorder**. No money touched.
+
+### 10(a-map) Coverage map — 5 cases added in `routes/aggregation.test.ts` (per B2-4-CO-2 / B2-R6 analogue)
+
+| # | Case (verbatim `it` title) | Route | Pins |
+|---|---|---|---|
+| 1 | `B2-4: malformed until → 400 byte-identical string` | r6 expense-merchant-trend | **(i)** byte-identical `"until must be in YYYY-MM format"` + code `validation_error` @400 |
+| 2 | `B2-4: absent until → default → 200` | r6 expense-merchant-trend | **(ii)** absent-until → hand-rolled `currentMonthKey()` default → 200 (safeParse branch skipped) |
+| 3 | `B2-4: bad months + bad until → months message wins (order preserved)` | r6 expense-merchant-trend | ordering — r6Schema first-fail wins over the separate `until` safeParse |
+| 4 | `B2-4: malformed until → 400 byte-identical string` | dashboard-metrics | **(i)** byte-identical `"until must be in YYYY-MM format"` + code `validation_error` @400 |
+| 5 | `B2-4: bad months + bad until → months message wins (order preserved)` | dashboard-metrics | ordering — hand-rolled months range check first-fail wins over the `until` safeParse |
+
+**(ii) for dashboard-metrics** is pinned by the **pre-existing** case `miss path: returns 200 with X-Cache-Status: miss and data.updated_at` (requests `/api/analytics/dashboard-metrics` with NO `until` → 200), reused per the B2-1 precedent (which reused existing default-month cases). So both routes have (i) present-malformed→reject AND (ii) absent→default→200 pinned.
+
+### 10(b) MONTH_RE deletion proof (per B2-CLOSE-1) — command + verbatim output + exit code
+```
+$ grep -n "MONTH_RE" apps/api/src/routes/aggregation.ts
+85:const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/
+90:// emits the byte-identical no-period string via zodErrorToEnvelope. MONTH_RE stays
+92:const MonthFormatSchema = z.string().regex(MONTH_RE, "month must be in YYYY-MM format")
+99:const UntilFormatSchema = z.string().regex(MONTH_RE, "until must be in YYYY-MM format")
+GREP_EXIT=0
+```
+`MONTH_RE` retains **two** live consumers (`MonthFormatSchema` line 92 + `UntilFormatSchema` line 99; line 90 is the comment) → **NOT deleted** (correct per the constraint; deletion was permitted only at zero consumers).
+
+### 10(c) Verification (three mandatory sections, verbatim)
+1. **Hermetic test run** — `pnpm --filter statera-api test`:
+   ```
+    Test Files  43 passed | 6 skipped (49)
+         Tests  675 passed | 16 skipped (691)
+   TEST_EXIT=0
+   ```
+   No-unhandled grep: `grep -cE "Unhandled Error|Unhandled Rejection|⎯ Failed Tests" → 0`.
+2. **`pnpm --filter statera-api exec tsc --noEmit`:**
+   ```
+   TSC_EXIT=0
+   ```
+   (0 errors, no output.)
+3. **Baseline diff hunk from the amended B2-4 commit (CLAUDE.md API test baseline, count fields complete):**
+   ```diff
+   -- **API test baseline (as of 10d zod-adoption B2-3, 2026-07-18):** ... = **670 passed / 16 skipped / 0 failed across 49 files** ...
+   ++ **API test baseline (as of 10d zod-adoption B2-4 / B2 close, 2026-07-18):** ... = **675 passed / 16 skipped / 0 failed across 49 files** ...
+   ```
+   +5 tests (all in `routes/aggregation.test.ts`); files unchanged at 49; skipped unchanged at 16.
+
+### 10(d) B2 MODULE CLOSE
+B2 is COMPLETE: **B0 · B1 · B2-1 · B2-2 · B2-3 · B2-4 done.** The analytics/aggregation router is now uniformly zod on its rejecting shape layer. Standing dispositions for the rest of the surface (all recorded, no open entries): money/transaction-input routes **hand-rolled by design** (B2-R8, Decision 2); auth + account routers **hand-rolled by design** (B2-CLOSE-3); `/summary` month **affirmed-harmless looseness** (B2-CLOSE-2). `TODO(phase4-zod-adoption)` closes with this report. Remaining 10d items: Docker log retention cap; `TODO(memorized-prune-rule-unification)`.

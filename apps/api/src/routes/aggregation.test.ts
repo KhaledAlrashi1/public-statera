@@ -465,6 +465,46 @@ describe("GET /api/analytics/expense-merchant-trend", () => {
     const body = (await res.json()) as Record<string, unknown>
     expect(body.error).toBe("months must be between 1 and 24")
   })
+
+  // B2-4 (10d zod adoption): malformed present `until` → zod reject, byte-identical envelope.
+  it("B2-4: malformed until → 400 byte-identical string", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request(
+      "/api/analytics/expense-merchant-trend?merchant=Test&months=6&until=2024-13",
+      { headers: { Authorization: await authHeader() } },
+    )
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("until must be in YYYY-MM format")
+    expect(body.code).toBe("validation_error")
+  })
+
+  // B2-4 (optional-present analogue of B2-R6): absent `until` → hand-rolled
+  // currentMonthKey() default → 200 (the safeParse branch is skipped entirely).
+  it("B2-4: absent until → default → 200", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([{ ym: "2024-03", total: "10.000" }]))
+    const res = await app.request(
+      "/api/analytics/expense-merchant-trend?merchant=Test&months=6",
+      { headers: { Authorization: await authHeader() } },
+    )
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.ok).toBe(true)
+    expect(((body.data as Record<string, unknown>).months as string[]).length).toBe(6)
+  })
+
+  // B2-4: first-fail ordering preserved — r6Schema (merchant/months) runs before the
+  // separate `until` safeParse, so a bad months + bad until yields the months message.
+  it("B2-4: bad months + bad until → months message wins (order preserved)", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request(
+      "/api/analytics/expense-merchant-trend?merchant=Test&months=25&until=2024-13",
+      { headers: { Authorization: await authHeader() } },
+    )
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("months must be between 1 and 24")
+  })
 })
 
 // ── R7: budget-metrics ────────────────────────────────────────────────────────
@@ -701,6 +741,30 @@ describe("GET /api/analytics/dashboard-metrics", () => {
     const body = (await res.json()) as Record<string, unknown>
     expect(body.ok).toBe(false)
     expect(body.code).toBe("validation_error")
+  })
+
+  // B2-4 (10d zod adoption): malformed present `until` → zod reject, byte-identical envelope.
+  it("B2-4: malformed until → 400 byte-identical string", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/dashboard-metrics?until=2024-13", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("until must be in YYYY-MM format")
+    expect(body.code).toBe("validation_error")
+  })
+
+  // B2-4: first-fail ordering preserved — the hand-rolled months range check runs
+  // before the separate `until` safeParse, so bad months + bad until yields months.
+  it("B2-4: bad months + bad until → months message wins (order preserved)", async () => {
+    vi.mocked(getDb).mockReturnValue(makeDbReturning([]))
+    const res = await app.request("/api/analytics/dashboard-metrics?months=0&until=2024-13", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(body.error).toBe("months must be between 1 and 60")
   })
 })
 
