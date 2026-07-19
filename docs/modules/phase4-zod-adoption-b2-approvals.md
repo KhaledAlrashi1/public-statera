@@ -364,3 +364,17 @@ GREP_EXIT=0
 
 ### 10(d) B2 MODULE CLOSE
 B2 is COMPLETE: **B0 · B1 · B2-1 · B2-2 · B2-3 · B2-4 done.** The analytics/aggregation router is now uniformly zod on its rejecting shape layer. Standing dispositions for the rest of the surface (all recorded, no open entries): money/transaction-input routes **hand-rolled by design** (B2-R8, Decision 2); auth + account routers **hand-rolled by design** (B2-CLOSE-3); `/summary` month **affirmed-harmless looseness** (B2-CLOSE-2). `TODO(phase4-zod-adoption)` closes with this report. Remaining 10d items: Docker log retention cap; `TODO(memorized-prune-rule-unification)`.
+
+---
+
+## 11. B2-4 close-out ACCEPTED + TODO(phase4-zod-adoption) MODULE CLOSE (channel, 2026-07-18)
+
+**B2-4-CO-ACCEPT:** the re-delivery satisfied CO-1 (three sections verbatim), CO-2 (5 cases; both optional-present branches pinned per route — dashboard-metrics absent-branch via the attributed pre-existing "miss path" case), CO-3 (MONTH_RE grep verbatim, exit 0, two consumers retained per B2-CLOSE-1). Recorded: the bounce surfaced a **real coverage gap** (r6 absent-until), cured in the amendment — the evidence standard caught a missing test, not merely missing paperwork.
+
+**B2-4-SUPERSEDE (authoritative commit mapping):** `f1aa595` is superseded by amendment **`69ad2bc`** (adds the r6 absent-until case + pending-acceptance commit-message correction). Final B2 implementation commits: **`0fc0535`** (B2-1), **`3dab393`** (COND-1), **`203c6f8`** (B2-2), **`14c29ca`** (B2-3), **`69ad2bc`** (B2-4 + close docs). No earlier bundle/ledger line cites `f1aa595` (grep-confirmed at close), so no correction was owed.
+
+**MODULE CLOSE:** `TODO(phase4-zod-adoption)` is **CLOSED** (channel ruling, 2026-07-18). B0 + B1 + B2-1..4 complete; final API baseline **675 passed / 16 skipped / 0 failed / 49 files, tsc 0**; the analytics/aggregation router is uniformly zod on its rejecting shape layer; wire behavior byte-identical throughout (D7 held end-to-end). Standing dispositions in force (terminology guards attached to all three): money routes **hand-rolled by design** (B2-R8); auth/account **hand-rolled by design** (B2-CLOSE-3; 10e re-evaluates under its own charter); `/summary` month **affirmed-harmless looseness** (B2-CLOSE-2). The CLAUDE.md CLOSED line in `69ad2bc` is ratified as accurate.
+
+**B2-4-F1: discharged** — the module-close ruling now exists, issued after acceptance, restoring the required order of record even though the docs rode early.
+
+**NEXT (queue):** `TODO(memorized-prune-rule-unification)` — operator deliberation. Awaiting the review channel's brief request; not started.
