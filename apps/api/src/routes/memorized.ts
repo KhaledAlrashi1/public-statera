@@ -15,6 +15,7 @@ import { searchRateLimit } from "../lib/rate-limit"
 import { Sentry } from "../lib/sentry"
 import { nullsLastDesc } from "../db/sql-helpers"
 import { txnNorm } from "../lib/transaction-lib"
+import { deleteStaleMemorizedRows } from "../lib/memorized-prune"
 import { zodErrorToEnvelope } from "./route-helpers"
 
 export const memorizedRouter = new Hono()
@@ -35,9 +36,6 @@ const MemorizedBulkDeleteSchema = z.object({ ids: z.unknown() }).superRefine((v,
 })
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-
-const PRUNE_DAYS_COUNT_1 = 90   // count==1 rows older than 90 days
-const PRUNE_DAYS_COUNT_2 = 180  // count==2 rows older than 180 days
 
 const VALID_SORT_KEYS = ["most_used", "recently_used", "oldest_first", "name_asc", "name_desc"] as const
 type SortKey = (typeof VALID_SORT_KEYS)[number]
@@ -91,28 +89,9 @@ function toFlaskTimestamp(d: Date | string): string {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function pruneStaleMemorized(userId: number, db: any): Promise<void> {
   try {
-    const now = new Date()
-    const cutoff1 = new Date(now.getTime() - PRUNE_DAYS_COUNT_1 * 86_400_000)
-    const cutoff2 = new Date(now.getTime() - PRUNE_DAYS_COUNT_2 * 86_400_000)
-
-    await db
-      .delete(memorizedTransactions)
-      .where(
-        and(
-          eq(memorizedTransactions.userId, userId),
-          eq(memorizedTransactions.isPinned, false),
-          or(
-            and(
-              eq(memorizedTransactions.count, 1),
-              sql`${memorizedTransactions.lastSeen} < ${cutoff1.toISOString().slice(0, 19).replace("T", " ")}`,
-            ),
-            and(
-              eq(memorizedTransactions.count, 2),
-              sql`${memorizedTransactions.lastSeen} < ${cutoff2.toISOString().slice(0, 19).replace("T", " ")}`,
-            ),
-          ),
-        ),
-      )
+    // Retention rule + constants live in lib/memorized-prune.ts (single source,
+    // shared with the cleanup-memorized-transactions batch job).
+    await deleteStaleMemorizedRows(db, { userId })
   } catch (err) {
     Sentry.captureException(err, { tags: { handler: "pruneStaleMemorized", userId } })
     console.error("[pruneStaleMemorized] failed for userId=%d:", userId, err)

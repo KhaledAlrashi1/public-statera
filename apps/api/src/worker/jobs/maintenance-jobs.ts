@@ -1,13 +1,13 @@
 import type { Job } from "bullmq"
-import { and, eq, isNotNull, lt, lte, or } from "drizzle-orm"
+import { and, eq, isNotNull, lt } from "drizzle-orm"
 import { getDb } from "../../db/connection"
 import {
   accountActionTokens,
-  memorizedTransactions,
   productEvents,
   securityEvents,
 } from "../../db/schema"
 import { env } from "../../lib/env"
+import { deleteStaleMemorizedRows } from "../../lib/memorized-prune"
 import { Sentry } from "../../lib/sentry"
 import { markWorkerTaskFinished, markWorkerTaskStarted } from "../task-runs"
 
@@ -104,27 +104,12 @@ export async function handleCleanupMemorizedTransactions(_job: Job): Promise<voi
   let errorMessage: string | undefined
   try {
     const db = getDb()
-    const now = Date.now()
-    // Flask prune constants: MEMORIZED_PRUNE_ALL_DAYS=180, MEMORIZED_PRUNE_SINGLE_DAYS=90.
-    // Deviation from Flask: Flask has no is_pinned column; Hono adds AND is_pinned = FALSE
-    // so user-pinned entries are never auto-pruned regardless of age.
-    const cutoffAll = new Date(now - 180 * DAY_MS)
-    const cutoffSingle = new Date(now - 90 * DAY_MS)
-    const [result] = await db
-      .delete(memorizedTransactions)
-      .where(
-        and(
-          eq(memorizedTransactions.isPinned, false),
-          or(
-            lt(memorizedTransactions.lastSeen, cutoffAll),
-            and(
-              lte(memorizedTransactions.count, 1),
-              lt(memorizedTransactions.lastSeen, cutoffSingle),
-            ),
-          ),
-        ),
-      )
-    console.log(`[${TASK_CLEANUP_MEMORIZED}] memorized_deleted=${result.affectedRows}`)
+    // Unified count-tiered retention (operator ruling Option A, 2026-07-18): the
+    // rule + constants live in lib/memorized-prune.ts, shared with the inline
+    // per-user prune (routes/memorized.ts). count>=3 and pinned rows are never
+    // auto-pruned. See docs/modules/phase4-memorized-prune-unification.md.
+    const deleted = await deleteStaleMemorizedRows(db)
+    console.log(`[${TASK_CLEANUP_MEMORIZED}] memorized_deleted=${deleted}`)
   } catch (err) {
     errorMessage = err instanceof Error ? err.message : String(err)
     Sentry.captureException(err, { tags: { handler: TASK_CLEANUP_MEMORIZED } })
