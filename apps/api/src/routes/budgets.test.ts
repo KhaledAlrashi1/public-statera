@@ -454,7 +454,14 @@ describe("POST /api/budgets", () => {
 // createRateLimiter never trips. Spy evalsha to report an over-limit totalHits and
 // assert heavyWriteRateLimit (20/min) on the full-month-replace POST short-circuits
 // with the standard 429 envelope BEFORE the handler runs (getDb untouched).
-describe("POST /api/budgets — rate limit", () => {
+// HERMETIC-ONLY (skipped under INTEGRATION): forces 429 by spying on
+// RedisMock.prototype.evalsha, which only exists when the ioredis mock is wired
+// (setupFiles is [] under INTEGRATION, so RedisMock is dead code there and the spy
+// is inert → the real limiter never trips on this file's ~8 hits). The real 429
+// envelope/counting is proven mode-independently by lib/rate-limit.test.ts. This is
+// the mirror image of the *.integration.test.ts rule: a unit test excluded under
+// INTEGRATION, not an integration test. See TODO(integration-rate-limit-test-isolation).
+describe.skipIf(process.env.INTEGRATION === "true")("POST /api/budgets — rate limit", () => {
   afterEach(() => vi.restoreAllMocks())
 
   it("returns 429 with the standard envelope and never reaches the handler", async () => {
@@ -481,13 +488,21 @@ describe("POST /api/budgets — rate limit", () => {
 // status+code; these pin the exact WIRE error string (byte-identical to the
 // pre-B1 hand-written checks) and the D1 combined-presence-then-format ordering.
 describe("budgets — B1 zod shape message identity + first-fail ordering", () => {
+  // Rate-limit-bucket isolation token (TODO(integration-rate-limit-test-isolation), RL-C2).
+  // These D1-ordering assertions expect a 400 zod response, but under INTEGRATION the real
+  // limiter is live and GET+POST on /api/budgets share one counter (rl:rl:{userId}:/api/budgets);
+  // on the default userId=1 the file's combined hits reach 21 > heavyWrite 20, so a late POST
+  // here would 429 before zod. A dedicated userId gives this describe a fresh, uncontended
+  // bucket in both modes. 9_000_001 is well outside any seeded/demo fixture user range.
+  const RL_ISO_USER = 9_000_001
+
   beforeEach(() => {
     vi.resetAllMocks()
     vi.mocked(getDb).mockReturnValue(makeMockDb([]))
   })
 
   it("GET empty month → exact 'required' message", async () => {
-    const res = await app.request("/api/budgets", { headers: { Authorization: await authHeader() } })
+    const res = await app.request("/api/budgets", { headers: { Authorization: await authHeader(RL_ISO_USER) } })
     expect(res.status).toBe(400)
     const body = (await res.json()) as Record<string, unknown>
     expect(body.code).toBe("validation_error")
@@ -495,7 +510,7 @@ describe("budgets — B1 zod shape message identity + first-fail ordering", () =
   })
 
   it("GET malformed month → exact 'format' message", async () => {
-    const res = await app.request("/api/budgets?month=2026-13", { headers: { Authorization: await authHeader() } })
+    const res = await app.request("/api/budgets?month=2026-13", { headers: { Authorization: await authHeader(RL_ISO_USER) } })
     expect(res.status).toBe(400)
     expect(((await res.json()) as Record<string, unknown>).error).toBe("month must be in YYYY-MM format.")
   })
@@ -503,7 +518,7 @@ describe("budgets — B1 zod shape message identity + first-fail ordering", () =
   it("POST missing month & items → combined presence message", async () => {
     const res = await app.request("/api/budgets", {
       method: "POST",
-      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      headers: { Authorization: await authHeader(RL_ISO_USER), "Content-Type": "application/json" },
       body: JSON.stringify({}),
     })
     expect(res.status).toBe(400)
@@ -513,7 +528,7 @@ describe("budgets — B1 zod shape message identity + first-fail ordering", () =
   it("POST valid month but items absent → still combined presence message (D1 ordering)", async () => {
     const res = await app.request("/api/budgets", {
       method: "POST",
-      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      headers: { Authorization: await authHeader(RL_ISO_USER), "Content-Type": "application/json" },
       body: JSON.stringify({ month: "2026-05" }),
     })
     expect(res.status).toBe(400)
@@ -523,7 +538,7 @@ describe("budgets — B1 zod shape message identity + first-fail ordering", () =
   it("POST valid presence but bad month format → format message only after presence passes (D1 ordering)", async () => {
     const res = await app.request("/api/budgets", {
       method: "POST",
-      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      headers: { Authorization: await authHeader(RL_ISO_USER), "Content-Type": "application/json" },
       body: JSON.stringify({ month: "2026-13", items: [] }),
     })
     expect(res.status).toBe(400)

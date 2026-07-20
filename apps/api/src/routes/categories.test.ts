@@ -308,7 +308,11 @@ describe("POST /api/categories/:id/remap", () => {
 // createRateLimiter never trips. Spy evalsha to report an over-limit totalHits and
 // assert writeRateLimit (30/min) on POST short-circuits with the standard 429
 // envelope BEFORE the handler runs (getDb, the handler's first DB touch, untouched).
-describe("POST /api/categories — rate limit", () => {
+// HERMETIC-ONLY (skipped under INTEGRATION): forces 429 by spying on
+// RedisMock.prototype.evalsha, inert when the ioredis mock is absent (INTEGRATION).
+// Real 429 behavior is covered by lib/rate-limit.test.ts in both modes.
+// See TODO(integration-rate-limit-test-isolation).
+describe.skipIf(process.env.INTEGRATION === "true")("POST /api/categories — rate limit", () => {
   afterEach(() => vi.restoreAllMocks())
 
   it("returns 429 with the standard envelope and never reaches the handler", async () => {
