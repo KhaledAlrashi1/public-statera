@@ -113,3 +113,66 @@ Operator GO recorded ("OK"): the one-time MySQL restart rides a normal deploy.
 All Docker-log-cap gates satisfied (DL-C1 discharged, DL-C2 BEFORE-half recorded,
 DL-C3 go). Module closes on the post-deploy activation proof, NOT on the green
 run — "deployed" ≠ "capped".
+
+## DL-C2-AFTER — activation proof (recorded 2026-07-19) — MODULE CLOSED ON PROOF
+
+Operator on-box captures 2026-07-19, verified against the **production host**
+(`deploy@statera-prod`, `statera-*` container names). Compared against the
+recorded BEFORE (DL-C2-BEFORE: `{"Type":"json-file","Config":{}}` on all five =
+unbounded), the caps are now live:
+
+**(i) LogConfig sweep — all five always-on containers carry the approved caps:**
+```
+statera-web-1    : {"Type":"json-file","Config":{"max-file":"5","max-size":"10m"}}
+statera-worker-1 : {"Type":"json-file","Config":{"max-file":"5","max-size":"10m"}}
+statera-api-1    : {"Type":"json-file","Config":{"max-file":"5","max-size":"10m"}}
+statera-redis-1  : {"Type":"json-file","Config":{"max-file":"3","max-size":"5m"}}
+statera-mysql-1  : {"Type":"json-file","Config":{"max-file":"3","max-size":"10m"}}
+```
+Matches DL-A1 exactly: api/worker/web 10m×5 (anchor), mysql 10m×3, redis 5m×3.
+BEFORE `{}` → populated caps = activation proven.
+
+**(ii) statera-nginx-1 GONE (DL-ORPHAN):** `docker ps -a … grep -i nginx`
+returned empty → the `OK: no nginx container (statera-nginx-1 GONE)` line. The
+8e nginx→Caddy orphan was removed (not merely stopped) by §5 `--remove-orphans`.
+
+**(iii) MySQL bounce evidence (DL-C3):** `StartedAt` — mysql
+`2026-07-19T15:24:52Z`, api `15:25:18Z`, web `15:25:24Z`. One restart, ~30s;
+dependents held on healthchecks (api/web started after mysql went healthy).
+No data risk — MySQL data lives on the persistent volume.
+
+**Provenance note (recorded per the standing verify-the-source discipline):** an
+earlier capture attempt measured the **operator's laptop Docker**
+(`public_statera-*` / `personal_statera-*` container names) and was **rejected on
+provenance** — those are the local dev stacks, not production. The accepted
+captures above are the **server-prompt set** (`statera-*` on `statera-prod`).
+
+## Evidence appendix
+
+**DLD-CURE-1 — `gh run view 29692683323` (raw capture, exit 0):**
+```
+run=29692683323  headSha=247824a9bac2b4a04ac795c453f08b80ec785148
+status=completed  conclusion=success
+title=phase-4: 10d Docker log retention cap (DL-A1) + deploy --remove-orpha…
+url=https://github.com/KhaledAlrashi1/public-statera/actions/runs/29692683323
+--- jobs ---
+resolve-sha  -> success
+test  -> success
+build-push  -> success
+deploy  -> success
+GH_RUN_VIEW_EXIT=0
+```
+
+**DLD-CURE-2 — `git diff --name-only 88a157f..247824a` (CSP "none" backing):**
+18 files, all under `apps/api` / `deploy/deploy.sh` / `docker-compose.prod.yml`
+/ `CLAUDE.md` / `docs/`. Scoped path check: **`apps/web` paths = 0**,
+**`deploy/Caddyfile` paths = 0** across all 14 ride-along commits → no
+frontend/CSP surface, dispositions confirmed none.
+
+**Probes (post-deploy, both SHA-matched to `247824a`):**
+```
+/healthz : {"ok":true,"status":"healthy","version":"247824a9bac2b4a04ac795c453f08b80ec785148"}
+/readyz  : {"ok":true,"status":"ready",  "version":"247824a9bac2b4a04ac795c453f08b80ec785148"}
+```
+
+**Status: Docker log-cap item CLOSED ON PROOF 2026-07-19.**
