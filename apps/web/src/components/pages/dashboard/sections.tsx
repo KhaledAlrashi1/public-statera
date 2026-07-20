@@ -1387,7 +1387,7 @@ export function FinancialSnapshotHero({
             <div className="grid gap-3 sm:grid-cols-1">
               <div className="inner-card flex flex-col gap-1">
                 <span className="text-xs text-muted-foreground">Net Position</span>
-                <span className={`text-lg font-bold tabular-nums ${(np?.net_kd ?? 0) >= 0 ? "text-primary" : "text-destructive"}`}>
+                <span className={`text-lg font-bold tabular-nums ${Number(np?.net_kd ?? 0) >= 0 ? "text-primary" : "text-destructive"}`}>
                   {formatKD(np?.net_kd ?? 0)}
                 </span>
                 <span className="text-[11px] text-muted-foreground">All-time tracked</span>
@@ -1432,7 +1432,7 @@ export function FinancialSnapshotHero({
                 </div>
                 <div className="inner-card flex flex-col gap-1">
                   <span className="text-xs text-muted-foreground">Net</span>
-                  <span className={`text-base font-semibold tabular-nums ${(cf?.net_kd ?? 0) >= 0 ? "text-primary" : "text-destructive"}`}>
+                  <span className={`text-base font-semibold tabular-nums ${Number(cf?.net_kd ?? 0) >= 0 ? "text-primary" : "text-destructive"}`}>
                     {formatKD(cf?.net_kd ?? 0)}
                   </span>
                 </div>

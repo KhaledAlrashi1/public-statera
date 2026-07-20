@@ -355,9 +355,11 @@ export interface SpendingIntelligenceResponse {
 // ============================================================
 
 export interface SnapshotCashFlowWindow {
-  income_kd: number
-  expense_kd: number
-  net_kd: number
+  // R13 returns KWD amounts as 3-decimal strings via formatKd (e.g. "500.000") —
+  // typed string to match the contract, not number. See C2 fix-forward.
+  income_kd: string
+  expense_kd: string
+  net_kd: string
 }
 
 export interface SnapshotConsentInfo {
@@ -381,9 +383,10 @@ export interface SnapshotAccount {
 
 export interface SnapshotResponse {
   net_position: {
-    income_total_kd: number
-    expense_total_kd: number
-    net_kd: number
+    // R13 KWD amounts are 3-decimal strings (formatKd), not number. See C2 fix-forward.
+    income_total_kd: string
+    expense_total_kd: string
+    net_kd: string
   }
   cash_flow: {
     "30d": SnapshotCashFlowWindow
