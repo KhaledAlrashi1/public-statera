@@ -1,0 +1,154 @@
+{
+  "_meta": {
+    "purpose": "isSimilarDuplicateName(left,right) == Flask _is_similar_duplicate_name(left,right)",
+    "oracle": "personal-finance backend upload.py:653-675 (verbatim; byte-identical in personal_statera)",
+    "python": "CPython 3.12.4",
+    "generated_by": "python3 tools/capture-difflib-ratio.py"
+  },
+  "cases": [
+    {
+      "left": "The Sultan Center",
+      "right": "the   sultan center",
+      "note": "exact after whitespace collapse",
+      "expected": true
+    },
+    {
+      "left": "STARBUCKS",
+      "right": "starbucks",
+      "note": "exact after lowercase",
+      "expected": true
+    },
+    {
+      "left": "Carrefour",
+      "right": "Carrefour Mall",
+      "note": "substring>=6 short-circuit",
+      "expected": true
+    },
+    {
+      "left": "lulu hypermarket",
+      "right": "lulu hypermarket salmiya",
+      "note": "substring>=6 with extra word",
+      "expected": true
+    },
+    {
+      "left": "abc",
+      "right": "abc def",
+      "note": "<6 substring: overlap ok but ratio<0.65 -> false",
+      "expected": false
+    },
+    {
+      "left": "careem",
+      "right": "kareem",
+      "note": "ratio>=0.82 -> true",
+      "expected": true
+    },
+    {
+      "left": "Careem كريم",
+      "right": "kareem",
+      "note": "mixed Arabic/Latin: Latin survives -> true",
+      "expected": true
+    },
+    {
+      "left": "KNET بنك",
+      "right": "knet",
+      "note": "mixed: Arabic stripped, Latin equal -> true",
+      "expected": true
+    },
+    {
+      "left": "sultan center market",
+      "right": "sultan center store",
+      "note": "overlap-path candidate",
+      "expected": true
+    },
+    {
+      "left": "lulu",
+      "right": "lulu hypermarket",
+      "note": "ratio 0.4 low -> false",
+      "expected": false
+    },
+    {
+      "left": "grocery",
+      "right": "grocers",
+      "note": "stem near threshold",
+      "expected": true
+    },
+    {
+      "left": "coffee shop downtown",
+      "right": "coffee shop uptown",
+      "note": "3-token overlap-path",
+      "expected": true
+    },
+    {
+      "left": "mcdonalds",
+      "right": "burger king",
+      "note": "disjoint -> false",
+      "expected": false
+    },
+    {
+      "left": "بنك الكويت",
+      "right": "بنك الكويت الوطني",
+      "note": "Arabic-only: both normalize empty -> false (FR-C3)",
+      "expected": false
+    },
+    {
+      "left": "بنك الكويت",
+      "right": "بنك الكويت",
+      "note": "identical Arabic: normalizes empty -> false via guard (FR-C3)",
+      "expected": false
+    },
+    {
+      "left": null,
+      "right": "abc",
+      "note": "null left -> false",
+      "expected": false
+    },
+    {
+      "left": "abc",
+      "right": null,
+      "note": "null right -> false",
+      "expected": false
+    },
+    {
+      "left": "",
+      "right": "",
+      "note": "empty/empty -> false",
+      "expected": false
+    },
+    {
+      "left": "",
+      "right": "abc",
+      "note": "empty/nonempty -> false",
+      "expected": false
+    },
+    {
+      "left": "   ",
+      "right": "abc",
+      "note": "whitespace-only left -> false",
+      "expected": false
+    },
+    {
+      "left": "the sultan center",
+      "right": "sultan center the",
+      "note": "token reorder",
+      "expected": true
+    },
+    {
+      "left": "order 12345",
+      "right": "order 12346",
+      "note": "trailing digit differ",
+      "expected": true
+    },
+    {
+      "left": "abcdef",
+      "right": "abcxyz",
+      "note": "half replace 0.5 -> false",
+      "expected": false
+    },
+    {
+      "left": "sultan",
+      "right": "sultan",
+      "note": "short exact -> true",
+      "expected": true
+    }
+  ]
+}

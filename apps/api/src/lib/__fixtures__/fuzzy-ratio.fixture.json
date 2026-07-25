@@ -1,0 +1,228 @@
+{
+  "_meta": {
+    "purpose": "sequenceRatio(a,b) == difflib.SequenceMatcher(None,a,b).ratio()",
+    "oracle": "difflib.SequenceMatcher(None,a,b).ratio() (default autojunk=True; == Flask's actual call)",
+    "python": "CPython 3.12.4",
+    "generated_by": "python3 tools/capture-difflib-ratio.py",
+    "float_serialization": "json.dump default float repr (round-trip-safe); no formatting/rounding"
+  },
+  "cases": [
+    {
+      "a": "",
+      "b": "",
+      "note": "empty/empty -> 1.0",
+      "ratio": 1.0
+    },
+    {
+      "a": "",
+      "b": "abc",
+      "note": "empty/nonempty -> 0.0",
+      "ratio": 0.0
+    },
+    {
+      "a": "abc",
+      "b": "",
+      "note": "nonempty/empty -> 0.0",
+      "ratio": 0.0
+    },
+    {
+      "a": "starbucks",
+      "b": "starbucks",
+      "note": "identical",
+      "ratio": 1.0
+    },
+    {
+      "a": "a",
+      "b": "a",
+      "note": "single-char identical",
+      "ratio": 1.0
+    },
+    {
+      "a": "a",
+      "b": "b",
+      "note": "single-char disjoint",
+      "ratio": 0.0
+    },
+    {
+      "a": "ab",
+      "b": "ba",
+      "note": "transposition",
+      "ratio": 0.5
+    },
+    {
+      "a": "abcd",
+      "b": "abcde",
+      "note": "insert one at end",
+      "ratio": 0.8888888888888888
+    },
+    {
+      "a": "abcde",
+      "b": "abcd",
+      "note": "delete one at end",
+      "ratio": 0.8888888888888888
+    },
+    {
+      "a": "abcde",
+      "b": "abxde",
+      "note": "single replace in middle",
+      "ratio": 0.8
+    },
+    {
+      "a": "xabcd",
+      "b": "abcd",
+      "note": "insert one at front",
+      "ratio": 0.8888888888888888
+    },
+    {
+      "a": "aaaa",
+      "b": "aa",
+      "note": "repeated-char shorter",
+      "ratio": 0.6666666666666666
+    },
+    {
+      "a": "aa",
+      "b": "aaaa",
+      "note": "repeated-char longer",
+      "ratio": 0.6666666666666666
+    },
+    {
+      "a": "aaaa",
+      "b": "aaaa",
+      "note": "repeated-char identical",
+      "ratio": 1.0
+    },
+    {
+      "a": "abab",
+      "b": "abab",
+      "note": "competing equal blocks identical",
+      "ratio": 1.0
+    },
+    {
+      "a": "abab",
+      "b": "baba",
+      "note": "competing equal blocks tie-break",
+      "ratio": 0.75
+    },
+    {
+      "a": "ab ab",
+      "b": "ab ab",
+      "note": "space-bearing identical",
+      "ratio": 1.0
+    },
+    {
+      "a": "careem",
+      "b": "kareem",
+      "note": "near-miss above 0.82 (~0.833)",
+      "ratio": 0.8333333333333334
+    },
+    {
+      "a": "kareem",
+      "b": "careem",
+      "note": "near-miss above 0.82 reversed",
+      "ratio": 0.8333333333333334
+    },
+    {
+      "a": "lulu",
+      "b": "lulu hypermarket",
+      "note": "prefix subset ~0.4",
+      "ratio": 0.4
+    },
+    {
+      "a": "knet",
+      "b": "k n e t",
+      "note": "spaced-out ~0.727",
+      "ratio": 0.7272727272727273
+    },
+    {
+      "a": "abcdef",
+      "b": "abxdef",
+      "note": "single replace ~0.833",
+      "ratio": 0.8333333333333334
+    },
+    {
+      "a": "abcdefgh",
+      "b": "abcdxfgh",
+      "note": "single replace ~0.875",
+      "ratio": 0.875
+    },
+    {
+      "a": "abcde",
+      "b": "fghij",
+      "note": "fully disjoint -> 0.0",
+      "ratio": 0.0
+    },
+    {
+      "a": "abcdef",
+      "b": "abcxyz",
+      "note": "half replace 0.5",
+      "ratio": 0.5
+    },
+    {
+      "a": "sultan center",
+      "b": "sultan centre",
+      "note": "swap near 0.9",
+      "ratio": 0.9230769230769231
+    },
+    {
+      "a": "the sultan center",
+      "b": "sultan center",
+      "note": "prefix-word drop",
+      "ratio": 0.8666666666666667
+    },
+    {
+      "a": "mcdonalds",
+      "b": "macdonalds",
+      "note": "insert one 0.94-ish",
+      "ratio": 0.9473684210526315
+    },
+    {
+      "a": "coffee shop",
+      "b": "coffee store",
+      "note": "shared prefix word",
+      "ratio": 0.782608695652174
+    },
+    {
+      "a": "grocery",
+      "b": "grocers",
+      "note": "shared stem ~0.857",
+      "ratio": 0.8571428571428571
+    },
+    {
+      "a": "abcdefghij",
+      "b": "abcdeXghij",
+      "note": "single replace long ~0.9",
+      "ratio": 0.9
+    },
+    {
+      "a": "aaaabbbb",
+      "b": "bbbbaaaa",
+      "note": "block swap",
+      "ratio": 0.5
+    },
+    {
+      "a": "x0y1z2",
+      "b": "x0y1z2",
+      "note": "digits identical",
+      "ratio": 1.0
+    },
+    {
+      "a": "order 12345",
+      "b": "order 12346",
+      "note": "trailing digit differ",
+      "ratio": 0.9090909090909091
+    },
+    {
+      "a": "aXbXcXd",
+      "b": "abcd",
+      "note": "interleaved noise ~0.727",
+      "ratio": 0.7272727272727273
+    }
+  ],
+  "autojunk_boundary": {
+    "note": "FR-C5: >=200-char pair where autojunk changes the ratio; the port implements autojunk=False. Test asserts port == ratio_autojunk_false AND port != ratio_autojunk_true.",
+    "a": "bdaaeaccaebaaddabaedbeabeabedabaebcdbeaececaeebcaeaeaebdeebdedccbbbaecedcdceaaedbcbdbabedccaededaacdaacedcdcadcbeadabcbbbddebddecbdeddccbbebbbbadebccabdeceeabeeadedaddaddababdbaccaa",
+    "b": "bdaaeaceaebaaddabaedaeabeaeedabaebcdbeaecebaeebcaeaeaebdedcdedccbbbaecedcdceaaedbcbddaaeecccededaacdaacedcdcadcbeadabcbbdddabddecbdecdcdbbabbbbadebccabdeceecbeeadeddddaddababdbaceaaaebeaceaabedbccecdaaddddcabaccdbeabecbe",
+    "ratio_autojunk_true": 0.034912718204488775,
+    "ratio_autojunk_false": 0.8179551122194514
+  }
+}

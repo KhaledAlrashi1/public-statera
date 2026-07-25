@@ -972,17 +972,17 @@ function matchingBlocksSize(a: string, b: string): number {
   }
   return total
 }
-function sequenceRatio(a: string, b: string): number {
+export function sequenceRatio(a: string, b: string): number {
   const t = a.length + b.length
   if (t === 0) return 1
   return (2 * matchingBlocksSize(a, b)) / t
 }
-function normalizedFuzzyName(name: string | null): string {
+export function normalizedFuzzyName(name: string | null): string {
   let n = buildNameKey(name ?? "")
   n = n.replace(/[^a-z0-9]+/g, " ")
   return n.split(/\s+/).filter(Boolean).join(" ")
 }
-function isSimilarDuplicateName(left: string | null, right: string | null): boolean {
+export function isSimilarDuplicateName(left: string | null, right: string | null): boolean {
   const l = normalizedFuzzyName(left), r = normalizedFuzzyName(right)
   if (!l || !r) return false
   if (l === r) return true
