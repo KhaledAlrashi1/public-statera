@@ -248,7 +248,14 @@ recurrences; prior fixes left the rest unswept. Blind to `tsc` (types lie), to u
 (api-function-level mocks, `TODO(module-9-network-mocking)`), and to test-file typecheck
 (`*.test.*` excluded). Strengthens `TODO(module-9-contract-validation)`. Do-not-bundle.
 
-**DISC-C1 · frontend-error-tracking gap (FINDING, recorded 2026-07-25)** — `apps/web` reports
-NO errors anywhere (no `@sentry/*`, ErrorBoundary has no `componentDidCatch`, no global
-handlers). A user-facing crash leaves no trace; only an operator looking finds it. Recorded as
-a finding; any remediation is its own future decision (not chartered here).
+**DISC-C1 · "frontend error tracking" (CHARTERED 2026-07-25 — DISC-C1-ELEVATE; own item,
+do-not-bundle, post-10d)** — ELEVATED from a finding to its own chartered item. Gap: `apps/web`
+has NO error reporting of any kind (no `@sentry/*` dep; `ErrorBoundary` implements
+`getDerivedStateFromError` only — no `componentDidCatch`; no `window.onerror`/
+`unhandledrejection` handlers), while the backend has had Sentry since module 1a. Consequence:
+a user-facing crash class is INVISIBLE — no event is produced, so neither frequency, recency,
+nor affected-route data exists; the sole detector is an operator looking at a console.
+**Sequencing note (recorded, NOT a ruling):** the chartered money-string consumer sweep can be
+verified in tests but NOT in production while this gap stands — fixing blind and confirming
+blind. Whether tracking precedes the sweep is an operator call at charter time, not decided
+here.
