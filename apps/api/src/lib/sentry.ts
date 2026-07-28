@@ -92,6 +92,17 @@ function _scrubDict(d: Record<string, unknown>, depth = 0): Record<string, unkno
   return result
 }
 
+// Exported for server-side reuse when a Sentry event is built BY HAND (e.g. the
+// frontend error-report forwarder, POST /api/client-errors). The installed
+// `beforeSend` (below) scrubs event.request / event.extra / event.breadcrumbs but
+// NOT event.message or event.exception values, so a caller placing client-supplied
+// text into those fields must scrub it with this first. Reuses the audited
+// _scrubString regexes (email / IBAN / enc1: / PII key=value); callers needing
+// additional domain redaction layer their own on top. (phase4-frontend-error-tracking T1-1)
+export function scrubText(value: string): string {
+  return _scrubString(value)
+}
+
 export function sentryBeforeSend(
   event: ErrorEvent,
   _hint: EventHint,

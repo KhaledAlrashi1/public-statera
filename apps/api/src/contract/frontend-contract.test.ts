@@ -28,6 +28,7 @@ vi.mock("../lib/rate-limit", () => {
   }
   return {
     createRateLimiter: () => passthrough,
+    createCustomRateLimiter: () => passthrough,
     searchRateLimit: passthrough,
     importRateLimit: passthrough,
     exportRateLimit: passthrough,

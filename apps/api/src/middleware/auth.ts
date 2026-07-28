@@ -135,3 +135,23 @@ export async function requireAuth(c: Context, next: Next): Promise<Response | vo
 
   return next()
 }
+
+/**
+ * Best-effort session read for OPTIONAL attribution on UNAUTHENTICATED routes
+ * (e.g. POST /api/client-errors). Unlike requireAuth this NEVER throws and does
+ * NOT consult the sv deny-list — a revoked session mis-attributing a low-value
+ * frontend error report is harmless (report noise only; no data access, no
+ * mutation). Returns the integer userId or null. It exposes ONLY the integer id
+ * to callers — never the email or any other claim. (phase4-frontend-error-tracking T1-1)
+ */
+export async function tryReadUserId(c: Context): Promise<number | null> {
+  const token = getCookie(c, SESSION_COOKIE)
+  if (!token) return null
+  try {
+    const { payload } = await jose.jwtVerify(token, sessionSecret())
+    const userId = payload["userId"]
+    return typeof userId === "number" ? userId : null
+  } catch {
+    return null
+  }
+}

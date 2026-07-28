@@ -103,3 +103,45 @@ export const exportRateLimit = createRateLimiter(5)
 export const readRateLimit = createRateLimiter(60)
 export const writeRateLimit = createRateLimiter(30)
 export const heavyWriteRateLimit = createRateLimiter(20)
+
+/**
+ * createCustomRateLimiter — like createRateLimiter but with a caller-supplied
+ * keyGenerator and an optional `onLimit` hook (called when a request is throttled,
+ * so the caller can emit a structured drop-log line).
+ *
+ * Used by POST /api/client-errors, which is UNAUTHENTICATED by design: with no
+ * session set, the default userId keyGenerator collapses every anonymous client
+ * into ONE `rl:anon:` bucket, so that endpoint keys per-IP (X-Real-IP) plus a
+ * fixed-key global ceiling. The 429 body below is byte-identical to
+ * createRateLimiter's `message` envelope (2026-07-10 rate-limit contract); the
+ * only difference is the `handler` form, needed so `onLimit` can fire before the
+ * envelope is returned. (phase4-frontend-error-tracking T1-1)
+ */
+export function createCustomRateLimiter(opts: {
+  max: number
+  windowSec?: number
+  keyGenerator: (c: Context) => string
+  onLimit?: (c: Context) => void
+}): MiddlewareHandler {
+  const windowSec = opts.windowSec ?? 60
+  return rateLimiter({
+    windowMs: windowSec * 1000,
+    limit: opts.max,
+    keyGenerator: opts.keyGenerator,
+    store: new RedisStore({ client: makeRedisClient(getRedis()), prefix: "rl:", resetExpiryOnChange: false }),
+    standardHeaders: "draft-6",
+    handler: (c) => {
+      opts.onLimit?.(c)
+      return c.json(
+        {
+          ok: false,
+          data: null,
+          error: "Too many requests. Please try again later.",
+          code: "rate_limit_exceeded",
+          meta: { retry_after: windowSec },
+        },
+        429,
+      )
+    },
+  }) as MiddlewareHandler
+}

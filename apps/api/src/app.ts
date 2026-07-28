@@ -17,6 +17,7 @@ import { aggregationRouter } from "./routes/aggregation"
 import { intelligenceRouter } from "./routes/intelligence"
 import { notificationsRouter } from "./routes/notifications"
 import { accountRouter } from "./routes/account"
+import { clientErrorsRouter } from "./routes/client-errors"
 
 export function createApp() {
   const app = new Hono()
@@ -51,6 +52,8 @@ export function createApp() {
   app.route("/api/analytics", intelligenceRouter)
   app.route("/api/notifications", notificationsRouter)
   app.route("/api/account", accountRouter)
+  // Frontend error-report forwarder (unauthenticated by design — SEQ-3 2026-07-27).
+  app.route("/api/client-errors", clientErrorsRouter)
 
   // 404 fallback for unmatched /api/* routes
   app.notFound((c) => {
