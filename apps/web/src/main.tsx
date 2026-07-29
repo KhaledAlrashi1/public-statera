@@ -16,6 +16,12 @@ import "@fontsource/ibm-plex-mono/600.css"
 import "@fontsource/ibm-plex-mono/700.css"
 import "./index.css"
 import App from "./App"
+import { initErrorReporter } from "./lib/error-reporter"
+
+// Earliest safe install point (see error-reporter.ts CAPTURE LIMIT note): errors
+// during this module's import-graph evaluation, above, are uncapturable; everything
+// from mount onward is covered.
+initErrorReporter()
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

@@ -7,6 +7,7 @@ import { ToastProvider } from "@/components/ui/toaster"
 import { AuthProvider } from "@/contexts/AuthContext"
 import { PreferencesProvider } from "@/contexts/PreferencesContext"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
+import { reportError } from "@/lib/error-reporter"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -73,7 +74,7 @@ const DeleteAccountConfirmPage = lazyWithRetry("delete-account-confirm", () => i
 const ENABLE_PHASE2_LEGACY_REDIRECTS =
   String(import.meta.env.VITE_ENABLE_PHASE2_LEGACY_REDIRECTS ?? "").toLowerCase() === "true"
 
-class ErrorBoundary extends React.Component<
+export class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; error: unknown }
 > {
@@ -81,6 +82,16 @@ class ErrorBoundary extends React.Component<
 
   static getDerivedStateFromError(error: unknown) {
     return { hasError: true, error }
+  }
+
+  // Report to the frontend error tracker (phase4-frontend-error-tracking T1-2).
+  // Rendering behaviour is unchanged — this only forwards. A chunk-load re-throw
+  // (lazyWithRetry's second-failure path) is classified so it does not read as a
+  // code defect.
+  componentDidCatch(error: unknown, info: { componentStack?: string | null }) {
+    reportError(error, isChunkImportError(error) ? "chunk-reload-failed" : "boundary", {
+      componentStack: info?.componentStack ?? undefined,
+    })
   }
 
   render() {
