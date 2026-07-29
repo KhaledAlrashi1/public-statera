@@ -44,6 +44,14 @@ export const EXERCISED_APIS = {
 // bankApi and featuresApi were dead code with no reachable UI caller; they were
 // deliberately kept out of the contract net and then deleted entirely in Phase 4 10b-1.
 
+// Non-api-object frontend→backend calls that must still resolve to a mounted route.
+// The error reporter (lib/error-reporter.ts) POSTs here fire-and-forget and swallows
+// the response, so an unmount/rename would be SILENT — exactly the drift 10a exists
+// to catch. It is not an api.ts method (no object/method to exercise), so it is added
+// directly rather than through INVOCATIONS/exercisedMethodGaps.
+// (phase4-frontend-error-tracking T1-4, implementer choice.)
+export const NON_API_CALLS: FrontendCall[] = [{ method: "POST", path: "/api/client-errors" }]
+
 type Invocation = { source: string; run: () => unknown }
 
 function csvFile(): File {
@@ -214,6 +222,8 @@ export async function captureFrontendCalls(): Promise<FrontendCall[]> {
     globalThis.URL.revokeObjectURL = realRevoke
     if (globalThis.HTMLAnchorElement && realClick) globalThis.HTMLAnchorElement.prototype.click = realClick
   }
+
+  for (const c of NON_API_CALLS) calls.push(c)
 
   const unique = new Map<string, FrontendCall>()
   for (const c of calls) unique.set(`${c.method} ${c.path}`, c)

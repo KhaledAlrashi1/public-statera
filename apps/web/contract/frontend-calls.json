@@ -205,6 +205,10 @@
   },
   {
     "method": "POST",
+    "path": "/api/client-errors"
+  },
+  {
+    "method": "POST",
     "path": "/api/memorized-transactions"
   },
   {
