@@ -31,6 +31,14 @@ RUN pnpm install --frozen-lockfile
 
 COPY apps/web ./apps/web
 
+# Release identity for the frontend error reporter (phase4-frontend-error-tracking
+# T1-3). Vite inlines ONLY VITE_-prefixed env at build time, so this MUST be set in
+# the BUILD stage before `pnpm build` (the Stage-2 ENV GIT_SHA is too late — the
+# bundle is already built). CI already passes --build-arg GIT_SHA to this image
+# (deploy.yml build-args), so no CI change is required; falls back to "dev" locally.
+ARG GIT_SHA=dev
+ENV VITE_GIT_SHA=${GIT_SHA}
+
 RUN pnpm --filter statera-frontend build
 
 # ── Stage 2: Caddy runtime ────────────────────────────────────────────────────
