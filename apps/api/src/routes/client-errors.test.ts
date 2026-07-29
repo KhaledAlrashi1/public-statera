@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest"
+import { describe, it, expect, beforeEach, vi } from "vitest"
 import { Hono } from "hono"
 import { randomUUID } from "node:crypto"
 
@@ -21,7 +21,6 @@ import {
   __getDropCountForTest,
   __setDropWindowStartForTest,
 } from "./client-errors"
-import { RedisMock } from "../test/redis-mock.setup"
 import { readJson } from "../test/json"
 
 const app = new Hono().route("/api/client-errors", clientErrorsRouter)
@@ -202,7 +201,11 @@ describe("POST /api/client-errors — rejection paths", () => {
     const body = await readJson(res)
     expect(body.code).toBe("payload_too_large")
     expect(captureEvent).not.toHaveBeenCalled()
+    // CONDITION (i): log line + counter for the over-cap drop path
     expect(__getDropCountForTest()).toBe(1)
+    const line = warn.mock.calls.map((c) => c[0] as string).find((l) => l?.startsWith?.("[client-errors.drop]"))
+    expect(line).toBeDefined()
+    expect(line).toMatch(/"reason":"over_cap_(declared|actual)"/)
     warn.mockRestore()
   })
 
@@ -227,7 +230,11 @@ describe("POST /api/client-errors — rejection paths", () => {
     const body = await readJson(res)
     expect(body.code).toBe("forbidden")
     expect(captureEvent).not.toHaveBeenCalled()
+    // CONDITION (i): log line + counter for the cross-origin drop path
     expect(__getDropCountForTest()).toBe(1)
+    const line = warn.mock.calls.map((c) => c[0] as string).find((l) => l?.startsWith?.("[client-errors.drop]"))
+    expect(line).toBeDefined()
+    expect(line).toMatch(/"reason":"cross_origin"/)
     warn.mockRestore()
   })
 
@@ -240,35 +247,9 @@ describe("POST /api/client-errors — rejection paths", () => {
   })
 })
 
-// HERMETIC-ONLY (skipped under INTEGRATION): forces 429 by spying on
-// RedisMock.prototype.evalsha, which only exists when the ioredis mock is wired
-// (setupFiles is [] under INTEGRATION, so RedisMock is dead code there and the spy
-// is inert). Per-IP keying + a unique synthetic X-Real-IP per test isolate the
-// bucket BY CONSTRUCTION, so this never keys on userId 1 and never contaminates a
-// re-run — the exact class behind the reopened isolation ticket.
-describe.skipIf(process.env.INTEGRATION === "true")("POST /api/client-errors — rate limit", () => {
-  afterEach(() => {
-    vi.restoreAllMocks()
-  })
-
-  it("returns 429 with the standard envelope and logs a throttle drop", async () => {
-    vi.spyOn(RedisMock.prototype, "evalsha").mockResolvedValue([9999, 60000])
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
-    const res = await post(validReport, { "X-Real-IP": `rl-test-${randomUUID()}` })
-    expect(res.status).toBe(429)
-    expect(await res.json()).toEqual({
-      ok: false,
-      data: null,
-      error: "Too many requests. Please try again later.",
-      code: "rate_limit_exceeded",
-      meta: { retry_after: 60 },
-    })
-    // over-limit request must not forward to Sentry
-    expect(captureEvent).not.toHaveBeenCalled()
-    // and the throttle drop is logged (condition i)
-    const throttleLines = warn.mock.calls
-      .map((c) => c[0] as string)
-      .filter((l) => typeof l === "string" && l.includes('"reason":"throttled_ip"'))
-    expect(throttleLines.length).toBeGreaterThanOrEqual(1)
-  })
-})
+// The 429 / throttle-drop path is verified against REAL Redis in
+// client-errors.integration.test.ts (T1-1-APPROVE follow-up): a limiter whose
+// behaviour is only ever asserted against a mock is the gap the reopened
+// isolation ticket names. Per-run-unique X-Real-IP (post() default) isolates the
+// bucket by construction, so that integration test needs no skip in the hermetic
+// file and no residue flush of its own bucket.
