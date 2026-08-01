@@ -82,10 +82,13 @@ export interface DashboardMetricsResponse {
   months: string[]
   monthly: Array<{
     month: string
-    income_kd: number
-    expense_kd: number
+    // R3 KWD amounts are 3-decimal strings via formatKd ("500.000"), not number.
+    // See the money-string consumer sweep (phase4-money-string-consumer-sweep.md).
+    income_kd: string
+    expense_kd: string
   }>
-  expense_by_category: Record<string, Record<string, number>>
+  // R3 expense_by_category leaf values are 3-decimal strings via formatKd, not number.
+  expense_by_category: Record<string, Record<string, string>>
   cycle_enabled?: boolean
   cycle_start?: string | null
   cycle_end?: string | null

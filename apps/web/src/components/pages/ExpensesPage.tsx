@@ -733,7 +733,9 @@ export default function ExpensesPage() {
   })
 
   const topCategories = useMemo(() => {
+    // Coerce formatKd string values for display/sort (SWEEP-R3 display-only boundary).
     return Object.entries(selectedMonthExpenseMap)
+      .map(([name, value]) => [name, Number(value || 0)] as [string, number])
       .sort((a, b) => b[1] - a[1])
       .slice(0, 4)
   }, [selectedMonthExpenseMap])
@@ -751,7 +753,7 @@ export default function ExpensesPage() {
 
     return topCategories.map(([name, value]) => {
       const sparklineData = months.map((month) => {
-        const total = expenseByCategoryByMonth[month]?.[name] || 0
+        const total = Number(expenseByCategoryByMonth[month]?.[name] || 0)
         return { month, value: total }
       })
       return { name, value, sparklineData }

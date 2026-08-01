@@ -282,8 +282,10 @@ export default function DashboardPage() {
   )
 
   const categoryData = useMemo(() => {
+    // R3 expense_by_category values are formatKd strings — coerce for display/sort
+    // (SWEEP-R3 display-only boundary; not ledger arithmetic).
     return Object.entries(selectedMonthExpenseMap)
-      .map(([name, value]) => ({ name, value }))
+      .map(([name, value]) => ({ name, value: Number(value || 0) }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 10)
   }, [selectedMonthExpenseMap])
@@ -326,7 +328,9 @@ export default function DashboardPage() {
   )
 
   const topExpenses = useMemo(() => {
+    // Coerce formatKd string values for display/sort (SWEEP-R3 display-only boundary).
     return Object.entries(selectedMonthExpenseMap)
+      .map(([name, value]) => [name, Number(value || 0)] as [string, number])
       .sort((a, b) => b[1] - a[1])
       .slice(0, 4)
   }, [selectedMonthExpenseMap])
@@ -343,7 +347,7 @@ export default function DashboardPage() {
 
     return topExpenses.map(([name, value]) => {
       const sparklineData = months.map((month) => {
-        const total = expenseByCategoryByMonth[month]?.[name] || 0
+        const total = Number(expenseByCategoryByMonth[month]?.[name] || 0)
         return { month, value: total }
       })
       return { name, value, sparklineData }
@@ -366,7 +370,7 @@ export default function DashboardPage() {
       )
       const avg =
         monthsWithData.length > 0
-          ? monthsWithData.reduce((s, m) => s + (expenseByCategoryByMonth[m]?.[name] || 0), 0) /
+          ? monthsWithData.reduce((s, m) => s + Number(expenseByCategoryByMonth[m]?.[name] || 0), 0) /
             monthsWithData.length
           : 0
       map.set(name, avg)
@@ -381,7 +385,7 @@ export default function DashboardPage() {
     return items
       .map((b) => {
         const allocated = Number(b.amount_kd || 0)
-        const spent = selectedMonthExpenseMap[b.category] || 0
+        const spent = Number(selectedMonthExpenseMap[b.category] || 0)
         const usedPct = allocated > 0 ? spent / allocated : 0
         return {
           category: b.category,
@@ -458,12 +462,12 @@ export default function DashboardPage() {
 
   const categoryTotal = useMemo(() => {
     if (!activeCategory || !selectedMonth) return 0
-    return selectedMonthExpenseMap[activeCategory] || 0
+    return Number(selectedMonthExpenseMap[activeCategory] || 0)
   }, [selectedMonthExpenseMap, activeCategory, selectedMonth])
 
   const categoryPrevTotal = useMemo(() => {
     if (!activeCategory || !prevMonthVal) return 0
-    return prevMonthExpenseMap[activeCategory] || 0
+    return Number(prevMonthExpenseMap[activeCategory] || 0)
   }, [prevMonthExpenseMap, activeCategory, prevMonthVal])
 
   const categoryShare = monthExpenses > 0 ? (categoryTotal / monthExpenses) * 100 : 0
