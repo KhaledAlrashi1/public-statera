@@ -3,7 +3,7 @@ import type { Context } from "hono"
 import { z } from "zod"
 import { zodErrorToEnvelope } from "./route-helpers"
 import { createCustomRateLimiter } from "../lib/rate-limit"
-import { Sentry, scrubText } from "../lib/sentry"
+import { Sentry, scrubEventText } from "../lib/sentry"
 import { tryReadUserId } from "../middleware/auth"
 
 // ── phase4-frontend-error-tracking — T1-1 backend endpoint ─────────────────────
@@ -20,11 +20,11 @@ import { tryReadUserId } from "../middleware/auth"
 //    where a public crash matters most. Rate-limited per-IP + a global ceiling.
 //  - The client CANNOT set arbitrary Sentry fields: the event is built
 //    server-side from ONLY the validated schema fields.
-//  - The installed Sentry `beforeSend` scrubs event.request/extra/breadcrumbs but
-//    NOT event.message / event.exception, so client message + stack are scrubbed
-//    HERE (scrubFrontendText) before the event is built. event.extra.client_stack
-//    is additionally re-scrubbed by beforeSend (defence in depth).
-//  - Scrubbing boundary (honest): scrubFrontendText redacts emails / IBANs /
+//  - Client message + stack are scrubbed HERE with the shared scrubEventText
+//    (lib/sentry.ts) before the event is built. As of Task B / B2 the installed
+//    `beforeSend` ALSO scrubs event.message / event.exception (and event.extra), so
+//    the two passes are idempotent defence in depth, not double redaction.
+//  - Scrubbing boundary (honest): scrubEventText redacts emails / IBANs /
 //    enc1: / PII key=value (reused backend scrubber) PLUS KWD-format amounts
 //    (DECIMAL(_,3)) and finance key=value (merchant/category/amount/...). A bare,
 //    UNKEYED merchant name in free prose is not regex-scrubbable; the primary
@@ -68,17 +68,10 @@ const ReportSchema = z.object({
 })
 
 // ── Scrubbing ──────────────────────────────────────────────────────────────────
-// KWD amounts are DECIMAL(_,3): a number ending in exactly three decimals. Stack
-// frames use `file:line:col` (integer:integer) so this does not eat stack numbers.
-const KWD_AMOUNT_RE = /\b\d{1,3}(?:,\d{3})*\.\d{3}\b/g
-const FINANCE_KV_RE =
-  /\b(merchant|merchant_name|category|category_name|amount|amount_kd|payee|note|memo)\s*[=:]\s*("[^"]*"|'[^']*'|[^\s,;]+)/gi
-
-function scrubFrontendText(value: string): string {
-  return scrubText(value)
-    .replace(KWD_AMOUNT_RE, "[REDACTED]")
-    .replace(FINANCE_KV_RE, (_m, key: string) => `${key}=[REDACTED]`)
-}
+// Task B / B2 (promote+unify, TB-R2): the KWD-amount + finance key=value patterns
+// that used to live here were promoted into lib/sentry.ts as scrubEventText, so this
+// forwarder and the beforeSend hook share ONE scrubber and ONE test suite (no drift).
+// Client message/name/stack are scrubbed with scrubEventText at the call sites below.
 
 // Server-side route normalization (defence — the client also normalizes, but this
 // endpoint is public and must not trust it): drop query/hash, replace numeric and
@@ -212,12 +205,14 @@ clientErrorsRouter.post("/", perIpLimiter, globalLimiter, async (c) => {
   }
   const report = parsed.data
 
-  // Scrub client-supplied free text HERE (beforeSend does not cover message/exception).
-  const message = scrubFrontendText(report.message)
-  const name = report.name ? scrubFrontendText(report.name) : undefined
-  const stack = report.stack ? scrubFrontendText(report.stack) : undefined
+  // Scrub client-supplied free text with the shared scrubEventText. beforeSend now
+  // ALSO re-scrubs the built event's message/exception (Task B / B2) — idempotent, so
+  // this pre-scrub plus the hook is defence in depth, not double redaction.
+  const message = scrubEventText(report.message)
+  const name = report.name ? scrubEventText(report.name) : undefined
+  const stack = report.stack ? scrubEventText(report.stack) : undefined
   const route = report.route ? normalizeRoute(report.route) : undefined
-  const ua = report.ua ? scrubFrontendText(report.ua) : undefined
+  const ua = report.ua ? scrubEventText(report.ua) : undefined
   // Validate + length-cap the client release: expect a 40-hex SHA, else ignore it
   // (keep the report — a bad release is not a reason to drop a real error).
   const release = report.release && SHA_RE.test(report.release) ? report.release : undefined

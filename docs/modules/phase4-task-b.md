@@ -1,9 +1,19 @@
 # Phase 4 — TASK B (batched follow-ons)
 
-**Status:** Phase A APPROVED WITH CONDITIONS (review channel, 2026-08-01). B1/B2/B3 proceed to
+**Status:** Phase A APPROVED WITH CONDITIONS (review channel, 2026-08-05). B1/B2/B3 proceed to
 implementation in that order; **B4 is approved in scope but GATED on a separate addendum (TB-R6)**.
 This document is the durable lineage (persist-first standing rule): the ruling block in full, then the
 Phase A proposal. **Implement from this file, not from conversation context.**
+
+**Date correction (B2-F2, review-channel ruling 2026-08-05):** Task B artifacts were initially stamped
+2026-08-01, inherited in error from the prior cycle's date via the review-channel blocks; corrected to
+2026-08-05 by review-channel ruling B2-F2. Recorded as a correction, not silently revised. (The
+money-string sweep genuinely closed 2026-08-01 and keeps that date.) **Deliberate LEAVES (reported):**
+the PART 1 verbatim ruling reproductions keep their as-issued 2026-08-01 stamps — they are faithful
+copies of blocks that were themselves misdated, and changing them would falsify the reproduction; this
+note documents the true 2026-08-05 date. The two money-string DASHBOARD-CRASH references inside the
+verbatim TB-R2/TB-R5 text ("the 2026-08-01 crash", "the real 2026-08-01 capture") are genuinely
+prior-cycle events and stay 2026-08-01.
 
 Scope: four items, one module, four sub-commits.
 - **B1** — F-1(b): globalSetup `rl:*` scope-flush (test-only).
@@ -17,7 +27,7 @@ INTEGRATION clean-start **766/3**; all `tsc --noEmit` = 0. HEAD at charter = `7f
 ---
 ---
 
-# PART 1 — RULING BLOCK (review channel, 2026-08-01), verbatim
+# PART 1 — RULING BLOCK (issued 2026-08-05; the blocks were stamped 2026-08-01 in error — see the Date correction above), reproduced verbatim as issued
 
 TASK B — PHASE A RULING (review channel, 2026-08-01)
 
@@ -297,7 +307,7 @@ retired.
 ---
 ---
 
-# PART 2 — PHASE A PROPOSAL (as delivered, 2026-08-01)
+# PART 2 — PHASE A PROPOSAL (as delivered, 2026-08-05)
 
 Ordering endorsed: **B1 → B2 → B3 → B4** (B1 first restores INTEGRATION residue-idempotency for
 `rl:*` so later INTEGRATION runs are readable without a manual precondition; B2/B3/B4 independent).
@@ -400,14 +410,14 @@ FINDING, stop-and-ask).
 
 # PART 3 — IMPLEMENTATION LOG (per sub-commit)
 
-## B1 — F-1(b) globalSetup `rl:*` flush — IMPLEMENTED + CLOSED 2026-08-05 (Phase A approved 2026-08-01)
+## B1 — F-1(b) globalSetup `rl:*` flush — IMPLEMENTED + CLOSED 2026-08-05 (Phase A approved 2026-08-05)
 
-**Date provenance (TB-F5, 2026-08-05):** the B1 durable-closure date is the closure ruling-block date
-**2026-08-05** (addendum approval "COMMIT B1"), which also matches the commit author-date and the session
-clock. Phase A approval + the verbatim ruling reproductions in this doc correctly retain their own
-2026-08-01 dates. TB-R1(c)'s "ruling date of this block" pointed at the 2026-08-01 TB-R1 block, which is
-why the first close-out stamped 08-01; corrected to 08-05 per the standing rule (dates derive from the
-ruling block that actually closes the work).
+**Date note (superseded by B2-F2, 2026-08-05):** the entire Task B cycle was issued in the 2026-08-05
+session; the earlier 2026-08-01 stamps were inherited-in-error from the prior cycle (see the Date
+correction near the top). All Task B artifact dates are 2026-08-05. (An earlier TB-F5 provenance note
+here wrongly reasoned that the verbatim reproductions "correctly retained" 2026-08-01 — B2-F2 supersedes
+that: the blocks were misdated, not correctly 08-01; the reproductions are LEFT as-issued only because
+they are faithful copies, with the true date documented in the Date correction.)
 
 **Changeset (test infra + docs only; `lib/rate-limit.ts` untouched, RL-A1/D1):**
 - NEW `apps/api/src/test/rl-flush.globalSetup.ts` — INTEGRATION-gated (`INTEGRATION !== "true"` early return),
@@ -435,4 +445,30 @@ ruling block that actually closes the work).
 - **E2 — natural residue (B1-F3, causal chain):** an IMMEDIATE natural back-to-back leaves **35** real `rl:*` keys after run-1, INCLUDING `rl:rl:1:/api/budgets` (the seeded-RED key) AND `rl:rl:anon:/limited` (the counting-test key); run-2's globalSetup flushed exactly **35**, both runs `766/3` exit 0. Chain: natural runs leave the budgets key (E2) → that key causes exit 1 (seeded RED) → the flush removes it (GREEN). The counting-test key is present in the natural residue too, so the flush covers it, though its FAILURE was not separately reproduced.
 - **TB-F6 (residual limitation, closed by the historical record — not re-earned):** E2 captured natural residue KEY NAMES but not VALUES, so the natural counter on `rl:rl:1:/api/budgets` is unmeasured, while the seeded RED used 100 (over every limit). Strictly, E2 proves the key returns naturally; it does not prove the natural count is over the limit. That gap is filled by the 2026-07-27 record — a NATURAL Run-2 exited 1 with the documented failures, direct evidence that natural residue reaches failing counts. E2 (natural key returns) + seeded RED/GREEN (that key over-limit → exit 1 → flush fixes) + the 2026-07-27 natural exit-1 (natural residue reaches failing counts) together complete the chain. No further experiment run for this — the evidence exists and is cited, not re-earned.
 
-_B2/B3/B4 pending their cycles._
+## B2 — FIND-S1 sentry scrub promote+unify — IMPLEMENTED + CLOSED 2026-08-05 (TB-R2/R3, TB-F7)
+
+**Changeset:**
+- `lib/sentry.ts` — promoted `KWD_AMOUNT_RE`/`FINANCE_KV_RE` (from `client-errors.ts`) as `_KWD_AMOUNT_PATTERN`/`_FINANCE_KV_PATTERN`; new exported `scrubEventText` (= `_scrubString` + KWD + finance); `sentryBeforeSend` now scrubs `event.message` + each `event.exception.values[].value`. Stack frames NOT scrubbed (`includeLocalVariables` off). `scrubText` kept as the base primitive.
+- `routes/client-errors.ts` — local `scrubFrontendText` + the two regexes DELETED; imports + delegates to `scrubEventText`. Behavior byte-identical.
+- `lib/sentry.test.ts` — +14 (9→23): message+exception scrub, positive redaction, BLOCKING negative controls, idempotency.
+- `docs/legal/lawyer-review-checklist.md` — added the Privacy §5 scrubbing line (FIND-TB1) incl. bare-unkeyed-name limitation; TB-F7 self-audit note (operator announces without external review).
+
+**TB-R2 conditions:**
+- **Promote+unify:** one `scrubEventText`, one test suite, no drift ✓.
+- **BLOCKING negative controls (proven):** `scrubEventText` leaves untouched the prod frame `index-BG3YW6B5.js:80:750`, a bare integer, a 2-decimal number (`12.50`), and a semver (`1.2.3` / `20.11.0`) — asserted `.toBe(input)` in `sentry.test.ts`. Over-redaction would eat the diagnostics a real crash is read from.
+- **Idempotency:** `scrubEventText(scrubEventText(x)) === scrubEventText(x)` (it.each, 6 inputs) + `email=[REDACTED]` fixed point ✓.
+- **Grouping conclusion (reasoned from code+docs, no live experiment):** Sentry groups stacktrace-primary; `type+value` only when stackless. Backend errors WITH stacktraces group on frames → unaffected. **NODE-EXPRESS-9** (the client-errors forward) groups on `type+value`; its value is already pre-scrubbed by the route pre-B2, and the hook re-scrub is idempotent ⇒ grouping UNCHANGED. Stackless PII values were already per-user-fragmented → scrubbing MERGES them (improvement). Exception `type` (code identifier) left intact.
+- **Site enumeration is non-load-bearing** BECAUSE the fix is at the choke point (the hook) — it covers `app.ts:71` 5xx capture and every current/future capture at once. If the fix were per-site the bucketed classification would need to be exhaustive; it does not.
+
+**TB-F7 pre-announcement captures (captured, not asserted):**
+- Legal placeholder markers: `PrivacyPolicyPage.tsx` / `TermsPage.tsx` / `LegalPageLayout.tsx` = 0 markers; RTL render tests (`PrivacyPolicyPage.test.tsx` + `TermsPage.test.tsx`, 7 tests) GREEN with `queryAllByText(/content pending operator review/i).toHaveLength(0)`.
+- Backup retention: Privacy §7 states "daily 14 days, weekly 56 days, monthly 365 days" — matches the recorded R2 lifecycle (8f-1) + `backup-db.sh` daily/weekly/monthly prefix routing. HOLDS.
+- Statement files parse-and-discard: `upload.ts` reads the file via `new Uint8Array(await file.arrayBuffer())` (in-memory), computes `file_hash`, and NEVER writes the bytes (grep for writeFile/createWriteStream/tmp/S3/R2/bucket across `import-lib.ts`+`upload.ts` = none; the only `persist*` is `persistPlannedRow` = derived transaction ROWS, which the policy says survive). Privacy §4 "never stored" HOLDS.
+
+**FIND-TB1 (recorded):** the scrubbing checklist line was proposed in the T1-4 close-out and never landed (checklist had 6 items, none about scrubbing) — commit-without-activation class. Added by B2.
+
+**B2-F5 — over-redaction cost, recorded (accepted, not a bug):** `_KWD_AMOUNT_PATTERN` is amount-SHAPED, not amount-AWARE — it cannot distinguish a 3-decimal KWD amount from any other 3-decimal float at a word boundary. So a `0.001` ratio, a `1.234 ` latency, or any computed 3-decimal metric in a backend error message is now redacted to `[REDACTED]`. Accepted cost: over-redacting a number is cheaper than leaking a KWD amount, and context-narrowing the regex would be fragile. Recorded so a future engineer seeing `[REDACTED]` where a duration/ratio should be knows it is by design. Pinned by a test in `sentry.test.ts` ("redacts a 3-decimal NON-money float by design") + a note in the scrubber's module comment (`lib/sentry.ts`). (Nuance: the `\b` anchor means a 3-decimal number IMMEDIATELY followed by a letter — e.g. `1.234s` — is NOT matched; the over-redaction applies at a word boundary.)
+
+**Baseline:** hermetic 750→765 (+14 B2 + 1 B2-F5 over-redaction pin), files 53 unchanged, skipped 19 unchanged; tsc 0; exit 0, no Errors/Unhandled.
+
+_B3/B4 pending their cycles._
