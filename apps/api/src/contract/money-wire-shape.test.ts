@@ -88,7 +88,7 @@
  * the shape of stored JSON rather than the shape a serializer produces.
  */
 
-import { describe, it, expect, vi } from "vitest"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { Hono } from "hono"
 import { readFileSync, writeFileSync } from "node:fs"
 import { resolve } from "node:path"
@@ -142,6 +142,22 @@ vi.mock("../lib/analytics-helpers", async (importOriginal) => {
   }
 })
 
+// ── Pinned clock (CF6) ───────────────────────────────────────────────────────
+// Several routes derive their windows from currentLocalDate() and then filter in
+// JS. Shape-dispatch fixtures ignore SQL predicates, so a DB-level window cannot
+// empty a container — but a JS-level one can. Unpinned, R11 falls to
+// detected:false (nulling suggested_monthly_income_kd -> NULL guard red) and R12's
+// patterns[] empties (-> PRESENCE guard red) once the calendar passes the fixture
+// dates. Neither would be a regression; both would be a red with no code change on
+// an unpredicted date. `toFake: ["Date"]` only — faking timers wholesale would
+// interfere with the ioredis mock and promise scheduling.
+const PINNED_INSTANT = "2026-05-15T09:00:00.000Z"
+
+function pinClock(instant: string): void {
+  vi.useFakeTimers({ toFake: ["Date"] })
+  vi.setSystemTime(new Date(instant))
+}
+
 // ── Fixture db (shape dispatch on the select() key-set) ──────────────────────
 // Order-independent, so R8's sequential-then-Promise.all fan-out needs no
 // positional assumptions. Every money-bearing query returns a NON-ZERO row; see
@@ -185,9 +201,35 @@ const FIXTURES: Record<string, unknown[]> = {
   ],
   // R12: >=2 entries in one normalised group, or zero patterns are emitted.
   "txDate,displayName,amountKd,categoryName,merchantName": [
+    // Re-dated for the pinned clock: days=90 from 2026-05-15 cuts off at
+    // 2026-02-14, so the pre-pin dates (2026-05/06/07-01) were partly in the
+    // FUTURE and would have fallen outside the lookback.
+    { txDate: "2026-03-01", displayName: "Netflix", amountKd: "5.500", categoryName: "Entertainment", merchantName: "Netflix" },
+    { txDate: "2026-04-01", displayName: "Netflix", amountKd: "5.500", categoryName: "Entertainment", merchantName: "Netflix" },
     { txDate: "2026-05-01", displayName: "Netflix", amountKd: "5.500", categoryName: "Entertainment", merchantName: "Netflix" },
-    { txDate: "2026-06-01", displayName: "Netflix", amountKd: "5.500", categoryName: "Entertainment", merchantName: "Netflix" },
-    { txDate: "2026-07-01", displayName: "Netflix", amountKd: "5.500", categoryName: "Entertainment", merchantName: "Netflix" },
+  ],
+  // CF5 — R3 Tier 2. `loadDashboardSnapshot` (dashboard-snapshot-lib.ts:277) is
+  // the ONLY bare `select()` (no projection object) reachable from R1-R13, so this
+  // key is unambiguous within this capture. monthsCount/windowEndMonth must satisfy
+  // isSnapshotEligible: months === DASHBOARD_SNAPSHOT_MONTHS (24) and
+  // windowEndMonth === currentMonthKey (2026-05 under the pinned clock).
+  __bare_select__: [
+    {
+      id: 1,
+      userId: 1,
+      monthsCount: 24,
+      windowEndMonth: "2026-05",
+      monthsJson: JSON.stringify(["2026-04", "2026-05"]),
+      monthlyJson: JSON.stringify([
+        { month: "2026-04", income_kd: "1950.000", expense_kd: "200.625" },
+        { month: "2026-05", income_kd: "2000.000", expense_kd: "175.250" },
+      ]),
+      expenseByCategoryJson: JSON.stringify({
+        "2026-04": { Groceries: "160.125", Transport: "40.500" },
+        "2026-05": { Groceries: "175.250" },
+      }),
+      computedAt: new Date("2026-05-15T00:00:00.000Z"),
+    },
   ],
   // R8 budget alerts: product_events rows; `month` must match the request month.
   "id,eventName,propertiesJson,eventTs": [
@@ -235,7 +277,9 @@ function makeFixtureDb(log: DbCall[]): any {
                 pending = Object.keys(args[0] as object).join(",")
                 kind = `select{${pending}}`
               } else {
-                kind = "select()" // bare select — no projection object
+                // bare select() — no projection object; see __bare_select__ above
+                pending = "__bare_select__"
+                kind = "select()"
               }
             } else if (prop === "insert" || prop === "update" || prop === "delete" || prop === "execute") {
               // C4: named explicitly so no db call in the transcript is an
@@ -260,6 +304,7 @@ function makeFixtureDb(log: DbCall[]): any {
 const DYNAMIC_KEY_PATHS: Record<string, RegExp[]> = {
   R1: [/^data\.items$/],
   R3: [/^data\.expense_by_category$/, /^data\.expense_by_category\.\*$/],
+  "R3-tier2": [/^data\.expense_by_category$/, /^data\.expense_by_category\.\*$/],
   R7: [/^data\.spent_by_category$/, /^data\.range_spent_by_category$/, /^data\.avg12_by_category$/],
 }
 
@@ -288,18 +333,170 @@ const MONEY_VALUE_MAPS = [
 // C1 requires every empty array/object to throw unless NAMED here with a
 // file:line justification for why it is empty BY DESIGN rather than by fixture
 // poverty. Keep short and reviewable.
-const EMPTY_ALLOWED: Array<{ path: RegExp; why: string }> = [
+// CF7: every entry carries a REVISIT TRIGGER naming the event that invalidates
+// it. Two of the three are empty because a feature is DEFERRED, not because they
+// are structurally empty — when that feature lands they may carry money, and a
+// silent exception would keep them out of the captured shape entirely.
+const EMPTY_ALLOWED: Array<{ path: RegExp; why: string; revisit: string }> = [
   {
     path: /^data\.accounts$/,
     why: "R13 intelligence-lib.ts:611 `accounts: []` — hardcoded empty; bank sync deferred indefinitely. No money leaves exist beneath it in any state.",
+    revisit: "BANK SYNC SHIPS. Empty is a deferral, not a structural property: connected accounts will carry balances (money). Delete this entry and fixture the array.",
   },
   {
     path: /connected_accounts$/,
     why: "R4/R8 aggregation.ts:870 `connected_accounts: []` — hardcoded empty; bank sync deferred indefinitely. No money leaves exist beneath it in any state.",
+    revisit: "BANK SYNC SHIPS. Same reasoning as data.accounts.",
   },
   {
     path: /warnings$/,
     why: "R9/R8 aggregation.ts:699-702 — empty IS the healthy state (income resolved AND budgets funded). Non-empty is mutually exclusive with the N1 non-null `monthly_income_kd` requirement, so it cannot be forced without defeating a blocking condition. Contains only strings, never money.",
+    revisit: "THE N1 NON-NULL `monthly_income_kd` FIXTURE CHANGES. This entry is coupled to it by construction: if the income fixture ever goes zero/null, warnings becomes non-empty and this exception is both unnecessary and misleading.",
+  },
+]
+
+// ── C7 — MULTI-PATH MONEY INVENTORY ──────────────────────────────────────────
+// THE CLASS (CF8): a money field with more than one producing path is only
+// captured on the path the fixture takes. A green capture proves the arm it took,
+// never the arms it did not. Reading a second arm's source and asserting it
+// matches is an AUTHORED ENTRY — so this inventory records ARMS and DISPOSITIONS,
+// and NEVER a wire type for an uncaptured arm. GAP-RECORDED means "not captured";
+// it never means "captured by reading the source".
+//
+// DERIVATION METHOD (not inherited from any prior list): over the five emit files,
+// (a) every money-producing line carrying a ternary or `??` fallback, (b) every
+// money container assigned in more than one place, (c) every serving-tier branch
+// upstream of a money payload, (d) every resolver with more than one documented
+// return arm. Each candidate was then reduced to the WIRE: a `??` INSIDE a
+// serializer call (e.g. `roundedKd(x ?? "0")`, `formatKd(String(v ?? "0"))`) is ONE
+// wire arm and is excluded.
+//
+// Only MP-1 crosses a serializer boundary (formatKd vs a JSON.parse replay of
+// stored rows) and is therefore the only entry with a PLAUSIBLE TYPE DIVERGENCE.
+// Every other entry is the same serializer on both arms, or a null arm the NULL
+// guard forbids by construction.
+type MultiPath = {
+  id: string
+  wirePath: string
+  arms: string[]
+  fixtureArm: string
+  disposition: "CAPTURED-BOTH" | "GAP-RECORDED"
+  divergenceRisk: string
+  revisit: string
+}
+
+const MULTI_PATH: MultiPath[] = [
+  {
+    id: "MP-1",
+    wirePath: "R3 data.expense_by_category.*.* (and data.monthly[].income_kd / .expense_kd)",
+    arms: [
+      "Tier 3 recompute: lib/dashboard-snapshot-lib.ts:222/223/230 (formatKd)",
+      "Tier 2 replay: lib/analytics-cache.ts loadDashboardSnapshot -> lib/dashboard-snapshot-lib.ts:277 (JSON.parse of a stored row)",
+    ],
+    fixtureArm: "BOTH — R3 (months=2&until=2026-05) forces Tier 3; R3-tier2 (months=24) forces Tier 2. X-Cache-Status asserted on each.",
+    disposition: "CAPTURED-BOTH",
+    divergenceRisk: "TYPE (cross-serializer)",
+    revisit:
+      "PROVEN REACHABLE. validateSnapshotPayload type-checks monthly[] money (dashboard-snapshot-lib.ts:135-136, 'Reject float monetary values') but NOT expense_by_category leaves, so a stored number leaf reaches the wire as a JSON number while Tier 3 always serves a formatKd string. Hardening is B4-1b (own cycle; B4-1a inherits zero-production-diff).",
+  },
+  {
+    id: "MP-2",
+    wirePath: "R9 / R11 / R8.safe_to_spend data.monthly_income_kd",
+    arms: [
+      "detected_from_transactions: lib/income-lib.ts resolveIncomeForPeriod -> aggregation.ts:710 / intelligence-lib.ts:349 (formatKd)",
+      "declared_in_profile: same call sites, Decimal sourced from user_profiles.monthly_income_kd",
+      "not_set: null literal",
+    ],
+    fixtureArm: "detected_from_transactions — select{total} returns a non-zero row, so detectMonthlyIncome > 0 and the profile query is never reached",
+    disposition: "GAP-RECORDED",
+    divergenceRisk: "none (same serializer)",
+    revisit: "Capture the declared_in_profile arm if the resolver's serialization ever stops being shared across arms. The not_set arm is forbidden by the NULL guard.",
+  },
+  {
+    id: "MP-3",
+    wirePath: "R8 data.budget.profile_context.monthly_income_kd and .budget_to_income_pct",
+    arms: [
+      "detected / declared: routes/budgets.ts:151/152 (.toFixed(3)) and :147 (.toFixed(1))",
+      "not_set: null literal (:152 ternary; :147 skipped when income is null or zero)",
+    ],
+    fixtureArm: "detected — budgets.ts has its OWN resolveIncomeForPeriod (budgets.ts:76), a second implementation distinct from lib/income-lib.ts",
+    disposition: "GAP-RECORDED",
+    divergenceRisk: "none (null arm forbidden by the NULL guard)",
+    revisit: "budgets.ts's local resolver is already a SECOND implementation of the same concept. If it ever diverges from lib/income-lib.ts in serialization, capture both.",
+  },
+  {
+    id: "MP-4",
+    wirePath: "R4 / R8.account_overview data.month_trend[].spend and .income",
+    arms: [
+      "populated from rows: routes/aggregation.ts:856-857 (formatKd of the query total)",
+      "zero-fill default: routes/aggregation.ts:862-863 (?? formatKd(new Decimal(0)))",
+    ],
+    fixtureArm: "BOTH — the 6-month window has a row for 2026-05 only, so 5 months take the zero-fill arm and 1 takes the populated arm within a single response",
+    disposition: "CAPTURED-BOTH",
+    divergenceRisk: "none (same serializer)",
+    revisit: "If the trend fixture is ever widened so every month has a row, the zero-fill arm stops being exercised.",
+  },
+  {
+    id: "MP-5",
+    wirePath: "R6 data.series[].total_kd",
+    arms: [
+      "roundedKd: routes/aggregation.ts:339",
+      "zero-fill literal `0`: routes/aggregation.ts:341 (byMonth[mk] ?? 0) — not a serializer call, hence its pinned non-primitive inventory entry",
+    ],
+    fixtureArm: "BOTH — the 3-month window has a row for 2026-05 only, so 2 months take the literal arm and 1 takes roundedKd",
+    disposition: "CAPTURED-BOTH",
+    divergenceRisk: "none (same serializer)",
+    revisit: "If the merchant-trend fixture ever covers every month in the window, the literal-zero arm stops being exercised.",
+  },
+  {
+    id: "MP-6",
+    wirePath: "R5 data.items[].amount_kd",
+    arms: [
+      "dimension=category: routes/aggregation.ts:249",
+      "dimension=merchant: routes/aggregation.ts:261",
+      "dimension=transaction: routes/aggregation.ts:276",
+    ],
+    fixtureArm: "dimension=category only",
+    disposition: "GAP-RECORDED",
+    divergenceRisk: "none (same serializer)",
+    revisit: "CHEAP TO PROMOTE — two extra capture entries (?dimension=merchant, ?dimension=transaction). Promote if any dimension arm stops using roundedKd.",
+  },
+  {
+    id: "MP-7",
+    wirePath: "R7 data.range_spent_by_category.*",
+    arms: [
+      "range=month: routes/aggregation.ts:424 — object spread of spent_by_category, no separate query",
+      "range=30|90|365|all: routes/aggregation.ts:444-446 — separate query, roundedKd",
+    ],
+    fixtureArm: "range=month (the spread arm)",
+    disposition: "GAP-RECORDED",
+    divergenceRisk: "none (same serializer)",
+    revisit: "CHEAP TO PROMOTE — one extra capture entry (?range=90).",
+  },
+  {
+    id: "MP-8",
+    wirePath: "R10 data.safe_to_spend_today_kd",
+    arms: [
+      "pass-through of R9 daily_rate_kd: routes/aggregation.ts:1047 String(...)",
+      'literal fallback "0.000": same line, ?? arm, reachable only if R9 omits daily_rate_kd',
+    ],
+    fixtureArm: "pass-through (R9 always emits daily_rate_kd under this fixture)",
+    disposition: "GAP-RECORDED",
+    divergenceRisk: "none (same serializer)",
+    revisit: "If R9 ever makes daily_rate_kd optional, the fallback arm becomes reachable and must be captured.",
+  },
+  {
+    id: "MP-9",
+    wirePath: "R11 data.suggested_monthly_income_kd",
+    arms: [
+      "detected:true: lib/intelligence-lib.ts:509 (formatKd)",
+      "detected:false (<2 months): lib/intelligence-lib.ts:387 — null literal",
+      "detected:false (no candidates): lib/intelligence-lib.ts:480 — null literal",
+    ],
+    fixtureArm: "detected:true (N3 — 3 distinct months on a day-25 cadence inside the pinned lookback)",
+    disposition: "GAP-RECORDED",
+    divergenceRisk: "none (null arm forbidden by the NULL guard)",
+    revisit: "The two null arms are deliberately unreachable: capturing them would record `null` as the wire type, which is what the NULL guard exists to prevent.",
   },
 ]
 
@@ -412,10 +609,15 @@ const app = new Hono()
   .route("/api/analytics", aggregationRouter)
   .route("/api/analytics", intelligenceRouter)
 
-const ROUTES: Array<{ id: string; path: string }> = [
+const ROUTES: Array<{ id: string; path: string; expectCacheStatus?: string }> = [
   { id: "R1", path: "/api/analytics/spend-by-category" },
   { id: "R2", path: "/api/analytics/spend-by-month" },
-  { id: "R3", path: "/api/analytics/dashboard-metrics?months=2&until=2026-05" },
+  { id: "R3", path: "/api/analytics/dashboard-metrics?months=2&until=2026-05", expectCacheStatus: "miss" },
+  // CF5 — R3's SECOND serving path. months=24 === DASHBOARD_SNAPSHOT_MONTHS and no
+  // `until`, so windowEndMonth === currentMonthKey and isSnapshotEligible is true.
+  // X-Cache-Status is asserted so the test proves WHICH tier it observed rather
+  // than assuming.
+  { id: "R3-tier2", path: "/api/analytics/dashboard-metrics?months=24", expectCacheStatus: "snapshot" },
   { id: "R4", path: "/api/analytics/account-overview?month=2026-05" },
   { id: "R5", path: "/api/analytics/expense-breakdown?dimension=category&range=month&month=2026-05" },
   { id: "R6", path: "/api/analytics/expense-merchant-trend?merchant=Lulu&months=3&until=2026-05" },
@@ -439,6 +641,7 @@ async function captureAll(): Promise<{
   presenceErrors: string[]
   nullErrors: string[]
   statuses: Record<string, number>
+  cacheStatuses: Record<string, string | null>
   dbCalls: Record<string, DbCall[]>
 }> {
   const token = await createSessionToken({
@@ -454,6 +657,7 @@ async function captureAll(): Promise<{
   const presenceErrors: string[] = []
   const nullErrors: string[] = []
   const statuses: Record<string, number> = {}
+  const cacheStatuses: Record<string, string | null> = {}
   const dbCalls: Record<string, DbCall[]> = {}
 
   for (const route of ROUTES) {
@@ -461,6 +665,7 @@ async function captureAll(): Promise<{
     vi.mocked(getDb).mockReturnValue(makeFixtureDb(log))
     const res = await app.request(route.path, { headers })
     statuses[route.id] = res.status
+    cacheStatuses[route.id] = res.headers.get("X-Cache-Status")
     dbCalls[route.id] = log
     if (res.status !== 200) continue
     const body = (await res.json()) as Record<string, unknown>
@@ -485,7 +690,7 @@ async function captureAll(): Promise<{
     shape[route.id] = [...byPath.values()].sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))
   }
 
-  return { shape, leaves, presenceErrors, nullErrors, statuses, dbCalls }
+  return { shape, leaves, presenceErrors, nullErrors, statuses, cacheStatuses, dbCalls }
 }
 
 // ── Emit-site guard (B4-1-R1: per-file CALL-SITE table) ──────────────────────
@@ -539,11 +744,18 @@ function countPrimitiveSites(relFile: string): number {
 // ── Tests ────────────────────────────────────────────────────────────────────
 
 describe("B4-1 money wire-shape capture", () => {
+  beforeEach(() => pinClock(PINNED_INSTANT))
+  afterEach(() => vi.useRealTimers())
+
   it("invokes R1-R13, captures money wire types, and violates neither guard", async () => {
-    const { shape, leaves, presenceErrors, nullErrors, statuses, dbCalls } = await captureAll()
+    const { shape, leaves, presenceErrors, nullErrors, statuses, cacheStatuses, dbCalls } = await captureAll()
 
     for (const route of ROUTES) {
       expect(statuses[route.id], `${route.id} must be hermetically invocable`).toBe(200)
+      if (route.expectCacheStatus) {
+        // Proves WHICH serving tier was observed rather than assuming it.
+        expect(cacheStatuses[route.id], `${route.id} X-Cache-Status`).toBe(route.expectCacheStatus)
+      }
     }
 
     for (const route of ROUTES) {
@@ -597,9 +809,37 @@ describe("B4-1 money wire-shape capture", () => {
     expect(r3Cats.size, "R3 needs >=1 expense_by_category category leaf").toBeGreaterThanOrEqual(1)
   })
 
+  it("CF6: the captured shape is identical at two different simulated instants", async () => {
+    // The point of the clock pin: real wall-clock time is irrelevant to the shape.
+    // Both instants sit inside the fixture's design envelope (same month, so
+    // R3-tier2 stays snapshot-eligible; both inside R11/R12's lookbacks) while
+    // differing in day, hour and ISO week — so R9's days_elapsed/days_remaining and
+    // R10's week bounds genuinely differ in VALUE while the shape must not move.
+    const instants = ["2026-05-15T09:00:00.000Z", "2026-05-28T21:45:00.000Z"]
+    const shapes: string[] = []
+    for (const instant of instants) {
+      vi.useRealTimers()
+      pinClock(instant)
+      const { shape, statuses, cacheStatuses } = await captureAll()
+      for (const r of ROUTES) expect(statuses[r.id], `${r.id} at ${instant}`).toBe(200)
+      expect(cacheStatuses["R3-tier2"], `tier2 at ${instant}`).toBe("snapshot")
+      shapes.push(JSON.stringify(shape))
+      console.log(`  captured at ${instant}: ${Object.keys(shape).length} routes, ${shapes[shapes.length - 1].length} bytes`)
+    }
+    expect(shapes[0]).toBe(shapes[1])
+    console.log(`  shapes identical across both instants: ${shapes[0] === shapes[1]}`)
+  })
+
   it("Guard 1: the re-derived shape equals the committed money-wire-shape.json", async () => {
     const { shape } = await captureAll()
     if (process.env.MONEY_SHAPE_WRITE === "1") {
+      // CF9: an ambient MONEY_SHAPE_WRITE=1 in a shell would make Guard 1 compare
+      // the file to itself and pass forever, and the run would look green. Announce
+      // the vacuous-pass state loudly and unconditionally so it cannot be silent.
+      console.log(
+        "\n*** REGENERATING money-wire-shape.json — THIS RUN CANNOT FAIL GUARD 1 ***\n" +
+          "*** (MONEY_SHAPE_WRITE=1 is set. CI never sets it; see deploy.yml:91.) ***\n",
+      )
       writeFileSync(ARTIFACT, `${JSON.stringify(shape, null, 2)}\n`, "utf8")
     }
     const committed = JSON.parse(readFileSync(ARTIFACT, "utf8")) as CapturedShape
@@ -661,6 +901,55 @@ describe("B4-1 money wire-shape capture", () => {
     console.log(`    ${total - NON_WIRE_PRIMITIVE.length + NON_PRIMITIVE_SITES.length}  wire-emitting sites feeding R1-R13`)
     expect(total).toBe(43)
     expect(total - NON_WIRE_PRIMITIVE.length + NON_PRIMITIVE_SITES.length).toBe(47)
+  })
+
+  it("C7: MULTI_PATH inventory — every CAPTURED-BOTH claim holds at runtime", async () => {
+    const { shape, leaves, cacheStatuses } = await captureAll()
+
+    console.log("\n=== C7 — MULTI-PATH MONEY INVENTORY ===")
+    for (const mp of MULTI_PATH) {
+      console.log(`  ${mp.id}  [${mp.disposition}]  ${mp.wirePath}`)
+      for (const arm of mp.arms) console.log(`        arm: ${arm}`)
+      console.log(`        fixture takes: ${mp.fixtureArm}`)
+      console.log(`        divergence risk: ${mp.divergenceRisk}`)
+    }
+    const both = MULTI_PATH.filter((m) => m.disposition === "CAPTURED-BOTH").map((m) => m.id)
+    const gaps = MULTI_PATH.filter((m) => m.disposition === "GAP-RECORDED").map((m) => m.id)
+    console.log(`  CAPTURED-BOTH: ${both.join(", ")}`)
+    console.log(`  GAP-RECORDED:  ${gaps.join(", ")}`)
+
+    // MP-1 — both R3 serving tiers observed, and their MONEY types are equal.
+    // If Tier 2 ever replays a different type for a money path, this goes red.
+    expect(cacheStatuses.R3).toBe("miss")
+    expect(cacheStatuses["R3-tier2"]).toBe("snapshot")
+    const moneyOf = (id: string) =>
+      Object.fromEntries(shape[id].filter((e) => e.money).map((e) => [e.path, e.type]))
+    const t3 = moneyOf("R3")
+    const t2 = moneyOf("R3-tier2")
+    console.log(`  MP-1 tier3 money: ${JSON.stringify(t3)}`)
+    console.log(`  MP-1 tier2 money: ${JSON.stringify(t2)}`)
+    expect(t2).toEqual(t3)
+
+    // MP-4 / MP-5 — assert BOTH arms actually ran, rather than declaring it: the
+    // raw leaves for each path must contain the zero-fill default AND a value that
+    // is not it. A fixture that stopped exercising one arm fails here.
+    const rawValues = (routeId: string, normalisedPath: string) =>
+      (leaves[routeId] ?? []).filter((l) => l.path === normalisedPath).map((l) => l.sample)
+
+    const trendIncome = rawValues("R4", "data.month_trend[].income")
+    console.log(`  MP-4 R4 month_trend[].income raw: ${JSON.stringify(trendIncome)}`)
+    expect(trendIncome).toContain("0.000")
+    expect(trendIncome.some((v) => v !== "0.000"), "MP-4 populated arm must run").toBe(true)
+
+    const series = rawValues("R6", "data.series[].total_kd")
+    console.log(`  MP-5 R6 series[].total_kd raw: ${JSON.stringify(series)}`)
+    expect(series).toContain(0)
+    expect(series.some((v) => v !== 0), "MP-5 roundedKd arm must run").toBe(true)
+
+    // No CAPTURED-BOTH claim may sit in the inventory without an assertion above.
+    expect(both).toEqual(["MP-1", "MP-4", "MP-5"])
+    // Only MP-1 crosses a serializer boundary; a second such entry is a stop condition.
+    expect(MULTI_PATH.filter((m) => m.divergenceRisk.startsWith("TYPE")).map((m) => m.id)).toEqual(["MP-1"])
   })
 
   it("provenance audit: every serializer-produced leaf is classified money", async () => {

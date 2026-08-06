@@ -70,6 +70,53 @@
       "money": false
     }
   ],
+  "R3-tier2": [
+    {
+      "path": "data.cache_warning",
+      "type": "null",
+      "money": false
+    },
+    {
+      "path": "data.cycle_enabled",
+      "type": "boolean",
+      "money": false
+    },
+    {
+      "path": "data.cycle_end",
+      "type": "null",
+      "money": false
+    },
+    {
+      "path": "data.cycle_start",
+      "type": "null",
+      "money": false
+    },
+    {
+      "path": "data.expense_by_category.*.*",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.monthly[].expense_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.monthly[].income_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.monthly[].month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.months[]",
+      "type": "string",
+      "money": false
+    }
+  ],
   "R4": [
     {
       "path": "data.manual_entry_summary.spend_mtd",

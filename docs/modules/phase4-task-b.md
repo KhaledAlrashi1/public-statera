@@ -5,6 +5,15 @@ implementation in that order; **B4 is approved in scope but GATED on a separate 
 This document is the durable lineage (persist-first standing rule): the ruling block in full, then the
 Phase A proposal. **Implement from this file, not from conversation context.**
 
+**Date-split amendment (B4-1 Phase A ruling, 2026-08-06) — a CORRECTION, not a silent revision.**
+The line "All Task B artifacts date 2026-08-05" (B4 section, below) was true through the B4 addendum
+(`8c22709`) and is now SUPERSEDED, not withdrawn: **B0 through the B4 addendum = 2026-08-05; B4-1 onward
+= 2026-08-06+.** B4-1's Phase A proposal and all three of its review-channel ruling blocks fall on
+2026-08-06. Do NOT stamp B4-1-and-later artifacts 08-05 by inheritance — that is the error B2-F2 corrected
+one cycle earlier. The three 2026-08-06 ruling blocks, cited by TITLE because a bare date is ambiguous
+across them: (1) "B4-1 Phase A ruling, 2026-08-06"; (2) "B4-1 close-out reconciliation, 2026-08-06";
+(3) "B4-1a approval and E-1/E-2 acceptance, 2026-08-06".
+
 **Date correction (B2-F2, review-channel ruling 2026-08-05):** Task B artifacts were initially stamped
 2026-08-01, inherited in error from the prior cycle's date via the review-channel blocks; corrected to
 2026-08-05 by review-channel ruling B2-F2. Recorded as a correction, not silently revised. (The
@@ -543,3 +552,78 @@ Flip `DashboardMetricsResponse.monthly[].income_kd` `string`→`number`, show `t
 **Handoff:** B4 implementation runs in a NEW review-channel conversation from a self-contained successor prompt. Nothing in Task B's approved lineage depends on conversation memory — it lives here and in CLAUDE.md. Any non-zero INTEGRATION exit is a FINDING. All Task B artifacts date 2026-08-05.
 
 **Task B commit ledger:** B1 `6afbc6c`, B2 `e76e455`, B3 `4ba99ba` (all committed, local). B4 NOT STARTED — implement from this section.
+
+## B4-1 — money wire-shape runtime capture R1–R13 (Option Y) — IMPLEMENTED `c37046a`, 2026-08-06
+
+Rulings: "B4-1 Phase A ruling, 2026-08-06" (R1–R6, C1–C6), "B4-1 close-out reconciliation, 2026-08-06"
+(R7–R10, E-1/E-2, C7–C9 via the third block), "B4-1a approval and E-1/E-2 acceptance, 2026-08-06".
+
+**Delivered:** `apps/api/src/contract/money-wire-shape.test.ts` + committed
+`apps/api/src/contract/money-wire-shape.json`; `money-shape:capture` regenerate script. **Zero production
+diff** (B4-1-R6) — no file under `src/routes/**` or `src/lib/**` modified, evidenced by the commit `--stat`.
+
+**Mechanism.** Uniform runtime capture of all R1–R13 (+R3-tier2) via `app.request` + a shape-dispatch mock
+db keyed on the `select({...})` projection (order-independent, so R8's sequential-then-`Promise.all`
+fan-out needs no positional assumptions). Every leaf's wire type is OBSERVED; nothing is transcribed.
+Guards: NULL fail-loud, PRESENCE fail-loud (C1), Guard 1 (`toEqual` the committed JSON), the emit-site
+guard, and a serializer-provenance audit. Both fail-loud guards carry observer checks proving they can
+report a violation.
+
+**E-1 — Guard 1 proven non-vacuous (accepted).** (a) flipping `data.monthly[].income_kd` string→number in
+the committed JSON drives the suite red with a `toEqual` hunk naming that path; (c) deleting
+`data.cash_flow.30d.net_kd` drives it red through a different `toEqual` path (the C1 case-(ii) backstop);
+(b) the only write is behind `MONEY_SHAPE_WRITE=1`, set in exactly one place repo-wide (the regenerate
+script), with `vitest.config.ts` setting only `STATERA_DEV_MODE` and `deploy.yml:91` setting nothing —
+proven statically AND empirically, the (a) mutation surviving a full-suite run unmodified.
+
+**Findings.** (1) The emit-site grep returns **43** primitive call sites, not the 42 predicted:
+`routes/budgets.ts:306` is a `formatKd()` on an INSERT value, not a wire field — reported, not reconciled;
+baseline is the mechanical 43 with `:306` named non-wire → 42 wire + 5 non-primitive = 47. (2) The CI step
+cited in the B4-1 proposal (`vitest run src/contract`) does not exist: **`433e6cc` (10f) removed it**, and
+the reason is that commit's own surviving comment. The gate is `pnpm --filter statera-api test`
+(`deploy.yml:91`). (3) **CF5 — `validateSnapshotPayload` polices `monthly[]` money but NOT
+`expense_by_category` leaves** (`dashboard-snapshot-lib.ts:135-136` vs no equivalent check), so R3 Tier 2
+can serve a JSON number where Tier 3 always serves a `formatKd` string. Proven at runtime via a TB-R9
+probe (`X-Cache-Status=snapshot`, number leaf reaching the wire). **No evidence this is live today** —
+current writers produce strings — the defect is that nothing enforces it, and `dashboard_snapshots` rows
+persist across deploys. (4) C4: the Phase A probe's unidentified db call was `recordEventDaily`'s INSERT,
+which fired only because the probe's empty rows made the "already recorded today" check fail.
+
+## B4-1a — clock pin, R3 Tier 2 capture, multi-path inventory — 2026-08-06
+
+- **CF6 clock pin** to `2026-05-15T09:00:00.000Z` (`vi.setSystemTime`, `toFake:["Date"]` only — faking
+  timers wholesale would interfere with the ioredis mock and promise scheduling). Without it R11 falls to
+  `detected:false` (nulling `suggested_monthly_income_kd` → NULL guard red) and R12's `patterns[]` empties
+  (→ PRESENCE guard red) once the calendar passes the fixture dates: a red with no code change on an
+  unpredicted date. R12's fixture rows were re-dated inside the 90-day lookback (flagged in advance).
+  Dissolves the prior R10 cross-day-determinism residual: cross-day variation stops existing.
+- **CF5 R3-tier2 capture** — a 14th entry (`?months=24`, no `until`, bare-`select()` snapshot fixture),
+  `X-Cache-Status` asserted `snapshot` so the test proves WHICH tier it observed, and its money leaf types
+  asserted EQUAL to Tier 3's.
+- **C7 MULTI_PATH inventory** — 9 entries, derived from source. CAPTURED-BOTH: MP-1 (R3 tiers), MP-4
+  (`month_trend` populated vs zero-fill), MP-5 (R6 `roundedKd` vs literal-zero). GAP-RECORDED with revisit
+  triggers: MP-2/3 (income-resolver arms), MP-6 (R5's three dimension arms), MP-7 (R7 range arms), MP-8
+  (R10 fallback), MP-9 (R11 null arms, forbidden by the NULL guard). Only MP-1 crosses a serializer
+  boundary; a second such entry is a stop condition, asserted in the test.
+- **CF7 revisit triggers** on the three empty-container exceptions (`accounts` / `connected_accounts` →
+  "bank sync ships"; `warnings` → "the N1 non-null `monthly_income_kd` fixture changes").
+- **CF9** — a loud unconditional banner when the regenerate path fires, so the vacuous-pass state
+  self-announces.
+
+## B4-1b — validateSnapshotPayload asymmetry — CHARTERED, NOT STARTED
+
+Ruling: B4-1-R10, "B4-1a approval and E-1/E-2 acceptance, 2026-08-06" (operator ruling by delegation).
+Its own propose→approve→implement→verify cycle — NOT inside B4-1a, which inherits zero-production-diff.
+Scope: extend `validateSnapshotPayload` to type-check `expense_by_category` leaves with the same rejection
+semantics as `monthly[]` money; a test proving a number-leafed stored snapshot is REJECTED and recompute
+serves instead; a test proving a string-leafed one is still accepted. No other validator change. If
+hardening requires touching the write path, that is an R14 stop. **Timing: BEFORE Task B close**, so it
+ships in the same deploy as B2. Basis: the validator's stated intent ("Reject float monetary values") is
+half-implemented — the inert-guard class B3 already deleted once this module; `dashboard_snapshots` rows
+persist across deploys, so a bad row survives a rollback; the failure mode is fail-safe (rejection falls
+back to Tier 3 recompute, blast radius = a cache miss); and it sits on the crash path, in the crash field.
+
+**Queued to the Task B close fix-forward batch:** F4 (CLAUDE.md's C2 typed-drift carry-forward is stale —
+closed in source), F5 (`aggregation.ts:18-19` self-contradiction: R4 is listed as both number and string;
+it is string), and CLAUDE.md's 10a entry describing the `vitest run src/contract` CI step that `433e6cc`
+removed.
