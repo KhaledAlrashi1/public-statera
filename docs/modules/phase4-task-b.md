@@ -498,4 +498,48 @@ Frontend-only (`apps/web/src/lib/error-reporter.ts` + `error-reporter.test.ts`);
 
 **Baseline:** frontend 182→183 (`error-reporter.test.ts` 13→14: −1 self-origin, +1 bounded-loop, +1 componentStack); files 38 unchanged; `tsc` 0; exit 0, no Errors/Unhandled. API baseline 765/19/53 unchanged (frontend-only). FIND-S3-DISP note updated (its earlier "reentrant flag is a primary guard" claim corrected per TB-R4).
 
-_B4 pending its addendum (TB-R6/R7) + implement cycle._
+## B4 — ADDENDUM APPROVED (review channel, 2026-08-05). NOT STARTED — implement in a NEW conversation from this lineage.
+
+**Scope (RAT-1, ratified 2026-08-05):** money/decimal WIRE-SHAPE fields only. NOT general contract validation.
+The class B4 kills: a frontend type annotation that is a claim nobody checked against the wire (9.1, budgets-crash, R3).
+
+### Bridging mechanism — codegen compile-time assertions (TB-R6 GATE CLOSED; PROVEN)
+- **JSON-import widening is REAL** (empirically confirmed): `import wire from "./x.json"` gives `typeof wire.k` = `string`, NOT the literal `"string"` — a `@ts-expect-error`-guarded assertion was *consumed*, proving widening. So a naive `expectTypeOf` driven off committed JSON literals cannot work.
+- **RECOMMENDED + PROVEN:** a `money-shape:generate` script (mirrors 10a `contract:generate`) reads the backend-captured wire types and emits a **committed** `apps/web/src/contract/money-wire-shape.assert.ts` — one compile-time assertion per money field, wire type baked as a LITERAL annotation (sidesteps widening):
+  ```ts
+  type AssertEqual<A, B> = [A] extends [B] ? ([B] extends [A] ? true : { ERR: "differ" }) : { ERR: "differ" }
+  const _dashboardMetrics_monthly_income_kd:
+    AssertEqual<DashboardMetricsResponse["monthly"][number]["income_kd"], string> = true
+  ```
+  Frontend `tsc --noEmit` (a CI gate) turns any frontend↔wire mismatch into a build error. Demonstrated: match → tsc PASS; flip (`string`→`number`) → `error TS2322: Type 'boolean' is not assignable to type '{ ERR: "differ"; }'`. Must live under `apps/web/src/` (non-`*.test.*`) so the web tsc gate reaches it. No runtime cost (Option B rejected).
+
+### Stale-fixture guards (ii, ACCEPTED) — two committed artifacts, one generator, two guards
+- `apps/api/src/contract/money-wire-shape.json` — human-readable wire-type record (backend-captured).
+- `apps/web/src/contract/money-wire-shape.assert.ts` — generated from the JSON.
+- **Guard 1:** backend test re-derives the wire shape and `toEqual`s the committed `.json` (10a `frontend-calls.json` pattern) → drift = "regenerate".
+- **Guard 2:** test regenerates the `.assert.ts` from the `.json` and asserts byte-equality with the committed file → a regenerated-but-uncommitted assert fails CI (the non-bypassable 10a property).
+- Transitive chain: wire change → Guard 1 forces `.json` commit → Guard 2 forces `.assert.ts` commit → tsc checks it against frontend types → disagreeing frontend type is tsc-red.
+
+### TB-R13 — OPTION Y (RULING 2026-08-05, REVERSES TB-R7). Runtime-capture ALL routes R1–R13 uniformly. NO authored entries anywhere.
+The operator REVERSED TB-R7's split. Premise gone (I corrected it: aggregation IS hermetically invocable via `app.request` + mock db, as `aggregation.test.ts` does — not INTEGRATION-only), so the reasoning that produced the split goes with it. **Ruling rationale (operator, overriding my split recommendation):**
+1. **Authored entries ARE the defect class B4 exists to kill.** An authored-from-A2 wire-shape entry is a human transcription of what a serializer does — the same unchecked-claim artifact one layer down. The completeness guard proves every emit site has an ENTRY, not that the entry is RIGHT; a transposed `formatKd`/`roundedKd` in an A2 transcription yields a fixture that is complete, green, and WRONG, then baked into an assertion enforced against the frontend — making the frontend match a lie. Worse than no check.
+2. **The cost is one-time and already paid:** ~10 aggregation routes needing auth + mock rows via `app.request` is exactly what `aggregation.test.ts` already does — transcription of an existing pattern, not new engineering.
+3. **It collapses a moving part:** under the split A2's 35-field table stays load-bearing forever; under Option Y A2 reverts to a historical enumeration and the serializers are the ONLY source of truth.
+
+**Do:** runtime-capture every route R1–R13 (pure-serializer libs R3/R11/R12/R13 via `makeDbReturning(mockRows)`; aggregation R1/R2/R4–R10 via `app.request` + mock db) → `money-wire-shape.json` entirely mechanically derived. **Keep the aggregation emit-site grep guard** (33 `formatKd`/`roundedKd` sites today): still the completeness proof, and under Option Y it gains a SECOND job — a new emit site with no captured entry means a route the capture does not invoke (a better failure signal). **Completeness meta-check spans the whole captured set** (mirrors 10a `exercisedMethodGaps`); A2's 35-field table is the coverage baseline (now historical, not load-bearing).
+**R14 if Option Y is more expensive than it looks:** STOP and report the specific routes that resist hermetic invocation and why. Do NOT silently fall back to authored entries for awkward routes (a half-authored fixture has the authored failure mode with none of the visibility). Reverting to the split is available — but as a RULING, not a drift.
+
+### NULLABLE MONEY FIELDS — BLOCKING for B4-1 (ACCEPTED as blocking)
+If a fixture leaves a `… | null` money field null, the captured `typeof` is `"object"` (or the field is skipped) → the generated assertion silently narrows or vanishes. **Every nullable money field's fixture must exercise the NON-NULL branch, and the capture must FAIL LOUDLY on a null-valued money field rather than recording it.** State the mechanism in the B4-1 proposal (e.g. the capture throws on a money field whose runtime value is null/undefined/non-string-non-number, forcing the fixture to populate it).
+
+### RED-gate (relocated per W2)
+Flip `DashboardMetricsResponse.monthly[].income_kd` `string`→`number`, show `tsc` red through the generated assertion, revert. Evidence artifact, NOT a commit (C2/Q1).
+
+### B4 implement plan — APPROVED, three sub-commits (each its own propose→approve→implement→verify with the 3 mandatory close-out sections)
+- **B4-1 (backend, hermetic):** uniform runtime capture R1–R13 (Option Y) → `money-wire-shape.json` + Guard 1 + the aggregation emit-site completeness guard + the meta-check. Nullable-fail-loud stated + implemented.
+- **B4-2 (frontend/tooling):** `money-shape:generate` + committed `money-wire-shape.assert.ts` + Guard 2 + the tsc gate + the RED-gate demonstrated.
+- **B4-3 (FIND-S5(b), TB-R8):** correct `ExpensesPage.test.tsx:108/110/236` numeric R3 fixtures → strings. **TB-R8 reframe IN FORCE (highest-value possible Task B outcome):** if any of the three goes RED when the fixtures become strings, that red = an uncoerced money-arithmetic consumer the sweep missed → **STOP AND ASK (R14)**; do NOT adjust the fixture/assertion/component to restore green.
+
+**Handoff:** B4 implementation runs in a NEW review-channel conversation from a self-contained successor prompt. Nothing in Task B's approved lineage depends on conversation memory — it lives here and in CLAUDE.md. Any non-zero INTEGRATION exit is a FINDING. All Task B artifacts date 2026-08-05.
+
+**Task B commit ledger:** B1 `6afbc6c`, B2 `e76e455`, B3 `4ba99ba` (all committed, local). B4 NOT STARTED — implement from this section.
