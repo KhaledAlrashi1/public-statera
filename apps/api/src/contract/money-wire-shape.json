@@ -1,0 +1,768 @@
+{
+  "R1": [
+    {
+      "path": "data.items.*",
+      "type": "number",
+      "money": true
+    }
+  ],
+  "R2": [
+    {
+      "path": "data.items[].month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.items[].total_kd",
+      "type": "number",
+      "money": true
+    }
+  ],
+  "R3": [
+    {
+      "path": "data.cache_warning",
+      "type": "null",
+      "money": false
+    },
+    {
+      "path": "data.cycle_enabled",
+      "type": "boolean",
+      "money": false
+    },
+    {
+      "path": "data.cycle_end",
+      "type": "null",
+      "money": false
+    },
+    {
+      "path": "data.cycle_start",
+      "type": "null",
+      "money": false
+    },
+    {
+      "path": "data.expense_by_category.*.*",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.monthly[].expense_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.monthly[].income_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.monthly[].month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.months[]",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.updated_at",
+      "type": "string",
+      "money": false
+    }
+  ],
+  "R4": [
+    {
+      "path": "data.manual_entry_summary.spend_mtd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.manual_entry_summary.transactions_mtd",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.month_trend[].income",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.month_trend[].month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.month_trend[].spend",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.top_categories[].amount_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.top_categories[].category",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.top_categories[].pct",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.total_income_mtd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.total_spend_mtd",
+      "type": "string",
+      "money": true
+    }
+  ],
+  "R5": [
+    {
+      "path": "data.dimension",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.items[].amount_kd",
+      "type": "number",
+      "money": true
+    },
+    {
+      "path": "data.items[].name",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.range",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.source",
+      "type": "null",
+      "money": false
+    },
+    {
+      "path": "data.total_kd",
+      "type": "number",
+      "money": true
+    },
+    {
+      "path": "data.window_months",
+      "type": "number",
+      "money": false
+    }
+  ],
+  "R6": [
+    {
+      "path": "data.merchant",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.months[]",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.series[].month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.series[].total_kd",
+      "type": "number",
+      "money": true
+    }
+  ],
+  "R7": [
+    {
+      "path": "data.avg12_by_category.*",
+      "type": "number",
+      "money": true
+    },
+    {
+      "path": "data.cycle_enabled",
+      "type": "boolean",
+      "money": false
+    },
+    {
+      "path": "data.cycle_end",
+      "type": "null",
+      "money": false
+    },
+    {
+      "path": "data.cycle_start",
+      "type": "null",
+      "money": false
+    },
+    {
+      "path": "data.month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.range",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.range_spent_by_category.*",
+      "type": "number",
+      "money": true
+    },
+    {
+      "path": "data.spent_by_category.*",
+      "type": "number",
+      "money": true
+    }
+  ],
+  "R8": [
+    {
+      "path": "data.account_overview.manual_entry_summary.spend_mtd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.account_overview.manual_entry_summary.transactions_mtd",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.account_overview.month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.account_overview.month_trend[].income",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.account_overview.month_trend[].month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.account_overview.month_trend[].spend",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.account_overview.top_categories[].amount_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.account_overview.top_categories[].category",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.account_overview.top_categories[].pct",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.account_overview.total_income_mtd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.account_overview.total_spend_mtd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.budget.items[].amount_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.budget.items[].category",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.budget.items[].id",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.budget.items[].month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.budget.month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.budget.profile_context.budget_to_income_pct",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.budget.profile_context.budget_total_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.budget.profile_context.income_source",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.budget.profile_context.monthly_income_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.budget.profile_context.payday_day",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.budget_alerts.items[].alert_key",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.budget_alerts.items[].budget_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.budget_alerts.items[].category",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.budget_alerts.items[].category_id",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.budget_alerts.items[].created_at",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.budget_alerts.items[].id",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.budget_alerts.items[].month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.budget_alerts.items[].ratio",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.budget_alerts.items[].spent_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.budget_alerts.items[].threshold",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.budget_alerts.items[].type",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.budget_alerts.month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.safe_to_spend.actual_spend_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.safe_to_spend.committed_breakdown_kd.budget_allocations",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.safe_to_spend.committed_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.safe_to_spend.cycle_end",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.safe_to_spend.cycle_start",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.safe_to_spend.daily_rate_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.safe_to_spend.data_complete",
+      "type": "boolean",
+      "money": false
+    },
+    {
+      "path": "data.safe_to_spend.days_elapsed",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.safe_to_spend.days_remaining",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.safe_to_spend.income_auto_detected",
+      "type": "boolean",
+      "money": false
+    },
+    {
+      "path": "data.safe_to_spend.income_source",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.safe_to_spend.month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.safe_to_spend.monthly_income_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.safe_to_spend.remaining_budget_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.safe_to_spend.total_budget_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.snapshot_computed_at",
+      "type": "string",
+      "money": false
+    }
+  ],
+  "R9": [
+    {
+      "path": "data.actual_spend_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.committed_breakdown_kd.budget_allocations",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.committed_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.cycle_end",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.cycle_start",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.daily_rate_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.data_complete",
+      "type": "boolean",
+      "money": false
+    },
+    {
+      "path": "data.days_elapsed",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.days_remaining",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.income_auto_detected",
+      "type": "boolean",
+      "money": false
+    },
+    {
+      "path": "data.income_source",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.month",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.monthly_income_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.remaining_budget_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.total_budget_kd",
+      "type": "string",
+      "money": true
+    }
+  ],
+  "R10": [
+    {
+      "path": "data.days_observed",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.days_until_payday",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.delta_pct",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.last_week_expense_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.safe_to_spend_today_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.this_week_expense_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.top_categories[].amount_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.top_categories[].name",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.week_end",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.week_start",
+      "type": "string",
+      "money": false
+    }
+  ],
+  "R11": [
+    {
+      "path": "data.confidence",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.detected",
+      "type": "boolean",
+      "money": false
+    },
+    {
+      "path": "data.evidence_months",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.income_auto_detected",
+      "type": "boolean",
+      "money": false
+    },
+    {
+      "path": "data.income_source",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.largest_income_name",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.monthly_income_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.suggested_monthly_income_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.suggested_payday_day",
+      "type": "number",
+      "money": false
+    }
+  ],
+  "R12": [
+    {
+      "path": "data.patterns[].avg_amount_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.patterns[].confidence",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.patterns[].frequency",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.patterns[].group",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.patterns[].last_seen",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.patterns[].name",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.patterns[].occurrences",
+      "type": "number",
+      "money": false
+    }
+  ],
+  "R13": [
+    {
+      "path": "data.cash_flow.30d.expense_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.cash_flow.30d.income_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.cash_flow.30d.net_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.cash_flow.60d.expense_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.cash_flow.60d.income_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.cash_flow.60d.net_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.cash_flow.90d.expense_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.cash_flow.90d.income_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.cash_flow.90d.net_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.generated_at",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.net_position.expense_total_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.net_position.income_total_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.net_position.net_kd",
+      "type": "string",
+      "money": true
+    }
+  ]
+}

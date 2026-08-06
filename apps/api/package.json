@@ -11,6 +11,7 @@
     "lint": "sh -c 'npm run lint:typecheck && npm run lint:eslint' --",
     "test": "vitest run",
     "test:watch": "vitest",
+    "money-shape:capture": "MONEY_SHAPE_WRITE=1 vitest run src/contract/money-wire-shape.test.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
