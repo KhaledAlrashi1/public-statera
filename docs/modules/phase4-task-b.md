@@ -471,4 +471,31 @@ they are faithful copies, with the true date documented in the Date correction.)
 
 **Baseline:** hermetic 750→765 (+14 B2 + 1 B2-F5 over-redaction pin), files 53 unchanged, skipped 19 unchanged; tsc 0; exit 0, no Errors/Unhandled.
 
-_B3/B4 pending their cycles._
+## B3 — FIND-S3 self-origin delete + componentStack dual budget — IMPLEMENTED + CLOSED 2026-08-05 (TB-R4/R5)
+
+Frontend-only (`apps/web/src/lib/error-reporter.ts` + `error-reporter.test.ts`); no backend change.
+**(Artifact date 2026-08-05 per the operator all-Task-B ruling. The commit's git author-date is 2026-08-06 — the session clock advanced mid-cycle — which is real git time, not a doc stamp; recorded so a future reader isn't puzzled by the mismatch. Consistent with B1/B2 whose commits were genuinely 08-05.)**
+
+**B3(a) — DELETE the inert self-origin guard (TB-R4, option i):** removed `SELF_ORIGIN_RE`, `isSelfOrigin`, the `fromGlobalHandler && isSelfOrigin` branch, the `suppressed.selfOrigin` counter (+ its reset), and the dev-only self-origin test. **Removal justification — the Phase A RED (guard inert in prod), re-pasted (NOT a red turned green):**
+```
+ FAIL  src/lib/__b3red_scratch__.test.ts > PRODUCTION-shaped stack (inlined into index-<hash>.js,
+       no 'error-reporter' substring) is STILL suppressed
+ AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+ ✓ DEV-shaped stack (contains 'error-reporter.ts') IS suppressed — the guard works in dev
+```
+**TB-R4 BLOCKING — reset semantics verified BEFORE writing the module comment:** `reportError` sets `reentrant=true` (line 181), and its **internal `try/catch` (line 229) swallows every synchronous throw in the body** ("never rethrow into the global handler"); the `finally` (line 234) resets `reentrant`. So a thrown error leaves `reportError` with the flag ALREADY cleared — the reentrant flag does NOT cover an escaped throw; **nothing escapes** because the catch swallows it first. The comment therefore names the TRUE guards: (1) reportError's internal try/catch (synchronous throws), (2) transmit's swallowed `.catch()` (async send rejection), (3) `SESSION_SEND_CAP`; the reentrant flag's narrow job = synchronous nested report during a send. **GREEN = bounded-loop test** (`error-reporter.test.ts`): a fetch that throws every time, fired 30× → total transmit attempts ≤ `SESSION_SEND_CAP` (20). NOT a suppression test.
+
+**B3(b) — componentStack DUAL BUDGET (TB-R5):** React lists the FAILING component FIRST in the componentStack, appended AFTER the error stack; the old single combined truncate let a long error stack consume the whole 4000 budget and cut the componentStack. **Budget (verbatim from `error-reporter.ts:218`, all counted against `MAX_STACK_CHARS = 4000`):** `errBudget = MAX_STACK_CHARS - COMPONENT_STACK_RESERVE - COMPONENT_STACK_SEP.length`. The three numbers: **componentStack reserve = 1500**, **error-stack budget = 2477** (`4000 − 1500 − 23`), **separator = 23** (`"\n--- componentStack ---"`) → **1500 + 2477 + 23 = 4000**. (The close-out earlier said "2500"; that was loose rounding of 2477 — the code sums to 4000, not a code/prose disagreement, B3-F1.) Each part keeps its TOP; `truncateStack` now counts its marker WITHIN max.
+
+**FIND-S3-OFF13 (second defect, found in passing — NOT in FIND-S3's scope):** the OLD `truncateStack` sliced to `MAX_STACK_CHARS` and THEN appended the `\n…[truncated]` marker (13 chars) → **4013**, over the very cap it existed to enforce. Fixed: `truncateStack` now slices to `max − marker.length` so the result is ≤ max. The componentStack dual-budget work would not have found this alone; recorded as its own finding.
+
+**Split ratio (TB-R5) — ASSUMPTION, not a measurement (B3-F2):** the real NODE-EXPRESS-9 capture is in Sentry and is NOT retrievable from this environment (no Sentry access) — stated, not guessed. The **1500** componentStack reserve is an **explicit assumption** sized from a **~50–90 char/frame ESTIMATE** (≈ 17–30 componentStack frames from the top — enough for the failing component + its ancestor chain); if that per-frame estimate is off by 2× the reserve holds ~8 frames, not 17–30. Corroborating basis: the recorded 2026-08-01 capture ran ~3400 chars (85% of the 4000 cap). **Revisit trigger:** the first production boundary report whose componentStack is truncated AT the reserve. **Operator-side (not blocking):** the assumption becomes a measurement if someone with Sentry access pastes NODE-EXPRESS-9's `stack` char-length and where the `--- componentStack ---` separator falls within it. **Named proving test — RED-first (captured this cycle):**
+```
+ × keeps the innermost component name when BOTH the error stack and componentStack are over budget
+   → expected 'Error: boom\n    at f (index-abc123.j…' to contain 'CategoryBreakdownChart'
+```
+(the failing component name absent under the old single-truncate) → GREEN after the dual budget (component name present, combined ≤ 4000).
+
+**Baseline:** frontend 182→183 (`error-reporter.test.ts` 13→14: −1 self-origin, +1 bounded-loop, +1 componentStack); files 38 unchanged; `tsc` 0; exit 0, no Errors/Unhandled. API baseline 765/19/53 unchanged (frontend-only). FIND-S3-DISP note updated (its earlier "reentrant flag is a primary guard" claim corrected per TB-R4).
+
+_B4 pending its addendum (TB-R6/R7) + implement cycle._

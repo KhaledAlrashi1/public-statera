@@ -109,14 +109,20 @@ describe("error-reporter — CONDITION (iii): re-entrancy suppresses during-send
   })
 })
 
-describe("error-reporter — self-origin filter (C)", () => {
-  it("ignores an error whose top frame is the reporter itself", () => {
-    reportError(
-      errWithStack("boom", "Error: boom\n    at reportError (/x/error-reporter.ts:9:9)\n    at y"),
-      "onerror",
-    )
-    expect(fetchMock).not.toHaveBeenCalled()
-    expect(__getSuppressedForTest().selfOrigin).toBe(1)
+describe("error-reporter — bounded loop (B3a; self-origin filter deleted)", () => {
+  it("a transmit that throws every time stays within SESSION_SEND_CAP total attempts", () => {
+    // The stack-text self-origin filter was deleted (inert in prod). The real guards:
+    // transmit's try/catch + the swallowed .catch() mean a failing send generates no
+    // report, and SESSION_SEND_CAP bounds the total. Fire well past the cap with a
+    // fetch that throws every time — no unbounded loop, capped at SESSION_SEND_CAP.
+    fetchMock.mockImplementation(() => {
+      throw new Error("network down")
+    })
+    for (let i = 0; i < 30; i++) {
+      reportError(errWithStack(`e${i}`, `Error: e${i}\n at F${i} (index-x.js:${i}:1)`), "onerror")
+    }
+    expect(fetchMock.mock.calls.length).toBeLessThanOrEqual(20) // SESSION_SEND_CAP
+    expect(__getSentCountForTest()).toBeLessThanOrEqual(20)
   })
 })
 
@@ -155,6 +161,26 @@ describe("error-reporter — truncation (G)", () => {
     expect(out.startsWith("TOPFRAME at fault")).toBe(true)
     expect(out).toContain("…[truncated]")
     expect(out.length).toBeLessThan(stack.length)
+  })
+})
+
+describe("error-reporter — componentStack dual budget (B3b)", () => {
+  it("keeps the innermost component name when BOTH the error stack and componentStack are over budget", () => {
+    // Error stack ALONE is over the 4000 cap; the componentStack (React lists the
+    // FAILING component FIRST) is appended after it and is itself large. A single
+    // combined truncate keeps the error stack and cuts the componentStack entirely —
+    // losing WHICH component failed. The dual budget reserves room for the
+    // componentStack's TOP (the failing component), and the combined stays under cap.
+    const bigErrorStack = "Error: boom\n" + "    at f (index-abc123.js:1:1)\n".repeat(200)
+    const componentStack =
+      "\n    at CategoryBreakdownChart (sections.tsx:1200:5)" +
+      "\n    at Ancestor (dashboard.tsx:1:1)".repeat(100)
+    reportError(errWithStack("boom", bigErrorStack), "boundary", { componentStack })
+    const out = lastBody().stack as string
+    // The failing component (TOP of componentStack) survives — this is the whole point.
+    expect(out).toContain("CategoryBreakdownChart")
+    // And the transmitted stack stays within the client cap.
+    expect(out.length).toBeLessThanOrEqual(4000)
   })
 })
 

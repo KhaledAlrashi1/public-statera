@@ -23,6 +23,18 @@
 
 const ENDPOINT = "/api/client-errors"
 const MAX_STACK_CHARS = 4000 // client cap, strictly below the server's 16KB body cap
+// B3b dual budget: reserve this many chars of the cap for the componentStack's TOP
+// (React lists the FAILING component first), so a long error stack cannot cut it.
+// Split (all counted against MAX_STACK_CHARS = 4000): componentStack reserve 1500 +
+// error-stack budget 2477 (= 4000 − 1500 − separator) + separator 23 = 4000.
+// ASSUMPTION (B3-F2), NOT a measurement: 1500 is sized from a ~50–90 char/frame
+// ESTIMATE (≈ 17–30 componentStack frames from the top). The real NODE-EXPRESS-9
+// capture was not retrievable when this was chosen. If the per-frame estimate is off
+// by 2×, this reserve holds ~8 frames, not 17–30. Revisit trigger: the first
+// production boundary report whose componentStack is truncated AT this reserve.
+const COMPONENT_STACK_RESERVE = 1500
+const COMPONENT_STACK_SEP = "\n--- componentStack ---"
+const TRUNC_MARKER = "\n…[truncated]"
 const MESSAGE_MAX = 2000
 const NAME_MAX = 200
 const SESSION_SEND_CAP = 20
@@ -41,7 +53,7 @@ export type ReportKind =
 let installed = false
 let reentrant = false // true only during the SYNCHRONOUS body of reportError
 let sentCount = 0
-const suppressed = { reentrancy: 0, cap: 0, dedupe: 0, noise: 0, selfOrigin: 0 }
+const suppressed = { reentrancy: 0, cap: 0, dedupe: 0, noise: 0 }
 const recent = new Map<string, { count: number; ts: number }>()
 
 // Test-only enable override (production gate is import.meta.env.PROD).
@@ -73,9 +85,11 @@ function currentRoutePathname(): string {
   }
 }
 
-function truncateStack(stack: string): string {
-  // Keep the TOP frames — the fault site is at the top of a stack.
-  return stack.length <= MAX_STACK_CHARS ? stack : `${stack.slice(0, MAX_STACK_CHARS)}\n…[truncated]`
+function truncateStack(stack: string, max = MAX_STACK_CHARS): string {
+  // Keep the TOP frames — the fault site is at the top of a stack. The marker is
+  // counted WITHIN max so the result never exceeds max (the old form sliced to max
+  // then appended the marker, overshooting the cap by the marker length).
+  return stack.length <= max ? stack : `${stack.slice(0, max - TRUNC_MARKER.length)}${TRUNC_MARKER}`
 }
 
 function topFrame(stack: string | undefined): string {
@@ -87,15 +101,25 @@ function fingerprint(name: string | undefined, message: string, stack: string | 
   return `${name ?? ""}|${message}|${topFrame(stack)}`
 }
 
-// Ignore errors that originate in the reporter itself — a failed report must not
-// be able to generate a report. Matches the reporter module frame
-// (error-reporter.ts / a prod chunk error-reporter-<hash>.js) but NOT a test file
-// (error-reporter.test.ts), and is only consulted for errors arriving via the
-// global handlers (see reportError) so it never suppresses a deliberate report.
-const SELF_ORIGIN_RE = /error-reporter(-[a-z0-9]+)?\.[jt]s/i
-function isSelfOrigin(stack: string | undefined): boolean {
-  return !!stack && SELF_ORIGIN_RE.test(stack.split("\n").slice(0, 3).join("\n"))
-}
+// ── Feedback-loop protection (B3a) ─────────────────────────────────────────────
+// The old stack-text self-origin filter was DELETED: it matched a literal
+// "error-reporter" frame, which Vite INLINES into index-<hash>.js in production, so
+// it only ever fired in dev (confirmed: a production-shaped stack was not suppressed).
+// "A failed report must not generate a report" is actually enforced — verified against
+// the reset semantics, NOT assumed — by THREE guards:
+//   (1) reportError's own try/catch (below) SWALLOWS any SYNCHRONOUS throw in its body,
+//       so a build/transmit error never propagates to the window error /
+//       unhandledrejection handler that called reportError. NB: the `reentrant` flag
+//       resets in a `finally`, so a thrown error leaves reportError with the flag
+//       already cleared — the flag does NOT cover that escaped-throw path; the catch
+//       does (nothing actually escapes, so there is no gap).
+//   (2) transmit()'s fetch(...).catch(() => {}) swallows the ASYNC send rejection, so a
+//       failed send never becomes an unhandledrejection that re-enters via the handler.
+//   (3) SESSION_SEND_CAP hard-bounds total sends, terminating any residual loop.
+// The `reentrant` flag's remaining, narrow job: suppress a SYNCHRONOUS nested
+// reportError generated DURING a send (CONDITION iii; test-exercised — in production
+// the fetch is async and does not synchronously re-enter). It is not, by itself, the
+// feedback-loop guard.
 
 // Noise filters (E): cross-origin "Script error." with no usable stack is
 // browser-extension / third-party-script noise, not our code; ResizeObserver loop
@@ -184,24 +208,24 @@ export function reportError(input: unknown, kind: ReportKind, extra?: { componen
     const message = extractMessage(input)
     let stack = extractStack(input)
 
-    // Self-origin filter (C) applies ONLY to errors surfaced via the global
-    // handlers — those are the ones that could be the reporter's own async throw
-    // bubbling back. Deliberate reports (boundary / chunk-* / self-heal) are trusted
-    // even though the self-heal event is constructed inside this module.
-    const fromGlobalHandler = kind === "onerror" || kind === "unhandledrejection"
-    if (fromGlobalHandler && isSelfOrigin(stack)) {
-      suppressed.selfOrigin++
-      return
-    }
     if (isNoise(message, stack)) {
       suppressed.noise++
       return
     }
 
-    // Fold componentStack (component NAMES only — no props/user data) into the stack
-    // for boundary reports; the server has a single `stack` field.
+    // Fold componentStack (component NAMES only — no props/user data) into the single
+    // `stack` field (B3b DUAL BUDGET). React lists the FAILING component FIRST in the
+    // componentStack, appended AFTER the error stack — so a single combined truncate
+    // would let a long error stack consume the whole budget and cut the componentStack,
+    // losing WHICH component failed. Give the error stack the cap minus the
+    // componentStack reserve minus the separator, and the componentStack its own
+    // reserve; truncateStack keeps the TOP of each. The combined is <= MAX_STACK_CHARS
+    // by construction, so buildBody's final truncateStack is a no-op safety net.
     if (extra?.componentStack) {
-      stack = `${stack ?? message}\n--- componentStack ---${extra.componentStack}`
+      const errBudget = MAX_STACK_CHARS - COMPONENT_STACK_RESERVE - COMPONENT_STACK_SEP.length
+      const errPart = truncateStack(stack ?? message, errBudget)
+      const compPart = truncateStack(extra.componentStack, COMPONENT_STACK_RESERVE)
+      stack = `${errPart}${COMPONENT_STACK_SEP}${compPart}`
     }
 
     // Dedupe + occurrences (D). Within the TTL, count and suppress; the next send
@@ -306,5 +330,4 @@ export function __resetReporterForTest(): void {
   suppressed.cap = 0
   suppressed.dedupe = 0
   suppressed.noise = 0
-  suppressed.selfOrigin = 0
 }
