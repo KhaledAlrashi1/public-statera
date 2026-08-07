@@ -112,9 +112,19 @@ export function isSnapshotEligible(
 // ── Shape validation ──────────────────────────────────────────────────────────
 
 // Validates structure and monetary field types. Returns null for any row that
-// fails — including rows with float income_kd/expense_kd values. Float monetary
-// fields indicate a legacy snapshot or manual DB edit; rejecting them forces
-// recomputation so the response always has string-typed KD values.
+// fails — including rows with float monetary values in monthly[] OR in
+// expense_by_category. Float monetary fields indicate a legacy snapshot or manual
+// DB edit; rejecting them forces recomputation so the response always has
+// string-typed KD values.
+//
+// Two properties worth stating, because both have been misread:
+//  - The monetary predicates are positive string-type assertions, so they reject
+//    EVERY non-string (number, boolean, null, a missing key, object, array), not
+//    only floats. The "float" framing names the motivating case, not the check.
+//  - Rejection is silent: it returns null, with no throw, log or Sentry event. The
+//    caller falls through to a Tier 3 recompute which ALSO rewrites the row via
+//    onDuplicateKeyUpdate, so a bad row costs exactly one cache miss, once. That
+//    self-healing is why no telemetry is wired here (B4-1b-R3).
 function validateSnapshotPayload(raw: unknown): DashboardMetricsPayload | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null
   const p = raw as Record<string, unknown>
@@ -134,6 +144,20 @@ function validateSnapshotPayload(raw: unknown): DashboardMetricsPayload | null {
     // Reject float monetary values — any non-string type is treated as invalid.
     if (typeof e.income_kd !== "string") return null
     if (typeof e.expense_kd !== "string") return null
+  }
+
+  // expense_by_category is a two-level map with DYNAMIC keys at both levels
+  // (month -> category -> amount), so this mirrors the monthly[] loop one level
+  // deeper and can name no key. The bucket check is load-bearing, not decorative:
+  // without it a string bucket passes, because Object.values("oops") walks as four
+  // strings (B4-1b-R1). It mirrors the monthly[] element check directly above.
+  // Empty maps stay valid — a month with no expenses legitimately produces {}
+  // (B4-1b-R2); that is the presence class, not the type class.
+  for (const bucket of Object.values(p.expense_by_category as Record<string, unknown>)) {
+    if (!bucket || typeof bucket !== "object" || Array.isArray(bucket)) return null
+    for (const amount of Object.values(bucket as Record<string, unknown>)) {
+      if (typeof amount !== "string") return null
+    }
   }
 
   return p as unknown as DashboardMetricsPayload

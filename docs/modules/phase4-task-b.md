@@ -610,7 +610,72 @@ which fired only because the probe's empty rows made the "already recorded today
 - **CF9** — a loud unconditional banner when the regenerate path fires, so the vacuous-pass state
   self-announces.
 
-## B4-1b — validateSnapshotPayload asymmetry — CHARTERED, NOT STARTED
+## B4-1b — validateSnapshotPayload `expense_by_category` guard — IMPLEMENTED 2026-08-06
+
+Rulings: charter **B4-1-R10**, "B4-1a approval and E-1/E-2 acceptance, 2026-08-06" (operator ruling by
+delegation); Phase A approved by **"B4-1b Phase A approval — bucket guard in, T3 added, self-referential
+SHA barred, 2026-08-06"** (R1–R11) — the SIXTH review-channel block dated 2026-08-06, so cite it by TITLE,
+never by date alone.
+
+**Delivered.** `validateSnapshotPayload` (`lib/dashboard-snapshot-lib.ts`) now type-checks the
+`expense_by_category` buckets AND leaves with the same reject-to-`null` semantics it already applied to
+`monthly[]` money; new `apps/api/src/lib/dashboard-snapshot-tier.test.ts` (T1/T2/T3).
+
+**Rulings as implemented.**
+- **R1 — bucket guard IN SCOPE.** Without it a string bucket passes, because `Object.values("oops")` walks
+  as four strings. Mirrors `monthly[]`'s existing `if (!entry || typeof entry !== "object") return null`.
+- **R2 — empty containers stay accepted.** `{}` is a legitimate no-expense month produced by the writer
+  itself (`dashboard-snapshot-lib.ts:202`). C1 presence class, explicitly out of scope. A decision, not an
+  oversight.
+- **R3 — no telemetry on rejection.** Rejection is self-healing within the same request (Tier 3 recomputes
+  and `onDuplicateKeyUpdate` overwrites), so a stale row costs exactly one miss, once. Recorded in the
+  function's own comment so the silence is not later read as an oversight.
+- **R4 — T3 required.** The fail-safe property rests entirely on "both writers emit strings", which Phase A
+  proved with a throwaway. A premise proven by a deleted artifact is not a guard, so T3 asserts it
+  hermetically at the `db.insert(...).values({...})` boundary for both entry points, with the CONTROL case
+  carried over. **Count note (flagged, not smuggled):** the approval's baseline says "Three tests" / 776, so
+  WRITER-1 + WRITER-2 + CONTROL are folded into T3's single `it` rather than three; five `it` blocks would
+  have landed 778.
+- **R5 — new file approved.** `analytics-cache.test.ts` mocks the lib under test at module scope (the 7.5
+  mock-contamination class); `aggregation.test.ts` mocks `analytics-cache` wholesale.
+- **R6 — INTEGRATION.** See the residue finding below.
+- **R7 — 771 MEASURED, not derived.** See the CLAUDE.md baseline bullet.
+- **R8 — no self-referential SHA.** Both amendments cite B4-1b by ruling name. No self-referential hash
+  placeholder survives anywhere in the tree — the Phase A drafts carried one, and it was removed rather
+  than backfilled. No follow-up commit owed. (This line deliberately avoids writing the placeholder token
+  itself, since R8's check is a literal grep that cannot distinguish a use from a mention.)
+- **R9 / R10 / R11 —** CF8 instance (i) marked closed; the `rm` near-miss added as instance (7); the
+  emit-site constraint recorded and verified (`lib/dashboard-snapshot-lib.ts` holds at 3 primitive sites).
+
+**§2 findings upheld and folded into the code comment:** the `monthly[]` monetary predicates are positive
+string-type assertions, so they reject EVERY non-string (number, boolean, `null`, a missing key, object,
+array) — the "float" framing names the motivating case, not the check. The comment now says so.
+
+**Prediction ledger (all MET).** Hermetic 773 → **776 / 19 / 55 (47 | 8)**, exit 0, `tsc` 0.
+`money-wire-shape.json` byte-identical; 157 leaves / 65 money paths / 14 routes; emit-site 43 → 42 + 5 = 47.
+INTEGRATION mode-invariance held: 776 + 19 − 3 = **792** accounted for (790 passed + 2 failed + 3 skipped),
+so the channel's inherited **780/3 is confirmed WITHDRAWN** and 789/3-at-HEAD was the right shape.
+
+**RESIDUE FINDING (R6(c)) — pre-existing, NOT a B4-1b regression, and it is INTRA-run, not inter-run.**
+`money-wire-shape.test.ts` fails under INTEGRATION on `CF6` (`tier2 … expected 'hit' to be 'snapshot'`,
+`:825`) and `C7` (`expected 'hit' to be 'miss'`, `:923`). Cause: the file calls `captureAll()` five times;
+under INTEGRATION the module-wide ioredis mock is absent, so the FIRST call populates
+`dashboard_metrics:1:2:2026-05` and `dashboard_metrics:1:24:2026-05` (900s TTL) and later calls take a
+Tier-1 hit. **Run 1 started from a verified-cold `dbsize 0`, so this is not inter-run residue**; the R6(c)
+protocol was executed anyway — both keys `DEL`ed with reply `2`, re-run — and run 2 failed **identically**,
+which is what proves the intra-run mechanism. **Proven pre-existing by measurement, not assertion:** with
+B4-1b stashed out, the file at HEAD (`bdd49ca`) fails under INTEGRATION with the same two assertions
+(`2 failed | 6 passed (8)`). B4-1b's own T1/T2/T3 are residue-immune by construction (R6(d)) — the
+unique-per-run userIds produced fresh keys (`dashboard_metrics:9221381{60,61,63}:2:`) and all three passed
+in every INTEGRATION run.
+
+**Queue additions accepted at approval, NOT this commit's work:** (1) extend B1's `globalSetup` to flush
+`dashboard_metrics:*` (and evaluate `safe_to_spend:*`) on db 1 — the residue class B1 scoped out, now with
+a second confirmed instance; (2) the snapshot payload's non-money type holes (`months[]` elements,
+`monthly[].month`), reported in Phase A §4 and deliberately unfixed. Note the fix for (1) must address the
+INTRA-run case, which a run-start flush alone does not.
+
+## B4-1b — CHARTER (as issued, superseded by the section above)
 
 Ruling: B4-1-R10, "B4-1a approval and E-1/E-2 acceptance, 2026-08-06" (operator ruling by delegation).
 Its own propose→approve→implement→verify cycle — NOT inside B4-1a, which inherits zero-production-diff.

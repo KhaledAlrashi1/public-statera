@@ -397,7 +397,13 @@ const MULTI_PATH: MultiPath[] = [
     disposition: "CAPTURED-BOTH",
     divergenceRisk: "TYPE (cross-serializer)",
     revisit:
-      "PROVEN REACHABLE. validateSnapshotPayload type-checks monthly[] money (dashboard-snapshot-lib.ts:135-136, 'Reject float monetary values') but NOT expense_by_category leaves, so a stored number leaf reaches the wire as a JSON number while Tier 3 always serves a formatKd string. Hardening is B4-1b (own cycle; B4-1a inherits zero-production-diff).",
+      "CLOSED by B4-1b (ruling B4-1-R10, review-channel block 'B4-1a approval and E-1/E-2 acceptance, 2026-08-06'; Phase A recorded in docs/modules/phase4-task-b.md). " +
+      "WHAT THIS CAPTURE PROVES, PRECISELY: the R3-tier2 entry proves the Tier 2 replay path is invocable and exposes the same money paths, and that GIVEN a well-formed, string-leafed stored row Tier 2 matches Tier 3. " +
+      "It does NOT — and structurally CANNOT — prove Tier 2 is unable to emit a number, because the fixture is what supplies the row: the capture can only observe the row it was handed. " +
+      "The divergence is guarded by validateSnapshotPayload (lib/dashboard-snapshot-lib.ts), NOT by this capture. " +
+      "Before B4-1b that validator type-checked monthly[] money but not expense_by_category leaves, so a stored number leaf reached the wire as a JSON number while Tier 3 always served a formatKd string (proven at runtime, not inferred). " +
+      "B4-1b extended it to the expense_by_category buckets AND leaves with the same reject-to-null semantics, so a number-leafed row is now rejected and Tier 3 recompute serves instead; see lib/dashboard-snapshot-tier.test.ts. " +
+      "If that guard is ever narrowed, this entry's divergenceRisk becomes live again.",
   },
   {
     id: "MP-2",
