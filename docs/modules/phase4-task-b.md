@@ -690,5 +690,138 @@ back to Tier 3 recompute, blast radius = a cache miss); and it sits on the crash
 
 **Queued to the Task B close fix-forward batch:** F4 (CLAUDE.md's C2 typed-drift carry-forward is stale —
 closed in source), F5 (`aggregation.ts:18-19` self-contradiction: R4 is listed as both number and string;
-it is string), and CLAUDE.md's 10a entry describing the `vitest run src/contract` CI step that `433e6cc`
-removed.
+it is string), CLAUDE.md's 10a entry describing the `vitest run src/contract` CI step that `433e6cc`
+removed, and **the T3 `it` split (B4-1b-R13)** — see the ruling below.
+
+---
+
+# RULINGS — the 2026-08-07 blocks (persisted BEFORE implementation, per B4-1c-R8)
+
+**Date discipline.** These are the FIRST Task B artifacts past the 2026-08-06 cluster. Do NOT inherit
+08-06 for anything from here forward. Two blocks share 2026-08-07, so cite by TITLE, never by date alone:
+(1) **"B4-1b close-out ACCEPTED; B4-1c chartered on the INTEGRATION red, 2026-08-07"**;
+(2) **"B4-1c Phase A approval — Option (C) with observer test; safe-to-spend replay recorded as
+FIND-B4-1c-b, 2026-08-07"**.
+
+## Carried from block (1) — B4-1b accepted, `249aa7e` blessed
+
+- **B4-1b-R12 — the doc-comment update is ACCEPTED and the reasoning ruled correct.** "No other validator
+  change" bars changes to BEHAVIOUR, not to the description of behaviour that the same commit changed.
+  Leaving a comment describing only `monthly[]` floats would have manufactured a fresh inaccuracy in the
+  commit that closed one — and that comment was itself the source of the §2 near-miss, since "same
+  rejection semantics" read off it would have produced a narrower mirror. Flagging rather than smuggling
+  is what made it a one-line ruling instead of a bounce.
+- **B4-1b-R13 — the T3 `it` split rides the Task B close fix-forward batch. DO NOT amend `249aa7e`, and do
+  NOT fold it into B4-1c.** The Phase A ambiguity was the channel's (R4 said "three tests" and "the
+  WRITER-1/WRITER-2/CONTROL cases carry over" in one breath); following the explicit number was the right
+  tie-break. But the split is the better end state: T3 guards the charter's load-bearing premise, and a
+  single `it` means a WRITER-1 failure masks whether WRITER-2 is also broken — the failure-injection
+  principle (assert the SPECIFIC failure) applied to a premise guard. Lands as **+2 → 778 / 19 / 55
+  (47 | 8)** with its own baseline line.
+- **B4-1c-R1 — STANDING, effective now: Task B CANNOT CLOSE over a non-zero INTEGRATION exit.** The
+  close-out that carries the deploy must include an INTEGRATION run at exit 0 with its count reconciled.
+  This is the gate that stops a named, understood, reproduced failure from decaying into ambient noise
+  while other sub-items pass over it.
+- **Queue item (1) AMENDED on the record.** "Extend B1's `globalSetup` to flush `dashboard_metrics:*`" is
+  now known to be **insufficient alone**: it addresses INTER-run residue, and the confirmed failure is
+  INTRA-run (and, per FIND-B4-1c-b, intra-CALL). Carry the item with that qualification attached so a
+  future reader does not implement the flush and believe the class is closed. Queue item (2) — the
+  snapshot payload's non-money type holes (`months[]` elements, `monthly[].month`) — is unchanged.
+
+## FIND-B4-1c — the capture file is hermetic-only by construction, and was never known to be
+
+`apps/api/src/contract/money-wire-shape.test.ts` performs **six** captures per run (five `captureAll()`
+call sites, one of which sits inside CF6's two-iteration loop). Hermetically the module-wide ioredis stub
+makes every `cacheGet` return null, so Tier 1 is inert and every tier assertion is valid. Under INTEGRATION
+`vitest.config.ts` sets `setupFiles: []`, the stub is absent, the first capture populates
+`dashboard_metrics:*`, and later captures take a Tier-1 hit — so CF6 (`:831`) and C7 (`:929`) read `hit`
+where they expect `snapshot`/`miss`. **The file depended on an inertness it did not state, did not enforce,
+and at header line 71 explicitly denied** (listing `cacheGet`/`cacheSet` among things that "run for real").
+
+Established by measurement, not argument: run 1 started from a **verified `dbsize 0`** (excludes inter-run
+residue); the R6(c) protocol (name the two keys, `DEL … reply=2`, re-verify by SCAN, re-run) produced an
+**identical** failure, which is what converts "probably residue" into "intra-run, and a run-start flush
+cannot fix it"; pre-existence proven by stashing B4-1b out and failing identically at `bdd49ca`
+(`2 failed | 6 passed (8)`); mode-invariance held (`790 + 2 + 3 = 795 = 776 + 19`), so the prediction was
+not retro-fitted and **780/3 stays withdrawn**.
+
+## Carried from block (2) — B4-1c Phase A approved
+
+- **B4-1c-R2 — Option (C) with the observer test APPROVED; (A) REJECTED on the record, durably.**
+  (A) (unique-per-call userId) would have converted a loud two-assertion failure into a green run with
+  R9/R10's money types still observed from a JSON round-trip — green-for-the-wrong-reason in its purest
+  form, and it would have been the channel's error, since the charter offered (A) first and named it
+  "proven this cycle". **Durable rule: a fix that removes the SYMPTOM by avoiding the MECHANISM is not a
+  fix; it must make the file's actual requirement true and enforced.** (B) (`describe.skipIf`) rejected
+  because a skip satisfies an exit-0 gate by not running — one category from the exit-1-by-attribution
+  posture B4-1c-R1 retires.
+- **B4-1c-R3 — FIND-B4-1c-b (below) is a SEPARATE and LARGER finding than the red that surfaced it.**
+- **B4-1c-R4 — the observer test must be PROVEN ABLE TO FAIL.** Assert R9's `dbCalls` contain the
+  safe-to-spend builder queries, then drive it red with a one-line temporary mutation making the inert
+  mock return a value for `safe_to_spend:{u}:{month}`, show the observer catch the replay, revert.
+  Evidence artifact, not a commit (C2/Q1). **A guard whose pass has never been distinguished from a
+  vacuous pass means nothing** — the whole of B4-1's E-1 exists for this.
+- **B4-1c-R5 — MULTI_PATH gains a safe-to-spend entry, GAP-RECORDED, in this commit.** Under (C) the
+  cached-replay arm is never taken, by design and now by enforcement — under CF8 that is exactly an
+  untaken arm hiding a path. Name both arms (build vs `_getSafeToSpendPayloadCached` replay), state that
+  the capture takes the build arm by construction because the file mocks the cache inert, and give the
+  revisit trigger (a serializer change on the safe-to-spend payload, or any assertion added that depends
+  on the replay arm). **Do NOT attempt to capture the replay arm** — that re-introduces exactly what this
+  commit removes. Coverage claim, not a type claim, so it stays inside the authored-entry boundary
+  (B4-1-R3).
+- **B4-1c-R6 — the line-71 header claim must be corrected in the same commit**, stated positively: this
+  capture REQUIRES an inert Redis; the cache is mocked as a data SOURCE (a fixture), never as a serializer,
+  and every serializer named in the header still runs for real. Name the file-local `vi.mock("ioredis")`
+  and say why it exists — the global setup skips under INTEGRATION, so inheriting inertness from it was
+  accidental.
+- **B4-1c-R7 — B4-1a is EXONERATED on the record.** `c37046a`'s capture file **passes cold under
+  INTEGRATION** (`6 passed`, exit 0, measured). B4-1a's tier assertions did not introduce the defect; they
+  EXPOSED it, and before them the file passed under INTEGRATION while silently observing Redis replays for
+  R9/R10. Recorded here so a reader arriving at the red later does not read `bdd49ca` as its cause.
+  **An assertion that turns a silent wrong observation into a loud failure is the assertion working.**
+- **B4-1c-R8 — persist these rulings NOW, docs-only, before implementing.** (This section is that commit.)
+  The tree-clean-through-Phase-A convention exists to stop implementation landing before approval, not to
+  stop rulings being recorded. Ruled the other way from the B4-1b cycle because the CONTENT is different,
+  not because that cycle was wrong.
+- **B4-1c-R9 — predicted baselines are the prediction of record.** Hermetic **777 / 19 / 55 (47 | 8)**,
+  exit 0, `tsc` 0. INTEGRATION **793 passed / 3 skipped / 0 failed** (777 + 19 − 3, total 796), exit 0.
+  `money-wire-shape.json` unmoved — already measured in the Phase A probe, so a movement is a FINDING, not
+  a surprise. Emit-site table unaffected. Frontend untouched and not re-run; 183/38 carried unverified by
+  design. Report what comes back; do not retro-fit.
+
+## FIND-B4-1c-b — safe-to-spend intra-CALL replay (larger than the red that surfaced it)
+
+`_getSafeToSpendPayloadCached` is reached from **R8 (`aggregation.ts:1115`), R9 (`:922`) and R10 (`:1037`)**
+inside a single `captureAll()`, and `ROUTES` orders them R8 → R9 → R10, so R8's build populates
+`safe_to_spend:{u}:{month}` (300s) and **R9/R10 replay it**. Proven by db-call signature, not inferred:
+hermetic **16 / 5 / 9** against cached **13 / 2 / 6** — exactly **−3 each**, the three
+`_buildSafeToSpendPayload` queries (`select{total} | select{amount,catName} | select{total}`), with **R9 at
+2 building nothing at all**. A seeded sentinel reached the wire as
+`EXTRA R8 data.safe_to_spend.safe_to_spend_kd = 12345`. **No unique-per-call userId can separate these —
+they are one user's dashboard by construction**, which is why option (A) was rejected.
+
+Three consequences, ruled (B4-1c-R3):
+
+- **(a) The committed `money-wire-shape.json` is NOT tainted — state this explicitly, do not leave a reader
+  to work it out.** Hermetically the ioredis stub always misses, so all three routes built for real and
+  every captured type is `typeof` on a real serializer's output. The capture's central claim HOLDS for the
+  artifact as committed. What was false was the claim's PORTABILITY to INTEGRATION mode.
+- **(b) Nothing about safe-to-spend was ever asserted.** No `X-Cache-Status`; a JSON round-trip preserves
+  string/number; and the provenance audit's `EMITTED` set is module-level and never cleared across the six
+  captures, so R8's first real run masks R9/R10 permanently. **That is the observation-window shape one
+  layer in: an audit that cannot distinguish "R9 emitted this" from "R8 emitted this and R9 replayed it."**
+- **(c) `EMITTED`'s non-clearing is a real weakness and is NOT fixed here** (`money-wire-shape.test.ts:117`,
+  written at `:126`/`:139`, read at `:608-609`). Currently harmless — hermetically every route builds — but
+  it is a masking mechanism waiting for a second cache. Named finding; do not touch it in this commit.
+
+**Enumeration (report only).** `dashboard_metrics:*` — R3/R3-tier2, distinct keys, no intra-call exposure,
+asserted (this was the red). `safe_to_spend:*` — R8/R9/R10, intra-call exposure PROVEN, **unasserted**.
+`sv_revoked:*` — read-only, absent ⇒ pass, identical in both modes. `rl:*` — module mocked in this file.
+`routes/intelligence.ts` (R11/R12/R13) contains **no** cache calls; `_buildAccountOverviewPayload` (R4) is
+uncached. Elsewhere: `aggregation.test.ts` mocks `../lib/analytics-cache` wholesale, so
+`money-wire-shape.test.ts` is the SOLE exposed file.
+
+**Stray key, chased to a conclusion:** a `safe_to_spend:1:2026-08` key (real clock, `days_elapsed: 7`)
+appeared during Phase A, which the clock pin should have made impossible. It was written by the `c37046a`
+control run — `grep -c 'pinClock\|useFakeTimers'` returns **0** at `c37046a` vs **4** at HEAD, because
+B4-1a introduced the pin. **No hole in the pin at HEAD.**
