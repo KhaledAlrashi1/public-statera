@@ -12,6 +12,7 @@
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "contract:generate": "UPDATE_CONTRACT=1 vitest run src/contract",
+    "money-shape:generate": "MONEY_ASSERT_WRITE=1 vitest run src/contract/money-wire-shape.assert.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:visual": "playwright test e2e/visual.spec.ts",
     "theme:audit": "bash ./scripts/theme-color-audit.sh",
