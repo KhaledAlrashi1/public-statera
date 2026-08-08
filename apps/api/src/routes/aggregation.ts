@@ -15,8 +15,13 @@
  *   as 0 not 0.0 (JS JSON.stringify vs Python json.dumps). Module 9 verifies.
  * - R7 range_spent_by_category groups by categories.name (not COALESCE) to
  *   match Flask exactly, with JS-side null → "Uncategorized" coalescing.
- * - Monetary serialization differs by route: R1–R7 return numbers (roundedKd);
- *   R4/R9/R10 return strings (formatKd), matching Flask's format_kd() contract.
+ * - Monetary serialization differs by route: R1/R2/R5/R6/R7 return numbers
+ *   (roundedKd); R4/R9/R10 return strings (formatKd), matching Flask's
+ *   format_kd() contract. (This line previously read "R1–R7 return numbers",
+ *   which contradicted the very next clause by listing R4 as both — F5, corrected
+ *   in the Task B close batch. R4 is STRING, verified against the serializer via
+ *   the runtime capture: all six of its money paths are type "string" in
+ *   contract/money-wire-shape.json, not against this comment.)
  *   R3 (dashboard-metrics) delegates to computeDashboardMetricsPayload which uses
  *   formatKd() strings, where Flask used floats (_rounded_number) — pre-existing
  *   5a-1 deviation, Module 9 verifies frontend compatibility.

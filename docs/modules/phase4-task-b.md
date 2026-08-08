@@ -970,7 +970,8 @@ suffix: (c) **"B4-2 close-out ACCEPTED; B4-3 Phase A chartered under the TB-R8 r
    `433e6cc` removed.
 4. **T3 `it` split** (B4-1b-R13) — split the single T3 `it` into WRITER-1 / WRITER-2 / CONTROL so a
    WRITER-1 failure cannot mask WRITER-2. Lands **+2 → 778 / 19 / 55 (47 | 8)** with its own baseline line.
-   Do NOT amend `249aa7e`.
+   Do NOT amend `249aa7e`. **EXECUTED 2026-08-08: the delta (+2) held but the ABSOLUTE was stale — 778 was
+   computed from B4-1b's 776 and never re-based when B4-1c added +1. Measured result: 777 + 2 = **779**.**
 5. **Observation-window instance (8)** (B4-1c-R10) — order-verification, with the §3 RIDER below.
 6. **F6** (B4-3-R3) — the typecheck-asymmetry line.
 
@@ -1001,6 +1002,38 @@ which IS checked, but the fixtures live in files the checker never opens.
 config: a deliberate error in a new `apps/api/src/lib/kd.test.ts` produced
 `src/lib/kd.test.ts(2,7): error TS2322`, exit 1. **The asymmetry is the finding**, and it is more useful
 than the flat "no" the charter anticipated.
+
+## Task B CLOSE BATCH — EXECUTED 2026-08-08 (all six items)
+
+Ruling: "B4-3 close-out ACCEPTED; Task B implementation COMPLETE; close batch chartered, 2026-08-08e".
+One commit. Items enumerated FROM THIS FILE IN FILE ORDER and ticked individually (B4-2-R9), never against
+a remembered count.
+
+1. **F4 — DONE.** CLAUDE.md's C2 typed-drift carry-forward rewritten: the stale "declares 12 KWD fields as
+   `number`" claim is GONE; all 12 are `string` in source, re-verified at B4-2 Phase A, which is also why
+   R13 was unavailable as B4-2's RED-gate subject.
+2. **F5 — DONE.** `aggregation.ts:18` now reads "R1/R2/R5/R6/R7 return numbers (roundedKd)"; R4 no longer
+   appears on both sides. **Verified against the serializer, not the comment:** all six R4 money paths are
+   type `"string"` in `money-wire-shape.json`. The old wording survives only as a quoted mention at `:20`
+   explaining the correction.
+3. **10a CI-step staleness — DONE.** The described `vitest run src/contract` step is named as removed by
+   `433e6cc` (10f); the real gate is `pnpm --filter statera-api test` (`deploy.yml:91`).
+4. **T3 `it` split — DONE.** T3a WRITER-1 / T3b WRITER-2 / T3c CONTROL, three independently-failing cases,
+   so a WRITER-1 failure can no longer abort before WRITER-2 runs. **Measured 779, not the predicted 778 —
+   see the stale-prediction finding above.**
+5. **Observation-window instance (8) + BOTH riders — DONE.** Order-verification, plus rider (a) the
+   partial set from an assumed-convention pattern and rider (b) the superset that only reading the
+   consumer resolves. Neither promoted to a numbered instance. All eight instances verified present and
+   **strictly ascending by character position** — the ordering was wrong on the first attempt (I inserted
+   (8) before (7)) and was caught by printing the list, which is instance (8)'s own lesson applying to
+   instance (8)'s authorship.
+6. **F6 — DONE.** The typecheck line now states BOTH sides: no frontend test file is type-checked by any
+   command anywhere; API test files ARE, in CI at `deploy.yml:82` (proven empirically). FIND-B4-3's queue
+   item recorded with its cost stated as **unmeasured**.
+
+**Verification:** API hermetic **779 / 19 / 55 (47 | 8)** exit 0; frontend **185 / 39** exit 0 (unchanged);
+both `tsc --noEmit` exit 0. Neither INTEGRATION run performed — B4-1c's **793 / 3 / 0** exit 0 remains the
+run of record, and **B4-1c-R1 is still owed by the deploy**, which must clear it again.
 
 ## B4-3 — FIND-S5(b) numeric money fixtures corrected — IMPLEMENTED 2026-08-08
 

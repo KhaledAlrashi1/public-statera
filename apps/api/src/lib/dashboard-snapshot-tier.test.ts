@@ -188,12 +188,19 @@ describe("B4-1b — expense_by_category leaves are policed at the snapshot tier"
     expect(payload.expense_by_category["2026-05"].Uncategorized).toBe("40.500")
   })
 
-  it("T3: both persistDashboardSnapshot entry points store STRING expense_by_category leaves", async () => {
-    // B4-1b-R4: the fail-safe property of the T1 rejection rests entirely on the
-    // write path being unable to emit a number. That premise was proven once by a
-    // throwaway probe; a premise proven by a deleted artifact is not a guard, so it
-    // is asserted here at the db.insert(...).values({...}) boundary for BOTH writers.
-    // WRITER 1 — worker path.
+  // ── T3 — the write-path premise, in THREE separately-asserted cases ─────────
+  // B4-1b-R4: the fail-safe property of the T1 rejection rests entirely on the
+  // write path being unable to emit a number. That premise was proven once by a
+  // throwaway probe, and a premise proven by a deleted artifact is not a guard —
+  // so it is asserted here at the db.insert(...).values({...}) boundary.
+  //
+  // SPLIT PER B4-1b-R13 (Task B close batch): these were originally one `it`,
+  // which meant a WRITER-1 failure aborted the case before WRITER-2 ran and
+  // masked whether it was also broken. That is the failure-injection principle
+  // — assert the SPECIFIC failure — applied to a premise guard. Three cases now
+  // fail independently.
+
+  it("T3a: WRITER 1 (worker path) — rebuildDashboardSnapshot stores STRING leaves", async () => {
     const w1: Captured[] = []
     await rebuildDashboardSnapshot(uniqueUserId(), makeTierDb([], w1), {
       monthsCount: 2,
@@ -201,12 +208,14 @@ describe("B4-1b — expense_by_category leaves are policed at the snapshot tier"
     })
     expect(w1).toHaveLength(1)
     const w1Leaves = leafTypes(JSON.parse(w1[0].expenseByCategoryJson as string))
-    console.log(`\n### T3 WRITER 1 rebuildDashboardSnapshot = ${w1[0].expenseByCategoryJson as string}`)
+    console.log(`\n### T3a WRITER 1 rebuildDashboardSnapshot = ${w1[0].expenseByCategoryJson as string}`)
     expect(w1Leaves.length).toBeGreaterThan(0)
     expect(w1Leaves.filter(([, t]) => t !== "string")).toEqual([])
+  })
 
-    // WRITER 2 — request path. An empty snapshot row set misses Tier 2, which is the
-    // identical `if (snapshot)`-false branch a validator rejection produces.
+  it("T3b: WRITER 2 (request path) — Tier 3 recompute stores STRING leaves", async () => {
+    // An empty snapshot row set misses Tier 2, which is the identical
+    // `if (snapshot)`-false branch a validator rejection produces.
     const w2: Captured[] = []
     const { cacheStatus } = await getDashboardMetricsWithCache(
       uniqueUserId(),
@@ -216,14 +225,15 @@ describe("B4-1b — expense_by_category leaves are policed at the snapshot tier"
     expect(cacheStatus).toBe("miss")
     expect(w2).toHaveLength(1)
     const w2Leaves = leafTypes(JSON.parse(w2[0].expenseByCategoryJson as string))
-    console.log(`### T3 WRITER 2 getDashboardMetricsWithCache = ${w2[0].expenseByCategoryJson as string}`)
+    console.log(`### T3b WRITER 2 getDashboardMetricsWithCache = ${w2[0].expenseByCategoryJson as string}`)
     expect(w2Leaves.length).toBeGreaterThan(0)
     expect(w2Leaves.filter(([, t]) => t !== "string")).toEqual([])
+  })
 
-    // CONTROL — the observation mechanism is not vacuously green: given a number
-    // leaf, leafTypes reports one. Without this, two empty filters prove nothing.
+  it("T3c: CONTROL — leafTypes reports a NUMBER leaf, so T3a/T3b are not vacuous", () => {
+    // Without this, T3a and T3b are two empty filters, which prove nothing.
     const control = leafTypes(JSON.parse('{"2026-05":{"Food":150.5,"Fuel":"10.000"}}'))
-    console.log(`### T3 CONTROL = ${JSON.stringify(control)}`)
+    console.log(`### T3c CONTROL = ${JSON.stringify(control)}`)
     expect(control.filter(([, t]) => t !== "string")).toHaveLength(1)
   })
 })
