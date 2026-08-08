@@ -923,6 +923,85 @@ infrastructure, not a defect hunt** — a fact that could not have been known wi
 `SnapshotCashFlowWindow`), each carrying a `// See C2 fix-forward` comment — and CLAUDE.md still says
 `number`, confirming F4's staleness.
 
+# RULINGS — the 2026-08-08c / 08-08d blocks (persisted BEFORE implementation, per B4-3-R4)
+
+**Date discipline.** FOUR blocks now share 2026-08-08, suffixed `` / `b` / `c` / `d`. Cite by title WITH
+suffix: (c) **"B4-2 close-out ACCEPTED; B4-3 Phase A chartered under the TB-R8 reframe, 2026-08-08c"**;
+(d) **"B4-3 Phase A approval — the 7 additional fixtures FOLD IN; typecheck asymmetry recorded,
+2026-08-08d"**.
+
+- **B4-2-R9 — a miscounted batch is how an item gets dropped.** The B4-2 close-out said the close batch
+  "now holds four items" and then listed five. The list was right, the count wrong. Same class as the
+  B4-1c chronology inversion: *a claim about a list that the list itself contradicts.* **At execution,
+  enumerate the batch from the file in FILE ORDER and tick items off individually, never against a
+  remembered count.**
+- **B4-3-R1 — the 7 additional numeric money fixtures FOLD INTO B4-3** (scope widened by ruling; a
+  successor item would leave seven known-wrong fixtures in the tree after this cycle audited them and
+  confirmed them wrong against the committed capture — a false-premise fixture knowingly retained, the
+  exact thing FIND-S5(b) exists to name, with no guard behind the class). Conditions: **(a)** TB-R8 applies
+  to all TEN sites individually — any red is a FINDING, stop and ask, do not adjust fixture/assertion/
+  component to restore green; **(b)** enumerate consumer paths for the 7 BEFORE touching them, to the same
+  standard as the ExpensesPage three; **(c)** `api.test.ts` is the one place LEGITIMATE assertion changes
+  are expected — it tests the api layer itself, so assertions there plausibly read raw unwrapped values; an
+  assertion reading `120` that must become `"120"` is correcting an expectation that was itself asserting
+  the wrong wire shape (legitimate, the clearest possible case), whereas an assertion whose RENDERED output
+  must change is barred; classify each explicitly, and stop if any resists clean classification;
+  **(d)** report the ten sites as ONE set with per-site outcome, so the record shows what was CHECKED, not
+  only what was changed.
+- **B4-3-R2 — the frontend/API typecheck asymmetry is a NAMED QUEUE ITEM, not chartered in Task B.**
+  Removing `src/**/*.test.ts(x)` from the frontend tsconfig would surface an unknown error count across 39
+  test files, and Task B does not open an unbounded remediation this late. Recorded as **the guard that
+  does not exist behind B4-3's class**, with the API side named as the precedent proving it is achievable,
+  and the honest note that **the cost is unmeasured**. Post-Task-B queue, its own cycle.
+- **B4-3-R3 — F6 joins the close batch.** CLAUDE.md's money-string-sweep line describing a repo-wide
+  `*.test.*`-excluded typecheck is true of the frontend, FALSE of the API; correct it to state both sides
+  and the asymmetry.
+- **B4-3-R5 — baselines.** Frontend **185 / 39 unchanged, no count movement**; both tsc runs unchanged.
+  Neither API suite re-run; B4-1c's INTEGRATION **793 / 3 / 0** exit 0 remains the run of record and
+  B4-1c-R1 remains in force for the close deploy. **If any count moves, that is a FINDING — a fixture
+  correction should not add or remove a test.**
+
+## THE TASK B CLOSE BATCH — SIX items (enumerate from this list, in file order, ticking individually)
+
+1. **F4** — CLAUDE.md's C2 typed-drift carry-forward is stale (closed in source; re-confirmed at B4-2
+   Phase A: all 12 `SnapshotResponse` money declarations are already `string`).
+2. **F5** — `aggregation.ts:18-19` self-contradiction: R4 is listed as both number and string; it is string.
+3. **10a CI-step staleness** — CLAUDE.md's 10a entry describes a `vitest run src/contract` CI step that
+   `433e6cc` removed.
+4. **T3 `it` split** (B4-1b-R13) — split the single T3 `it` into WRITER-1 / WRITER-2 / CONTROL so a
+   WRITER-1 failure cannot mask WRITER-2. Lands **+2 → 778 / 19 / 55 (47 | 8)** with its own baseline line.
+   Do NOT amend `249aa7e`.
+5. **Observation-window instance (8)** (B4-1c-R10) — order-verification, with the §3 RIDER below.
+6. **F6** (B4-3-R3) — the typecheck-asymmetry line.
+
+### Instance (8) rider text (B4-3, approved 2026-08-08d)
+
+Instance (8) is order-verification; this is **the same lesson in SEARCH form**, recorded as a rider rather
+than as instance (9) because inflating the list would cheapen it:
+
+> *a grep pattern built from a naming convention returned a partial set that looked complete; the fix was
+> to derive the search vocabulary from the artifact being checked, not from what the names were assumed to
+> look like.*
+
+Earned at B4-3 Phase A: the first re-derivation pattern (`_kd|_pct` suffix) missed
+`ExpensesPage.test.tsx:110` entirely, because category names do not end in `_kd`. The fix was to extract the
+money-leaf vocabulary from `money-wire-shape.json` itself — 28 leaf names with per-route wire types — and
+grep on that.
+
+## FIND-B4-3 — the typecheck asymmetry (recorded, queued, not chartered)
+
+`apps/web/tsconfig.json` excludes `src/**/*.test.ts`, `src/**/*.test.tsx`, `src/test/**`, and every frontend
+tsc invocation shares that one config (`typecheck`, `lint:typecheck`, `build` via `tsc -b`, CI
+`deploy.yml:83`). **No frontend test file is type-checked by any command, in CI or locally** — which is
+exactly why the numeric money fixtures survived B4-2: the compile-time assertions live in `src/contract/`,
+which IS checked, but the fixtures live in files the checker never opens.
+
+**`apps/api/tsconfig.json` has NO test exclusion** (`include: ["src"]`, `exclude: ["node_modules"]`), so
+**API test files ARE type-checked in CI** (`deploy.yml:82`). Proven empirically rather than read off the
+config: a deliberate error in a new `apps/api/src/lib/kd.test.ts` produced
+`src/lib/kd.test.ts(2,7): error TS2322`, exit 1. **The asymmetry is the finding**, and it is more useful
+than the flat "no" the charter anticipated.
+
 ## B4-2 — money wire-shape frontend compile-time assertions — IMPLEMENTED 2026-08-08
 
 Rulings: block (2), "B4-2 Phase A approval — nullability form confirmed, R8 composition check ruled a
