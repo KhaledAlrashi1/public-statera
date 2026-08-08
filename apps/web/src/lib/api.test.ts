@@ -165,10 +165,13 @@ describe("envelope parsing", () => {
       data: {
         month: "2026-02",
         items: [{ id: 1, month: "2026-02", category: "Groceries", amount_kd: "120.000" }],
+        // profile_context money is serialized as STRINGS by routes/budgets.ts
+        // (:151/:152 .toFixed(3), :147 .toFixed(1)) — the 2026-07-10 typed-drift
+        // crash. FIND-S5(b).
         profile_context: {
-          budget_total_kd: 120,
-          monthly_income_kd: 500,
-          budget_to_income_pct: 24,
+          budget_total_kd: "120.000",
+          monthly_income_kd: "500.000",
+          budget_to_income_pct: "24.0",
           payday_day: 25,
         },
       },
@@ -179,7 +182,7 @@ describe("envelope parsing", () => {
     const result = await budgetsApi.get("2026-02")
     expect(result.month).toBe("2026-02")
     expect(result.items).toHaveLength(1)
-    expect(result.profile_context?.budget_total_kd).toBe(120)
+    expect(result.profile_context?.budget_total_kd).toBe("120.000")
   })
 
   it("memorizedApi.list reads pagination from envelope meta", async () => {
@@ -318,9 +321,9 @@ describe("envelope parsing", () => {
           month: "2026-02",
           items: [{ id: 1, month: "2026-02", category: "Food", amount_kd: "100.000" }],
           profile_context: {
-            budget_total_kd: 100,
-            monthly_income_kd: 500,
-            budget_to_income_pct: 20,
+            budget_total_kd: "100.000",
+            monthly_income_kd: "500.000",
+            budget_to_income_pct: "20.0",
             payday_day: 25,
           },
         },

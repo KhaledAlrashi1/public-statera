@@ -1002,6 +1002,70 @@ config: a deliberate error in a new `apps/api/src/lib/kd.test.ts` produced
 `src/lib/kd.test.ts(2,7): error TS2322`, exit 1. **The asymmetry is the finding**, and it is more useful
 than the flat "no" the charter anticipated.
 
+## B4-3 — FIND-S5(b) numeric money fixtures corrected — IMPLEMENTED 2026-08-08
+
+Rulings: "B4-3 Phase A approval — the 7 additional fixtures FOLD IN; typecheck asymmetry recorded,
+2026-08-08d" (R1–R5). Rulings persisted first in `25e385f` per B4-3-R4. Frontend test fixtures only;
+**zero `apps/api` diff**, zero production code.
+
+### The TEN sites, with per-site outcome (B4-3-R1(d) — what was CHECKED, not only what changed)
+
+| # | site | field → capture entry | wire | fixture was | outcome |
+|---|---|---|---|---|---|
+| 1 | `ExpensesPage.test.tsx:108` | R3 `data.monthly[].income_kd` | string | `500` | **CORRECTED** `"500.000"` |
+| 2 | `ExpensesPage.test.tsx:108` | R3 `data.monthly[].expense_kd` | string | `120` | **CORRECTED** `"120.000"` |
+| 3 | `ExpensesPage.test.tsx:110` | R3 `data.expense_by_category.*.*` | string | `100`, `20` | **CORRECTED** `"100.000"`, `"20.000"` |
+| 4 | `ExpensesPage.test.tsx:236` | R3 `monthly[].income_kd`/`expense_kd` | string | `0`, `0` | **CORRECTED** `"0.000"` ×2 |
+| 5 | `insights/RecurringCommitmentsCard.test.tsx:9` | `avg_amount_kd` | — | `3.25` | **NO CHANGE — false positive** (see below) |
+| 6 | `api.test.ts:169` | budgets `profile_context.budget_total_kd` | string | `120` | **CORRECTED** `"120.000"` |
+| 7 | `api.test.ts:170` | `profile_context.monthly_income_kd` | string | `500` | **CORRECTED** `"500.000"` |
+| 8 | `api.test.ts:171` | `profile_context.budget_to_income_pct` | string | `24` | **CORRECTED** `"24.0"` |
+| 9 | `api.test.ts:321-323` | same three, dashboard-bundle | string | `100`, `500`, `20` | **CORRECTED** `"100.000"`, `"500.000"`, `"20.0"` |
+| 10 | `api.test.ts:182` (assertion) | reads site 6 | string | `.toBe(120)` | **CORRECTED** `.toBe("120.000")` — legitimate, see below |
+
+Nine value corrections + one assertion. Precision from the serializers, not guessed: `formatKd` → 3dp for
+R3; `routes/budgets.ts:151/152` `.toFixed(3)` and `:147` `.toFixed(1)` for `profile_context`.
+
+### Site 5 — a FALSE POSITIVE in B4-3's own Phase A list, withdrawn on the record
+
+**This is a scope REDUCTION from B4-3-R1's "7 additional fixtures", flagged rather than taken silently.**
+`RecurringCommitmentRow.avg_amount_kd` is typed **`number`** at `insights/RecurringCommitmentsCard.tsx:7`
+and is a **client-derived** type, not a wire type: `InsightsPage.tsx:159` coerces the wire value with
+`Number(row.avg_amount_kd || 0)` and re-emits it at `:180` into the derived row, which the card renders via
+`formatKD(row.avg_amount_kd)` (`:98`). Correcting it to a string would have **introduced** a defect.
+Same structure as `MonthDeltaRow`, which Phase A had already classified correctly.
+
+**Lesson, and it is the instance-(8) rider one layer on:** matching a captured money LEAF NAME is not
+sufficient — a fixture must be confirmed to stand in for the WIRE type rather than a client-derived type
+that happens to share the name. The vocabulary-derived grep found the site; only reading the consumer
+decided it. So: 7 additional candidates → **6 genuine, 1 withdrawn**.
+
+### TB-R8 outcome: GREEN on the money paths, with exactly one legitimate assertion change
+
+Run order was fixture-first, observe, then classify — never pre-adjusted. Correcting the nine values
+produced **exactly one** failure:
+```
+ FAIL  src/lib/api.test.ts > envelope parsing > budgetsApi.get reads budget payload from envelope data
+ AssertionError: expected '120.000' to be 120 // Object.is equality
+ Tests  1 failed | 184 passed (185)
+```
+**Classified LEGITIMATE** under §5 / B4-3-R1(c): `api.test.ts:182` reads the **raw unwrapped value**
+(`result.profile_context?.budget_total_kd`), not rendered output, and it was asserting `120` — a wire shape
+that does not exist. It is the clearest possible case of an expectation that was itself asserting the wrong
+wire shape. **Not** the barred kind: no matcher loosened, no rendered output changed, no component touched.
+Site 9's triplet has **no** assertion reading it (the dashboardBundle test asserts only `month`,
+`committed_kd`, `items` length and `total_income_mtd` — all already strings), so it needed none.
+
+**All nine other corrections produced ZERO failures**, confirming Phase A §2's enumeration: every
+`ExpensesPage` consumer coerces (`:565`, `:571`, `:737-739`, `:756`, `:764-766`, `:779`, `:784`), and the
+one that does not (`:816-817` `allCategories`) reads `Object.keys` only and never touches a value. **No
+uncoerced money-arithmetic consumer exists on these paths** — the boring outcome, reported as found.
+
+**Verification:** frontend **185 / 39, exit 0, no count movement** (B4-3-R5 met — a moved count would
+itself have been a finding); frontend `tsc` 0; API `tsc` 0 and **neither API suite re-run** (zero
+`apps/api` diff). **B4-1c's INTEGRATION 793 / 3 / 0 exit 0 remains the run of record, and B4-1c-R1 remains
+in force for the close deploy.**
+
 ## B4-2 — money wire-shape frontend compile-time assertions — IMPLEMENTED 2026-08-08
 
 Rulings: block (2), "B4-2 Phase A approval — nullability form confirmed, R8 composition check ruled a

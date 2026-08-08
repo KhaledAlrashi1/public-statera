@@ -105,9 +105,12 @@ describe("ExpensesPage", () => {
     mocks.analyticsApi.dashboardMetrics.mockResolvedValue({
       ok: true,
       months: ["2026-02"],
-      monthly: [{ month: "2026-02", income_kd: 500, expense_kd: 120 }],
+      // R3 money is formatKd STRINGS on the wire (money-wire-shape.json:
+      // data.monthly[].income_kd / .expense_kd / data.expense_by_category.*.*
+      // are all type "string"). FIND-S5(b).
+      monthly: [{ month: "2026-02", income_kd: "500.000", expense_kd: "120.000" }],
       expense_by_category: {
-        "2026-02": { Food: 100, Subscription: 20 },
+        "2026-02": { Food: "100.000", Subscription: "20.000" },
       },
     })
 
@@ -233,7 +236,7 @@ describe("ExpensesPage", () => {
     mocks.analyticsApi.dashboardMetrics.mockResolvedValue({
       ok: true,
       months: ["2026-02"],
-      monthly: [{ month: "2026-02", income_kd: 0, expense_kd: 0 }],
+      monthly: [{ month: "2026-02", income_kd: "0.000", expense_kd: "0.000" }],
       expense_by_category: {
         "2026-02": {},
       },
