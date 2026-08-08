@@ -923,6 +923,74 @@ infrastructure, not a defect hunt** — a fact that could not have been known wi
 `SnapshotCashFlowWindow`), each carrying a `// See C2 fix-forward` comment — and CLAUDE.md still says
 `number`, confirming F4's staleness.
 
+# TASK B — DEPLOY RECORD (2026-08-08). SHIPPED.
+
+**Two facts, both true, stated together so neither goes stale (Deploy-R7).** Task B's **application code shipped at
+`2011b73`** — GitHub Actions run **`31258943784`**, the **deploy of record**. This deploy-record commit then rode a
+**docs-only no-op redeploy**, so production reports **this commit's SHA** while the **application content is
+byte-identical to `2011b73`**: only the embedded release SHA differs. No follow-up SHA correction is owed.
+
+*(This commit is cited by ROLE, not by hash — naming its own SHA inside itself is the self-referential-SHA failure
+B4-1b-R8 barred, and it would break the moment the commit was amended. The redeploy's own run number and probe
+reading are recorded in the push confirmation, not here, for the same reason.)*
+
+**First application of the new "derive, don't carry" rule at AUTHORSHIP time rather than after a miss** — the line
+was written to survive the event that would have invalidated it, instead of being corrected afterwards.
+
+Ruling: "Deploy CLOSED — Task B is shipped; deploy record chartered, 2026-08-08i" (Deploy-R6).
+
+## (1) Deploy facts
+
+| | |
+|---|---|
+| Actions run | **`31258943784`**, green across all four jobs (resolve-sha → test → build-push → deploy) |
+| Range | `7f271d9` → `2011b73`, **14 riders, all `phase-4: Task B`**, zero non-Task-B riders ⇒ no CSP subjects |
+| Push → deploy | **automatic.** `on: push: branches: [main]`; no job-level `if:` gates deploy off the push path. Confirmed empirically — the push alone started the run (Deploy-R3) |
+| `environment: production` | **carries no blocking protection rule — no approval pause occurred.** Explicitly unverifiable from the tree at pre-flight; now a MEASURED fact (Deploy-R5) |
+| Deploy job | 37s |
+| API identity | `/healthz` + `/readyz` both `"version":"2011b73570538d44d510f48176ade5bd5d9d0464"` |
+| Web identity | content-hashed bundle `/assets/index-DTUPxqSF.js`, `grep -c <sha>` = **1** |
+| Worker identity | **INFERRED**, not proven — it shares `statera-api:${GIT_SHA}` (`docker-compose.prod.yml:122`) and has no health endpoint. Unchanged from 8F4 |
+| Migrations | **zero**; `_journal.json` blob identical at both refs, 7 entries. **The `88a157f` floor is UNMOVED**; rollback would be a clean image revert, no schema concern, no R2 restore |
+| Caddyfile | **byte-identical** (blob `b2c414f38424…` at both refs). **8F4-R6 stays UNTRIGGERED**, awaiting a Caddyfile-changing deploy |
+
+Two identity proofs by two different mechanisms — a JSON version field and a content-hashed asset grep — which is what the standing method requires, and why worker remains the one inferred component.
+
+## (2) Smoke walk — recorded honestly (Deploy-R2 binding)
+
+**E1–E5: PASS on OPERATOR ATTESTATION.** Labelled as such deliberately: **operator attestation is the weakest evidence class** (8f-4's S2-RETRACT established that a "clean console" claim must carry a captured artifact, and none was captured here). No automated observer exists for this walk.
+
+**E4 — the step the walk exists for — is INHERENTLY an attestation.** It requires hovering the category-breakdown chart until the tooltip renders, and no automated observer can hover a chart. That is stated plainly rather than dressed as instrumented. The D3.5 lesson is that a load-and-reload walk *cannot* see a hover-only crash, which is exactly how the previous dashboard bug survived a "clean" walk; E4 exists to close that, and it closes it at attestation strength, not better.
+
+**E6 — NOT OBSERVED. The 16-minute TTL wait was NOT PERFORMED.**
+
+Asked directly before writing this line, because the operator's "all good" covers E1–E5 and does **not** distinguish `snapshot` from `hit` — opposite outcomes under Deploy-R2. The answer was that the optional timed step was skipped.
+
+**Therefore: B4-1b's `validateSnapshotPayload` change was NOT exercised on the Tier 2 path in production.** No Tier-2 snapshot replay was observed. This is recorded as a **not-observed, not as a pass** — the deploy is green and the walk was clean, and neither of those facts constitutes Tier-2 coverage. Letting a clean walk imply coverage it did not produce is precisely what the D3.5 lesson forbids.
+
+What *does* cover the change: T1/T2 hermetically (a number-leafed stored snapshot is rejected and Tier 3 serves; a string-leafed one is still served from Tier 2), and the full INTEGRATION suite at 795 / 3 / 0. The production blast radius if it were wrong is a cache miss — fail-safe and self-healing, since rejection routes to Tier 3 recompute which also rewrites the row. **No production write was performed to force a cache bust (Deploy-R2); that was refused on the grounds that writing live financial data to observe a fail-safe path is the wrong side of the trade.**
+
+## (4) Deploy-R4 — the channel's own self-containment breach, on the record
+
+The tenth channel correction. A ruling block was issued that referenced an operator run-sheet three times (*"the run-sheet below"*) while the run-sheet lived **outside** the block, so what reached the implementing session pointed at a document that did not travel with it. The implementer **refused to reconstruct it and stopped** — correctly: there was enough material in the pre-flight's own §7–§9 to produce something plausible, and that is exactly why it must not be produced. **A run-sheet invented downstream and then executed is unreviewed.**
+
+Same failure as SC-1/2's §8, which arrived empty twice. **Rule as amended: anything a downstream session must act on lives INSIDE the block, not adjacent to it — including operator-facing material, because the operator relays by pasting the block.**
+
+## (7) Carried forward — unchanged, and NOT opened by this deploy
+
+- `EMITTED`'s non-clearing in the money-wire capture (masking mechanism, harmless today, awaiting a second cache).
+- **Queue item (1)** — extend B1's `globalSetup` to flush `dashboard_metrics:*` (and evaluate `safe_to_spend:*`). **Still insufficient alone**: it addresses INTER-run residue, while the confirmed failure is intra-run and, per FIND-B4-1c-b, intra-CALL.
+- **Queue item (2)** — the snapshot payload's non-money type holes (`months[]` elements, `monthly[].month`).
+- **FIND-B4-3** — the frontend/API typecheck asymmetry; the guard that does not exist behind the FIND-S5(b) class. **Cost unmeasured.**
+- **FIND-S2** — the `sendEmailBackground` ENOENT flake. **Not to be absorbed as known noise.**
+- **8F4-R4** — `_rollback()`'s web-scope asymmetry (reverts api + worker, never web). Fix-or-affirm, operator call, own cycle.
+- **8F4-R6** — CSP-delta rollback proof, awaiting a Caddyfile-changing deploy.
+- **RL-C1** — the double-prefixed `rl:rl:` key and GET/POST sharing one counter across differing limits.
+- The **e2e/Playwright disposition module**.
+- The **Sentry project rename**.
+
+---
+
 # RULINGS — the 2026-08-08c / 08-08d blocks (persisted BEFORE implementation, per B4-3-R4)
 
 **Date discipline.** FOUR blocks now share 2026-08-08, suffixed `` / `b` / `c` / `d`. Cite by title WITH
