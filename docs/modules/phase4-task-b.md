@@ -826,6 +826,103 @@ appeared during Phase A, which the clock pin should have made impossible. It was
 control run — `grep -c 'pinClock\|useFakeTimers'` returns **0** at `c37046a` vs **4** at HEAD, because
 B4-1a introduced the pin. **No hole in the pin at HEAD.**
 
+# RULINGS — the 2026-08-08 blocks (persisted BEFORE implementation, per B4-2-R7)
+
+**Date discipline.** TWO blocks share 2026-08-08; the second carries a **`b` suffix**. Cite by title:
+(1) **"B4-1c close-out ACCEPTED; B4-2 Phase A chartered, 2026-08-08"**;
+(2) **"B4-2 Phase A approval — nullability form confirmed, R8 composition check ruled a deliberate asset,
+2026-08-08b"**.
+
+## From block (1) — B4-1c accepted (`01c1175`, `8330e0e` blessed)
+
+- **B4-1c-R10 — the order-verification near-miss becomes observation-window instance (8), and it RIDES THE
+  TASK B CLOSE FIX-FORWARD BATCH. Do NOT amend `8330e0e`.** Landing text: *a grep for a baseline line whose
+  pattern assumed a naming convention the line did not follow returned empty, indistinguishable from the
+  line being absent — caught only by printing the list in file order and reading it. Cheap discipline: when
+  verifying an ordered list, print the whole list in file order; a pattern match confirms presence, never
+  order, and its silence confirms nothing.* **Order-verification is a genuinely new facet** — instances
+  (1)–(7) are all about presence or absence; this one is about SEQUENCE, which no grep observes. Second
+  instance in this task where the near-miss occurred during the rule's own authorship.
+- **B4-1c-R11 — MP-10's `divergenceRisk` reasoning ruled correct and worth preserving.** A JSON round-trip
+  preserves string/number, so the replay arm cannot change a wire TYPE — only its provenance. That is the
+  precise reason the gap is safe to RECORD rather than CAPTURE, and it correctly bounds FIND-B4-1c-b: the
+  replay was a **provenance** defect, never a **type** defect, which is why the committed `.json` was never
+  tainted.
+- The `--amend` of `8330e0e` accepted: unpushed, not `249aa7e`, fixing a defect found in its own
+  verification, and stated plainly in the close-out — which is what makes it fine. A fix-forward commit for
+  a chronology inversion would have been worse for the record.
+
+## From block (2), the `b` block — B4-2 Phase A approved
+
+- **B4-2-R1 — WITHDRAWAL ON THE RECORD (the EIGHTH this module). The charter's
+  `AssertEqual<…, "string">` sketch was WRONG, and it is the channel's error, not an implementer
+  deviation.** The sketch presumed the capture's `"string"` is a complete claim about the wire type. It is
+  not, and **B4-1's own blocking clause is why**: the NULL fail-loud guard forbids the capture from
+  recording a null money field, and MP-2/MP-9 record the non-null arms as GAP-RECORDED precisely because
+  the fixtures take them. The capture can therefore only ever emit `"string"` for a field whose true wire
+  type is `string | null`, and a strict bidirectional equality against that asserts something the capture
+  never claimed. **The four TS2322 failures were the type system correctly reporting that the ASSERTION was
+  wrong, not the frontend types.** The `Exclude`/`NonNullable` form is CONFIRMED: weaker than the sketch
+  implied, and **exactly as strong as the capture's actual claim** — it still catches `number`-for-`string`,
+  `string`-for-`number` and `string | number`, verified by the RED-gate firing under it.
+- **B4-2-R2 — the nullability gap is recorded with its revisit trigger, AND the trigger's COST.** Land in
+  both the emitted header and CLAUDE.md: *B4-2 does not check nullability; a frontend type that wrongly
+  omits `| null` passes. Not a regression — nullability was never in the capture's scope.* **Explicit
+  addition:** extending the capture to record nullability requires **relaxing the NULL fail-loud guard,
+  which is a blocking-clause change under TB-R13 and therefore its own chartered cycle, not a tweak.**
+  Write the cost into the trigger so a future reader does not attempt it as a small improvement.
+- **B4-2-R3 — R3-tier2 merge APPROVED; the R8 ruling the other way APPROVED as the stronger call.**
+  Merge-on-key-with-throw-on-disagreement makes duplication impossible **by construction** — there is no
+  dedup step to forget. **Record the convergence:** the 62-from-65 delta being exactly R3-tier2's 3 paths,
+  with the conflict check NOT firing, is a second independent instrument agreeing with C7/MP-1's runtime
+  `expect(t2).toEqual(t3)` — two mechanisms reaching the same conclusion by different routes is worth more
+  than either alone. On R8: emitting both `DashboardBundleResponse["safe_to_spend"]["monthly_income_kd"]`
+  and `SafeToSpendResponse["monthly_income_kd"]` is **not** the duplication the charter barred — different
+  key strings, and the pair is a free check that `DashboardBundleResponse.safe_to_spend` really is typed
+  `SafeToSpendResponse` rather than a divergent inline shape. Resolving through composition would need an
+  authored nested map and would LOSE that check. **State this in the generator's header so a future
+  maintainer does not "optimise" it away.**
+- **B4-2-R4 — the map-gap guard is REQUIRED, not optional.** The route→(prefix, type) map is admissible as
+  a COVERAGE claim under B4-1-R3, but an unmapped route emits zero assertions, zero failures, and vanishes
+  — the CF8/C1 shape one layer out. Both directions. **Prove it able to fail**: remove one route from the
+  map, show red, restore.
+- **B4-2-R5 — Guard 2 in the FRONTEND suite APPROVED**, with 10a's precedent noted as reversed-direction
+  and load-bearing. **Confirm at implementation, do not assume:** that the cross-package path resolves
+  under the frontend Vitest config as it does under 10a's, and that a **missing or moved JSON fails loudly
+  rather than resolving to undefined and passing vacuously**. An empty read that looks like agreement is
+  the observation-window shape yet again.
+- **B4-2-R6 — `resolveJsonModule` being absent is a CONSTRAINT TO STATE, not merely to work around.** Write
+  the reason into the emitted header, or a future maintainer enables `resolveJsonModule`, "simplifies" the
+  generator to import the JSON directly, and **silently reintroduces the widening-to-`string` failure the
+  consumed `@ts-expect-error` already proved**.
+- **B4-2-R7 — persist these rulings NOW, docs-only, before implementing.** (This section is that commit.)
+  Same call and same reasoning as B4-1c-R8; asking rather than inferring a standing rule from one instance
+  was correct.
+- **B4-2-R8 — predicted baselines are the prediction of record.** Frontend **185 / 39**, `tsc` 0, exit 0.
+  API hermetic **777 / 19 / 55 (47 | 8)** and INTEGRATION **793 / 3 / 0** both UNCHANGED.
+  `money-wire-shape.json` unmoved. **The 183/38 line is now MEASURED — it stopped being carried-unverified
+  as of this cycle, and the carried figure was accurate.** No production code, and the assert file is not
+  bundled (nothing imports it, so it never enters Vite's entry graph), so the deploy's smoke-walk
+  obligations are unchanged from what B4-1b imposed.
+
+## B4-2 Phase A — the finding that changed the design (recorded before implementation)
+
+Running all 62 assertions against the real types **before** proposing produced 7 errors in two classes,
+**neither of them typed-drift**: 3 × TS2339 (the generator could not index through an OPTIONAL intermediate,
+`profile_context?`) and 4 × TS2322 (every one a NULLABLE money field —
+`SafeToSpendResponse["monthly_income_kd"]`, the same through `DashboardBundleResponse`, and
+`IncomePatternResponse["monthly_income_kd"]` / `["suggested_monthly_income_kd"]`, all declared
+`string | null`, all captured as `"string"`). Both classes share one fix: step the path with `NonNullable<>`
+and compare the leaf's non-null type via `Exclude<…, null | undefined>`. Under that form **all 62 pass,
+`tsc` exit 0**, and the RED-gate still fires.
+
+**Headline result: ZERO real typed-drift defects.** All 62 money paths agree, so **B4-2 lands as pure
+infrastructure, not a defect hunt** — a fact that could not have been known without running it.
+**R13 is unavailable as a RED-gate subject, verified against the tree rather than inherited:** all 12
+`SnapshotResponse` money declarations are already `string` (3 in `net_position`, 3×3 via
+`SnapshotCashFlowWindow`), each carrying a `// See C2 fix-forward` comment — and CLAUDE.md still says
+`number`, confirming F4's staleness.
+
 ## B4-1c — inert-Redis capture fix — IMPLEMENTED 2026-08-07
 
 Rulings: block (2), "B4-1c Phase A approval — Option (C) with observer test; safe-to-spend replay recorded
