@@ -93,14 +93,32 @@ export async function sendEmail(
 
 // Fire-and-forget — does not block the caller. Node's event loop handles the
 // concurrency; no thread pool needed (contrast with Flask's ThreadPoolExecutor).
+//
+// Returns the promise (FIND-S2 fix, 10e-0): callers remain free to ignore it, but
+// returning it makes completion OBSERVABLE, which is what the test needs. As of
+// 10e-0 there are NO production callers at all — the only invocation in the repo is
+// email.test.ts (the live email path is budget-alerts-job.ts → sendTemplatedEmail →
+// sendEmail), so void → Promise<void> is a widening with no call site to break.
+// Before this, the discarded chain forced the test to guess a
+// fixed sleep long enough for two awaited filesystem syscalls (mkdir + appendFile),
+// and under load 10 ms was not, so the read raced the write and the hermetic suite
+// failed on ENOENT. The returned promise IS the write's completion, so the race is
+// removed rather than made less likely.
+//
+// This does NOT weaken the fire-and-forget rule: that rule is about not blocking a
+// response on an audit/tracking write. A promise nobody awaits blocks nothing. The
+// internal .catch() is retained unchanged, so the returned promise never rejects —
+// an ignoring caller cannot acquire an unhandled rejection.
 export function sendEmailBackground(
   to: string,
   subject: string,
   htmlBody: string,
   textBody: string,
-): void {
-  sendEmail(to, subject, htmlBody, textBody).catch((exc) => {
-    Sentry.captureException(exc)
-    console.error("[email] Background send threw unexpectedly:", exc)
-  })
+): Promise<void> {
+  return sendEmail(to, subject, htmlBody, textBody)
+    .then(() => undefined)
+    .catch((exc) => {
+      Sentry.captureException(exc)
+      console.error("[email] Background send threw unexpectedly:", exc)
+    })
 }

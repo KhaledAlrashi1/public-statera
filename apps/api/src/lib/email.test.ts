@@ -72,9 +72,7 @@ describe("sendEmail validation", () => {
 
 describe("sendEmailBackground", () => {
   it("fires without blocking and the log entry appears asynchronously", async () => {
-    sendEmailBackground("bg@example.com", "Bg subject", "<p>bg</p>", "bg")
-    // Give the event loop one tick to flush the promise.
-    await new Promise((r) => setTimeout(r, 10))
+    await sendEmailBackground("bg@example.com", "Bg subject", "<p>bg</p>", "bg")
     const entry = JSON.parse(readFileSync(TEST_LOG, "utf8").trim())
     expect(entry.to).toBe("bg@example.com")
   })
