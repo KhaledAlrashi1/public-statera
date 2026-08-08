@@ -825,3 +825,51 @@ uncached. Elsewhere: `aggregation.test.ts` mocks `../lib/analytics-cache` wholes
 appeared during Phase A, which the clock pin should have made impossible. It was written by the `c37046a`
 control run — `grep -c 'pinClock\|useFakeTimers'` returns **0** at `c37046a` vs **4** at HEAD, because
 B4-1a introduced the pin. **No hole in the pin at HEAD.**
+
+## B4-1c — inert-Redis capture fix — IMPLEMENTED 2026-08-07
+
+Rulings: block (2), "B4-1c Phase A approval — Option (C) with observer test; safe-to-spend replay recorded
+as FIND-B4-1c-b, 2026-08-07" (R2–R9). Rulings persisted first in `01c1175` per B4-1c-R8; implementation
+sits on top of that commit.
+
+**Changeset** (one file, `apps/api/src/contract/money-wire-shape.test.ts`; zero production diff):
+- **R2/(C)** — file-local `vi.mock("ioredis")` reusing the exported `RedisMock`, in the async-factory form
+  (`vi.mock` is hoisted above imports). Makes `cacheGet` miss in BOTH modes.
+- **R6** — header line 71 corrected. `cacheGet`/`cacheSet` removed from the "run for real here" list;
+  `ioredis` added to the mocked list; a new "THIS CAPTURE REQUIRES AN INERT REDIS" section states the
+  requirement positively and says why the mock is file-local (the global setup skips under INTEGRATION, so
+  inheriting inertness was accidental).
+- **R5** — MULTI_PATH gains **MP-10** (safe-to-spend, GAP-RECORDED): both arms named, the build arm taken
+  by construction AND by enforcement, `divergenceRisk` "none (a JSON round-trip preserves string/number, so
+  the replay arm cannot change a wire TYPE — only its provenance)", revisit trigger recorded, and an
+  explicit **do NOT capture the replay arm**. Coverage claim, inside the B4-1-R3 authored-entry boundary.
+  The C7 assertions are unaffected (`both` still `["MP-1","MP-4","MP-5"]`; TYPE-risk still only `["MP-1"]`).
+- **R4** — new safe-to-spend OBSERVER CHECK asserting R8/R9/R10 each issue the builder's own queries.
+
+**R4 — the observer PROVEN ABLE TO FAIL** (one-line temporary mutation making the inert mock serve a
+`safe_to_spend:` value; evidence artifact, reverted, never committed):
+```
+    R8 dbcalls=13 :: execute | select{id,month,amountKd,categoryName} | ...
+    R9 dbcalls=2  :: execute | execute
+    R10 dbcalls=6 :: execute | select{total} | select{total} | select{name,total} | select{paydayDay} | execute
+ FAIL … OBSERVER CHECK: the safe-to-spend builder ran for R8/R9/R10 — no cache replay
+ AssertionError: R8 must run the safe-to-spend builder, not replay a cached payload:
+   expected [ 'execute', …(12) ] to include 'select{amount,catName}'
+ Tests  3 failed | 6 passed (9)
+```
+Green after revert, with the full builder signature restored: **R8=16, R9=5, R10=9**.
+(The same mutation also drove Guard 1 and the provenance audit red — `EXTRA R8
+data.safe_to_spend.safe_to_spend_kd = "1.000"` — so three independent guards see it once a cache is live.)
+
+**Verification (B4-1c-R9 — every prediction MET, none retro-fitted):**
+- Hermetic **777 passed / 19 skipped / 0 failed across 55 files (47 passed | 8 skipped)**, exit 0, no
+  Errors/Unhandled section. `tsc --noEmit` exit 0.
+- **INTEGRATION `793 passed / 3 skipped / 0 failed across 55 files, exit 0`**, reconciling exactly as
+  777 + 19 − 3 = 793 (total 796). **This run discharges B4-1c-R1.**
+- **Residue class closed for this file, proven not asserted:** the run wrote **zero** `dashboard_metrics:1:*`
+  and **zero** `safe_to_spend:*` keys (the only `dashboard_metrics:*` keys left are B4-1b's
+  unique-per-run tier-test userIds), and an immediate back-to-back second INTEGRATION run was also
+  `793 / 3 / 0` exit 0 with no manual precondition.
+- `money-wire-shape.json` **unmoved** (Guard 1 green; `git diff --stat` empty) — measured in the Phase A
+  probe and again here. Emit-site table unaffected (no serializer call site touched).
+- Frontend untouched and **not re-run**; 183/38 carried unverified by design.

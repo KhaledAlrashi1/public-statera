@@ -65,13 +65,31 @@
  *     items array empties.
  *
  * ── WHAT IS MOCKED, AND WHY THAT IS NOT AN AUTHORED ENTRY ────────────────────
- * ONLY `../db/connection` (getDb) and `../lib/rate-limit`. Mocking a data SOURCE
- * is a fixture; mocking a SERIALIZER is an authored entry by the back door.
+ * `../db/connection` (getDb), `../lib/rate-limit`, and `ioredis`. Mocking a data
+ * SOURCE is a fixture; mocking a SERIALIZER is an authored entry by the back door.
  * Deliberately NOT mocked, all of which run for real here: `withAnalyticsTimeout`,
- * `cacheGet`/`cacheSet`, `getDashboardMetricsWithCache`, `resolveIncomeForPeriod`,
- * `buildBudgetPayload`, `listActiveBudgetAlerts`. (`routes/aggregation.test.ts`
- * mocks `./budgets`; if this file did the same, R8's four budget money types
- * would be transcriptions rather than observations.)
+ * `getDashboardMetricsWithCache`, `loadDashboardSnapshot`, `resolveIncomeForPeriod`,
+ * `buildBudgetPayload`, `listActiveBudgetAlerts`, and every `formatKd`/`roundedKd`.
+ * (`routes/aggregation.test.ts` mocks `./budgets`; if this file did the same, R8's
+ * four budget money types would be transcriptions rather than observations.)
+ *
+ * ── THIS CAPTURE REQUIRES AN INERT REDIS (B4-1c-R6; FIND-B4-1c) ──────────────
+ * Stated positively, because this header previously listed `cacheGet`/`cacheSet`
+ * among things that "run for real here" — the file's most misleading sentence, and
+ * the exact opposite of its actual dependency.
+ * Every captured type must be `typeof` on a REAL SERIALIZER's output. A cache HIT
+ * serves a JSON round-trip instead, so the type is preserved while the provenance
+ * is fake. The cache is therefore mocked at `ioredis` — a data SOURCE, a fixture,
+ * never a serializer — via the file-local `vi.mock("ioredis")` below.
+ * It is file-local ON PURPOSE: `vitest.config.ts` sets `setupFiles: []` when
+ * INTEGRATION=true, so the global stub disappears in that mode and inheriting
+ * inertness from it was ACCIDENTAL. Under INTEGRATION the first capture used to
+ * populate `dashboard_metrics:*` and later captures took a Tier-1 hit (CF6/C7 read
+ * `hit` where they expect `snapshot`/`miss`), while R8/R9/R10 silently replayed one
+ * `safe_to_spend:*` entry (FIND-B4-1c-b). The mock makes Tier 1 inert in BOTH modes,
+ * writes nothing to Redis, and is verified by the safe-to-spend OBSERVER CHECK below
+ * rather than trusted. Tier 2 (the DB snapshot) and Tier 3 are unaffected and both
+ * remain exercised.
  *
  * ── GATE ─────────────────────────────────────────────────────────────────────
  * This file is gated by the full hermetic suite (`pnpm --filter statera-api test`,
@@ -107,6 +125,16 @@ vi.mock("../lib/rate-limit", () => ({
   writeRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
   heavyWriteRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
 }))
+
+// Inert Redis, file-local and unconditional — see "THIS CAPTURE REQUIRES AN INERT
+// REDIS" in the header. RedisMock's `get()` returns null, so every cacheGet misses
+// and every payload is built by a real serializer in BOTH modes. Reuses the stub
+// `src/test/redis-mock.setup.ts` already exports for exactly this purpose; the
+// async-factory form is required because vi.mock is hoisted above imports.
+vi.mock("ioredis", async () => {
+  const { RedisMock } = await import("../test/redis-mock.setup")
+  return { default: RedisMock, Redis: RedisMock }
+})
 
 // ── Serializer provenance ────────────────────────────────────────────────────
 // Wrap the REAL formatKd/roundedKd and record every value they return, so the
@@ -504,6 +532,20 @@ const MULTI_PATH: MultiPath[] = [
     divergenceRisk: "none (null arm forbidden by the NULL guard)",
     revisit: "The two null arms are deliberately unreachable: capturing them would record `null` as the wire type, which is what the NULL guard exists to prevent.",
   },
+  {
+    id: "MP-10",
+    wirePath: "R8 data.safe_to_spend.* / R9 data.* / R10 data.safe_to_spend_today_kd (the whole safe-to-spend payload)",
+    arms: [
+      "build: routes/aggregation.ts:742 _buildSafeToSpendPayload — the real serializers run",
+      "cached replay: routes/aggregation.ts:733-739 _getSafeToSpendPayloadCached — JSON.parse of a stored safe_to_spend:{userId}:{month} entry, no serializer runs",
+    ],
+    fixtureArm:
+      "build, BY CONSTRUCTION AND NOW BY ENFORCEMENT — the file-local ioredis mock makes cacheGet always miss, so the replay arm is unreachable here. Verified, not assumed: the safe-to-spend OBSERVER CHECK asserts R8/R9/R10 each issue the builder's own queries.",
+    disposition: "GAP-RECORDED",
+    divergenceRisk: "none (a JSON round-trip preserves string/number, so the replay arm cannot change a wire TYPE — only its provenance)",
+    revisit:
+      "FIND-B4-1c-b. _getSafeToSpendPayloadCached is reached from R8 (:1115), R9 (:922) and R10 (:1037) within ONE captureAll, and ROUTES orders them R8 -> R9 -> R10, so before B4-1c R8's build populated the key and R9/R10 replayed it under INTEGRATION (db-call signature 16/5/9 hermetic vs 13/2/6 cached, -3 each; R9 at 2 built nothing). No unique-per-call userId can separate them — they are one user's dashboard by construction. DO NOT attempt to capture the replay arm: that re-introduces exactly what B4-1c removed. Revisit if the safe-to-spend payload's serializers change, or if any assertion is added that depends on the replay arm.",
+  },
 ]
 
 type Leaf = {
@@ -869,6 +911,36 @@ describe("B4-1 money wire-shape capture", () => {
     expect(presenceErrors).toHaveLength(1)
     expect(presenceErrors[0]).toContain("data.expense_by_category")
     expect(nullErrors).toHaveLength(0) // the non-empty sibling is not false-positived
+  })
+
+  it("OBSERVER CHECK: the safe-to-spend builder ran for R8/R9/R10 — no cache replay", async () => {
+    // B4-1c-R4. The inert-Redis mock is the fix; this is what stops it being a mock
+    // nobody verifies — the shape of the inert guard B3 deleted. FIND-B4-1c-b:
+    // R8/R9/R10 share safe_to_spend:{userId}:{month} within ONE captureAll, so if
+    // any cache read went live, R8 would build and R9/R10 would replay a JSON
+    // round-trip. That is invisible to every other guard here: safe-to-spend sets no
+    // X-Cache-Status, the round-trip preserves string/number, and the provenance
+    // audit's EMITTED set is module-level and never cleared, so R8's real run masks
+    // R9/R10 permanently. The builder's own three queries are the only signal left.
+    const { dbCalls } = await captureAll()
+    console.log("\n=== OBSERVER CHECK (safe-to-spend builder) ===")
+    for (const id of ["R8", "R9", "R10"]) {
+      console.log(`    ${id} dbcalls=${dbCalls[id].length} :: ${dbCalls[id].map((c) => c.kind).join(" | ")}`)
+    }
+    for (const id of ["R8", "R9", "R10"]) {
+      const kinds = dbCalls[id].map((c) => c.kind)
+      // _buildSafeToSpendPayload's budget-rows query. Unique to the builder on all
+      // three routes, so its absence means the payload arrived from the cache.
+      expect(kinds, `${id} must run the safe-to-spend builder, not replay a cached payload`).toContain(
+        "select{amount,catName}",
+      )
+      // ...plus its two select{total} queries. The measured replay signature is
+      // exactly -3 db calls per route (16/5/9 -> 13/2/6).
+      expect(
+        kinds.filter((k) => k === "select{total}").length,
+        `${id} safe-to-spend builder select{total} count`,
+      ).toBeGreaterThanOrEqual(2)
+    }
   })
 
   it("OBSERVER CHECK: the NULL guard fires on a nulled money field", () => {
