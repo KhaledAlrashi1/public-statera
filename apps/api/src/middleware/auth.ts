@@ -22,6 +22,10 @@ import { HTTPException } from "hono/http-exception"
 import * as jose from "jose"
 import Redis from "ioredis"
 import { env } from "../lib/env"
+// Imported, NOT re-exported (10e-R36 condition 1): session-cookie.ts is the single canonical
+// import path for this symbol. Re-exporting it here would give it two import paths and would
+// recreate the mock-enumeration coupling that moving the helper out of this file removed.
+import { SESSION_COOKIE } from "./session-cookie"
 
 export interface SessionData {
   userId: number
@@ -36,8 +40,9 @@ declare module "hono" {
   }
 }
 
-const SESSION_COOKIE = "statera_session"
 // 30 days — matches JWT expiry so revoked-sv keys expire when the token would anyway.
+// NOT the same constant as SESSION_MAX_AGE_SECONDS (session-cookie.ts) despite the equal
+// value: that one is the browser cookie's lifetime, this one is the deny-list key's TTL.
 const SV_REVOKE_TTL_SECONDS = 60 * 60 * 24 * 30
 
 function sessionSecret(): Uint8Array {

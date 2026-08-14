@@ -7,6 +7,7 @@ import { users, userProfiles, securityEvents } from "../db/schema"
 import { env } from "../lib/env"
 import { generators, getOidcClient } from "../lib/oidc"
 import { createSessionToken, revokeSessionVersion, requireAuth, getAuthRedis } from "../middleware/auth"
+import { setSessionCookie, SESSION_COOKIE } from "../middleware/session-cookie"
 import { Sentry } from "../lib/sentry"
 import { recordEventOnce } from "../lib/product-events-lib"
 import { createRateLimiter } from "../lib/rate-limit"
@@ -352,13 +353,7 @@ router.get("/callback", async (c) => {
     .catch((err) => Sentry.captureException(err, { tags: { handler: "auth.callback.lastLoginAt", userId } }))
 
   const sessionToken = await createSessionToken({ userId, externalId, authProvider: provider, sv: sessionVersion })
-  setCookie(c, "statera_session", sessionToken, {
-    httpOnly: true,
-    sameSite: "Lax",
-    secure: !env.isDev,
-    maxAge: 60 * 60 * 24 * 30,
-    path: "/",
-  })
+  setSessionCookie(c, sessionToken)
 
   const frontendOrigin = env.corsOrigins[0] ?? "http://127.0.0.1:3002"
   return c.redirect(`${frontendOrigin}${isNewUser ? "/welcome?source=signup" : "/"}`)
@@ -366,7 +361,7 @@ router.get("/callback", async (c) => {
 
 // POST /api/auth/logout
 router.post("/logout", (c) => {
-  deleteCookie(c, "statera_session", { path: "/" })
+  deleteCookie(c, SESSION_COOKIE, { path: "/" })
   return c.json({ ok: true })
 })
 
@@ -585,13 +580,7 @@ router.post(
     await revokeSessionVersion(userId, oldSv)
     const { externalId, authProvider } = c.var.session
     const newToken = await createSessionToken({ userId, externalId, authProvider, sv: newSv })
-    setCookie(c, "statera_session", newToken, {
-      httpOnly: true,
-      sameSite: "Lax",
-      secure: !env.isDev,
-      maxAge: 60 * 60 * 24 * 30,
-      path: "/",
-    })
+    setSessionCookie(c, newToken)
 
     return c.json({ ok: true, data: null, error: null, meta: {} })
   },
@@ -748,13 +737,7 @@ router.post(
 
     const { authProvider, externalId, sessionVersion } = user
     const sessionToken = await createSessionToken({ userId, externalId, authProvider, sv: sessionVersion })
-    setCookie(c, "statera_session", sessionToken, {
-      httpOnly: true,
-      sameSite: "Lax",
-      secure: !env.isDev,
-      maxAge: 60 * 60 * 24 * 30,
-      path: "/",
-    })
+    setSessionCookie(c, sessionToken)
 
     const data: Record<string, unknown> = { user_id: userId }
     if (backupCodesLow && remainingBackupHashes !== null) {
@@ -799,13 +782,7 @@ router.post(
 
     // Re-issue caller's cookie with newSv before returning — prevents self-lockout.
     const newToken = await createSessionToken({ userId, externalId, authProvider, sv: newSv })
-    setCookie(c, "statera_session", newToken, {
-      httpOnly: true,
-      sameSite: "Lax",
-      secure: !env.isDev,
-      maxAge: 60 * 60 * 24 * 30,
-      path: "/",
-    })
+    setSessionCookie(c, newToken)
 
     auditSecurityEvent(db, "sessions.revoke_all", {
       userId,
