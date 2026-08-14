@@ -10,6 +10,7 @@ import { createSessionToken, revokeSessionVersion, requireAuth, getAuthRedis } f
 import { setSessionCookie, SESSION_COOKIE } from "../middleware/session-cookie"
 import { Sentry } from "../lib/sentry"
 import { recordEventOnce } from "../lib/product-events-lib"
+import { auditSecurityEvent } from "../lib/security-events-lib"
 import { createRateLimiter } from "../lib/rate-limit"
 import { cacheBustDashboardMetrics, cacheBustSafeToSpend } from "../lib/analytics-cache"
 import {
@@ -103,26 +104,6 @@ async function packDeleteIntentToken(userId: number): Promise<string> {
 export async function verifyDeleteIntentToken(token: string): Promise<{ userId: number }> {
   const { payload } = await jwtVerify(token, stateSecret())
   return { userId: payload["userId"] as number }
-}
-
-// Fire-and-forget security event write. Never throws — Sentry-captured on failure.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function auditSecurityEvent(
-  db: ReturnType<typeof getDb>,
-  eventType: string,
-  opts: { userId?: number | null; ipAddress?: string; userAgent?: string; details?: Record<string, unknown> } = {},
-): void {
-  db.insert(securityEvents)
-    .values({
-      userId: opts.userId ?? null,
-      eventType,
-      ipAddress: opts.ipAddress ?? null,
-      userAgent: opts.userAgent ?? null,
-      detailsJson: opts.details ? JSON.stringify(opts.details) : null,
-    })
-    .catch((err: unknown) =>
-      Sentry.captureException(err, { tags: { handler: "auditSecurityEvent", eventType } }),
-    )
 }
 
 // GET /api/auth/login
