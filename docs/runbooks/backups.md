@@ -209,7 +209,7 @@ bash deploy/restore-drill.sh --verify-only daily/statera-2026-07-08T15:23:03Z.sq
 
 `restore-drill.sh` asserts (fails loudly, never "completed without errors"): object + decrypted
 `sha256` recorded; a complete dump (`-- Dump completed` trailer, truncation guard); the restored
-table set equals the **declared 19-table set** exactly, both directions (A2 — no discover-and-accept);
+table set equals the **declared 20-table set** exactly, both directions (A2 — no discover-and-accept);
 a per-table row-count manifest; FK-integrity probes = 0 orphaned owned rows; and (if given) exactly
 one active anchor user.
 
@@ -217,8 +217,9 @@ one active anchor user.
 > The declared manifest was reduced from 21 to 19 tables when SC-3 dropped the debt/savings
 > tables (and the `user_profiles.has_debt_choice` column). Three facts govern restores across
 > this cutover:
-> 1. **Backups taken BEFORE the SC-3 deploy date carry 21 tables** and will FAIL the 19-table
->    exact-match assertion (2 EXTRA: `debt_accounts`, `savings_goals`). This is an **expected
+> 1. **Backups taken BEFORE the SC-3 deploy date carry 21 tables** and will FAIL the exact-match
+>    assertion (2 EXTRA: `debt_accounts`, `savings_goals`). The assertion was 19-table at the time
+>    of this cutover and is 20-table since 10e-1 — see the note below. This is an **expected
 >    finding, not a defect** — such backups age out of R2 within their lifecycle window (up to
 >    365d at the monthly tier). To drill a pre-SC-3 object during the overlap, temporarily
 >    re-add the two table names to `DECLARED_TABLES` for that run.
@@ -228,8 +229,28 @@ one active anchor user.
 >    A real recovery-into-prod from a pre-SC-3 backup must run `migrate` immediately after restore.
 > 3. **That automatic re-drop also erases any legacy debt/savings rows of already-deleted users**
 >    carried in an old backup — preserving the "re-apply all deletions completed before the
->    restore" commitment (Privacy §7) for those two tables, which the 11-table re-purge no longer
->    covers (the re-purge scope shrank with the purge in SC-1/2). It leaves the scratch container **running** and prints `T_backup` + the
+>    restore" commitment (Privacy §7) for those two tables, which the re-purge no longer
+>    covers (the re-purge scope shrank with the purge in SC-1/2 to 11 tables; it is 12 since
+>    10e-1 added `magic_link_tokens`).
+>
+> **Table-count cutover: 19 → 20 tables (10e-1, CREATE `magic_link_tokens`).** The mirror image of
+> the SC-3 cutover, and it fails in the opposite direction:
+> 1. **Backups taken BEFORE the 10e-1 deploy carry 19 tables** and will FAIL the 20-table
+>    exact-match assertion with **1 MISSING: `magic_link_tokens`** — not EXTRA. Expected, not a
+>    defect. To drill a pre-10e-1 object during the overlap, temporarily remove that one table
+>    name from `DECLARED_TABLES` for that run.
+> 2. **This one self-heals the same way SC-3's did, by the same mechanism:** a restored DB whose
+>    `__drizzle_migrations` predates `0007` gains the table on the next `migrate` run. A recovery
+>    -into-prod from a pre-10e-1 backup must run `migrate` immediately after restore — the same
+>    instruction, for the same reason, in the additive direction.
+> 3. **Unlike SC-3's, this cutover has no Privacy §7 consequence.** SC-3's re-drop mattered because
+>    it erased deleted users' surviving rows; here the pre-10e-1 backup simply has no such rows to
+>    carry, and the 12-table re-purge covers `magic_link_tokens` from 10e-1 onward. Note the one
+>    class the re-purge structurally cannot reach in EITHER direction: sign-up-path rows with
+>    `user_id = NULL`, whose only bound is the cleanup job (see `db/schema/magic-link-tokens.ts`).
+>    A restore resurrects those rows and no re-purge removes them; the cleanup job re-expires them
+>    on its normal schedule.
+It leaves the scratch container **running** and prints `T_backup` + the
 scratch connection string for Stage 2/3. A **resource guard (A4)** aborts before creating the
 container if free memory/disk are below `MIN_FREE_MEM_MB` (512) / `MIN_FREE_DISK_MB` (2048).
 

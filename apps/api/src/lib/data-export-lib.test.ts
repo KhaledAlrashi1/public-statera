@@ -313,7 +313,7 @@ describe("buildUserDataExport — user not found", () => {
 // ── Exclusions constant (feeds meta.excluded — see route test) ────────────────
 describe("DATA_EXPORT_EXCLUSIONS", () => {
   it("documents both field-level and table-level departures from export=purge", () => {
-    expect(DATA_EXPORT_EXCLUSIONS.length).toBe(7)
+    expect(DATA_EXPORT_EXCLUSIONS.length).toBe(8)
     const joined = DATA_EXPORT_EXCLUSIONS.join(" ")
     expect(joined).toContain("external_id")
     expect(joined).toContain("totp_secret")
@@ -326,7 +326,7 @@ describe("DATA_EXPORT_EXCLUSIONS", () => {
 
   // Full deep-equal of the real list — the route test asserts pass-through against a
   // mocked stand-in, so this is the only place the exact meta.excluded content is pinned.
-  it("is exactly the seven documented exclusions, in order", () => {
+  it("is exactly the eight documented exclusions, in order", () => {
     expect(DATA_EXPORT_EXCLUSIONS).toEqual([
       "users.external_id — authentication-infrastructure (IdP-issued cross-service identifier)",
       "users.totp_secret / users.totp_backup_codes_json / users.session_version — authentication-infrastructure / credential material",
@@ -334,6 +334,7 @@ describe("DATA_EXPORT_EXCLUSIONS", () => {
       "transactions.import_row_hash — import-dedup infrastructure",
       "dashboard_snapshots — derived aggregation cache, reconstructable from transactions/budgets",
       "account_action_tokens — short-lived authentication tokens",
+      "magic_link_tokens — short-lived sign-in tokens (auth-infra, same rationale as account_action_tokens)",
       "security_events tombstone rows — account-deletion audit records not tied to the user",
     ])
   })

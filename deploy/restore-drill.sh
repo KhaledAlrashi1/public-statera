@@ -33,7 +33,7 @@ AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-${HOME}/.config/sops/age/keys.txt}"
 MIN_FREE_MEM_MB="${MIN_FREE_MEM_MB:-512}"
 MIN_FREE_DISK_MB="${MIN_FREE_DISK_MB:-2048}"
 
-# Declared table set (A2): 20 Drizzle schema tables + the migrations journal. Stage 1 fails on
+# Declared table set (A2): 19 Drizzle schema tables + the migrations journal. Stage 1 fails on
 # ANY delta in EITHER direction — no discover-and-accept. Update deliberately when the schema changes.
 DECLARED_TABLES=$(cat <<'EOF'
 __drizzle_migrations
@@ -45,6 +45,7 @@ budgets
 categories
 dashboard_snapshots
 data_access_logs
+magic_link_tokens
 memorized_transactions
 merchants
 product_events
@@ -250,7 +251,7 @@ if [[ -n "${MISSING}" || -n "${EXTRA}" ]]; then
   [[ -n "${EXTRA}"   ]] && echo "  unexpected tables: ${EXTRA}" >&2
   die "restored table set does not match the declared set"
 fi
-echo "[drill]   table set: OK — matches the declared 19-table set exactly."
+echo "[drill]   table set: OK — matches the declared 20-table set exactly."
 
 # Row-count manifest (recorded as the checksum of a good restore).
 echo "[drill]   row-count manifest:"

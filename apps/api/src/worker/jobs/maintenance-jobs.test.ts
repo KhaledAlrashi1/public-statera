@@ -111,6 +111,25 @@ describe("handleCleanupAccountTokens", () => {
     )
     expect(vi.mocked(Sentry.captureException)).toHaveBeenCalledOnce()
   })
+
+  // 10e-1: the log line IS the on-box activation discriminator (A6.7). At 10e-close the
+  // operator greps the worker journal, and PASS requires the two magic_* fields — a pre-10e
+  // worker prints the old two-field line, a stopped worker prints nothing, and the three
+  // outcomes are distinguishable only because these field names exist. A discriminator that
+  // is asserted nowhere is a claim, so it is pinned here rather than read off the source.
+  it("logs all four delete counters, so the 10e-close on-box discriminator exists", async () => {
+    vi.spyOn(connection, "getDb").mockReturnValue(makeDbReturning([{ affectedRows: 3 }]))
+    const log = vi.spyOn(console, "log").mockImplementation(() => {})
+    await handleCleanupAccountTokens(fakeJob)
+    const line = log.mock.calls.map((c) => String(c[0])).join("\n")
+    log.mockRestore()
+
+    expect(line).toContain(`[${TASK_CLEANUP_ACCOUNT_TOKENS}]`)
+    expect(line).toContain("expired_deleted=3")
+    expect(line).toContain("used_deleted=3")
+    expect(line).toContain("magic_expired_deleted=3")
+    expect(line).toContain("magic_consumed_deleted=3")
+  })
 })
 
 // ── cleanup-security-data ─────────────────────────────────────────────────────

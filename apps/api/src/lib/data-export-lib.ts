@@ -31,6 +31,11 @@
  *   exported transactions/budgets. No independent right-to-know value.
  * - account_action_tokens — short-lived authentication tokens (auth-infra, same rationale
  *   as external_id).
+ * - magic_link_tokens (10e-1) — short-lived sign-in tokens (auth-infra, same rationale as
+ *   account_action_tokens). Exporting them would hand back a table whose only non-infra
+ *   column is an address the user already supplied, alongside the hash of a credential; and
+ *   sign-up-path rows carry user_id = NULL, so they are not this user's rows to export in
+ *   the first place. See the orphan-class block in db/schema/magic-link-tokens.ts.
  * - security_events tombstone rows — account-deletion audit records (user_id=NULL,
  *   is_tombstone=true). Not tied to this user's identity; never exported.
  *
@@ -98,6 +103,7 @@ export const DATA_EXPORT_EXCLUSIONS: readonly string[] = [
   "transactions.import_row_hash — import-dedup infrastructure",
   "dashboard_snapshots — derived aggregation cache, reconstructable from transactions/budgets",
   "account_action_tokens — short-lived authentication tokens",
+  "magic_link_tokens — short-lived sign-in tokens (auth-infra, same rationale as account_action_tokens)",
   "security_events tombstone rows — account-deletion audit records not tied to the user",
 ] as const
 

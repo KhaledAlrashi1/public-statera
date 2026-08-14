@@ -1336,3 +1336,51 @@ this section is new judgement — it is a pointer index into the two documents a
 | A6.2: `it` title "seven … exclusions" | moves to **eight** | 10e-R17 |
 | F2 replacement line | goes in **Key architectural decisions**, adopted verbatim | 10e-R8 |
 | verify failure copy | one non-distinguishing string naming all four causes, rendered on `/auth/magic` **with the request form directly beneath it**; byte-identical-response tests on both endpoints | 10e-R14 |
+
+---
+---
+
+# ERRATA
+
+Corrections to the report above, appended as the work proceeded. **The original text is never
+edited** — the error and its correction both stay visible, per the standing culture that
+withdrawals are recorded rather than silently revised. Each entry names the sub-commit that
+found it and the date.
+
+## E1 — A5's `sendEmailBackground` caller claim is FALSE (found 10e-0 §c; recorded 10e-1, 2026-08-08)
+
+**What A5 said.** In the FIND-S2 fix rationale ("The signature change is safe"), A5 wrote:
+
+> every existing call site (`grep`: `budget-alerts-lib.ts`, and the module's own tests) ignores
+> return values today
+
+**What the tree says.** `sendEmailBackground` has **ZERO production callers.** Its only
+invocation anywhere in `apps/api/src` is its own test:
+
+```
+apps/api/src/lib/email.test.ts:5:import { sendEmail, sendEmailBackground } from "./email"
+apps/api/src/lib/email.test.ts:75:    await sendEmailBackground("bg@example.com", "Bg subject", "<p>bg</p>", "bg")
+apps/api/src/lib/email.ts:112:export function sendEmailBackground(
+```
+
+The live email path does not pass through it at all. It is
+`worker/jobs/budget-alerts-job.ts:160` → `sendTemplatedEmail` (`lib/email-templates.ts:63`) →
+`sendEmail` (`lib/email-templates.ts:70`). Note also that the file A5 named — `budget-alerts-lib.ts`
+— sends no email; the sending job is `worker/jobs/budget-alerts-job.ts`. **The claim is therefore
+wrong twice over: wrong function, wrong file.**
+
+**What this does and does not change.**
+
+- It does **not** weaken the 10e-0 fix. The `void` → `Promise<void>` widening is *more* obviously
+  safe with zero production callers than with one, and the fix was verified in both directions
+  (race mechanically reproduced against the pre-fix code; fixed test shown able to fail) rather
+  than resting on this claim.
+- It **does** correct the record on what `sendEmailBackground` currently is: **dead production
+  code with a live test**. 10e-2 is its first real caller, if the request endpoint uses it —
+  which is now a decision to make explicitly rather than an existing pattern to follow. Recorded
+  here so 10e-2 does not inherit "there is precedent for calling this" from a sentence that was
+  never true.
+- **Class:** an assertion about the tree, stated with a `grep:` prefix that implied it had been
+  run, which the tree contradicts. The same shape as the standing rule's instance set — a search
+  reported as evidence without the matched-file list printed. Had A5 pasted the match list, the
+  absence of any non-test caller would have been visible in the paste.

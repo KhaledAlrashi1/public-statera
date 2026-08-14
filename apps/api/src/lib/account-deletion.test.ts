@@ -85,9 +85,10 @@ describe("purgeUserAccountRows — DB call sequence", () => {
     // All operations between the tombstone and the soft-delete are deletes.
     const middle = calls.slice(2, -1)
     expect(middle.every((c) => c === "delete")).toBe(true)
-    // Total: 1 select + 1 insert + 11 deletes + 1 update = 14 calls
-    // (11 deletes since phase4 SC-1/2 removed the debt_accounts + savings_goals purges)
-    expect(calls).toHaveLength(14)
+    // Total: 1 select + 1 insert + 12 deletes + 1 update = 15 calls
+    // (11 deletes since phase4 SC-1/2 removed the debt_accounts + savings_goals purges;
+    //  12 since 10e-1 added magic_link_tokens after account_action_tokens)
+    expect(calls).toHaveLength(15)
     // Returns the pre-purge sessionVersion for the caller's post-commit revoke.
     expect(result).toEqual({ revokedSv: 5 })
   })

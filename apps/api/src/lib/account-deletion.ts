@@ -7,8 +7,14 @@
  *   SecurityEvent → ProductEvent → MemorizedTransaction → TemplateSuggestionFeedback →
  *   AccountActionToken → UserProfile → Merchant → Category → soft-delete User.
  *   Hono matches this order exactly, MINUS DebtAccount and SavingsGoal: those features were
- *   removed in phase4 scope-narrowing (SC-1/2), so the purge is now 11 tables, not 13. The
+ *   removed in phase4 scope-narrowing (SC-1/2), so the purge dropped to 11 tables, not 13. The
  *   debt_accounts / savings_goals tables themselves are dropped in SC-3 (deploy 2).
+ *   Module 10e-1 then added MagicLinkToken immediately after AccountActionToken (same
+ *   auth-infra class, same ordering logic), so the purge is now 12 tables.
+ *   NOTE (10e-1): the magic_link_tokens delete reaches only rows whose user_id is set.
+ *   Sign-up-path rows carry user_id = NULL by design and are unreachable from here; their
+ *   only bound is handleCleanupAccountTokens. See the orphan-class block in
+ *   db/schema/magic-link-tokens.ts.
  * - Tombstone: Flask relies on DELETE WHERE user_id=uid (NULL semantics for tombstone with
  *   user_id=NULL). Hono adds is_tombstone=true column and uses AND is_tombstone=false in the
  *   DELETE, so tombstone survival is explicit rather than implicit.
@@ -46,6 +52,7 @@ import {
   memorizedTransactions,
   templateSuggestionFeedback,
   accountActionTokens,
+  magicLinkTokens,
   userProfiles,
   merchants,
   categories,
@@ -107,6 +114,7 @@ export async function purgeUserAccountRows(
   await db.delete(memorizedTransactions).where(eq(memorizedTransactions.userId, userId))
   await db.delete(templateSuggestionFeedback).where(eq(templateSuggestionFeedback.userId, userId))
   await db.delete(accountActionTokens).where(eq(accountActionTokens.userId, userId))
+  await db.delete(magicLinkTokens).where(eq(magicLinkTokens.userId, userId))
   await db.delete(userProfiles).where(eq(userProfiles.userId, userId))
   await db.delete(merchants).where(eq(merchants.userId, userId))
   await db.delete(categories).where(eq(categories.userId, userId))

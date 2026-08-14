@@ -10,8 +10,9 @@
 import { describe, it, expect } from "vitest"
 import { eq } from "drizzle-orm"
 import { getDb } from "../db/connection"
-import { users, securityEvents } from "../db/schema"
+import { users, securityEvents, magicLinkTokens } from "../db/schema"
 import { purgeUserAccountRows } from "./account-deletion"
+import { hashMagicLinkToken, magicLinkExpiry, mintMagicLinkToken } from "./magic-link-lib"
 
 const INTEGRATION = process.env.INTEGRATION === "true"
 
@@ -104,6 +105,55 @@ describe.skipIf(!INTEGRATION)("purgeUserAccountRows — transaction rollback [in
 
     // Cleanup the soft-deleted stub. The tombstone (user_id=NULL, is_tombstone=true) is
     // left in place by design — it must survive deletion.
+    await db.delete(users).where(eq(users.id, uid))
+  })
+
+  it("purges the user's magic_link_tokens rows, and CANNOT reach the user_id=NULL orphan class (10e-1)", async () => {
+    const db = getDb()
+
+    const email = `magic-purge-${Date.now()}@example.com`
+    const [inserted] = await db.insert(users).values({
+      authProvider: "test",
+      externalId: `test-magic-${Date.now()}`,
+      email,
+    }).$returningId()
+    const uid = inserted.id
+
+    // Two rows: one bound to the user (must be purged), one sign-up-path orphan with
+    // user_id = NULL (structurally unreachable by a purge that deletes WHERE user_id = ?).
+    const ownedHash = hashMagicLinkToken(mintMagicLinkToken())
+    const orphanHash = hashMagicLinkToken(mintMagicLinkToken())
+    await db.insert(magicLinkTokens).values([
+      { email, tokenHash: ownedHash, userId: uid, expiresAt: magicLinkExpiry() },
+      { email: `orphan-${Date.now()}@example.com`, tokenHash: orphanHash, userId: null, expiresAt: magicLinkExpiry() },
+    ])
+
+    // Non-vacuity: prove the owned row is THERE before asserting it is gone. "Zero rows
+    // survive" is otherwise equally satisfied by a seed that never landed.
+    const seeded = await db
+      .select({ id: magicLinkTokens.id })
+      .from(magicLinkTokens)
+      .where(eq(magicLinkTokens.userId, uid))
+    expect(seeded).toHaveLength(1)
+
+    await db.transaction(async (tx) => purgeUserAccountRows(uid, "b".repeat(64), "", "", tx))
+
+    const survivingOwned = await db
+      .select({ id: magicLinkTokens.id })
+      .from(magicLinkTokens)
+      .where(eq(magicLinkTokens.userId, uid))
+    expect(survivingOwned).toHaveLength(0)
+
+    // The orphan MUST survive — not a leniency, a structural fact. It is why the cleanup
+    // job is a data-minimisation control rather than housekeeping (schema orphan-class block).
+    const survivingOrphan = await db
+      .select({ id: magicLinkTokens.id })
+      .from(magicLinkTokens)
+      .where(eq(magicLinkTokens.tokenHash, orphanHash))
+    expect(survivingOrphan).toHaveLength(1)
+
+    // Cleanup — the orphan has no owner, so nothing else would ever remove it here.
+    await db.delete(magicLinkTokens).where(eq(magicLinkTokens.tokenHash, orphanHash))
     await db.delete(users).where(eq(users.id, uid))
   })
 })

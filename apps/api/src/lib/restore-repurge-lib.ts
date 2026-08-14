@@ -19,6 +19,12 @@ import { hashEmail, purgeUserAccountRows } from "./account-deletion"
 
 // User-owned tables the purge empties (mirrors purgeUserAccountRows, minus security_events
 // whose tombstone rows must survive). Used only for count assertions in the drill.
+//
+// This array is NOT free-form (F8, 10e-R17): restore-repurge-lib.test.ts derives the purge's
+// real delete list by EXECUTING purgeUserAccountRows against a recording mock and asserts
+// this array equals it, in order, minus security_events. Add a table to the purge and this
+// array must move in the same commit or that guard goes red. It exists because a missed entry
+// here is otherwise silent and observable only during a disaster-recovery drill.
 export const OWNED_TABLES = [
   "transactions",
   "budgets",
@@ -27,6 +33,7 @@ export const OWNED_TABLES = [
   "memorized_transactions",
   "template_suggestion_feedback",
   "account_action_tokens",
+  "magic_link_tokens",
   "user_profiles",
   "merchants",
   "categories",
