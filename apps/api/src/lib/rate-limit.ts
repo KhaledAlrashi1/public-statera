@@ -109,6 +109,15 @@ export const heavyWriteRateLimit = createRateLimiter(20)
  * keyGenerator and an optional `onLimit` hook (called when a request is throttled,
  * so the caller can emit a structured drop-log line).
  *
+ * keyGenerator may be ASYNC (10e-2). hono-rate-limiter supports this natively — its
+ * own type is `(c) => Promisify<string>` where `type Promisify<T> = T | Promise<T>`
+ * (dist/index.d.ts:23,47) and it awaits the result (`const key = await
+ * keyGenerator(c)`, dist/index.js:251). The widening here is TYPE-ONLY: no export is
+ * added and no runtime behaviour changes. It exists so a key can depend on the parsed
+ * request BODY — magic-link's per-email bucket. Hono memoizes body reads
+ * (HonoRequest#cachedBody, dist/request.js:88-104), so reading it in the keyGenerator
+ * and again in the handler is safe PROVIDED both use the same accessor.
+ *
  * Used by POST /api/client-errors, which is UNAUTHENTICATED by design: with no
  * session set, the default userId keyGenerator collapses every anonymous client
  * into ONE `rl:anon:` bucket, so that endpoint keys per-IP (X-Real-IP) plus a
@@ -120,7 +129,7 @@ export const heavyWriteRateLimit = createRateLimiter(20)
 export function createCustomRateLimiter(opts: {
   max: number
   windowSec?: number
-  keyGenerator: (c: Context) => string
+  keyGenerator: (c: Context) => string | Promise<string>
   onLimit?: (c: Context) => void
 }): MiddlewareHandler {
   const windowSec = opts.windowSec ?? 60

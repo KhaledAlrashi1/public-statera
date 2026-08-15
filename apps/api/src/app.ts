@@ -6,6 +6,7 @@ import { env } from "./lib/env"
 import { Sentry } from "./lib/sentry"
 import { healthRouter } from "./routes/health"
 import { authRouter } from "./routes/auth"
+import { magicLinkRouter } from "./routes/magic-link"
 import { categoriesRouter } from "./routes/categories"
 import { merchantsRouter } from "./routes/merchants"
 import { transactionsRouter } from "./routes/transactions"
@@ -39,6 +40,13 @@ export function createApp() {
 
   // Auth routes
   app.route("/api/auth", authRouter)
+  // Magic-link sign-in (10e). A SEPARATE router on the same prefix, not part of
+  // authRouter: routes/auth.ts's four test files wholesale-mock ../lib/rate-limit
+  // with a factory enumerating only createRateLimiter (10e-R37), so importing
+  // createCustomRateLimiter there would break them at module load. Multi-router
+  // composition on one prefix is the existing pattern — see /api/transactions and
+  // /api/analytics below. No authRouter path can shadow it: all fifteen are literal.
+  app.route("/api/auth", magicLinkRouter)
 
   // Domain routes
   app.route("/api/categories", categoriesRouter)

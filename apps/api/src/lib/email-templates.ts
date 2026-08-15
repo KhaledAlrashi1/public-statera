@@ -38,6 +38,43 @@ Spent: KD {{ spent_kd }} of KD {{ budget_kd }}.
 
 Open DinarTrack to review and adjust your plan.`,
   },
+  // Module 10e. ONE template for BOTH the sign-in and sign-up branches (10e-R65):
+  // the copy below is true in either case, and a second variant is a place a future
+  // edit can land on one branch only. It also makes the mail byte-identical for a
+  // known and an unknown address, which strengthens the 10e-R14 uniformity property
+  // beyond the HTTP response — see routes/magic-link.ts.
+  //
+  // NOTHING REQUEST-CONTROLLED IS INTERPOLATED HERE, and that is load-bearing because
+  // interpolate() below does a bare String(val) with NO HTML escaping. {{ link }} is
+  // an operator-configured origin plus a base64url token (alphabet [A-Za-z0-9_-], so
+  // it cannot emit <, >, " or & and cannot break out of the href); {{ ttl_minutes }}
+  // is a number derived from a constant. The user's address is deliberately NOT
+  // interpolated. Do not add a placeholder carrying user input without escaping first.
+  magic_link: {
+    html: `<!doctype html>
+<html>
+  <body style="font-family: Arial, sans-serif; color: #111827;">
+    <h2 style="margin: 0 0 12px;">Sign in to Statera</h2>
+    <p style="margin: 0 0 16px;">
+      Use the button below to sign in. This link expires in {{ ttl_minutes }} minutes,
+      and requesting a new link replaces any earlier one.
+    </p>
+    <p style="margin: 0 0 16px;">
+      <a href="{{ link }}" style="background:#111827;color:#ffffff;padding:10px 18px;border-radius:6px;text-decoration:none;display:inline-block;">Sign in to Statera</a>
+    </p>
+    <p style="margin: 0 0 8px; color: #6b7280;">If the button does not work, paste this into your browser:</p>
+    <p style="margin: 0 0 16px; word-break: break-all; color: #6b7280;">{{ link }}</p>
+    <p style="margin: 0; color: #6b7280;">If you did not request this, you can ignore this email — no account changes were made.</p>
+  </body>
+</html>`,
+    text: `Sign in to Statera
+
+Use this link to sign in. It expires in {{ ttl_minutes }} minutes, and requesting a new link replaces any earlier one.
+
+{{ link }}
+
+If you did not request this, you can ignore this email — no account changes were made.`,
+  },
 }
 
 function interpolate(template: string, context: TemplateContext): string {
