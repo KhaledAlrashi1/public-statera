@@ -1384,3 +1384,16 @@ wrong twice over: wrong function, wrong file.**
   run, which the tree contradicts. The same shape as the standing rule's instance set — a search
   reported as evidence without the matched-file list printed. Had A5 pasted the match list, the
   absence of any non-test caller would have been visible in the paste.
+
+---
+---
+
+# RULING-SET COMPLETENESS — read before citing this file as the ruling record (2026-08-15)
+
+This document's ruling blocks run **10e-R7 … 10e-R17** and stop there. That is not the module's full ruling set, and the gap is recorded rather than papered over.
+
+- **R1–R6** are the charter rulings, referenced in the header and reproduced only in summary.
+- **R5 is absent entirely, and R18–R35 appear in no artifact.** Recorded as **UNACCOUNTED-FOR** (10e-R50): the channel cannot distinguish *never issued* from *issued and never persisted*, and asserting either would be a claim without evidence.
+- **R36–R101 were issued after this file was persisted and are on disk nowhere.** A verbatim backfill is **OWED**. Per **10e-R102** it is **blocked on source availability**, not effort — the verbatim text survives only in the predecessor conversations — and it must **NOT** be reconstructed from CLAUDE.md prose, close-out reports, or summaries, because a reconstructed ruling block is checkable-and-wrong, which 10e-R71 rates as worse than an uncheckable one.
+
+Until the backfill lands, a citation of the form "per 10e-Rnn" for nn > 17 resolves to no artifact in this repository. **Cite it anyway**, with its number, date and title, so the gap stays visible instead of being routed around.
