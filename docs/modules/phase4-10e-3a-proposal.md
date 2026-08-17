@@ -7,8 +7,21 @@ only as an untracked working-tree file — the 10e-R56 class, where an uncommitt
 discarded and is unrecoverable. When a ruling block lands it is appended verbatim below and
 this header is superseded rather than edited; the original text is never revised.
 
+**[SUPERSEDED 2026-08-15 — retained, not edited.]** The status above is discharged: the
+review channel's ruling block on this document's contents is appended verbatim at the end
+of this file. The header's own mechanism ("appended verbatim below") is satisfied there;
+this line exists because that text is ~1350 lines away and a linear reader meets the
+superseded claim here. Per 10e-R111 the correction is adjacent, not only appended.
+
 **PROPOSAL ONLY.** No implementation code, no route file, nothing committed beyond
 `10e-3a-DOCS` (`fe63668`). Written against the charter in **10e-R104** (2026-08-15).
+
+**[SUPERSEDED IN PART 2026-08-15, 10e-R114 — retained as the authorship-state record, not edited.]**
+The third clause above is false as of `b565914`, which committed this file under 10e-R105:
+that commit is beyond `fe63668`. The first two clauses — no implementation code, no route
+file — remain TRUE and remain in force; this marker corrects the commit-ledger claim only,
+and is not a retraction of the propose-before-implement guarantee. Marked here rather than
+only at the status paragraph below because a linear reader meets this claim first.
 
 The design is already approved (A2, A3, A8, R9–R17 in `phase4-10e.md`). This document does not
 re-derive or re-litigate it. Its job is to show the tree, state the plan against it, and surface
@@ -17,6 +30,13 @@ contradictions.
 **Status of this file:** UNCOMMITTED. Written under the persist-first standing rule so the
 proposal survives compaction; R104 forbids committing anything further, so it stays in the working
 tree until the ruling lands. This is the only dirty path.
+
+**[SUPERSEDED 2026-08-15, 10e-R111 — retained as the authorship-state record, not edited.]**
+Every clause of the paragraph above is false as of `b565914`, which committed this file under
+10e-R105. It is kept because it accurately records the file's state when it was written, and
+because 10e-R105's "the original text is never revised" governs. It is marked here rather than
+appended-to-elsewhere because a linear reader meets the false claim at this point in the file
+and nowhere else.
 
 ---
 
@@ -1228,6 +1248,18 @@ request with a known address whose stored form differs in case, assert `user_id 
 `email === storedForm`. That converts "the branch is zod-gated" from an argument into an assertion,
 and it is cheap. I recommend it and did not assume approval for it.
 
+**[SUPERSEDED 2026-08-15, 10e-R122 — retained as the authorship-state record, not edited.]**
+The re-classification argued in this section is **REJECTED**. The accent-variant takeover IS
+reachable at verify — not through the INPUT, which this section correctly proves zod-gated on
+the branch that performs the lookup, but through the MATCH TARGET. On the `user_id IS NULL`
+branch the mail went to the address the requester TYPED, not to a stored one, so "the token is
+delivered only to the stored address" does not hold on the one branch that does the lookup; and
+an `ai_ci` comparison against a `users` table that changed between request and verify adopts a
+different person's account. The corrected classification, the three premises it rests on, and
+the exact-match adopt guard are in the review-channel ruling block appended at the end of this
+file. The co-variance analysis above STANDS and is unaffected — it is the conclusion drawn from
+it that is superseded.
+
 ---
 
 ## (E) Tests
@@ -1362,3 +1394,133 @@ trustworthy.
 6. **(D)** — approve the co-variance pin, and confirm the re-classification of the R100 mitigation.
 
 **STOP.** No implementation, no route file, nothing further committed. Awaiting a ruling block.
+
+---
+---
+
+# APPENDED VERBATIM — review-channel ruling block on this document's contents
+
+Manifest item 1 (10e-R120). Appended verbatim; nothing above this line is revised. This block
+supersedes the STATUS header at the top of this file.
+
+---
+
+Review-channel ruling block — 10e-3a PROPOSAL: APPROVED WITH CONDITIONS. 10e-R121 … 10e-R126, 2026-08-15
+
+This is the contents ruling block. It is manifest item 1 and is appended verbatim to docs/modules/phase4-10e-3a-proposal.md.
+
+10e-R121 — the proposal RECONCILES. Four of six requests are already ruled; here is the mapping.
+
+Every section carries pasted source. The two enumerations I asked to be falsifiable (C4's mock surface, D's eq(users.email, …) caller set) were run with matched-file lists printed, and D reported against the convenient answer. C1's near-miss — three files that read as a live bug and are not — is rider (b) applied unprompted, and a recorded non-finding is worth as much as a finding.
+
+Requests 1, 2, 5 are already ruled and are confirmed, not re-opened:
+
+request	ruling	status
+1 — the pending-2FA extract	10e-R107	APPROVED as 10e-3a-EXTRACT-2, conditions (a)–(e). See R125 — condition (a) is not yet discharged.
+2 — authProvider / externalId	10e-R106	SETTLED at phase4-10e.md A1(c) + 10e-R8 item 2. authProvider: "email" / crypto.randomUUID(). Cite R8(2); do not re-request. F9 is the queued consequence and does not reopen.
+5 — per-IP INTEGRATION test	10e-R108	Your split APPROVED: real 11-request test on a unique IP for per-IP; spy+skipIf for the fixed-key global only. "Consistency with 10e-2" refused; 10e-2's gap is a separate queue item.
+
+Approved without amendment, so you know these were read and are settled: C1's consume statement including gt(expiresAt, now) folded into the predicate rather than checked after; affectedRows as the branch signal with the tuple destructure and its four precedents; no db.transaction(); C2's branch-by-branch event mapping, including that the TOTP path emits login.pending_2fa and no magic-link string because the session does not exist yet — that reading of R11 is correct and better than a looser one; C2's BLOCKING guard by whole-payload JSON.stringify scan rather than key-absence; C3's two limiters, their key literals, the deliberate distinctness from 10e-2's keys, and the refusal of a per-token bucket; C4 and C5 in full, including the account.test.ts env-factory check and the commitment to re-measure health.test.ts rather than inherit 10e-2's argument; F-3a-3; and every false-green statement in (E), which is the section that most clearly did what was asked.
+
+Requests 3, 4, 6 are ruled in R123–R124. Request 6's second half is REJECTED — see R122.
+
+10e-R122 — THE R100 RE-CLASSIFICATION IS REJECTED. The accent-variant takeover IS reachable at verify — through the MATCH, not the input.
+
+You found both limbs correctly and the co-variance argument is sound as far as it goes. The re-classification built on top of it is not. The defect is one step past where the analysis stopped, and the analysis stopped because it was reasoning about the input when the exposure is in the match target.
+
+The channel's reasoning, stated so you can falsify it rather than accept it:
+
+The proposal's protective claim is: "the token itself is the credential, 256 bits of CSPRNG output delivered only to the stored address." That sentence is true on the user_id IS NOT NULL branch. On the user_id IS NULL branch there is no stored address — effectiveEmail = user?.email ?? normalized takes the ?? normalized arm, and the mail goes to the address the requester typed. So on precisely the branch that performs the email lookup, the token is delivered to the requester's own mailbox by design, and "an attacker who cannot read that mailbox cannot present the token" does not hold, because the attacker's mailbox is the delivery target.
+
+That opens a race, and ai_ci is what closes it into a takeover:
+
+T0 — attacker controls jose@x.com and requests a link for it. The request-side lookup finds no user (under ai_ci, so not even an accent variant exists). Token row: user_id = NULL, email = 'jose@x.com', zod-gated ASCII — exactly as your invariant says.
+T1 — the victim signs up with Google as josé@x.com, a different mailbox. users_email_unique permits this only because no jose@x.com row exists.
+T2, within the 15-minute TTL — the attacker clicks. Verify takes the user_id IS NULL branch and runs eq(users.email, 'jose@x.com'). Under ai_ci that matches the victim's stored josé@x.com. Verify adopts, issues a session, and the attacker is in the victim's account.
+
+The token was legitimately the attacker's. No mailbox was compromised. The zod gate held perfectly — the input is ASCII, exactly as your invariant guarantees. The exposure is that the match target is a users table that changed between T0 and T2, and the comparison is accent-insensitive.
+
+This is the identical shape to 10e-R13(a) on the OIDC side, and R13(a) already ruled on it: do not bind an existing account to an identity on the strength of a weak email signal; fail closed rather than either inserting (which 500s) or binding (which is an account-takeover primitive). Verify's adopt is the mirror image of 10e-3b's adopt. It needs the mirror-image gate.
+
+Case variants are NOT the concern and must not be swept in. Jose@X.com and jose@x.com reach the same mailbox in practice, so an inexact case match is not a takeover — and the ai_ci lookup must keep finding it, exactly as 10e-R82/R83 records, or an exact lookup would miss a stored Khaled@Gmail.com and manufacture the F2 crash. Accent-insensitivity is the whole exposure; case-insensitivity is load-bearing and stays.
+
+Ruled
+
+(a) Verify the three premises FIRST, and report before implementing. I derived this; I did not measure it. Report:
+
+That on the user_id IS NULL branch the request endpoint mails the typed/normalized address, not a stored one — from routes/magic-link.ts source, pasted.
+That utf8mb4_0900_ai_ci matches 'jose@x.com' against a stored 'josé@x.com' — measured against the dev DB, not read from the collation's documentation. phase4-10e.md A1 asserts it; an assertion in a document is not a measurement, and this one is now load-bearing for a security ruling.
+That users_email_unique permits the T1 insert of josé@x.com when no jose@x.com row exists, and forbids it when one does — the second half being why the attack needs the victim to arrive second.
+
+If any premise fails, STOP and report the falsification. I would rather be wrong here in writing than have a guard built on a bad premise. If all three hold, (b) is pre-approved and needs no second round-trip.
+
+(b) The guard: adopt only on an EXACT match, and fail CLOSED otherwise. On the user_id IS NULL branch, after the ai_ci lookup returns a row, compare normalizeEmail(foundUser.email) === tokenRow.email in application code. Equal → adopt. Not equal → the ai_ci match was inexact beyond case, so return the uniform 400 MAGIC_LINK_INVALID and emit login.magic_link.failed with a fifth reason literal.
+
+Do not fall through to INSERT on refusal. Inserting jose@x.com while josé@x.com exists hits users_email_unique under ai_ci and is the F2 crash on a new path. The refusal branch is terminal.
+
+Do not "fix" this by making the lookup exact. That reintroduces the F2 crash for the stored-case-variant user (10e-R82/R83's load-bearing note). The lookup stays ai_ci; the adoption decision becomes exact. Those are different things and the code must say so in a comment.
+
+(c) The uniform envelope holds. The refusal is byte-identical to the other four causes — no new code, no distinguishing message. R14's pin extends to five causes; update case (7).
+
+(d) Record the user-facing consequence, do not fix it here. A genuine jose@x.com owner cannot sign up while josé@x.com holds the ai_ci-unique slot. That is already the queued 10e-R72/R85 item — the same root, the same user, post-announcement, its own cycle. This ruling does not enlarge it; it makes the failure a clean 400 instead of a silent takeover. Cite R85 and do not bundle.
+
+(e) The re-classification is rewritten, not amended in place. Your (D) section stays exactly as written — it is the authorship-state record, and the reasoning in it is 90% correct and worth preserving. The corrected classification lives in this appended block. Per 10e-R111, place an adjacent supersession marker at the end of (D) pointing here; per 10e-R118, no structural figure in it.
+
+Credit where it is due, because it is the reason this was findable: your own paragraph — "the invariant is UNGUARDED, and that is the finding… no test goes red, for the same structural reason R82/R83 already recorded" — is what pointed at the right region. You identified that the argument rested on an unpinned invariant and said so. The error was concluding the surrounding surface was safe; the instinct that something under it was load-bearing and unguarded was correct.
+
+10e-R123 — the co-variance pin is APPROVED, and it now has a sibling
+
+Request 6, first half: APPROVED as proposed. Both cases as specified — unknown address → user_id === null and email === normalized; known address with a case-differing stored form → user_id !== null and email === storedForm. This is what converts "the branch is zod-gated" from an argument into an assertion, and it stays required under 10e-R109 independently of R122.
+
+Second pin, required by R122(b): a hermetic case asserting the adopt refusal. Seed a user with a non-ASCII stored address; seed a token row with user_id = NULL and the ASCII-normalized form; verify; assert 400 MAGIC_LINK_INVALID, no session cookie, no user INSERT, and no session issued for the seeded user. The last assertion is the one that matters — a test asserting only the 400 passes in a world where the handler adopted and then errored.
+
+Both pins proven able to fail, red captured, per 10e-R17.
+
+10e-R124 — C2's classify APPROVED; F-3a-4 approved with one amendment
+
+Request 4 — classify the failure reason. APPROVED, and there is a stronger argument for it than the one you made, which is why it is not merely the more useful of two options.
+
+10e-1 shipped a committed schema comment stating that "actually clicked" vs "invalidated by a re-request" is distinguished by the security_events audit trail, not by a second column. Under the cheap alternative (userId: null, no reason) that committed comment is false — nothing anywhere distinguishes them, and the comment becomes a pointer to a capability that does not exist. The classify version is what makes an already-committed claim true. One extra indexed SELECT on the failure path only is not a cost worth weighing against a false comment in the schema.
+
+The reason set is now five literals (R122(b) adds one). Closed set, enumerated in code, and the enumeration is what makes the BLOCKING address-scan checkable rather than a promise.
+
+Request 3 — F-3a-4 response shapes. APPROVED with one amendment.
+
+Drop user_id from the success payload. The frontend has /me; a caller that just authenticated does not need its own id echoed back, and the smallest surface that satisfies 10e-4 is the right one. Adding it later is cheap; removing a shipped field is a client-observable change.
+Keep is_new_user — 10e-4 needs it to route to /welcome?source=signup, matching the OIDC callback's target.
+The two shapes are ruled as specified otherwise, including ok: true on the TOTP handoff: ok reports that the request was handled, not that a session exists, which is the envelope's established meaning.
+These are now a public API contract. They go in CLAUDE.md's "Public API contracts" section at 10e-close, not left to be discovered by 10e-4.
+
+10e-R125 — F-3a-1's destination is INCOMPLETE. R107(a) is not discharged.
+
+The extract is approved (R107) and middleware/pending-2fa.ts is a reasonable home. But the proposed module contents do not resolve their own dependency.
+
+C6 names four module-private symbols: packPending2faToken, PENDING_2FA_COOKIE, PENDING_2FA_TTL, and stateSecret. The proposed module lists the first three plus verifyPending2faToken and setPending2faCookie. stateSecret is not among them — and packPending2faToken calls it (auth.ts:452: .sign(stateSecret())). Move the mint without the secret accessor and it does not compile.
+
+That is exactly what R107(a) asked: which reasoning governs a set that mixes a JWT mint, a secret accessor, and cookie constants — one module or two? The module name was answered; the secret accessor was not.
+
+Ruled: state the disposition for stateSecret with reasoning, before the extract is written. The channel is not choosing for you, but the options are not equal and the reasoning must engage with this:
+
+stateSecret is named for the OAuth state cookie, and it is almost certainly used by more than the pending-2FA family — packDeleteIntentToken / verifyDeleteIntentToken are the obvious other consumers, the latter already exported for routes/account.ts. So a two-line accessor used by three unrelated token families would be filed inside a module named for one of them. That is a misfiling, and it is the kind that reads as correct for a year.
+
+Establish it by measurement, not inference: enumerate every caller of stateSecret in routes/auth.ts, with the matched-line list printed. Then state the disposition and its reason. If it has one consumer family, moving it is fine. If it has three, it wants its own home or it stays put and the extract takes env.sessionSecret directly — and either of those is defensible, but the choice must follow the measurement rather than precede it.
+
+R107's conditions (b)–(e) are unchanged. (e) remains the load-bearing one: establish by measurement whether any test asserts the statera_pending_2fa cookie's attributes; if none does, the extract leaves a guard behind, proven able to fail in both directions.
+
+10e-R126 — test-count arithmetic, and the updated manifest
+
+Two small things on (F), neither blocking.
+
+The delta reads "+19 to +23 (21 listed cases…)", but the case table has 21 rows and row 19 is "two cases" — so the list is 22 tests, not 21. R122(b) adds a 23rd and R122(c) extends case 7 in place. Restate the delta as a count derived from the case list, with the row-vs-test distinction explicit. A count that requires the reader to reconcile rows against tests is the item-1 problem from the last close-out, one artifact over.
+INTEGRATION I5 is APPROVED as a fifth case. The orphan-row backfill is a data-minimisation property with nothing else behind it, and its false-green statement is correct: nothing else would catch a missed backfill.
+
+Sequencing, so nothing is ambiguous:
+
+The pending commit — eight manifest items, this block as item 1.
+R122(a) — the three-premise verification report. STOP after it.
+R125 — the stateSecret enumeration and disposition. STOP after it.
+Then 10e-3a-EXTRACT-2, then 10e-3a.
+
+Manifest items 2–8 are unchanged from R120. Item 1 is this block, plus the R122(e) adjacent supersession marker at the end of section (D).
+
+Nothing beyond the commit and the two reports is authorized.
