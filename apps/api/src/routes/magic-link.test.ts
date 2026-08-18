@@ -404,3 +404,539 @@ describe.skipIf(process.env.INTEGRATION === "true")(
     })
   },
 )
+
+// ── 10e-R109 / 10e-R123: the co-variance pin ──────────────────────────────────
+// user_id and email are assigned from the SAME `user` binding two lines apart, so
+// `user_id IS NULL` implies `email` took the `?? normalized` arm — i.e. the zod-gated,
+// normalized, ASCII typed address. The whole R100 argument for verify's sign-up branch
+// rests on that, and nothing pinned it: a future edit setting email from the stored
+// address while leaving user_id null would break it with no test going red, for the same
+// structural reason 10e-R82/R83 records (no test can cover an input zod refuses to admit).
+// This asserts the INVARIANT at the write boundary rather than mirroring the two lines.
+describe("POST /api/auth/magic-link/request — user_id/email co-variance (10e-R109)", () => {
+  const tokenInsert = (calls: Call[]) =>
+    calls.find((c) => c.op === "insert" && c.table === "magic_link_tokens")?.values
+
+  it("unknown address: user_id IS NULL and email is the NORMALIZED typed address", async () => {
+    const calls: Call[] = []
+    vi.mocked(getDb).mockReturnValue(makeMockDb([], calls))
+    await post({ email: "  NoBody@Example.COM  " })
+
+    const v = tokenInsert(calls)
+    expect(v?.userId).toBeNull()
+    expect(v?.email).toBe("nobody@example.com")
+  })
+
+  it("known address with a case-differing stored form: user_id is SET and email is the STORED form", async () => {
+    const calls: Call[] = []
+    const stored = "Known@Example.com"
+    vi.mocked(getDb).mockReturnValue(makeMockDb([{ id: 42, isActive: true, email: stored }], calls))
+    await post({ email: KNOWN_EMAIL })
+
+    const v = tokenInsert(calls)
+    expect(v?.userId).toBe(42)
+    expect(v?.email).toBe(stored)
+    // The two arms move together: a set user_id NEVER co-occurs with the typed address.
+    expect(v?.email).not.toBe(KNOWN_EMAIL)
+  })
+})
+
+// ═════════════════════════════════════════════════════════════════════════════
+// POST /api/auth/magic-link/verify (Module 10e-3a)
+// ═════════════════════════════════════════════════════════════════════════════
+
+// Verify touches more tables in sequence than the request endpoint, so it needs a mock
+// that answers per-table and in call order rather than returning one canned row set.
+function makeVerifyDb(opts: {
+  consumeAffected?: number
+  tokenRows?: unknown[][]
+  userRows?: unknown[][]
+  insertedId?: number
+  calls?: Call[]
+}) {
+  const calls = opts.calls ?? []
+  const tokenQ = [...(opts.tokenRows ?? [])]
+  const userQ = [...(opts.userRows ?? [])]
+  let tokenUpdates = 0
+
+  const db = {
+    select: () => ({
+      from: (t: unknown) => ({
+        where: () => ({
+          limit: async () => {
+            const table = nameOf(t)
+            calls.push({ op: "select", table })
+            return table === "magic_link_tokens" ? (tokenQ.shift() ?? []) : (userQ.shift() ?? [])
+          },
+        }),
+      }),
+    }),
+    update: (t: unknown) => ({
+      set: (values: Record<string, unknown>) => ({
+        where: () => {
+          const table = nameOf(t)
+          calls.push({ op: "update", table, values })
+          let affected = 1
+          if (table === "magic_link_tokens") {
+            tokenUpdates += 1
+            if (tokenUpdates === 1) affected = opts.consumeAffected ?? 1
+          }
+          return Promise.resolve([{ affectedRows: affected }])
+        },
+      }),
+    }),
+    insert: (t: unknown) => ({
+      values: (values: Record<string, unknown>) => {
+        calls.push({ op: "insert", table: nameOf(t), values })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const p: any = Promise.resolve([{ affectedRows: 1 }])
+        p.$returningId = async () => [{ id: opts.insertedId ?? 4242 }]
+        return p
+      },
+    }),
+  }
+  return db as unknown as ReturnType<typeof getDb>
+}
+
+const RAW_TOKEN = "a".repeat(43)
+const TOKEN_ROW = { id: 7, email: KNOWN_EMAIL, userId: 42 }
+const ACTIVE_USER = {
+  id: 42,
+  isActive: true,
+  totpEnabled: false,
+  sessionVersion: 3,
+  authProvider: "google",
+  externalId: "ext-42",
+}
+
+function postVerify(body: unknown, headers: Record<string, string> = {}) {
+  return app.request("/api/auth/magic-link/verify", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Real-IP": `v-${randomUUID()}`,
+      ...headers,
+    },
+    body: typeof body === "string" ? body : JSON.stringify(body),
+  })
+}
+
+// The single expected failure body. Written out here rather than imported so a change to
+// the production constant has to be mirrored deliberately.
+const MAGIC_LINK_INVALID_EXPECTED = {
+  ok: false,
+  data: null,
+  error: "This sign-in link is no longer valid.",
+  code: "MAGIC_LINK_INVALID",
+}
+
+const securityEventValues = (calls: Call[]) =>
+  calls.filter((c) => c.op === "insert" && c.table === "security_events").map((c) => c.values)
+
+describe("POST /api/auth/magic-link/verify — happy path", () => {
+  it("consumes the token, issues a session cookie, and returns is_new_user", async () => {
+    const calls: Call[] = []
+    vi.mocked(getDb).mockReturnValue(
+      makeVerifyDb({ tokenRows: [[TOKEN_ROW]], userRows: [[ACTIVE_USER]], calls }),
+    )
+
+    const res = await postVerify({ token: RAW_TOKEN })
+
+    expect(res.status).toBe(200)
+    expect(await readJson(res)).toEqual({
+      ok: true,
+      data: { is_new_user: false },
+      error: null,
+      meta: {},
+    })
+    expect(res.headers.get("set-cookie")).toContain("statera_session=")
+  })
+
+  it("the emitted session cookie carries the shared helper's attribute set", async () => {
+    vi.mocked(getDb).mockReturnValue(
+      makeVerifyDb({ tokenRows: [[TOKEN_ROW]], userRows: [[ACTIVE_USER]] }),
+    )
+    const header = (await postVerify({ token: RAW_TOKEN })).headers.get("set-cookie") ?? ""
+    // Delegation check, not a re-implementation: the attribute VALUES are pinned by
+    // middleware/session-cookie.test.ts. What matters here is that verify goes through it.
+    expect(header).toContain("HttpOnly")
+    expect(header).toContain("SameSite=Lax")
+    expect(header).toContain("Max-Age=2592000")
+    expect(header).toContain("Path=/")
+  })
+
+  it("emits login.magic_link.success exactly once on the no-TOTP path", async () => {
+    const calls: Call[] = []
+    vi.mocked(getDb).mockReturnValue(
+      makeVerifyDb({ tokenRows: [[TOKEN_ROW]], userRows: [[ACTIVE_USER]], calls }),
+    )
+    await postVerify({ token: RAW_TOKEN })
+
+    const types = securityEventValues(calls).map((v) => v?.eventType)
+    expect(types.filter((t) => t === "login.magic_link.success")).toHaveLength(1)
+    expect(types).not.toContain("login.pending_2fa")
+  })
+
+  it("sets consumed_at on magic_link_tokens as its FIRST write", async () => {
+    const calls: Call[] = []
+    vi.mocked(getDb).mockReturnValue(
+      makeVerifyDb({ tokenRows: [[TOKEN_ROW]], userRows: [[ACTIVE_USER]], calls }),
+    )
+    await postVerify({ token: RAW_TOKEN })
+
+    const firstWrite = calls.find((c) => c.op === "update" || c.op === "insert")
+    expect(firstWrite?.op).toBe("update")
+    expect(firstWrite?.table).toBe("magic_link_tokens")
+    expect(firstWrite?.values).toHaveProperty("consumedAt")
+  })
+})
+
+// ── 10e-R14 / 10e-R122(c): ONE envelope for FIVE causes ──────────────────────
+describe("POST /api/auth/magic-link/verify — uniform failure (10e-R14, five causes)", () => {
+  const EXPIRED = { userId: 42, consumedAt: null, expiresAt: new Date(Date.now() - 60_000) }
+  const CONSUMED = { userId: 42, consumedAt: new Date(), expiresAt: new Date(Date.now() + 60_000) }
+
+  // Each entry drives a DIFFERENT cause to affectedRows === 0.
+  const causes: Array<[string, () => ReturnType<typeof getDb>]> = [
+    ["never existed", () => makeVerifyDb({ consumeAffected: 0, tokenRows: [[]] })],
+    ["expired", () => makeVerifyDb({ consumeAffected: 0, tokenRows: [[EXPIRED]] })],
+    ["consumed", () => makeVerifyDb({ consumeAffected: 0, tokenRows: [[CONSUMED]] })],
+    ["superseded", () => makeVerifyDb({ consumeAffected: 0, tokenRows: [[CONSUMED]] })],
+    [
+      "inexact email match",
+      () =>
+        makeVerifyDb({
+          tokenRows: [[{ id: 7, email: "jose@x.com", userId: null }], [{ userId: null, consumedAt: null, expiresAt: new Date(Date.now() + 60_000) }]],
+          userRows: [[{ ...ACTIVE_USER, email: "josé@x.com" }]],
+        }),
+    ],
+  ]
+
+  it("returns a byte-identical 400 body for all five causes", async () => {
+    const bodies: string[] = []
+    for (const [, mk] of causes) {
+      vi.mocked(getDb).mockReturnValue(mk())
+      const res = await postVerify({ token: RAW_TOKEN })
+      expect(res.status).toBe(400)
+      bodies.push(await res.text())
+    }
+    expect(new Set(bodies).size).toBe(1)
+    expect(bodies[0]).toBe(JSON.stringify(MAGIC_LINK_INVALID_EXPECTED))
+  })
+
+  it("issues NO session cookie on any failing cause", async () => {
+    for (const [, mk] of causes) {
+      vi.mocked(getDb).mockReturnValue(mk())
+      const res = await postVerify({ token: RAW_TOKEN })
+      expect(res.headers.get("set-cookie")).toBeNull()
+    }
+  })
+
+})
+
+describe("POST /api/auth/magic-link/verify — failure audit (10e-R124)", () => {
+  it("emits login.magic_link.failed with a closed-set reason and NO address", async () => {
+    const calls: Call[] = []
+    vi.mocked(getDb).mockReturnValue(
+      makeVerifyDb({
+        consumeAffected: 0,
+        tokenRows: [[{ userId: 42, consumedAt: new Date(), expiresAt: new Date(Date.now() + 60_000) }]],
+        calls,
+      }),
+    )
+    await postVerify({ token: RAW_TOKEN })
+
+    const ev = securityEventValues(calls)
+    expect(ev).toHaveLength(1)
+    expect(ev[0]?.eventType).toBe("login.magic_link.failed")
+    expect(ev[0]?.detailsJson).toContain("consumed_or_superseded")
+  })
+})
+
+// ── 10e-R11 BLOCKING ─────────────────────────────────────────────────────────
+describe("POST /api/auth/magic-link/verify — no email address in ANY audit payload", () => {
+  it("scans every security_events insert payload across all branches", async () => {
+    const scenarios: Array<() => { db: ReturnType<typeof getDb>; calls: Call[] }> = [
+      () => {
+        const calls: Call[] = []
+        return { db: makeVerifyDb({ tokenRows: [[TOKEN_ROW]], userRows: [[ACTIVE_USER]], calls }), calls }
+      },
+      () => {
+        const calls: Call[] = []
+        return {
+          db: makeVerifyDb({
+            tokenRows: [[TOKEN_ROW]],
+            userRows: [[{ ...ACTIVE_USER, isActive: false }]],
+            calls,
+          }),
+          calls,
+        }
+      },
+      () => {
+        const calls: Call[] = []
+        return {
+          db: makeVerifyDb({
+            tokenRows: [[TOKEN_ROW]],
+            userRows: [[{ ...ACTIVE_USER, totpEnabled: true }]],
+            calls,
+          }),
+          calls,
+        }
+      },
+      () => {
+        const calls: Call[] = []
+        return {
+          db: makeVerifyDb({
+            consumeAffected: 0,
+            tokenRows: [[{ userId: 42, consumedAt: new Date(), expiresAt: new Date() }]],
+            calls,
+          }),
+          calls,
+        }
+      },
+      () => {
+        const calls: Call[] = []
+        return {
+          db: makeVerifyDb({
+            tokenRows: [[{ id: 7, email: KNOWN_EMAIL, userId: null }]],
+            userRows: [[], []],
+            calls,
+          }),
+          calls,
+        }
+      },
+    ]
+
+    for (const mk of scenarios) {
+      const { db, calls } = mk()
+      vi.mocked(getDb).mockReturnValue(db)
+      await postVerify({ token: RAW_TOKEN })
+      // Whole-payload scan, not key-absence: an address under a differently-named key
+      // would satisfy a `toHaveProperty` check and fail this one.
+      for (const v of securityEventValues(calls)) {
+        expect(JSON.stringify(v)).not.toContain(KNOWN_EMAIL)
+      }
+    }
+  })
+})
+
+describe("POST /api/auth/magic-link/verify — TOTP handoff", () => {
+  it("sets the pending-2FA cookie, emits login.pending_2fa, and issues NO session", async () => {
+    const calls: Call[] = []
+    vi.mocked(getDb).mockReturnValue(
+      makeVerifyDb({
+        tokenRows: [[TOKEN_ROW]],
+        userRows: [[{ ...ACTIVE_USER, totpEnabled: true }]],
+        calls,
+      }),
+    )
+    const res = await postVerify({ token: RAW_TOKEN })
+
+    expect(res.status).toBe(200)
+    expect(await readJson(res)).toEqual({
+      ok: true,
+      data: { pending_2fa: true },
+      error: null,
+      meta: {},
+    })
+    const cookie = res.headers.get("set-cookie") ?? ""
+    expect(cookie).toContain("statera_pending_2fa=")
+    expect(cookie).not.toContain("statera_session=")
+
+    const types = securityEventValues(calls).map((v) => v?.eventType)
+    expect(types).toContain("login.pending_2fa")
+    expect(types).not.toContain("login.magic_link.success")
+  })
+})
+
+describe("POST /api/auth/magic-link/verify — reactivate-as-fresh (10e-R3)", () => {
+  it("flips isActive, nulls the TOTP fields, and audits account.reactivated", async () => {
+    const calls: Call[] = []
+    vi.mocked(getDb).mockReturnValue(
+      makeVerifyDb({
+        tokenRows: [[TOKEN_ROW]],
+        userRows: [[{ ...ACTIVE_USER, isActive: false, totpEnabled: true }]],
+        calls,
+      }),
+    )
+    const res = await postVerify({ token: RAW_TOKEN })
+
+    expect(res.status).toBe(200)
+    // TOTP was enabled on the stub, but reactivation nulls it — so this must NOT be the
+    // pending-2FA handoff. A deleted-era secret must never gate a returning user.
+    expect(await readJson(res)).toEqual({
+      ok: true,
+      data: { is_new_user: true },
+      error: null,
+      meta: {},
+    })
+
+    const userUpdate = calls.find((c) => c.op === "update" && c.table === "users")
+    expect(userUpdate?.values).toMatchObject({
+      isActive: true,
+      totpEnabled: false,
+      totpSecret: null,
+      totpBackupCodesJson: null,
+    })
+    expect(securityEventValues(calls).map((v) => v?.eventType)).toContain("account.reactivated")
+  })
+
+  it("does NOT re-bump sessionVersion (F-3a-3)", async () => {
+    const calls: Call[] = []
+    vi.mocked(getDb).mockReturnValue(
+      makeVerifyDb({
+        tokenRows: [[TOKEN_ROW]],
+        userRows: [[{ ...ACTIVE_USER, isActive: false }]],
+        calls,
+      }),
+    )
+    await postVerify({ token: RAW_TOKEN })
+
+    for (const c of calls.filter((x) => x.op === "update" && x.table === "users")) {
+      expect(c.values).not.toHaveProperty("sessionVersion")
+    }
+  })
+})
+
+describe("POST /api/auth/magic-link/verify — sign-up branch (user_id IS NULL)", () => {
+  const NULL_TOKEN_ROW = { id: 7, email: UNKNOWN_EMAIL, userId: null }
+
+  it("creates the user with authProvider 'email' and a random externalId (10e-R8(2))", async () => {
+    const calls: Call[] = []
+    vi.mocked(getDb).mockReturnValue(
+      makeVerifyDb({ tokenRows: [[NULL_TOKEN_ROW]], userRows: [[], [{ externalId: "gen" }]], calls }),
+    )
+    const res = await postVerify({ token: RAW_TOKEN })
+
+    expect(res.status).toBe(200)
+    expect(await readJson(res)).toEqual({
+      ok: true,
+      data: { is_new_user: true },
+      error: null,
+      meta: {},
+    })
+    const ins = calls.find((c) => c.op === "insert" && c.table === "users")
+    expect(ins?.values).toMatchObject({ authProvider: "email", email: UNKNOWN_EMAIL })
+    // A UUID, not the address — no PII in an export-excluded column.
+    expect(String(ins?.values?.externalId)).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+    )
+  })
+
+  it("ADOPTS an existing user on an EXACT match and does not INSERT (the R100 race)", async () => {
+    const calls: Call[] = []
+    vi.mocked(getDb).mockReturnValue(
+      makeVerifyDb({
+        tokenRows: [[NULL_TOKEN_ROW]],
+        userRows: [[{ ...ACTIVE_USER, email: UNKNOWN_EMAIL }]],
+        calls,
+      }),
+    )
+    const res = await postVerify({ token: RAW_TOKEN })
+
+    expect(res.status).toBe(200)
+    expect(calls.some((c) => c.op === "insert" && c.table === "users")).toBe(false)
+  })
+
+  it("backfills user_id on the token row so it leaves the orphan class", async () => {
+    const calls: Call[] = []
+    vi.mocked(getDb).mockReturnValue(
+      makeVerifyDb({
+        tokenRows: [[NULL_TOKEN_ROW]],
+        userRows: [[{ ...ACTIVE_USER, email: UNKNOWN_EMAIL }]],
+        calls,
+      }),
+    )
+    await postVerify({ token: RAW_TOKEN })
+
+    const backfill = calls.filter((c) => c.op === "update" && c.table === "magic_link_tokens")
+    expect(backfill.some((c) => Object.prototype.hasOwnProperty.call(c.values ?? {}, "userId"))).toBe(
+      true,
+    )
+  })
+})
+
+// ── 10e-R122(b) / 10e-R123 second pin: the adopt refusal ─────────────────────
+describe("POST /api/auth/magic-link/verify — inexact-match adopt refusal (10e-R122)", () => {
+  it("refuses, issues NO session for the seeded user, and does NOT fall through to INSERT", async () => {
+    const calls: Call[] = []
+    vi.mocked(getDb).mockReturnValue(
+      makeVerifyDb({
+        // token row was written on the sign-up path, so its email is the zod-gated ASCII form
+        tokenRows: [[{ id: 7, email: "jose@x.com", userId: null }]],
+        // the ai_ci lookup returns the victim's ACCENTED stored address
+        userRows: [[{ ...ACTIVE_USER, id: 99, email: "josé@x.com" }]],
+        calls,
+      }),
+    )
+    const res = await postVerify({ token: RAW_TOKEN })
+
+    expect(res.status).toBe(400)
+    expect((await readJson(res)).code).toBe("MAGIC_LINK_INVALID")
+    // The assertion that matters: a test asserting only the 400 passes in a world where
+    // the handler adopted and then errored.
+    expect(res.headers.get("set-cookie")).toBeNull()
+    expect(calls.some((c) => c.op === "insert" && c.table === "users")).toBe(false)
+    const ev = securityEventValues(calls)
+    expect(ev.map((v) => v?.eventType)).toContain("login.magic_link.failed")
+    expect(String(ev[0]?.detailsJson)).toContain("inexact_email_match")
+  })
+})
+
+describe("POST /api/auth/magic-link/verify — validation", () => {
+  it("rejects a missing, empty, non-string or over-long token with the validation envelope", async () => {
+    vi.mocked(getDb).mockReturnValue(makeVerifyDb({}))
+    for (const body of [{}, { token: "" }, { token: 5 }, { token: "x".repeat(513) }]) {
+      const res = await postVerify(body)
+      expect(res.status).toBe(400)
+      expect((await readJson(res)).code).not.toBe("MAGIC_LINK_INVALID")
+    }
+  })
+
+  it("rejects a non-JSON body", async () => {
+    vi.mocked(getDb).mockReturnValue(makeVerifyDb({}))
+    const res = await postVerify("not json")
+    expect(res.status).toBe(400)
+    expect((await readJson(res)).code).toBe("invalid_json")
+  })
+})
+
+// ── Rate limiting (HERMETIC-ONLY; the per-IP limiter's real behaviour is
+//    covered residue-immune under INTEGRATION per 10e-R108) ──────────────────
+describe.skipIf(process.env.INTEGRATION === "true")(
+  "POST /api/auth/magic-link/verify — rate limits",
+  () => {
+    afterEach(() => vi.restoreAllMocks())
+
+    it("uses keys DISTINCT from the request endpoint's, so requesting cannot throttle clicking", async () => {
+      vi.mocked(getDb).mockReturnValue(makeVerifyDb({ tokenRows: [[TOKEN_ROW]], userRows: [[ACTIVE_USER]] }))
+      const keys: string[] = []
+      vi.spyOn(RedisMock.prototype, "evalsha").mockImplementation(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        async (...args: any[]) => {
+          keys.push(String(args[2]))
+          return [1, 60000]
+        },
+      )
+      await postVerify({ token: RAW_TOKEN })
+
+      // Keys are DOUBLE-PREFIXED in the store (`rl:` from RedisStore + `rl:` from the
+      // generator) — the documented RL-C1 observation, confirmed here rather than assumed.
+      expect(keys.some((k) => k.includes("magic-link-verify:ip:"))).toBe(true)
+      expect(keys.some((k) => k.endsWith("rl:magic-link-verify:global"))).toBe(true)
+      // The request endpoint's buckets are untouched by a verify call.
+      expect(keys.some((k) => /magic-link:ip:/.test(k) && !k.includes("verify"))).toBe(false)
+      expect(keys.some((k) => k.endsWith("rl:magic-link:global"))).toBe(false)
+    })
+
+    it("returns the standard 429 envelope when the ceiling is reached", async () => {
+      vi.mocked(getDb).mockReturnValue(makeVerifyDb({}))
+      vi.spyOn(console, "warn").mockImplementation(() => {})
+      vi.spyOn(RedisMock.prototype, "evalsha").mockResolvedValue([9999, 60000])
+
+      const res = await postVerify({ token: RAW_TOKEN })
+      expect(res.status).toBe(429)
+      expect((await readJson(res)).code).toBe("rate_limit_exceeded")
+    })
+  },
+)

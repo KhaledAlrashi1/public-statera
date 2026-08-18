@@ -45,8 +45,8 @@
 
 import { Hono } from "hono"
 import type { Context } from "hono"
-import { createHash } from "node:crypto"
-import { and, eq, isNull } from "drizzle-orm"
+import { createHash, randomUUID } from "node:crypto"
+import { and, eq, gt, isNull } from "drizzle-orm"
 import { z } from "zod"
 import { zodErrorToEnvelope } from "./route-helpers"
 import { getDb } from "../db/connection"
@@ -56,6 +56,10 @@ import { createCustomRateLimiter } from "../lib/rate-limit"
 import { sendTemplatedEmail } from "../lib/email-templates"
 import { Sentry } from "../lib/sentry"
 import { auditSecurityEvent } from "../lib/security-events-lib"
+import { createSessionToken } from "../middleware/auth"
+import { setSessionCookie } from "../middleware/session-cookie"
+import { packPending2faToken, setPending2faCookie } from "../middleware/pending-2fa"
+import { recordEventOnce } from "../lib/product-events-lib"
 import {
   MAGIC_LINK_TTL_SECONDS,
   hashMagicLinkToken,
@@ -302,5 +306,369 @@ magicLinkRouter.post(
     // observable to the caller. A well-meant "we've sent you a link to create your
     // account" split here would reintroduce the enumeration oracle in one line.
     return c.json({ ok: true, data: { sent: true }, error: null, meta: {} }, 200)
+  },
+)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/auth/magic-link/verify (Module 10e-3a)
+//
+// Consumes a mailed token and issues a session, or hands off to the 2FA gate.
+// UNAUTHENTICATED by design — this endpoint is what CREATES the session.
+//
+// Design notes specific to verify:
+//  - NO db.transaction(). The single-statement UPDATE ... WHERE consumed_at IS NULL
+//    autocommits, which makes the consume globally visible the instant it succeeds —
+//    the strongest available anti-double-click property. Wrapping consume + user
+//    creation would hold the row lock across the user INSERT: correct, but strictly
+//    weaker on visibility and longer on lock hold.
+//  - Rate-limit keys are DISTINCT from the request endpoint's, so a user who asked for
+//    a link is never throttled out of clicking it.
+//  - No per-token bucket: a token is single-use, so a second request carrying it is
+//    already refused by the consume predicate. A limiter there would spend a Redis key
+//    re-implementing what the UNIQUE index and consumed_at already enforce.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const PER_IP_VERIFY_MAX = 10
+const GLOBAL_VERIFY_MAX = 100
+
+// base64url of 32 bytes is 43 chars; the bound exists to cap an unvalidated body, not
+// to validate the token — a wrong-but-well-formed token is indistinguishable from a
+// right one until it is hashed and looked up, which is the point.
+const TOKEN_MAX = 512
+
+const perIpVerifyLimiter = createCustomRateLimiter({
+  max: PER_IP_VERIFY_MAX,
+  keyGenerator: (c) => `rl:magic-link-verify:ip:${clientIp(c)}`,
+  onLimit: (c) => recordThrottle("ip", c),
+})
+
+const globalVerifyLimiter = createCustomRateLimiter({
+  max: GLOBAL_VERIFY_MAX,
+  keyGenerator: () => "rl:magic-link-verify:global",
+  onLimit: (c) => recordThrottle("global", c),
+})
+
+const VerifySchema = z.object({
+  token: z
+    .string({ required_error: "Token is required." })
+    .trim()
+    .min(1, "Token is required.")
+    .max(TOKEN_MAX, "Token is required."),
+})
+
+/**
+ * The CLOSED set of audit reasons for a failed verify (10e-R124).
+ *
+ * Closed and enumerated in code on purpose: it is what makes the 10e-R11 BLOCKING
+ * address-scan checkable rather than a promise — there is no free-text field here into
+ * which an email address could be interpolated.
+ *
+ * "consumed" and "superseded" are ONE literal because they are one database state:
+ * consumed_at doubles as the supersession marker (10e-R2), so nothing at this layer can
+ * distinguish "already clicked" from "invalidated by a re-request".
+ */
+const VERIFY_FAIL_REASONS = [
+  "not_found",
+  "expired",
+  "consumed_or_superseded",
+  "inexact_email_match",
+  "user_missing",
+] as const
+type VerifyFailReason = (typeof VERIFY_FAIL_REASONS)[number]
+
+/**
+ * The ONE failure envelope, built at a single site (10e-R14, extended to five causes by
+ * 10e-R122(c)). Expired, consumed, superseded, never-existed and inexact-email-match are
+ * byte-identical to the caller. 410 Gone was rejected deliberately: it asserts the
+ * resource once existed, which is itself the distinguishing signal uniformity suppresses.
+ */
+const MAGIC_LINK_INVALID_BODY = {
+  ok: false as const,
+  data: null,
+  error: "This sign-in link is no longer valid.",
+  code: "MAGIC_LINK_INVALID",
+}
+
+/**
+ * Classify the failure for the AUDIT TRAIL only, then return the uniform envelope.
+ *
+ * The classifying SELECT is what makes an already-committed claim true: the
+ * magic_link_tokens schema comment states that "actually clicked" vs "invalidated by a
+ * re-request" is distinguished by the security_events audit trail rather than a second
+ * column. Without a reason recorded here that comment is a pointer to a capability that
+ * does not exist (10e-R124). One extra indexed read, on the failure path only.
+ */
+async function failVerify(
+  c: Context,
+  db: ReturnType<typeof getDb>,
+  tokenHash: string,
+  now: Date,
+  ipAddress: string,
+  userAgent: string | undefined,
+  known?: { reason: VerifyFailReason; userId: number | null },
+): Promise<Response> {
+  let reason: VerifyFailReason = known?.reason ?? "not_found"
+  let userId: number | null = known?.userId ?? null
+
+  if (!known) {
+    const [row] = await db
+      .select({
+        userId: magicLinkTokens.userId,
+        consumedAt: magicLinkTokens.consumedAt,
+        expiresAt: magicLinkTokens.expiresAt,
+      })
+      .from(magicLinkTokens)
+      .where(eq(magicLinkTokens.tokenHash, tokenHash))
+      .limit(1)
+
+    if (row) {
+      userId = row.userId
+      if (row.consumedAt !== null) reason = "consumed_or_superseded"
+      else if (row.expiresAt <= now) reason = "expired"
+    }
+  }
+
+  // 10e-R11 BLOCKING: userId / ip / user-agent and a CLOSED-SET reason. Never the address.
+  auditSecurityEvent(db, "login.magic_link.failed", {
+    userId,
+    ipAddress,
+    userAgent,
+    details: { reason },
+  })
+  return c.json(MAGIC_LINK_INVALID_BODY, 400)
+}
+
+magicLinkRouter.post(
+  "/magic-link/verify",
+  perIpVerifyLimiter,
+  globalVerifyLimiter,
+  async (c) => {
+    let json: unknown
+    try {
+      json = JSON.parse(await c.req.text())
+    } catch {
+      return c.json({ ok: false, data: null, error: "Invalid JSON.", code: "invalid_json" }, 400)
+    }
+
+    const parsed = VerifySchema.safeParse(json)
+    if (!parsed.success) return zodErrorToEnvelope(c, parsed.error)
+
+    const db = getDb()
+    const tokenHash = hashMagicLinkToken(parsed.data.token)
+    const now = new Date()
+    const ipAddress = clientIp(c)
+    const userAgent = c.req.header("user-agent") ?? undefined
+
+    // ── ATOMIC CONSUME ───────────────────────────────────────────────────────
+    // One statement collapses all four "invalid" causes into affectedRows === 0, so the
+    // uniform failure is a property of the QUERY rather than four branches that have to
+    // be kept in agreement. MySQL evaluates the predicate under a row lock and
+    // token_hash is UNIQUE, so the result is exactly 1 or 0 and never more: 1 means THIS
+    // request consumed the token, which is what makes a concurrent double-click safe.
+    // expires_at is folded into the predicate rather than checked afterwards — checking
+    // after would consume an expired token before rejecting it.
+    const [consumeResult] = await db
+      .update(magicLinkTokens)
+      .set({ consumedAt: now })
+      .where(
+        and(
+          eq(magicLinkTokens.tokenHash, tokenHash),
+          isNull(magicLinkTokens.consumedAt),
+          gt(magicLinkTokens.expiresAt, now),
+        ),
+      )
+
+    if (consumeResult.affectedRows !== 1) {
+      return failVerify(c, db, tokenHash, now, ipAddress, userAgent)
+    }
+
+    const [tokenRow] = await db
+      .select({
+        id: magicLinkTokens.id,
+        email: magicLinkTokens.email,
+        userId: magicLinkTokens.userId,
+      })
+      .from(magicLinkTokens)
+      .where(eq(magicLinkTokens.tokenHash, tokenHash))
+      .limit(1)
+
+    if (!tokenRow) {
+      // Unreachable while affectedRows === 1 (we just updated this row). Defensive only.
+      return failVerify(c, db, tokenHash, now, ipAddress, userAgent, {
+        reason: "not_found",
+        userId: null,
+      })
+    }
+
+    let resolved: {
+      id: number
+      isActive: boolean
+      totpEnabled: boolean
+      sessionVersion: number
+      authProvider: string
+      externalId: string
+    } | null = null
+    let isNewUser = false
+
+    if (tokenRow.userId !== null) {
+      const [user] = await db
+        .select({
+          id: users.id,
+          isActive: users.isActive,
+          totpEnabled: users.totpEnabled,
+          sessionVersion: users.sessionVersion,
+          authProvider: users.authProvider,
+          externalId: users.externalId,
+        })
+        .from(users)
+        .where(eq(users.id, tokenRow.userId))
+        .limit(1)
+      if (!user) {
+        return failVerify(c, db, tokenHash, now, ipAddress, userAgent, {
+          reason: "user_missing",
+          userId: tokenRow.userId,
+        })
+      }
+      resolved = user
+    } else {
+      // ── SIGN-UP BRANCH — the second caller of the users.email lookup (10e-R100) ──
+      // The lookup stays COLLATION-DEPENDENT (utf8mb4_0900_ai_ci) and must not be made
+      // exact: an exact lookup would miss a stored "Khaled@Gmail.com" for a normalized
+      // "khaled@gmail.com", fall through to INSERT, and hit users_email_unique — the F2
+      // crash on a new path (10e-R82/R83). What becomes exact is the ADOPTION DECISION,
+      // below. Those are different things.
+      //
+      // Why the adoption decision must be exact (10e-R122, MEASURED not argued):
+      // ai_ci matches ACROSS ACCENTS ('jose@x.com' = 'josé@x.com' returns 1; the same
+      // pair under _as_cs returns 0). On THIS branch the mail went to the address the
+      // requester TYPED — effectiveEmail took the `?? normalized` arm — so the token is
+      // legitimately the requester's. An attacker who requests a link for jose@x.com
+      // before a victim signs up as josé@x.com would otherwise click it afterwards, match
+      // the victim's row under ai_ci, and be adopted into the victim's account. No
+      // mailbox is compromised and the zod gate holds throughout; the exposure is that
+      // the MATCH TARGET changed between request and verify.
+      const [existing] = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          isActive: users.isActive,
+          totpEnabled: users.totpEnabled,
+          sessionVersion: users.sessionVersion,
+          authProvider: users.authProvider,
+          externalId: users.externalId,
+        })
+        .from(users)
+        .where(eq(users.email, tokenRow.email))
+        .limit(1)
+
+      if (existing) {
+        if (normalizeEmail(existing.email) !== tokenRow.email) {
+          // TERMINAL — deliberately no INSERT fallthrough. Inserting here would hit
+          // users_email_unique under ai_ci and produce the F2 crash (10e-R122(b)).
+          // The user-facing consequence — a genuine jose@x.com owner cannot sign up
+          // while josé@x.com holds the ai_ci-unique slot — is the queued 10e-R72/R85
+          // item, unchanged by this ruling except that it now fails cleanly.
+          return failVerify(c, db, tokenHash, now, ipAddress, userAgent, {
+            reason: "inexact_email_match",
+            userId: null,
+          })
+        }
+        resolved = existing
+      } else {
+        // authProvider "email" + a random external_id: approved at phase4-10e.md A1(c)
+        // and 10e-R8 item 2. The composite (auth_provider, external_id) unique is
+        // satisfied without collisions, and no PII enters an export-excluded column.
+        const [inserted] = await db
+          .insert(users)
+          .values({ authProvider: "email", externalId: randomUUID(), email: tokenRow.email })
+          .$returningId()
+        resolved = {
+          id: inserted.id,
+          isActive: true,
+          totpEnabled: false,
+          sessionVersion: 1, // DB default
+          authProvider: "email",
+          externalId: "",
+        }
+        isNewUser = true
+        recordEventOnce(inserted.id, "signup_completed", {}, db).catch((err: unknown) =>
+          Sentry.captureException(err, {
+            tags: { handler: "magic-link.verify.signup_completed", userId: inserted.id },
+          }),
+        )
+        // externalId is needed for the session claim; read back rather than guessed.
+        const [fresh] = await db
+          .select({ externalId: users.externalId })
+          .from(users)
+          .where(eq(users.id, inserted.id))
+          .limit(1)
+        if (fresh) resolved.externalId = fresh.externalId
+      }
+    }
+
+    const userId = resolved.id
+
+    // ── Reactivate-as-fresh (10e-R3), replicating routes/auth.ts's inactive branch ──
+    // sessionVersion is read AS-IS and deliberately NOT re-bumped: the purge that
+    // preceded this login already bumped it (10d-0a), so the token issued below is not
+    // self-denied by the sv_revoked key. Re-bumping here would issue a token whose sv the
+    // deny-list key does not cover, silently widening the revocation window.
+    if (!resolved.isActive) {
+      await db
+        .update(users)
+        .set({ isActive: true, totpSecret: null, totpEnabled: false, totpBackupCodesJson: null })
+        .where(eq(users.id, userId))
+      resolved.totpEnabled = false
+      isNewUser = true
+      recordEventOnce(userId, "signup_completed", {}, db).catch((err: unknown) =>
+        Sentry.captureException(err, {
+          tags: { handler: "magic-link.verify.reactivated.signup_completed", userId },
+        }),
+      )
+      auditSecurityEvent(db, "account.reactivated", { userId, ipAddress, userAgent })
+    }
+
+    // Backfill user_id on a sign-up-path row so it leaves the ORPHAN CLASS and becomes
+    // reachable by purgeUserAccountRows. A data-minimisation property, not bookkeeping:
+    // without it the address persists until the cleanup job's age bound alone.
+    if (tokenRow.userId === null) {
+      await db
+        .update(magicLinkTokens)
+        .set({ userId })
+        .where(eq(magicLinkTokens.id, tokenRow.id))
+    }
+
+    // ── TOTP gate — reuses login.pending_2fa VERBATIM (10e-R11) ──────────────
+    // No magic-link-specific string here: the session does not exist yet, so claiming
+    // login.magic_link.success would name a session that has not been issued. The
+    // positive event comes from /2fa/verify's own login.success on completion.
+    if (resolved.totpEnabled) {
+      const pendingToken = await packPending2faToken(userId)
+      setPending2faCookie(c, pendingToken)
+      auditSecurityEvent(db, "login.pending_2fa", { userId, ipAddress, userAgent })
+      return c.json({ ok: true, data: { pending_2fa: true }, error: null, meta: {} }, 200)
+    }
+
+    db.update(users)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(users.id, userId))
+      .catch((err: unknown) =>
+        Sentry.captureException(err, { tags: { handler: "magic-link.verify.lastLoginAt", userId } }),
+      )
+
+    auditSecurityEvent(db, "login.magic_link.success", { userId, ipAddress, userAgent })
+
+    const sessionToken = await createSessionToken({
+      userId,
+      externalId: resolved.externalId,
+      authProvider: resolved.authProvider,
+      sv: resolved.sessionVersion,
+    })
+    setSessionCookie(c, sessionToken)
+
+    // user_id deliberately NOT echoed (10e-R124): the frontend has /me, and the smallest
+    // surface that satisfies 10e-4 is the right one. is_new_user is kept because 10e-4
+    // routes on it to /welcome?source=signup, matching the OIDC callback's target.
+    return c.json({ ok: true, data: { is_new_user: isNewUser }, error: null, meta: {} }, 200)
   },
 )
