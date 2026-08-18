@@ -8,6 +8,12 @@ import { env } from "../lib/env"
 import { generators, getOidcClient } from "../lib/oidc"
 import { createSessionToken, revokeSessionVersion, requireAuth, getAuthRedis } from "../middleware/auth"
 import { setSessionCookie, SESSION_COOKIE } from "../middleware/session-cookie"
+import {
+  PENDING_2FA_COOKIE,
+  packPending2faToken,
+  setPending2faCookie,
+  verifyPending2faToken,
+} from "../middleware/pending-2fa"
 import { Sentry } from "../lib/sentry"
 import { recordEventOnce } from "../lib/product-events-lib"
 import { auditSecurityEvent } from "../lib/security-events-lib"
@@ -38,9 +44,9 @@ const router = new Hono()
 const OIDC_STATE_COOKIE = "oidc_state"
 const OIDC_STATE_TTL = 600 // 10 minutes
 
-// Short-lived cookie carries userId across the 2FA verify step (post-OIDC, pre-session).
-const PENDING_2FA_COOKIE = "statera_pending_2fa"
-const PENDING_2FA_TTL = 300 // 5 minutes
+// Failure ceiling for POST /2fa/verify. Stays here deliberately (10e-3a-EXTRACT-2): it is
+// that endpoint's retry policy, not a property of the token. PENDING_2FA_COOKIE and
+// PENDING_2FA_TTL moved to middleware/pending-2fa.ts with the mint and the cookie setter.
 const PENDING_2FA_MAX_FAILURES = 3
 
 // Short-lived cookie confirms that the user re-authenticated specifically to delete their account.
@@ -73,23 +79,6 @@ async function unpackStateCookie(token: string): Promise<StateCookiePayload> {
     nonce: payload["nonce"] as string,
     deleteIntent: payload["deleteIntent"] as boolean | undefined,
     userId: payload["userId"] as number | undefined,
-  }
-}
-
-async function packPending2faToken(userId: number, deleteIntent?: boolean): Promise<string> {
-  const claims: Record<string, unknown> = { userId, pendingAt: Date.now() }
-  if (deleteIntent) claims.deleteIntent = true
-  return new SignJWT(claims)
-    .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime(`${PENDING_2FA_TTL}s`)
-    .sign(stateSecret())
-}
-
-async function verifyPending2faToken(token: string): Promise<{ userId: number; deleteIntent?: boolean }> {
-  const { payload } = await jwtVerify(token, stateSecret())
-  return {
-    userId: payload["userId"] as number,
-    deleteIntent: payload["deleteIntent"] as boolean | undefined,
   }
 }
 
@@ -284,13 +273,7 @@ router.get("/callback", async (c) => {
     // /2fa/verify issues the delete-intent cookie instead of a new session on success.
     if (existing.totpEnabled) {
       const pendingToken = await packPending2faToken(userId, stateDeleteIntent ?? false)
-      setCookie(c, PENDING_2FA_COOKIE, pendingToken, {
-        httpOnly: true,
-        sameSite: "Lax",
-        secure: !env.isDev,
-        maxAge: PENDING_2FA_TTL,
-        path: "/",
-      })
+      setPending2faCookie(c, pendingToken)
       if (stateDeleteIntent) {
         auditSecurityEvent(db, "account.delete_reauth.pending_2fa", {
           userId,
