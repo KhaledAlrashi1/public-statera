@@ -1045,6 +1045,22 @@ matters.
 > spy+`skipIf` form. If you would rather 10e-3a simply match 10e-2's shape for consistency, say
 > so and I will.
 
+**[SUPERSEDED 2026-08-18, 10e-R136 — retained as the authorship-state record, not edited.]**
+The block above is **FALSE**, and it is the premise the channel's 10e-R108 departure finding was
+built on. `routes/magic-link.integration.test.ts` already existed at `33ca1bb` (10e-2) with five
+tests covering the per-IP **and** per-email limiters against **real Redis**, plus real-MySQL
+supersession and the global ceiling with its isolation stated in its own header. So 10e-2's per-IP
+limiter does **not** lack INTEGRATION coverage; it has exactly the coverage 10e-R16 prescribes, in
+the dedicated `*.integration.test.ts` file the standing convention requires. Both statements were
+always true and do not conflict: CLAUDE.md's "all five rate-limit cases share one `skipIf`'d
+describe — not drift" describes the HERMETIC file only. I read one as contradicting the other and
+did not open the integration file before asserting it. **Consequences:** 10e-R108's departure
+finding and its self-attribution are WITHDRAWN (10e-R136); the queue item it created closes as
+**MOOT**, never having described real work. **10e-R108's operative ruling STANDS unchanged** — the
+real 11-request INTEGRATION test on a unique IP for verify's per-IP limiter, with `skipIf` reserved
+for the fixed-key global, is correct on its own merits and does not depend on this premise. A
+remedy can be right while its diagnosis is wrong.
+
 ### C4 — 10e-R37 check, performed
 
 Enumeration run, matched-file lists pasted. A channel enumeration is a hypothesis until a
