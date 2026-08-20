@@ -1,6 +1,8 @@
 import { Hono } from "hono"
+import type { Context } from "hono"
 import { deleteCookie, getCookie, setCookie } from "hono/cookie"
 import { SignJWT, jwtVerify } from "jose"
+import { z } from "zod"
 import { and, desc, eq, like } from "drizzle-orm"
 import { getDb } from "../db/connection"
 import { users, userProfiles, securityEvents } from "../db/schema"
@@ -17,6 +19,7 @@ import {
 import { Sentry } from "../lib/sentry"
 import { recordEventOnce } from "../lib/product-events-lib"
 import { auditSecurityEvent } from "../lib/security-events-lib"
+import { normalizeEmail } from "../lib/magic-link-lib"
 import { createRateLimiter } from "../lib/rate-limit"
 import { cacheBustDashboardMetrics, cacheBustSafeToSpend } from "../lib/analytics-cache"
 import {
@@ -48,6 +51,140 @@ const OIDC_STATE_TTL = 600 // 10 minutes
 // that endpoint's retry policy, not a property of the token. PENDING_2FA_COOKIE and
 // PENDING_2FA_TTL moved to middleware/pending-2fa.ts with the mint and the cookie setter.
 const PENDING_2FA_MAX_FAILURES = 3
+
+// ── 10e-3b: OIDC email adoption ──────────────────────────────────────────────
+//
+// Deliberate deviations from Flask: Flask has no OIDC callback at all, so every
+// decision below is Hono-native and is ruled rather than ported.
+//
+// Closed reason set for a refused adoption (10e-R162(d), 2026-08-19). Enumerated
+// in code, not free-form: the enumeration is what makes the BLOCKING no-address-
+// in-payload scan checkable rather than a promise.
+//
+// `inexact_email_match` is SHARED BY VALUE with magic-link's VERIFY_FAIL_REASONS
+// — one decision class must not report two literals. The two arrays are pinned
+// byte-identical by a hermetic assertion (10e-R162(d)); a comment would rot,
+// an assertion goes red.
+const ADOPT_FAIL_REASONS = [
+  "claim_unparseable",
+  "email_unverified",
+  "inexact_email_match",
+  "delete_reauth_context",
+  "duplicate_email_race",
+] as const
+export type AdoptFailReason = (typeof ADOPT_FAIL_REASONS)[number]
+export { ADOPT_FAIL_REASONS }
+
+function frontendOrigin(): string {
+  return env.corsOrigins[0] ?? "http://127.0.0.1:3002"
+}
+
+/**
+ * The ONE generic callback-failure exit (10e-R161, 2026-08-19).
+ *
+ * Bare `/login`, no query parameter. A distinguishing literal such as
+ * `?error=oidc_adopt_refused` would be an ACCOUNT-EXISTENCE ORACLE: an attacker
+ * holding a Google account at josé@x.com who receives a refusal distinguishable
+ * from the callback's other failures has learned a Statera account exists at an
+ * accent-variant of that address. That is the signal R14's uniform envelope
+ * suppresses on the verify side, arriving through a query param instead of a
+ * response body — the adoption decision has two front doors and both must be
+ * uniform. No param at all also means a param with one value cannot later
+ * acquire a second one, which is how such oracles get reintroduced.
+ *
+ * Co-routed causes, so the refusal is not the only redirecting failure and the
+ * anonymity set is larger than one: token-exchange failure and an unparseable
+ * email claim. State-cookie failures are deliberately NOT co-routed — their
+ * dominant cause is blocked/expired cookies, and redirecting such a user to
+ * /login produces a silent sign-in loop with no diagnostic, which is worse than
+ * the JSON that names the cause in words.
+ */
+function failCallback(c: Context): Response {
+  return c.redirect(`${frontendOrigin()}/login`)
+}
+
+/**
+ * Refuse an adoption: audit, then take the generic exit. The audit is
+ * fire-and-forget and never reaches the response, so every refusal is
+ * byte-identical to every co-routed failure.
+ *
+ * `userId` is the TARGET account when one was located. That is a single-account
+ * security event the owner would want, not a cross-account link — contrast
+ * `account.email_refresh_skipped`, which deliberately omits the colliding row's
+ * id (10e-R162(e)).
+ */
+function refuseAdoption(
+  c: Context,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db: any,
+  reason: AdoptFailReason,
+  userId: number | null,
+): Response {
+  auditSecurityEvent(db, "login.failed", {
+    userId: userId ?? undefined,
+    ipAddress: c.req.header("x-forwarded-for") ?? undefined,
+    userAgent: c.req.header("user-agent") ?? undefined,
+    details: { reason },
+  })
+  return failCallback(c)
+}
+
+/** MySQL 1062 — the `users_email_unique` violation, observed as ER_DUP_ENTRY. */
+function isDuplicateEmailError(err: unknown): boolean {
+  return typeof err === "object" && err !== null && (err as { code?: string }).code === "ER_DUP_ENTRY"
+}
+
+/**
+ * CRASH PATHS 2 and 3 of 3 (10e-R13(b), extended to the reactivate branch by
+ * 10e-R154 after F-3b-1 found a third site the ruling did not name).
+ *
+ * Both surviving branches refresh `users.email` from the provider claims, and
+ * both hit `users_email_unique` when the provider-side address has moved to one
+ * another Statera row already holds. 10e materially enlarges this because
+ * magic-link creates users keyed on arbitrary user-supplied addresses, not only
+ * on addresses Google issued. It is reachable rather than theoretical because
+ * `purgeUserAccountRows` never clears `users.email` (F-3b-2), so soft-deleted
+ * rows keep occupying the unique index — a retention that is LOAD-BEARING, not a
+ * defect, since both reactivation paths find their row by it (10e-R155).
+ *
+ * The identity is already established by (auth_provider, external_id), so the
+ * refresh is COSMETIC. Failing a login over a cosmetic write would be strictly
+ * worse than a stale address, so the write is attempted and, on collision,
+ * retried without `email`; the login proceeds. Attempt-and-translate rather than
+ * pre-check-then-write deliberately: a pre-check carries its own TOCTOU race and
+ * costs an extra SELECT on every login for a branch that almost never fires.
+ *
+ * The stale-address consequence is the queued 10e-R72/R85 item — same root, same
+ * user, post-announcement, its own cycle. Cited, not bundled.
+ */
+async function updateWithEmailFallback(
+  c: Context,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db: any,
+  userId: number,
+  email: string,
+  rest: Record<string, unknown>,
+): Promise<void> {
+  try {
+    await db.update(users).set({ ...rest, email }).where(eq(users.id, userId))
+    return
+  } catch (err) {
+    if (!isDuplicateEmailError(err)) throw err
+  }
+
+  await db.update(users).set(rest).where(eq(users.id, userId))
+
+  // Records only the reason. NOT the colliding address (10e-R11 BLOCKING) and
+  // NOT the other row's id: pairing "this address collided" with "with this
+  // user" reconstructs the very association the address scan exists to prevent
+  // (10e-R162(e)).
+  auditSecurityEvent(db, "account.email_refresh_skipped", {
+    userId,
+    ipAddress: c.req.header("x-forwarded-for") ?? undefined,
+    userAgent: c.req.header("user-agent") ?? undefined,
+    details: { reason: "email_conflict" },
+  })
+}
 
 // Short-lived cookie confirms that the user re-authenticated specifically to delete their account.
 // Path=/api/account scopes it to the deletion endpoints only.
@@ -158,46 +295,163 @@ router.get("/callback", async (c) => {
       state: storedState,
       nonce: storedNonce,
     })
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "OAuth callback failed"
-    return c.json({ error: message }, 400)
+  } catch {
+    // Co-routed to the generic exit (10e-R161): post-state-validation, and
+    // indistinguishable from an adoption refusal from outside. The provider's
+    // message is deliberately dropped rather than rendered — it is diagnostic
+    // text for an operator, not copy for a browser.
+    return failCallback(c)
   }
 
   const claims = tokenSet.claims()
   const externalId = claims.sub
-  const email = claims.email
-  if (!email) {
-    return c.json(
-      { error: "No email in OIDC claims — verify provider scopes include 'email'" },
-      400,
-    )
-  }
-
   const provider = env.oauthProvider
   const db = getDb()
 
-  const [existing] = await db
+  // ── Email boundary gate (10e-R156(d), 2026-08-19) ───────────────────────────
+  // R122 bounded its own exposure on the magic-link side by leaning on zod's
+  // .email(), which rejects a non-ASCII local part before any comparison runs.
+  // THIS PATH HAD NO VALIDATOR OF ANY KIND (F-3b-4): claims.email reached the
+  // INSERT and both UPDATEs verbatim, so the one mitigation R122 assumed was
+  // absent exactly where the same match gate was about to be introduced.
+  // Parsing and normalizing here restores it.
+  //
+  // This is DEFENCE IN DEPTH and must never be argued as the primary gate; the
+  // primary gate is the exact adoption comparison below (10e-R156(d)).
+  //
+  // Subsumes the former "No email in OIDC claims" check — an absent claim fails
+  // to parse — and that exit is co-routed here by 10e-R161 anyway.
+  //
+  // CONSEQUENCE, recorded rather than hidden: a provider issuing a non-ASCII
+  // local part can no longer sign in at all, where today it would succeed. A
+  // no-op against Google, whose addresses are ASCII — which is the point, since
+  // the codebase is provider-agnostic by architectural decision and R13(a) says
+  // the day a second provider is added is the day this becomes load-bearing.
+  const parsedEmail = z.string().email().safeParse(claims.email)
+  if (!parsedEmail.success) {
+    return refuseAdoption(c, db, "claim_unparseable", null)
+  }
+  const email = normalizeEmail(parsedEmail.data)
+
+  let [existing] = await db
     .select()
     .from(users)
     .where(and(eq(users.authProvider, provider), eq(users.externalId, externalId)))
     .limit(1)
+
+  // ── ADOPTION (10e-3b) ───────────────────────────────────────────────────────
+  // Adoption converts a not-found into a found, and the three branches below then
+  // run UNCHANGED. That shape is the design decision: an adopted row may be
+  // soft-deleted or may carry TOTP, so a fourth branch would duplicate the
+  // reactivate and 2FA-gate logic, and duplicated auth logic is what 10e-R9 and
+  // 10e-R63 exist to prevent. Routing through the existing branches means an
+  // adopted soft-deleted row inherits reactivate-as-fresh — including reading
+  // sessionVersion as-is, never re-bumping it, whose reasoning ORIGINATED here
+  // at 10d-0a (10e-R160) — and an adopted row with TOTP cannot bypass the gate.
+  if (!existing) {
+    const [byEmail] = await db
+      .select()
+      .from(users)
+      // COLLATION-DEPENDENT BY DESIGN (utf8mb4_0900_ai_ci) and must NOT be made
+      // exact: an exact lookup would miss a stored "Khaled@Gmail.com" for a
+      // normalized "khaled@gmail.com", fall through to INSERT, and hit
+      // users_email_unique — the F2 crash the adoption exists to prevent
+      // (10e-R82/R83). What becomes exact is the ADOPTION DECISION below.
+      // Those are different things.
+      .where(eq(users.email, email))
+      .limit(1)
+
+    if (byEmail) {
+      // GATE 1 (10e-R13(a)) — never bind an existing account to an identity on
+      // the strength of an unverified claim. Absent and false collapse together.
+      if (claims.email_verified !== true) {
+        return refuseAdoption(c, db, "email_unverified", byEmail.id)
+      }
+
+      // GATE 2 (10e-R122(b) mirrored, amended by 10e-R156(c)) — BOTH SIDES are
+      // normalized. R122(b)'s form compared against an already-normalized token
+      // email; mirrored naively here the right-hand side is a raw provider claim,
+      // and a claim of "Khaled@Gmail.com" against a stored "khaled@gmail.com"
+      // would refuse a LEGITIMATE adoption — a security gate turned into a rare,
+      // unreproducible sign-in failure. `email` is normalized above, so this
+      // compares normalized to normalized: case-insensitive (load-bearing, stays)
+      // and accent-SENSITIVE (the whole exposure).
+      if (normalizeEmail(byEmail.email) !== email) {
+        // TERMINAL — no INSERT fallthrough. Inserting here hits users_email_unique
+        // under ai_ci and is the F2 crash on a new path (10e-R156(e)).
+        return refuseAdoption(c, db, "inexact_email_match", byEmail.id)
+      }
+
+      // GATE 3 (defensive) — a delete-reauth flow requires a live session, so
+      // (provider, external_id) resolves and adoption is unreachable here. The
+      // guard costs one line and fails closed if that reasoning is ever wrong.
+      if (stateDeleteIntent) {
+        return refuseAdoption(c, db, "delete_reauth_context", byEmail.id)
+      }
+
+      // The bind rewrites (auth_provider, external_id), which is ITSELF a unique
+      // index. It cannot collide in the ordinary case — we are only here because
+      // the lookup on that exact composite returned nothing — but a concurrent
+      // login of the same new identity can win the race between that lookup and
+      // this write. Left unhandled it is an uncaught 500 on the auth path: the F2
+      // class this sub-step exists to eliminate, and leaving one behind while
+      // fixing three others would reproduce 10e-R154's own objection.
+      //
+      // Reuses `duplicate_email_race` rather than minting a sixth literal. The
+      // literal names a CLASS — another request won the race for this identity —
+      // and both index violations are that class. Mandate is 10e-R162(d)'s closed
+      // set; this resolution is an implementation choice within it.
+      try {
+        await db
+          .update(users)
+          .set({ authProvider: provider, externalId })
+          .where(eq(users.id, byEmail.id))
+      } catch (err) {
+        if (isDuplicateEmailError(err)) {
+          return refuseAdoption(c, db, "duplicate_email_race", byEmail.id)
+        }
+        throw err
+      }
+
+      auditSecurityEvent(db, "account.provider_linked", {
+        userId: byEmail.id,
+        ipAddress: c.req.header("x-forwarded-for") ?? undefined,
+        userAgent: c.req.header("user-agent") ?? undefined,
+      })
+
+      existing = { ...byEmail, authProvider: provider, externalId }
+    }
+  }
 
   let userId: number
   let sessionVersion: number
   let isNewUser = false
 
   if (!existing) {
-    const [inserted] = await db
-      .insert(users)
-      .values({
-        authProvider: provider,
-        externalId,
-        email,
-        displayName: (claims["name"] as string | undefined) ?? null,
-        firstName: (claims["given_name"] as string | undefined) ?? null,
-        lastName: (claims["family_name"] as string | undefined) ?? null,
-      })
-      .$returningId()
+    // CRASH PATH 1 of 3 (10e-R13(b) as extended by 10e-R154). The adoption block
+    // above closes the ordinary case; what remains is the race, which adoption
+    // narrows but cannot close — a concurrent request may claim this address
+    // between the byEmail lookup and this INSERT. Translate the unique-constraint
+    // violation into the same generic refusal rather than letting it 500.
+    let inserted: { id: number }
+    try {
+      ;[inserted] = await db
+        .insert(users)
+        .values({
+          authProvider: provider,
+          externalId,
+          email,
+          displayName: (claims["name"] as string | undefined) ?? null,
+          firstName: (claims["given_name"] as string | undefined) ?? null,
+          lastName: (claims["family_name"] as string | undefined) ?? null,
+        })
+        .$returningId()
+    } catch (err) {
+      if (isDuplicateEmailError(err)) {
+        return refuseAdoption(c, db, "duplicate_email_race", null)
+      }
+      throw err
+    }
     userId = inserted.id
     sessionVersion = 1 // DB default
     isNewUser = true
@@ -224,17 +478,13 @@ router.get("/callback", async (c) => {
     // path), and null the TOTP fields. The TOTP null is idempotent for post-10d-0a purges
     // (already null) but heals legacy stubs purged before this fix — without it, their
     // second and subsequent logins would hit the 2FA gate against a deleted-era secret.
-    await db
-      .update(users)
-      .set({
-        isActive: true,
-        email,
-        displayName: (claims["name"] as string | undefined) ?? existing.displayName,
-        totpSecret: null,
-        totpEnabled: false,
-        totpBackupCodesJson: null,
-      })
-      .where(eq(users.id, userId))
+    await updateWithEmailFallback(c, db, userId, email, {
+      isActive: true,
+      displayName: (claims["name"] as string | undefined) ?? existing.displayName,
+      totpSecret: null,
+      totpEnabled: false,
+      totpBackupCodesJson: null,
+    })
 
     // Mirror the new-user branch: re-emit signup_completed (product_events were purged).
     isNewUser = true
@@ -258,15 +508,9 @@ router.get("/callback", async (c) => {
     }
 
     // Refresh email and display name in case they changed at the provider.
-    await db
-      .update(users)
-      .set({
-        email,
-        displayName: (claims["name"] as string | undefined) ?? existing.displayName,
-      })
-      .where(eq(users.id, userId))
-
-    const frontendOrigin = env.corsOrigins[0] ?? "http://127.0.0.1:3002"
+    await updateWithEmailFallback(c, db, userId, email, {
+      displayName: (claims["name"] as string | undefined) ?? existing.displayName,
+    })
 
     // 7b: Gate on TOTP — issue a short-lived pending-2FA cookie and redirect to the
     // verify page. For delete-reauth flows, deleteIntent is embedded in the JWT so
@@ -280,14 +524,14 @@ router.get("/callback", async (c) => {
           ipAddress: c.req.header("x-forwarded-for") ?? undefined,
           userAgent: c.req.header("user-agent") ?? undefined,
         })
-        return c.redirect(`${frontendOrigin}/auth/2fa-verify?intent=delete`)
+        return c.redirect(`${frontendOrigin()}/auth/2fa-verify?intent=delete`)
       }
       auditSecurityEvent(db, "login.pending_2fa", {
         userId,
         ipAddress: c.req.header("x-forwarded-for") ?? undefined,
         userAgent: c.req.header("user-agent") ?? undefined,
       })
-      return c.redirect(`${frontendOrigin}/auth/2fa-verify`)
+      return c.redirect(`${frontendOrigin()}/auth/2fa-verify`)
     }
 
     // No TOTP: for delete-reauth, issue delete-intent cookie directly without
@@ -306,7 +550,7 @@ router.get("/callback", async (c) => {
         ipAddress: c.req.header("x-forwarded-for") ?? undefined,
         userAgent: c.req.header("user-agent") ?? undefined,
       })
-      return c.redirect(`${frontendOrigin}/delete-account/confirm`)
+      return c.redirect(`${frontendOrigin()}/delete-account/confirm`)
     }
   }
 
@@ -319,8 +563,7 @@ router.get("/callback", async (c) => {
   const sessionToken = await createSessionToken({ userId, externalId, authProvider: provider, sv: sessionVersion })
   setSessionCookie(c, sessionToken)
 
-  const frontendOrigin = env.corsOrigins[0] ?? "http://127.0.0.1:3002"
-  return c.redirect(`${frontendOrigin}${isNewUser ? "/welcome?source=signup" : "/"}`)
+  return c.redirect(`${frontendOrigin()}${isNewUser ? "/welcome?source=signup" : "/"}`)
 })
 
 // POST /api/auth/logout

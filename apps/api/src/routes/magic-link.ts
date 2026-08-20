@@ -367,7 +367,10 @@ const VerifySchema = z.object({
  * consumed_at doubles as the supersession marker (10e-R2), so nothing at this layer can
  * distinguish "already clicked" from "invalidated by a re-request".
  */
-const VERIFY_FAIL_REASONS = [
+// Exported for the 10e-R162(d) shared-literal parity assertion: `inexact_email_match`
+// is shared BY VALUE with routes/auth.ts's ADOPT_FAIL_REASONS, and one decision class
+// must not report two literals into the audit trail.
+export const VERIFY_FAIL_REASONS = [
   "not_found",
   "expired",
   "consumed_or_superseded",

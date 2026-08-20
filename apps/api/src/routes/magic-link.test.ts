@@ -940,3 +940,25 @@ describe.skipIf(process.env.INTEGRATION === "true")(
     })
   },
 )
+
+// ── 10e-R162(d): shared-literal parity with routes/auth.ts ───────────────────
+describe("inexact_email_match parity across the two closed reason sets", () => {
+  it("is byte-identical in VERIFY_FAIL_REASONS and ADOPT_FAIL_REASONS", async () => {
+    // One decision class — "the ai_ci match was inexact beyond case" — is reached
+    // from two endpoints and must not report two different literals into the audit
+    // trail. The sets are deliberately defined separately (the routers share no
+    // vocabulary module); a comment saying "keep these in sync" would rot, so this
+    // assertion goes red instead.
+    const { VERIFY_FAIL_REASONS } = await import("./magic-link")
+    const { ADOPT_FAIL_REASONS } = await import("./auth")
+
+    const fromVerify = VERIFY_FAIL_REASONS.filter((r) => r.includes("inexact"))
+    const fromAdopt = ADOPT_FAIL_REASONS.filter((r) => r.includes("inexact"))
+
+    // Each set contributes exactly one, so the comparison below cannot pass vacuously.
+    expect(fromVerify).toHaveLength(1)
+    expect(fromAdopt).toHaveLength(1)
+    expect(fromAdopt[0]).toBe(fromVerify[0])
+    expect(fromVerify[0]).toBe("inexact_email_match")
+  })
+})
