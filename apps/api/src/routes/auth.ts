@@ -64,13 +64,27 @@ const PENDING_2FA_MAX_FAILURES = 3
 // `inexact_email_match` is SHARED BY VALUE with magic-link's VERIFY_FAIL_REASONS
 // — one decision class must not report two literals. The two arrays are pinned
 // byte-identical by a hermetic assertion (10e-R162(d)); a comment would rot,
-// an assertion goes red.
+// an assertion goes red. THAT PIN LIVES IN `routes/magic-link.test.ts`, not in
+// this router's test file (10e-R169(a)): siting it here would require adding
+// `createCustomRateLimiter` to auth.callback.test.ts's enumerating rate-limit
+// factory, the forced edit 10e-R36 chose Option B to avoid. Named here so the
+// pin is findable from the thing it protects and does not get deleted as
+// orphaned.
+//
+// The two race literals are DISTINCT because they name different constraints
+// (10e-R166(c)): `duplicate_email_race` is a `users_email_unique` violation,
+// `duplicate_identity_race` is a `uq_users_provider_external_id` violation in
+// which no email participates — not in the constraint, not in the comparison,
+// not in the cause. Collapsing them would make a permanent audit string assert
+// "email" about an event with no email in it. The shared class is duplicate-KEY
+// race, not duplicate-EMAIL race.
 const ADOPT_FAIL_REASONS = [
   "claim_unparseable",
   "email_unverified",
   "inexact_email_match",
   "delete_reauth_context",
   "duplicate_email_race",
+  "duplicate_identity_race",
 ] as const
 export type AdoptFailReason = (typeof ADOPT_FAIL_REASONS)[number]
 export { ADOPT_FAIL_REASONS }
@@ -129,8 +143,17 @@ function refuseAdoption(
   return failCallback(c)
 }
 
-/** MySQL 1062 — the `users_email_unique` violation, observed as ER_DUP_ENTRY. */
-function isDuplicateEmailError(err: unknown): boolean {
+/**
+ * MySQL 1062 — ANY unique-index violation, surfaced by mysql2 as ER_DUP_ENTRY.
+ * Named for the key, not for the column: it guards both `users_email_unique` and
+ * `uq_users_provider_external_id` (10e-R166(c)).
+ *
+ * The shape is verified against REAL MySQL, not only against the fabricated error
+ * the hermetic tests construct — `code === "ER_DUP_ENTRY"`, `errno 1062`. A test
+ * that builds the condition its predicate matches cannot detect a wrong predicate
+ * (10e-R168).
+ */
+function isDuplicateKeyError(err: unknown): boolean {
   return typeof err === "object" && err !== null && (err as { code?: string }).code === "ER_DUP_ENTRY"
 }
 
@@ -169,7 +192,7 @@ async function updateWithEmailFallback(
     await db.update(users).set({ ...rest, email }).where(eq(users.id, userId))
     return
   } catch (err) {
-    if (!isDuplicateEmailError(err)) throw err
+    if (!isDuplicateKeyError(err)) throw err
   }
 
   await db.update(users).set(rest).where(eq(users.id, userId))
@@ -397,18 +420,20 @@ router.get("/callback", async (c) => {
       // class this sub-step exists to eliminate, and leaving one behind while
       // fixing three others would reproduce 10e-R154's own objection.
       //
-      // Reuses `duplicate_email_race` rather than minting a sixth literal. The
-      // literal names a CLASS — another request won the race for this identity —
-      // and both index violations are that class. Mandate is 10e-R162(d)'s closed
-      // set; this resolution is an implementation choice within it.
+      // Its OWN literal (10e-R166(c)). An earlier revision reused
+      // `duplicate_email_race` on the reasoning that the literal names a class;
+      // that was the right instinct and the wrong class. The constraint violated
+      // here is `uq_users_provider_external_id` and NO EMAIL participates in it,
+      // so reusing the email literal would make a permanent audit string assert
+      // "email" about an event that has none. The shared class is duplicate-KEY.
       try {
         await db
           .update(users)
           .set({ authProvider: provider, externalId })
           .where(eq(users.id, byEmail.id))
       } catch (err) {
-        if (isDuplicateEmailError(err)) {
-          return refuseAdoption(c, db, "duplicate_email_race", byEmail.id)
+        if (isDuplicateKeyError(err)) {
+          return refuseAdoption(c, db, "duplicate_identity_race", byEmail.id)
         }
         throw err
       }
@@ -447,7 +472,7 @@ router.get("/callback", async (c) => {
         })
         .$returningId()
     } catch (err) {
-      if (isDuplicateEmailError(err)) {
+      if (isDuplicateKeyError(err)) {
         return refuseAdoption(c, db, "duplicate_email_race", null)
       }
       throw err

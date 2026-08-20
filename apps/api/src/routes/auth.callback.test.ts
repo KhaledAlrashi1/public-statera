@@ -12,7 +12,7 @@ import { SignJWT } from "jose"
 const SESSION_SECRET = "test-session-secret-at-least-32-chars-long"
 
 // Mutable OIDC claims holder (hoisted so the vi.mock factory can close over it).
-const oidc = vi.hoisted(() => ({ claims: {} as Record<string, unknown> }))
+const oidc = vi.hoisted(() => ({ claims: {} as Record<string, unknown>, throwOnExchange: false }))
 
 // ── Module mocks (mirror auth.2fa-verify.test.ts, + a functional getOidcClient) ──
 
@@ -37,7 +37,13 @@ vi.mock("../lib/oidc", () => ({
   generators: { state: vi.fn(() => "st"), nonce: vi.fn(() => "no") },
   getOidcClient: vi.fn(async () => ({
     callbackParams: () => ({}),
-    callback: async () => ({ claims: () => oidc.claims }),
+    callback: async () => {
+      // Reaches the token-exchange failure exit (auth.ts :163), which calls
+      // failCallback DIRECTLY — not via refuseAdoption. That independence is
+      // what makes it a non-degenerate counterpart for the R161 pin.
+      if (oidc.throwOnExchange) throw new Error("token exchange failed")
+      return { claims: () => oidc.claims }
+    },
   })),
 }))
 vi.mock("../middleware/auth", () => ({
@@ -184,6 +190,7 @@ async function makeStateCookie(): Promise<string> {
 beforeEach(() => {
   vi.clearAllMocks()
   oidc.claims = { sub: "ext-42", email: "user@example.com", name: "Refreshed Name" }
+  oidc.throwOnExchange = false
 })
 
 describe("GET /callback — reactivate-as-fresh on inactive account (10d-0b)", () => {
@@ -417,6 +424,26 @@ describe("GET /callback — 10e-3b adoption gates", () => {
     expect(auditOf("login.failed")[0].detailsJson).toContain("delete_reauth_context")
   })
 
+  it("translates an adopt-BIND identity-collision race into its own literal, not a 500", async () => {
+    // The fourth crash site (10e-R166): the bind rewrites (auth_provider,
+    // external_id), itself UNIQUE, and a concurrent login of the same new identity
+    // can win the race between the composite lookup and this write. Its literal is
+    // DISTINCT from duplicate_email_race because no email participates in that
+    // constraint. Exercised so the closed set has no unused literal.
+    oidc.claims = { sub: "ext-new", email: "user@example.com", email_verified: true }
+    vi.spyOn(connection, "getDb").mockReturnValue(
+      makeSeqDb({ selects: [[], [ADOPT_TARGET]], updateErrors: [dupErr()] }, updateSets, insertValues),
+    )
+
+    const res = await callCallback()
+
+    expect(res.status).toBe(302)
+    expect(res.headers.get("location")).toBe("http://localhost:3002/login")
+    expect(auditOf("login.failed")[0].detailsJson).toContain("duplicate_identity_race")
+    // And NOT the email literal — the two must not collapse.
+    expect(auditOf("login.failed")[0].detailsJson).not.toContain("duplicate_email_race")
+  })
+
   it("translates an INSERT unique-collision race into the generic refusal, not a 500", async () => {
     oidc.claims = { sub: "ext-race", email: "raced@example.com", email_verified: true }
     vi.spyOn(connection, "getDb").mockReturnValue(
@@ -545,11 +572,26 @@ describe("GET /callback — 10e-3b uniformity and payload hygiene", () => {
     )
     const refusal = await callCallback()
 
+    // COUNTERPART = the TOKEN-EXCHANGE failure (auth.ts :163), deliberately NOT
+    // the boundary gate (10e-R167). Both the refusal and the boundary gate route
+    // through `refuseAdoption`, so pinning refusal against the boundary gate would
+    // hold BY CONSTRUCTION and prove nothing about the anonymity set — the same
+    // shape as the mutation that moved both sides of this very comparison. :163
+    // reaches `failCallback` by an independent path, so the pin has real content.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const b: any[] = []
-    oidc.claims = { sub: "ext-att", email: "not-an-address" }
+    oidc.throwOnExchange = true
     vi.spyOn(connection, "getDb").mockReturnValue(makeSeqDb({}, b, b))
     const coRouted = await callCallback()
+    oidc.throwOnExchange = false
+
+    // Independence made CHECKABLE, not merely asserted in prose: the refusal
+    // audits and :163 does not, so a non-empty/empty split proves the two
+    // responses were produced by different code paths. Without this, a future
+    // edit could quietly re-point the counterpart at a shared helper and the pin
+    // would go degenerate again with every assertion still green.
+    expect(a.some((v) => v?.eventType === "login.failed")).toBe(true)
+    expect(b).toHaveLength(0)
 
     expect(refusal.status).toBe(coRouted.status)
     expect(refusal.headers.get("location")).toBe(coRouted.headers.get("location"))
