@@ -1429,6 +1429,31 @@ The ranges above are superseded as follows. **The rule that a citation carries n
 `9c1b2e8` inside 10e-R140 denotes `3e3357a`. The adjacency marker is placed beside R140 in the
 appended section; R140's own text is unedited.
 
+## AMENDMENT — 2026-08-21, under 10e-R187(d) (10e-4 proposal commit)
+
+- **10e-R174 … 10e-R187 are now PERSISTED**, verbatim, in the two appended sections at the end of
+  this file (`^10e-R<n> — `, Format A). The persisted set is therefore **R7–R17, R140–R173 and
+  R174–R187**. Fourteen rulings, not seven: 10e-R187(d) extended 10e-R180(d)'s original scope after
+  the second ruling block was issued.
+- **THIS FILE CARRIES RULING BLOCKS IN TWO HEADER FORMATS, and a single-format sweep is not evidence
+  of absence (10e-R183, 2026-08-21, "FINDING 2 is ACCEPTED and INDEPENDENTLY VERIFIED. 10e-R180(e)
+  is AMENDED").** Format **A** is a bare `^10e-R<n> — ` and covers **R140–R187**. Format **B** is a
+  markdown heading `^## 10e-R<n> — ` and covers **R7–R17**. A Format-A sweep reports **10e-R14
+  absent**, and R14 is the ruling governing 10e-4's verify-failure copy. Before checking whether a
+  ruling is persisted here, **enumerate the formats, run each, and state which matched** — the
+  header format is an assumption the instrument shares with the file, which is 10e-R168 on a third
+  surface.
+- **R103, R131, R139 and R36–R101 are unchanged** — still issued-but-unpersisted, still OWED and
+  BLOCKED on source availability (10e-R102), still not to be reconstructed.
+- **10e-R149 is PERSISTED and was misfiled once** (10e-R185, 2026-08-21, "FINDING 5's map is
+  ACCEPTED with ONE CORRECTION"). It sits at `:1572`, Format A, inside the R148…R152 block. It is
+  the permanent licence for skipping both test gates on a docs-only commit; cite **10e-R149,
+  2026-08-19**, never 10e-R144, and do not re-run its premise measurement.
+- **10e-R179's staleness claim about the contract-fixture absolute is WITHDRAWN** (10e-R182,
+  2026-08-21, "FINDING 1 is ACCEPTED and it FALSIFIES THE CHANNEL"). A8's `64 → 66` at `:913` is
+  CURRENT: the fixture measured 64 entries at `c6103c5`. R179's *obligation* — derive the absolute
+  at execution and state the movement as a delta — stands unchanged.
+
 ---
 ---
 
@@ -1843,3 +1868,228 @@ Rulings 10e-R171, 10e-R172, 10e-R173 appended verbatim to docs/modules/phase4-10
 The completeness note amended: R140–R173 persisted, R147's gap explained and closed, R103/R131/R139 unchanged as issued-but-unpersisted.
 
 Per R142 it closes with one presence assertion per item, run before the commit — and per R171 the R147 assertion uses the block-header pattern, not a substring search. Docs-only under R149's licence. Report the commit and stop; the next prompt comes from the successor conversation.
+
+---
+
+## Review-channel ruling block — 10e-R174 … 10e-R180, 2026-08-21
+
+**Provenance, stated and not backdated (10e-R171 precedent):** these seven rulings were issued as
+the opening prompt of the 10e-4 successor conversation on 2026-08-21, each already in block form
+under `10e-R<n> — `. They are pasted here verbatim. 10e-R174 carries its own provenance note about
+having been prose before that point; that note is R174's own text and is not edited here.
+
+10e-R174 — the predecessor's handoff block miscounted its own session, in two directions. 2026-08-21.
+
+Provenance, stated plainly and not backdated (10e-R171 precedent, 2026-08-19, "R147's absence is EXPLAINED and CLOSED. It was never a block."): this ruling was issued as prose inside the successor-conversation opening prompt on 2026-08-21. It was numbered and dated but not written in block form. It is rendered in block form here on the same date. It was not a block before that, and nothing should be read as implying otherwise.
+
+The predecessor's close-out reported "three commits this session" and then listed four SHAs, and the true figure is five — the list omitted f59efc2, the 10e-3b proposal, which was also that session's. The derived absolute is what governs and it holds: 18 − 13 = 5.
+
+This is the self-falsifying-structural-figure class (10e-R118) — a number describing the artifact it sits inside, falsified by the artifact — and it landed in a handoff block, the one place a wrong number propagates to a session that cannot check it. Derive-don't-carry applies to session inventories exactly as it does to test baselines.
+
+Recorded alongside it, NOT a rule: c6103c5's negative control used ^10e-R174 —  → 0 / rc=1, and issuing R174 expires it. A negative control drawn from the next unused identifier has a shelf life measured in one ruling; draw controls from a permanently-unreachable identifier instead (Step 0.8). Left as a record rather than promoted, per the predecessor's own classification. If it recurs, it becomes a rule.
+
+10e-R175 — 10e-4's scope. Five lineage items, two carried copy obligations, one explicit non-bundle list.
+
+From the persisted A8 row, which you read from the file and not from this prompt: LoginPage email path, /auth/magic landing page + route, authApi methods, AuthContext wiring, contract fixture regeneration. A8 records 10e-4 as carrying no db.transaction() boundary and no INTEGRATION cases, therefore no cadence obligation — CONFIRM that against what you actually propose rather than inheriting it, and if any INTEGRATION case is added the obligation fires and is planned, not discovered.
+
+Two obligations travel INTO this sub-commit and are in scope:
+
+(a) 10e-R14's verify-failure copy [persisted, docs/modules/phase4-10e.md]. One non-distinguishing string naming every cause — expired, consumed, superseded, never-existed — rendered on /auth/magic WITH THE REQUEST FORM DIRECTLY BENEATH IT. R14's own words: a dead end with no recovery affordance is the actual failure. The known/unknown-address split must not reappear anywhere the client can observe it; the request endpoint already returns one fixed 200 envelope, so the frontend cannot distinguish, and a test must pin that it does not try.
+
+(b) 10e-R161's queued copy obligation [persisted, same file]. Legitimate users hitting the callback's :163 token-exchange failure or the merged :170 boundary gate now land on a bare /login with no diagnostic — a real regression accepted deliberately. A non-distinguishing "sign-in didn't complete" message in R14's shape, one string naming every cause, is the remedy, and R161 queued it rather than opening it. It is opened here as a DECISION REQUESTED, not as a mandate: propose a disposition (implement, or scope out with reasoning) and, if you propose implementing it, propose the rendering mechanism. The constraint travels with the item and is BLOCKING: no mechanism may introduce a distinguishing parameter. R161's reasoning is the standard — a param with one value carries no information but invites a second, and that is precisely how an oracle is reintroduced by a later well-meaning commit. A mechanism you cannot defend against that argument is not a candidate.
+
+Explicitly out of scope, do NOT bundle:
+- 10e-R129 [number held, date/title not held] — cross-family token presentation; three token families signing with one secret and no family-distinguishing claim, specifically whether verifyDeleteIntentToken accepts a statera_pending_2fa token. HYPOTHESIS, unmeasured, own cycle post-10e.
+- The operator-drafted Privacy Policy copy commit (10e-R12) [persisted]. You do not draft it. Your only job on it arrives at 10e-close: confirm the commit exists and rides the deploy.
+- Anything belonging to 10e-close: the public-API-contract entries owed under 10e-R124, the bounded-unknown record on the Errors instrument (10e-R134 + 10e-R168), queue reconciliation, the production end-to-end send proof (10e-R15 / 10e-R147).
+- 10e-R85 / 10e-R72 [numbers held, date/title not held] — the non-ASCII local-part user who can neither hold an accent-variant account nor sign in by mail. Same root, same user, post-announcement, own cycle.
+
+10e-R176 — what is MEASURED before anything is designed. Ten items, every enumeration falsifiable.
+
+Every claim about current behaviour carries pasted source and a matched-line list, including the enumerations that come back inconvenient (10e-R146(c) precedent). An assertion in a document is not a measurement. Where an item below states an expectation, that expectation is the channel's hypothesis and your measurement outranks it — a falsified premise reported is a better outcome than a design built on a good-looking one.
+
+1. The landing route's server-side contract. Read apps/api/src/routes/magic-link.ts AT HEAD and paste: the verify endpoint's success envelope, its TOTP-handoff envelope, its failure envelope and status, and the exact link the request endpoint mails. 10e-R124 [persisted] ruled the two success shapes a PUBLIC API CONTRACT. Frontend type annotations are claims to verify against the backend serializer, never the other way round — so the frontend types you propose are derived from that pasted source, and you state that they were.
+
+2. LoginPage as it stands. Locate it by enumeration, not by remembered path. Print every useSearchParams / searchParams read in the file with matched lines. The channel's expectation is exactly one — searchParams.get("deleted") === "1", from 10c-3. If there are more, or fewer, that is a finding.
+
+3. The router table. Print every route in App.tsx with matched lines, and state for each of /auth/magic's neighbours whether it sits inside or outside ProtectedRoute. /delete-account/confirm is the existing outside-ProtectedRoute precedent (10c-3). State where /auth/magic must sit and why — a landing page that bounces an unauthenticated clicker to /login is a broken magic link.
+
+4. The two post-verify destinations, confirmed to exist. is_new_user === true routes to /welcome?source=signup, matching the OIDC callback's target (10e-R124). The TOTP handoff routes to /auth/2fa-verify. Confirm both routes exist and print what each expects on arrival — TwoFactorVerifyPage reads an ?intent=delete param (10c-3), so state whether it tolerates arrival with no param at all, from source.
+
+5. The TOTP handoff's mechanism gap, which is NOT the OIDC one. The OIDC callback sets the pending cookie and redirects server-side. Verify is XHR, so the pending cookie arrives on an XHR response and the SPA must navigate itself. State how, and state what happens if the navigation is interrupted — the pending cookie's TTL is 300s (middleware/pending-2fa.ts).
+
+6. AuthContext. Enumerate what it exposes, with matched lines: how session state is established after the OIDC path lands, what resetAuthState() does, and whether a /me refetch is required after verify or happens by construction. State which.
+
+7. StrictMode and the double-mount. grep for StrictMode in apps/web/src/main.tsx and print the result. A verify-on-mount effect that fires twice consumes the token on the first call and shows the R14 failure copy to a user who just succeeded — the server's atomic consume (10e-3a) protects the server, not the client. State whether StrictMode is on, and propose the guard with how it will be proven able to fail.
+
+8. The token's exposure surface, and its disposition. The raw token arrives in the URL query string. State, from measurement rather than assumption: whether it persists in the address bar and browser history after verification, whether any Referer can carry it off the page, and what you propose to do about it. A history.replaceState scrub is the obvious candidate; propose whatever you can defend, and state the residual.
+
+9. CSP. The Phase A record states the premise "no CSP change expected — a same-origin POST from /auth/magic needs nothing beyond connect-src 'self', so deploy/Caddyfile should not move." That is a PREDICTION, and the standing rule is that any NEW external resource — font host, image or CDN origin, third-party script, cross-origin connect target — adds its deploy/Caddyfile entry in the SAME commit that introduces it. There is no Report-Only safety net; a missed directive is a production breakage that works silently in dev. Enumerate what 10e-4 introduces and state the conclusion as yours, measured. If anything external appears, the Caddyfile change rides the same commit.
+
+10. The shared-form question. Both LoginPage and /auth/magic need a request form (R14 requires the form directly beneath the failure copy). State whether you propose one component used twice or two, and give the reason. The no-renames constraint (R178) binds the answer.
+
+10e-R177 — the copy is RULED, not shipped. Exact strings in the proposal, verbatim.
+
+R14 gave a shape, not a pin — "Something of the shape: 'This sign-in link is no longer valid. Links expire after 15 minutes, and requesting a new link replaces any earlier one. Request a fresh link below.'" That is a specification of the property, not approved copy.
+
+Every user-facing string 10e-4 introduces is quoted VERBATIM in the proposal and is ruled before it ships. That includes: the verify-failure string, the request-submitted confirmation string, any validation string on the email field, and — if you propose opening it — R161's "sign-in didn't complete" string. None of them ships unruled.
+
+Two properties are BLOCKING on the failure string and each needs a test that goes red: (a) it is true in all four failure causes and names them without distinguishing which occurred; (b) the request form is rendered beneath it on the same view, not on a page the user has to navigate to.
+
+One property is BLOCKING on the request-submitted string: it is byte-identical for a known and an unknown address. R14's warning is the specific one to defend against — a well-meant "we've sent you a sign-in link" versus "…a link to create your account" reintroduces the account-existence oracle in one line. In the mail body the distinction is fine and wanted; in anything the client renders it is not.
+
+10e-R178 — the constraints that travel with frontend work. Named, so none is rediscovered in a red run.
+
+Three named regression files stay green AND untouched (design-5.4, confirmed 2026-07-13): components/layout/AppShell.test.tsx, components/pages/legal/PrivacyPolicyPage.test.tsx, components/pages/legal/TermsPage.test.tsx. Untouched means git diff --stat empty for those paths, demonstrated, not asserted.
+
+The design-track standing constraints apply to this commit in full: no renames of files, exports or components; logical properties only — no physical ml-/mr-/pl-/pr- additions, the Phase 6 RTL sweep depends on it; components/ui/* stays direction-free; the 5.3 FAB topology and its pinned strings are untouchable; the two legal data-testids (commitment-backup-retention, commitment-statement-files) are pinned.
+
+"No test impact expected" is a PREDICTION, not an allowance. Any red test, and any forced selector or class edit to an existing test, surfacing during implementation is a NAMED forced edit requiring explicit approval before it ships (5.3 precedent). Name it in the proposal if you foresee it; name it in a stop-and-ask if you meet it.
+
+10e-R179 — baselines. What you re-derive, what is stale, what you do not restate.
+
+State these as the figures you will re-derive at execution rather than restating them as results. Every absolute is re-derived at execution against the then-current measured baseline. Carry nothing.
+
+- API hermetic 873 passed / 34 skipped / 61 files, exit 0 — measured at 4f71494, carried across two docs-only commits under 10e-R149's licence [number held, date/title not held].
+- INTEGRATION 897 / 10 / 0, exit 0 — same measurement point.
+- The two-mode cross-check 873 + 34 − 10 = 897 is the load-bearing instrument.
+- tsc 0.
+- Frontend 185 / 39 — CARRIED UNVERIFIED BY DESIGN, and that stops here. Step 0.5 measures it. The proposal's frontend delta is stated against the MEASURED figure, never against this one.
+- The contract fixture absolute in A8 (64 → 66) is STALE. Step 0.7 derives the real one.
+
+The predicted test-count delta is derived from an EXPLICIT case list with the row-vs-test distinction explicit (10e-R126 [persisted, docs/modules/phase4-10e-3a-proposal.md]) — a count the reader has to reconcile against rows is the defect that ruling names. A case list and the prose it summarizes are two artifacts, and the count is derived from the table, which makes the table a claim about the prose and verifiable against it (10e-R172 [persisted]). State which gate idiom each new case uses and therefore which skipped column it lands in (10e-R144(c) [persisted]).
+
+A baseline figure that misses its prediction is INVESTIGATED before it is absorbed (10e-R137b). A predicted count that comes in wrong is a question, not a datum — including in the skipped and file columns, where a single digit was once the only signal an overwrite produced.
+
+Do NOT write "two independent instruments" (10e-R134 [number held, date/title not held] + 10e-R168 [persisted]). The counts are demonstrated non-discriminating in both directions; the Errors grep is demonstrated capable of firing; its independence from the exit code is UNDEMONSTRATED and is a bounded unknown owed to 10e-close.
+
+10e-R180 — form of the deliverable, and the stop.
+
+(a) Step 0 first, delivered on its own, then STOP. The proposal follows only after the Step 0 report is acknowledged.
+
+(b) Proposal only. Stop when the proposal is delivered. No file under apps/ is written. No commit beyond (c).
+
+(c) If the proposal is too large to relay comfortably in chat — it probably is — commit it docs-only as docs/modules/phase4-10e-4-proposal.md with its approval status on its face in a header: STATUS: PROPOSED, NOT APPROVED. Docs-only means docs-only: git diff --stat shows nothing outside docs/.
+
+(d) That same commit PERSISTS this ruling block verbatim — 10e-R174 through 10e-R180 — appended to docs/modules/phase4-10e.md in block form under ^10e-R<n> — , and amends the RULING-SET COMPLETENESS note to say so. Reason, and it is the whole reason: a ruling that exists only in a prompt is one relay away from becoming R36–R101. The persist-first standing rule points the same way. If you do not make a docs-only proposal commit, the persistence rides 10e-4's docs half instead and you say so explicitly.
+
+(e) Per 10e-R142 [persisted] the persistence closes with ONE PRESENCE ASSERTION PER RULING, run BEFORE the commit — seven items, seven assertions. Per 10e-R171 [persisted] each uses the BLOCK-HEADER pattern ^10e-R<n> —  and not a substring search: a substring search for an identifier is satisfied by prose recording its absence, which is how a sweep once reported R147 present, twice, both hits being records of its own absence. Each assertion carries the ^10e-R0 —  negative control from Step 0.8, with its match count and rc printed. Never sweep the range R174…R180 without checking header-by-header that every number in it heads a block.
+
+(f) Every enumeration is falsifiable: matched-file and matched-line lists printed, including the ones that came back inconvenient.
+
+(g) Every guard proposed is proposed together with how it will be proven able to fail, IN BOTH DIRECTIONS, with the red to be captured. Every failure-injection test asserts the SPECIFIC expected error, not merely that something failed.
+
+(h) An instrument that shares a mechanism with what it measures cannot detect a fault in that mechanism (10e-R168 [persisted]). This bites hard on frontend work: a test that mocks the api function it is meant to be checking the wire shape of is the FIND-S5 / TODO(module-9-network-mocking) class, and the suite is already on record as having been structurally incapable of catching a live production crash. For every assertion about the wire, state what it actually observes and what it does not.
+
+(i) Any INTEGRATION-gated describe lives in a dedicated *.integration.test.ts file with no module-level db/redis mocks. If the proposal adds any external resource, the deploy/Caddyfile CSP change rides the same commit.
+
+(j) Capture and relay are two separate acts (10e-R112 [number held, date/title not held]). A report that POINTS at a captured result — "printed above", "the output shows" — transmits a pointer the reader cannot resolve. The result is IN the report. If it is too long, paste the discriminating portion and name what was elided and why.
+
+(k) Any claim of the form "per your ruling / approved / operator condition" cites the specific review-channel block by number, date and title. Operator selections made in-session are "operator selection (in-session) — pending review-channel ratification" until ratified in the channel.
+
+Sequence, so nothing is ambiguous: Step 0 report → STOP → proposal (relayed, or committed docs-only per (c)+(d)) → STOP. Implementation is not authorized by this prompt.
+
+---
+
+## Review-channel ruling block — 10e-R181 … 10e-R187, 2026-08-21
+
+10e-R181 — Step 0 is ACCEPTED. Four instruments ratified, one bounded unknown extended.
+
+Every handoff figure is confirmed against the repository: HEAD c6103c5, 18 ahead, origin/main 1d95398, tree clean, all five SHAs round-tripped against subject lines. The R174 arithmetic was checked rather than accepted — 13 + 5 = 18, and 3e3357a..HEAD is exactly the five-commit list — which is the correct instinct on a ruling whose subject is a miscount. Verifying the ruling that tells you a number was wrong is not redundant; it is the only reading of R174 that is not itself a carry.
+
+Four instrument results are ratified as improvements on what was asked:
+
+(a) The Errors pattern was attributed PER ALTERNATIVE rather than rested on a whole-pattern control (10e-R135 [number held, date/title not held]). All three alternatives fire; the negative control does not. That the anchor binds only the first alternative is what makes the other two live, and it is the corrected form of the exact defect R135 was earned on — where two of three alternatives were dead and the instrument worked for a reason other than the one believed. Recorded as reproduced-correctly on a second surface.
+
+(b) The synthetic-control caveat is ACCEPTED and is the better half of (a). Feeding the pattern a hand-written "Errors 1 error" proves the pattern matches that string; it does not prove vitest's frontend reporter emits it. State it that way in the proposal and in the close-out. This EXTENDS the 10e-R134 [number held, date/title not held] bounded unknown to the frontend instrument rather than duplicating it: the API-side gap is independence from the exit code, the frontend-side gap adds shape-fidelity of the reporter's output. Both go in the 10e-close bounded-unknown record, cited alongside 10e-R168 [persisted, docs/modules/phase4-10e.md:1774]. Do not write "two independent instruments."
+
+(c) The tsconfig exclusion was upgraded from a CONFIG READ to a PROGRAM-MEMBERSHIP observation via tsc --noEmit --listFiles, and the zero is discriminating because 81 non-test src files appear in the same listing while 39 test files exist on disk and none appears. Reading the config would have established what the config says; the listing establishes what the compiler built. This is the standing observer discipline applied without being told to apply it. FIND-B4-3 is CONFIRMED on evidence, not inherited.
+
+(d) The fixture count was derived three ways (node, grep, python3) and the four-step history reconciles arithmetically at every hop: 77 − 4 = 73, + 2 = 75, − 12 = 63, + 1 = 64. A count that closes against its own history is a reconstruction, not a subtraction (10e-R113 [number held, date/title not held]).
+
+The measured frontend baseline is 185 / 39, exit 0, tsc 0 at 0 bytes. It AGREES with the carried figure — same disposition as B4-2-R8, where the carried frontend figure was also accurate and the measurement is what established it rather than the agreement excusing it. It stops being carried here.
+
+10e-R182 — FINDING 1 is ACCEPTED and it FALSIFIES THE CHANNEL. 10e-R179's staleness claim is WITHDRAWN. The derive obligation STANDS.
+
+The measurement governs: the fixture holds 64 entries at HEAD, which is exactly A8's stated "from" figure at phase4-10e.md:913. My 10e-R179 asserted that absolute was STALE. It is not. The assertion is withdrawn on the record rather than quietly dropped.
+
+The diagnosis of my own error is the useful part, and it is not the one I would have guessed. I derived ~76 by taking CLAUDE.md's "fixture 73→75" and adding T1-1's +1. That line is a HISTORICAL RECORD of 10c-3, not a live index (10e-R78 [persisted, CLAUDE.md standing rules]), and reading a current value off it silently omitted SC-1/2's −12. R78 is normally invoked to stop a historical record being EDITED to match the present; this is its mirror image — a historical record READ as though it described the present. Your framing of it as the mirror image is correct and is adopted.
+
+Note what this is NOT. It is not derive-don't-carry catching a figure that went stale across an interval: A8's 64 was measured correctly at 10e-1 and the fixture has not moved since, so the four movements all predate A8. My failure was in the DERIVATION, not in a carry — I derived, but from a document ABOUT the artifact instead of from the artifact. Re-deriving from apps/web/contract/frontend-calls.json is what caught it, and nothing else would have.
+
+Durable line, riding 10e-4's docs half, one line in CLAUDE.md's standing rules:
+
+  A figure is derived from the ARTIFACT it describes, never from a document about the artifact (10e-R182, earned 10e-4 Step 0, 2026-08-21). The mirror image of [[10e-R78]]: that rule stops a historical record being edited to match the present, this one stops a historical record being read as if it described the present. A module-status line recording "fixture 73→75" is a true claim about one commit and a false claim about HEAD, and the arithmetic performed on it inherits every movement it omits. Re-deriving is not sufficient — re-derive FROM THE FILE.
+
+Separation of remedy from diagnosis, per the 10e-R136 precedent [number held, date/title not held]: 10e-R179's staleness ASSERTION is withdrawn; its OBLIGATION — derive the fixture absolute at execution and state 10e-4's movement as a delta — stands unchanged. A remedy can be right while the reasoning offered for it is wrong, and the two are separated so the remedy is not withdrawn along with it.
+
+10e-R183 — FINDING 2 is ACCEPTED and INDEPENDENTLY VERIFIED. 10e-R180(e) is AMENDED.
+
+Verified in the channel against the artifact rather than taken on the report's word:
+
+  ^10e-R[0-9]+ —        → 34 matches, numbers 140…173, contiguous, no gaps, no duplicates
+  ^## 10e-R[0-9]+ —     → 11 matches, numbers 7…17, contiguous
+  ^(## )?10e-R14 —      → phase4-10e.md:1268, Format B
+
+So a Format-A sweep reports 10e-R14 ABSENT, and R14 is the ruling that governs 10e-4's failure copy. The finding holds exactly as reported.
+
+This is 10e-R171 [persisted, :1808] one turn further, and your reading of the mechanism is right: R171 fixed substring-vs-header, and the residual is header-vs-header-in-another-format. It is therefore 10e-R168 [persisted, :1774] on its own terms — the instrument shares an assumption, the header format, with the thing that defeats it. Third surface, same rule, which is why it gets a line rather than another rule.
+
+10e-R180(e) is AMENDED, in two directions:
+
+  (i) The presence assertions for rulings THIS commit appends stay in Format A. That is correct and not a concession — the appended-section convention is Format A, the assertions test the blocks as written, and each carries the matching-format ^10e-R0 —  control. Unchanged.
+  (ii) Any check for a ruling NOT appended by this commit runs BOTH formats and states which format matched. A single-format check that comes back empty is not evidence of absence; it is evidence about one format. Running both and attributing the match is preferred over a single alternation pattern ^(## )?10e-R<n> — , because an alternation is a compound instrument and would need per-alternative attribution under 10e-R135 anyway — two runs are cheaper than one run plus its attribution.
+
+Durable line, riding 10e-4's docs half, one line in CLAUDE.md's standing rules, continuing the 10e-R171 entry:
+
+  A header-pattern presence check is FORMAT-SPECIFIC, and the format is an assumption it shares with the file (10e-R183, earned 10e-4 Step 0, 2026-08-21). docs/modules/phase4-10e.md carries ruling blocks in two formats — bare ^10e-R<n> —  for R140…R173 and ^## 10e-R<n> —  for R7…R17 — so a single-format sweep reports R14 absent. [[10e-R171]] replaced a substring check with a header check; this says the header check inherits one assumption of its own. Enumerate the formats present in the file before checking, run each, and say which matched.
+
+10e-R184 — FINDINGS 3 and 4 are RATIFIED. No new rule; both are existing rules firing. The zsh form is named.
+
+Finding 3 — the pattern relaxed for extraction convenience stopped being the pattern under test, returned 40 numbers spanning 102–147, and manufactured 36 missing entries and three duplicates. Correctly classified: rider (b) of the standing observer rule, false-positive direction. The part worth keeping is that the wrong answer LOOKED LIKE A SERIOUS FINDING ABOUT THE FILE rather than a defect in the instrument — which is the whole reason rider (b) says a search can be wrong in both directions and neither error is visible in its output. Reporting it rather than silently correcting it is the standard.
+
+Finding 4 — 10e-R150 [persisted, :1588] firing again, unaltered in shape: the instrument's failure output was 0, five times, and 0 was a value that could have been believed. Correctly identified that the adjacent error lines are not a control. The specific form is NAMED here so it does not recur, since 10e-R151 [persisted, :1598] named glob quoting and this is a different zsh trap on the same seam:
+
+  Under zsh, "$c:apps/web/…" — an unbraced parameter followed by a colon — is parsed as a modifier expansion, and :a is the absolute-path modifier. Write "${c}:apps/web/…". The brace is not stylistic; without it the shell silently answers a different question.
+
+10e-R151's obligation is extended accordingly: command blocks are written for zsh, which means quoted globs AND braced parameters before any colon. Both belong to the proposal's command blocks.
+
+Neither finding mints a rule. Two existing rules fired and were named correctly; adding a third line for each would cheapen the set.
+
+10e-R185 — FINDING 5's map is ACCEPTED with ONE CORRECTION, and the corrected entry is the one that governs the next commit.
+
+10e-R149 is PERSISTED, not number-held. phase4-10e.md:1572, Format A, inside the R148…R152 block — and therefore inside the 140…173 range your own Step 0.8 derived as contiguous with no gaps. The map contradicts the range check that sits four paragraphs above it in the same report. Recorded plainly because a map built "from both formats, not from prose" misfiling a number that its own completeness check covers is the failure mode maps exist to prevent, and because R149 is not a neutral entry to misfile.
+
+What R149 rules, quoted so the proposal does not need to re-open the question:
+
+  "Ruled: R144(a)'s premise HOLDS. The docs-only gate disposition is licensed permanently and this measurement is not repeated. The licence attaches to the read-shaped instrument named here, not to the mention-count, and any future citation of it cites 10e-R149, 2026-08-19, not R144."
+
+Consequence, ruled: the docs-only proposal commit authorized by 10e-R180(c) SKIPS both test gates under 10e-R149, permanently licensed, and the premise measurement is NOT re-run. Do not re-measure it; do not cite 10e-R144 for it; cite 10e-R149, 2026-08-19, "R144(a)'s instrument was MIS-SPECIFIED BY THE CHANNEL." Had R149 stayed misfiled as number-held, the likely outcomes were re-running a permanently-settled measurement or citing an unpersisted number for a licence that is in fact checkable — the first wastes a cycle, the second degrades the citation record.
+
+The rest of the map is confirmed against the artifacts and is correct: R7–R17 Format B, R121–R126 in phase4-10e-3a-proposal.md (verified: six blocks, Format A, no others), R140–R173 Format A, and phase4-10e-3b-proposal.md carrying ZERO ruling blocks in either format (verified, rc=1) — which is exactly why this prompt directed you to read 10e-3b's amendments from the persisted rulings rather than that file's text.
+
+10e-R186 — FIND-B4-3 is not a Step 0 curiosity, it is a DESIGN CONSTRAINT on 10e-4. Disposition REQUESTED.
+
+Your 0.6 measurement establishes that 10e-4's own test files will be outside the type program: 39 test files on disk, 0 in the program. So every frontend test file this sub-commit adds can carry a type error, a wrong-shaped fixture, or a wire-shape literal of the wrong primitive type, and CI stays green. That is not a caveat to note in a close-out; it is a fact about the sub-commit whose entire job is to consume a new API contract.
+
+The specific exposure, stated so it can be designed against rather than merely disclosed: 10e-3a's verify endpoint returns two success shapes and one failure shape, ruled a PUBLIC API CONTRACT under 10e-R124 [persisted, phase4-10e-3a-proposal.md]. A test fixture in a new frontend test file asserting is_new_user or pending_2fa at the wrong type is precisely the FIND-S5(b) artifact — a live false-premise fixture asserting a wire shape that does not exist — and it survived B4-2's compile-time assertions for exactly this reason.
+
+Propose a disposition. The channel is not choosing for you, and the options are not equal:
+
+  (a) Accept the gap, and state what carries the weight instead.
+  (b) Put the type claim somewhere the program reaches. The existing precedent is src/contract/money-wire-shape.assert.ts — a non-test .ts file that IS in the program and whose assertions are checked by the CI tsc gate. Your 0.6 listing already establishes whether that file is among the 81; say so.
+  (c) Something else you can defend.
+
+Whichever you propose, the reasoning engages with this: the frontend types you declare for the verify response are CLAIMS TO VERIFY AGAINST THE BACKEND SERIALIZER, and the serializer is apps/api/src/routes/magic-link.ts at HEAD, pasted per 10e-R176 item 1. A claim that no gate checks is a comment.
+
+10e-R187 — the proposal is AUTHORIZED. Conditions, and the stop.
+
+Proceed to the 10e-4 proposal under 10e-R175 … 10e-R180 as amended by this block. Nothing in R175, R176, R177 or R178 is changed. R179 is amended by R182 (staleness claim withdrawn, obligation intact). R180(d) and (e) are amended as follows:
+
+  (d) The docs-only proposal commit persists 10e-R174 through 10e-R187 verbatim — FOURTEEN rulings, not seven — appended to docs/modules/phase4-10e.md in Format A under ^10e-R<n> — , and amends the RULING-SET COMPLETENESS note to say so. The two durable lines from R182 and R183 ride 10e-4's DOCS HALF, not the proposal commit, since they are standing rules earned by work this module has not yet done.
+  (e) FOURTEEN presence assertions, one per ruling, run BEFORE the commit, in Format A, each carrying the ^10e-R0 —  control with its match count and rc printed. State the format each assertion tests, per R183(ii). Never sweep R174…R187 as a range without checking header-by-header that every number in it heads a block.
+  Gates: skipped under 10e-R149, 2026-08-19, permanently licensed, premise not re-measured.
+
+Command blocks are written for zsh: quoted globs (10e-R151) and braced parameters before any colon (10e-R184). Every claim about current behaviour carries pasted source and a matched-line list, including the ones that come back inconvenient. Every guard is proposed together with how it will be proven able to fail IN BOTH DIRECTIONS. Every enumeration that falsifies something in this prompt is a finding and outranks the prompt — Step 0 produced two, and both improved the ruling record.
+
+Deliver the proposal. Then STOP. Implementation is not authorized.
