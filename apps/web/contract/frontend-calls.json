@@ -185,6 +185,14 @@
   },
   {
     "method": "POST",
+    "path": "/api/auth/magic-link/request"
+  },
+  {
+    "method": "POST",
+    "path": "/api/auth/magic-link/verify"
+  },
+  {
+    "method": "POST",
     "path": "/api/auth/profile/update"
   },
   {

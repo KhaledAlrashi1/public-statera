@@ -467,6 +467,22 @@ export interface AuthResponse {
   errors?: string[]
 }
 
+/**
+ * Narrowed result of POST /api/auth/magic-link/verify (Module 10e-4).
+ *
+ * NOT a wire type — the wire carries TWO 200 responses that both have `ok: true`
+ * and are told apart ONLY by which key is present in `data`
+ * (`routes/magic-link.ts:652` vs `:675`). Reading `is_new_user` first would see
+ * `undefined` on the handoff response and route a session-less user into the app
+ * (FINDING M-1). `authApi.magicLinkVerify` therefore checks `pending_2fa` first
+ * and narrows to this discriminated union at runtime, so consumers cannot make
+ * that mistake — the discrimination is done once, at one site, and is type-checked
+ * everywhere it is consumed.
+ */
+export type MagicLinkVerifyResult =
+  | { kind: "pending_2fa" }
+  | { kind: "session"; isNewUser: boolean }
+
 export interface SecurityEvent {
   id: number
   event_type: string

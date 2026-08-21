@@ -1,5 +1,6 @@
 import { Link, useSearchParams } from "react-router-dom"
 import { Scale, Sparkles, ShieldCheck, CheckCircle2 } from "lucide-react"
+import MagicLinkRequestForm from "@/components/auth/MagicLinkRequestForm"
 
 export default function LoginPage() {
   const [searchParams] = useSearchParams()
@@ -71,6 +72,20 @@ export default function LoginPage() {
           >
             Continue with Google
           </a>
+
+          {/* Magic-link sign-in (10e-4), a second path beside Google. Deliberately
+              NOT introduced with a heading: LoginPage.test.tsx:24 queries
+              getByRole("heading", { name: /sign in/i }), which throws on multiple
+              matches, so a "Sign in with email" heading would redden a test this
+              module never set out to touch. A separator and a labelled field carry
+              the same meaning and assert nothing about uniqueness. */}
+          <div className="my-6 flex items-center gap-3" aria-hidden="true">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs uppercase tracking-widest text-muted-foreground">or</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <MagicLinkRequestForm />
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
             <Link to="/privacy" className="hover:underline">

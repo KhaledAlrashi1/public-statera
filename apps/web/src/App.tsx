@@ -67,6 +67,7 @@ const ProfilePage = lazyWithRetry("profile", () => import("@/components/pages/Pr
 const InsightsPage = lazyWithRetry("insights", () => import("@/components/pages/InsightsPage"))
 const NotFoundPage = lazyWithRetry("not-found", () => import("@/components/pages/NotFoundPage"))
 const TwoFactorVerifyPage = lazyWithRetry("2fa-verify", () => import("@/components/pages/TwoFactorVerifyPage"))
+const MagicLinkPage = lazyWithRetry("magic-link", () => import("@/components/pages/MagicLinkPage"))
 const PrivacyPolicyPage = lazyWithRetry("privacy", () => import("@/components/pages/legal/PrivacyPolicyPage"))
 const TermsPage = lazyWithRetry("terms", () => import("@/components/pages/legal/TermsPage"))
 const DeleteAccountConfirmPage = lazyWithRetry("delete-account-confirm", () => import("@/components/pages/DeleteAccountConfirmPage"))
@@ -163,6 +164,10 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/auth/2fa-verify" element={<TwoFactorVerifyPage />} />
+      {/* Magic-link landing (10e-4). The clicker has NO session at mount — the page's
+          own POST creates it — so this is deliberately OUTSIDE ProtectedRoute, as
+          /auth/2fa-verify above is, for the same reason. */}
+      <Route path="/auth/magic" element={<MagicLinkPage />} />
       {/* Standalone (post-reauth, no session) — the delete-reauth OIDC flow redirects
           here with a statera_delete_intent cookie; deliberately OUTSIDE ProtectedRoute. */}
       <Route path="/delete-account/confirm" element={<DeleteAccountConfirmPage />} />

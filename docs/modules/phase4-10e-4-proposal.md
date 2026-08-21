@@ -1,6 +1,9 @@
 # Phase 4 / Module 10e-4 — frontend magic-link surface
 
-**STATUS: PROPOSED, NOT APPROVED.**
+**STATUS: APPROVED AND EXECUTED (2026-08-21).** Approved by 10e-R187, amended by 10e-R189 …
+10e-R195. The body below is the proposal **as submitted** and is left unedited; everything that
+changed between proposal and implementation is recorded in **§12 — EXECUTION AMENDMENTS** at the
+end, never by rewriting the text above it.
 
 Authority: 10e-R175 … 10e-R180 (2026-08-21), as amended by 10e-R181 … 10e-R187 (2026-08-21).
 Both ruling blocks are persisted verbatim in `docs/modules/phase4-10e.md` by the same commit
@@ -893,3 +896,121 @@ Failure-injection cases assert the **specific** expected error, never merely tha
 4. **§7 — the +20 / +2 delta** overshooting A8's +8–10, with the accounting given.
 5. **§6 case 2 and §9 G-1** — confirm the non-degenerate form is what is wanted, since the
    degenerate form is the easy one to write.
+
+---
+
+## §12 — EXECUTION AMENDMENTS (2026-08-21)
+
+Recorded here rather than by editing §1–§11, so the proposal stays a record of what was
+submitted and this section is the record of what changed. Every item names the ruling or the
+measurement that caused it.
+
+### 12.1 — §6 case 2 is RE-POINTED (10e-R194), and the case list now says so
+
+**Superseded:** the original case 2, "C-2 is byte-identical for two different addresses."
+It is **DEGENERATE BY CONSTRUCTION** — the server returns ONE fixed 200 envelope built outside
+every branch, so the frontend receives identical input both times, and the assertion would hold
+against a component that branched on a response field the server never varies. Unlike the
+10e-R167 case, it is not repairable by re-pointing at a sibling cause: there is no independent
+path on this side to point at.
+
+**What case 2 tests now:** *independence from the response and the input* — the rendered
+confirmation is byte-equal to the ruled literal, so interpolating anything breaks it. The
+cross-address property lives on the SERVER and is already pinned there by 10e-2's fixed-envelope
+and mail-identical cases; it is CITED at 10e-close, not re-pinned here.
+
+### 12.2 — the error split is THREE-way, not two (10e-R191's C-3 condition)
+
+§2.3 proposed 429 → C-4 and everything else → C-5. Deciding where format rejection lives
+(R191's C-3 condition) added a middle branch: a 400 `validation_error` surfaces the **server's**
+message verbatim. Its messages are static literals with no interpolation
+(`routes/magic-link.ts:167-174`), so surfacing them leaks nothing, and inventing a parallel
+string would create a second driftable copy of the same claim. Costs one case.
+
+### 12.3 — `?token=` (present but empty) is treated as ABSENT
+
+Not in the proposal. It falls out of R191's C-6 enumeration: `""` would be rejected by the
+server's zod `min(1)` as a `validation_error`, spending a rate-limit slot to learn what the
+client already knows. Costs one case.
+
+### 12.4 — the C-3 answer is the opposite of what §2.3 assumed, and it is MEASURED
+
+§2.3 said client-side validation "deliberately does NOT replicate the server's zod `.email()`".
+**That is false as implemented**, and the component comment now says so. `<input type="email">`
+applies HTML5 constraint validation, whose email grammar is ASCII-only: measured against this
+repo's jsdom 26.1.0, `"josé@x.com"` gives `validity.typeMismatch === true` and
+`form.checkValidity() === false`. It is therefore a **second site** emitting the claim 10e-R85
+records as false, with the browser's own non-ruled, non-localizable message.
+
+**Kept and named, per R191** ("name it, do not fix R85 here, do not enlarge it silently"): it is
+the correct input semantics, and it does not enlarge R85 — the server refused that user anyway;
+this refuses sooner. Consequence for the ruled copy: C-3 covers exactly one state, **empty** —
+and a whitespace-only entry arrives already empty, because `type="email"` value-sanitization
+strips whitespace before React's `onChange` sees it. The `validation_error` branch is a genuine
+fallback for when constraint validation does not run, so its test drives `fireEvent.submit`
+directly; a click never reaches the handler, and an unexercised branch is the defect the gate-3
+omission demonstrated once already.
+
+### 12.5 — R191's C-6 condition: every response the verify handler can emit
+
+From source, with the branch each falls into. The client split is exhaustive because the
+default arm is C-6, and exactly one response reaches C-1.
+
+| # | source | status | `code` | branch |
+|---|---|---|---|---|
+| 1 | `perIpVerifyLimiter` | 429 | `rate_limit_exceeded` | C-6 |
+| 2 | `globalVerifyLimiter` | 429 | `rate_limit_exceeded` | C-6 |
+| 3 | `JSON.parse` catch, `:453` | 400 | `invalid_json` | C-6 |
+| 4 | zod, `:457` | 400 | `validation_error` | C-6 |
+| 5 | `failVerify` ×5, `:441` | 400 | `MAGIC_LINK_INVALID` | **C-1** |
+| 6 | TOTP handoff, `:652` | 200 | — | navigate `/auth/2fa-verify` |
+| 7 | session, `:675` | 200 | — | navigate `/` or `/welcome?source=signup` |
+| 8 | `app.onError`, `app.ts:86` | 500 | **none** | C-6 |
+| 9 | `app.notFound`, `app.ts:69` | 404 | **none** | C-6 |
+
+Client-side-only outcomes — network failure, `MAGIC_LINK_UNEXPECTED_RESPONSE`, a `refreshUser`
+rejection — also land in C-6. Note that #8 and #9 carry **no `code` field at all**, so
+`readErrorCode` returns `undefined` and the default arm is what catches them; a split whose
+default were C-1 would mis-describe a 500 as a spent link.
+
+### 12.6 — §9 G-2's direction-B control was WRONG, and the corrected mutation is recorded
+
+§9 predicted that rendering `err.message` would redden case 12 while case 11 stayed green,
+"which proves case 12 is carrying its own weight". **Measured: it reddens BOTH** — case 11
+asserts `toContain(INVALID_TITLE)` on the container, so replacing the title breaks it too. The
+mutation does not discriminate.
+
+**The discriminating mutation appends the server text to the BODY**: case 11's `toContain` on
+the container still passes, case 12's `toBe(INVALID_BODY)` goes red alone (1 failed / 11 passed).
+Recorded rather than silently substituted, because a control that does not control is the
+10e-R168 class and the proposal asserted this one would work.
+
+### 12.7 — the M-2 pins did not initially detect a missing `await`, and that is the more serious finding
+
+Dropping the `await` before `refreshUser` was predicted to redden the post-condition case.
+**Measured: it reddened only the `/me`-FAILURE case.** Cause: the `refreshUser` mock's body was
+synchronous, so it set auth state before the very next statement ran, and `void refreshUser();
+navigate(...)` still found the user populated. **Both the post-condition pin and the ordering
+pin would have stayed GREEN against code that never awaits** — the instrument sharing a timing
+assumption with the thing it measures.
+
+Fixed inside 10e-4's own new test file (not a forced edit to an existing test) by giving the
+mock a real `setTimeout` boundary. Re-run: the same mutation now reddens **6** cases including
+both pins. The mock's comment records why the boundary is load-bearing, so a later "simplify
+this mock" does not silently restore the hole.
+
+### 12.8 — a third non-discriminating instrument, found in passing
+
+Grepping the run output for a per-test `✓` line to confirm a case stayed green returns **0
+whether it passed or not**, because vitest prints no per-test `✓` lines for a failing file. It
+returned 0 under both the wrong mutation and the right one. The discriminating evidence is the
+**exhaustive `×` list plus the pass count**, and that is what the close-out reports.
+
+### 12.9 — final measured figures
+
+Frontend **209 / 41**, exit 0, Errors-instrument 0; `tsc` 0 at 0 bytes. API **873 / 34 / 61**,
+exit 0, Errors 0; `tsc` 0 — unchanged, and run because
+`apps/api/src/contract/frontend-contract.test.ts` reads the fixture, which moved **64 → 66**
+with the ALLOWLIST still empty. Delta **+24 / +2** against the predicted **+20 / +2**; the file
+column landed, the test column missed by 4 and each of the four is accounted for in 12.2, 12.3,
+10e-R190(ii)'s ordering pin, and 10e-R189(i)'s branch-order pin.

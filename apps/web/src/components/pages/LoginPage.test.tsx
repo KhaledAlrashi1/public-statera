@@ -51,4 +51,18 @@ describe("LoginPage", () => {
     )
     expect(screen.queryByText(/your account has been deleted/i)).not.toBeInTheDocument()
   })
+
+  // 10e-4: magic-link is a SECOND sign-in path, not a replacement. Asserting both
+  // together is the point — either one silently displacing the other is a defect,
+  // and a test for only the new path would not catch it.
+  it("offers the email sign-in form alongside the Google link", () => {
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    )
+    expect(screen.getByRole("link", { name: /continue with google/i })).toBeInTheDocument()
+    expect(screen.getByTestId("magic-link-form")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /email me a sign-in link/i })).toBeInTheDocument()
+  })
 })

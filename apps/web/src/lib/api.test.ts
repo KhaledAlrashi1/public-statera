@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import {
   __resetApiClientStateForTests,
   analyticsApi,
+  authApi,
   budgetsApi,
   memorizedApi,
   notificationsApi,
@@ -355,4 +356,69 @@ describe("envelope parsing", () => {
     expect(result.account_overview.total_income_mtd).toBe("500.000")
   })
 
+})
+
+// ── Module 10e-4: magic-link ────────────────────────────────────────────────
+//
+// These pin the RUNTIME NARROWING that 10e-R186 disposition (c) assigns the weight
+// to. `apps/web/tsconfig.json` excludes `src/**/*.test.ts(x)`, so no frontend test
+// file is type-checked by any command — a compile-time assertion cannot reach a
+// wrong fixture, and a throw can. What these observe is the narrowing's behaviour
+// against literal bodies; what they do NOT observe is whether those bodies match
+// what the running server sends (that residual is recorded for 10e-close).
+describe("authApi magic-link", () => {
+  beforeEach(() => {
+    fetchMock.mockReset()
+    __resetApiClientStateForTests()
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it("magicLinkRequest POSTs the address to the request endpoint", async () => {
+    mockJsonResponse({ ok: true, data: { sent: true }, error: null, meta: {} })
+    await authApi.magicLinkRequest("khaled@example.com")
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe("/api/auth/magic-link/request")
+    expect(init.method).toBe("POST")
+    expect(init.body).toBe(JSON.stringify({ email: "khaled@example.com" }))
+  })
+
+  it("narrows the TOTP handoff response to kind pending_2fa", async () => {
+    mockJsonResponse({ ok: true, data: { pending_2fa: true }, error: null, meta: {} })
+    await expect(authApi.magicLinkVerify("t")).resolves.toEqual({ kind: "pending_2fa" })
+  })
+
+  it("narrows the session response to kind session", async () => {
+    mockJsonResponse({ ok: true, data: { is_new_user: true }, error: null, meta: {} })
+    await expect(authApi.magicLinkVerify("t")).resolves.toEqual({
+      kind: "session",
+      isNewUser: true,
+    })
+  })
+
+  // 10e-R189(i). Both wire shapes are 200 with ok:true and are told apart ONLY by
+  // which key is present, so the branch ORDER is load-bearing. Swapping the two
+  // checks reddens this case; ordering stated in a comment would not.
+  it("prefers pending_2fa when a body somehow carries both keys", async () => {
+    mockJsonResponse({
+      ok: true,
+      data: { pending_2fa: true, is_new_user: false },
+      error: null,
+      meta: {},
+    })
+    await expect(authApi.magicLinkVerify("t")).resolves.toEqual({ kind: "pending_2fa" })
+  })
+
+  // 10e-R189(ii). The narrowing is EXHAUSTIVE and its default THROWS. A default of
+  // "assume success" would be FINDING M-1 relocated one layer down — and this is
+  // the case that makes a wrong-shaped fixture anywhere in the suite go RED.
+  it("throws MAGIC_LINK_UNEXPECTED_RESPONSE on a 200 carrying neither key", async () => {
+    mockJsonResponse({ ok: true, data: {}, error: null, meta: {} })
+    await expect(authApi.magicLinkVerify("t")).rejects.toMatchObject({
+      code: "MAGIC_LINK_UNEXPECTED_RESPONSE",
+    })
+  })
 })

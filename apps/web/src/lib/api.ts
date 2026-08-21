@@ -29,6 +29,7 @@ import type {
   TransactionSuggestion,
   DemoDataClearResult,
   DemoDataLoadResult,
+  MagicLinkVerifyResult,
   SnapshotResponse,
   SpendingIntelligenceResponse,
   User,
@@ -844,6 +845,54 @@ export const authApi = {
       user: User | null
       flags?: Partial<FeatureFlags>
     }>("/api/auth/me"),
+
+  /**
+   * Request a magic sign-in link (Module 10e-4).
+   *
+   * Returns `void` DELIBERATELY. The 200 body is the fixed `{ sent: true }` built
+   * at a single site outside every branch (`routes/magic-link.ts:308`), identical
+   * for a known and an unknown address. Returning nothing means the confirmation UI
+   * CANNOT branch on a distinguishing field, because no field reaches it — 10e-R14's
+   * uniformity becomes a property of this signature rather than of a caller's
+   * discipline. Failures arrive as ApiError and carry `code`.
+   */
+  magicLinkRequest: async (email: string): Promise<void> => {
+    await apiFetch<unknown>("/api/auth/magic-link/request", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    })
+  },
+
+  /**
+   * Consume a magic-link token (Module 10e-4).
+   *
+   * The wire carries TWO 200 responses that both have `ok: true`; see
+   * MagicLinkVerifyResult. The narrowing below is EXHAUSTIVE and its default THROWS
+   * (10e-R189(ii)): a body carrying neither key — or a `pending_2fa` that is not
+   * literally `true` — must not fall through to any success path, because "assume
+   * success" is the M-1 defect relocated one layer down.
+   *
+   * This runtime narrowing, not a declared type, is what carries the weight
+   * (10e-R186 disposition (c) / 10e-R192). `apps/web/tsconfig.json` excludes
+   * `src/**\/*.test.ts(x)`, so NO frontend test file is type-checked by any command
+   * — a compile-time assertion cannot reach a wrong fixture. A throw can: a fixture
+   * asserting a shape the server never sends makes this function throw, so the test
+   * feeding it goes RED instead of passing while asserting a wire shape that does
+   * not exist (the FIND-S5(b) class, inverted).
+   */
+  magicLinkVerify: async (token: string): Promise<MagicLinkVerifyResult> => {
+    const payload = await apiFetch<unknown>("/api/auth/magic-link/verify", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    })
+    const data = readApiData<{ pending_2fa?: unknown; is_new_user?: unknown }>(payload)
+    // pending_2fa FIRST — ordering is load-bearing, not stylistic (10e-R189(i)).
+    if (data.pending_2fa === true) return { kind: "pending_2fa" }
+    if (typeof data.is_new_user === "boolean") {
+      return { kind: "session", isNewUser: data.is_new_user }
+    }
+    throw new ApiError("Unexpected sign-in response.", 200, "MAGIC_LINK_UNEXPECTED_RESPONSE")
+  },
 
   twoFactorSetup: async (): Promise<{ qr_data_uri: string; secret_b32: string; backup_codes: string[] }> => {
     const payload = await apiFetch<unknown>("/api/auth/2fa/setup", { method: "POST" })

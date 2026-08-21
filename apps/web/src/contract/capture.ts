@@ -138,6 +138,11 @@ export const INVOCATIONS: Invocation[] = [
 
   // authApi
   { source: "authApi.me", run: () => authApi.me() },
+  { source: "authApi.magicLinkRequest", run: () => authApi.magicLinkRequest("a@b.com") },
+  // magicLinkVerify's exhaustive narrowing THROWS on the mocked `data: {}` body
+  // above — by design (10e-R189(ii)). The per-invocation catch below records the
+  // URL before the body is ever read, so the capture is unaffected.
+  { source: "authApi.magicLinkVerify", run: () => authApi.magicLinkVerify("t") },
   { source: "authApi.twoFactorSetup", run: () => authApi.twoFactorSetup() },
   { source: "authApi.twoFactorConfirm", run: () => authApi.twoFactorConfirm("123456") },
   { source: "authApi.twoFactorVerify", run: () => authApi.twoFactorVerify({ code: "123456" }) },
