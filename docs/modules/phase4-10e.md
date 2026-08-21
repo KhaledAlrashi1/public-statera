@@ -1454,6 +1454,30 @@ appended section; R140's own text is unedited.
   CURRENT: the fixture measured 64 entries at `c6103c5`. R179's *obligation* — derive the absolute
   at execution and state the movement as a delta — stands unchanged.
 
+## AMENDMENT — 2026-08-21, under 10e-R203(c) + 10e-R204(d) (10e-4 boundary persistence commit)
+
+- **10e-R188 … 10e-R204 are now PERSISTED**, verbatim, in the four appended sections at the end
+  of this file (Format A). The persisted set is therefore **R7–R17 (Format B)** and
+  **R140–R204 (Format A)** — 65 Format-A blocks, contiguous, no gaps.
+- **This persistence deliberately rides the 10e-4 BOUNDARY, not 10e-close** (10e-R203(c)). 10e-R202
+  had assigned it to 10e-close; the conversation boundary falls between the two, and rulings living
+  only in a conversation across a handoff is **the R36–R101 gap forming prospectively**. The
+  persist-first standing rule says the record is written BEFORE the boundary.
+- **The set's COUNT moved three times and each figure was correct when written** — R202 fifteen,
+  R203(d) sixteen, R204(d) seventeen. A count describing the set it belongs to is falsified by any
+  addition to that set (10e-R118, interval collapsed to zero). The committed figure was **derived
+  from the blocks actually held at commit time** and reconciled against 204 − 188 + 1 = 17, not
+  carried from any of the three.
+- **10e-R196 … 10e-R202 were NEVER DELIVERED when first issued** (10e-R204(b)). The block was
+  pasted backward into the channel instead of forward, so the channel received its own output and
+  recorded it as an echo under 10e-R203(a) — a disposition now WITHDRAWN, with the withdrawal
+  placed beside R203(a) rather than folded into it. The gap ran a full cycle and closed only
+  because the implementer's BLOCKED report **enumerated which numbers it held** rather than
+  reconstructing the missing seven. Non-delivery and supersession markers travel beside the
+  affected blocks; their text is unedited (10e-R148 precedent).
+- **R103, R131, R139 and R36–R101 are unchanged** — still issued-but-unpersisted, still OWED and
+  BLOCKED on source availability (10e-R102), still not to be reconstructed.
+
 ---
 ---
 
@@ -2093,3 +2117,679 @@ Proceed to the 10e-4 proposal under 10e-R175 … 10e-R180 as amended by this blo
 Command blocks are written for zsh: quoted globs (10e-R151) and braced parameters before any colon (10e-R184). Every claim about current behaviour carries pasted source and a matched-line list, including the ones that come back inconvenient. Every guard is proposed together with how it will be proven able to fail IN BOTH DIRECTIONS. Every enumeration that falsifies something in this prompt is a finding and outranks the prompt — Step 0 produced two, and both improved the ruling record.
 
 Deliver the proposal. Then STOP. Implementation is not authorized.
+
+---
+
+## Review-channel ruling block — 10e-R188 … 10e-R195, 2026-08-21
+
+10e-R188 — aa91b61 is ACCEPTED. The persistence verifies. Two findings are the commit's real output.
+
+Checked in the channel against docs/modules/phase4-10e.md, not taken on the report's word:
+Format A was 34 blocks numbered 140…173 at c6103c5; the report claims 48 numbered 140…187.
+34 + 14 = 48 and 187 − 140 + 1 = 48, both closing on the same figure by different routes.
+The fourteen assertion line numbers are strictly ascending and their spacing is consistent
+with a 250-line growth that also carries the completeness-note amendment. Format B unchanged
+at 11 is the R183(ii) discipline applied — you stated the format each assertion tested and
+ran the matching-format control, so the Format-A result is a claim about Format A rather
+than a claim about the file.
+
+Unshipped 18 → 19, re-derived. Docs-only proven by exclusion before the commit rather than
+asserted after. Gates skipped under 10e-R149 and cited as R149, not R144 — R185 discharged.
+The R182/R183 durable lines correctly held back for 10e-4's docs half.
+
+M-1 and M-2 are the commit's most valuable content and neither was asked for. Both are
+ruled below.
+
+10e-R189 — M-1 ACCEPTED. The contract does NOT change. §4's narrowing is what closes it, and 10e-close gains a documentation obligation.
+
+The finding is real and 10e-R124 [persisted, phase4-10e-3a-proposal.md] did not address it:
+that ruling settled what the two shapes ARE and said nothing about how a client tells them
+apart. Two 200s with ok: true, discriminated only by which key is present in data, is a
+consumer trap, and your failure trace is exactly right — if (data.is_new_user) reads
+undefined on the handoff, falls through falsy, and routes a sessionless user into the app
+while a 300 s pending cookie expires unused.
+
+The contract does not change. R124's minimality reasoning stands and is strengthened, not
+weakened, by this finding: the defect is not in the shapes, it is in the absence of a stated
+discrimination rule, and adding a discriminant field would treat a documentation problem as
+a schema problem. Your §4 disposition already supplies the mechanism.
+
+Two conditions, both red-provable:
+
+  (i) pending_2fa is tested FIRST, and that ordering is pinned by a case that goes red when
+      the branches are swapped. Ordering asserted in prose rots; ordering asserted by a
+      failing test does not.
+  (ii) The narrowing is EXHAUSTIVE and its default THROWS. A response carrying neither key,
+       or both, must not fall through to any success path. Prove it with a fixture omitting
+       both — a narrowing whose default is "assume success" is the M-1 defect relocated one
+       layer down.
+
+Documentation obligation, owed to 10e-close alongside the R124 entry: the public-API-contract
+entry states the DISCRIMINATION RULE, not only the two shapes. A contract that documents two
+responses without saying how to tell them apart hands the next consumer the identical defect,
+and the next consumer will not have M-1 in front of them.
+
+10e-R190 — M-2 ACCEPTED. This is the 9.4 defect class, caught before it shipped. Two conditions.
+
+The mechanism is correct and the asymmetry is the part worth keeping: OIDC works because a
+full-document redirect reboots the SPA with the cookie already present, and magic-link's
+client-side navigate() does not remount the provider whose mount-only effect already ran and
+set user = null. So the OIDC path's correctness is not evidence about this path — it is the
+EXTRACT-2 finding's shape on a different surface, where greenness on one path says nothing
+about a path that was never entered.
+
+Left unfound this ships as a route that returns 200, sets a valid cookie, and bounces the
+user to /login — which is 9.4 almost exactly (route correct, frontend reads undefined,
+ProtectedRoute bounces), and 9.4 survived a Module 7 smoke test that validated /me as HTTP
+200. An operator smoke of "the link worked" would not have caught this either.
+
+  (i) The test asserts the POST-CONDITION, not the call. Asserting that refreshUser was
+      invoked proves an invocation; it does not prove the user ends up authenticated, and a
+      spy that resolves to nothing satisfies it. Assert where the user lands and that auth
+      state is populated. Proven able to fail by removing the await.
+  (ii) The ORDERING is pinned: refreshUser resolves BEFORE navigate. Reversed, the
+       destination mounts with user still null and bounces, then the refetch resolves onto
+       /login — a failure indistinguishable from having no refetch at all. Two different
+       bugs with one symptom is exactly the case that needs its own red.
+
+10e-R191 — §3: five strings APPROVED as written, C-1 APPROVED WITH ONE AMENDMENT, C-3 owes one statement. C-6's separation is APPROVED with an enumeration condition.
+
+C-2, C-4, C-5, C-7 approved verbatim. C-2 in particular does real work — "has an account —
+or is ready to have one" tells an unknown-address user what clicking will do without telling
+THIS user which they are, and it is true in both branches because 10e-2 sends for both under
+one template. Approved as written.
+
+C-1 — AMENDED, one clause. R177(a) made "true in all four causes" BLOCKING, and "no longer
+valid" is not true of a token that never existed: "no longer" is a temporal claim meaning
+not now, though formerly. That is the precise assertion 10e-R14 [persisted,
+docs/modules/phase4-10e.md:1268, Format B] refused 410 Gone for — "410 asserts the resource
+once existed, which is itself the distinguishing signal the uniformity exists to suppress."
+Rejecting the status code and then making the same assertion in the copy would restore in
+prose what the status code was chosen to avoid. Uniformity is NOT breached (one string, four
+causes, no information carried), so this is an accuracy defect against the property I made
+blocking, not a security one — and it costs one word:
+
+  This sign-in link isn't valid.
+  Links expire after 15 minutes, are single-use, and requesting a new link replaces any
+  earlier one. Request a fresh link below.
+
+Everything else in C-1 stands, and the addition of "single-use" is RATIFIED as an
+improvement on the channel's own specification: R14's sketch named expiry and supersession
+and never named the consumed cause, so the sketch failed the property the same ruling
+imposed. Finding the channel's illustrative string incomplete against the channel's own
+blocking requirement is the right kind of reading.
+
+C-3 — one statement owed before it ships, not a rejection. State which validation states
+"Enter your email address." covers, and whether client-side validation replicates the
+server's zod .email() predicate. If it does, that is a SECOND site emitting the claim
+10e-R85 [number held, date/title not held] already records as false about a non-ASCII local
+part — the user is told their address is invalid when it is not. Naming it as a second site
+is sufficient; do not fix R85 here, and do not enlarge it silently.
+
+C-6 — the separation is APPROVED and the reasoning is right. R14's uniformity binds the four
+TOKEN causes, which the server collapses into one 400 body before the client sees anything;
+transport and server-health say nothing about a token's state or an account's existence, and
+folding them together would make C-1 false for causes it names — which R177(a) forbids.
+
+Condition, because a two-branch client split is only exhaustive if the server's response set
+is: ENUMERATE every response the verify handler can emit, with status codes, from source,
+and state which branch each falls into. A third response the enumeration did not anticipate
+lands in whichever branch the code happens to route it to, and that routing was never a
+decision. This is the R135 discipline on a client instrument — a compound split needs each
+alternative attributed, not the split as a whole shown to work.
+
+10e-R192 — §4: disposition (c) APPROVED. The decline of (b) is RATIFIED, and the argument is better than the option it declines.
+
+You were right and the channel was wrong to call (b) the obvious one. Authoring both the
+type and the AssertEqual pin from the same paste makes them agree BY CONSTRUCTION — a
+counterpart reaching its result by the same path as the thing it checks, which is 10e-R167
+[persisted, :1766] retired one commit ago and 10e-R168 [persisted, :1774] in general form.
+B4-2 escapes only because its right-hand side is GENERATED FROM A RUNTIME CAPTURE, and that
+property does not transfer to a hand-authored assertion. The precedent is the capture, not
+the assert file. Recorded so a future reader does not cite money-wire-shape.assert.ts as
+licence for an authored pin.
+
+(c) approved. Runtime narrowing is the stronger answer for the reason you give: it is not a
+type claim, so the tsconfig exclusion cannot reach it, and it INVERTS FIND-S5(b) — a
+wrong-shaped fixture throws instead of quietly passing, so the defect surfaces as a red test
+rather than as a green one asserting a wire shape that does not exist. Moving a guard from a
+layer that does not reach test files into one that does is the correct response to a
+measured gap.
+
+The residual you state — nothing verifies the declared shape against the RUNNING server
+pre-deploy — is accepted as stated and gets a home rather than a mention: it goes into the
+10e-close bounded-unknown record alongside 10e-R134 [number held, date/title not held],
+10e-R168, and R181(b)'s frontend synthetic-control gap. Four entries, one record. The
+closer you name (extending B4-1's capture beyond money leaves) is correctly identified as a
+chartered cycle — widening the money predicate and relaxing the NULL fail-loud guard are
+blocking-clause changes under TB-R13 and are not a small improvement made in passing.
+
+10e-R193 — §5: the SPLIT is ACCEPTED. The recovery half is discharged, with one correction to its framing. The acknowledgement half is QUEUED, and the surviving mechanism is RECORDED so it is not re-derived.
+
+The split is a real analytical contribution — R161 [persisted, :1702] treated the item as one
+thing and it is two.
+
+Correction to the framing, because it matters for what remains open. R161's stated concern
+was that legitimate users "lose a diagnostic string and land on an unexplained login page" —
+that is the ACKNOWLEDGEMENT half. The dead-end-with-no-recovery-affordance concern is R14's,
+about /auth/magic. So what 10e-4 discharges structurally is not R161's stated concern; it is
+the HARM that concern was about. A user whose Google token exchange failed now has a second
+sign-in path that does not involve the failing dependency, which is a genuine mitigation
+arriving for free, with zero information carried and zero parameter. Accepted on that
+ground, stated accurately.
+
+The acknowledgement half is QUEUED, not ruled into 10e-4. Your commit-hygiene reasoning is
+adopted: the flash-cookie mechanism would make 10e-4 touch the OIDC callback, and A8 Change 1
+split 10e-3b out precisely so that callback is reviewable without a frontend diff around it.
+Reversing that at 10e-4 would undo the split's purpose one sub-commit later.
+
+What the queue item now carries, and this is why the analysis was worth doing: three
+mechanisms are ELIMINATED WITH REASONS, and one SURVIVES.
+
+  - single-valued param — eliminated by R161's own argument.
+  - redirect to /auth/magic — eliminated twice over: it reuses C-1 for a cause C-1 is false
+    about, AND a distinguishing DESTINATION is the same oracle as a distinguishing param.
+    That second half is yours and the channel had not seen it; R161 ruled on params and the
+    reasoning generalises to any observable that varies with cause.
+  - unconditional message — eliminated; it lies to ordinary visitors.
+  - value-less server-set flash cookie — SURVIVES the constraint. Presence means "sign-in
+    did not complete", no cause encoded, anonymity set of three matching the redirect's own.
+    Deferred on scope, NOT on soundness, and the record says so.
+
+The item goes to 10e-close's queue reconciliation with the constraint travelling attached,
+per R161. A queue item carrying a worked elimination is worth more than one carrying an open
+question, and the next cycle starts from the surviving candidate instead of re-deriving four.
+
+10e-R194 — §6 case 2 / §9 G-1: the byte-identity form is DEGENERATE BY CONSTRUCTION and must NOT be written. RE-POINTED.
+
+You asked the right question and the answer is the one you suspected. The server returns ONE
+FIXED 200 ENVELOPE built at a single site outside every branch (10e-2), so the frontend
+receives identical input for a known and an unknown address. A frontend pin asserting the two
+renders are byte-identical therefore feeds one code path the same input twice and holds by
+construction — it would stay GREEN against a component that branched on a response field the
+server never varies. That is R167's degenerate counterpart exactly, and this time it is not
+repairable by re-pointing at a sibling cause: there is no independent path on this side to
+point at.
+
+Re-pointed. The frontend pins INDEPENDENCE FROM THE RESPONSE BODY, not identity across two
+inputs:
+
+  - Assert the rendered request-submitted text is byte-equal to the C-2 literal.
+  - Prove able to fail with a mutation that makes the component read ANY field of the
+    response into the rendered string. That mutation breaks the relation the pin is on;
+    feeding two identical responses does not.
+
+The cross-address byte-identity property lives on the SERVER, where the two branches are
+genuinely distinct code, and it is already pinned there by 10e-2's fixed-envelope and
+mail-identical cases. It is CITED at 10e-close, not re-pinned here. Two pins on one property
+at two layers, one of them vacuous, is worse than one real pin plus a citation — the vacuous
+one reads as coverage.
+
+State in the proposal file which of the two properties case 2 now tests, so the case list and
+this ruling do not diverge.
+
+10e-R195 — §7's delta APPROVED. §8 RATIFIED. Four conditions, then IMPLEMENTATION IS AUTHORIZED.
+
+§7 — +20 tests / +2 files approved against A8's +8–10 / +1–2. Files land inside the range;
+tests overshoot and the accounting closes: 3 (R177's blocking properties, cases 2/9/10) +
+3 (§4's disposition, 17–19) + 4 (post-A8 measurements, 11–14) = 10 ruling-and-measurement
+additions, leaving 10 as the A8 base at the top of its own range. Same shape as 10e-3b's
++16-against-+12, which 10e-R172 [persisted, :1820] closed by decomposition — A8 was written
+2026-08-08, before R156(d), R161, R162(d), R177 and R186 existed, and a prediction cannot
+anticipate rulings issued after it. Declared in advance rather than discovered at close is
+what 10e-R137b [number held, date/title not held] exists to produce. The +20 remains a
+PREDICTION: a miss at execution is a question, not a datum, including in the file column.
+
+R126 [persisted, phase4-10e-3a-proposal.md] is satisfied by construction — 20 it, one row
+one test, no loops, no skipIf, and apps/web has no INTEGRATION mode so no case lands in any
+skipped column. The NONE INTEGRATION obligation is confirmed against what is proposed rather
+than inherited from A8, which is what R175 asked.
+
+§8 RATIFIED, and it is the preferred direction of the R178 rule. LoginPage.test.tsx:24's
+getByRole("heading", { name: /sign in/i }) throws on multiple matches, so a natural "Sign in
+with email" heading would have reddened a test 10e-4 never set out to touch. Avoiding it by
+choosing a label and a button is better than naming a forced edit and shipping it — R178 says
+a forced edit needs approval, and needing none is the superior outcome. RECORDED, not fixed:
+that query is now a latent constraint on any future copy near it, since it asserts a
+uniqueness it does not mean to assert. To 10e-close's queue, one line, no cycle attached.
+
+Also RECORDED, in 10e-4's own entry and NOT by editing the design-5.4e entry (10e-R78): the
+font self-host is what makes the Referer exposure same-origin-only. Had the Google Fonts
+<link> survived, every magic-link click would have sent a live single-use credential in a
+Referer header to fonts.googleapis.com before any application code ran, and no replaceState
+could have prevented it. A narrowing chosen for visitor-IP privacy paying off in a
+credential-leak threat model it was not chosen for is worth the record — it is evidence for
+the standing enforcing-CSP rule, not a new rule.
+
+Conditions, all four before or at the close-out:
+
+  (a) TOKEN SCRUB TIMING. Rule: the URL scrub happens BEFORE the verify request is sent,
+      with the token held in memory. Reason, and your measurement outranks it if it is
+      wrong: scrub-after leaves a live window in which a reload re-sends a token the
+      in-flight request is consuming, so the reloaded page shows C-1 to a user who
+      succeeded, with the session cookie's fate depending on which request landed first.
+      Scrub-before closes that window, and a reload after it lands on /auth/magic with no
+      token — which renders C-1 with the request form beneath it, a recoverable state R14
+      already designed for. State what a browser BACK navigation onto the scrubbed URL
+      renders, in one line.
+  (b) DESIGN-TRACK CONSTRAINTS, stated with the enumeration that establishes each, not
+      asserted: no physical-direction utility added (ml-/mr-/pl-/pr-), no file, export or
+      component renamed, components/ui/* untouched. "Not mentioned" is not "satisfied."
+  (c) THE THREE NAMED REGRESSION FILES green AND byte-untouched, demonstrated with an empty
+      git diff --stat over those paths, not with the claim that they are on no path edited.
+  (d) Every guard proven able to fail IN BOTH DIRECTIONS with the red captured, and every
+      capture IN the report rather than pointed at (10e-R112). If a mutation cannot redden
+      a pin, report that — your §9 commitment to do so is the correct standing disposition
+      and is ratified.
+
+Implementation of 10e-4 is AUTHORIZED, amended by R189, R190, R191, R192, R193, R194 and the
+four conditions above. Re-derive every absolute at execution against the then-current
+measured baseline; carry nothing. Do not write "two independent instruments." The close-out
+carries the three mandatory sections: verbatim test tail including the Test Files line with
+its captured exit code, verbatim tsc output with its exit code, and the baseline hunk itself
+rather than a prose restatement.
+
+---
+
+## Review-channel ruling block — 10e-R196 … 10e-R202, 2026-08-21
+
+> **NON-DELIVERY MARKER (10e-R204(b), 2026-08-21) — travels beside this block, never folded
+> into it.** This block was issued on 2026-08-21 and **never reached the implementer**. It was
+> pasted BACKWARD into the channel instead of forward, so it was consumed at the relay: the
+> channel received its own output as input and recorded it under 10e-R203(a) as an
+> "identical-text echo, no answer owed." That disposition is WITHDRAWN by 10e-R204(b). The
+> block below is the **re-relayed verbatim text**, unedited, and it is what is persisted. The
+> gap was one full cycle wide and was closed only because the implementer's BLOCKED report
+> enumerated which numbers it held.
+
+10e-R196 — fcc721e is ACCEPTED, subject to the assertions owed under R201. Verification reconciles on every axis.
+
+Three mandatory sections present and in form: verbatim tails carrying the Test Files line
+with captured exit codes, verbatim tsc at 0 bytes both packages, and the baseline hunk
+itself rather than a prose restatement.
+
+Frontend 185 / 39 → 209 / 41, exit 0, Errors-instrument 0. API hermetic 873 / 34 / 61
+byte-identical to R179's baseline, exit 0. Both tsc 0. No apps/api/** path in the stat.
+Unshipped 19 → 20, re-derived.
+
+The +24 / +2 delta is INVESTIGATED, not absorbed. Files landed on prediction; tests missed by
+4 and the miss is reconciled two independent ways — per-file (6 + 12 + 5 + 1 = 24) and
+against the totals (209 − 185 = 24), which agree. The four extras each trace to a ruling
+issued AFTER the proposal or a measurement one of those rulings forced: R191's C-3 turned a
+two-way split three-way, R190(ii) added the ordering pin, R191's C-6 enumeration produced the
+empty-?token= case, R189(i) added the both-keys branch-order pin. 20 + 4 = 24, and every
+addition is attributable to a specific ruling by number.
+
+Recorded as a PATTERN now that it has held three times, strengthening 10e-R172 [persisted,
+docs/modules/phase4-10e.md:1820] rather than minting anything: a test-count prediction in a
+proposal is a prediction ABOUT THE PROPOSAL, and the ruling block issued on that proposal
+necessarily invalidates it. 10e-3b overshot +12 by 4 and closed as 12 + 3 + 1; 10e-4 overshot
++20 by 4 and closes as 20 + 4. The reconcilable form is "proposal base + ruling-added," and
+the miss is a property of the propose→rule→implement sequence, not a defect in the
+prediction. What 10e-R137b [number held, date/title not held] requires is that the miss
+become a question — it did, twice running, and both times the answer was in the ruling
+record rather than in the code.
+
+Running the API suite under NO obligation, because the contract fixture crossed the package
+boundary, is RATIFIED and is the better instinct. A8's cadence table is keyed on what a
+commit TOUCHES — db.transaction() boundaries, integration cases — which is path-shaped. This
+dependency is DATA-shaped: no apps/api file changed, and an apps/api test reads a file that
+moved. A path-keyed obligation table cannot see that, and the correct response is the one you
+took rather than a rule amendment. Recorded so the next data-dependency crossing is
+recognised rather than re-derived.
+
+Two items the close-out did not claim and that reconcile in the channel's favour, stated so
+they are on the record rather than left as luck:
+
+  (i) The baseline hunk's offset moved 553 → 556, i.e. three net lines inserted above it.
+      That is CONSISTENT with the 10e-4 module-status entry plus the two durable lines from
+      R182 and R183 riding this docs half per R187(d) — one plus two. Consistent, not proven;
+      R201 asks for the assertion that settles it.
+  (ii) The two-mode cross-check (873 + 34 − 10 = 897) was NOT exercised this cycle, correctly,
+       since 10e-4 carried no INTEGRATION obligation. Consequence, stated because it is now
+       load-bearing: the INTEGRATION absolute 897 / 10 / 0 has been carried across FOUR
+       commits since its measurement at 4f71494. Hermetic agreeing byte-for-byte is strong
+       evidence apps/api is unchanged, but it is not a measurement of INTEGRATION, and the
+       10-skipped figure is an INTEGRATION-mode observation that no hermetic run produces.
+       It is re-derived at 10e-close's final reconciliation, never carried into it.
+
+10e-R197 — M11 is the finding of this sub-commit, and it defeated BOTH conditions I wrote to prevent it. New standing rule.
+
+A mock whose body is synchronous cannot detect a missing await. `void refreshUser()` followed
+immediately by `navigate(...)` found auth state already populated, because the mock set it
+before the very next statement ran. So the post-condition pin (R190(i)) and the ordering pin
+(R190(ii)) would BOTH have stayed green against code that never awaits — the two conditions
+were jointly insufficient, and the sufficiency condition was a third thing neither of them
+named.
+
+This is 10e-R168 [persisted, :1774] in its purest form yet: the instrument shares a TIMING
+assumption with the thing it measures. Every previous instance shared a mechanism visible in
+the instrument's own text — a collation, a helper, a fabricated error object. This one shares
+an assumption that appears nowhere in the assertion and nowhere in the mutation; it lives in
+the mock's body, which reads as setup rather than as instrument. That is why it needs its own
+line rather than a citation.
+
+Recorded against the channel, not only the implementer: R190 asked for the two pins that
+matter and both were correct. Naming what a pin must ASSERT does not establish that the
+harness can OBSERVE it, and I did not ask. The asymmetry is the familiar one — the defect is
+invisible from inside a green suite.
+
+Durable line, riding 10e-close, one line in CLAUDE.md's standing rules:
+
+  A test that pins ASYNC ORDERING must mock the async dependency with a REAL scheduling
+  boundary (10e-R197, earned 10e-4, 2026-08-21). A mock whose body runs synchronously
+  resolves before the next statement, so `void f(); g()` is indistinguishable from
+  `await f(); g()` and BOTH a post-condition pin and an ordering pin stay green against code
+  that never awaits. [[10e-R168]]'s sharpest instance: the shared assumption is TIMING, and
+  it lives in the mock body — setup, not assertion — so it appears in neither the pin nor
+  the mutation. Give the mock a setTimeout (or equivalent) boundary and comment WHY it is
+  load-bearing, or a later tidy will delete it as gratuitous.
+
+The repair is ratified: same mutation now reddens 6 cases including both pins, and the mock
+carries the comment. Comment included unprompted, which is what stops the boundary being
+removed as noise by someone who does not know it is the instrument.
+
+10e-R198 — M3 is RATIFIED as a falsification of your own control. New standing rule on mutations as instruments. The third finding is recorded without one.
+
+You predicted the err.message mutation would redden case 12 alone and thereby prove case 12
+carries its own weight. It reddened two, because case 11 also asserts
+toContain(INVALID_TITLE). The mutation does not discriminate, and the discriminating one —
+appending to the body, which case 11's container-level toContain survives — was found and
+run (1 failed / 11 passed).
+
+This is a distinct instrument class from every prior instance. 10e-R135 [number held,
+date/title not held] governs SEARCH patterns: a positive control on a compound proves the
+pattern fired, not that any alternative did. The same logic governs MUTATIONS and had not
+been stated: a mutation that reddens N cases proves the SET is sensitive to it, not that any
+particular member carries weight. Given this project verifies almost everything by mutation,
+the gap was worth closing.
+
+Durable line, riding 10e-close, one line in CLAUDE.md's standing rules:
+
+  A mutation attributes sensitivity to the SET it reddens, never to a member (10e-R198,
+  earned 10e-4, 2026-08-21). "This mutation proves case N carries its own weight" holds only
+  if case N is the ONLY case it reddens; a mutation reddening several proves they are
+  collectively sensitive and leaves each individually UNPROVEN. To attribute weight to one
+  case, find the mutation its neighbours SURVIVE — the neighbours' green is the attribution,
+  and it is the half that is easy to omit because it looks like nothing happened. Mutation
+  counterpart to [[10e-R135]]; same logic, different instrument.
+
+The third finding — grepping for a per-test ✓ returns 0 whether the case passed or not,
+because vitest prints no per-test ✓ for a failing file — is the standing observer rule
+firing, not a new one. Non-discriminating in both worlds, and correctly replaced by the
+exhaustive × list plus the pass count. No line; the rule already covers it and inflating the
+set cheapens it.
+
+10e-R199 — C-3's self-falsification is ACCEPTED and is the right kind of correction. Two bounds named, and 10e-R85's queue item gains a second site.
+
+You wrote that client-side validation deliberately does not replicate zod's .email(), then
+measured and found the opposite: `<input type="email">` applies HTML5 constraint validation
+and `validity.typeMismatch === true` for a non-ASCII local part. Correcting the component's
+comment to say the opposite of what you had written, rather than leaving a comment that reads
+plausibly and is false, is the standard — a false comment is a pointer to a capability that
+does not exist, which is the defect 10e-R124 [persisted, phase4-10e-3a-proposal.md] was
+partly written about.
+
+Two bounds, neither of which changes the disposition:
+
+  (i) The measurement is against jsdom 26.1.0, which is what runs the tests. The claim it
+      supports is about PRODUCTION browsers. The constraint firing transfers — it is
+      specified behaviour, implemented by every target browser — but the MESSAGE STRING does
+      not: jsdom reports no user-visible message, and real browsers each emit their own.
+      So "the constraint fires" is measured; "the user sees string X" is not, and no
+      instrument in this repository can observe it.
+  (ii) R85 is NOT enlarged, and your reasoning is right: the server refuses that user anyway,
+       so the capability is unchanged. What IS new is that the refusal now has TWO voices,
+       and the second is a platform-supplied, unruled, non-localizable string in an app that
+       is bilingual by design. 10e-R177 made every user-facing string ruled-before-ship, and
+       this one ships without being ruled because the platform emits it — a real exception to
+       a rule I wrote, found by measurement rather than by argument.
+
+To 10e-close's queue, attached to the existing 10e-R85 / 10e-R72 item [numbers held,
+date/title not held], not opened here: that cycle now inherits a second site with a
+platform-supplied message and the localization consequence. One line, no cycle attached to
+10e-4.
+
+10e-R200 — the TODO marker: the refusal to self-grant is RATIFIED. Removal is AUTHORIZED as a named rider on 10e-close.
+
+Leaving TODO(module-10e-4-token-in-url) standing rather than deleting it was correct. The
+behaviour is discharged and the marker is stale, but removing it edits apps/api and would
+falsify the frontend-only property this commit's stat demonstrates — and doing it unasked is
+the self-grant 10e-R166(b) [persisted, :1756] recorded once, applied here PREEMPTIVELY rather
+than after the fact, which is the improvement.
+
+Ruled, so it is not left to judgement a second time: the removal RIDES 10e-close, named in
+its commit body as a discharged-TODO removal, with a grep -n showing the marker present
+before and absent after. It does NOT ride the operator-drafted Privacy Policy commit —
+10e-R12 [persisted, :1252] keeps that commit operator-authored and single-purpose.
+
+Stating the cost — that until removal a grep for the marker finds a discharged item — is what
+makes the deferral a decision rather than an omission.
+
+10e-R201 — OWED before 10e-close. Three assertion sets, reported first, committed only on divergence.
+
+None of these is a defect; each is an assertion the close-out did not carry for a ruling that
+named specific content. 10e-R141 [persisted, :1472] governs: where a ruling names specific
+text, close with grep -n output, not a hunk header. 10e-R142 [persisted, :1480] governs the
+count: N ruled items close with N per-item presence assertions.
+
+  (a) SEVEN string assertions, C-1 … C-7 as SHIPPED, one grep -n per string. C-1 must appear
+      in its R191-AMENDED form — "This sign-in link isn't valid." The amendment turned on one
+      word, and one word is exactly what a hunk header cannot settle. If any string diverges
+      from what R191 approved, that is a corrections commit; if all seven match, it is a
+      report and nothing more.
+  (b) The C-6 RESPONSE ENUMERATION from source, which R191 made a condition and which the
+      close-out references only through the case it produced. Every response the verify
+      handler can emit, with status codes, and which of the two client branches each falls
+      into. A two-branch split is exhaustive only if the server's response set is, and the
+      empty-?token= case proves the enumeration found something — which is precisely why the
+      enumeration itself is the artifact, not the case it happened to yield.
+  (c) TWO presence assertions that the R182 and R183 durable lines landed in CLAUDE.md per
+      R187(d). The baseline hunk's 553 → 556 offset is consistent with them plus the
+      module-status entry, but consistency is not presence, and the omitted item is precisely
+      the one not on the list you are reading.
+
+Report all three in the channel. No commit unless (a) diverges.
+
+10e-R202 — 10e-4 is CLOSED. The remaining sequence, and what 10e-close carries.
+
+10e-4 was the last code sub-commit. Remaining: the operator-drafted Privacy Policy copy commit
+(10e-R12, gates the DEPLOY, not 10e-close's code — your only job on it is confirming at
+10e-close that the commit exists and rides the deploy) → deploy → 10e-close → the production
+end-to-end send proof (10e-R15 [persisted, :1278] / 10e-R147 [persisted, :1548]), which is the
+ANNOUNCEMENT gate and is not discharged by attestation.
+
+10e-close carries, and this list is the reconciliation target rather than a summary:
+
+  - Public API contracts: the two verify shapes AND the DISCRIMINATION RULE (10e-R124,
+    10e-R189). Two shapes without a stated discrimination rule hands the next consumer M-1.
+  - The BOUNDED-UNKNOWN record, FOUR entries: the Errors grep's undemonstrated independence
+    from the exit code (10e-R134 + 10e-R168); the frontend control's synthetic provenance
+    (R181(b)); and nothing verifying the declared shape against the running server pre-deploy
+    (R192). Do not write "two independent instruments."
+  - INTEGRATION re-derived, not carried (R196(ii)). Final two-mode cross-check exercised.
+  - Frontend baseline re-derived from 209 / 41.
+  - The on-box cleanup-schedule activation proof (A6.7) — the magic_expired_deleted= /
+    magic_consumed_deleted= log shape is the discriminator, and it is pinned by a hermetic
+    assertion precisely so it is checkable on the box.
+  - QUEUE RECONCILIATION: 10e-R129 (own cycle, post-10e, do not bundle); 10e-R85 / R72 with
+    R199's second site; 10e-R161's acknowledgement half with three eliminated mechanisms and
+    one survivor; LoginPage.test.tsx:24's getByRole heading constraint; R200's TODO rider;
+    R155's soft-delete email retention.
+  - PERSISTENCE: 10e-R188 … 10e-R202 appended verbatim to docs/modules/phase4-10e.md in
+    Format A under ^10e-R<n> —  — FIFTEEN rulings — with fifteen presence assertions run
+    before the commit, the ^10e-R0 —  control, and the format stated per 10e-R183(ii).
+    Checkable prediction, stated in advance: Format A goes 48 → 63 blocks, numbered
+    140 … 202, contiguous. 202 − 140 + 1 = 63 and 48 + 15 = 63 agree, so a miss is a
+    question. Format B stays 11. Check header-by-header; never sweep the range.
+  - The R197 and R198 durable lines ride this commit.
+
+Deliver R201's three reports. Then the 10e-close prompt comes from the channel.
+
+> **SUPERSESSION MARKER (10e-R203(c) + 10e-R204(d)) — travels beside 10e-R202's final
+> PERSISTENCE bullet, never folded into it.** R202 assigned the persistence to 10e-close and
+> predicted Format A 48 → 63 for FIFTEEN rulings. **10e-R203(c) moved the persistence AHEAD of
+> the 10e-4 conversation boundary** — because the boundary falls between 10e-4 and 10e-close,
+> and fifteen rulings living only in a conversation across a handoff is the R36–R101 gap
+> forming prospectively. **10e-R204(d) then moved the count twice more**, to SEVENTEEN
+> (R188…R204), with the final prediction Format A 48 → 65. Each figure was correct when
+> written; a count describing the set it belongs to is falsified by any addition to that set.
+> R202's text above is unedited, per the 10e-R148 precedent.
+
+---
+
+## Review-channel ruling block — 10e-R203, 2026-08-21
+
+> **WITHDRAWAL MARKER (10e-R204(b), 2026-08-21) — travels beside 10e-R203(a), never folded
+> into it.** **10e-R203(a) is WITHDRAWN.** It recorded the R196–R202 arrival as "an
+> identical-text echo, second occurrence, no answer owed, closed." That disposition was wrong:
+> the block had been pasted BACKWARD into the channel rather than forward to the implementer,
+> so the channel was receiving its OWN OUTPUT, which is positive evidence of NON-DELIVERY
+> rather than of duplication. R203(a) stands below as issued; this marker is the correction.
+
+10e-R203 — 10e-R202's persistence assignment is AMENDED. Persistence moves AHEAD of the conversation boundary. The relay event is recorded.
+
+(a) Relay event, recorded and closed. The 10e-R196 … 10e-R202 block was returned to the
+channel verbatim rather than a report. Per 10e-R115 [number held, date/title not held] a
+duplicate arrival is relay-layer until proven otherwise and only the operator sees both
+sides; per 10e-R119 the dangerous variant is a number arriving twice with DIFFERENT text,
+and this is not that — the text is byte-identical to what the channel issued. No ruling
+numbers are issued for it, no answer is owed on it, and R201's three reports remain the
+outstanding item. Second occurrence this conversation; both were identical-text echoes.
+
+(b) The defect, and it is the channel's. 10e-R202 assigned the persistence of 10e-R188 …
+10e-R202 to 10e-close. The conversation boundary falls BETWEEN here and 10e-close — the
+operator's standing pattern is a new conversation per module or major sub-commit boundary,
+and 10e-4 is closed. So R202 as written leaves FIFTEEN rulings living only in conversation
+across a handoff.
+
+That is the R36–R101 gap forming, prospectively and in full view. Those rulings are OWED,
+BLOCKED on source availability, and must not be reconstructed — because the verbatim text
+survives only in conversations that ended. R202 would have reproduced the identical
+condition by the identical mechanism: rulings issued, relied upon, never written down, and
+then a conversation closes. The persist-first standing rule exists for exactly this and
+says the record is written BEFORE the boundary, not after it.
+
+(c) AMENDED. The persistence of 10e-R188 … 10e-R203 rides a DOCS-ONLY COMMIT AT THE 10e-4
+BOUNDARY, before this conversation closes. It does not ride 10e-close.
+
+Moving with it, for the same reason — a standing rule that exists only in a conversation is
+worse than one in a file, because a reader who does not know it exists cannot look for it:
+
+  - The 10e-R197 durable line (async-ordering mocks need a real scheduling boundary).
+  - The 10e-R198 durable line (a mutation attributes sensitivity to the SET, not a member).
+
+Both were assigned to 10e-close by their own blocks; both are earned by work already
+committed at fcc721e, so there is nothing to wait for.
+
+(d) The commit's shape:
+
+  - Docs-only. Prove it by exclusion BEFORE committing, not after.
+  - Gates skipped under 10e-R149, 2026-08-19, "R144(a)'s instrument was MIS-SPECIFIED BY
+    THE CHANNEL" — permanently licensed, premise not re-measured, not cited as R144.
+  - 10e-R188 … 10e-R203 appended verbatim to docs/modules/phase4-10e.md in Format A under
+    ^10e-R<n> — . SIXTEEN rulings, not fifteen — R202's figure was correct when written and
+    this block moves it.
+  - SIXTEEN presence assertions, one per ruling, run before the commit, Format A, each with
+    the ^10e-R0 —  control and the format stated per 10e-R183(ii).
+  - The RULING-SET COMPLETENESS note amended to record R188–R203 persisted.
+  - The two durable lines into CLAUDE.md's standing rules.
+
+Checkable prediction, stated in advance so a miss is a question: Format A goes 48 → 64
+blocks, numbered 140 … 203, contiguous, no gaps, no duplicates. 203 − 140 + 1 = 64 and
+48 + 16 = 64 agree by different routes. Format B stays 11. Check header-by-header; never
+sweep the range.
+
+(e) Sequence, and it is strict:
+
+  1. R201's three reports, delivered in the channel. Nothing is committed on them unless
+     (a) diverges.
+  2. If R201(a) diverges — any of C-1 … C-7 not matching what R191 approved — the
+     corrections commit lands FIRST and belongs to this conversation, which holds the
+     reasoning behind the C-1 amendment.
+  3. Then this persistence commit.
+  4. Then the boundary.
+
+(f) What does NOT move. Everything else in 10e-R202's list stays at 10e-close: the public
+API contract entries with the discrimination rule, the four-entry bounded-unknown record,
+the INTEGRATION re-derivation, the frontend baseline re-derivation, the on-box
+cleanup-schedule activation proof, and the queue reconciliation. Those are close-out work
+and belong there. Only the ruling record and the two standing-rule lines move forward,
+because only they are damaged by a conversation ending.
+
+Deliver R201's three reports. Then this commit. Then stop; the next prompt comes from the
+successor conversation.
+
+---
+
+## Review-channel ruling block — 10e-R204, 2026-08-21
+
+10e-R204 — the BLOCKED report is ACCEPTED IN FULL and it FALSIFIES 10e-R203(a). The relay fault is diagnosed. New standing rule.
+
+(a) The refusal was correct and is ratified without qualification. Nine of sixteen held, seven
+absent, and the two available wrong moves were both refused: reconstructing R196–R202 from
+R203's summaries, which 10e-R102 forbids and 10e-R71 rates as worse than an uncheckable
+block; and committing 9 while the completeness note claimed 16, which is the same defect at a
+smaller number. Reporting before acting, because acting would mean fabricating, is the
+standing discipline working exactly as intended. The disk-state measurement — Format A 48,
+140…187, contiguous, nothing ≥ 188, control 0/rc=1 — establishes the starting point is not in
+question, which is what makes the blocked report actionable rather than merely an objection.
+
+(b) 10e-R203(a) is WITHDRAWN. It recorded the R196–R202 arrival as "an identical-text echo,
+second occurrence, no answer owed, closed." That disposition was wrong, and the correction
+travels adjacent to R203(a) rather than folded into it (10e-R148 precedent [persisted,
+:1558]): when R203 is persisted, R203(a) stands as issued with this withdrawal beside it.
+
+The diagnosis, which your report supplies the missing half of. You have issued a report at
+every turn and never an echo. The channel received its own R196–R202 text as input. Both
+accounts are true simultaneously under exactly one hypothesis: the block was pasted BACKWARD
+into the channel instead of FORWARD to you, so it was consumed at the relay and never
+delivered. Your paste-buffer / message-selection reading is the correct one, and it explains
+both events in this conversation — the earlier Step 0 duplicate was your report re-pasted to
+the channel, this one was the channel's own output re-pasted to the channel.
+
+(c) The rule I got wrong, and it is worth more than the incident. 10e-R115's duplicate-arrival
+disposition assumes a duplicate arriving at its RECIPIENT. What arrived here was the channel's
+own OUTPUT returning to its AUTHOR, and those are not the same event: a duplicate at the
+recipient means the message was delivered twice, while output returning to its author is
+POSITIVE EVIDENCE OF NON-DELIVERY. I classified the second as the first because both satisfy
+"text identical to something already in this conversation" — an instrument that shares its
+mechanism, text identity, with the thing that defeats it. 10e-R168 [persisted, :1774] again,
+on the relay seam this time, and the cost was seven rulings undelivered for a full cycle while
+both ends believed the channel had answered.
+
+Durable line, riding the persistence commit, one line in CLAUDE.md's standing rules:
+
+  A block returning to its AUTHOR is evidence of NON-DELIVERY, not of duplication
+  (10e-R204, earned 10e-4 boundary, 2026-08-21). [[10e-R115]]'s re-relay disposition governs
+  a duplicate arriving at its RECIPIENT; the channel receiving its OWN output back is the
+  opposite signal — the message was consumed at the relay and never reached the far end.
+  Text identity cannot distinguish them, so AUTHORSHIP is the discriminator: on receiving
+  text this end authored, treat the original as UNDELIVERED, re-relay it verbatim, and do
+  not record it as an echo. Only the author can recognise it, which is why the obligation
+  sits with the author and not the operator.
+
+(d) The persistence set MOVES AGAIN, and the count is DERIVED AT COMMIT TIME, not carried.
+The set is now 10e-R188 … 10e-R204 — SEVENTEEN rulings. R202 said fifteen, R203(d) said
+sixteen, this says seventeen, and each figure was correct when written: a count describing the
+set it belongs to is falsified by any addition to that set, which is 10e-R118 [number held,
+date/title not held] with the interval collapsed to zero.
+
+So do not trust seventeen either. DERIVE the count from the blocks you actually hold in the
+relay at commit time, state the derivation, and reconcile it against the arithmetic below. If
+they disagree, that is a question and it stops the commit.
+
+Checkable prediction, stated in advance, closing two ways: Format A 48 → 65 blocks, numbered
+140 … 204, contiguous, no gaps, no duplicates. 204 − 140 + 1 = 65 and 48 + 17 = 65 agree by
+different routes. Format B stays 11. SEVENTEEN presence assertions, Format A, each with the
+^10e-R0 —  control and the format stated per 10e-R183(ii). Check header-by-header; never
+sweep the range.
+
+(e) Everything else in R203 stands unchanged: persistence rides a docs-only commit at the
+10e-4 boundary and not 10e-close; the R197 and R198 durable lines move with it, joined now by
+this one; gates skipped under 10e-R149, 2026-08-19, "R144(a)'s instrument was MIS-SPECIFIED
+BY THE CHANNEL"; docs-only proven by exclusion before committing; the completeness note
+amended to record R188–R204 persisted.
+
+Sequence, unchanged from R203(e) and now unblocked: R201's three reports → the C-1…C-7
+corrections commit FIRST if R201(a) diverges → the persistence commit → stop at the boundary.
