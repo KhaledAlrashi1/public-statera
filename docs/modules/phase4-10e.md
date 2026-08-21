@@ -1405,9 +1405,16 @@ The ranges above are superseded as follows. **The rule that a citation carries n
 
 - **10e-R140 … 10e-R170 are now PERSISTED**, verbatim, in the appended section at the end of this
   file. They no longer resolve to nothing, and citations of them can be checked.
-- **10e-R147 is UNACCOUNTED-FOR.** No block relayed in the 10e-3b conversation contains it. Recorded
-  on the 10e-R50 precedent rather than assumed skipped: *never issued* and *issued and never relayed*
-  are not distinguishable from here, and asserting either would be a claim without evidence.
+- **10e-R147 — the gap is EXPLAINED and CLOSED (10e-R171, 2026-08-19).** ~~UNACCOUNTED-FOR~~. The
+  original entry is struck rather than deleted, because the reasoning that produced it was sound and
+  the record of a corrected inference is worth more than a tidy line. It read: *"No block relayed in
+  the 10e-3b conversation contains it. Recorded on the 10e-R50 precedent rather than assumed skipped:
+  never issued and issued and never relayed are not distinguishable from here, and asserting either
+  would be a claim without evidence."* The channel supplied the third possibility neither disjunct
+  covered: **it was issued, and relayed, as PROSE — never in block form.** A channel authoring
+  defect, not a lost artifact and not a persistence failure. Nothing was lost. R147 is now written in
+  block form in its numbered position above, with its provenance stated and not backdated.
+- **R140–R173 are PERSISTED** (extended from R140–R170 by the 10e-RULINGS-PERSIST-2 commit).
 - **10e-R103, 10e-R131 and 10e-R139 JOIN R36–R101 as issued-but-unpersisted** (10e-R143, 2026-08-19,
   "citations to unpersisted rulings carry number, date AND title"). They were cited during 10e-3a and
   10e-3a-CORRECTIONS and resolve to no artifact here. R103 in particular is load-bearing — it is the
@@ -1524,6 +1531,23 @@ Explicitly out of scope, do not bundle: 10e-R129 (cross-family token presentatio
 (g) State the baselines you will re-derive at execution rather than restating these: hermetic 856 / 31 / 60 files exit 0, INTEGRATION 877 / 10 / 0 exit 0, cross-check 856 + 31 − 10 = 877, tsc 0, frontend 185 / 39 carried unverified by design. Re-derive every absolute at execution time. Carry nothing.
 
 (h) Do not write "two independent instruments" (10e-R134). The counts are demonstrated non-discriminating in both directions; the Errors grep is demonstrated capable of firing; its independence from the exit code is undemonstrated and is a bounded unknown owed to 10e-close.
+
+---
+
+## Review-channel ruling block — 10e-R147, 2026-08-19
+
+**Provenance, stated plainly and not backdated (10e-R171, 2026-08-19, "R147's absence is EXPLAINED
+and CLOSED. It was never a block."):** this ruling was **issued as prose** on 2026-08-19, in a reply
+to the operator under the heading "Postmark approval — ruling block". It was numbered and dated but
+**never written in block form**, which is why the 10e-R170 sweep of R140–R170 found no header for it
+and why 10e-RULINGS-PERSIST recorded it as UNACCOUNTED-FOR. That was a **channel authoring defect,
+not a lost artifact**. It is rendered in block form the same date under 10e-R171 and persisted here
+on 2026-08-20. It was **not** a block before that, and nothing in this file should be read as
+implying otherwise.
+
+10e-R147 — Postmark account approval has CLEARED. The 10e-R15 announcement gate loses its external dependency; the send proof does not go with it.
+
+Postmark account approval CLEARED 2026-08-19, recorded on operator attestation. The 10e-R15 announcement gate loses its external dependency and becomes schedulable. Approval clearing does not discharge the production end-to-end send proof — request a magic link on production against a real address, confirm the message appears in Postmark Activity for the production server, confirm arrival, paste the Authentication-Results: lines verbatim. The standing prohibition on reading POSTMARK_API_KEY out of sops for comparison is unchanged, and the 2026-08-14 rotation precedent stands: screenshot configuration screens, never code samples. R43 sits in the blocked-backfill range and must not be reconstructed to attach this to.
 
 ---
 
@@ -1776,3 +1800,46 @@ Commit 1 — 10e-3b-CORRECTIONS: the sixth reason literal per R166(c); the pin r
 Commit 2 — 10e-RULINGS-PERSIST (docs-only): rulings 10e-R140 through 10e-R170, verbatim, appended to docs/modules/phase4-10e.md. Pasted from the channel, not reconstructed, not summarized. R148's correction to R140 travels adjacent to R140, never folded into it. Update the RULING-SET COMPLETENESS note to record that R140–R170 are now persisted and that R103, R131 and R139 join R36–R101 as issued-but-unpersisted per R143.
 
 Stop after commit 2 and report both. Nothing else is authorized: not the deploy, not 10e-4, not the R12 privacy copy, not 10e-close. R129 remains out of scope and unmeasured.
+
+---
+
+## Review-channel ruling block — 10e-R171 … 10e-R173, 2026-08-19
+
+10e-R171 — R147's absence is EXPLAINED and CLOSED. It was never a block. The instrument finding is ratified and generalized.
+
+R147 was issued in this channel on 2026-08-19 as prose in a reply to the operator, under the heading "Postmark approval — ruling block," recording that account approval had cleared. It was numbered and dated but never written in block form, and R170 then swept R140–R170 as a range without checking that every number in the range had a block. So the gap is a channel authoring defect, not a persistence failure and not a missing artifact. Nothing is lost.
+
+Its content, restated for the record and persisted with this block: Postmark account approval CLEARED 2026-08-19, recorded on operator attestation. The 10e-R15 announcement gate loses its external dependency and becomes schedulable. Approval clearing does not discharge the production end-to-end send proof — request a magic link on production against a real address, confirm the message appears in Postmark Activity for the production server, confirm arrival, paste the Authentication-Results: lines verbatim. The standing prohibition on reading POSTMARK_API_KEY out of sops for comparison is unchanged, and the 2026-08-14 rotation precedent stands: screenshot configuration screens, never code samples. R43 sits in the blocked-backfill range and must not be reconstructed to attach this to.
+
+The instrument finding is the valuable half and is ratified. A plain substring search for 10e-R147 reports it present — twice — because both hits are records of its own absence. A search for a thing finds the discussion of its absence. The block-header pattern ^10e-R<n> —  is the discriminating instrument, and it is discriminating because it tests the property that actually matters (a block exists) rather than the property that correlates with it (the string occurs).
+
+This is 10e-R168 one surface over: a presence check written as a substring search shares its mechanism — string occurrence — with the thing that defeats it, namely prose that mentions the identifier. It is also the R142 rider-(b) class again, third instance this module. Add to CLAUDE.md's standing rules, one line, riding the corrections commit named in R173: A presence check must test the property, not a string that correlates with it (10e-R171, earned 10e-RULINGS-PERSIST, 2026-08-19). A substring search for an identifier is satisfied by prose recording its absence; check for the structure the identifier should head.
+
+Channel obligation, adopted: a ruling issued as prose is not a ruling block. From here the channel emits every numbered ruling in block form under ^10e-R<n> — , and any range citation is checked header-by-header against that pattern before it is swept.
+
+10e-R172 — R165's owed report is ACCEPTED. 12 + 4 = 16 closes, and the fourth entry is the better finding.
+
+The gate-3 case occupies the 12 bucket — proposed and written, written late — and the earlier 12 − 1 + 5 double-counted it. That is the correct reading and it is the one the channel named. The decomposition now admits one reading.
+
+The fourth row is worth more than the arithmetic it repairs. The INSERT duplicate-race translation was in your proposal's §1.2 prose and absent from your own 12-row table — so the table under-counted the proposal it summarized, and labelling it as your own under-count rather than folding it into "ruling-added" is the attributional discipline working in the direction that costs you something. Recorded: a case list and the prose it summarizes are two artifacts, and the count is derived from the table — which makes the table a claim about the prose, verifiable against it, not a restatement of it. Consistent with the standing rule that frontend type annotations are claims to verify against the backend serializer; same shape, different surface.
+
+Strictly, then: 12 table + 3 ruling-added (R156(d), R161, R162(d)) + 1 table under-count = 16. Closed.
+
+10e-R173 — 10e-3b is CLOSED. Both commits ACCEPTED. One corrections item, then this conversation ends.
+
+4f71494 verifies: tsc 0 at 0 bytes; hermetic 873 / 34 / 61 exit 0, Errors 0; INTEGRATION 897 / 10 / 0 exit 0, Errors 0; cross-check 873 + 34 − 10 = 897. The rename moved no counts as R170 predicted and the +1 is the new case exercising the sixth literal — a prediction stated in advance and met, which is the form R137b exists to make readable. Unshipped 17 reconciles as 15 plus two.
+
+R166(c) is discharged with more than was asked: minting duplicate_identity_race was required, renaming isDuplicateEmailError → isDuplicateKeyError was not, and it is right for the identical reason — the predicate matches a key class, not an email class, and a name asserting otherwise is the same defect one layer down. Giving the new literal its own exercising case, unprompted, applies the gate-3 lesson to the commit that repairs it.
+
+R167 is discharged and the report is the standard. The pin was degenerate: the counterpart was the merged :170 boundary gate routing through refuseAdoption, the same helper as the refusal, so byte-identity held by construction. Re-pointing at :163 via a throw flag is right, and making independence checkable — the refusal audits, :163 does not, so a non-empty/empty split proves two different code paths produced the two responses — is better than the ruling required. R161 asked for byte-identity; you added a positive demonstration that the two responses have independent origins, which is precisely the R134 gap (independence undemonstrated) closed on a smaller surface. That the reasoning transferred without being told to transfer is the point.
+
+bc12b14 is accepted: R140–R170 verbatim in five blocks, R148's correction beside R140 as a block-quoted marker with R140's text unedited, completeness note amended with R103 flagged as load-bearing since it authorised skipping both gates on 3e3357a.
+
+One commit remains before the boundary — 10e-RULINGS-PERSIST-2, docs-only:
+
+R171's standing rule line at CLAUDE.md, continuing 446.
+Rulings 10e-R171, 10e-R172, 10e-R173 appended verbatim to docs/modules/phase4-10e.md, in block form under ^10e-R<n> — .
+10e-R147 written in block form and persisted in its numbered position, with the content restated in R171 above, and a one-line note that it was issued as prose on 2026-08-19 and rendered as a block on the same date. Do not backdate it and do not present it as having been a block.
+The completeness note amended: R140–R173 persisted, R147's gap explained and closed, R103/R131/R139 unchanged as issued-but-unpersisted.
+
+Per R142 it closes with one presence assertion per item, run before the commit — and per R171 the R147 assertion uses the block-header pattern, not a substring search. Docs-only under R149's licence. Report the commit and stop; the next prompt comes from the successor conversation.
