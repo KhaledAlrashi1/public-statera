@@ -44,7 +44,7 @@ export async function handleCleanupAccountTokens(_job: Job): Promise<void> {
     const db = getDb()
     const now = Date.now()
     // Keep expired tokens for 24 h after expiry before purging (clock-skew grace).
-    const expiredCutoff = new Date(now - 24 * DAY_MS)
+    const expiredCutoff = new Date(now - DAY_MS)
     // Keep consumed tokens for 7 days for audit trail before purging.
     const usedCutoff = new Date(now - 7 * DAY_MS)
 
