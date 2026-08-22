@@ -14,7 +14,7 @@
 
 import LegalPageLayout from "./LegalPageLayout"
 
-const LAST_UPDATED = "6 July 2026"
+const LAST_UPDATED = "22 August 2026"
 
 export default function PrivacyPolicyPage() {
   return (
@@ -47,9 +47,11 @@ export default function PrivacyPolicyPage() {
           </p>
           <ul className="mt-2 list-disc space-y-2 pl-5">
             <li>
-              <span className="font-semibold text-foreground">Account data:</span> your name and
-              email address as provided by your sign-in provider (Google), and your security
-              settings (whether two-factor authentication is enabled).
+              <span className="font-semibold text-foreground">Account data:</span> your email
+              address, and your name if we receive one from your sign-in provider. You give us the
+              address either by signing in with Google, or by entering it to request a sign-in
+              link. We also store your security settings (whether two-factor authentication is
+              enabled).
             </li>
             <li>
               <span className="font-semibold text-foreground">Profile data:</span> preferences you
@@ -86,8 +88,8 @@ export default function PrivacyPolicyPage() {
           <ul className="mt-2 list-disc space-y-2 pl-5">
             <li>
               <span className="font-semibold text-foreground">No passwords.</span> Statera has no
-              password database. You sign in through your identity provider; we never see or store a
-              password.
+              password database. You sign in either through Google or with a link we email you — we
+              never see or store a password.
             </li>
             <li>
               <span className="font-semibold text-foreground">No bank connections.</span> Statera
@@ -170,8 +172,9 @@ export default function PrivacyPolicyPage() {
           <p data-testid="commitment-backup-retention" className="mt-2">
             We keep encrypted database backups for disaster recovery: daily backups for 14 days,
             weekly backups for 56 days, and monthly backups for 365 days. When you delete your
-            account, your data is removed from the live database immediately, but copies may persist
-            inside these encrypted backups for up to 365 days before they expire. Backups are never
+            account, the data you entered is removed from the live database immediately (your email
+            address and name are kept — see §8), but copies may persist inside these encrypted
+            backups for up to 365 days before they expire. Backups are never
             used for any purpose other than restoring the service after data loss. If we ever restore
             the service from a backup, we re-apply all account deletions completed before the restore,
             so a deleted account is purged again as part of the restore procedure and does not come
@@ -181,6 +184,13 @@ export default function PrivacyPolicyPage() {
             A permanent, anonymous deletion record (a one-way hash) is retained after account
             deletion so we can honor the re-deletion commitment above. It cannot be used to
             reconstruct your data.
+          </p>
+          <p className="mt-2">
+            If someone requests a sign-in link for an email address that has no Statera account, we
+            store that address only so we can send the link and check it when the link is opened.
+            If the link is never opened, the address is deleted automatically within about a day.
+            If it is opened, an account is created and the address becomes account data covered by
+            the rest of this policy.
           </p>
         </section>
 
@@ -196,9 +206,14 @@ export default function PrivacyPolicyPage() {
             </li>
             <li>
               <span className="font-semibold text-foreground">Deletion.</span> You can delete your
-              account and all its data at any time from your profile. Deletion requires re-confirming
-              your identity and is immediate and irreversible in the live system (see §7 for
-              backups).
+              account at any time from your profile, and deletion requires re-confirming your
+              identity. Everything you put into Statera — your transactions, budgets, categories,
+              merchants, learned patterns, profile settings, and security records — is removed from
+              the live database immediately and cannot be recovered (see §7 for backups). We keep
+              your email address, and your name if we have one, so that if you sign in again your
+              account is restored rather than started over. These are kept for as long as Statera
+              runs. Apart from them and the anonymous deletion record described in §7, nothing
+              survives deletion.
             </li>
             <li>
               <span className="font-semibold text-foreground">Questions and requests.</span> For
