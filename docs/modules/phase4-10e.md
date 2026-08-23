@@ -1478,6 +1478,48 @@ appended section; R140's own text is unedited.
 - **R103, R131, R139 and R36–R101 are unchanged** — still issued-but-unpersisted, still OWED and
   BLOCKED on source availability (10e-R102), still not to be reconstructed.
 
+## AMENDMENT — 2026-08-22, under 10e-R240 (ruling-recovery persistence commit)
+
+- **10e-R205 … 10e-R209 and 10e-R237 … 10e-R241 are now PERSISTED**, verbatim, in the appended
+  section at the end of this file (Format A). The persisted set is therefore **R7–R17 (Format B,
+  11 blocks)** and **R140–R209 + R237–R241 (Format A, 75 blocks)**. The 75 was **derived at commit
+  time** from the blocks actually present and reconciled two ways — 65 + 10 = 75 and
+  (209 − 140 + 1) + 5 = 75 — not carried from 10e-R240(d), because a count describing the set it
+  belongs to is falsified by any addition to that set (10e-R118).
+- **PROVENANCE — R205–R209 were RECOVERED, not held (10e-R238, 2026-08-22).** They were issued in
+  the predecessor conversation and crossed the 10e-4 → 10e-close session boundary in an
+  implementer's context only. **They were lost.** The successor implementer reported NOT-HELD for
+  five of five, enumerated the total absence, and **refused to reconstruct them** from the
+  subject-matter references present in its own prompt. The channel then read them verbatim out of
+  the predecessor conversation *"Module state and deployment gates documentation"*
+  (`c0b7cd9b-8d4e-4f64-8f5a-cb89b35d6043`), turns 15 and 17 — the message in which the channel
+  originally authored them. **Recovered from the author's own emission; NOT reconstructed from
+  prose, CLAUDE.md, close-out reports or summaries.** Their line counts closed **three ways**: the
+  channel's enumeration and the predecessor's hold confirmation both gave 54, 26, 14, 47, 43, and
+  the mechanical enumeration at commit time agreed with both.
+- **10e-R210 … 10e-R236 ARE NOT MISSING AND ARE NOT OWED.** They were procedural — prompts,
+  acceptances and reconciliations consumed within the predecessor session — and were recorded as
+  not owed persistence at the 10e-close handoff. This is written down deliberately: without it,
+  twenty-seven numbers become **UNACCOUNTED-FOR** by default the first time anyone runs a
+  contiguity check, and the record could not then distinguish a deliberate omission from the
+  R36–R101 mechanism.
+- **FORMAT A IS NO LONGER CONTIGUOUS, AND THAT IS BY DESIGN.** The shape is **140 … 209
+  contiguous**, then a **deliberate gap at 210 … 236**, then **237 … 241 contiguous**. A future
+  presence check must **not** read that gap as loss.
+- **NO RULING CROSSES A SESSION BOUNDARY IN AN IMPLEMENTER'S CONTEXT (10e-R239, 2026-08-22).** The
+  hold attestation is **retired as an evidence class**: it attests to a STATE at an instant, never
+  to a property that survives, and unlike a stale figure its expiry leaves **no trace** — nothing
+  to re-derive, nothing that stops agreeing with anything. The medium for a ruling that must
+  survive a boundary is **disk**, and the persistence commit is written **before** the boundary.
+  R209 is the control that proves it: of the five blocks issued after `3e4645c`, R209 alone
+  travelled verbatim **inside the handoff prompt**, and R209 alone needed no recovery.
+- **R103, R131, R139 and R36–R101 are unchanged** — still issued-but-unpersisted, still OWED,
+  still not to be reconstructed. **Their BLOCKED status is under review (10e-R241, 2026-08-22):**
+  10e-R102's premise was **ACCESS, not existence**, and it has now been falsified once for
+  in-project conversations by this very recovery. That is a **HYPOTHESIS with one supporting
+  observation**, scoped to its **own cycle** — it is **not** a licence to reconstruct anything,
+  and it was **not** acted on here.
+
 ---
 ---
 
@@ -2793,3 +2835,453 @@ amended to record R188–R204 persisted.
 
 Sequence, unchanged from R203(e) and now unblocked: R201's three reports → the C-1…C-7
 corrections commit FIRST if R201(a) diverges → the persistence commit → stop at the boundary.
+
+---
+
+# APPENDED RULING BLOCKS — 10e-R205 … 10e-R209, 10e-R237 … 10e-R241 (persisted 2026-08-22 under 10e-R240)
+
+Pasted from the review channel **verbatim**, not reconstructed and not summarized, per 10e-R102
+and 10e-R143. The original text of each block is unedited; the only additions are the section
+headers. **R205–R209 were RECOVERED rather than held** — see the 2026-08-22 amendment to the
+RULING-SET COMPLETENESS note above for their provenance (10e-R238).
+
+**Note the deliberate gap: 10e-R210 … 10e-R236 are NOT persisted here and are NOT owed.** They
+were procedural — prompts, acceptances and reconciliations consumed within the predecessor
+session. A contiguity check across this file must not read that gap as loss (10e-R240(c)).
+
+---
+
+## Review-channel ruling block — 10e-R205, 2026-08-21
+
+10e-R205 — R201(a) is DISCHARGED. All seven match; no corrections commit. Two findings, one of them the channel's.
+
+C-1 carries the R191 amendment — "isn't valid" — and the six remaining strings match what R191
+approved. Seven grep -n results, one per string, which is what 10e-R141 [persisted,
+docs/modules/phase4-10e.md:1472] requires where a ruling names specific text.
+
+(a) The defective absence check, self-reported, is RATIFIED as a finding. Grepping the
+component for "is no longer valid" returned rc=0 on line 49 — the COMMENT explaining why the
+amendment was made. That is 10e-R171 [persisted, :1808] exactly: a search for a thing finds
+the discussion of the thing. Reporting the defective instrument alongside its replacement,
+rather than only the replacement, is the standard — the comment-stripping form is the
+discriminating one, and its rc=1 means something only because the un-stripped form's rc=0
+was shown first.
+
+Worth naming as the generalisation, since it is the second surface: R171 said a presence
+check must test the property, not a string that correlates with it. The ABSENCE case is the
+same rule inverted — an absence check over a file containing prose ABOUT the absent string is
+satisfied by the prose, and the fix is the same shape: strip the layer that discusses the
+code before checking the code. No new line; R171 covers it and inflating the set cheapens it.
+
+(b) FINDING, and it is mine rather than yours. Your positive control surfaced that "is no
+longer valid" lives at magic-link.ts:391 — THE SERVER'S OWN 400 BODY. Your characterization,
+"none of which is our copy," is correct about ownership and leaves the substantive point
+unstated: the server string carries the exact temporal assertion R191 removed from C-1.
+
+R191 amended C-1 because "no longer" means not now, though formerly — the assertion 10e-R14
+[persisted, :1268] refused 410 Gone for, since it claims the token once existed. That
+reasoning does not stop at the client boundary. The server emits the identical claim, to any
+caller reading the response directly, and it is false in the never-existed case for the same
+reason it was false in C-1.
+
+Bounded honestly, because it is small: it is UNIFORM across all four causes, so it is no
+oracle; no client renders it (M3's mutations established that rendering err.message reddens);
+and no consumer keys on it, since readErrorCode reads `code`. It is an accuracy defect in a
+public error string, not a security one.
+
+The cause is mine. R191 ruled on §3, which was frontend copy, and I did not ask whether the
+server said the same thing. That makes this the 10e-R13(b) [persisted, :1258] shape — its
+closing sentence, "silently fixing one of two identical crash paths is not acceptable," on a
+string rather than a crash. Fixing one site and leaving its twin is the pattern that ruling
+exists to stop.
+
+NOT opened in 10e-4, which is closed, and it does not gate the deploy. To 10e-close, with the
+paste owed first: quote magic-link.ts:391 VERBATIM in the channel, and the disposition is ruled
+then, not now — R177's rule that user-facing strings are ruled before they ship applies to a
+replacement as much as to an original. 10e-close already touches apps/api under R200's TODO
+rider, so if it is changed it rides there as a second named rider, never folded in silently.
+
+(c) Recorded, and it strengthens an existing entry rather than adding one:
+MagicLinkPage.test.tsx:71 is a fixture standing in for the server, carrying the server's
+string. Nothing checks it against the server. That is R192's bounded-unknown entry — nothing
+verifies the declared shape against the running server pre-deploy — now with a CONCRETE
+INSTANCE rather than a general statement. Cite the instance in the 10e-close record; a
+bounded unknown with a named example is checkable in a way a general one is not.
+
+---
+
+## Review-channel ruling block — 10e-R206, 2026-08-21
+
+10e-R206 — R201(b) is DISCHARGED. The §12.5 self-correction is ACCEPTED, and 10e-R78 governs what happens to it.
+
+The enumeration is complete in the form the condition required: nine response classes, each
+with source, status, code and client branch, derived from source rather than from the case it
+produced. That distinction was the whole point of making the enumeration the artifact.
+
+The self-correction is right and its DISPOSITION matters more than the arithmetic. Your
+committed §12.5 wrote "failVerify ×5"; derived, it is 4 call sites and 5 reasons, with :485
+passing no known reason and the classifying SELECT resolving it to one of three, so not_found
+is reachable from two sites. Conflating reasons with call sites is the error, correctly named.
+
+10e-R78 [persisted, CLAUDE.md standing rules] governs: phase4-10e-4-proposal.md is a
+HISTORICAL RECORD — a proposal as submitted — and must NOT be edited to match the present.
+The correction travels ADJACENT, which is what reporting it here and persisting it with this
+block accomplishes. Do not touch §12.5. A future reader finding "×5" in the proposal and this
+correction in the ruling record has the full picture; one finding a silently-corrected
+proposal has neither the error nor the fact that it was caught.
+
+The load-bearing half of the enumeration is the DEFAULT ARM, and it is stated in exactly the
+right form: the split is exhaustive because its default is C-6 and precisely one response
+reaches C-1. #8 and #9 carry no `code` at all, so readErrorCode returns undefined and they
+fall to the default correctly rather than by accident. Your own sentence is the argument — a
+split whose default were C-1 would describe a 500 as a spent link — and it generalises: when
+a client splits on a server's response set, the default arm must be the one that is merely
+UNHELPFUL when wrong, never the one that makes a specific false claim. An unanticipated tenth
+response now lands in C-6 and says something true.
+
+---
+
+## Review-channel ruling block — 10e-R207, 2026-08-21
+
+10e-R207 — R201(c) is DISCHARGED on PRESENCE. R196(i) is SETTLED. One cosmetic check deferred, not owed.
+
+CLAUDE.md:435 (R182) and :450 (R183), one match each, rc=0, with a negative control on a line
+never written. R196(i)'s 553 → 556 offset moves from CONSISTENT to SETTLED: two durable lines
+plus the 10e-4 module-status entry, three lines, arithmetic closed by an assertion rather than
+by plausibility. That is the distinction R201(c) existed to force, and consistency-is-not-
+presence held — the offset would have been equally consistent with three lines of anything.
+
+What was established is PRESENCE, which is what the condition asked for. PLACEMENT was not,
+and R183's own text says it continues the 10e-R171 entry. If it did not land adjacent to
+R171, a standing rule sits away from its family and is harder to find — the shape of the
+session-cookie helper-index omission, where a live index naming two of three siblings is
+worse than naming none. Cosmetic, one line, and NOT owed as a separate report: fold the
+observation into 10e-close's docs pass, and if it is misplaced, move it there.
+
+---
+
+## Review-channel ruling block — 10e-R208, 2026-08-21
+
+10e-R208 — 3e4645c is ACCEPTED. The primary prediction MET, two ways. ONE COROBORATING FIGURE DOES NOT CLOSE, and it is owed before the boundary.
+
+Accepted on the primary instrument. Format A 48 → 65, numbered 140 … 204, contiguous, no
+gaps, no duplicates, with the two routes agreeing — 204 − 140 + 1 = 65 and 48 + 17 = 65.
+Format B unchanged at 11. Seventeen presence assertions, Format A stated per R183(ii), each
+with the ^10e-R0 —  control at 0 / rc=1. The count DERIVED at commit time and reconciled
+against the range rather than carried, which is R204(d) applied as written. Docs-only proven
+by exclusion WITH a positive control — removing docs/ from the allowlist yielding one row is
+what makes the rc=1 an observation rather than an empty result. Gates skipped under 10e-R149,
+2026-08-19, cited correctly. Three markers adjacent, never folded in, with R202's text
+unedited including its superseded 48 → 63.
+
+The figure that does not close. The report carries two line-count claims and they disagree
+by 24:
+
+  - the diffstat: 2 files changed, 703 insertions(+), NO deletions clause, of which 3 are
+    CLAUDE.md — so 700 insertions into phase4-10e.md, and with zero deletions the file grew
+    by 700;
+  - the reconstruction: 2095 + 676 = 2771, a growth of 676.
+
+700 − 676 = 24. Both figures describe the same commit and only one can be right.
+
+This is a QUESTION, not a defect (10e-R137b [number held, date/title not held]), and it is
+bounded on both sides. It does not touch the block count, which closed two independent ways
+and is the instrument that matters; 676 was offered as CORROBORATION under 10e-R113
+[number held, date/title not held], which asks that a count claim be verified by
+reconstruction rather than subtraction. A reconstruction that disagrees with the diff it
+reconstructs is precisely the case R113 exists to surface — the arithmetic is the cheap half,
+and the reproduced content is the observation.
+
+The likeliest innocent reading, which you are free to falsify: 676 is the appended
+RULING-BLOCK lines alone, excluding the completeness-note amendment and the adjacency
+markers, i.e. a COMPONENT reported as the TOTAL. If so, say which lines the 676 covers and
+which 24 it omits, and the figure becomes true about a named thing instead of false about the
+file.
+
+OWED before the boundary, and it is one command plus one sentence:
+
+  git show --stat 3e4645c          (or the equivalent) — insertions and deletions per file
+  wc -l on docs/modules/phase4-10e.md at 3e4645c and at 3e4645c^
+
+Report the four numbers and state which claim was wrong and why. No commit unless the
+enumeration shows something committed that should not have been — and nothing in the report
+suggests it does. If the growth is 700, the persisted line count is 2795 or 2796, and a
+figure stated in the channel is corrected in the channel; nothing on disk moves.
+
+Everything else about 3e4645c stands ACCEPTED. Deliver the four numbers. Then the boundary.
+
+---
+
+## Review-channel ruling block — 10e-R209, 2026-08-21
+
+10e-R209 — R208 is DISCHARGED. The reconstruction closes and the mechanism is not the one the channel guessed. New standing rule.
+
+The four numbers settle it: 700 insertions, 0 deletions, 2095 → 2795. The diffstat was right
+and the reconstruction was wrong. Corrected in the channel; nothing on disk moves.
+
+What makes this closed rather than merely explained is the reconstruction, not the
+arithmetic. 700 − 676 = 24 raised the question and is equally satisfied by any 24-line
+discrepancy anywhere; deleting lines 1457–1480 from the committed file and reproducing 2771
+exactly is what identifies WHICH 24, and no other 24-line change could produce that result.
+10e-R113 [number held, date/title not held] working as specified: the count is arithmetic,
+the reproduced content is the observation.
+
+The channel's innocent reading was WRONG and the refinement is the finding. I proposed a
+component mis-summed as a total. It was not: 2771 was a CORRECT measurement of a REAL
+INTERMEDIATE STATE, taken after the append and before the completeness-note edit. Nothing
+was mis-added. The referent moved out from under a correct number.
+
+That is a distinct class and it is why this gets a line rather than a citation. 10e-R118
+[number held, date/title not held] is the interval collapsed to ZERO — the write that states
+the figure is the write that falsifies it. Derive-don't-carry spans CYCLES — a figure stated
+in one and read in a later one. This sits between them: a real interval WITHIN one commit's
+construction, opened by the author's own measurement and closed by the author's own
+subsequent edit. Re-deriving at execution does not help, because the measurement WAS at
+execution; it was simply not at the last one.
+
+Durable line, riding 10e-close, one line in CLAUDE.md's standing rules:
+
+  A figure measured MID-CONSTRUCTION describes the state it was measured in, not the commit
+  (10e-R209, earned 10e-4 boundary, 2026-08-21). Between a measurement and the commit it is
+  reported about there is a window, and any write into that window falsifies the figure
+  without touching it. Distinct from [[10e-R118]], where the interval is zero, and from
+  derive-don't-carry, where it spans cycles: here the author measures correctly, edits, then
+  reports the earlier measurement as describing the finished artifact. Re-derive after the
+  LAST edit, not after the largest one — the small trailing edit is the one that gets
+  forgotten, precisely because it does not feel like the work.
+
+Both figures are now true about named things: 676 is the ruling-block append, 24 is the
+completeness-note amendment, 700 = 676 + 24 is the file's growth, 703 = 700 + 3 is the
+diffstat. The block count is untouched by any of it — it closed two independent ways and
+remains 65, 140…204, contiguous. Reporting the defective figure's mechanism rather than only
+its correction is what makes it a finding instead of an erratum.
+
+3e4645c is ACCEPTED without residue. 10e-4 is CLOSED.
+
+---
+
+## Review-channel ruling block — 10e-R237, 2026-08-22
+
+10e-R237 — R205(b) DISPOSITION RULED: the server error string CHANGES. Named rider on 10e-close. No second deploy owed.
+
+apps/api/src/routes/magic-link.ts:391 emits error: "This sign-in link is no longer valid."
+inside MAGIC_LINK_INVALID_BODY (:388-393), whose code field is "MAGIC_LINK_INVALID" (:392).
+It carries the exact temporal assertion 10e-R191 removed from the client string C-1. "No
+longer" claims the token once existed, which is what 10e-R14 refused 410 Gone for. In the
+not_found case it is simply false.
+
+Bounded honestly. It is UNIFORM across all FIVE causes — not_found, expired,
+consumed_or_superseded, inexact_email_match, user_missing, the closed set at :373-379 — so
+it is no oracle. The record said four; five is the derived figure and 10e-close carries five.
+One envelope constant, one emit site (:441). No production client renders it; its only
+apps/web occurrence is a test fixture at MagicLinkPage.test.tsx:71, and sibling tests at
+:157/:164 pass "alpha" and "omega" under the same code, pinning the component's behaviour as
+message-independent. No consumer keys on it: MagicLinkPage.tsx:104 branches on
+err.code === "MAGIC_LINK_INVALID", and server and client literals were verified
+byte-identical, 18 characters, by extraction and od -c dump behind a working negative
+control. An accuracy defect in a public error string, not a security one.
+
+It changes for the same reason R191 changed C-1. Leaving it is silently fixing one of two
+identical paths, which is 10e-R13(b)'s shape on a string rather than a crash. This is the
+channel's own miss: R191 ruled on frontend copy and did not ask whether the server said the
+same thing.
+
+REPLACEMENT: "This sign-in link is not valid." Uniformity preserved, no temporal claim, no
+oracle. It reddens the hermetic assertion at magic-link.test.ts:529, which pins the old
+text; that test updates in the SAME commit. R177's rule that user-facing strings are ruled
+before they ship applies to a replacement as much as to an original, and this is that ruling.
+
+NO SECOND DEPLOY IS OWED. The string is rendered by no client and keyed on by no consumer.
+It ships whenever the next deploy happens. Do not schedule one for it.
+
+---
+
+## Review-channel ruling block — 10e-R238, 2026-08-22
+
+10e-R238 — R205 … R209 are RECOVERED VERBATIM. Provenance stated. Your NOT-HELD report is RATIFIED, and so is your absence report at Step 0.0.
+
+The five blocks above are not reconstructions and not retypings. They were read directly out
+of the predecessor channel conversation "Module state and deployment gates documentation"
+(id c0b7cd9b-8d4e-4f64-8f5a-cb89b35d6043), turns 15 and 17, using the channel's own
+conversation-search and read tools. The source is the message in which this channel ORIGINALLY
+AUTHORED them. That is the strongest provenance available for an unpersisted block — better
+than an implementer's held copy, because it is the author's own emission rather than a
+transported copy of it.
+
+Two independent routes agree on the line counts. The channel enumerated them from the
+recovered text: 54, 26, 14, 47, 43. The predecessor's hold-confirmation report, carried
+forward in the 10e-close opening prompt, gave the same five figures. Neither route is
+mechanical, so your enumeration under R240 is the third and it is the one that closes them.
+
+RATIFIED, and it is the standard: you returned NOT-HELD for five of five, enumerated the
+total absence rather than reporting a vague loss, and refused to reconstruct from the
+subject-matter references scattered through the Step 0 prompt — which named R205's lettered
+sub-parts, R207's subject, and the persistence prediction. Every one of those was a
+reconstruction surface. Declining all of them is 10e-R71 and 10e-R102 applied correctly under
+pressure, and it is the second cycle running in which an implementer's refusal to reconstruct
+is what made recovery possible rather than a fabricated ratification.
+
+ALSO RATIFIED, Step 0.0. You reported the shell prompt string as NOT OBSERVABLE rather than
+substituting something for it. Correct, and it falsifies a channel obligation rather than
+your execution. "Every operator command block opens with a Step 0 prompt-confirmation line"
+was written for an interactive shell that renders a prompt. Your bash tool is
+non-interactive and renders none. The obligation's PROPERTY is shell identity, shell version
+and working directory; the prompt string was a CORRELATE of it. That is 10e-R171 firing on
+the channel's own standing rule, which is the third surface for R171 and the reason it does
+not get a new line. RESTATED, standing: a Step 0 shell-context confirmation reports $0, the
+shell version and pwd. A prompt string is reported if observable and recorded as absent if
+not; its absence discharges nothing and blocks nothing.
+
+---
+
+## Review-channel ruling block — 10e-R239, 2026-08-22
+
+10e-R239 — THE HOLD ATTESTATION IS RETIRED AS AN EVIDENCE CLASS. New standing rule.
+
+The predecessor did everything the protocol asked. It named the exposure explicitly rather
+than hiding it. It obtained a hold confirmation in the strongest available form — first line,
+final line, and enumerated line counts for all five blocks. It independently re-counted three
+of them in the channel and matched exactly. It wrote the recovery path into the successor
+prompt in advance. Every one of those acts was correct.
+
+The blocks were still lost within roughly twenty-four hours, and nothing in the record looked
+any different the moment before the loss was discovered than it had the moment after the
+attestation was taken.
+
+That is the finding, and it is not about diligence. A hold confirmation attests to a STATE at
+an instant. Persistence to disk establishes a PROPERTY that survives. The two read alike in a
+report — both come back as "confirmed, enumerated, matched" — and they are different kinds of
+thing. Worse, a stale FIGURE at least leaves a trace: a count that no longer matches its
+artifact can be caught by re-deriving it. A stale HOLD leaves no trace at all. There is
+nothing to re-derive, nothing that stops agreeing with anything, and no way to distinguish a
+live hold from a dead one except by asking — which means the loss is invisible until the
+moment it blocks work.
+
+STANDING, and it retires a practice this module used four times:
+
+  An attestation about VOLATILE STATE is falsified by time alone, and its expiry leaves no
+  trace (10e-R239, earned 10e-close, 2026-08-22). A hold confirmation is evidence that a
+  session held text WHEN ASKED, never that it holds it now. It has no shelf life and, unlike
+  a stale figure, no tell. Therefore: NO RULING CROSSES A SESSION BOUNDARY IN AN
+  IMPLEMENTER'S CONTEXT. The medium for a ruling that must survive a boundary is disk, and
+  the persistence commit is written BEFORE the boundary rather than scheduled after it. Where
+  persistence genuinely cannot precede the boundary, the ruling's verbatim text travels
+  INSIDE the handoff prompt — as R209's did, which is exactly why R209 was the one block that
+  never needed recovering.
+
+Note what that last clause records. Of the five blocks issued after 3e4645c, R209 was carried
+in the handoff prompt verbatim and R205–R208 were not. R209 survived the boundary intact in
+the operator's hands. The other four did not. The predecessor had the correct mechanism
+available, used it for one block, and used an attestation for the other four. The experiment
+was run and it returned a clean result.
+
+---
+
+## Review-channel ruling block — 10e-R240, 2026-08-22
+
+10e-R240 — THE PERSISTENCE COMMIT. Ten blocks, docs-only, one file. Confirm by enumeration first. Nothing else is touched.
+
+This commit exists to move ten ruling blocks out of volatile context onto disk. It does that
+and nothing else. Every other 10e-close obligation — the Public API contract entry, the
+bounded-unknown record, the R200 TODO rider, R237's string change, R207's line move, R209's
+durable CLAUDE.md line, and all baseline re-derivation — stays where it is and is NOT started
+here. Narrowing this commit to one file is deliberate: the failure being repaired is a
+persistence failure, and the repair should not acquire dependencies that could delay it.
+
+(a) CONFIRM BEFORE ANYTHING ELSE. For each of 205, 206, 207, 208, 209, 237, 238, 239, 240,
+241, report exactly one of:
+
+    HELD-VERBATIM — followed by that block's first line verbatim, its final line verbatim,
+      and its line count BY ENUMERATION, not by eye.
+    DID-NOT-ARRIVE — nothing else.
+
+    GATE: proceed to (b) only if all TEN report HELD-VERBATIM. If any reports
+    DID-NOT-ARRIVE, report BLOCKED, enumerate which arrived, COMMIT NOTHING, and stop. Do not
+    reconstruct a missing block from this prompt, from CLAUDE.md, from
+    docs/modules/phase4-10e.md, from a close-out report, or from any summary.
+
+    If any number arrives TWICE with DIFFERENT text, report the divergence and act on
+    NEITHER. Picking one manufactures a ratification out of a transport failure.
+
+(b) THE COMMIT. Docs-only, and prove it by exclusion BEFORE committing, with a positive
+control — an exclusion sweep returning nothing is the same output as a sweep that did not
+run. Gates skipped under 10e-R149, 2026-08-19, "R144(a)'s instrument was MIS-SPECIFIED BY THE
+CHANNEL" — permanently licensed, premise not re-measured, never cited as R144.
+
+    ONE FILE: docs/modules/phase4-10e.md. Not CLAUDE.md. Not any source file.
+
+    Append all ten blocks verbatim in Format A under ^10e-R<n> — , in ascending numeric
+    order, then amend the RULING-SET COMPLETENESS note per (c).
+
+(c) THE COMPLETENESS-NOTE AMENDMENT, and one clause of it is load-bearing:
+
+    - 10e-R205 … 10e-R209, 10e-R237 … 10e-R241 are now PERSISTED. State the PROVENANCE of
+      R205–R209: recovered from the predecessor channel conversation under 10e-R238, not
+      reconstructed.
+    - 10e-R210 … 10e-R236 ARE NOT MISSING AND ARE NOT OWED. They were procedural — prompts,
+      acceptances and reconciliations consumed within the predecessor session — and were
+      recorded as not owed persistence at the 10e-close handoff. Write this down. If it is
+      not written down, twenty-seven numbers become UNACCOUNTED-FOR by default the first time
+      anyone runs a contiguity check, and the record cannot then distinguish deliberate
+      omission from the R36–R101 mechanism. This clause is the entire reason the note is
+      amended in the same commit rather than later.
+    - FORMAT A IS NO LONGER CONTIGUOUS AND THAT IS BY DESIGN. State the shape explicitly:
+      140 … 209 contiguous, then a deliberate gap at 210–236, then 237 … 241 contiguous.
+      A future presence check must not read that gap as loss.
+    - R103, R131, R139 and R36–R101 are unchanged — still issued-but-unpersisted, still OWED,
+      still not to be reconstructed. Their BLOCKED status is under review per 10e-R241; do
+      not act on that here.
+
+(d) CHECKABLE PREDICTION, stated in advance so a miss becomes a question. Format A 65 → 75.
+    Two routes, and they must agree: 65 + 10 = 75, and (209 − 140 + 1) + 5 = 70 + 5 = 75.
+    Format B unchanged at 11. TEN presence assertions, one per ruling, run BEFORE the commit,
+    Format A stated per 10e-R183(ii), each with the ^10e-R0 —  control expected at 0 / rc=1.
+
+    DERIVE the final count at commit time from the blocks actually present and reconcile it
+    against the range; do NOT carry 75 from this block. A count describing the set it belongs
+    to is falsified by any addition to that set (10e-R118).
+
+(e) THE LINE COUNT IS MEASURED AFTER THE LAST EDIT, NOT THE LARGEST ONE. This commit makes
+    two writes to one file: the block append and the completeness-note amendment. That is
+    precisely the construction window 10e-R209 was earned on, and R209 is in the payload.
+    Measure wc -l after BOTH edits, immediately before committing, and reconcile it against
+    the diffstat. If the two disagree, reconstruct which lines account for the difference and
+    report that — do not report the arithmetic alone.
+
+(f) DO NOT MEASURE R207's LINE NUMBERS IN THIS COMMIT. R207 names CLAUDE.md:450 for the R183
+    standing-rule line. That figure is already known stale by at least one later commit, and
+    10e-close's docs pass will add R209's durable line to the same section and move it again.
+    Measuring it now would produce a third stale figure by the same mechanism R209 describes.
+    It is derived in the docs pass, after the last edit to that section, and not before.
+
+(g) HARD STOP after the commit. Report: the ten-block enumeration, the exclusion proof with
+    its positive control, the ten presence assertions with controls, the before/after Format A
+    and Format B counts with both reconciliation routes, the wc -l before and after, the
+    diffstat, and the commit SHA. Then stop. No baselines, no test runs, no typechecks, no
+    further edits. The 10e-close Step 0 measurement prompt comes after this report lands.
+
+---
+
+## Review-channel ruling block — 10e-R241, 2026-08-22
+
+10e-R241 — 10e-R102's BLOCKED premise is FALSIFIED for in-project conversations. R36–R101 recovery is a live hypothesis. OWN CYCLE. DO NOT BUNDLE. Do not act on this in 10e-close.
+
+10e-R102 recorded the R36–R101 backfill as OWED and BLOCKED ON SOURCE AVAILABILITY, on the
+stated ground that the verbatim text survives only in the predecessor conversations. That
+ground was always about ACCESS, not about existence, and it was never tested.
+
+It has now been tested once, incidentally. R205–R208 were recovered verbatim from a
+predecessor conversation in this project by the channel, using search and read tools scoped to
+the project. The blocked premise did not hold for those four. Whether it holds for R36–R101,
+R103, R131 and R139 is UNKNOWN and depends on facts nobody has checked: whether those
+conversations are inside this project, whether they still exist, and whether the blocks are
+retrievable in full rather than in snippets.
+
+Recorded as a HYPOTHESIS with one supporting observation, which is what it is. Not a finding,
+not a plan, and explicitly not a licence to reconstruct anything from any other source — if
+recovery fails, the blocks stay unpersisted and the gap stays visible. R103 is the
+load-bearing one: it authorised skipping both gates on 3e3357a, and it is the single ruling
+whose recovery would most change what the record can support.
+
+SCOPE: its own cycle, after 10e and before or alongside R129's. NOT 10e-close. Bundling a
+speculative multi-conversation retrieval into a close-out is how close-outs stop closing.
