@@ -1520,6 +1520,39 @@ appended section; R140's own text is unedited.
   observation**, scoped to its **own cycle** — it is **not** a licence to reconstruct anything,
   and it was **not** acted on here.
 
+## AMENDMENT — 2026-08-22, under 10e-R250(b) + 10e-R252 §2 (10e-close ruling-persistence commit)
+
+- **10e-R242 … 10e-R252 are now PERSISTED**, verbatim, in the appended section at the end of
+  this file (Format A). The persisted set is therefore **R7–R17 (Format B, 11 blocks)** and
+  **R140–R209 + R237–R252 (Format A, 86 blocks)**. The 86 was **derived at commit time** from
+  the blocks actually present and reconciled two ways — 75 + 11 = 86 and
+  (209 − 140 + 1) + (252 − 237 + 1) = 70 + 16 = 86 (10e-R118).
+- **PROVENANCE — RELAYED, and one of them RELAYED LATE.** All eleven arrived as text in the
+  review channel; this is a different class from R205–R209, which were **RECOVERED** after being
+  lost across a session boundary (10e-R238). **10e-R243 was authored 2026-08-22, emitted without
+  the relay marking, and never delivered when first issued** — authored, self-contained, correct
+  and invisible to the relay. It was relayed under **10e-R251** only after the implementer's
+  enumeration of its held set reported a gap at 243. Its text is persisted **unedited**: clause
+  (f) still reads "OWED, UNCHANGED" for Items 1 and 2, which 10e-R244 closed the same day, and
+  under 10e-R78 a historical record is not rewritten to agree with what happened next — the
+  correction travels adjacent, in 10e-R251.
+- **THE 242 … 252 RUN IS CONTIGUOUS. There is no second deliberate gap** (10e-R251). Format A's
+  shape is now: **140 … 209 contiguous**, the **deliberate gap at 210 … 236**, then
+  **237 … 252 contiguous**.
+- **ENUMERATION IS THE ONLY INSTRUMENT THAT HAS EVER DETECTED THE RELAY-FAULT CLASS** (10e-R251).
+  Three faults in this module were found by an implementer enumerating which ruling numbers it
+  held, and by nothing else: R196–R202 (pasted backward, never delivered), R205–R209 (lost across
+  a session boundary), and R243 (emitted unmarked). None was detectable from either end alone —
+  the author's record shows a block written, the implementer's shows a block absent, and no
+  message contradicts either.
+- **AN UNANCHORED GREP FOR A RULING NUMBER NO LONGER RETURNS THE BLOCK COUNT** (10e-R242,
+  10e-R244). Each persisted ruling now appears at least **twice** — once in its `^10e-R<n> — `
+  Format-A header and once in its `## Review-channel ruling block — 10e-R<n>` section heading.
+  Anchored presence checks are unaffected. An unanchored one is measuring something else, which
+  is 10e-R171's family.
+- **R103, R131, R139 and R36–R101 are unchanged** — still issued-but-unpersisted, still OWED,
+  still not to be reconstructed. 10e-R241's recovery hypothesis is **not** acted on here.
+
 ---
 ---
 
@@ -3285,3 +3318,1106 @@ whose recovery would most change what the record can support.
 
 SCOPE: its own cycle, after 10e and before or alongside R129's. NOT 10e-close. Bundling a
 speculative multi-conversation retrieval into a close-out is how close-outs stop closing.
+
+---
+
+# APPENDED RULING BLOCKS — 10e-R242 … 10e-R252 (persisted 2026-08-22 under 10e-R250(b), approved 10e-R252 §2)
+
+Pasted from the review channel **verbatim**, not reconstructed and not summarized, per 10e-R102
+and 10e-R143. The original text of each block is unedited; the only additions are the section
+headers.
+
+**PROVENANCE — RELAYED.** All eleven arrived as text in the review channel and were held
+verbatim. This is a different class from the preceding section's R205–R209, which were
+**RECOVERED** from a predecessor conversation after being lost across a session boundary
+(10e-R238). **10e-R243 is RELAYED LATE**: authored 2026-08-22, emitted without the relay
+marking, never delivered when first issued, and relayed under 10e-R251 only after the
+implementer's enumeration reported a gap at 243. Its text is delivered **unedited** — clause (f)
+still reads "OWED, UNCHANGED" for Items 1 and 2, both of which 10e-R244 closed the same day, and
+under 10e-R78 that historical record is not rewritten to agree with what happened next. The
+correction travels adjacent, in 10e-R251.
+
+**This set is CONTIGUOUS from 242 to 252. There is no second deliberate gap** (10e-R251). The
+one deliberate gap in this file remains 10e-R210 … 10e-R236, recorded in the 2026-08-22
+amendment to the RULING-SET COMPLETENESS note above.
+
+---
+
+## Review-channel ruling block — 10e-R242, 2026-08-22
+
+10e-R242 — e6aab65 is ACCEPTED ON PERSISTENCE. The primary prediction MET, two ways. THREE items owed before any measurement. None is a defect and one of them is the channel's.
+
+Accepted on the primary instrument. Format A 65 → 75, both routes agreeing — 65 + 10 = 75 and
+(209 − 140 + 1) + 5 = 75 — DERIVED at commit time from the blocks actually present rather than
+carried from R240(d), which is 10e-R118 applied as written. Format B unchanged at 11, with the
+reason stated rather than assumed: the per-block ## headings do not match ^## 10e-R[0-9]+ — .
+Ten presence assertions at count=1 rc=0 with the ^10e-R0 —  control at 0 rc=1. Docs-only proven
+by exclusion with a working positive control. One file. Nothing pushed.
+
+The three recovered-block counts close on a THIRD route and it is the mechanical one: 54, 26,
+14, 47, 43, measured by writing each block to its own file and running wc -l, agreeing with the
+channel's enumeration of the recovered text and with the predecessor's hold report. Three
+routes, one of them mechanical, is more than R205–R209 have ever had.
+
+RATIFIED, and it is the best thing in the report. You observed that 3245 is the
+mid-construction figure 10e-R209 warns about, measured after edit one, and that R209 was in
+the payload while its own rule was being applied to the commit carrying it. Naming that
+unprompted is the standard. So is (e)'s form: the 42 was closed by deleting lines 1481–1522
+and REPRODUCING 3245, not by subtracting — the arithmetic is the cheap half and the reproduced
+byte-for-byte separator is the observation. So is (f): declining to measure R207's line
+numbers because doing so would mint a third stale figure by the mechanism R209 describes is
+R209 applied prospectively rather than recited.
+
+ITEM 1 — THE 63 IS UNRECONSTRUCTED. This is R208's shape and it is a QUESTION, not a defect.
+
+The ten blocks total 387 lines. The append is 450. 450 − 387 = 63, and 63 is currently
+satisfied by any 63 lines anywhere. The likeliest innocent reading, which you are free to
+falsify: per-block ## headings, blank separators, and the === BEGIN/END VERBATIM === transport
+markers carried through into the file — roughly six structural lines per block plus a section
+header. If that is what it is, say so by ENUMERATION and the figure becomes true about named
+things instead of merely arithmetically available.
+
+Note the sub-question inside it, because it is a real decision and not bookkeeping: the
+BEGIN/END VERBATIM markers are RELAY-TRANSPORT artifacts. Whether the record should carry them
+permanently is a live question — they make the verbatim boundary explicit on disk, which is an
+argument FOR, and no previous persistence commit carried them, which is an argument for
+consistency. Report whether they landed. Do not remove them. The disposition is ruled in the
+channel.
+
+ITEM 2 — NOTHING VERIFIED WHAT LANDED ON DISK AGAINST WHAT WAS HELD, AND THAT IS MY DEFECT.
+
+R240(d) asked for ten PRESENCE assertions. Presence is not integrity. A header presence check
+establishes that ^10e-R205 —  is in the file; it says nothing about whether the fifty-three
+lines beneath it are the fifty-three lines you held. The bodies are the entire thing that was
+lost and recovered this cycle, and a truncated, reflowed or partially-pasted body passes every
+single assertion in your report.
+
+That is 10e-R171 firing on an instrument the channel itself specified — a check that tests a
+string correlating with the property instead of the property. R171 is now on its fourth
+surface and its third against the channel rather than the implementer. No new line; R171
+covers it, and inflating the set cheapens it.
+
+The fix is one command and it is byte-level. IF the ten per-block files from (a) still exist:
+
+  For each of the ten, extract the block from docs/modules/phase4-10e.md at HEAD — from its
+  ^10e-R<n> —  header line through its final body line — and diff it against the corresponding
+  per-block file. Report ten diffs.
+
+  POSITIVE CONTROL IS MANDATORY. An empty diff is byte-identical to a diff that did not run
+  (10e-R150). Alter one copy deliberately — one character, in a temp copy, never in the
+  committed file — and show that form producing non-empty output before the ten empty results
+  mean anything.
+
+IF the per-block files are gone, say so and fall back to per-block line counts extracted from
+the committed file, expecting 54, 26, 14, 47, 43, 31, 33, 38, 80, 21 and summing to 387. State
+plainly that line agreement is weaker than byte agreement, and do not describe it as
+verification of verbatim-ness.
+
+That fallback also closes ITEM 1 by subtraction — which is exactly why it does not replace
+Item 1's enumeration. Deliver both.
+
+ITEM 3 — "mirrorhouse" IS AN UNRECOGNISED TOKEN AND IS NOT ABSORBED.
+
+Your report closes: "Nothing was pushed, here or in mirrorhouse." That term appears nowhere in
+CLAUDE.md, nowhere in docs/modules/phase4-10e.md, and in no ruling this channel holds. The
+project record knows exactly one remote.
+
+Three readings and the channel cannot pick between them: a typo; a stray token; or a SECOND
+REMOTE that exists and was never documented. The third would be materially important — a
+deploy in this project is one git push of main, so a second push target is a second deploy
+surface, and an undocumented one is the shape of the dead-backup-timer class (F1).
+
+  git remote -v
+
+Report it verbatim and state what you meant by the word. If it was a typo, say so and it costs
+one line. This is 10e-R14's stop-and-ask on an unexpected discovery, applied to a word rather
+than to code.
+
+CARRIED TO 10e-CLOSE'S DOCS PASS, recorded now so it is not rediscovered: each ruling number
+now appears in the file at least TWICE — once in its ^10e-R<n> —  header and once in its ##
+section heading. Anchored presence checks are unaffected and yours were anchored. An
+UNANCHORED grep for a ruling number now returns a count that is not the block count, which is
+R171's family again. The completeness note should say so.
+
+WHAT IS NOT OWED. No re-commit. Nothing on disk moves unless a diff comes back non-empty, and
+nothing in your report suggests one will. If Item 2 diverges, a corrections commit lands first
+and belongs to this conversation. If all three close clean, they close in the channel and the
+10e-close measurement Step 0 follows immediately.
+
+DO NOT PUSH. The commit stays local. A push of main is a deploy in this project, and a
+docs-only redeploy buys nothing; this rides out with 10e-close's code so one deploy carries
+both. Nothing about that is urgent and nothing about it is yours to trigger.
+
+HARD STOP after the three items. No baselines, no test runs, no typechecks, no edits, no
+further commits.
+
+---
+
+## Review-channel ruling block — 10e-R243, 2026-08-22
+
+10e-R243 — e6aab65 is ROUND-TRIPPED. Item 3 is CLOSED. One channel form defect recorded. Items 1 and 2 remain owed and nothing proceeds without them.
+
+(a) 10e-R148 DISCHARGED. rev-parse --verify resolved
+e6aab65e7560632595b4672e545569dff3f43251 to itself, and git show confirms HEAD carries it with
+the subject "phase-4: 10e-RULINGS-PERSIST-4 — R205…R209 + R237…R241 verbatim; five RECOVERED".
+The SHA now exists in the repository rather than only in a relayed report.
+
+(b) TREE CLEAN, and the discriminator is named rather than assumed. git status --porcelain
+printed nothing, which is byte-identical to the command not running (10e-R150). What separates
+the two here is the FOURTH command's output: "1" was printed, so the shell executed past the
+third, so the third ran and returned empty. That establishes RAN-AND-EMPTY. It does not
+establish exit 0 — a failing git status writes to stderr and none appeared, which is
+corroboration, not proof. Recorded at that strength and not upgraded. origin/main..HEAD = 1,
+consistent with one local docs-only commit, unpushed, exactly as 10e-R242 required.
+
+(c) PROVENANCE, and it is attributionally different from every measurement this module has
+taken. These four were run BY THE OPERATOR in his own terminal, not by the implementer. They
+are admissible because the working copy is the same one — the implementer reported
+/Users/khaledalrashidi/DevLocal/public-statera and the operator's prompt shows public-statera
+on Khaleds-MacBook-Air. Same tree, different hand. Recorded as OPERATOR-MEASURED so a later
+reader does not attribute it to the implementer's report.
+
+(d) ITEM 3 IS CLOSED. "mirrorhouse" is outside this project and unrelated, per operator
+statement 2026-08-22. There is no second remote and no second deploy surface. The question is
+recorded closed rather than deleted: R240's persisted report contains the word, and a future
+reader finding it needs the disposition beside it, not a silently tidy record.
+
+Narrow standing consequence, and it is the only durable half: NOTHING FROM A WORKSPACE
+OUTSIDE THIS PROJECT ENTERS THIS RECORD. A report that asserts a state about one is asserting
+across a boundary this record cannot check, and an unfalsifiable clause in an otherwise
+verified report is worse than an absent one because it reads as verified.
+
+(e) CHANNEL FORM DEFECT, and it is MINE. The four round-trip commands were placed OUTSIDE the
+fenced 10e-R242 block, in the message body. This module's standing rule is that everything a
+downstream session must act on lives INSIDE the ruling block, because the operator relays by
+pasting. Putting executable content outside it made its audience ambiguous, and the operator
+reasonably ran it himself.
+
+No harm followed — the commands were read-only and the answer is identical from either hand.
+But the CLASS is the one that cost this module three relays: actionable content placed where
+the paste does not carry it. Positional reference was one instance; outside-the-fence is
+another; both are the same failure to make the block self-sufficient. RESTATED, standing:
+read-only or not, incidental or not, if it is to be executed it is inside the block. The
+channel does not get an exception for commands it considers minor.
+
+(f) OWED, UNCHANGED, and neither is discharged by anything above:
+
+  ITEM 1 — the 63-line reconstruction by enumeration, and whether the === BEGIN/END VERBATIM
+    === transport markers landed in the file. Report; do not remove them.
+  ITEM 2 — verification of the ten blocks AS THEY SIT ON DISK against what was held, byte-level
+    by diff if the per-block files survive, line-level by extraction if they do not, with a
+    mandatory positive control either way.
+
+No baselines. No test runs. No typechecks. No edits. No push. The 10e-close measurement Step 0
+comes after both close.
+
+---
+
+## Review-channel ruling block — 10e-R244, 2026-08-22
+
+10e-R244 — ALL THREE ITEMS CLOSED. e6aab65 is ACCEPTED WITHOUT RESIDUE. One attribution correction, one disposition ruled, one new standing rule earned outside this repository.
+
+ITEM 1 CLOSED. The 63 resolves into named categories measured from the file — 11 horizontal
+rules, 10 section headings, 1 top header, 7 preamble prose lines, 34 scaffolding blanks —
+rather than remaining a figure arithmetically available to any 63 lines anywhere. That is
+10e-R113's standard met.
+
+Two qualifications, neither of them owed and both worth the record. The 13 + 50 route is a
+RE-PARTITION of the same measurement, not a second one; grouping a set two ways is arithmetic
+and the categories are the observation. And the 34 is a SUBTRACTION — 101 total minus 67
+inside bodies. A subtraction is only as good as its terms, and what makes this one admissible
+is ITEM 2: the byte-level result pins the bodies exactly, so the 67 is exact, so the 34 is
+exact. The two items are NOT independent. Item 2 retro-validates Item 1's weakest step, and a
+reader who takes them as mutual corroboration has double-counted one measurement.
+
+THE MARKERS NEVER ENTERED, and the control was well-formed. grep 'VERBATIM' returning 6 rc=0
+alongside 'BEGIN VERBATIM' and 'END VERBATIM' at 0 rc=1 is a SUPERSET control: the target
+string contains the control string, so if a marker existed the control would have found it.
+That is stronger than an adjacent-string control and it is the right shape. The channel's
+innocent reading was PARTLY WRONG and the correction is the finding — you stripped them at
+transcription, so the 63 is entirely markdown scaffolding and there was never anything to
+remove.
+
+DISPOSITION RULED on the live general question, so it does not sit in a queue indefinitely:
+THE RECORD DOES NOT ADOPT EXPLICIT VERBATIM DELIMITERS. Not now and not as a retrofit.
+
+The reasoning, stated so a later cycle can reopen it on evidence rather than on taste. The
+file already carries two delimiters — ^---$ and ^## — and the fragility this cycle exposed is
+not in the file, it is in the EXTRACTOR's fallback branch at end-of-file. You controlled that
+branch. A delimiter retrofit across 75 blocks is a docs sweep with its own risk surface, and
+the need for it is currently zero demonstrated instances. WHAT WOULD REOPEN IT: a second
+extractor, written by someone who does not know about the EOF branch, getting a wrong answer
+that its controls do not catch. At that point the delimiter stops being tidiness and becomes a
+fix for an observed failure. Until then it is not.
+
+ITEM 2 CLOSED AT FULL STRENGTH, and this is the strongest work in the cycle. Ten empty diffs
+against extractions taken from git show HEAD:<path> — the committed object, not the working
+tree — with the working tree first shown identical to HEAD so the choice of artifact is stated
+rather than assumed. Three positive controls, all fired.
+
+Control B is the one that earns the ratification and it was unprompted. R241 is the
+EOF-boundary block, reached through a different extractor branch because no ^---$ follows it.
+Controlling only a mid-file block would have proven the pattern while leaving the branch that
+carries the last block unproven — 10e-R135 exactly, a compound instrument passing its control
+while one path carries the load. Identifying that the instrument had two paths, and that the
+control had only exercised one, is the observer rule applied to your own tool without being
+asked. Control C is the other half: truncation is the specific failure a header presence check
+cannot see, and controlling for the exact named failure rather than for failure-in-general is
+the standard.
+
+ATTRIBUTION CORRECTION, and it runs the OTHER way from your report. You wrote that you ran the
+ten presence assertions and reported them as satisfying R240(d) without noticing they answered
+a weaker question. That over-assigns. R240(d) was the CHANNEL'S SPECIFICATION. You satisfied
+it exactly as written, and satisfying a specification is not a defect. The defect is mine and
+stays mine.
+
+Your residual duty is real but far smaller, and naming it precisely matters more than
+absorbing it: the implementer is the SECOND READER of the channel's instrument, and where a
+specified check cannot reach the property the ruling is about, saying so is worth more than
+executing it well. That is a flag, not a failure. This module has had the channel's
+instruments corrected by the implementer three times now and each was worth more than the work
+it interrupted.
+
+ITEM 3 CLOSED. One remote, origin, github.com/KhaledAlrashi1/public-statera.git, fetch and
+push. The undocumented-second-remote reading is FALSIFIED. Operator confirmed independently
+that the other repository is unrelated and outside this project.
+
+NEW STANDING RULE, and it is the durable thing this item produced:
+
+  THE IMPLEMENTER'S SESSION IS NOT CO-EXTENSIVE WITH THE REPOSITORY (10e-R244, earned
+  10e-close, 2026-08-22). A session may hold several working directories and may be handed
+  tasks in any of them. Two consequences follow and both are the channel's obligation, not a
+  restriction on anyone's working habits. FIRST: a command whose answer depends on the current
+  directory answers about wherever it ran, and nothing in its output says where that was —
+  so every measurement command is path-anchored or preceded by a pwd whose value is reported,
+  and Step 0's working-directory line is load-bearing rather than ceremonial. SECOND: AN
+  AUTHORISATION IS SCOPED TO THE TASK THAT ISSUED IT AND DIES WITH THAT TASK. A grant made for
+  one repository's push does not survive into another repository's work in the same session,
+  and an unused grant is spent, not stored. Reporting the terminal state of an abandoned grant
+  was correct; what made it a defect was carrying a token with no referent into a record whose
+  reader has only this project's vocabulary.
+
+CARRIED to 10e-close's docs pass, unchanged and confirmed: each ruling number now appears in
+the file at least twice — its ^10e-R<n> —  header and its ## section heading. Anchored checks
+are unaffected and yours were anchored. An UNANCHORED grep for a ruling number now returns a
+count that is not the block count. The completeness note says so in the docs pass.
+
+e6aab65 is ACCEPTED WITHOUT RESIDUE. Nothing on disk moves. Proceed to 10e-R245.
+
+---
+
+## Review-channel ruling block — 10e-R245, 2026-08-22
+
+10e-R245 — 10e-close STEP 0. STATE AND PRE-CHANGE MEASUREMENT. Nine steps, fixed content, hard stop at the end.
+
+Read the whole block before running anything. Nothing is edited, staged, committed or pushed
+in this step.
+
+SHELL AND FORM. zsh. Quote glob-bearing arguments (--include='*.ts', 10e-R151). Brace any
+parameter before a colon ("${c}:apps/…" — bare "$c:apps/…" is the :a absolute-path modifier
+and silently answers a different question, 10e-R184). Capture return codes with an explicit $?
+on its own line after a NON-PIPED command; never PIPESTATUS, never pipestatus. Report VERBATIM
+output. A typeset reconstruction is non-compliant.
+
+ABORT DISCIPLINE. Each step names its own abort. When one fires: STOP, report, and do not
+repair, do not retry with a changed command, do not continue. Aborts are limited to exit codes
+and structural impossibilities. A FIGURE that differs from anything you hold is NEVER an abort
+— report it and the channel reconciles. Do not adjust a command to make a figure come out.
+
+DERIVE, DO NOT CARRY. Re-measure every absolute from the artifact at HEAD (10e-R182). Where a
+figure you hold disagrees with what you measure, report BOTH and state which is derived
+(10e-R174). Do not edit held ruling text to match.
+
+--- STEP 0.0 — SHELL AND WORKING DIRECTORY ---
+  pwd
+  echo $0
+  echo $ZSH_VERSION
+Report all three. Under 10e-R244 this is load-bearing, not ceremonial: this session holds more
+than one working directory and every step below assumes public-statera.
+ABORT IF: not zsh, or pwd is not the public-statera repository root.
+
+--- STEP 0.1 — HEAD AND TREE ---
+  git rev-parse HEAD
+  git show --no-patch --format='%H %s' HEAD
+  git rev-list --count origin/main..HEAD
+  git rev-list --count HEAD..origin/main
+  git status --porcelain
+  echo "rc=$?"
+Then a positive control distinguishing clean from did-not-run (10e-R150): create a file inside
+the working tree, re-run git status --porcelain, show the count moves off zero, delete it,
+re-confirm clean. Report all three readings.
+ABORT IF: HEAD is not e6aab65…, or origin/main..HEAD ≠ 1, or HEAD..origin/main ≠ 0, or the
+tree is not clean, or the control does not move.
+
+--- STEP 0.2 — RULING RECORD, BOTH FORMATS, EACH WITH ITS CONTROL ---
+  wc -l < docs/modules/phase4-10e.md
+  grep -cE '^10e-R[0-9]+ — ' docs/modules/phase4-10e.md
+  grep -cE '^## 10e-R[0-9]+ — ' docs/modules/phase4-10e.md
+  grep -cE '^10e-R0 — ' docs/modules/phase4-10e.md
+  grep -cE '^## 10e-R0 — ' docs/modules/phase4-10e.md
+Then enumerate rather than range-check:
+  grep -oE '^10e-R[0-9]+ — ' docs/modules/phase4-10e.md | grep -oE '[0-9]+$' | tr '\n' ' '
+  grep -oE '^## 10e-R[0-9]+ — ' docs/modules/phase4-10e.md | grep -oE '[0-9]+$' | tr '\n' ' '
+Report both lists in full. State, FROM THE LISTS, the contiguous runs and the gaps.
+THE 210–236 GAP IS DELIBERATE (10e-R240(c)). Confirm the completeness note says so, by quoting
+the clause. If the note does not say so, report it — that is a docs defect to fix in the docs
+pass, not here.
+ABORT IF: Format A ≠ 75, Format B ≠ 11, either control ≠ 0, or 140…209 or 237…241 has a gap.
+
+--- STEP 0.3 — 10e-R237 TARGET SITES. DERIVE; DO NOT CONFIRM. ---
+R237 names line numbers measured before HEAD. Treat them as carried and unverified (10e-R118).
+  grep -n 'MAGIC_LINK_INVALID' apps/api/src/routes/magic-link.ts
+  grep -n 'no longer valid' apps/api/src/routes/magic-link.ts
+  grep -rn 'no longer valid' apps/api/src apps/web/src
+Then print, with line numbers, the full envelope constant and the full closed cause set, using
+the line numbers you just measured rather than the ones R237 names.
+Report: (i) the constant's span and its error string verbatim; (ii) every emit site with line
+numbers; (iii) the cause set enumerated ONE PER LINE with the count derived from the
+enumeration; (iv) every occurrence of the old string under apps/api/src and apps/web/src,
+path:line; (v) the delta from each figure R237 names.
+ABORT IF: the old string occurs at more than one non-test site under apps/api/src, or the
+derived cause count is not 5.
+
+--- STEP 0.4 — 10e-R200 RIDER: TODO MARKER CENSUS ---
+  grep -rn 'TODO(module-10e-4-token-in-url)' .
+Report EVERY hit as path:line and classify each PRODUCTION or HISTORICAL RECORD. The
+documentation hits are historical records under 10e-R78 and MUST NOT MOVE; deleting them to
+make a grep come back clean would destroy the record of the decision. Change nothing here.
+ABORT IF: the production hit count is not exactly 1.
+
+--- STEP 0.5 — 10e-R207: ORDER, NOT LINE NUMBERS. READ THIS ONE TWICE. ---
+Do NOT report line numbers as figures to be recorded. 10e-close's docs pass will add 10e-R209's
+durable line to CLAUDE.md's standing rules and may move the R183 line, so any number measured
+now is pre-last-edit and would be the third stale figure produced by the mechanism 10e-R209
+describes.
+What IS stable under insertion elsewhere, and what this step asks for, is RELATIVE ORDER:
+  grep -n '10e-R168' CLAUDE.md
+  grep -n '10e-R171' CLAUDE.md
+  grep -n '10e-R183' CLAUDE.md
+  grep -n '10e-R197' CLAUDE.md
+  grep -n '10e-R198' CLAUDE.md
+  grep -n '10e-R204' CLAUDE.md
+Report ONLY: the six in ascending positional order, as an ordered list of ruling numbers with
+no line numbers attached, and the single finding — IS the R183 line adjacent to the R171 entry
+its own text continues, YES or NO, and if NO, what sits between them. Line numbers are derived
+in the docs pass after the last edit, not here.
+ABORT IF: any of the six is absent from the standing-rules section, or matches ambiguously
+outside it — report the ambiguity rather than choosing.
+
+--- STEP 0.6 — PUBLIC API CONTRACTS: ABSENCE BY ENUMERATION ---
+10e-R124 + 10e-R189 owe CLAUDE.md's "Public API contracts" section an entry carrying BOTH
+verify response shapes AND the discrimination rule. Establishing absence is a presence check
+on a property, and 10e-R171 forbids testing a correlate. A grep for "magic" is a correlate.
+  grep -nE '^## Public API contracts' CLAUDE.md
+  grep -nE '^## ' CLAUDE.md
+Derive the section's range from those two. Then, within that range only, print the truncated
+first line of every top-level bullet. Substitute your derived START and END; do not run it with
+a placeholder.
+Report: the derived range, the bullet count, every truncated bullet line, and your explicit
+finding as to whether any bullet states a magic-link verify contract. Also:
+  grep -n 'is_new_user' CLAUDE.md
+and state which section each hit falls in.
+ABORT IF: the section range cannot be derived unambiguously.
+
+--- STEP 0.7 — LAST_UPDATED: LITERAL OR DERIVED ---
+The claim owed is about the RENDERED page. The deployed OCI revision label equals 2efaefa on
+api, web and worker, and every commit since is docs-only, so source at that commit IS the
+deployed content — which makes a source read admissible ONLY IF the value is a LITERAL.
+  grep -rn 'LAST_UPDATED' apps/web/src
+  grep -rn '22 August 2026' apps/web/src
+Print the full surrounding declaration with line numbers, enough context to see whether the
+value is a literal or computed.
+Report: every hit path:line, the value verbatim, and your explicit finding — LITERAL or
+DERIVED — with the source lines that establish it.
+ABORT IF: not found, or found at more than one declaration site, or the value is DERIVED. In
+the DERIVED case stop and report; the channel rules on how it is confirmed.
+
+--- STEP 0.8 — PRE-CHANGE BASELINES. NOTHING IS EDITED. ---
+Structural note, stated so a miss becomes a question rather than an adjustment: the only commit
+since the last code baseline was taken is docs-only and proven so by exclusion. Movement in a
+code baseline is therefore a QUESTION to report, never something to reconcile away.
+Run each; capture the exit code with an explicit $? on its own line; report the VERBATIM tail
+including the Test Files line and the Tests line.
+  (i)   pnpm --filter statera-api test --run                          + echo "rc=$?"
+  (ii)  DATABASE_URL='mysql://statera:change-me@127.0.0.1:3306/statera' INTEGRATION=1 \
+          pnpm --filter statera-api test --run                        + echo "rc=$?"
+        Use the INTEGRATION invocation this repository actually uses. If the env-var name or
+        script differs, STOP and report rather than guessing.
+  (iii) pnpm --filter statera-web test --run                          + echo "rc=$?"
+        pnpm --filter statera-web exec tsc --noEmit                   + echo "rc=$?"
+        pnpm --filter statera-api exec tsc --noEmit                   + echo "rc=$?"
+        pnpm --filter statera-web lint                                + echo "rc=$?"
+  (iv)  Contract fixture, derived from the artifact never from a document about it (10e-R182).
+        apps/web/contract/frontend-calls.json is a TOP-LEVEL ARRAY with no named entry key:
+        parse it, then take .length. Do not count lines and do not count braces.
+          node -e 'const a=require("./apps/web/contract/frontend-calls.json"); console.log(Array.isArray(a), a.length)'
+          grep -n 'ALLOWLIST' apps/web/src/contract/frontend-contract.test.ts
+        If a path is wrong, locate the files and report the paths you used. Report ALLOWLIST's
+        full declaration with line numbers and state whether it is empty.
+THEN the two-mode cross-check, stated as DERIVED from the four figures you just measured:
+  hermetic_passed + hermetic_skipped − integration_skipped = integration_passed
+Report the arithmetic with your own numbers substituted and state whether it reconciles.
+Do NOT describe this as two independent instruments (10e-R134 + 10e-R168). The counts are
+demonstrated non-discriminating in both directions; the Errors grep is demonstrated capable of
+firing but its independence from the exit code is UNDEMONSTRATED. If you run an Errors grep,
+report it in exactly those terms.
+ABORT IF: any exit code is non-zero. A figure differing from one you hold is NOT an abort.
+
+--- STEP 0.9 — HARD STOP ---
+Do not propose. Do not edit any file, including CLAUDE.md, the TODO marker, or the error
+string. Do not stage, commit or push. Do not run anything not listed above. Do not repair
+anything an abort caught.
+Report the nine steps in order. Where a step aborted, say which and stop there.
+The 10e-close proposal is drafted in the review channel after this report lands.
+
+---
+
+## Review-channel ruling block — 10e-R246, 2026-08-22
+
+10e-R246 — STEPS 0.0 … 0.7 ACCEPTED. 0.8's STOP IS RATIFIED AND IS THE HIGHEST-VALUE CATCH OF THIS MODULE. Four channel defects, one of them a re-commission of a class this project already has a module named after. One new standing rule.
+
+0.8 FIRST, because everything else is smaller.
+
+You stopped on three commands that would have exited 0 while executing nothing, and you proved
+the no-op rather than asserting it:
+
+  pnpm --filter statera-web exec node -e 'console.log("MATCHED")'
+  No projects matched the filters …
+  rc_filter=0
+
+That is the whole finding in three lines. Exit 0. No output from the payload. Every abort
+condition in 10e-R245 keyed on a non-zero exit code, so all three frontend commands would have
+passed every gate the ruling contained, and three fabricated baselines would have entered the
+record wearing verbatim tails and captured exit codes — the exact evidence form this module
+treats as authoritative.
+
+VERIFIED AGAINST THE RECORD, and it is worse than your report states. CLAUDE.md:95 is module
+10f, "API CI rehabilitation": the deploy.yml typecheck and test steps used --filter api when
+the package is statera-api, so the filter matched no project and — quoting the entry — only
+the frontend was ever gated; silent no-ops since written. That same entry records dropping a
+stray run argument, test run → vitest run run. This project has a MODULE named after this
+class, and the channel reproduced BOTH halves of it — the unmatched filter and the stray run
+arg — in a prompt whose own first instruction to you was to read CLAUDE.md in full. Your
+naming it "the 10f false-green class" was exactly right and the citation resolves.
+
+WHY IT RECURRED, and this is the part worth keeping. 10f fixed the INSTANCE and recorded it as
+HISTORY. It never minted a STANDING RULE. CLAUDE.md's standing-rules section carries no line
+about selector no-matches. A class that is fixed once and filed as history is available to
+recur, because a reader looking for rules does not read module summaries. That is the
+structural cause, and it is not yours.
+
+NEW STANDING RULE, and it is the only one this cycle mints:
+
+  A SELECTOR THAT MATCHES NOTHING SUCCEEDS (10e-R246, earned 10e-close, 2026-08-22). Where a
+  command addresses its target through a filter, glob, workspace name, script name or pattern,
+  the exit code reports whether the SELECTOR RAN, not whether anything was SELECTED. A
+  no-match is not an error condition in pnpm, and the same holds for any tool that treats an
+  empty match set as a valid result. Therefore an abort condition written on exit codes is
+  BLIND to the failure mode where the work never happened, and the verbatim-tail evidence form
+  is blind with it — there is no tail, and its absence looks like brevity.
+  OBLIGATION, on the author of the command block: every selector-addressed command carries a
+  RESOLUTION PROOF — a prior invocation, same selector, whose payload emits a distinguishing
+  token, shown producing it. The proof form is the one demonstrated here:
+  --filter <name> exec node -e 'console.log("MATCHED")'.
+  RIDER — THE WRONG NAME MAY BE A REAL NAME. statera-web EXISTS in this project: it is the
+  Docker image carrying Caddy plus the built frontend, and CLAUDE.md:550 names both in one
+  line — the statera-web image, built by pnpm --filter statera-frontend build. So an existence
+  check on the string passes, a plausibility check passes, and only NAMESPACE is wrong.
+  Package names come from package.json and CI invocations come from the workflow file; a name
+  read from a directory, an image, a container or a service is a name from another namespace
+  and does not transfer. This is 10e-R182 with the artifact identified: for an invocation, the
+  artifact is package.json and .github/workflows/deploy.yml, never prose and never a path.
+
+DEFECT 3 IS CONFIRMED FROM THE RECORD, INDEPENDENTLY OF YOUR MEASUREMENT. CLAUDE.md contains
+INTEGRATION=true at twenty-plus sites and INTEGRATION=1 at ZERO. 10f's own entry states the
+contract: setupFiles is wired only when INTEGRATION !== "true". Your two source citations —
+vitest.config.ts:12 and magic-link.integration.test.ts:42 — and the record agree. INTEGRATION=1
+would have installed the Redis mock and skipped every skipIf(!INTEGRATION) describe, returning
+a green HERMETIC run under an INTEGRATION label. That is the same false-green shape as Defect
+1 arriving by a different route, and it is the more dangerous of the two because it produces a
+plausible non-empty tail.
+
+WHY THE SAFETY VALVE FIRED ON ONLY ONE SUB-STEP. 10e-R245(ii) carried "if the env-var name or
+script differs, STOP and report rather than guessing." (i) and (iii) carried no such clause.
+The valve was placed on the sub-step the channel was UNSURE of and omitted from the ones it
+was CONFIDENT of — which inverts where it was needed, since a wrong command you are unsure
+about gets checked anyway. Recorded as a channel discipline: the escape clause goes on every
+step or on none, because its placement encodes confidence and confidence is not evidence.
+
+0.2 — THE ENUMERATION PIPELINE DEFECT IS MINE, AND IT HAS A NAMED PRECEDENT. grep -oE
+'^10e-R[0-9]+ — ' emits a trailing space-emdash-space, so [0-9]+$ can never match. Your od dump
+identifying the trailing bytes, your anchored-versus-unanchored comparison, and your labelling
+the working command as a CORRECTED INSTRUMENT rather than silently substituting it are all the
+standard.
+
+The cause, stated because it is instructive: the channel ran the UNANCHORED form against a copy
+of the file, saw it work, then added the $ anchor to tidy stray matches out of the output, and
+shipped the edited form WITHOUT RE-RUNNING IT. An instrument edited for presentation after its
+last validation is no longer the validated instrument. 10e-R184's Finding 3 already covers this
+— the pattern relaxed for extraction convenience stopped being the pattern under test — and
+this is its second surface, so it is CITED and no new line is minted. Inflating the set
+cheapens it.
+
+0.0 ACCEPTED. 10e-R244's working-directory line earned its keep on its first outing.
+
+0.1 ACCEPTED. HEAD round-trips, 1 ahead / 0 behind, and the control moved 0 → 1 → 0 so clean is
+an observation rather than a silence.
+
+0.2 ACCEPTED on substance. Format A 75, Format B 11, both ^10e-R0 —  controls at 0 rc=1, runs
+140…209 and 237…241 both contiguous, one break at 209 → 237, and the completeness note QUOTED
+rather than characterised. 10e-R240(c) discharged.
+
+0.3 ACCEPTED. Cause set derived from source, one per line, count 5 from the enumeration. One
+emit site. Exactly one non-test production occurrence. Delta from every figure R237 names: ZERO.
+
+  Stated carefully so nobody draws the wrong lesson: the zero delta does NOT vindicate carrying
+  figures. It is what a docs-only interval produces. Every commit between R237's measurement
+  and HEAD touched docs/ only, proven by exclusion at e6aab65, so the api source could not have
+  moved. Re-deriving was still correct, and it was correct BEFORE the answer was known.
+
+0.4 ACCEPTED. Five hits, one production at magic-link.ts:278, four historical records under
+10e-R78. Your note that the CLAUDE.md:118 hit is PROSE ABOUT the marker is 10e-R171 on a fourth
+surface and it is load-bearing for the rider: R200's after-absent proof is scoped to
+magic-link.ts, never tree-wide, precisely because four hits must survive.
+
+  INDEPENDENT CORROBORATION, unlooked-for. The channel measured this marker at
+  docs/modules/phase4-10e.md:2555 in a pre-e6aab65 copy; you measure :2597. The delta is 42,
+  which is exactly the completeness-note amendment at 1481–1522 — above :2555, so it displaces
+  it — while the 450-line block append went to end-of-file and cannot. Item 1's decomposition
+  is confirmed by a measurement taken for an unrelated purpose, which is stronger corroboration
+  than a second count of the same thing.
+
+0.5 ACCEPTED and the FINDING IS CONFIRMED. Order R168 → R171 → R197 → R198 → R204 → R183; the
+R183 line is NOT adjacent to the R171 entry its own text continues, with three bullets between
+them. 10e-R207's observation holds. The docs pass moves it and derives line numbers AFTER the
+last edit to that section, per 10e-R209. Your R168 disambiguation — six occurrences, definitions
+identified by the (10e-Rnnn, earned …, date) parenthetical which only definitions carry — is a
+property test rather than a string test, which is R171 satisfied rather than cited.
+
+0.6 ACCEPTED. Range 584–622, 33 bullets enumerated, no magic-link verify contract present;
+is_new_user at 114 and 118, both Migration status. The 10e-R124 + 10e-R189 entry is CONFIRMED
+ABSENT BY ENUMERATION and remains owed at 10e-close.
+
+0.7 ACCEPTED as LITERAL, and your refusal to resolve the nuance yourself is RATIFIED.
+
+  RULED: TWO DECLARATIONS OF THE SAME IDENTIFIER IN TWO FILES ARE NOT "MORE THAN ONE
+  DECLARATION SITE" FOR THIS ABORT. The abort protected against ambiguity about WHICH constant
+  supplies the Privacy Policy's rendered date. PrivacyPolicyPage.tsx:17 supplies it, once, and
+  TermsPage.tsx:9 is a different page's different claim. The token-scoped reading is NOT
+  intended. 0.7 stands discharged: LAST_UPDATED = "22 August 2026", literal, passed as a prop,
+  file byte-identical between 2efaefa and HEAD with the empty diff CONTROLLED against a file
+  that does move. The last open item from the deploy record is closed.
+
+  TWO THINGS CARRIED, NEITHER ACTED ON HERE. (1) LAST_UPDATED is a shared identifier across two
+  legal pages, so an unanchored grep for it returns two values and a future confirmation can
+  read the wrong one — R171's family, one line in the docs pass. (2) TermsPage's LAST_UPDATED
+  reads "6 July 2026" and predates magic-link. Whether Terms needs any magic-link edit was
+  never in 10e-R12's scope, which the operator reduced to the Privacy Policy by election
+  2026-08-19. Recorded as a QUEUE ITEM for the operator, not as an obligation, and not opened.
+
+0.8(iv) DELIVERED AND ACCEPTED. Fixture is a top-level array, length 66, parsed not counted.
+ALLOWLIST empty at apps/api/src/contract/frontend-contract.test.ts:54 — and note the channel
+named apps/web/src/, a FOURTH wrong path in the same block. Your flagging that the apps/web
+grep was piped into head and therefore rc-non-discriminating, and claiming only what you
+measured, is the standard; 10e-R247 closes it with one unpiped sweep.
+
+THE CHANNEL'S OWN ACCOUNTING, because the asymmetry should be on the record. 10e-R245 opened by
+requiring you to derive every absolute from the artifact and it named four invocations derived
+from none of them — a package name taken from a directory, a script name assumed, an env-var
+value invented, a test path guessed. The channel read parts of CLAUDE.md and required of the
+implementer a completeness it did not apply to itself. Four defects in one command block is the
+worst instrument this channel has shipped this module, and it was caught because you tested the
+commands before believing them.
+
+10e-R247 re-issues 0.8. Your four substitutions are RATIFIED as hypotheses to be DERIVED, not
+adopted on report — including from your own report, which is a document about the artifact.
+
+---
+
+## Review-channel ruling block — 10e-R247, 2026-08-22
+
+10e-R247 — STEP 0.8 RE-ISSUED. Derive the invocations, prove each selector resolves, then measure. Five sub-steps, hard stop.
+
+Nothing is edited, staged, committed or pushed. Same shell and abort discipline as 10e-R245:
+zsh, explicit $? on its own line after non-piped commands, verbatim output, stop rather than
+repair, and a FIGURE that differs from one you hold is never an abort.
+
+CONFIRM WORKING DIRECTORY FIRST (10e-R244): pwd, reported, before anything else.
+
+--- 0.8-A — DERIVE THE INVOCATIONS FROM ARTIFACTS ---
+Do not adopt the four substitutions from your prior report. That report is a document ABOUT the
+artifacts (10e-R182), and it is the channel's job to make you re-derive even when the channel
+agrees with you.
+  cat apps/api/package.json
+  cat apps/web/package.json
+  sed -n '70,100p' .github/workflows/deploy.yml
+Adjust the deploy.yml range if the steps fall outside it; report the range you used and why.
+Report: both package "name" fields verbatim; both "scripts" blocks verbatim; and the four CI
+invocation lines verbatim with their line numbers.
+ABORT IF: either package.json is absent, or deploy.yml carries no recognisable typecheck/test
+steps — report rather than searching further.
+
+--- 0.8-B — RESOLUTION PROOF FOR EVERY SELECTOR (10e-R246) ---
+For EACH pnpm filter name you derived in 0.8-A, and additionally for the string statera-web:
+  pnpm --filter <name> exec node -e 'console.log("RESOLVED:<name>")'
+  echo "rc=$?"
+Report all of them. statera-web is included DELIBERATELY as the negative control: it must
+produce no RESOLVED token AND rc=0, which is what makes the positive results observations
+rather than assumptions. A control that failed loudly would prove nothing about a class whose
+failure is silent.
+ABORT IF: any filter you intend to USE does not emit its RESOLVED token, or if statera-web
+DOES emit one — the latter would mean the channel's model of the defect is wrong and the whole
+block needs re-ruling.
+
+--- 0.8-C — ENV-CONTRACT RESOLUTION PROOF ---
+The INTEGRATION contract is a string comparison against "true". Prove the variable crosses into
+the runner as that exact value, in the same invocation shape you will use in 0.8-E:
+  INTEGRATION=true pnpm --filter <api-name> exec node -e 'console.log("ENV:["+process.env.INTEGRATION+"]")'
+  echo "rc=$?"
+Report verbatim. This is 0.8-B's obligation applied to an environment variable rather than a
+package name: an env var that does not arrive is as silent as a filter that matches nothing.
+
+--- 0.8-D — HERMETIC BASELINES, CI's OWN COMMANDS ---
+Run the four CI invocations exactly as derived in 0.8-A — not as the channel wrote them in
+10e-R245, and not with any argument CI does not use. Capture each exit code with an explicit
+$? on its own line. Report the VERBATIM tail including the Test Files line and the Tests line.
+  api typecheck   /   frontend typecheck   /   api tests   /   frontend tests
+Also run the frontend lint invocation if one exists in the workflow; if none does, say so and
+run nothing.
+ABORT IF: any exit code is non-zero. Report and stop; do not repair.
+
+--- 0.8-E — INTEGRATION RUN, WITH A MODE DISCRIMINATOR THAT IS NOT THE LABEL ---
+  DATABASE_URL='mysql://statera:change-me@127.0.0.1:3306/statera' INTEGRATION=true \
+    <the api test invocation derived in 0.8-A>
+  echo "rc=$?"
+THE LABEL ON THE COMMAND IS NOT EVIDENCE THE MODE ENGAGED — that is precisely how INTEGRATION=1
+would have passed. The discriminator is structural and internal to your own two runs: under
+INTEGRATION the skipIf(!INTEGRATION) describes RUN, so the SKIPPED count must DIFFER from the
+skipped count in 0.8-D's hermetic api run. State both skipped counts side by side and state the
+difference.
+ABORT IF: the exit code is non-zero, OR the INTEGRATION run's skipped count EQUALS the hermetic
+run's skipped count. The second is not a test failure — it means the mode did not engage and
+the run is a hermetic result wearing an INTEGRATION label. Report it as such and stop.
+
+--- 0.8-F — CROSS-CHECK AND ONE LOOSE END ---
+State the two-mode cross-check as DERIVED from the four figures you just measured:
+  hermetic_passed + hermetic_skipped − integration_skipped = integration_passed
+Substitute your own numbers, show the arithmetic, and state whether it reconciles. Do NOT
+describe this as two independent instruments (10e-R134 + 10e-R168): the counts are demonstrated
+non-discriminating in both directions, and the Errors grep is demonstrated capable of firing
+but its independence from the exit code is UNDEMONSTRATED. If you run an Errors grep, report it
+in exactly those terms.
+Then one unpiped sweep, closing the loose end you correctly flagged:
+  grep -rn 'ALLOWLIST' apps
+  echo "rc=$?"
+Report every hit path:line and state how many declaration sites exist.
+
+--- HARD STOP ---
+No edits, no staging, no commits, no push, nothing not listed. Report A through F in order.
+Where a step aborted, say which and stop there. The 10e-close proposal is drafted in the
+channel after this report lands.
+
+---
+
+## Review-channel ruling block — 10e-R248, 2026-08-22
+
+10e-R248 — STEP 0 IS DISCHARGED IN FULL. All baselines derived and reconciled. Two carried items close. One description of the cross-check is corrected before it reaches a close-out.
+
+0.8-A ACCEPTED. Package names read from package.json — statera-api, statera-frontend — and the
+four CI invocations read from deploy.yml:82, 83, 91, 92. You did not stop at the range the
+channel named: grep -nE 'pnpm --filter' across the whole workflow returning exactly those four
+lines is what makes the range SUFFICIENT rather than merely correct, and that distinction is
+the difference between checking an assumption and inheriting it. The lint absence is reported
+as measured (rc=1) rather than as an omission, so nothing was run in its place.
+
+AND THE WORKFLOW CARRIES 10f's EPITAPH AT :80-81. The file the channel's invocations should
+have been derived from contains, in a comment beside the very lines in question, the record
+that the old filter matched no project and the step was a silent no-op — plus the stray-run fix
+at :87-90. Both defects 10e-R245 shipped are documented at the site 10e-R245 declined to read.
+That is the strongest possible statement of the miss and it belongs in the record in exactly
+those terms.
+
+0.8-B ACCEPTED, and the control is the point. Two RESOLVED tokens at rc=0, and statera-web
+emitting nothing at rc=0. A NEGATIVE CONTROL THAT IS SILENT IS THE CORRECT SHAPE HERE, because
+the class 10e-R246 names is one whose failure is silent: a control that failed loudly would
+have demonstrated a different mechanism than the one under test. Recorded because it inverts
+the usual instinct — most controls in this module are proven by making something fire, and this
+one is proven by making something not fire while still succeeding.
+
+0.8-C ACCEPTED. ENV:[true], with the brackets deliberate so an empty or undefined value would
+be visible rather than blank. That is 10e-R150 applied to an environment variable: the failure
+output and the success output are made distinguishable BEFORE the reading is taken.
+
+0.8-D ACCEPTED. Four CI invocations, four rc=0, verbatim tails. And the hygiene note is the
+standard: your first api run was piped into tail, you recognised the rc belonged to the
+pipeline rather than the command, discarded it and re-ran. Declaring a discarded run rather
+than quietly replacing it is what makes the second one evidence. That is 10e-R151's obligation
+enforced by the implementer against its own convenience.
+
+0.8-E ACCEPTED. MODE ENGAGED, established three ways and not one of them is the label:
+skipped 34 → 10; file counts 51 passed | 10 skipped (61) → 61 passed (61), so the ten
+integration files executed; and setup 665ms → 0ms, which is setupFiles: [] visible in the
+timing. The second and third were unlooked-for and are structural rather than declarative.
+Three routes to mode engagement, after a cycle in which the label alone would have lied.
+
+0.8-F ACCEPTED, WITH ITS DESCRIPTION CORRECTED — and this correction matters because the
+close-out will describe the instrument and the description should be true.
+
+  873 + 34 − 10 = 897 reconciles. But rearranged, it is 873 + 34 = 897 + 10, i.e. 907 = 907:
+  both runs COLLECTED 907 tests. The cross-check's actual content is that THE COLLECTED SET IS
+  INVARIANT ACROSS MODES. That is a real discriminator with real reach — it would catch a file
+  failing to collect, a suite silently narrowing between modes, or a test lost in a mode
+  transition, and those are exactly the failures this module has been bitten by. What it does
+  NOT attest is that the integration tests exercised anything substantive. Write it as
+  collected-set invariance in the close-out, not as "the cross-check reconciles," which
+  overstates it in the direction of a coverage claim.
+
+  A DECOMPOSITION OF THE Δ24, offered as the likeliest reading and EXPLICITLY NOT MEASURED. If
+  the individually-skipped set is identical in both modes, the ten integration files hold 24
+  tests and 873 + 24 = 897. Your file-count and setup-timing corroborations both point that
+  way. Confirming it would take one command diffing skipped test NAMES between modes. DO NOT
+  RUN IT. The instrument has done its job, the reading is a nicety, and manufacturing a
+  measurement at close-out is how close-outs stop closing. It is recorded as an unmeasured
+  reading so that a later cycle wanting it knows it was offered and declined, and on what
+  grounds.
+
+BASELINES ACCEPTED, all five at zero delta, and your restatement of 10e-R246's caution is
+correct and unprompted: zero delta is what a docs-only interval produces, not a vindication of
+carrying. The structural note said movement would be a question; there is none, so there is no
+question. Recording the absence of the question rather than silently not raising it is the
+distinction.
+
+ALLOWLIST CLOSED. Six hits, ONE declaration site at apps/api/src/contract/frontend-contract.
+test.ts:54, empty. Zero at the apps/web/src/contract/ path 10e-R245 named — the channel's fourth
+wrong path in one block, now falsified by an unpiped sweep rather than by a grep whose rc could
+not be trusted. Your flagging the untrustworthy rc in the prior report and claiming only what
+you had measured is why this closes cleanly now.
+
+TWO CARRIED ITEMS CLOSE HERE, neither of them yours to act on:
+
+  LAST_UPDATED — DISCHARGED at 0.7. Literal, PrivacyPolicyPage.tsx:17, "22 August 2026", file
+  byte-identical between the deployed commit and HEAD with a controlled empty diff. The last
+  open thread from the deploy record.
+
+  MAINT_ACCOUNT_TOKENS_INTERVAL_MINUTES — DISCHARGED, by a stronger instrument than the one
+  owed. The obligation was to confirm no sops override. The deploy record already carries a
+  better observation: fired IDs 900,000 ms apart on the RUNNING worker — fifteen minutes,
+  measured on the deployed configuration rather than inferred from a config file. With b136fe6
+  correcting the cutoff to 24 hours, the published "within about a day" is accurate. DO NOT
+  OPEN SOPS FOR THIS; a measurement of the running system dominates a read of its inputs, and
+  the 8c key-disclosure precedent says do not open a secret store for a question already
+  answered.
+
+STEP 0 IS DISCHARGED. Proceed to 10e-R249 and 10e-R250.
+
+---
+
+## Review-channel ruling block — 10e-R249, 2026-08-22
+
+10e-R249 — OPERATOR ELECTION: the server string matches C-1 BYTE-FOR-BYTE. 10e-R237's REPLACEMENT clause is AMENDED. R237's text is NOT edited; this correction travels adjacent.
+
+ATTRIBUTION, stated first because it is not the channel's decision. OPERATOR ELECTION,
+2026-08-22, on a question the channel raised and recommended on. 10e-R237 ruled the server
+string CHANGES and specified "This sign-in link is not valid." — expanded. C-1 as shipped is
+contracted. R237's own justification is a PARITY argument: it changes "for the same reason
+R191 changed C-1," and leaving it would be "silently fixing one of two identical paths." A
+replacement that does not restore parity does not complete that argument. The operator elected
+parity. The channel recommended it; the operator ruled it.
+
+AMENDMENT: the replacement is C-1's shipped bytes, whatever they are.
+
+THIS RULING DOES NOT SPECIFY THE STRING AS TEXT, AND THAT IS DELIBERATE. A string typed into a
+ruling block is a document about the artifact, and 10e-R182 forbids deriving a figure from one.
+Parity that is byte-identity cannot be established by copying from a prompt. DERIVE C-1 FROM
+THE FRONTEND SOURCE AT HEAD AND USE THOSE BYTES.
+
+NAMED HAZARD, and it is the reason this ruling exists in this form rather than as one line:
+THE APOSTROPHE. U+0027 APOSTROPHE and U+2019 RIGHT SINGLE QUOTATION MARK render nearly
+identically in most fonts and are different bytes. A visual comparison, a copy through a
+rendered surface, or a retype cannot distinguish them, and a mismatch would leave two strings
+that LOOK identical and are not — which is worse than the current state, because the present
+divergence is at least visible. 10e-R237 itself established the code literal's identity by
+od -c dump rather than by eye; the same instrument governs here and for the same reason.
+
+OBLIGATIONS on the implementing commit:
+
+  (a) Extract C-1 from the frontend source at HEAD. Report its path:line and its od -c dump.
+  (b) After the edit, od -c dump the server literal at magic-link.ts. Show the two dumps
+      byte-identical.
+  (c) BEHIND A WORKING NEGATIVE CONTROL. Two empty diffs, or two dumps a reader must compare by
+      eye, are not evidence. Demonstrate the comparison form producing a NON-match on a
+      deliberately altered copy — one byte, in a temp copy, never in a tracked file — before
+      the match means anything. 10e-R150: the success output and the failure output must be
+      distinguishable before either is read.
+
+  (d) THE R78 CLASSIFICATION STEP RUNS BEFORE ANY EDIT. Step 0.3 measured FOUR occurrences of
+      the old string and they are not the same kind of thing:
+
+        apps/api/src/routes/magic-link.ts:391        — PRODUCTION. Changes. Ruled.
+        apps/api/src/routes/magic-link.test.ts:529   — pins the old text; R237 already ruled it
+                                                       updates in the SAME commit.
+        apps/web/.../MagicLinkPage.test.tsx:71       — the fixture standing in for the server.
+                                                       NOT RULED. See below.
+        apps/web/.../MagicLinkPage.tsx:49            — the COMMENT explaining why R191 amended
+                                                       C-1 (established at 10e-R205(a)).
+                                                       NOT RULED. See below.
+
+      CLASSIFY ALL FOUR under 10e-R78 — live index versus historical record — and PROPOSE a
+      disposition for the two unruled ones WITH REASONING. Do not edit either until the channel
+      rules. All mentions are classified before any are edited; that is the R78 step and it
+      exists because the classification is the decision.
+
+      The channel's view, offered so you can falsify it rather than infer it. :71 is arguably a
+      LIVE INDEX — it is a hand-maintained copy of the server's string, and if the server moves
+      and the fixture does not, the fixture carries a string the server never emits, which
+      converts 10e-R192/R205(c)'s bounded unknown from theoretical to demonstrated. Note that
+      updating it does NOT close that bounded unknown: nothing checks the fixture against the
+      server either way, and the entry must not be written as if it did. :49 is arguably a
+      HISTORICAL RECORD — a comment explaining a past amendment, where editing it to match the
+      present would destroy the explanation. Both readings are contestable and neither is
+      ruled. Argue them.
+
+  (e) UNIFORMITY IS PRESERVED. The replacement remains one envelope constant, one emit site,
+      uniform across all five causes. It is no oracle, before or after. Re-derive that at
+      implementation rather than carrying it from here.
+
+NO SECOND DEPLOY IS OWED, unchanged from 10e-R237. The string is rendered by no client and
+keyed on by no consumer. It ships whenever the next deploy happens. Do not schedule one.
+
+---
+
+## Review-channel ruling block — 10e-R250, 2026-08-22
+
+10e-R250 — DRAFT THE 10e-close PROPOSAL. Draft only. No commit, no edit, hard stop.
+
+Propose; do not implement. The proposal is reviewed in the channel and approved before anything
+is written. If any item below cannot be done as described, say so IN the proposal rather than
+adapting silently — a proposal that reports an obstacle is worth more than one that routes
+around it.
+
+(a) COMMIT SPLIT, ruled as a constraint rather than a plan. A commit touching apps/api DOES NOT
+    CARRY THE DOCS PASS. Mixing forfeits 10e-R149's permanent licence to skip both gates on a
+    docs-only commit and makes the code diff unreviewable behind a several-hundred-line docs
+    diff. Within that constraint the ordering, and whether the docs work is one commit or two,
+    is yours to propose with reasoning.
+
+(b) THE FIRST COMMIT IS DOCS-ONLY AND PERSISTS THE OUTSTANDING RULING SET. 10e-R239 says
+    rulings do not live in conversations, and the set outstanding right now lives in one. DERIVE
+    the set at proposal time — it runs from 10e-R242 upward and it will have grown by then;
+    state it as a derived list with its endpoints, never as a count carried from this block
+    (10e-R118). Precedent: aa91b61 was a proposal commit that also persisted R174–R187.
+
+(c) THE CODE COMMIT, two riders, EACH NAMED IN THE COMMIT BODY, never folded in silently:
+      (i)  10e-R200 — remove TODO(module-10e-4-token-in-url) at apps/api/src/routes/magic-link.
+           ts:278. Before-present / after-absent ON THAT PATH ONLY. The four documentation hits
+           are historical records under 10e-R78 and MUST NOT MOVE; a tree-wide clean grep would
+           mean the record of the decision had been destroyed.
+      (ii) 10e-R237 as AMENDED by 10e-R249 — the server error string, its od -c parity proof
+           behind a negative control, the R78 classification of all four occurrences, and
+           magic-link.test.ts:529 in the same commit.
+
+(d) THE DOCS PASS:
+      - CLAUDE.md standing rules: the durable lines from 10e-R209, 10e-R239, 10e-R244 and
+        10e-R246 including R246's namespace rider. FOUR, and derive that count from the blocks
+        rather than from this list.
+      - The 10e-R207 move: relocate the R183 line adjacent to the R171 entry its own text
+        continues. Line numbers derived AFTER the last edit to that section, never before
+        (10e-R209).
+      - CLAUDE.md "Public API contracts": the 10e-R124 + 10e-R189 entry. BOTH verify response
+        shapes AND THE DISCRIMINATION RULE. Both are 200 with ok:true, distinguished only by
+        which key is present in data; a consumer writing if (data.is_new_user) reads undefined
+        on the handoff and routes a sessionless user into the app. An entry with two shapes and
+        no discrimination rule hands the next consumer that defect and does not discharge R124.
+      - Completeness-note additions: each ruling number now appears in the file at least twice,
+        so an unanchored grep returns a count that is not the block count; and the R242-upward
+        persistence.
+      - The Migration status entry closing 10e.
+
+(e) THE BOUNDED-UNKNOWN RECORD, FOUR ENTRIES: the Errors grep's undemonstrated independence
+    from the exit code (R134 + R168); the frontend control's synthetic provenance (R181(b));
+    nothing verifying the declared shape against the running server pre-deploy (R192), whose
+    concrete instance is MagicLinkPage.test.tsx:71 (R205(c)) — and that entry NARROWS but does
+    not close, because sibling tests at :157/:164 pass "alpha" and "omega" under the same code,
+    which is affirmative evidence the component is message-independent; what survives is that
+    the field the client branches on is `code`, not `error`. The fourth entry is yours to
+    identify from the record and to state; if you conclude there are three rather than four,
+    say so and argue it rather than padding to the number.
+
+(f) QUEUE RECONCILIATION, NINE ITEMS, none of them opened here. Five carried: 10e-R129 (own
+    cycle, DO NOT BUNDLE); R85/R72 with R199's second site; R161's acknowledgement half with its
+    one surviving mechanism, deferred on SCOPE not soundness; LoginPage.test.tsx:24's
+    getByRole("heading", { name: /sign in/i }) as a latent constraint on future copy; R155's
+    soft-delete email retention. Four new, ALL DO-NOT-BUNDLE: the argument-recording mock;
+    account_action_tokens as a dead table; §7's "anonymous" / "one-way hash" characterisation
+    against an unsalted SHA-256 plus ip_address and user_agent; and §5's Postmark line, declined
+    2026-08-19 as weak-but-true when magic-link was not live. SEPARATELY SCOPED, not part of the
+    nine: 10e-R241's R36–R101 recovery hypothesis, and the TermsPage LAST_UPDATED question,
+    which is the operator's and is not an obligation.
+
+(g) FORM. Checkable predictions stated IN ADVANCE so a miss becomes a question rather than an
+    adjustment. Per-item presence assertions with the ^10e-R0 —  control and the format stated
+    (10e-R142, 10e-R183(ii)). Explicit abort conditions on every step, with the escape clause on
+    EVERY step or none — 10e-R246 recorded that placing it only where the author feels unsure
+    inverts where it is needed. Selector-addressed commands carry resolution proofs (10e-R246).
+    The three mandatory close-out verbatim sections.
+
+(h) HARD STOP. Draft and stop. Nothing edited, staged, committed or pushed. Report the proposal
+    in full and wait.
+
+---
+
+## Review-channel ruling block — 10e-R251, 2026-08-22
+
+10e-R251 — 10e-R243 WAS AUTHORED AND NEVER DELIVERED. It is SUBSTANTIVE, not procedural. Relayed verbatim in this message. The cause is the channel's emission form, and it produced a defect the channel's own ledger could not see.
+
+DISPOSITION: NOT procedural-and-not-owed. R210–R236 were consumed within a session and left
+nothing a later reader needs. R243 is not that. It carries the 10e-R148 round-trip discharge
+for e6aab65, the ran-and-empty discriminator for an empty git status, the mirrorhouse closure
+with its standing consequence about workspaces outside this project, an attribution class
+(OPERATOR-MEASURED) that had no precedent in this module, and clause (e). It is persisted with
+the rest.
+
+ITS TEXT IS DELIVERED UNEDITED. Clause (f) names Items 1 and 2 as owed; both were closed by
+10e-R244 on the same day. That is a HISTORICAL RECORD under 10e-R78 and is not edited to match
+the present — the correction travels adjacent, which is what this paragraph is. A reader
+finding "(f) OWED, UNCHANGED" needs the closure beside it, not a block silently rewritten to
+agree with what happened next.
+
+THE CAUSE, stated plainly because it is the channel's. R243 was emitted inside a code fence
+but WITHOUT the paste-ready heading and rulers this channel puts on everything the operator is
+meant to relay. The same message closed by asking whether R242 had reached you. The operator
+answered about R242 — correctly — and R243 carried no marking identifying it as a thing to
+send. It was authored, self-contained, correct, and invisible to the relay.
+
+THE SYMMETRY IS THE FINDING AND IT SHOULD NOT BE SMOOTHED OVER. Clause (e) of R243 is the
+channel recording a form defect for placing actionable content OUTSIDE the fenced block. R243
+was then lost to the adjacent defect: correctly fenced, incorrectly unmarked. The block
+diagnosing the class was destroyed by the class.
+
+WHAT THE CHANNEL'S LEDGER COULD NOT SEE. This channel asserted the outstanding set as "R242
+through R247" three separate times. It had no evidence for R243's membership — only the memory
+of having written it. 10e-R204 established that a block returning to its AUTHOR is evidence of
+non-delivery. This is the complementary case and it is worse, because nothing returns at all:
+the author's record shows a block written, the implementer's shows a block absent, and no
+message in either direction contradicts either. Only enumeration crosses the gap.
+
+DETECTION. This was caught by the implementer enumerating its held set and reporting a gap at
+243 — the 10e-R240(a) form. That is the THIRD relay fault in this module found by
+enumeration-of-held-numbers and by nothing else: R196–R202, R205–R209, and now R243.
+Enumeration is not a formality in this project; it is the only instrument that has ever
+detected this class.
+
+STANDING, and it is a CHANNEL obligation, not a CLAUDE.md standing-rules line — the same
+disposition 10e-R238's restatement received:
+
+  SINGLE EMISSION FORM. Every ruling block leaves this channel under the relay marking, with
+  no exception for short blocks, incidental blocks, acknowledgements, or blocks the channel
+  judges minor. A block emitted outside the marking is authored, correct, self-contained and
+  UNDELIVERED, and neither end can see it.
+  LEDGER CLAUSE: the channel's statement of the outstanding unpersisted set is a claim about
+  DELIVERY, not about authorship. It is DERIVED from the implementer's most recent enumeration
+  of what it holds, never from the channel's memory of what it wrote. Where the two disagree,
+  the implementer's enumeration governs and the difference is a delivery fault to be diagnosed,
+  never a discrepancy to be reconciled away.
+
+CONSEQUENCE FOR COMMIT 1: the outstanding set is CONTIGUOUS from 242 upward. There is no second
+deliberate gap. Do not write one into the completeness note.
+
+---
+
+## Review-channel ruling block — 10e-R252, 2026-08-22
+
+10e-R252 — THE 10e-close PROPOSAL IS APPROVED. Both R78 dispositions ratified. The fourth bounded-unknown accepted. ONE independence overclaim corrected. ONE addition to commit 2.
+
+§1 THE THREE-COMMIT SPLIT IS APPROVED, and the reasoning is ratified rather than merely the
+shape. Persistence first because it is the repair and must not queue behind a commit that could
+hit an obstacle — which is the failure this whole sequence exists to fix, and which just
+recurred at R243 while the proposal was being written. Docs pass last because its
+Migration-status entry describes commit 2 and should carry its SHA. And the refusal to fold 1
+into 3 is right for the reason given: they differ IN KIND. Commit 1 is a verbatim paste under
+R149's licence and reviewable as one act; commit 3 is authored prose and reviewable as another.
+Folding them would make a several-hundred-line paste and a set of judgement calls share a
+single diff.
+
+§2 COMMIT 1 APPROVED. Re-derive the prediction at commit time; do not carry any figure from the
+proposal, which was written before R243 and R251 and R252 existed and whose contingent branch is
+now moot. The SHAPE, which is what to assert: Format A runs 140 … 209, then the DELIBERATE gap
+at 210 … 236, then 237 … <top> CONTIGUOUS WITH NO SECOND GAP. Reconcile the count two ways —
+previous total plus blocks appended, and (209 − 140 + 1) + (top − 237 + 1) — and state both.
+Format B unchanged. Provenance in the completeness note is RELAYED, and R243's is RELAYED
+LATE — distinct from R205–R209's RECOVERED, and the distinction is worth the four words.
+
+§3 COMMIT 2 APPROVED. BOTH R78 DISPOSITIONS ARE RATIFIED, and the arguments are what earn it.
+
+  :71 UPDATE, as a LIVE INDEX. The distinction that carries it is correct: invalidLinkError()
+  is an active test INPUT, not a record of a decision, and a hand-maintained copy of the
+  server's string left stale becomes a fixture asserting a wire shape the server never emits.
+  The FIND-S5(b) citation resolves and the precedent is apt — a false-premise fixture is a
+  defect while it passes. Your safety argument is checked and stands: :157/:164 pass
+  "alpha"/"omega" under the same code and :170 asserts against the imported INVALID_TITLE, so
+  no assertion depends on the fixture's text.
+
+  AND THE SENTENCE THAT MAKES IT RATIFIABLE RATHER THAN MERELY CORRECT: updating :71 does NOT
+  close the R192/R205(c) bounded unknown, because nothing checks the fixture against the server
+  in either direction and hand-updating is the same hand-maintenance that produced the
+  divergence. Stating the limit of your own repair, unprompted, is the standard. Carry that
+  sentence into the bounded-unknown entry verbatim; an entry that reads as if the update closed
+  something would be worse than no update.
+
+  :49 DO NOT TOUCH, as a HISTORICAL RECORD. Correct, and for the stated reason: the comment's
+  entire content IS the contrast between the two wordings, so deleting the rejected wording
+  destroys the explanation. It also remains TRUE after the change — it describes C-1 and claims
+  nothing about the server. Your commit-body note that a grep for the old string still returns
+  this comment, and that this is correct rather than residue, is required and not optional.
+
+  YOUR REJECTION OF THE ADJACENT STATUS NOTE IS RATIFIED AND PROMOTED. "R78 adjacency is
+  reserved for CORRECTIONS, not status updates" is a real distinction this module had not
+  articulated. A correction beside a historical record tells a reader the record is wrong about
+  something; a status update beside it tells the reader nothing they cannot get from the ruling
+  record, while diluting the signal that adjacency carries. Recorded as the disposition, minted
+  as no new rule — it is 10e-R78's own boundary made explicit.
+
+  ADDED TO COMMIT 2, and it is the one thing the proposal is missing. RUN THE FINAL TWO-MODE
+  CROSS-CHECK AFTER COMMIT 2, not before. Your INTEGRATION-not-owed argument is correct AS AN
+  ARGUMENT ABOUT THIS COMMIT — no db.transaction() boundary, no integration case added or
+  edited — and it is not the obligation. 10e-close separately owes the FINAL cross-check
+  exercised at the module's end state, and the 0.8-E baseline was measured at e6aab65, before
+  commit 2 exists. One run. State it per 10e-R248 as COLLECTED-SET INVARIANCE — that both modes
+  collect the same total — and not as a coverage claim.
+
+  PREDICTIONS ACCEPTED AS STATED, all deltas zero, with 873/34/61 unchanged because :529 is
+  edited in place. A miss is a question, not an adjustment.
+
+§4 COMMIT 3 APPROVED. FOUR durable CLAUDE.md lines — R209, R239, R244, R246 with its namespace
+rider — and your derivation is right on both exclusions: R238's "RESTATED, standing" is a
+channel obligation rather than a CLAUDE.md rule, and R238 explicitly declines a new line for
+R171. FOR THE AVOIDANCE OF A FIFTH: 10e-R243(e) and 10e-R251 are likewise CHANNEL OBLIGATIONS
+and take no CLAUDE.md line. The count is four. Derive it from the blocks anyway.
+
+§5 THE FOURTH BOUNDED-UNKNOWN IS ACCEPTED, and your rejection reasoning is the better half —
+"a bounded-unknown entry should name what the evidence CANNOT REACH," so a measured zero is a
+coverage gap for the queue and not an unknown. That sentence is the definition this record has
+been operating on without stating.
+
+  ONE CORRECTION, INSIDE THAT ENTRY. You wrote that mode engagement was established "three
+  structurally independent ways." It was established two ways, observed at three granularities.
+  The skipped-test count (34 → 10) and the file count (51 passed | 10 skipped → 61 passed) are
+  the SAME MECHANISM — the skipIf(!INTEGRATION) branch — read at two levels; if that branch
+  failed to flip, both readings move together and neither could detect it. The setup timing
+  (665ms → 0ms) is the genuinely separate one: it reflects the setupFiles: [] branch, a
+  different conditional. Two mechanisms, three readings.
+
+  This is 10e-R134 + 10e-R168 firing on the implementer's own claim, in the same cycle the
+  channel required you to apply it to the Errors grep. It changes nothing about the conclusion —
+  mode engaged, and two independent mechanisms agreeing is strong — and it changes the sentence.
+  Write two, not three.
+
+§6 QUEUE APPROVED. Nine items, none opened. R241 and the TermsPage question correctly held
+separate and outside the nine.
+
+§7 FORM APPROVED as stated.
+
+PROCEED. Commit 1, then commit 2, then commit 3, reporting after EACH rather than at the end —
+three reports, three channel reviews. Do not batch the three commits behind one report; the
+first is the repair and the channel wants it confirmed landed before code moves. Hard stop
+after commit 1's report.
