@@ -275,8 +275,6 @@ magicLinkRouter.post(
     const frontendOrigin = env.corsOrigins[0] ?? "http://127.0.0.1:3002"
     // The token and NOTHING else. An `email` parameter here would hand the address to
     // the Referer header and browser history alongside the credential.
-    // TODO(module-10e-4-token-in-url): the landing page should history.replaceState
-    // the token out of the URL immediately after reading it.
     const link = `${frontendOrigin}/auth/magic?token=${encodeURIComponent(rawToken)}`
 
     const sent = await sendTemplatedEmail(effectiveEmail, MAGIC_LINK_SUBJECT, "magic_link", {
@@ -388,7 +386,7 @@ type VerifyFailReason = (typeof VERIFY_FAIL_REASONS)[number]
 const MAGIC_LINK_INVALID_BODY = {
   ok: false as const,
   data: null,
-  error: "This sign-in link is no longer valid.",
+  error: "This sign-in link isn't valid.",
   code: "MAGIC_LINK_INVALID",
 }
 

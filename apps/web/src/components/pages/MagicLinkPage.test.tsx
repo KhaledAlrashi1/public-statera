@@ -68,7 +68,7 @@ function renderPage(path: string, { strict = false }: { strict?: boolean } = {})
 }
 
 function invalidLinkError() {
-  return new ApiError("This sign-in link is no longer valid.", 400, "MAGIC_LINK_INVALID")
+  return new ApiError("This sign-in link isn't valid.", 400, "MAGIC_LINK_INVALID")
 }
 
 beforeEach(() => {

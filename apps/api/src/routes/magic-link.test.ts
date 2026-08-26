@@ -526,7 +526,7 @@ function postVerify(body: unknown, headers: Record<string, string> = {}) {
 const MAGIC_LINK_INVALID_EXPECTED = {
   ok: false,
   data: null,
-  error: "This sign-in link is no longer valid.",
+  error: "This sign-in link isn't valid.",
   code: "MAGIC_LINK_INVALID",
 }
 
