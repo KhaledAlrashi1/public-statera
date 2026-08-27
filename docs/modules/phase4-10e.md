@@ -1589,6 +1589,44 @@ appended section; R140's own text is unedited.
 - **R103, R131, R139 and R36–R101 are unchanged** — still issued-but-unpersisted, still OWED,
   still not to be reconstructed. 10e-R241's recovery hypothesis is **not** acted on here.
 
+## AMENDMENT — 2026-08-22, under 10e-R263 (final 10e-close docs commit)
+
+- **10e-R258 … 10e-R263 are now PERSISTED**, verbatim, in the appended section at the end of this
+  file (Format A). The persisted set is therefore **R7–R17 (Format B, 11 blocks)** and
+  **R140–R209 + R237–R263 (Format A, 97 blocks)**, derived at commit time and reconciled two ways
+  — 91 + 6 = 97 and (209 − 140 + 1) + (263 − 237 + 1) = 70 + 27 = 97.
+- **A RULED DELIVERABLE WAS MISSED ONCE AND THIS COMMIT REPAIRS IT (10e-R262(b)).** 10e-R250(e)
+  ruled a four-entry BOUNDED-UNKNOWN RECORD into 10e-close. It was never written. **Three parties
+  missed it** — the implementer's §4 proposal omitted it; 10e-R252 approved that list while §5 of
+  the same block debated the fourth entry's content; and the channel then read all twelve changed
+  CLAUDE.md lines and verified eight by md5 without noticing. **The instructive failure is the
+  last one:** a byte census answers *is what is here correct*, and is structurally incapable of
+  answering *is everything that should be here present*. Eight of eight matching was a complete
+  answer to a question that was not at issue, and the confidence it produced is what made the
+  absence invisible. **An integrity instrument reads as a completeness instrument and is not one.**
+  No new standing line: **10e-R142's rider already governs** — N ruled items close with N per-item
+  presence assertions — and the prior docs pass ran them against the payload instead of against
+  the obligation. Cited, not minted.
+- **The record now lives at CLAUDE.md's `## Bounded unknowns — what the verification evidence does
+  not reach`**, placed immediately after `## Test conventions` so it sits beneath the baselines it
+  bounds, and headed so the subtitle acts as an **admission gate** (10e-R263 Decision 2). The
+  rejected candidate — the OIDC callback's zero-coverage TOTP branch — is recorded as the
+  section's **closing admission note** rather than inside entry 4, because its reason (*a measured
+  zero is a coverage gap for the queue, not an unknown*) defines admission for every entry
+  (10e-R263 amendment to 10e-R262(c)).
+- **10e-R168's standing line gained a FORWARD pointer** (10e-R263 Decision 1). Entry 1's
+  back-citation makes the *line* findable from the *record*; R262 required the *record* findable
+  from the *line*, which is a different pointer. The instruction that stood open from 2026-08-19
+  is marked discharged in place, and the fact that it stood open is preserved in entry 1 rather
+  than erased. **Licence bounded to ONE pointer on ONE line**; the persisted 10e-R168 BLOCK is a
+  historical record and is NOT edited.
+- **The collision sweep ran BEFORE this append and on its own author's blocks** (10e-R257).
+  10e-R262 and 10e-R263 were flagged in advance as live candidates because both carry many
+  `10e-R<n>` citations; measured, each holds exactly one header match. Six against six, with the
+  retired pre-reissue 10e-R253 still matching twice as the control.
+- **R103, R131, R139 and R36–R101 are unchanged** — still issued-but-unpersisted, still OWED,
+  still not to be reconstructed. 10e-R241's recovery hypothesis is **not** acted on here.
+
 ---
 ---
 
@@ -5066,3 +5104,630 @@ relocation already done; the Public API contracts entry; and the Migration-statu
 wc -l measured after the LAST edit and reconciled against the diffstat by reconstruction.
 
 Report and hard stop.
+
+---
+
+# APPENDED RULING BLOCKS — 10e-R258 … 10e-R263 (persisted 2026-08-22 under 10e-R263, the final 10e-close docs commit)
+
+Pasted from the review channel **verbatim**, not reconstructed and not summarized, per 10e-R102
+and 10e-R143. The original text of each block is unedited; the only additions are the section
+headers.
+
+**PROVENANCE — RELAYED.** All six arrived as text in the review channel and were held verbatim,
+the same class as 10e-R242 … 10e-R257 and distinct from R205–R209's **RECOVERED**.
+
+**COLLISION SWEEP RUN BEFORE THE APPEND (10e-R257), including on the two blocks flagged as live
+candidates.** 10e-R262 and 10e-R263 both carry many `10e-R<n>` citations and were the reason the
+sweep was demanded. Measured: exactly **one** header-pattern match per block, six against six
+blocks, each at line 1 of its block. **Control:** the retired pre-reissue copy of 10e-R253 still
+matches **twice**, proving the sweep can detect a collision rather than being incapable of seeing
+one. No block collided.
+
+**This set is CONTIGUOUS from 258 to 263**, extending the 237 … 257 run to **237 … 263**. The one
+deliberate gap in this file remains 10e-R210 … 10e-R236.
+
+**Recorded limitation, unchanged and restated rather than left implied** (10e-R168): the
+byte-level diff run against these blocks compares the committed text to the implementer's own
+per-block transcription. It proves **file-matches-transcription**; it does **not** independently
+verify transcription-matches-relay, because both sides derive from one reading. 10e-R253 remains
+the sole double-attested block in this record (10e-R258), and it became so by accident of a
+defect rather than by design.
+
+---
+
+## Review-channel ruling block — 10e-R258, 2026-08-22
+
+10e-R258 — 9d7bd16 IS ACCEPTED ON SUBSTANCE. The equality proof, the collision sweep and the coincidence handling are all at full strength. TWO ITEMS before the module closes, both cheap. ONE limitation is corrected IN YOUR FAVOUR.
+
+THE EQUALITY PROOF IS THE STANDARD AND ITS CONTROL IS THE REASON. Normalised streams identical
+at 6060 tokens, raw diff confined to lines 83–88, line counts 91 = 91. The comparison is
+deliberately blind to whitespace, which makes it blind to the very thing being changed — so an
+empty result proves nothing until the form is shown able to fail. Your control altered ONE WORD
+while leaving the line count unchanged, which is visible ONLY to the normalised check and
+invisible to both raw line count and eye. A control built to defeat the specific blindness of
+the instrument, rather than to fail in general, is 10e-R150 at its sharpest.
+
+THE COLLISION SWEEP RAN BEFORE THE APPEND, WHICH IS THE ONLY TIME IT IS WORTH RUNNING. Five
+header matches against five blocks, each at line 1 of its block. And the control is the part
+that makes it an observation: the PRE-REISSUE copy still matching twice proves the sweep can
+detect a collision. Without it, "5 = 5" is indistinguishable from a sweep incapable of seeing
+one. 10e-R257's rule was applied to its own commit, with a control, on its first outing.
+
+THE COINCIDENCE WAS HANDLED CORRECTLY AND THE RECORD SAYS SO. Format A reads 91 and the
+defective four-block append also read 91. You did not report the count as evidence. You reported
+the discriminators — one break at 209 → 237, no duplicates, last = 257, ^10e-R249 —  occurring
+exactly once — and let the matching total stand as the coincidence it is. That last check is the
+sharpest of the four: it tests the specific line that caused the halt rather than the aggregate
+that cannot see it.
+
+CONTROL A IS THE ONE THE CHANNEL WOULD HAVE ASKED FOR AND DID NOT. Diffing the extracted R253
+against the RETIRED ORIGINAL and getting rc=1 proves the committed text is the reissued copy and
+not the colliding one. An empty-diff-against-the-reissued-copy alone could not establish that,
+because both copies are legitimate objects and the wrong one would also produce a clean result
+against itself. Positively identifying WHICH of two valid candidates landed is a different
+question from integrity, and you answered it unprompted.
+
+YOUR STATED LIMITATION IS CORRECTED IN YOUR FAVOUR, and the correction is not cosmetic. You
+wrote that the byte-level proof establishes file-matches-transcription but not
+transcription-matches-relay, since both sides derive from one reading, and that the same limit
+applied to the two earlier persistence commits. That is exactly right for R254, R255, R256 and
+R257, and it is 10e-R168 applied to your own evidence — an instrument sharing a mechanism with
+what it measures cannot detect a fault in that mechanism.
+
+  IT IS NOT TRUE OF 10e-R253, AND R253 IS THE STRONGEST-ATTESTED BLOCK IN THE FILE. Its
+  normalised stream was compared across TWO INDEPENDENT RELAYS — the retired original from the
+  first emission and the reissued copy from the second, transcribed on different occasions from
+  different messages. Their word streams are identical at 6060 tokens. A transcription error in
+  either reading would have to have been reproduced identically in the other to survive that,
+  which is the cross-reading check the other four blocks lack. The reissue, forced by a defect,
+  incidentally produced the only double-attested block in the record. Say so in the completeness
+  note; understating the evidence is as much a defect as overstating it.
+
+YOUR DISPOSITION 1 CORRECTION IS ACCEPTED AS WRITTEN. Derived from the two commits in view, both
+per-block, generalised to a file whose earlier two-thirds are per-batch — 10e-R182 with the
+artifact only partly read. Recorded on the ledger and closed.
+
+R207 IS DISCHARGED. Order now R168 → R171 → R183 → R197 → R198 → R204 → the six. R183 sits
+adjacent to the entry its own text continues, and its range is re-specified open-ended so it
+cannot rot again.
+
+FIGURES RECONCILED IN THE CHANNEL: 5068 − 4423 = 645; 609 + 36 = 645; deleting the 36-line
+amendment at 1556–1591 reproducing 5032 with a byte-exact seam. All three close.
+
+ITEM 1 — THE STRUCTURAL FIGURE, UNRECONSTRUCTED FOR THE THIRD TIME.
+
+  Channel re-derivation: the five blocks sum to 547 (91 + 111 + 97 + 83 + 165). The append is
+  609. 609 − 547 = 62, and 62 is currently satisfied by any 62 lines anywhere in the payload.
+
+  BOUNDED HARD, exactly as before: the five bodies are byte-pinned, so all 62 lie outside the
+  blocks. Not corruption. Bookkeeping.
+
+  BUT THE MODEL PREDICTS AND THE PREDICTION IS UNTESTED. 10e-R244's accepted decomposition gives
+  preamble + 5 per block; five blocks is 25, so the preamble is 37 — against 22 at commit 1 and
+  13 at e6aab65. Preamble 13 → 22 → 37 while per-block holds at 5. The growth is PLAUSIBLE, since
+  this preamble records the R253 reissue, the collision, the coincidence and the stated
+  limitation. Plausible is not measured, and this record does not accept plausible for a figure
+  describing a commit.
+
+  OWED: the 62 in 10e-R244's OWN CATEGORIES — horizontal rules, section headings, top header,
+  preamble prose, scaffolding blanks — with the per-category delta against commit 1's 77. Same
+  categories, so it localises rather than merely partitions. Confirm per-block is still 5 by
+  category rather than by quotient, as 10e-R254 did. If the preamble grew, name what grew.
+
+  NOTHING ON DISK MOVES unless the enumeration surfaces something committed that should not have
+  been, and nothing suggests it does.
+
+ITEM 2 — THE CLAUDE.md HUNK, WHICH THE CHANNEL HAS NEVER READ.
+
+  CLAUDE.md is this project's canonical ground-truth document and every future cycle inherits it.
+  Its diff here is 10 insertions and 2 deletions — twelve lines — and the channel has approved
+  its CONTENTS through a description, never through the artifact. 10e-R176 and the commit-2
+  episode both say the same thing: a description of a diff is not the diff, and the failure it
+  hides is invisible to every other instrument. No test, no typecheck and no line count can see a
+  standing rule that says something slightly different from what was ruled.
+
+    git show 9d7bd16ef972363e8fc34fda39dfc81961d60edf -- CLAUDE.md
+    echo "rc=$?"
+
+  PASS GIT'S OUTPUT THROUGH. Do not re-render it, do not re-type any line, do not annotate inside
+  the block (10e-R256). If the relay path cannot carry a byte unchanged, say so and dump the
+  changed lines with od -c instead.
+
+  The channel's own arithmetic, stated in advance so a mismatch is a question rather than an
+  adjustment: six standing-rule lines is 6 insertions; the R183 relocation-plus-respecification is
+  1 deletion and 1 insertion; the Public API contracts entry is at least 1 insertion; the
+  Migration-status closure looks like 1 deletion and 1 insertion if it EDITS an existing 10e line
+  rather than adding one. That accounts for 9 insertions and 2 deletions against a reported 10 and
+  2. ONE INSERTION IS UNACCOUNTED IN THE CHANNEL'S MODEL — most likely the R200 two-line
+  correction as its own line, or a two-line contracts entry. The channel is NOT asserting a defect;
+  it is stating that it cannot reconcile twelve lines from a summary, which is the whole reason to
+  read them.
+
+BOTH ITEMS IN ONE REPORT. Then hard stop. The module's final reconciliation follows in the
+channel, and a FINAL DOCS COMMIT will persist 10e-R258 and the close-out ruling before anything
+is pushed — because 10e-R239 says rulings do not cross a boundary in a conversation, and these
+two currently live in one. Do not start that commit; it will be ruled with its own payload.
+
+---
+
+## Review-channel ruling block — 10e-R259, 2026-08-22
+
+10e-R259 — ITEM 1 CLOSED. The CLAUDE.md read goes DIRECT FROM THE REPOSITORY, option (1). The md5 census is retained and becomes the verification instrument rather than a substitute for reading. The refusal to retype 18.5 KB is RATIFIED.
+
+ITEM 1 IS CLOSED AND THE PREDICTION WAS MET EXACTLY. 62 = 6 rules + 5 headings + 1 top header
++ 28 preamble prose + 22 blanks, equal to 609 − 547 independently. Preamble 37 = 1 + 1 + 28 + 7;
+per-block 25 = 5 + 5 + 15, i.e. 1 + 1 + 3 = 5 each, confirmed BY CATEGORY for the third
+consecutive commit. The channel predicted preamble 37 and per-block 25 in advance and both
+landed. Preamble prose 13 → 15 → 28 is the only growing term and it is nameable: the R253
+reissue paragraph with its equality-proof figures, the collision account, and the stated
+limitation. The structural figure is now true about named things in all three persistence
+commits, and the model that predicts it has survived three tests.
+
+ITEM 2's ARITHMETIC RECONCILES AND THE CHANNEL'S GUESS IS FALSIFIED. 6 + 1 + 1 + 2 = 10
+insertions and 1 + 1 = 2 deletions. The unaccounted insertion is the Migration-status closure
+being ONE deletion and TWO insertions — it edits the STATUS line and adds a closure bullet. The
+channel's specific hypothesis, that the R200 two-line correction occupied its own line, is
+WRONG: it lives inside the closure bullet as finding (b), and the contracts entry is one line
+rather than two. Recorded as falsified rather than quietly dropped, because a prediction stated
+in advance is only worth stating if its miss is reported (10e-R208).
+
+THE R183 BYTE DELTA IS THE RIGHT KIND OF EVIDENCE. 904 → 1376 bytes makes the re-specification
+a measured change rather than an assertion that one occurred. A claim that a line was rewritten
+is discharged by the bytes moving, not by the claim.
+
+THE REFUSAL IS RATIFIED, AND IT IS 10e-R256 APPLIED AGAINST YOUR OWN CONVENIENCE. Twelve lines,
+≈18.5 KB, the longest at 2997 bytes. Retyping that is precisely the operation R256 forbids, at a
+volume where fidelity cannot be asserted — and R256 is explicit that a caveat on a rendering is
+not a mitigation. Declining to ship 18 KB of unverifiable transcription is the rule holding
+where it costs something, which is the only place a rule is tested. Flagging the choice rather
+than making it by omission is the second half and matters as much.
+
+RULED — OPTION (1). The text is read DIRECT FROM THE REPOSITORY by the operator, with zero
+transcription steps. Option (2) instruments the hazard; option (1) removes it, and R256 prefers
+removal. Your recommendation is adopted for the reason you gave.
+
+THE MD5 CENSUS IS NOT SUPERSEDED — IT BECOMES THE INSTRUMENT. This is the part that makes
+option (1) verifiable rather than merely shorter.
+
+  The census was computed from the artifact by the implementer. The operator's paste reaches the
+  channel from the SAME artifact by an entirely DIFFERENT path — git to terminal to clipboard to
+  channel, with no retyping anywhere. The channel then recomputes md5 over the pasted lines in
+  its own container. Two independent paths from one artifact, compared by a mechanical
+  instrument neither path can influence.
+
+  That is not the same-reading limitation you correctly identified for R254–R257. It is the
+  cross-reading check, and it is the R253 double-attestation shape arriving by design rather
+  than by accident.
+
+  THE DISCRIMINATOR, stated in advance so a mismatch is diagnosable rather than alarming: a
+  mismatch on ALL TWELVE indicates a CONVENTION difference — trailing newline included or
+  excluded, diff marker stripped or retained, trailing whitespace — and is recoverable by trying
+  the alternatives. A mismatch on ONE OR A FEW while the others match indicates CORRUPTION on
+  that line. Uniform failure and selective failure mean different things, and conflating them
+  would turn a formatting question into a false alarm or, worse, the reverse. The channel will
+  try the conventions itself and report which one matches all twelve.
+
+  A byte-count match with an md5 mismatch would indicate a same-length substitution, which is
+  the one corruption a length check cannot see and the census can.
+
+OPERATOR COMMAND — run in the public-statera working tree, paste the complete output:
+
+  git show 9d7bd16ef972363e8fc34fda39dfc81961d60edf -- CLAUDE.md
+
+  Paste it inside a fenced code block opened with FOUR backticks, because the content itself
+  contains backticks and a three-backtick fence will break mid-paste. Paste everything the
+  command prints, including the commit header and all three hunks with their context lines. Do
+  not edit it, do not trim it, and do not fix anything that looks wrong — if something looks
+  wrong that is the finding.
+
+NOTHING IS OWED BY THE IMPLEMENTER UNTIL THE CHANNEL HAS READ THE TEXT. Hard stop stands at
+9d7bd16, tree clean, 4 ahead of origin/main, nothing pushed.
+
+---
+
+## Review-channel ruling block — 10e-R260, 2026-08-22
+
+10e-R260 — THE CENSUS IS RUN AND EIGHT OF EIGHT MATCH. The convention was derived independently and agrees with yours in every particular. The content is READ. Three findings from the reading, one queue item, no defect. COMMIT 3 IS ACCEPTED WITHOUT RESIDUE.
+
+YOUR CONVENTION STATEMENT ARRIVED AFTER THE CENSUS HAD ALREADY RUN, and it is worth recording
+that it agrees with what the channel derived rather than merely being adopted. Independently, in
+the channel's own container: marker INCLUDED, trailing newline EXCLUDED, hash over that string,
+byte count over that same string. Identical to your four bullets. Two parties reaching the same
+convention from opposite ends — you from the instrument you wrote, the channel from probing the
+target — is a stronger statement than either declaring it.
+
+EIGHT OF EIGHT MATCH, byte count and md5 both, on every line whose CONTENT the channel had
+approved through a description rather than through the artifact:
+
+  R209 927 · R239 988 · R244 1090 · R246 1673 · R256 1279 · R257 1573 · R183 1376 ·
+  contracts 1994
+
+AND THE CROSS-READING PROPERTY IS THE POINT. You computed those digests from the repository in
+your container. The bytes reached the channel by an entirely different route — git to the
+operator's terminal to a paste to the channel's container — and were re-hashed there. Neither
+path could influence the other. That is not the same-reading limitation you correctly claimed for
+R254 through R257; it is the cross-reading check, arriving by design. Together with R253's
+double-attestation, this commit's CLAUDE.md half is now the best-evidenced text in the record.
+
+YOUR SAME-LENGTH WARNING FIRED ON ITS FIRST OUTING, AND IT FIRED ON THE CHANNEL.
+
+  The channel's FIRST convention guess — content without the marker, trailing newline included —
+  produced EXACTLY 927 BYTES on R209, matching the census byte count, with a different md5. Both
+  conventions yield 927 because the marker is one byte and the newline is one byte. A byte-count
+  match with an md5 mismatch, in the first line tested, in the very cycle in which you named that
+  class as the reason the census survives as an instrument rather than a shortcut.
+
+  Had the channel been checking lengths, it would have read 927 = 927 and stopped, and would have
+  concluded from a coincidence that the text was verified. The md5 is what refused. RECORDED as
+  the second live instance of 10e-R150's shape on a FIGURE rather than an instrument — the first
+  being the 91 = 91 coincidence one commit earlier. Two in two commits, both caught only because
+  a second, non-length instrument was present.
+
+  Note what this also does: it retroactively justifies your having reported byte counts AND
+  digests rather than either alone. Either alone would have been defeated here.
+
+THE CONTENT IS READ, AND YOUR STATEMENT THAT IT REMAINS OPEN IS DISCHARGED. You are right that
+hashes cannot tell whether a rule says what was ruled, right that it is the check to insist on,
+and right about why — a rule subtly wrong in CLAUDE.md is inherited by every future cycle and no
+instrument in this repository would ever contradict it. The channel read all twelve lines in the
+operator's paste. Findings:
+
+  (a) R246's durable line is STRONGER than the channel's draft. It closes with the 10f
+      diagnosis — a class fixed once and recorded as history is available to recur, because a
+      reader looking for rules does not read module summaries. That sentence was in the ruling's
+      prose and NOT in the line the ruling specified. Carrying it into the durable line was an
+      improvement on the ruling, not a deviation from it, and it is the half that explains why
+      the rule exists rather than what it says.
+
+  (b) R183's re-specification CARRIES ITS OWN PROVENANCE, which the ruling did not require. The
+      parenthetical records what the line previously said, why it was stale, and that the
+      persisted R183 block is untouched. A future reader who finds the CLAUDE.md line and the
+      persisted block disagreeing has the reconciliation in front of them instead of a puzzle —
+      which is the whole purpose of 10e-R78's adjacency principle, applied without being told to.
+
+  (c) THE CONTRACTS ENTRY EXCEEDS R124 AND R189, CORRECTLY. Beyond both shapes and the
+      discrimination rule it carries the /me asymmetry (must NOT be called on the handoff, MUST
+      be called on the session path, with the SPA-remount reason), why user_id is absent, the
+      five-cause uniformity with the apostrophe codepoint named, and the 410 REJECTION. The last
+      is the one the channel would have missed: without it, a future reader sees five causes
+      returning an indistinguishable 400, reasonably proposes 410 for the expired case, and does
+      not know 10e-R14 already refused it and why. An entry that anticipates the wrong question a
+      reader will ask is worth more than one that answers the right one.
+
+ONE QUEUE ITEM, NOT A DEFECT, NOT REOPENING A CLOSED MODULE. The 10e STATUS bullet was edited to
+DONE while its trailing "Remaining, in order" sentence was left standing, with a bracketed note
+declaring that sentence a historical record under 10e-R78. The reasoning is explicit and
+defensible and nothing is wrong today, because the closure bullet beneath it carries the live
+truth. But the result is ONE BULLET THAT IS SIMULTANEOUSLY A LIVE STATUS LINE AND A HISTORICAL
+RECORD, which is the exact shape 10e-R78 exists to keep apart. Queued for whoever next touches
+that entry: split it, or move the historical tail below the live line. Not owed by anyone now.
+
+FIGURES RECONCILED: 62 = 6 + 5 + 1 + 28 + 22, equal to 609 − 547 independently; per-block 5 by
+category for the third consecutive commit; preamble 13 → 22 → 37 with the growth named. 5068 −
+4423 = 645 = 609 + 36, with the 36-line amendment deleted to reproduce 5032 at a byte-exact seam.
+CLAUDE.md 10 insertions, 2 deletions, all twelve mapped to ruled work with none unaccounted.
+
+9d7bd16 IS ACCEPTED WITHOUT RESIDUE. MODULE 10e's THREE COMMITS ARE COMPLETE.
+
+STAND BY. The close-out reconciliation is written in the channel and will arrive as one prompt
+carrying the final docs commit — which persists 10e-R258, 10e-R259, 10e-R260 and the close-out
+ruling itself, under 10e-R239, before any push. Do not start it. Nothing is owed until it
+arrives.
+
+---
+
+## Review-channel ruling block — 10e-R261, 2026-08-22
+
+10e-R261 — TWO CORRECTIONS FROM THE IMPLEMENTER ARE ACCEPTED. The 927 event's generalisation is RATIFIED and amends 10e-R256's framing. The queue item is RE-CLASSIFIED from a judgement call to a DEPARTURE, on the implementer's own argument. Finding (c)'s intent is recorded.
+
+CORRECTION ONE IS ACCEPTED AND IT AMENDS THE CHANNEL'S FRAMING, NOT ONLY ITS EXAMPLES.
+
+  The channel wrote that 927 = 927 was a coincidence. IT IS NOT. Your arithmetic is right and it
+  is the better statement: the marker is one byte and the newline is one byte, so the two
+  conventions are indistinguishable by LENGTH BY CONSTRUCTION. There is no chance in it. A
+  length check cannot separate marker-included-newline-excluded from marker-excluded-newline-
+  included, ever, for any line. The channel called a structural property luck, which understates
+  the hazard in the direction that makes it likelier to recur — a coincidence is something you
+  wait out, and a construction is something you must instrument around.
+
+  AND THE GENERALISATION IS THE PART THAT MATTERS. Every prior instance of this class in this
+  module put the implementer on the failing side: the retyped hunk, the summarised diffstat,
+  Disposition 1's under-count. Three in a row invites reading the whole class as an
+  implementer-discipline problem, and the record was drifting that way. Then it caught the
+  channel, on the first line the channel tested, one turn after you named it.
+
+  RULED, and it is a genuine amendment to how 10e-R256 and 10e-R246 should be read: THIS CLASS
+  IS A PROPERTY OF MEASUREMENT, NOT OF ANYONE'S CARE. It bites whoever is holding the
+  instrument. The evidence is now symmetric across both parties and the record should say so,
+  because a rule believed to be about the other end's discipline is a rule the reader exempts
+  themselves from.
+
+  RECORDED AS AN AMENDMENT TRAVELLING ADJACENT, NOT AS AN EDIT — 10e-R256's persisted line is
+  NOT touched (10e-R78), and this block is the adjacency. NO NEW CLAUDE.md LINE. The count stays
+  at six. R256 and R246 already state the mechanism correctly; what needed correcting was the
+  distribution of examples, and inflating the standing set to fix an impression would cheapen
+  it (10e-R184's principle, and 10e-R238's disposition for the same situation).
+
+CORRECTION TWO IS ACCEPTED AND IT IS THE SHARPER OF THE TWO, BECAUSE YOU RULED AGAINST YOURSELF
+ON A RULE THE CHANNEL DID NOT CITE.
+
+  The channel called the mixed 10e STATUS bullet a defensible judgement call with an explicit
+  reason. You declined that characterisation and named the governing rule: 10e-R256's "a caveat
+  that a block is a rendering is not a mitigation" generalises, and NAMING A MIXTURE DOES NOT
+  UNMIX IT. A bracketed note declaring part of a live bullet historical is a caveat standing in
+  for a fix, which is the same move R256 forbids one surface over. The correct remedy was to
+  SPLIT the entry, and the cheaper thing was chosen and documented.
+
+  RE-CLASSIFIED: not a judgement call that went either way. A DEPARTURE, documented at the time,
+  in the shape 10e-R166(b) records — which is exactly the disposition this module gives a
+  self-licensed shortcut taken with its reasoning stated. That is a better record than "fair
+  enough," and you are right not to want the softer one, because a departure recorded as a
+  judgement call is available as precedent and a departure recorded as a departure is not.
+
+  IT REMAINS QUEUED AND UNOWED. Nothing is wrong today: the closure bullet beneath carries the
+  live truth. The fix is to split the bullet or move the historical tail below the live line,
+  by whoever next touches that entry. Module 10e does not reopen for it.
+
+  ONE OBSERVATION THE CHANNEL OWES ITS OWN LEDGER: the mixed bullet was in the paste the channel
+  read line by line, and the channel classified it correctly as the shape R78 exists to prevent
+  — but reached for "defensible" rather than for R256, which was on the screen in the same diff.
+  Having the governing rule in view is not the same as applying it.
+
+FINDING (c) — INTENT RECORDED, and it upgrades the finding. The 410 rejection was DELIBERATE,
+not thorough. Five distinct failures returning one indistinguishable 400 reads to a cold reader
+as under-specification, and the natural next move is to propose 410 for the expired case; without
+10e-R14's refusal recorded beside the contract, that reader rediscovers the reasoning or, far
+more likely, does not. ANTICIPATING THE WRONG QUESTION A READER WILL ASK is a distinct
+documentation standard from answering the right one, and it is the standard a contract entry
+should be held to, because a contract's readers arrive without the deliberation that produced it.
+Recorded as the intent it was rather than as a happy thoroughness.
+
+NOTHING IS OWED. State holds at 9d7bd16, tree clean, 4 ahead, nothing pushed, final docs commit
+not started. The close-out prompt follows.
+
+---
+
+## Review-channel ruling block — 10e-R262, 2026-08-22
+
+10e-R262 — MODULE 10e CLOSE-OUT. ONE RULED DELIVERABLE WAS NEVER WRITTEN and three parties missed it. The final docs commit is specified. The module does not close until it lands.
+
+(a) YOUR CONNECTIVE OBSERVATION IS RATIFIED AND RECORDED AS AN INSTANCE, NOT A RULE. "Proximity
+to a rule does not produce application of it" is the same mechanism 10e-R255 recorded from the
+other side, where the retyping class survived being named, owned and corrected inside a single
+document. Here the governing rule was on screen in the diff being read and the reading still
+reached for "defensible." Two instances, opposite ends, one mechanism. Instances belong beside
+the rule; declining to propose a seventh standing line was correct and the count stays at six.
+
+(b) THE MISS. 10e-R250(e) ruled that 10e-close carries a FOUR-ENTRY BOUNDED-UNKNOWN RECORD.
+IT WAS NEVER WRITTEN.
+
+  Measured, not inferred. CLAUDE.md contains ONE occurrence of "bounded unknown", at :118,
+  inside the 10e-4 module-status entry — and that occurrence QUEUES the obligation ("the
+  bounded-unknown record gains a fourth entry"), it does not discharge it. The 10e-close diff
+  has three hunks: Migration status, standing rules, Public API contracts. None is the record.
+  And the standing line for 10e-R168 ends with an instruction that is still outstanding: cite
+  alongside [[10e-R134]] at 10e-close, the Errors-grep's undemonstrated independence being that
+  rule's live instance. The file itself has been asking for this since 2026-08-19.
+
+  THREE PARTIES MISSED IT, and the accounting matters more than the omission. Your §4 proposal
+  listed the docs-pass contents and did not include it. The channel's 10e-R252 approved that
+  list — while §5 of the SAME BLOCK accepted the fourth entry's content and rejected a
+  candidate for it. The channel debated what belonged in a record it had just failed to require
+  be written. Then the channel read all twelve changed lines and verified eight by md5, and
+  still did not notice.
+
+  THAT LAST FAILURE IS THE INSTRUCTIVE ONE. A byte census answers "is what is here correct." It
+  is structurally incapable of answering "is everything that should be here present." Eight of
+  eight matching is a complete answer to a question that was not the one at issue, and the
+  confidence it produced is what made the absence invisible. An integrity instrument reads as a
+  completeness instrument and is not one.
+
+  NO NEW STANDING LINE. 10e-R142's rider already governs: N ruled items close with N per-item
+  presence assertions. The docs pass ran presence assertions on the six standing-rule lines and
+  ran NONE against the ruled deliverable list. The discipline existed and was applied to part of
+  the payload instead of to the obligation. Cited, not minted; the count stays at six.
+
+(c) THE FOUR ENTRIES, ruled in full so the writing is transcription rather than authorship:
+
+  1. THE ERRORS-GREP'S INDEPENDENCE FROM THE EXIT CODE IS UNDEMONSTRATED (10e-R134 + 10e-R168).
+     It is demonstrated capable of firing. Its independence from the exit code has never been
+     shown. It is ONE instrument, not a second opinion, and must never be described as two
+     independent instruments. This entry discharges the instruction standing in 10e-R168's own
+     line.
+
+  2. THE FRONTEND CONTROL'S PROVENANCE IS SYNTHETIC (10e-R181(b)). Its right-hand side was
+     authored rather than generated from a runtime capture, so it and the thing it checks can
+     agree by construction. Contrast money-wire-shape.assert.ts, which escapes this only
+     because its counterpart IS generated from a capture.
+
+  3. NOTHING VERIFIES THE DECLARED SHAPE AGAINST THE RUNNING SERVER PRE-DEPLOY (10e-R192).
+     CONCRETE INSTANCE (10e-R205(c)): MagicLinkPage.test.tsx:71, a fixture standing in for the
+     server, carrying the server's string, checked against nothing.
+     NARROWED, NOT CLOSED. Sibling tests at :157/:164 pass "alpha" and "omega" under the same
+     code, which is affirmative evidence the component is message-independent; what survives is
+     that the field the client branches on is `code`, not `error`.
+     AND THE ENTRY MUST CARRY THIS SENTENCE, in substance: updating :71 at 87333af did NOT close
+     this, because nothing checks the fixture against the server in either direction and
+     hand-updating is the same hand-maintenance that produced the divergence. An entry that reads
+     as though the update closed something is worse than no entry.
+
+  4. THE INTEGRATION BASELINE IS NOT REPRODUCIBLE BY CONSTRUCTION. 897/10 was measured against a
+     dev MySQL/Redis whose state is not reset between runs; per TB-R1(b) only rl:* is flushed by
+     globalSetup, while dev rows, BullMQ state and analytics-cache keys persist. This does not
+     impugn the reading — exit 0, mode engaged by two mechanisms — it bounds its reproducibility
+     from a clean database, which no run has established.
+     The rejected candidate is recorded WITH its reason, because the reason is the definition
+     this record has been operating on unstated: the OIDC callback's TOTP branch has zero
+     route-level coverage, measured at 0 executions behind a positive control — and a MEASURED
+     ZERO is a coverage gap for the queue, not an unknown. A bounded-unknown entry names what the
+     evidence CANNOT REACH.
+
+  PLACEMENT IS YOURS TO PROPOSE, WITH REASONING, AND THE CHANNEL RULES IT BEFORE YOU WRITE.
+  The constraints: it must be findable from 10e-R168's standing line, which promises the
+  citation; it must not dilute the standing-rules section, since these are not rules; and the
+  10e-close Migration-status bullet is already 2997 bytes. The channel has read CLAUDE.md only
+  in part and will not rule a structural placement in a file you can see whole — that is
+  10e-R182 applied to the channel's own decision.
+
+(d) THE QUEUE, DERIVED at close rather than carried. TEN items, none opened, none owed now:
+
+  Carried into 10e-close (five): 10e-R129 cross-family token presentation, OWN CYCLE, DO NOT
+  BUNDLE; R85/R72 with R199's second site, the platform-supplied non-localizable HTML5 refusal;
+  R161's acknowledgement half with its one surviving mechanism, a value-less server-set flash
+  cookie, deferred on SCOPE not soundness; LoginPage.test.tsx:24's heading query as a latent
+  constraint on future copy; R155's soft-delete email retention.
+
+  Raised at the 10e-close proposal (four), all DO-NOT-BUNDLE: the argument-recording mock, whose
+  WHERE bound is unobservable by construction and whose fix touches a shared helper three other
+  handlers depend on; account_action_tokens as a DEAD TABLE with no write path in any commit in
+  repository history; §7's "anonymous" and "one-way hash" against an unsalted SHA-256 plus
+  ip_address and user_agent, which is pseudonymous rather than anonymous; §5's Postmark line,
+  declined 2026-08-19 as weak-but-true when magic-link was not live, and it is live now.
+
+  Raised this cycle (one): the 10e STATUS bullet is simultaneously a live status line and a
+  historical record, recorded per 10e-R261 as a DEPARTURE under 10e-R166(b) rather than as a
+  judgement call. The fix is a split. Whoever next touches that entry.
+
+  SEPARATELY SCOPED, not among the ten: 10e-R241's R36–R101 recovery hypothesis, own cycle; and
+  the TermsPage LAST_UPDATED question, which is the operator's and is not an obligation.
+
+(e) THE THREE MANDATORY CLOSE-OUT SECTIONS are discharged and must be CARRIED IN THE FINAL
+COMMIT BODY so the close-out is self-contained on disk rather than only in a conversation:
+  (1) the verbatim test tail with Test Files summary and captured exit code, for the exact
+      commands CI runs — statera-api test and statera-frontend run test:unit — with the Errors
+      instrument reported as ONE instrument of undemonstrated independence;
+  (2) the verbatim tsc --noEmit output and captured exit code for both packages;
+  (3) the baseline hunk, VACUOUS — no count moved, so it is satisfied by saying so and showing
+      nothing (10e-R250(g)).
+
+(f) THE FINAL DOCS COMMIT. Docs-only, gates skipped under 10e-R149. Contents:
+  the bounded-unknown record at the placement the channel approves; ruling blocks 10e-R258,
+  R259, R260, R261 and this block appended verbatim; the completeness-note amendment; and the
+  three sections above in the commit body.
+
+  MANDATORY, per 10e-R257 and applied to its author: sweep the payload for header collisions
+  BEFORE appending. Header-pattern matches must EQUAL the block count, with a control proving
+  the sweep can detect one. The channel has NOT verified its own emitted bytes and cannot.
+
+  PREDICTION, to be re-derived at commit time and not carried from here (10e-R118): Format A
+  91 → 96, reconciled 91 + 5 = 96 and (209 − 140 + 1) + (262 − 237 + 1) = 70 + 26 = 96. Format B
+  unchanged at 11. Shape: one break at 209 → 237, no duplicates, last = 262. Five presence
+  assertions with the ^10e-R0 —  control. Docs-only by exclusion with a positive control. wc -l
+  after the LAST edit, reconciled against the diffstat by reconstruction.
+
+  DO NOT START IT. Propose the placement first; the commit is written after the channel rules it.
+
+(g) NOTHING IS PUSHED. The push is the operator's and two decisions precede it.
+
+MODULE 10e DOES NOT CLOSE UNTIL (b) IS DISCHARGED. Everything else is complete.
+
+---
+
+## Review-channel ruling block — 10e-R263, 2026-08-22
+
+10e-R263 — PLACEMENT APPROVED AS PROPOSED. Both decisions RULED. One amendment to 10e-R262(c), and it strengthens the section against its own failure mode. The final docs commit is specified and released.
+
+PLACEMENT APPROVED: a new top-level ## section, immediately after ## Test conventions and before
+## Public API contracts. Reasons 1 and 2 are decisive and the channel adopts them as given.
+
+  THE STRUCTURAL MEASUREMENT IS INDEPENDENTLY CONFIRMED, which matters because the whole ruling
+  was deferred to you on the ground that you can see the file whole and the channel cannot. The
+  channel measured its own pre-commit-3 copy: ZERO ### headings, ZERO ####, TWELVE ##, with Test
+  conventions at :553 and Public API contracts at :584. You report :560 and :591 post-commit-3, a
+  uniform +7 — which is exactly commit 3's net insertion above that point (Migration status +1,
+  standing rules +6). Two measurements from different copies at different commits, reconciling
+  through a delta neither was computed to explain. The ### rejection rests on a measured zero,
+  not on taste, and that is the right basis for declining to invent a markdown convention.
+
+  REASON 3 IS THE ONE THE CHANNEL WOULD NOT HAVE FOUND. Placing the record immediately beneath
+  the baselines it bounds means a reader who has just read 897/10, exit 0 at :576 meets its bound
+  next, rather than needing to know a separate section exists elsewhere. A bound that must be
+  looked for is a bound that will not be. That is 10e-R183's session-cookie-helper-index argument
+  applied to a record instead of a rule: a live index sitting away from its family is harder to
+  find, and harder to find is functionally absent.
+
+DECISION 1 — RULED: R168's STANDING LINE GAINS A POINTER. AUTHORISED.
+
+  Your directional analysis is correct and the channel's 10e-R262(c) wording was satisfied by an
+  arrangement that does not satisfy its INTENT. A back-citation from entry 1 to R134 and R168
+  makes the LINE findable from the RECORD. R262 required the RECORD findable from the LINE. Those
+  are different pointers and only one of them was ruled. Entry 1 keeps its back-citation; the
+  line gains the forward one.
+
+  THE LICENCE IS THE R183 CLASS AND THE CHANNEL RULES IT SO EXPLICITLY, since you correctly
+  declined to extend a licence granted once for one line (10e-R166(b)). The governing clause in
+  R168's line reads, in substance, "cite alongside [[10e-R134]] at 10e-close" — an INSTRUCTION
+  POINTING FORWARD TO A FUTURE ACT. That act is now performed. An outstanding instruction left
+  standing after discharge tells a future reader something is owed that is not, which is a LIVE
+  INDEX gone stale, exactly as R183's fixed upper bound was. It moves.
+
+  WHAT MUST SURVIVE: the fact that the instruction stood open from 2026-08-19 to 10e-close is
+  preserved, not erased — 10e-R262(c) entry 1 already carries "this entry discharges the
+  instruction standing in 10e-R168's own line," and that sentence is now load-bearing rather than
+  decorative. The correction travels adjacent; the persisted 10e-R168 BLOCK is a historical record
+  and is NOT edited.
+
+  BOUNDED: this authorises ONE pointer on ONE line. It does not license editing any other
+  standing-rule line, and a second instance comes back to the channel.
+
+DECISION 2 — HEADING RATIFIED AS PROPOSED, VERBATIM:
+
+  ## Bounded unknowns — what the verification evidence does not reach
+
+  Pinned as a citation target. Ratified for a reason stronger than the one offered: THE SUBTITLE
+  IS AN ADMISSION GATE, not a gloss. A section called "Bounded unknowns" with no definition in
+  view will, within two modules, accumulate known coverage gaps, deferred work and things nobody
+  got to — and you already ruled why that is wrong: a MEASURED ZERO is a coverage gap for the
+  queue, not an unknown; an entry names what the evidence CANNOT REACH. Putting that test in the
+  heading means every future contributor meets the admission criterion before the first entry.
+  The heading defends the section from the failure mode that kills records of this kind.
+
+AMENDMENT TO 10e-R262(c), and it follows from the paragraph above. The channel placed the
+REJECTED CANDIDATE — the OIDC callback's TOTP branch, zero route-level coverage measured at 0
+executions behind a positive control — inside entry 4. MOVE IT. It belongs as a SECTION-LEVEL
+ADMISSION NOTE, because its reason defines admission for EVERY entry, not for the fourth. Entry 4
+keeps its own content; the rejected candidate and its reason become the section's closing note,
+positioned so a contributor adding a fifth entry reads it.
+
+FORM FOR THE SECTION, so it is transcription rather than authorship:
+  - Four numbered entries, contents exactly as ruled at 10e-R262(c), including entry 3's sentence
+    that updating :71 at 87333af did NOT close it.
+  - Each entry names the rulings that earned it, so a reader can reach the reasoning.
+  - Closing admission note: the rejected candidate with its reason.
+  - No entry is written as closed, narrowed-to-nothing, or discharged. Entry 3 is NARROWED and
+    the narrowing is stated with what survives — the field the client branches on is `code`, not
+    `error`.
+
+THE FINAL DOCS COMMIT IS RELEASED. Docs-only, gates skipped under 10e-R149, 2026-08-19.
+
+  CONTENTS:
+    (i)   the new ## section, placed and headed as ruled above;
+    (ii)  the pointer appended to 10e-R168's standing line, per Decision 1;
+    (iii) ruling blocks 10e-R258, R259, R260, R261, R262 and R263 appended verbatim to
+          docs/modules/phase4-10e.md;
+    (iv)  the completeness-note amendment;
+    (v)   the three mandatory close-out sections in the COMMIT BODY per 10e-R262(e), so the
+          close-out is self-contained on disk and not only in a conversation.
+
+  COLLISION SWEEP BEFORE APPENDING, mandatory (10e-R257), and your flag is right: R262 and R263
+  both carry many 10e-R<n> citations and are live candidates. Header-pattern matches must EQUAL
+  the block count, with a control proving the sweep can detect a collision. If any block collides,
+  STOP and report which — do not rewrap it yourself; the author reissues under the 10e-R257
+  licence.
+
+  PREDICTION, re-derived at commit time and not carried from here (10e-R118): Format A 91 → 97 —
+  SIX blocks, not the five 10e-R262(f) predicted, because R263 joins the payload. Reconciled two
+  ways: 91 + 6 = 97 and (209 − 140 + 1) + (263 − 237 + 1) = 70 + 27 = 97. Format B unchanged at 11.
+  Shape: exactly ONE break at 209 → 237, no duplicates, last = 263. Six presence assertions with
+  the ^10e-R0 —  control. Docs-only by exclusion with a positive control. wc -l after the LAST
+  edit, reconciled against the diffstat by reconstruction.
+
+  AND RUN A PER-ITEM PRESENCE ASSERTION AGAINST THE RULED DELIVERABLE LIST (i)…(v), not only
+  against the ruling blocks. That is 10e-R142's rider, and its absence from the last docs pass is
+  precisely how the bounded-unknown record went unwritten while every block-level check passed.
+  A commit that verifies its payload and not its obligations is the failure this commit exists to
+  repair.
+
+  NOTHING IS PUSHED. The push is the operator's and two decisions precede it.
+
+MODULE 10e CLOSES WHEN THIS COMMIT LANDS AND IS RECONCILED.
