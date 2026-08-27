@@ -1553,6 +1553,42 @@ appended section; R140's own text is unedited.
 - **R103, R131, R139 and R36–R101 are unchanged** — still issued-but-unpersisted, still OWED,
   still not to be reconstructed. 10e-R241's recovery hypothesis is **not** acted on here.
 
+## AMENDMENT — 2026-08-22, under 10e-R256(iv) + 10e-R257 (10e-close docs pass)
+
+- **10e-R253 … 10e-R257 are now PERSISTED**, verbatim, in the appended section at the end of this
+  file (Format A). The persisted set is therefore **R7–R17 (Format B, 11 blocks)** and
+  **R140–R209 + R237–R257 (Format A, 91 blocks)**, derived at commit time and reconciled two ways
+  — 86 + 5 = 91 and (209 − 140 + 1) + (257 − 237 + 1) = 70 + 21 = 91.
+- **THE COUNT 91 IS NOT EVIDENCE HERE, AND THE RECORD SAYS SO DELIBERATELY (10e-R257).** A halted,
+  *defective* append of four blocks also measured Format A = 91, because it introduced one phantom
+  header. **The count cannot distinguish the correct state from the broken one.** The
+  discriminating instrument is the SHAPE: exactly **one** break (209 → 237), **no duplicates**,
+  **last = 257**, and `^10e-R249 — ` occurring exactly **once**. Anyone re-deriving this figure
+  later must check the shape, not the total.
+- **HEADER COLLISION — found, halted, and fixed at the source (10e-R257).** The first relay of
+  10e-R253 contained a mid-sentence citation broken by its own line-wrapping to column 0
+  (`10e-R249 — C-1's derived bytes…`). That satisfies the Format-A header pattern, so appending it
+  would have written a phantom header into this file and duplicated a real R249 block. **The
+  composite instrument fired** — three breaks instead of one, a duplicate at 249, and a count
+  exceeding both routes — the commit was halted before writing and the append reverted. **The
+  author reissued R253 pre-persistence for wrapping only**, under a narrow licence (author only,
+  pre-persistence only, non-semantic layout only, equality proof mandatory). Proven layout-only:
+  normalised token streams byte-identical (6060 = 6060, rc=0), raw diff showing exactly six
+  reflowed lines, both copies 91 lines, and a one-word positive control producing 12191 bytes of
+  normalised diff at an unchanged line count. **A reader comparing this record against an earlier
+  relay of R253 sees a wrapping difference and nothing else.**
+- **THE BARE GREP IS A CORRELATE; THE COMPOSITE IS THE INSTRUMENT.** `^10e-R<n> — ` can be
+  satisfied by a body line. What makes the check sound is reconciling the count **two ways**
+  against the range and inspecting the enumerated list for duplicates and breaks — **the range
+  route cannot see a spurious match**, so disagreement between the routes is positive evidence of
+  one. **Retrospective validation:** at every prior persistence commit the two routes AGREED and
+  the enumeration showed no duplicates, and a colliding line necessarily inflates the grep route
+  while leaving the range route untouched. That agreement is therefore positive evidence of **zero
+  collisions in everything persisted to date**, not merely an absence of reports. `e6aab65` and
+  `5dd2bd3` stand.
+- **R103, R131, R139 and R36–R101 are unchanged** — still issued-but-unpersisted, still OWED,
+  still not to be reconstructed. 10e-R241's recovery hypothesis is **not** acted on here.
+
 ---
 ---
 
@@ -4421,3 +4457,612 @@ PROCEED. Commit 1, then commit 2, then commit 3, reporting after EACH rather tha
 three reports, three channel reviews. Do not batch the three commits behind one report; the
 first is the repair and the channel wants it confirmed landed before code moves. Hard stop
 after commit 1's report.
+
+---
+
+# APPENDED RULING BLOCKS — 10e-R253 … 10e-R257 (persisted 2026-08-22 under 10e-R256(iv) + 10e-R257, the 10e-close docs pass)
+
+Pasted from the review channel **verbatim**, not reconstructed and not summarized, per 10e-R102
+and 10e-R143. The original text of each block is unedited; the only additions are the section
+headers.
+
+**PROVENANCE — RELAYED.** All five arrived as text in the review channel and were held verbatim,
+the same class as 10e-R242 … 10e-R252 and distinct from R205–R209's **RECOVERED**. **10e-R254
+arrived TWICE with IDENTICAL text**; under 10e-R240(a) identical re-arrival is not a divergence,
+so neither copy was discarded and the block is persisted once.
+
+**10e-R253 WAS REISSUED BY ITS AUTHOR BEFORE PERSISTENCE, FOR WRAPPING ONLY (10e-R257).** The
+first relay of R253 contained a mid-sentence citation that its own line-wrapping broke at column
+0 — `10e-R249 — C-1's derived bytes…` — which satisfies the Format-A block-header pattern and
+would have entered this file as a phantom header, duplicating a real R249 block. The append was
+halted before committing and reverted. The author reissued the block with that one paragraph
+rewrapped; **the licence is narrow** — pre-persistence only, author only, non-semantic layout
+only, exact delta declared, equality proof mandatory. **Proven layout-only before the reissued
+text replaced the held copy:** normalising both copies to a whitespace-separated token stream
+gave byte-identical results (6060 = 6060, rc=0), the raw diff showed exactly the six reflowed
+lines and nothing else, and both copies are 91 lines. The positive control — one word altered in
+a temp copy — produced 12191 bytes of normalised diff while leaving the line count unchanged at
+91, so only the normalised check could have seen it. **A reader comparing this record against
+any earlier relay of R253 sees a wrapping difference and nothing else.**
+
+**This set is CONTIGUOUS from 253 to 257**, extending the 237 … 252 run to **237 … 257**. The one
+deliberate gap in this file remains 10e-R210 … 10e-R236.
+
+**Recorded limitation on the integrity check that follows this commit** (10e-R168): the
+byte-level diff run against these blocks compares the committed text to the implementer's own
+per-block transcription. It proves **file-matches-transcription**, which catches an assembly or
+truncation fault; it does **not** independently verify transcription-matches-relay, because both
+sides derive from one reading. That limit applied equally to the preceding two persistence
+commits and is stated here rather than left implied.
+
+---
+
+## Review-channel ruling block — 10e-R253, 2026-08-22
+
+10e-R253 — COMMIT 1 (5dd2bd3) IS ACCEPTED ON PERSISTENCE AND ON INTEGRITY. Both predictions met two ways. ONE STRUCTURAL FIGURE IS UNRECONSTRUCTED and is owed with commit 2's report. It does not gate commit 2. PROCEED.
+
+ACCEPTED on the primary instrument. Format A 75 → 86, both routes agreeing — 75 + 11 = 86 and
+(209 − 140 + 1) + (252 − 237 + 1) = 70 + 16 = 86 — derived at commit time from the blocks
+actually present rather than carried from a proposal that predated three of them (10e-R118).
+Format B unchanged at 11. Eleven presence assertions at count=1 rc=0 with BOTH controls at 0
+rc=1. Shape derived from the enumerated list rather than asserted: one break at 209 → 237,
+last 252, no duplicates, no second gap. 10e-R251's consequence discharged.
+
+The eleven block counts sum to 1026 by channel re-derivation, agreeing with yours.
+
+ITEM 2 RUN UNPROMPTED, AND THE REASONING IS BETTER THAN THE COMPLIANCE. You identified that
+these eleven were hand-transcribed and therefore the HIGHER-risk case rather than the lower
+one, and ran the byte-level check without being asked. Eleven empty diffs against extractions
+from git show HEAD:<path>, with the working tree first shown identical to HEAD. Three controls
+firing at rc=1 with a matching rc=0 pair for contrast — mid-file, EOF-boundary (10e-R135, the
+extractor's other branch), and truncation, which is the specific failure a presence check
+cannot see. A discipline the channel had to impose two cycles ago is now applied by the
+implementer to a case the channel did not think to name. That is the difference between
+following a rule and holding one.
+
+PIPE HYGIENE, DECLARED AGAIN AND OBSERVED TWICE. Your first control run piped diff into head,
+so the reported rc belonged to head; you caught it, re-ran unpiped, and declared the discarded
+run. Same slip as the api-suite pipe, same self-correction, and declaring it is what makes the
+replacement evidence. RECORDED AS A RECURRING HAZARD, not as a new rule — 10e-R151 already
+governs rc capture and the detection is working both times. The ergonomic note, offered rather
+than imposed: redirect to a file and read the file, so the rc is never a pipeline's.
+
+R243 PERSISTED UNEDITED, clause (f) still reading "OWED, UNCHANGED" for items 10e-R244 closed
+the same day, with the correction travelling adjacent in R251. That is 10e-R78 applied to a
+block whose staleness was known at the moment of writing it down, which is the hardest case to
+resist editing.
+
+COMPLETENESS NOTE ACCEPTED, including the provenance distinction — RELAYED and RELAYED-LATE
+kept separate from R205–R209's RECOVERED — and the record that enumeration is the only
+instrument that has ever caught the relay-fault class, three times.
+
+THE UNRECONSTRUCTED FIGURE. Your own decomposition gives the block append as 1103 lines
+(3287 + 1103 + 33 = 4423). The eleven blocks total 1026. 1103 − 1026 = 77, and 77 is currently
+satisfied by any 77 lines anywhere in the payload.
+
+  IT IS BOUNDED HARD, and Item 2 is what bounds it: the eleven bodies are byte-pinned against
+  the held copies, so every one of the 77 lies OUTSIDE the blocks. This cannot be body
+  corruption. It is bookkeeping, not risk, and that is why it does not gate commit 2.
+
+  IT IS A QUESTION, NOT A DEFECT (10e-R137b), and it is R208's shape. What makes it a question
+  rather than an idle sum: 10e-R244's accepted decomposition of the PRIOR commit resolved 63
+  structural lines into preamble 13 plus per-block 5 × 10. Applied here — preamble 13 plus
+  per-block 5 × 11 — that predicts 68. Measured, 77. Delta +9. Two commits of the same kind,
+  built by the same hand, should not disagree about their own scaffolding without a reason.
+
+  THE INNOCENT READINGS, offered for falsification and not to be adopted: this commit's
+  section preamble may simply be longer than the prior one's seven prose lines; or the
+  per-block scaffolding may have gained a line; or a trailing blank may be counted differently
+  at the payload boundary. The channel cannot tell which and is not guessing.
+
+  OWED WITH COMMIT 2's REPORT, and it is one enumeration rather than a re-measurement. Resolve
+  the 77 into NAMED CATEGORIES using the SAME categories 10e-R244 accepted for the 63 —
+  horizontal rules, section headings, top header, preamble prose, scaffolding blanks — and
+  state the per-category delta against that commit. Comparing category to category localises
+  the +9 immediately; a fresh partition would not, because it would be a different question
+  answered well. If a category legitimately grew, name it and the figure becomes true about
+  something instead of merely available.
+
+  NOTHING ON DISK MOVES unless the enumeration surfaces something committed that should not
+  have been, and nothing in your report suggests it does.
+
+ROUND-TRIP, INSIDE THIS BLOCK per 10e-R251's single-emission rule — the channel does not get
+an exception for commands it considers minor, which is the defect that produced R243's
+non-delivery:
+
+  git rev-parse --verify 5dd2bd3a2ee6efce5a9091a01c2b48144e9c4daa^{commit}
+  git show --no-patch --format='%H %s' HEAD
+  git rev-list --count origin/main..HEAD
+  git status --porcelain > /tmp/c1-status.txt
+  echo "rc=$?"
+  wc -l < /tmp/c1-status.txt
+
+A SHA appearing only in a relayed report is a label, not an identifier (10e-R148). Report all
+six outputs. Expect origin/main..HEAD = 2.
+
+PROCEED TO COMMIT 2 as approved at 10e-R252 §3, unchanged: rider (i) 10e-R200's marker removal
+with before-present / after-absent ON THAT PATH ONLY; rider (ii) 10e-R237 as amended
+by 10e-R249 — C-1's derived bytes, od -c parity behind a working negative control, the
+ratified R78 dispositions (:71 UPDATE as live index, :49 DO NOT TOUCH as historical record,
+with the grep-still-returns-the-comment note required in the commit body), and
+magic-link.test.ts:529 in the same commit. Then the FINAL two-mode cross-check AFTER commit 2,
+stated as COLLECTED-SET INVARIANCE and not as a coverage claim (10e-R248).
+
+Report commit 2, the round-trip above, and the 77-line enumeration together. Then hard stop.
+Commit 3 awaits channel review.
+
+---
+
+## Review-channel ruling block — 10e-R254, 2026-08-22
+
+10e-R254 — THE 77 IS CLOSED. Commit 2's SUBSTANCE is accepted; its DIFFSTAT is not. Two figures disagree with the ruled scope by the same amount, from different directions. ONE COMMAND SETTLES IT. Commit 3 HOLDS.
+
+THE 77 IS CLOSED AND THE ENUMERATION IS THE RIGHT KIND. Rules 11 → 12, headings 10 → 11, top
+header 1 → 1, preamble prose 7 → 15, blanks 34 → 38; sum 77, verified mechanically and equal to
+1103 − 1026 independently. Same categories as 10e-R244, so the comparison localises rather than
+merely partitions — which is why the channel asked for those categories and not a fresh split.
+
+Channel re-derivation, and it is stronger than the division you used. (77 − 22) / 11 = 5
+establishes the per-block figure only if per-block is uniform. The categories establish it
+directly, in BOTH commits, by the same decomposition:
+
+  prior:  preamble 1 rule + 1 header + 7 prose + 4 blanks = 13
+          per-block 10 rules + 10 headings + 30 blanks = 50, i.e. 1 + 1 + 3 = 5 each
+  this:   preamble 1 rule + 1 header + 15 prose + 5 blanks = 22
+          per-block 11 rules + 11 headings + 33 blanks = 55, i.e. 1 + 1 + 3 = 5 each
+
+Per-block is 5 in both by construction rather than by quotient. Total Δ+14 decomposes as +9
+preamble and +5 for the eleventh block. Your first innocent reading is CONFIRMED AND QUANTIFIED;
+the per-block and boundary-term readings are FALSIFIED, and falsified by the categories summing
+to 77 with no remainder rather than by assertion. The growth is accounted to two named
+paragraphs the prior preamble had no need of — the RELAYED / RELAYED-LATE provenance and the
+contiguity statement 10e-R251 required. True about named things. Closed.
+
+RIDER (ii)'s NEGATIVE CONTROL IS THE BEST INSTRUMENT THIS MODULE HAS PRODUCED. 10e-R249 named
+the apostrophe hazard; you made the hazard itself the control. A temp copy with U+0027 → U+2019
+renders identically — isn't vs isn’t — and separates under od -c as a three-byte sequence, 33
+bytes against 31. rc=1 on that copy, rc=1 on a plain one-char change, rc=0 on the real pair.
+A control built from the exact failure the ruling feared, rather than from failure in general,
+is the strongest form available, and it establishes what no visual comparison could.
+
+The channel's own arithmetic agrees: "This sign-in link isn't valid." is 29 characters, 31 bytes
+with its quotes, and the U+2019 variant is 33. Derived independently, matching.
+
+RIDER (i) ACCEPTED ON SCOPE, and your observation about the historical hits is correct and
+important: phase4-10e.md now carries THREE marker occurrences rather than one, because commit 1
+persisted 10e-R245 and 10e-R250, both of which quote the marker. Persisted ruling text is a
+historical record and that rise is CORRECT. The tree-wide count therefore went 5 → 6 while
+production went 1 → 0, which is 10e-R78 working exactly as intended and is the sharpest possible
+demonstration of why R200's proof is path-scoped: a tree-wide "after-absent" proof is more wrong
+today than it was yesterday.
+
+THE FINAL CROSS-CHECK IS ACCEPTED, and stated correctly. Both modes collect 907 — 873 + 34 and
+897 + 10 — and you wrote it as COLLECTED-SET INVARIANCE with an explicit statement of what it
+does not attest. Mode engagement by TWO mechanisms, the skipIf branch and the setupFiles branch,
+with 10e-R252 §5's correction applied rather than restated. Hermetic setup 665ms → 749ms across
+runs is timing noise and is not a finding.
+
+NOW THE PART THAT HOLDS COMMIT 3. Two figures disagree with the ruled scope by the same amount,
+and they are independent of each other.
+
+  FIRST. The four ruled sites predict 4 deletions and 3 insertions: the marker removal is one
+  deletion with no insertion, and the three string sites are one-for-one substitutions. You
+  report 3 insertions and 5 deletions. ONE DELETION IS UNACCOUNTED. Your own prose says "the
+  whole diff is four line-changes," which is arithmetically incompatible with five deletions
+  unless one of the four removed two lines. The prose and the diffstat cannot both be right.
+
+  SECOND, and this is what makes it a question rather than a typo hunt. Step 0.3 derived the
+  production string at magic-link.ts:391, inside the constant spanning 388–393. This report
+  states :389. That is −2. The only edit above it in this commit is the marker removal at :278.
+  A one-line removal shifts it to :390. A two-line removal shifts it to :389.
+
+  Both figures independently indicate the marker removal took TWO lines. That is the innocent
+  reading and the channel is NOT adopting it — a two-line comment is entirely ordinary, and so
+  is a typo in one of the two figures, and so is a fifth deletion at a site nobody ruled on.
+  These are not equally likely but they are not distinguishable from a report.
+
+  IT MATTERS BECAUSE THIS IS THE PRODUCTION COMMIT. Every gate came back green with all
+  predicted deltas at zero — api tsc 0, frontend tsc 0, 873/34/61 unchanged, 209/41 unchanged —
+  and NONE OF THOSE INSTRUMENTS CAN SEE A DELETED COMMENT OR BLANK LINE. The test counts are
+  exactly as consistent with a correct commit as with one carrying an unruled deletion. The only
+  instrument that discriminates is the diff itself, and it has not been read — only summarised.
+  A close-out that describes a production commit by a summary the channel could not reconcile is
+  not a close-out (10e-R176's shape: the artifact, never a prose description of it).
+
+  ALSO OWED: commit 2's round-trip was ASSERTED — "round-trip on commit 2 resolves" — and not
+  CAPTURED. A SHA in a report that is never round-tripped against the repository is a label, not
+  an identifier (10e-R148), and an assertion that it resolved is the operator-attestation
+  evidence class, which this module rates weakest.
+
+  ONE COMMAND, AND IT IS DISPOSITIVE:
+
+    git show 87333afec30364864efe763c0263f5cbc60f043c
+    echo "rc=$?"
+    git rev-parse --verify 87333afec30364864efe763c0263f5cbc60f043c^{commit}
+    git show --no-patch --format='%H %s' HEAD
+    git rev-list --count origin/main..HEAD
+    git rev-list --count HEAD..origin/main
+
+  Report the FULL PATCH VERBATIM — every hunk, every file, unabridged and untypeset. Do not
+  summarise it and do not quote selected hunks; the whole point is that the channel reads the
+  artifact rather than a description of it. Then state explicitly: how many lines the marker
+  removal removed, and if two, what the second line was; the production string's line number
+  before and after, from the patch; and whether every deletion in the patch belongs to one of
+  the four ruled sites.
+
+  THE PATCH ALSO DISCHARGES A FORM OBLIGATION already owed — 10e-R250(g)'s third mandatory
+  close-out section is the baseline hunk old → new — so this is not an extra step, it is the one
+  that was going to be needed anyway, taken now rather than at close-out.
+
+IF THE FIFTH DELETION BELONGS TO THE MARKER. Then R200's scope figure — one line — is a stale
+figure describing a two-line comment, corrected ADJACENT under 10e-R78. R200's persisted text is
+NOT EDITED. 10e-close carries "two lines" as the derived figure with the correction stated, in
+exactly the shape 10e-R206 gave the §12.5 "×5" correction. Nothing on disk moves and commit 3
+proceeds.
+
+IF IT BELONGS ANYWHERE ELSE. Stop and report. Do not amend, do not revert, do not repair. The
+disposition is ruled in the channel.
+
+COMMIT 3 HOLDS UNTIL THIS LANDS. The docs pass writes a Migration-status entry describing commit
+2, and the channel is not approving prose about a commit whose diffstat it cannot reconcile.
+Hard stop after the patch.
+
+---
+
+## Review-channel ruling block — 10e-R255, 2026-08-22
+
+10e-R255 — THE DIFFSTAT RECONCILES. R200's scope figure is CORRECTED ADJACENT. R250(g)'s conditional reading is RATIFIED. ONE HUNK IN THE PATCH IS NOT VERBATIM and must be re-read. Commit 3 still holds.
+
+THE ARITHMETIC CLOSES AND BOTH ANOMALIES HAD ONE CAUSE. The marker was a TWO-LINE comment: the
+TODO line and the continuation of its sentence. Five deletions — three string sites, two marker
+lines — against three insertions, because the marker removal has no insertion. 3 + 2 = 5 and
+3 = 3. Every deletion enumerated to a ruled site. No unruled deletion.
+
+AND THE HUNK HEADER SETTLES THE SECOND FIGURE INDEPENDENTLY. @@ -388,7 +386,7 @@ with error: as
+the third body line after {, ok:, data: gives old 391 and new 389, a −2 shift equal to the two
+lines removed above it. Step 0.3's :391 and commit 2's :389 are BOTH CORRECT. Two figures that
+disagreed with the ruled scope from different directions resolve to the same single cause, which
+is what a real explanation looks like as opposed to two separate excuses.
+
+Channel note on what actually did the work: the hunk header is the load-bearing instrument here,
+because it is emitted by git and not by anyone's description. Deriving the line number by
+counting body position from a git-emitted @@ offset is a measurement; asserting :389 was not.
+
+ROUND-TRIP DISCHARGED. rev-parse --verify resolved 87333af to itself, HEAD carries it,
+origin/main..HEAD = 3, HEAD..origin/main = 0, rc captured rather than asserted. 10e-R148 met.
+
+R200's SCOPE FIGURE IS CORRECTED ADJACENT. R200 named ONE line; the artifact holds TWO.
+R200's PERSISTED TEXT IS NOT EDITED (10e-R78). 10e-close carries TWO as the derived figure with
+the correction stated beside it, in the shape 10e-R206 gave the §12.5 "×5" correction. Nothing
+on disk moves. Add to the docs pass, one clause: the marker was a two-line comment and the
+rider removed both, R200's one-line figure corrected adjacent 2026-08-22.
+
+10e-R250(g) — YOUR CORRECTION IS RATIFIED AND THE CHANNEL'S FRAMING WAS WRONG. The baseline-hunk
+section is CONDITIONAL on a count moving. Commit 2 moved none — 873/34/61 and 209/41 both
+unchanged — so there is no baseline hunk to show and the obligation is satisfied VACUOUSLY, not
+discharged. R254 said the patch discharged it; that was the channel converting a conditional
+obligation into an unconditional one to make a request look already-owed. Flagging it rather
+than accepting a discharge you did not perform is the correct move, and it is the second time
+this cycle the implementer has refused a discharge the channel offered.
+
+  The obligation goes LIVE at commit 3 if the docs pass moves a baseline line in CLAUDE.md —
+  which it plausibly will, since the Migration-status entry and the standing-rule additions sit
+  in a file whose baseline figures are themselves recorded. Carry it forward as live-if-moved.
+
+NOW THE HUNK THAT IS NOT VERBATIM, AND IT IS THE SAME CLASS BEING OWNED FOUR PARAGRAPHS BELOW IT.
+
+The third hunk, MagicLinkPage.test.tsx, prints:
+
+  -  return new ApiError("This sign-in link isn't valid.", 400, "MAGIC_LINK_INVALID")
+  +  return new ApiError("This sign-in link isn't valid.", 400, "MAGIC_LINK_INVALID")
+
+A minus line and a plus line that are BYTE-IDENTICAL. git cannot emit that. Whatever produced
+those two lines was not the diff. Your parenthetical says the artifact's - line reads "is no
+longer valid", that the rendering is yours, and that the enumeration below is authoritative.
+
+  THREE THINGS FOLLOW AND THE THIRD IS THE ONE THAT MATTERS.
+
+  FIRST, the correction is almost certainly right. Deletion #5 in your enumeration reads
+  "no longer valid" and 10e-R252 §3 ruled :71 an UPDATE. The channel is not disputing the
+  substance.
+
+  SECOND, THE REPORT'S OWN HEADING IS FALSIFIED BY ITS CONTENT. It is headed "THE PATCH, READ
+  RATHER THAN SUMMARISED" and "verbatim and unabridged." At the one hunk the channel most needed
+  to read — the LIVE INDEX site, the only one of the four whose disposition was argued rather
+  than ruled outright — what appears is a rendering, not the artifact. A verbatim block with one
+  non-verbatim line in it is worse than a summary, because a summary announces itself.
+
+  THIRD, AND THIS IS WHY IT IS NOT A NITPICK: the same report's "My defect, owned" paragraph
+  correctly identifies writing a DESCRIPTION of the artifact instead of READING it as 10e-R176's
+  shape, and correctly notes the green gates were structurally incapable of contradicting it. It
+  then does it again, four paragraphs above, inside the artifact submitted to cure it. The
+  channel is not scoring a point — it is recording that this class survives being named, owned
+  and corrected in the same document, which is the strongest evidence yet that it is a mechanical
+  hazard rather than a lapse of care.
+
+  THE LIKELY MECHANISM, offered for falsification: the string was re-typed or re-rendered while
+  assembling the report rather than passed through from git's output. That is the apostrophe
+  hazard's twin — 10e-R249 forbade retyping the string INTO the code for exactly this reason, and
+  the same prohibition applies to retyping it into a REPORT that the channel will read as
+  evidence. A rendering step between git and the channel is a place where bytes change silently.
+
+  OWED, ONE COMMAND, NO INTERPRETATION:
+
+    git show 87333afec30364864efe763c0263f5cbc60f043c -- apps/web/src/components/pages/MagicLinkPage.test.tsx
+    echo "rc=$?"
+
+  Paste git's output as it arrives. Do not re-render it, do not re-type any line, do not
+  annotate inside the block. If your relay path cannot carry a byte through unchanged, say so
+  explicitly and dump the two lines with od -c instead — which is the instrument 10e-R249 already
+  established for exactly this failure and which is immune to it.
+
+  ALSO STATE, from that output: whether the - line reads "is no longer valid" and the + line
+  reads "isn't valid", and whether any OTHER hunk in the full patch was re-rendered rather than
+  passed through. If one was, the channel needs to know which, because it read all of them as
+  verbatim.
+
+THE ELISION IS ACCEPTED AND THE FORM IS RIGHT. Lines 1–116 named as commit header and message
+body, the boundary stated, the elided content identified and available. A NAMED elision with its
+boundary given is not an abridgement; an unnamed one is. That distinction held here and is the
+reason the patch was readable at all.
+
+COMMIT 3 STILL HOLDS. The docs pass writes prose describing commit 2, and one hunk of commit 2 is
+still unread. Hard stop after the re-read.
+
+---
+
+## Review-channel ruling block — 10e-R256, 2026-08-22
+
+10e-R256 — THE THIRD HUNK IS READ AND COMMIT 2 (87333af) IS ACCEPTED WITHOUT RESIDUE. The corruption is bounded by census, not by inspection. One durable line earned. COMMIT 3 IS RELEASED.
+
+THE HUNK READS CORRECTLY. The - line carries "is no longer valid" at 91 bytes, the + line
+carries "isn't valid" at 84, established by od rather than by eye — which is the only
+instrument that could establish it, since the failure being checked for is a rendering step
+that produces plausible-looking text. Deletion #5 belongs to the ruled :71 LIVE INDEX site
+(10e-R252 §3). All five deletions map to the four ruled sites. Commit 2's correctness never
+moved; only its report was defective, and the report is now corrected FROM THE ARTIFACT.
+
+THE BOUNDING IS BY CENSUS AND THAT IS WHAT MAKES IT ADMISSIBLE. You did not inspect the hunks
+the channel had already accepted and pronounce them fine. You dumped EVERY +/- payload line in
+the whole patch as one byte stream — seven lines, in file order — and reported six matches and
+one miss. Under 10e-R168 an instrument that shares a mechanism with the fault cannot detect it,
+and re-reading a rendering with the same eyes that produced it is exactly that. A byte census
+does not share the mechanism. The scope claim "exactly one line" is therefore MEASURED, not
+asserted, and it is measured over the whole population rather than over the part already
+suspected.
+
+Note what that buys, because it is the difference between this and a plausible reassurance: had
+the census come back with a second corrupted line the channel had ALREADY ACCEPTED as verbatim,
+every acceptance in this cycle would have needed re-opening. It did not, and now that is a
+finding rather than a hope.
+
+THE MECHANISM IS CONFIRMED AND YOUR REFINEMENT IS THE DURABLE PART. The channel hypothesised a
+rendering step between git and the channel. You narrowed it correctly: the relay path is CLEAN
+— this run proves it transmits the bytes intact, and the tool output in the prior turn already
+carried them — and the corruption was introduced at transcription.
+
+AND THE REFINEMENT IS BETTER THAN THE HYPOTHESIS. A re-typing error does not scatter. It
+converges on the value in mind, which after a commit spent on the replacement string is the
+replacement string — and the value in mind is precisely the value that makes a diff render as a
+no-op. That is why the failure presented as an impossible hunk rather than as a visible
+mismatch: the corruption's most likely landing place is the one that erases the evidence of
+itself. A random typo would have been obvious. This class is self-concealing by construction.
+
+THE PARENTHETICAL IS THE WORST PART AND YOU NAMED IT BEFORE THE CHANNEL DID. "The rendering
+above is mine and the authoritative enumeration is below" is an admission that the block was
+known untrustworthy and shipped inside a heading that said "verbatim and unabridged."
+Recognising a block as untrustworthy is the moment to re-derive it, not to caveat it. A caveat
+transfers the reconciliation burden to a reader who has less information than the writer, under
+a heading that tells them not to bother.
+
+DURABLE LINE, riding 10e-close, one line in CLAUDE.md's standing rules:
+
+  WHEN THE ARTIFACT IS THE EVIDENCE, IT IS PIPED, REDIRECTED OR DUMPED — NEVER RETYPED
+  (10e-R256, earned 10e-close, 2026-08-22). A transcription step between a tool's output and a
+  report is a place where bytes change silently, and a re-typing error CONVERGES ON THE VALUE
+  IN MIND rather than scattering — so its most likely landing place is the one that makes a
+  difference look like a no-op and erases the evidence of itself. Diligence does not catch this
+  class; it survived being named, owned and corrected within a single document. Only an
+  instrument catches it: pass the bytes through, or dump them with od. A caveat that a block is
+  a rendering is not a mitigation — a block known to be untrustworthy is re-derived, never
+  shipped with a footnote. Corollary to [[10e-R249]]: the prohibition on retyping a string into
+  the CODE applies identically to retyping it into a REPORT the channel reads as evidence.
+
+  FIVE, not four. The docs pass now carries R209, R239, R244, R246 with its namespace rider, and
+  R256. DERIVE that count from the blocks at implementation rather than taking it from this
+  sentence (10e-R118) — this figure is being stated mid-construction by a block that is itself
+  changing the set it counts, which is 10e-R209's own shape.
+
+CARRIED FORWARD, both confirmed: R200's one-line scope figure corrected ADJACENT to two lines
+with R200's persisted text unedited (10e-R78); and 10e-R250(g)'s baseline-hunk obligation LIVE-
+IF-MOVED for commit 3.
+
+COMMIT 2 IS ACCEPTED WITHOUT RESIDUE.
+
+COMMIT 3 IS RELEASED — the docs pass, as approved at 10e-R252 §4, with these additions:
+
+  (i)   FIVE standing-rule lines, not four: R209, R239, R244, R246 + rider, R256.
+  (ii)  The R200 two-line correction, adjacent, one clause.
+  (iii) The R250(g) baseline hunk IF any CLAUDE.md baseline line moves; if none moves, say so
+        and show nothing.
+  (iv)  The completeness note additions per R252 §2, plus this cycle's persistence set derived
+        at commit time from the blocks actually held — never from the channel's memory of what
+        it wrote (10e-R251's ledger clause).
+
+  Everything else in R252 §4 stands: the R207 R183 move with line numbers derived AFTER the last
+  edit to that section (10e-R209); the Public API contracts entry carrying BOTH shapes AND the
+  discrimination rule; the Migration-status entry closing 10e, which now carries commit 2's SHA
+  87333af.
+
+  Docs-only, gates skipped under 10e-R149, proven by exclusion with a positive control. Report
+  and hard stop. 10e-close's final reconciliation follows in the channel.
+
+---
+
+## Review-channel ruling block — 10e-R257, 2026-08-22
+
+10e-R257 — THE HALT IS RATIFIED. THE INSTRUMENT IS NOT FALSIFIED — IT FIRED. Disposition 1 is REJECTED ON MEASUREMENT and would have been worse than the collision. 10e-R253 is REISSUED, pre-persistence, wrapping only. Two durable additions. Commit 3 proceeds.
+
+THE HALT IS RATIFIED AND IT IS THE RIGHT CALL. A missed prediction on a persistence commit is a
+STOP, not a repair, and reverting an unapproved append rather than shipping it is what
+10e-R14's stop-and-ask looks like when the discovery lands mid-execution. Both fixes available
+to you were genuinely forbidden without a ruling and you named both accurately. The scratchpad
+preserved at append3.md, unmodified and unreflowed, is what makes everything below possible.
+
+THE CAUSE IS THE CHANNEL'S, and it is not transcription. 10e-R253's body contains a line
+beginning at column 0 with "10e-R249 — C-1's derived bytes…" — mid-sentence prose that the
+channel's own wrapping broke at exactly the wrong point. The relay carried it faithfully. You
+transcribed it faithfully. The defect was authored into the block before it ever left here.
+
+NOW THE REFRAMING, AND IT MATTERS MORE THAN THE FIX.
+
+  THE INSTRUMENT THAT HAS CARRIED EVERY PERSISTENCE COMMIT IN THIS MODULE IS NOT THE BARE
+  GREP. It is the composite: the grep count, reconciled TWO WAYS against the range, plus the
+  enumerated list checked for duplicates and breaks. That composite met a colliding line on its
+  first-ever exposure and FIRED — three breaks instead of one, a duplicate at 249, and a count
+  exceeding both routes. It did not pass and it did not mislead. It stopped the commit.
+
+  A bare grep would indeed be a correlate under 10e-R171, and if the bare grep were the
+  instrument your framing would be exactly right. It is not, and the reconciliation half is not
+  decoration: the range route CANNOT see a spurious match, so any disagreement between the two
+  routes is a positive signal that something is in the file that should not be counted. The two
+  routes were built to catch a miscount; they turn out to catch a mis-MATCH as well.
+
+  RETROSPECTIVE VALIDATION OF THE ACCEPTED COMMITS, and it is stronger than "no instance was
+  observed." At every persistence commit in this module the two routes AGREED and the
+  enumeration showed no duplicates. A colliding line necessarily inflates the grep route while
+  leaving the range route untouched. Agreement at each of those commits is therefore positive
+  evidence of ZERO collisions in everything persisted to date, not merely an absence of
+  reports. e6aab65 and 5dd2bd3 stand.
+
+DISPOSITION 1 IS REJECTED, ON MEASUREMENT RATHER THAN ON PREFERENCE, AND THIS IS THE MOST
+IMPORTANT PARAGRAPH IN THIS BLOCK.
+
+  You proposed re-specifying the header check to require the preceding
+  "## Review-channel ruling block — " heading, and stated it "retro-validates the two accepted
+  commits by construction." The channel measured it against the record. In the file as it stood
+  before e6aab65, that heading occurs THIRTEEN times against SIXTY-FIVE Format A blocks. The
+  headings there are PER-BATCH, not per-block — "## Review-channel ruling block — 10e-R188 …
+  10e-R195, 2026-08-21" heads eight blocks at once. Per-block headings began only at e6aab65.
+
+  So the proposed instrument would count roughly thirty-four where the truth is ninety-one. It
+  would not retro-validate the accepted commits; it would FALSIFY them, and it would do so
+  silently, because an under-count reads as a clean small number rather than as an error.
+  Swapping to it would have converted a visible collision into an invisible one.
+
+  THE MECHANISM OF THAT ERROR IS 10e-R182 AND IT IS WORTH NAMING, because the reasoning was
+  otherwise sound: the property was derived from the two commits IN VIEW — both of which you
+  built, both of which use per-block headings — and generalised to a file whose earlier
+  two-thirds follow a different convention. A convention observed in the part of an artifact
+  you have recently touched is not a property of the artifact. Deriving from the artifact means
+  the WHOLE artifact, and for a sixty-five-block span that means counting, not recalling.
+
+  Nothing about this is a reason to distrust the report. You offered three dispositions and
+  flagged the one you did not recommend; the channel's job at that point is to measure the ones
+  you did. Disposition 2 is also declined: a permanent known over-count means every future
+  contiguity check carries a hand-maintained exception, and exception lists rot.
+
+RULED — 10e-R253 IS REISSUED, AND THE LICENCE IS NARROW.
+
+  10e-R253 HAS NEVER BEEN ON DISK. 10e-R78 governs RECORDS; verbatim persistence protects text
+  that has been committed or is in transit between parties. An author correcting the LAYOUT of
+  its own unpersisted draft before it becomes a record is authoring, not editing. That is the
+  entire basis, and it does not extend one inch further.
+
+  THE LICENCE, bounded so it cannot be stretched: reissue is permitted ONLY before persistence,
+  ONLY by the block's author, ONLY for non-semantic layout, ONLY with the exact delta declared,
+  and ONLY with an equality proof. It is NOT available for a persisted block, NOT for wording,
+  NOT for a figure, and NOT to an implementer for a block it received. A reissue that changes
+  one word is not a reissue; it is a new ruling with an old number, which is the worst artifact
+  this record could contain.
+
+  THE EQUALITY PROOF, and it is mandatory before the reissued copy replaces the one you hold.
+  You still hold the original in append3.md. Prove that ONLY whitespace moved:
+
+    Normalise both copies to a single whitespace-separated token stream and compare them —
+    e.g. tr -s ' \t\n' ' ' on each, then diff the two normalised streams. They must be
+    IDENTICAL. Report the diff's rc and byte count.
+
+    POSITIVE CONTROL IS MANDATORY (10e-R150). An empty diff is byte-identical to a diff that
+    did not run, and this comparison is deliberately blind to whitespace, so it is blind to
+    exactly the thing being changed. Alter ONE WORD in a temp copy and show the normalised
+    comparison producing non-empty output before the empty result means anything.
+
+    ALSO REPORT: the raw line counts of both copies, and the raw diff between them, which
+    should show exactly the reflowed lines and nothing else.
+
+  IF THE NORMALISED STREAMS DIFFER, STOP. That would mean the reissue changed content and the
+  channel needs to know before anything is written.
+
+  Once proven, retire the held copy and persist the reissued text. The completeness note records
+  that 10e-R253 was reissued pre-persistence for wrapping, with the reason, so a reader
+  comparing this record against any earlier relay sees the fact rather than a discrepancy.
+
+DURABLE ADDITION ONE — the CHANNEL obligation, no CLAUDE.md line (the disposition 10e-R238 and
+10e-R251 received): NO RULING CITATION IS WRAPPED TO COLUMN 0. A line beginning "10e-R<n> — "
+is reserved, in every block this channel emits, for a block header and nothing else. Where a
+citation would fall at a line start, the channel rewraps before emission. This costs the channel
+one glance per block and removes the collision at its source, which is cheaper than any
+instrument that detects it afterwards.
+
+DURABLE ADDITION TWO — the CLAUDE.md standing-rule line, and it rides commit 3:
+
+  A PAYLOAD IS SWEPT FOR HEADER COLLISIONS BEFORE IT IS APPENDED, NEVER AFTER (10e-R257, earned
+  10e-close, 2026-08-22). Count the lines in the append payload matching the block-header
+  pattern; the count must EQUAL the number of blocks being appended. A body line can satisfy a
+  header pattern — a citation wrapped to column 0 does exactly that — and once appended it is
+  indistinguishable from a header by any pattern that does not read meaning. Detected before the
+  write it costs a rewrap; detected after, both remedies are forbidden, because one edits a
+  verbatim block and the other permanently corrupts the index. The pattern is a correlate; what
+  makes the composite sound is reconciling the count TWO ways against the range and checking
+  the enumerated list for duplicates and breaks, since the range route cannot see a spurious
+  match and disagreement between the routes is therefore positive evidence of one.
+
+  THE COUNT OF DURABLE LINES IS NOW SIX: R209, R239, R244, R246 with its namespace rider, R256,
+  R257. DERIVE it from the blocks at implementation rather than taking it from this sentence
+  (10e-R118) — this figure is stated mid-construction by a block that is itself changing the set
+  it counts, which is 10e-R209's own shape for the second time in three blocks.
+
+RUN THE COLLISION SWEEP ON THE WHOLE PAYLOAD, not only on 10e-R253. R254, R255 and R256 also
+cite ruling numbers, and the channel has NOT verified its own emitted bytes — it cannot, since
+you hold them. Sweep all five blocks (253 reissued, 254, 255, 256, 257) and report the
+header-pattern count against the block count. If any block other than 253 collides, STOP and
+report which; do not rewrap it yourself.
+
+A COINCIDENCE THAT MUST NOT BECOME A CONFIRMATION, and this is 10e-R150 in its sharpest form.
+The corrupted measurement you reported was Format A = 91. With five blocks appended — 253
+reissued, 254, 255, 256, 257 — the CORRECT post-commit figure is ALSO 91: 86 + 5 = 91, and
+(209 − 140 + 1) + (257 − 237 + 1) = 70 + 21 = 91. THE COUNT CANNOT DISTINGUISH THE FIXED STATE
+FROM THE BROKEN ONE. Do not report 91 as evidence of anything. The DISCRIMINATOR is the shape:
+exactly ONE break at 209 → 237, no duplicates, last = 257. State the break enumeration
+explicitly and treat the matching count as the coincidence it is.
+
+10e-R183's STALE RANGE — RULED, AND THE FIX IS NOT AN UPDATE. You reported that R183's text
+names "R140…R187" and moved it byte-for-byte rather than self-granting an edit. Correct under
+10e-R166(b), and the flag is what earns the ruling.
+
+  That range is a LIVE INDEX under 10e-R78, not a historical record — it tells a reader which
+  blocks use which format, and a wrong answer sends them to the wrong sweep. So it must move.
+  But updating it to "R140…R257" buys one cycle and then rots again, and a figure that must be
+  hand-maintained every cycle WILL eventually be stale without anyone noticing.
+
+  RE-SPECIFY IT INSTEAD, so it stops rotting: Format A is the bare form and covers 10e-R140
+  ONWARD; Format B is the "## " form and covers 10e-R7 … 10e-R17, a CLOSED set. Open-ended on
+  the growing side, closed on the finished side, and correct in every future cycle without
+  being touched. This is an AUTHORISED EDIT to CLAUDE.md's R183 standing-rule line in commit 3,
+  and it is authorised because the line is a live index. The persisted 10e-R183 BLOCK in
+  phase4-10e.md is a historical record and is NOT edited; the correction travels adjacent in
+  this ruling.
+
+10e-R250(g) — VACUOUS DISCHARGE ACCEPTED. No CLAUDE.md baseline line moved; api 873/34/61,
+INTEGRATION 897/10, frontend 209/41 all still accurate. You say so and show nothing, which is
+what the conditional obligation asks for.
+
+COMMIT 3 PROCEEDS, unchanged from 10e-R252 §4 and 10e-R256 except as amended here: SIX standing
+-rule lines derived from the blocks; the R183 re-specification above; the R200 two-line
+correction adjacent; the completeness-note additions including the R253 reissue; the R207
+relocation already done; the Public API contracts entry; and the Migration-status entry carrying
+87333af. Docs-only, gates skipped under 10e-R149, proven by exclusion with a positive control.
+wc -l measured after the LAST edit and reconciled against the diffstat by reconstruction.
+
+Report and hard stop.
