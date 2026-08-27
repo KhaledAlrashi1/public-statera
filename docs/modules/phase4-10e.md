@@ -1627,6 +1627,61 @@ appended section; R140's own text is unedited.
 - **R103, R131, R139 and R36–R101 are unchanged** — still issued-but-unpersisted, still OWED,
   still not to be reconstructed. 10e-R241's recovery hypothesis is **not** acted on here.
 
+## AMENDMENT — 2026-08-27, under 10e-R268 (deploy-record commit) — **MODULE 10e IS CLOSED**
+
+- **10e-R264 … 10e-R268 are now PERSISTED**, verbatim. The persisted set is **R7–R17 (Format B,
+  11 blocks)** and **R140–R209 + R237–R268 (Format A, 102 blocks)**, derived at commit time and
+  reconciled two ways that now **AGREE**: 97 + 5 = 102 and
+  (209 − 140 + 1) + (268 − 237 + 1) = 70 + 32 = 102.
+- **PROVENANCE — TWO CLASSES IN ONE SET, and the set has both because it was assembled across a
+  session boundary.** Every prior set in this note carries a class (R205–R209 **RECOVERED**,
+  R242–R252 **RELAYED**, R243 **RELAYED LATE**); without one, a reader cannot tell these five from
+  **RECONSTRUCTED**, the single class this note exists to exclude and which 10e-R71 rates worse
+  than an uncheckable block.
+  **(a) 10e-R265, R266, R267 and R268 were RECOVERED** — read back **verbatim** by the successor
+  review channel out of the predecessor conversation in which the channel itself authored them.
+  That is the **10e-R238 mechanism, SECOND INSTANCE**, the first being R205–R209. Recovered from
+  the author's own emission; **NOT reconstructed** from CLAUDE.md, close-out reports or summaries.
+  **(b) 10e-R264 was HELD IN THE IMPLEMENTER'S CONTEXT**, and was reported unpersisted in two
+  consecutive implementer reports before this commit. **It therefore SURVIVED a state 10e-R239
+  exists to end — and it survived because the session happened not to break, not by any method.**
+  A block whose preservation rests on a session's luck is **the R36–R101 mechanism with a
+  favourable outcome**; recording the outcome without the mechanism would teach a future reader
+  that holding a ruling in context is a way of keeping it, which is exactly what 10e-R239 ruled it
+  is not. The hold attestation is retired as an evidence class; this is what it looks like when
+  the dice fall the other way.
+  **(c) and (d) — the five-not-four resolution and the two opposite ledger faults — are stated in
+  full in the two bullets immediately below** and are not restated here, to avoid a duplicate
+  record of the same facts inside one amendment.
+- **THE PAYLOAD WAS FIVE, NOT THE FOUR THE RULING NAMED, AND THAT IS THE ANSWER TO THE QUESTION
+  10e-R268 LEFT DELIBERATELY OPEN.** R268 predicted 97 → 101 and reported its routes disagreeing
+  by one, attributing the difference to a hole at 264 on the ground that *"no ruling was numbered
+  264."* **That premise was false.** 10e-R264 was issued 2026-08-22, held verbatim, reported
+  unpersisted in two consecutive implementer reports, and its own header reads *"persist in the
+  closing commit."* **The +1 disagreement WAS R264.** Including it makes both routes agree and
+  leaves **no second gap** — the run is `237 … 268` contiguous, one break only, at 209 → 237.
+- **TWO LEDGER FAULTS RAN IN OPPOSITE DIRECTIONS IN ONE PAYLOAD.** The channel **lost** a block it
+  had issued (R264) and **believed it had delivered** one it had not (R266 — asserted as "relayed
+  inline" at 10e-R268 and absent from that message; relayed the following turn). Both were
+  surfaced **only by enumeration**, which is now the fourth occasion in this module after
+  R196–R202, R205–R209 and R243. **10e-R251's ledger clause is the authority for the resolution:**
+  the outstanding set is settled by the implementer's enumeration of what it holds, never by the
+  channel's memory of what it wrote, and a difference is a delivery fault to be diagnosed rather
+  than reconciled away.
+- **THE MODULE IS DEPLOYED AND CLOSED.** `2610318` deployed 2026-08-27, run `3304117…`, success,
+  05:04:32Z, carrying five commits. All four 10e-R266 predictions met, with `/healthz` as a second
+  surface on the revision and operator smoke PASS. The full record, including the channel's
+  **verification defect** (a stale pre-deploy capture misread as a failed deploy, caught by an
+  error rather than by an instrument) is in CLAUDE.md's Migration status.
+- **THE ANNOUNCEMENT GATE IS CLOSED BY OPERATOR ELECTION WITH THE SPECIFIED ARTIFACTS NOT TAKEN.**
+  10e-R15 / 10e-R147 required Postmark Activity for the production server and verbatim
+  `Authentication-Results:` lines. **Neither was captured.** A live production send was observed
+  end-to-end and the operator signed in with it. **Recorded as an election past the evidence, not
+  as a discharge of it.**
+- **R103, R131, R139 and R36–R101 are unchanged** — still issued-but-unpersisted, still OWED,
+  still not to be reconstructed. 10e-R241's recovery hypothesis remains its own cycle and is
+  **not** acted on here. **These are the only ruling-record obligations Module 10e leaves behind.**
+
 ---
 ---
 
@@ -5731,3 +5786,417 @@ THE FINAL DOCS COMMIT IS RELEASED. Docs-only, gates skipped under 10e-R149, 2026
   NOTHING IS PUSHED. The push is the operator's and two decisions precede it.
 
 MODULE 10e CLOSES WHEN THIS COMMIT LANDS AND IS RECONCILED.
+
+---
+
+# APPENDED RULING BLOCKS — 10e-R264 … 10e-R268 (persisted 2026-08-27 under 10e-R268, the deploy-record commit — MODULE 10e's LAST)
+
+Pasted from the review channel **verbatim**, not reconstructed and not summarized, per 10e-R102
+and 10e-R143. The original text of each block is unedited; the only additions are the section
+headers.
+
+**THE PAYLOAD IS FIVE BLOCKS, NOT THE FOUR 10e-R268 NAMED, AND THE RESOLUTION IS THE ANSWER TO
+THE QUESTION R268 DELIBERATELY LEFT OPEN.** R268 predicted Format A 97 → 101 and reported its two
+reconciliation routes disagreeing by one — 97 + 4 = 101 against
+(209 − 140 + 1) + (268 − 237 + 1) = 102 — attributing the difference to a hole at 264 on the
+ground that *"no ruling was numbered 264."* **That premise is false.** 10e-R264 was issued
+2026-08-22, was held verbatim by the implementer, was reported as unpersisted in two consecutive
+reports, and its own header reads *"persist in the closing commit"* — which is this one. **The
++1 disagreement WAS R264.** With it included the count is 97 + 5 = 102, the range route is 102,
+the two AGREE, and **no second gap exists**: the run is `237 … 268` contiguous.
+
+The authority for including it is not the implementer's judgement but **10e-R251's ledger
+clause**, which rules that the outstanding-set question is settled by the implementer's
+enumeration of what it holds and never by the channel's memory of what it wrote, with any
+difference to be diagnosed rather than reconciled away. Two ledger faults ran in opposite
+directions in one payload: the channel **lost** a block it had issued (R264) and **believed it
+had delivered** one it had not (R266, asserted as relayed inline at 10e-R268 and absent from that
+message; relayed on the following turn). Both were surfaced only by enumeration — the fourth such
+occasion in this module, after R196–R202, R205–R209 and R243.
+
+**PROVENANCE — RELAYED.** All five arrived as text in the review channel and were held verbatim,
+the same class as 10e-R242 … 10e-R263 and distinct from R205–R209's **RECOVERED**.
+
+**COLLISION SWEEP RUN BEFORE THE APPEND (10e-R257).** 10e-R265 and 10e-R268 were flagged in
+advance as live candidates. Measured: exactly **one** header-pattern match per block, five against
+five, each at line 1. **Control:** the retired pre-reissue copy of 10e-R253 still matches
+**twice**. No block collided.
+
+**Recorded limitation, restated rather than left implied** (10e-R168): the byte-level diff run
+against these blocks proves **file-matches-transcription**, not transcription-matches-relay, since
+both sides derive from one reading. 10e-R253 remains the sole double-attested block in this
+record.
+
+---
+
+## Review-channel ruling block — 10e-R264, 2026-08-22
+
+10e-R264 — 2610318 IS ACCEPTED ON EVERY FIGURE IT STATES. THREE GAPS, all small, all in one round. This is the last verification of Module 10e.
+
+THE R142 RIDER RAN AGAINST THE OBLIGATION AND THAT IS THE REPAIR WORKING. Eight assertions
+covering (i)…(iv) plus a never-written control at 0 — a commit that verifies its obligations and
+not only its payload, which is precisely what the last docs pass failed to do and how the
+bounded-unknown record went unwritten while every block-level check passed cleanly.
+
+AND THE NON-DISCRIMINATING INSTRUMENT WAS REPORTED RATHER THAN QUIETLY CORRECTED. An unscoped
+^[1-4]\. \*\* sweep returning 156 across CLAUDE.md's fix-forward lists, re-scoped to the derived
+range and returning 4 at :595–598. You re-scoped the INSTRUMENT, not the artifact, and said so.
+A 156 offered as "four entries present" is 10e-R150's shape on a count, and it is the third live
+instance in three commits — 91 = 91, then 927 = 927, now 156. Each caught only because something
+other than the number was also being measured.
+
+THE COLLISION SWEEP RAN ON ITS OWN AUTHOR'S BLOCKS, with R262 and R263 flagged in advance as live
+candidates and cleared by measurement rather than by assumption. Six against six, each at line 1,
+with the retired pre-reissue R253 as the control proving the sweep can detect a collision. The
+flag was right to raise and the measurement cleared it — that is the correct sequence, and it is
+the first time in this module the collision class was checked before it could fire.
+
+SHAPE REPORTED, NOT COUNT. One break at 209 → 237, last 263, no duplicates, both routes agreeing
+at 97, both ^10e-R0 —  controls at 0. Format B 11.
+
+FIGURES RECONCILED IN THE CHANNEL: 5733 − 5068 = 665 = 627 + 38; deleting the 38-line amendment
+at 1592–1629 reproducing 5695. All three close.
+
+THE THREE MANDATORY CLOSE-OUT SECTIONS are in the commit body, with the exact CI invocations,
+Test Files summary lines, captured exit codes, both tsc runs at rc=0 and 0 bytes, and the Errors
+instrument reported as ONE instrument of undemonstrated independence — which is now entry 1 of
+the section this commit adds. The baseline hunk is vacuous across all four commits. 10e-R250(g)
+and the design-5.4a mandatory-sections rule are both discharged ON DISK rather than in a
+conversation, which was the point of putting them in the body.
+
+GAP 1 — THE STRUCTURAL FIGURE, FOURTH INSTANCE, AND THE MODEL PREDICTS AGAIN.
+
+  Channel re-derivation: the six blocks sum to 569 (110 + 70 + 86 + 66 + 131 + 106). The append
+  is 627. 627 − 569 = 58, and 58 is currently satisfied by any 58 lines anywhere.
+
+  BOUNDED HARD by the six empty diffs: every one of the 58 lies outside the blocks. Bookkeeping,
+  not risk.
+
+  THE MODEL'S PREDICTION, stated before measurement: per-block 5 × 6 = 30, therefore preamble 28.
+  Preamble would run 13 → 22 → 37 → 28, the first DECREASE in the series — plausible, since this
+  preamble has less to record than the close-out's did, and plausible is not measured.
+
+  OWED: the 58 in 10e-R244's OWN CATEGORIES — horizontal rules, section headings, top header,
+  preamble prose, scaffolding blanks — with per-category delta against the prior commit's 62.
+  Confirm per-block is 5 BY CATEGORY, not by quotient (10e-R254's form). If the preamble shrank,
+  name what is absent that was present before.
+
+GAP 2 — THE CLAUDE.md INSERTIONS DO NOT FULLY ACCOUNT, AND THE CHANNEL CANNOT CLOSE IT FROM THE
+REPORT.
+
+  From your own byte-count list the channel can name TEN of twelve insertions: the new R168 line
+  (2118), the heading (70), four entries (533 / 454 / 773 / 522), the admission note (651), and
+  three 1-byte blank separators. Twelve are reported.
+
+  Independently: you derived the section range as 591–601, which is ELEVEN lines. Eleven section
+  lines plus the R168 line is twelve — which implies FIVE blank lines inside the section, not
+  three. Heading 1 + entries 4 + admission 1 + blanks 5 = 11.
+
+  Two readings and the channel is not choosing: the census named three of five blanks, or two of
+  the eleven section lines are diff CONTEXT rather than insertions and the count works out
+  differently. Report the section's line-by-line composition — every line in 591–601 by role,
+  and the twelve insertions enumerated against it. One deletion is the old R168 line at 1697
+  bytes; confirm that is the only one.
+
+GAP 3 — THE CENSUS CANNOT BE RUN. You state the convention and the byte counts, but the report
+carries no digests except one truncated 26b17…. The channel cannot verify a hash it does not
+have.
+
+  REPORT THE FULL CENSUS: all thirteen changed lines, each with its md5 and byte count, same
+  convention as last cycle — marker included, trailing newline excluded. The operator is pasting
+  the diff in parallel, so the channel will recompute from a path that never touches your
+  container, which is the cross-reading property that made last cycle's eight-of-eight conclusive
+  rather than merely consistent.
+
+  Your observation that the three 1-byte lines appear in the census AT ALL is the right one to
+  have made: an instrument that sees blank separators is seeing structure, not prose, and a
+  census that silently skipped them would be a census of what someone thought mattered.
+
+WHY THIS ROUND EXISTS AT ALL, stated plainly: the four entries' content was RULED VERBATIM at
+10e-R262(c), so writing them is transcription — and 10e-R256 was earned when a transcription
+step silently changed bytes. Entry 3's did-NOT-close sentence is the one that must be right: an
+entry reading as though 87333af closed the bounded unknown would tell every future cycle that a
+thing is settled which is not. That is the specific failure no instrument in this repository
+would ever contradict.
+
+ALL THREE IN ONE REPORT. Then hard stop. The module's closing ruling follows and nothing further
+is owed by the implementer.
+
+---
+
+## Review-channel ruling block — 10e-R265, 2026-08-22
+
+10e-R265 — ALL THREE GAPS CLOSED. 2610318 IS ACCEPTED WITHOUT RESIDUE. MODULE 10e IS COMPLETE. Two instances recorded, no new rules.
+
+GAP 3 CLOSED AT FULL STRENGTH. Seven of seven verified in the channel's own container against
+the operator's independently-pasted diff: heading 70, intro 346, entries 533 / 454 / 773 / 522,
+admission note 651, blank 1. Every byte count and every digest matches. Two paths from one
+artifact, neither able to influence the other.
+
+  ENTRY 3 IS BYTE-EXACT AND IT IS THE ONE THAT HAD TO BE. It reads, verbatim on disk:
+  "Updating `:71` at `87333af` did NOT close this — nothing checks the fixture against the server
+  in either direction, and hand-updating it is the same hand-maintenance that produced the
+  divergence in the first place." That sentence is the reason this round existed. An entry
+  reading as though the fixture update settled the bounded unknown would have told every future
+  cycle a thing was closed that is not, and no instrument in this repository would ever have
+  contradicted it.
+
+  THE FOUR-COLLIDING-BLANKS CHECK IS THE BEST SMALL INSTRUMENT OF THE MODULE. Four one-byte
+  lines share digest 26b17225…, and nothing else does. That is a positive control ON THE CENSUS
+  ITSELF, costing nothing: lines that MUST collide do, lines that must not, don't. The channel
+  verified it independently — md5 of the single byte "+" is that digest. A census whose
+  collisions land exactly where structure predicts is a census that is reading bytes rather than
+  summarising them.
+
+GAP 2 CLOSED, AND BOTH SIDES WERE WRONG IN DIFFERENT PLACES. The channel's model omitted the
+intro paragraph, which is why five blanks fell out of arithmetic that should have produced four.
+Your report said three one-byte lines where the census in front of you listed four. Composition
+now reconciles exactly: heading 1 + blank 1 + intro 1 + blank 1 + four entries 4 + blank 1 +
+admission note 1 + blank 1 = 11 section lines, plus the R168 line = 12 insertions against 1
+deletion, matching the hunk header's +11 and the reported numstat. Neither party's figure was
+adopted; the composition was derived and both were corrected against it.
+
+GAP 1 CLOSED. Preamble 28 landed exactly where the channel predicted before measurement, and
+per-block held at 5 BY CATEGORY for the fourth consecutive commit. Preamble 13 → 22 → 37 → 28,
+with the decrease named. A model that has now predicted four commits, including the first
+decrease in its series, is an instrument rather than a description.
+
+TWO INSTANCES RECORDED, NO NEW RULES, AND YOUR REFUSAL TO PROPOSE ONE IS RATIFIED.
+
+  You described a census instead of pasting it, and counted its rows by eye instead of counting
+  them — in a report whose explicit subject was that class, one commit after 10e-R255 recorded
+  that this class survives being named, owned and corrected inside a single document. 10e-R112
+  and 10e-R256 already state the mechanism. 10e-R261 ruled that inflating the standing set to
+  fix a distribution of examples cheapens it. Instances belong beside the rule. The count stays
+  at SIX.
+
+  AND THE DISTRIBUTION IS NOW THE EVIDENCE FOR 10e-R261'S OWN RULING, which is the finding worth
+  keeping. The channel was caught by the same class at 927 = 927; you were caught here twice.
+  Four live instances across both parties in three commits, every one inside a document about
+  the class. 10e-R261 ruled it a property of MEASUREMENT rather than of CARE, and the record now
+  demonstrates that rather than asserting it. A rule believed to be about the other end's
+  discipline is a rule the reader exempts themselves from; this one cannot be read that way.
+
+  THE THIRD 10e-R150 INSTANCE IS ALSO RECORDED: an unscoped sweep returning 156 where the
+  scoped one returns 4, re-scoping the INSTRUMENT rather than the artifact, and reported rather
+  than quietly corrected. 91 = 91, then 927 = 927, then 156 — three in three commits, each
+  caught only because something other than the number was also being measured.
+
+2610318 IS ACCEPTED WITHOUT RESIDUE. Nothing on disk moves.
+
+MODULE 10e IS COMPLETE. Four close-out commits — 5dd2bd3 persistence, 87333af code, 9d7bd16 docs
+pass, 2610318 final — on top of b136fe6 and 2efaefa. Five unpushed. Magic-link authentication has
+been live in production since 2026-08-22; nothing in these five commits changes runtime behaviour
+beyond one error string no client renders.
+
+STILL OPEN AND STILL THE ONLY ANNOUNCEMENT BLOCKER: the production end-to-end magic-link send
+proof (10e-R15 / 10e-R147). It requires a live send from the PRODUCTION server, the message
+visible in Postmark Activity FOR THAT SERVER, and the Authentication-Results: lines captured
+VERBATIM. A magic link observed working in production does not discharge it and never did. Never
+read POSTMARK_API_KEY out of sops for comparison; screenshot configuration screens, never code
+samples (the 8c precedent).
+
+NOTHING IS OWED BY THE IMPLEMENTER. The push is the operator's, two decisions precede it, and
+the send proof is operator-side. Stand down.
+
+---
+
+## Review-channel ruling block — 10e-R266, 2026-08-22
+
+10e-R266 — OPERATOR ELECTION, 2026-08-22, BY DELEGATION: fresh backup before the push, and ONE deploy carrying all five commits. Deploy plan ruled. A post-deploy docs commit is OWED.
+
+ATTRIBUTION. The operator elected both by delegation ("let's go with your recommendations"),
+2026-08-22, on channel recommendations stated at 10e-R262(g) and 10e-R265. Recorded as an
+OPERATOR RULING BY DELEGATION, not as an implementer or channel choice.
+
+BACKUP — YES, and the reasoning is recorded because the case is weaker than the 22 August one.
+That deploy carried migration 0007; this one carries no schema change at all, so the migration
+argument does not apply. It is taken anyway: the last backup is five days old, the cost is one
+systemd start, and a docs-and-three-lines deploy is exactly the class nobody expects to need one.
+F1 — the backup timer committed but never installed, production unprotected 37 days — is this
+project's own precedent for what an unexamined backup assumption costs.
+
+  THE INVOCATION IS THE SYSTEMD UNIT, NOT A HAND-ROLLED SCRIPT CALL. deploy/backup-db.sh requires
+  sops-sourced MYSQL_ROOT_PASSWORD and an rclone temp-file credential pattern, and the channel
+  does not know its manual invocation requirements. `systemctl start statera-backup.service` runs
+  the same script under exactly the environment the daily timer uses. This is 10e-R246 applied
+  before the error rather than after it: an invocation is derived from the artifact that already
+  runs it, never composed from prose.
+
+  VERIFIED TWO WAYS, one of them off-box: the journal for a clean run, AND the Healthchecks.io
+  `statera-db-backup` check going green. The HC ping lives on a different system and has been
+  demonstrated to fire from a manual run before, so it is not sharing a mechanism with the thing
+  it confirms (10e-R168).
+
+ONE DEPLOY — YES. Five commits: four docs-only and one three-line code change. Splitting would
+mean two deploys for a string rendered by no client and keyed on by no consumer, which 10e-R237
+already ruled owes no deploy of its own.
+
+CHECKABLE PREDICTIONS, stated in advance so a miss is a question rather than an adjustment:
+  - OCI revision label 2610318… on api, web AND worker — all three, each named.
+  - __drizzle_migrations COUNT UNCHANGED AT 8. This deploy carries no migration; the count is the
+    instrument that distinguishes "no migration ran" from "one ran quietly". A 9 is a full stop.
+  - mysql and redis started= and restarts= BYTE-IDENTICAL to the 2026-08-22 capture. NO DATASTORE
+    BOUNCE.
+  - The worker's cleanup line still prints FOUR fields.
+  - Magic-link sign-in behaves identically. Nothing user-visible changes in this deploy.
+
+THE RIDE-ALONG CHECK RUNS BEFORE THE PUSH, against origin/main and never against local main —
+the standing rule records that the first application of it diffed local main and missed a riding
+commit. A fetch precedes it, because the working copy's notion of origin/main is hours old.
+
+OWED AFTER THE DEPLOY, and named now so it is not forgotten the way the bounded-unknown record
+was: a docs-only commit carrying the DEPLOY RECORD in CLAUDE.md's Migration status — each
+measurement named, in the form the 2026-08-22 entry uses — and persisting 10e-R265 and this block,
+under 10e-R239. Two rulings currently live only in a conversation. That commit is specified after
+the deploy report lands, not before.
+
+THE ANNOUNCEMENT GATE IS UNAFFECTED BY ANY OF THIS. 10e-R15 / 10e-R147 require a live send from
+the PRODUCTION server, the message visible in Postmark Activity for THAT server, and the
+Authentication-Results: lines captured VERBATIM. Do it AFTER the deploy so the proof is against
+the shipped state. Never read POSTMARK_API_KEY out of sops; screenshot configuration screens,
+never code samples (the 8c precedent).
+
+---
+
+## Review-channel ruling block — 10e-R267, 2026-08-27
+
+10e-R267 — 2610318 IS DEPLOYED AND VERIFIED. All four predictions met, each measurement named and taken on the box. ONE VERIFICATION DEFECT IS RECORDED, and it is the channel's.
+
+DEPLOYED 2026-08-27, run 3304117…, conclusion success, headSha
+2610318c84c258dcb8b298c35292ceb3a585a83c, completed 05:04:32Z. Five commits carried: e6aab65,
+5dd2bd3, 87333af, 9d7bd16, 2610318 — four docs-only and one code commit of three files and four
+line-changes. Backup taken BEFORE the push via `systemctl start statera-backup.service`,
+confirmed by journal and by the Healthchecks.io `statera-db-backup` check going green, which is
+an off-box instrument and therefore not sharing a mechanism with what it confirms.
+
+MEASURED ON THE BOX, prompt `deploy@statera-prod:~/statera`, single capture, all four predictions
+stated in advance at 10e-R266:
+  - OCI revision label 2610318c84c258dcb8b298c35292ceb3a585a83c on statera-api-1, statera-web-1
+    AND statera-worker-1. All three named, all three matching.
+  - __drizzle_migrations COUNT = 8. UNCHANGED. This deploy carried no migration, and the count is
+    what distinguishes "none ran" from "one ran quietly".
+  - statera-mysql-1 2026-07-19T15:24:52.639108167Z restarts=0 and statera-redis-1
+    2026-07-19T15:25:12.749949098Z restarts=0 — BYTE-IDENTICAL to the 2026-08-22 capture.
+    NO DATASTORE BOUNCE.
+
+THE VERIFICATION DEFECT IS THE CHANNEL'S AND IT NEARLY PRODUCED A FALSE ALARM.
+
+  The first Part D capture returned 2efaefa on all three services, a migration count of 8, and
+  unchanged datastore timestamps. The channel read that as a failed deploy. It was a STALE
+  PRE-DEPLOY READING — the run finished at 05:04:32Z and the check was taken before it landed.
+
+  THREE COMPOUNDING CAUSES, all in the channel's run-sheet:
+  (i)  Part D carried no gate on the Actions run completing. The instruction said "watch the run
+       finish" in Part C prose and then listed Part D as though it followed automatically.
+  (ii) Part D carried NO `hostname; pwd` line, while Part B did. 10e-R244 exists precisely
+       because a command's output does not say where it ran, and the channel wrote that rule,
+       ratified it, persisted it to CLAUDE.md — and then omitted its own obligation from the
+       block where it mattered most. That is 10e-R261's ruling demonstrated once more: proximity
+       to a rule does not produce application of it.
+  (iii) TWO OF THE THREE CHECKS CANNOT DISCRIMINATE. A migration count of 8 and unchanged
+       datastore timestamps are what a SUCCESSFUL no-migration deploy produces AND what NO DEPLOY
+       AT ALL produces. Only the revision label separates them. A three-check panel where two
+       arms are structurally silent on the question being asked is 10e-R150's shape on a panel
+       rather than a single figure, and the channel specified it without noticing.
+
+  WHAT CAUGHT IT was an error, not an instrument: the second attempt ran on the laptop and Docker
+  answered "No such object", loudly. The wrong-host case that produced a plausible wrong answer
+  was invisible; the wrong-host case that produced an error was obvious. RECORDED AS AN INSTANCE
+  of 10e-R244 rather than a new rule — the rule is correct as written and was simply not applied.
+
+  DISPOSITION ON THE MIXED CAPTURE: the entire first capture was DISCARDED and re-run rather than
+  triaged line by line. Once a capture is known to contain one measurement of uncertain
+  provenance, selecting which of its lines to keep is a judgement the evidence cannot support —
+  8 from a dev database is also 8.
+
+STANDING, a CHANNEL obligation, no CLAUDE.md line (the 10e-R238 / 10e-R251 disposition): EVERY
+operator command block that measures a host reports `hostname; pwd` as its first line, without
+exception for blocks the channel judges short or obvious. And a verification panel states, for
+each check, WHAT IT WOULD READ IF THE THING BEING VERIFIED HAD NOT HAPPENED — a check whose
+negative case equals its positive case is not a check.
+
+OWED: the deploy-record docs commit, carrying this deploy's measurements in CLAUDE.md's Migration
+status in the form the 2026-08-22 entry uses, and persisting 10e-R265, R266 and R267 under
+10e-R239. Three rulings currently live only in a conversation.
+
+THE ANNOUNCEMENT GATE IS UNCHANGED AND UNDISCHARGED: 10e-R15 / 10e-R147, the production
+end-to-end send proof.
+
+---
+
+## Review-channel ruling block — 10e-R268, 2026-08-27
+
+10e-R268 — THE DEPLOY-RECORD COMMIT. Docs-only, one payload, hard stop. Module 10e's last commit.
+
+CONTEXT YOU DO NOT HOLD. Since your last report the operator took a fresh backup, pushed, and the
+deploy completed and was verified. Four blocks are relayed inline in this message — 10e-R265,
+R266, R267 and this one. They exist only in a conversation, which is the state 10e-R239 exists to
+end. This commit ends it.
+
+DO NOT RE-MEASURE PRODUCTION. You have no access to it. Every production figure below is
+operator-measured and is the SOURCE for the record you write, not a value to reproduce.
+
+  Deployed 2026-08-27. Run 3304117…, conclusion success, headSha 2610318…, completed 05:04:32Z.
+  Five commits: e6aab65, 5dd2bd3, 87333af, 9d7bd16, 2610318 — four docs-only, one code commit of
+  three files and four line-changes.
+  Backup taken BEFORE the push via `systemctl start statera-backup.service`, confirmed by the
+  unit journal and by the Healthchecks.io `statera-db-backup` check going green.
+  Measured at prompt `deploy@statera-prod:~/statera`, all four 10e-R266 predictions met:
+  revision label 2610318c84c258dcb8b298c35292ceb3a585a83c on statera-api-1, statera-web-1 AND
+  statera-worker-1; __drizzle_migrations COUNT = 8 UNCHANGED; statera-mysql-1
+  2026-07-19T15:24:52.639108167Z restarts=0 and statera-redis-1 2026-07-19T15:25:12.749949098Z
+  restarts=0, byte-identical to the 2026-08-22 capture, NO DATASTORE BOUNCE.
+  /healthz returns {"ok":true,"status":"healthy","version":"2610318c84c258dcb8b298c35292ceb3a585a83c"}
+  — a SECOND surface reaching the revision by a different path than the container label.
+  OPERATOR SMOKE PASS: magic-link sign-in against the deployed build, successful.
+
+THE ANNOUNCEMENT GATE IS CLOSED BY OPERATOR ELECTION, 2026-08-27, AND THE RECORD STATES ON WHAT.
+10e-R15 / 10e-R147 specified a production send with the message visible in Postmark Activity for
+the production server AND the Authentication-Results: lines captured verbatim. NEITHER ARTIFACT
+WAS TAKEN. What was observed instead: a live send from production landing in an external Gmail
+inbox at 08:09, from the ratified sender noreply@staterafinance.app, subject "Your Statera
+sign-in link", template rendering correctly, the /auth/magic link well-formed against production,
+and the operator signing in with it successfully. The gate is CLOSED ON OPERATOR ELECTION with
+the specified artifacts NOT TAKEN. Write it that way. A future reader must be able to see which
+evidence was gathered and which was elected past; recording it as "discharged" without the
+distinction would be the checkable-and-wrong form 10e-R71 rates worse than an uncheckable one.
+
+ALSO RECORDED, one line: a screenshot of the sign-in email exposed a live magic-link token in the
+fallback URL. The operator was advised to supersede it by requesting a fresh link. The 8c
+key-disclosure precedent generalises — a credential can arrive in a product's own output, not
+only in a provider's console.
+
+CONTENTS — docs-only, gates skipped under 10e-R149, 2026-08-19:
+  (i)   THE DEPLOY RECORD in CLAUDE.md's Migration status, in the FORM the 2026-08-22 entry uses.
+        Read that entry first and follow it rather than composing a new shape. Each measurement
+        NAMED. It carries: the five commits; the pre-push backup with its two confirmations; all
+        three revision labels; the migration count UNCHANGED at 8 with the reason it is the
+        discriminating check; the no-datastore-bounce evidence; /healthz as a second surface; the
+        operator smoke; the announcement gate's election with the artifacts not taken; and the
+        VERIFICATION DEFECT recorded at 10e-R267, which is the channel's and is recorded rather
+        than smoothed.
+  (ii)  10e-R265, R266, R267 and this block appended verbatim to docs/modules/phase4-10e.md.
+  (iii) The completeness-note amendment recording the above and CLOSING the module.
+
+NO NEW CLAUDE.md STANDING LINE. The count stays at SIX. 10e-R244 is correct as written and was
+simply not applied; 10e-R267's two obligations are CHANNEL obligations and take the 10e-R238 /
+10e-R251 disposition.
+
+MANDATORY BEFORE APPENDING (10e-R257): sweep the payload for header collisions. Matches must
+EQUAL the block count, with a control proving the sweep can detect one. R265 and R268 both carry
+many 10e-R<n> citations and are live candidates. If any block collides, STOP and report which.
+
+RUN THE 10e-R142 RIDER against the ruled deliverable list (i)…(iii), not only against the blocks.
+
+PREDICTION, re-derived at commit time (10e-R118): Format A 97 → 101. The two routes DISAGREE —
+97 + 4 = 101, while (209 − 140 + 1) + (268 − 237 + 1) = 102 — because the range route assumes
+237…268 contiguous and it is not: no ruling was numbered 264. RESOLVE IT FROM THE FILE, not from
+this arithmetic. State the actual shape from the enumerated list: the breaks, the last, and
+whether a SECOND deliberate gap now exists at 264. The channel has deliberately left this
+unresolved so the resolution is derived rather than adopted. Format B unchanged at 11. Four
+presence assertions with the ^10e-R0 —  control. Docs-only by exclusion with a positive control.
+wc -l after the LAST edit, reconciled by reconstruction. Structural figure enumerated in
+10e-R244's categories.
+
+HARD STOP after the commit. Nothing is pushed — the push is the operator's.
