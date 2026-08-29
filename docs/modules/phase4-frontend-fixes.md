@@ -30,6 +30,35 @@ context.**
   track with no commits would be a live index pointing at nothing.
 - **No new CLAUDE.md standing rule was earned** (FF-R3). The standing-rule count stays at SIX.
 
+### Amendment — track close, 2026-08-29
+
+The five bullets above are the note as written at the Phase A persistence commit (`a39a0cb`) and
+are left as they stood; this amendment is the live index from the track close forward.
+
+- **Persisted set is now FF-R1 … FF-R8**, complete and contiguous. Shape **derived from this file**,
+  not asserted: 8 Format-A headers, first **1**, last **8**, **0** duplicates, **0** breaks in
+  1…8. A ninth match would mean a citation wrapped to column 0.
+- **Relay provenance: all eight RELAYED** — every block reached the implementer as verbatim
+  relayed text inside an operator prompt, none by delegation of authorship. All were
+  **UNPERSISTED** until the commit that carried them (FF-R1…FF-R3 at `a39a0cb`; FF-R4…FF-R8 here).
+- **FF-R4 was REISSUED IN BLOCK FORM.** Original date **2026-08-27**, reissued in block form
+  2026-08-27. It was authored as prose in a message and never given block form or a paste fence,
+  so the relay had nothing to carry — a **channel authoring defect** (10e-R147 class), not a lost
+  artifact, not a persistence failure, not a relay fault. Detected only because the implementer's
+  open enumeration reported it MISSING while FF-R5 cited it twice. Its text is persisted above in
+  its numbered position with its original date; nothing was backdated.
+- **FF-R5 is persisted UNEDITED, including its wrong `WeeklyDigestSection.tsx:121` reference.**
+  The operative line is **`:116`**. FF-R6 carries the correction and sits immediately after it, so
+  a reader meets the error and its correction together. The correction is **NOT** folded into
+  FF-R5 (10e-R78; 10e-R148 precedent) — a line number is semantic, so R257's pre-persistence
+  reissue licence (non-semantic layout only) does not reach it.
+- **Supersedes the "nothing is opened by this file" bullet above:** the track has now shipped
+  code (`eb036c2`, four items), and this close-out commit makes the **only two** CLAUDE.md edits
+  of the track — the frontend baseline line and one Migration-status entry.
+- **The transcription seam (bounded unknown 1) still applies** to FF-R4…FF-R8 and to the two
+  Phase B reports, on the same terms: derive any load-bearing string from the source a block
+  cites, never by retyping it from here. FF-R4 states why the unknown is bounded rather than open.
+
 ---
 
 ## Ruling blocks
@@ -245,6 +274,356 @@ every discipline it exercised is already written.
 
 NOTHING IS OPENED BY THIS BLOCK. Phase B is not scoped here and awaits three operator decisions.
 
+FF-R4 — a39a0cb IS ACCEPTED. Two departures ratified, two bounded unknowns recorded.
+
+PROVENANCE, STATED AND NOT BACKDATED (10e-R147 disposition). This ruling was issued as PROSE in a
+message to the operator and never given block form or a paste fence, so there was nothing for the
+relay to carry. It is a CHANNEL AUTHORING DEFECT — not a lost artifact, not a persistence failure,
+not a relay fault. Nothing was lost. It is written in block form here, in its numbered position,
+with its original date. Detected by the implementer's open enumeration reporting it MISSING while
+FF-R5 cited it twice: the FIFTH occasion in this project that enumeration is the only instrument
+to detect a ledger fault, after R196–R202, R205–R209, R243 and R264.
+
+a39a0cb IS ACCEPTED. Collision sweep: count route 3, enumeration route 1/2/3, agreement between
+the routes being what makes a spurious match visible. Detection control fires at 1 on a synthetic
+column-0 citation. Negative control ^FF-R0 —  = 0 run AFTER the file existed, with test -f, since
+a missing file greps to 0 identically. Ten per-item assertions against (i)…(v). Line count 688
+reconciled by reconstruction with an off-by-one control at 687. Docs-only by exclusion with two
+synthetic non-docs paths proving the exclusion discriminates.
+
+  DELIVERABLE (v) IS THE ONE WORTH NAMING: `git status --short -- CLAUDE.md` = 0 tests a NEGATIVE
+  deliverable positively. The ruled item was "do not edit CLAUDE.md", and an assertion that the
+  file is untouched is how a prohibition is proven honoured rather than merely unmentioned. That
+  is the omission class that let 10e's bounded-unknown record go unwritten while every
+  block-level check passed.
+
+DEPARTURE 1 — SWEEP ORDERING INVERTED. RATIFIED, WITH ITS BOUNDARY STATED. The file was written
+then swept; FF-R3 ruled the reverse. No consequence followed, and the reason is precise:
+10e-R257's "both remedies are forbidden after the fact" describes an append to an ESTABLISHED,
+PERSISTED record — one remedy edits a verbatim block, the other corrupts the index. Neither
+applied to a NEW, UNCOMMITTED file discardable whole. THAT IS A BOUNDARY, NOT A GENERAL LICENCE:
+docs/modules/phase4-frontend-fixes.md is now committed, and every future append to it sits in
+exactly the state R257 was written for. Recorded so this clean result is not read next cycle as
+evidence the ordering is optional. No new rule; R257 is correct as written and was inverted once.
+
+DEPARTURE 2 — COMMITTED TO main RATHER THAN BRANCHING. RATIFIED. This repo's entire lineage
+commits to main and the workflow is fast-forward-then-push; a branch would have made "the push is
+the operator's" mean something other than intended. Flagged rather than chosen silently.
+
+BOUNDED UNKNOWN 1 — VERBATIM FIDELITY IS NOT MECHANICALLY VERIFIED. The blocks and the report were
+transcribed from conversation text with no file to diff against, so 10e-R256 could not be
+satisfied: the source was never a tool's output. SYMMETRIC — the same limitation applied to the
+channel's relay of 10e-R265…R268 and was flagged then. The mitigation stands: derive any
+load-bearing string from the source a block CITES, never retype it from the block. STRENGTHENED,
+and this is why the unknown is bounded rather than open: FF-R3's load-bearing content is almost
+entirely FILE:LINE CITATIONS AND MEASURED FIGURES, every one of which is CHECKABLE AGAINST THE
+TREE. A future reader validating it has a BETTER instrument than the missing diff. The
+transcription risk is concentrated in the prose, not in the claims that carry weight.
+
+BOUNDED UNKNOWN 2 — PRESENCE ASSERTIONS TEST PRESENCE, NOT INTERIOR CONTENT. Unknown 1 restated
+where it bites. Correct, and correctly not padded into a third entry.
+
+FF-R5 — OPERATOR RULING BY DELEGATION, 2026-08-27. Phase B scope set at four items; the convention work moves to the mobile track. Two decisions remain OPEN and are named as open. One channel scope error is corrected.
+
+ATTRIBUTION. The operator elected by delegation ("Let's go with your recommendation."),
+2026-08-27, on the channel recommendations stated in the FF-R4 message. Recorded as an OPERATOR
+RULING BY DELEGATION, not as an implementer or channel choice.
+
+WHAT THE DELEGATION COVERS, AND WHAT IT CANNOT. It covers the two things the channel actually
+recommended: the four-item Phase B scope, and moving the currency/delta/label convention work
+into the MOBILE track so it is done once over components that track will reopen anyway, with the
+32 pre-existing physical-property sites swept in the same pass.
+
+  IT DOES NOT COVER THE SUBSCRIPTIONS DECISION. The channel explicitly DECLINED to choose among
+  the three candidates, so there is no recommendation for a delegation to land on. Silence is not
+  a choice, and inferring one from "go with your recommendation" would manufacture an operator
+  ruling out of a refusal to make one. OPEN.
+
+  IT DOES NOT COVER THE KPI VISUAL-VS-INFORMATIONAL QUESTION. The channel offered a READ — that
+  the row shows correct numbers about an empty month and no restyling fixes that — which is an
+  assessment, not a recommendation with an action attached. OPEN.
+
+  Neither blocks Phase B. Both are recorded as OPEN so a later reader cannot mistake an
+  unanswered question for a settled one.
+
+A CHANNEL SCOPE ERROR, CORRECTED BEFORE IT REACHES A PROPOSAL. FF-R4 said "whitespace-nowrap off
+the two prose labels." There is ONE prose label. WeeklyDigestSection.tsx:121 is prose ("Days
+until payday: {n}") and is the site actually CLIPPED in the operator's screenshot.
+SpendForecastWidget.tsx:68 is a NUMBER ("KD 1,800.000"), where nowrap is DEFENSIBLE — removing it
+would break a money value across lines, which is worse than a tight fit. The two sites share a
+class name and not a remedy. Corrected here rather than in the proposal, because a proposal built
+on the wrong scope produces a correct-looking commit against a wrong mandate.
+
+PHASE B IS A PROPOSAL. Four items. Produce a written proposal, no code, no commit. For each item:
+the exact change, the file:line, the tests that must move and why, and the RED-FIRST proof
+planned. Deviations and discoveries are STOP-AND-ASK, never autonomous resolution.
+
+ITEM 1 — sections.tsx:382, the copy that names income while its gate names budgets.
+  BEFORE PROPOSING COPY, ESTABLISH ARM 3's REACHABILITY EXHAUSTIVELY. The chain is
+  data_complete ? full : incomeNeedsSetup ? "Set your income" : ARM 3. Determine, from source,
+  EVERY state that reaches arm 3, and state the reasoning. The channel's expectation, offered so
+  it can be FALSIFIED rather than confirmed: arm 2's `monthlyIncome <= 0` is true for a null
+  monthlyIncome under JS coercion, so arm 2 absorbs the income-absent case and arm 3 is reachable
+  ONLY with income resolved and totalBudget = 0. IF THAT IS WRONG AND ARM 3 HAS MORE THAN ONE
+  CAUSE, STOP AND REPORT — one string cannot honestly name two causes, and a string naming
+  budgets would then be false on the other path, which is the defect relocated rather than fixed.
+  Confirm also whether the existing "Open Plan" CTA is already correct for a budgets cause; if it
+  is, say so — a fix that changes only the copy is smaller than one that changes both.
+
+ITEM 2 — InsightsPage.tsx:357, `items-start` overriding CSS Grid's default stretch, which is the
+  ragged bottom edge. Propose its removal. State what the two cards look like stretched, and
+  whether any child depends on the shrink-to-content height.
+
+ITEM 3 — WeeklyDigestSection.tsx:121, whitespace-nowrap on a prose label in a 3-across tile with
+  no min-w-0 and no overflow handling. Propose removing it from THE PROSE LABEL ONLY; the number
+  at :120 keeps it. SEPARATELY, for SpendForecastWidget.tsx:68: REPORT ONLY, DO NOT PROPOSE A FIX
+  IN THIS COMMIT. That element is simultaneously the brass slot under the ink-and-brass ration,
+  an overflow site, and enlarged by the R6 WCAG ruling — three constraints on one element, and it
+  belongs to the design/mobile track. Report the options you can see; choose none.
+
+ITEM 4 — the no-current-data delta case. On Home, Expenses carries `inverted`, so a −100 delta
+  caused by ABSENT ROWS renders a GREEN success pill reading "100.0% vs last month", with props
+  BYTE-IDENTICAL to a genuine 100% reduction.
+  THE PRINCIPLED FIX IS SYMMETRY, NOT A NEW POLICY. DashboardPage.tsx:253-265 ALREADY suppresses
+  the chip when the PREVIOUS period is empty. Applying the same treatment when the CURRENT period
+  is empty is the existing policy applied to the other side, which is why it is preferred over
+  inventing neutral styling or new wording.
+  DETERMINE WHETHER A "CURRENT PERIOD HAS NO DATA" SIGNAL EXISTS or must be derived, and from
+  what. Propose the mechanism; do not write it. If suppression would hide a legitimately-zero
+  period that genuinely has rows, SAY SO — suppressing real information to fix a misleading
+  rendering is a worse trade and the operator rules it, not you.
+
+CONSTRAINTS BINDING THIS PROPOSAL, cited not restated: logical properties only, no ml-/mr-/pl-/pr-
+additions (CLAUDE.md:482); CSP enforcing with no Report-Only net, any new external origin lands in
+deploy/Caddyfile in the SAME commit (CLAUDE.md:470); no renames; QuickAdd internals untouchable;
+pinned strings; and the three NAMED REGRESSION FILES stay green AND untouched —
+components/layout/AppShell.test.tsx, components/pages/legal/PrivacyPolicyPage.test.tsx,
+components/pages/legal/TermsPage.test.tsx.
+
+TEST IMPACT IS A PREDICTION, NOT AN ALLOWANCE. "No test impact expected" is a claim to be
+verified. ANY red test, and ANY forced selector or class edit to a test, is a NAMED FORCED EDIT
+requiring explicit approval BEFORE it ships. Predict the delta for each item and state what each
+check would read IF THE CHANGE HAD NOT LANDED — a check whose negative case equals its positive
+case is not a check.
+
+THE CONVENTION WORK IS DEFERRED TO THE MOBILE TRACK, NOT DROPPED. Three money formatters, two
+decimal conventions, two thousands-separator conventions, three delta systems with two sign
+conventions, two date formats one of which drops the year, the M10 label/heading divergences, and
+the 32 physical-property sites. NONE of it is in scope here. Do not tidy any of it in passing —
+an unrequested convention edit inside a four-item fix commit is the scope creep this split
+exists to prevent.
+
+NOTHING IS IMPLEMENTED BY THIS BLOCK.
+
+FF-R6 — PHASE B PROPOSAL ACCEPTED. Copy and Item 2 approved by the operator. Item 4 gated on one pre-check. Two channel errors corrected adjacent, neither by editing anything.
+
+CHANNEL ERROR 1 — A LINE NUMBER PROPAGATED FROM A DOCUMENT INTO A RULING. Phase A recorded
+WeeklyDigestSection.tsx:120-122; the tree says :115 (number), :116 (prose className), :117 (prose
+text). The file is byte-identical since Phase A, so this was mis-transcription at authorship, not
+drift. THE CHANNEL THEN READ THAT FIGURE OUT OF THE PHASE A DOCUMENT AND WROTE :121 INTO FF-R5 —
+a figure derived from a document about the artifact rather than from the artifact, propagating
+into a ruling. That is 10e-R182's exact failure mode, committed by the channel one commit after
+persisting the rule.
+  DISPOSITIONS, NEITHER OF THEM AN EDIT. The Phase A report is a HISTORICAL RECORD and is NOT
+  corrected in place. FF-R5 is NOT amended either: it is unpersisted, but 10e-R257's
+  pre-persistence reissue licence is NON-SEMANTIC LAYOUT ONLY, and a line number is semantic.
+  FF-R5's text stands with :121; this block corrects it adjacent (10e-R148 precedent). Both
+  persist together so a reader sees the error and its correction side by side. THE OPERATIVE LINE
+  IS :116. The implementer proceeded against the correct line because the element was unambiguous
+  by description — the mandate was intact.
+
+CHANNEL ERROR 2 — "the two prose labels" in the FF-R4 message. There is ONE. Already corrected in
+FF-R5 and restated here only so the correction is inside a persisted block.
+
+ITEM 1 — ACCEPTED. The reachability proof is airtight and its load-bearing step is that arm 2's
+two disjuncts are PROVABLY EQUIVALENT, not independent: warnings.includes("income_not_set") ⟺
+monthlyIncome === null (aggregation.ts:705), and resolveIncomeForPeriod returns null or strictly
+> 0, both non-null arms .gt(0)-guarded (income-lib.ts:58, :70). Arm 2 therefore absorbs the entire
+income-absent case and ARM 3 HAS EXACTLY ONE CAUSE: income resolved AND month budget total = 0.
+The NaN path is correctly NAMED as requiring a contract violation rather than dismissed. CTA
+verified already correct, so the fix is COPY-ONLY.
+
+  OPERATOR-APPROVED COPY, 2026-08-27, verbatim and not to be paraphrased:
+    Title: No budget set for this month.
+    Body:  Safe-to-spend compares your income against your planned budget. Set a budget for this
+           month to start seeing a daily figure.
+  WHY "Set a budget" AND NOT "add at least one budget category": the gate is totalBudget.gt(0),
+  an AMOUNT, not a COUNT. If a zero-amount budget is creatable, a count-shaped promise is FALSE on
+  that path — a new true-sounding statement the code did not check, which is this defect one
+  sentence over. The approved wording avoids the question rather than answering it.
+  DERIVE THESE STRINGS FROM THIS BLOCK BY COPY, NEVER BY RETYPING (10e-R249/R256).
+
+  QUEUED, NOT OPENED, AND MORE INTERESTING THAN THE FIX: this makes the copy honest about a gate
+  that may itself be wrong. R9 computes free-to-spend as income − committed − spent, which works
+  with committed = 0 — and Insights PROVES it, rendering FREE TO SPEND 1,800.000 with COMMITTED
+  0.000 from the SAME payload Home suppresses. Home hides a card Insights shows. Product decision,
+  operator's, NOT in this commit.
+
+ITEM 2 — APPROVED BY THE OPERATOR, 2026-08-27, on the channel recommendation that aligned edges
+read as intentional while trailing space inside a card reads as breathing room. Remove
+items-start. The dependency sweep was DONE rather than assumed. THE ZERO-TEST GAP IS APPROVED and
+the reasoning is why: jsdom computes no layout, so a className assertion restates the diff and its
+negative case equals its positive case. Writing it would manufacture apparent coverage. Recorded
+as a DELIBERATE COVERAGE GAP.
+
+ITEM 3 — ACCEPTED at :116, prose label only; the number at :115 keeps whitespace-nowrap. THE
+min-w-0 ANALYSIS IS RATIFIED: grid items default to min-width:auto, so under whitespace-nowrap the
+min-content width IS the whole string — min-w-0 would let the track shrink while the text still
+refuses to wrap, CONVERTING OVERFLOW INTO CLIPPING. No min-w-0.
+  ONE SHARPENING ON THE GREEN-TEST REASONING: the existing test staying green proves the edit did
+  not touch TEXT; it does NOT prove the edit HAPPENED — a no-op is equally green. The diff carries
+  that half. Two instruments, two jobs.
+  SpendForecastWidget.tsx:68 REPORT-ONLY DEFERRAL CONFIRMED; the six-option table showing every
+  route landing in the design or mobile track is the EVIDENCE for the deferral, not an assertion.
+
+ITEM 4 — PROOF ACCEPTED ABOUT THE DATA, INCOMPLETE ABOUT THE LOOKUP. GATED.
+  Two checks exceeded the mandate and are ratified: verifying chk_transactions_amount_positive
+  reached APPLIED DDL (0000_cultured_jimmy_woo.sql:70, carried in meta/0007_snapshot.json) rather
+  than living only in the schema file — the committed-≠-active class; and catching that *_mtd is a
+  FLASK-INHERITED MISNOMER with both queries bounded date >= monthStart AND date <= monthEnd. Had
+  they been true month-to-date, every delta would be structurally negative and suppression would
+  have been treating a symptom.
+  THE GAP: the proof establishes 0/0 ⟺ no rows about the DATA. The guard reads the LOOKUP.
+  Current-month figures come from R4 account_overview when present and fall back to monthlyKpiMap
+  from R3 monthly[] when absent — AND A LOOKUP MISS ALSO YIELDS 0/0, byte-identical to a genuinely
+  empty month. That is 10e-R150 on this figure: the failure output equals the predicted success
+  value and the guard cannot separate them.
+
+  PRE-CHECK, REPORT BEFORE WRITING THE GUARD:
+    (a) R3 monthly[]'s window bounds, from source. Can the selected month fall outside it?
+    (b) Does the fallback distinguish an ABSENT entry from a ZERO entry, or does it default to 0?
+    (c) Are the guard's operands the COERCED NUMBERS from DashboardPage.tsx:109-110? "0.000" === 0
+        is FALSE, and a string reaching that comparison makes the guard SILENTLY NEVER FIRE.
+    If (a) or (b) shows a lookup miss is indistinguishable from an empty month, the guard needs a
+    PRESENCE condition, not only a VALUE condition. STOP AND REPORT rather than writing either.
+  FF-R5's "SAY SO" CLAUSE IS ANSWERED AND CLOSED: suppression cannot hide a legitimately-zero
+  period that genuinely has rows, because the DB CHECK forbids such a period existing. No
+  trade-off for the operator to rule.
+  MECHANISM APPROVED SUBJECT TO THE PRE-CHECK: the guard mirrors the one prevMonthKpis already
+  applies, so the existing rule "no baseline → no chips" becomes "no baseline or no current data →
+  no chips". All four chips vanish together. NO new colour, NO new copy, NO new prop.
+
+IMPLEMENT, one commit, four items. Items 1, 2 and 3 proceed independently of Item 4's gate.
+Test-impact predictions stand as the implementer stated them: +1 (safe-to-spend.test.tsx), 0, 0,
++1 (DashboardPage.test.tsx); frontend 209 → 211, files 41 unchanged; api untouched but RUN, since
+contract/frontend-contract.test.ts reads the frontend fixture — fixture predicted 66, ALLOWLIST
+empty, VERIFIED not assumed. A MISS IS A QUESTION, NOT AN ADJUSTMENT (10e-R137b). Both new tests
+RED-FIRST with the red captured. Named forced edits: NONE predicted; any red test or any forced
+selector/class edit STOPS and asks BEFORE it ships. The three named regression files stay green
+AND untouched.
+
+CONSTRAINTS: zero physical-property additions (CLAUDE.md:482); no new external origin, no
+Caddyfile change (CLAUDE.md:470); no renames; QuickAdd untouched; pinned strings untouched. NO
+CONVENTION WORK IN PASSING — the three formatters, two decimal conventions, two separator
+conventions, three delta systems, two date formats, M10 divergences and 32 physical-property sites
+are DEFERRED TO THE MOBILE TRACK and are not to be tidied here.
+
+CLOSE-OUT CARRIES THE THREE MANDATORY SECTIONS (CLAUDE.md:436): the verbatim test tail INCLUDING
+the Test Files summary line with captured exit code for the exact CI commands, each with a
+10e-R246 RESOLUTION PROOF; the verbatim tsc --noEmit output and exit code for both packages; and
+the baseline hunk old → new. Missing any is an auto-return.
+
+NO CLAUDE.md EDIT IN THIS COMMIT. The baseline line moves at track close, not per sub-commit.
+Persistence of FF-R4, FF-R5 and FF-R6 rides the close-out commit, not this one.
+
+FF-R7 — PHASE B ACCEPTED. The unrequested control case is RATIFIED and KEPT. Prediction corrected to +3. One latent hazard queued.
+
+THE PREDICTION MISS WAS INVESTIGATED, NOT ABSORBED, AND THE OVERSHOOT IS RIGHT. +3 against +2,
+caused by a second, unrequested control case on Item 4 — "still passes hero deltas when the
+selected month has rows." KEPT. No existing test asserts deltas at all, so A GUARD THAT RETURNED
+null UNCONDITIONALLY WOULD HAVE PASSED THE TARGET ASSERTION. Without the control, Item 4's test
+proves the chips vanish and says nothing about whether they ever appear — a check whose negative
+case equals its positive case. This is 10e-R198 applied IN CONSTRUCTION rather than in review: to
+attribute weight to a case you need the neighbour that survives, written in advance instead of
+discovered missing later. FLAGGING IT RATHER THAN ABSORBING IT IS WHAT MAKES IT ACCEPTABLE — a
+judgement outside the approved plan, declared as the implementer's own with the removal cost
+stated, is a REQUEST; arriving silently inside an unquestioned +3 it would have been the
+self-grant class. THE PREDICTED DELTA IS CORRECTED TO +3 / 41 files. Frontend baseline 212/41.
+
+ITEM 4's GATE CLOSED THE RIGHT WAY. (a) dashboard-snapshot-lib.ts:244 builds monthly as
+monthKeys.map(...) and :259 returns months: monthKeys — the same array, 1:1, zero-filled — and
+selectedMonth is constrained to options derived from months, so a miss is structurally impossible
+post-load; pre-load prevMonthKpis returns null and heroDeltas short-circuits first. The 10e-R150
+concern is closed BY CONSTRUCTION rather than by a defensive condition, which is the better
+outcome. (c) Both operands are statically guaranteed numbers, so === 0 cannot silently never-fire.
+  THE CHECK NOBODY ASKED FOR IS THE ONE WORTH KEEPING: no placeholderData/keepPreviousData on the
+  bundle query (hooks.ts:44-49), so a month switch drops accountOverview to undefined rather than
+  serving the prior month's figures. HAD IT CACHED, THE GUARD WOULD HAVE READ ONE MONTH'S NUMBERS
+  AGAINST ANOTHER'S — a correct guard producing wrong answers, invisible to every test.
+
+FF-R7(a) — LATENT HAZARD, QUEUED WITH ITS TRIGGER, NOT OPENED. `?.income || 0` does NOT
+distinguish an ABSENT entry from a ZERO one, and is unreachable today ONLY because months and
+monthly are the same array. That is a correctness property resting on a construction detail in a
+different file with nothing asserting it. TRIGGER: any change making monthly anything other than
+a 1:1 zero-filled map of months. On that day `|| 0` starts reporting LOOKUP MISS as EMPTY MONTH
+and the guard silently suppresses chips for months that have data, with no test going red. NOT
+FIXED HERE — a defensive presence check today would be code with no reachable failure to guard.
+
+EVERYTHING ELSE RECONCILES. RED-first captured on both new cases, and Item 1's red is the good
+kind: the target string absent WITH THE OLD STRING PRESENT TWICE in the dumped DOM, proving the
+case reached arm 3 rather than failing somewhere unrelated. Item 4's red printed
+expensesDelta: -100, the exact value rendering the green success pill, with the control passing in
+the same run — the two cases were discriminating BEFORE the fix. Resolution proofs on both
+filters with a non-matching filter exiting 0. Test tails carry the Test Files line with captured
+exit codes. tsc 0 bytes both packages. Fixture 66 and ALLOWLIST = [] derived from the file. Three
+named regression files green and untouched via empty git diff --stat. Zero physical-property
+additions with a positive control. `git status --short -- CLAUDE.md` = 0 — the negative
+deliverable tested positively again. Production diff is four edits, five of six added lines being
+a rationale comment. No convention work leaked in.
+
+FF-R8 — PHASE B IS VERIFIED IN PRODUCTION BY OPERATOR OBSERVATION. THE TRACK CLOSES. Eight new findings are QUEUED to the mobile track, seven of them one root cause.
+
+PRODUCTION VERIFICATION, OPERATOR-OBSERVED 2026-08-29, AND ITS EVIDENCE CLASS IS STATED. Three of
+the four items are CONFIRMED LIVE against the deployed build by operator screenshot: Item 1 —
+"No budget set for this month." with the approved body copy and the unchanged Open Plan CTA,
+rendering at 81 transactions and 0 budgets, which is arm 3 in exactly the state the reachability
+proof predicted; Item 2 — This Week and Month Snapshot bottom-aligned; Item 3 — "Days until
+payday: 27" wrapping inside its tile rather than clipping.
+  ITEM 2 IS THE ONE THAT MATTERS HERE. It shipped with a DELIBERATE ZERO-TEST GAP because jsdom
+  computes no layout, so this operator observation is THE ONLY INSTRUMENT THAT HAS EVER CHECKED
+  IT. Recorded as such, not as a formality.
+  ITEM 4 IS NOT VERIFIED IN PRODUCTION and that is stated rather than assumed: no observed month
+  had zero rows with a populated previous month, so the guard's live behaviour is UNOBSERVED. Its
+  evidence is the RED-first unit proof plus the control case, which is real evidence and is not
+  the same thing.
+  A FIRST OBSERVATION ROUND WAS DISCARDED, and the operator's own diagnosis is recorded because
+  it is the right one: the screenshots were taken after the push but BEFORE the deploy landed.
+  The channel questioned the unchanged card heights, the operator identified the cause. This is
+  10e-R267's stale-pre-deploy-reading class recurring at the operator seam — a push is not a
+  deploy, and a UI observation is only evidence against the build actually serving.
+
+EIGHT FINDINGS, QUEUED TO THE MOBILE TRACK, NONE OPENED, NONE FIXED HERE.
+  SEVEN OF THEM ARE ONE ROOT CAUSE: THE APP DOES NOT DISTINGUISH ZERO FROM NO DATA. With budget
+  total 0 it renders "% USED 0.0%" beside spend of 682 while its own caption reads "Over budget
+  this month"; "Budget / Income 0.0%" badged WITHIN INCOME; "Housing is KD 542 over plan" where
+  Housing has no plan at all; and "12 of 12 visible months finished with income ahead of
+  expenses" where seven of the twelve are flat zero on both series. THIS IS THE SAME CLASS AS THE
+  DELTA CHIP ITEM 4 JUST FIXED, and that is the finding worth carrying: the fix was correct and
+  the class is wider than the site.
+  THE REMAINING FOUR, RECORDED SEPARATELY: (i) two different daily safe-to-spend figures on two
+  pages at the same moment, Home 609.000 and Insights 639.000 — a divergence, not a formatting
+  question, and the one item here that may not be cosmetic; (ii) "% USED 1136.7%", a four-digit
+  percentage in a KPI tile with no display cap; (iii) the Budget-vs-Spending legend declaring
+  Spent = black while no bar is black, now unmissable because with no budgets every bar is a
+  spent bar; (iv) the Home headline rounding to "KD 1.3K in reserve" directly above REMAINING
+  KD 1,278.000.
+  THE WITHIN-INCOME BADGE APPEARS NON-DISCRIMINATING — observed reading WITHIN INCOME at 0.0%,
+  3.1% and 45.4% Budget/Income, the last while Home simultaneously warned that commitments
+  exceeded 40% of income. Recorded as an OBSERVATION with its falsifier: if a ratio exists that
+  flips it, the badge is fine and only its threshold disagrees with Home's. UNMEASURED.
+
+THE TRACK CLOSES. Four items shipped, three verified in production. The convention work — three
+money formatters, two decimal conventions, two thousands-separator conventions, three delta
+systems with two sign conventions, two date formats one of which drops the year, the M10
+heading/label divergences and 32 pre-existing physical-property sites — is DEFERRED TO THE MOBILE
+TRACK by operator ruling by delegation, 2026-08-27, and the zero-vs-no-data class joins it as its
+own item. Queue items recorded and not opened: the subscriptions definition (three candidates,
+none chosen, and the requirement is not expressible until one is); the KPI visual-vs-informational
+question; Home suppressing a card Insights renders from the same payload; the demo seed's
+one-month budget shelf life; and FF-R7(a).
+
+NO NEW CLAUDE.md STANDING LINE. The count stays at SIX. Nothing in this track earned a rule;
+every discipline it exercised is already written.
 ---
 
 ## Phase A measurement report, verbatim as submitted
@@ -686,3 +1065,320 @@ Per FF-R2, recorded before measurement and unchanged by it:
 Two further items surfaced that were not on the list and that I am **reporting, not opening**: the M4 seed-anchoring decay (bears directly on track item 3), and the M6 `items-start` / `whitespace-nowrap` pair.
 
 **HARD STOP.** Nothing committed, nothing pushed, tree clean at `d0e06cc`.
+
+---
+
+## Phase B proposal, verbatim as submitted
+
+# PHASE B — PROPOSAL ONLY
+
+## Step 0 results
+
+```
+Khaleds-MacBook-Air.local
+/Users/khaledalrashidi/DevLocal/public-statera
+
+a39a0cb phase-4: phase4-frontend-fixes Phase A persistence — FF-R1…FF-R3 + measurement report
+$ git status --short      → [no output]
+ahead of origin/main: 1   (unpushed, content unchanged)
+phase4-frontend-fixes.md: 688 lines
+```
+
+**Held FF blocks (my own sweep): FF-R1, FF-R2, FF-R3, FF-R5. FF-R4 is MISSING.** FF-R5 cites it twice as load-bearing ("the FF-R4 message"; quoting its "two prose labels" wording). Per 10e-R204 that is a non-delivery signal; per 10e-R251 I reconstruct nothing from FF-R5's quotations of it. **Not blocking** — FF-R5 supersedes FF-R4 on their only interaction and states all four items in full — but **FF-R4 must be relayed before Phase B's persistence commit**, or that commit persists a set with a hole and a dangling citation.
+
+### Citation re-derivation (10e-R182) — two do not resolve
+
+| Phase A cited | Actual | Status |
+|---|---|---|
+| `WeeklyDigestSection.tsx:120-122` | **:115** (number), **:116** (prose `className`), **:117** (prose text) | **WRONG — off by 5** |
+| `monthlyIncome` (I said :212 in session) | **:214** | corrected |
+
+Everything else resolves exactly: `sections.tsx:382`, `:220`, `:228`, `:232-233`, `:355`, `:360`, `:108`; `InsightsPage.tsx:357`; `SpendForecastWidget.tsx:68`; `DashboardPage.tsx:253-265`; `aggregation.ts:726`, `:705`; `income-lib.ts:52-76`; `demo-data-lib.ts:439`.
+
+**This matters beyond bookkeeping. FF-R5 Item 3 names `WeeklyDigestSection.tsx:121` — that line number came from my Phase A error and is wrong.** The file is byte-identical since Phase A (tree clean, only the docs file added), so this was my mis-transcription at the time, not drift. The *element* FF-R5 describes is unambiguous ("prose label", "Days until payday"), so the mandate is intact and I proceed against the correct line — but **the persisted Phase A document and FF-R5's line reference both need amending.** This is precisely the 10e-R182 failure mode: a figure read from a document about the artifact rather than the artifact, which then propagated into a ruling.
+
+---
+
+## ITEM 1 — `dashboard/sections.tsx:382`
+
+### Arm-3 reachability, established exhaustively from source
+
+The chain, re-derived (`dashboard/sections.tsx`):
+
+| Line | Branch | Renders |
+|---|---|---|
+| :276 | `isLoading ?` | skeleton |
+| :278 | `: !safeToSpend ?` | "We can't calculate…" |
+| :287 | `: safeToSpend.data_complete ?` | full card |
+| :370 | `: incomeNeedsSetup ?` | "Set your income" |
+| **:380** | `: (` | **ARM 3** — string at :382 |
+
+Arm 3 ⟺ `safeToSpend` truthy ∧ `!data_complete` ∧ `!incomeNeedsSetup`.
+
+`incomeNeedsSetup` (:220-222) = `safeToSpend && !data_complete && (warnings.includes("income_not_set") || monthlyIncome <= 0)`. In arm-3 context the first two conjuncts already hold, so `!incomeNeedsSetup` reduces to **no `income_not_set` warning ∧ `monthlyIncome > 0`**.
+
+Three backend invariants close it:
+
+1. `warnings` contains `income_not_set` ⟺ `monthlyIncome === null` — `aggregation.ts:705`.
+2. `monthly_income_kd = monthlyIncome !== null ? formatKd(monthlyIncome) : null` — `aggregation.ts:715`.
+3. **`resolveIncomeForPeriod` returns either `null` or a value strictly `> 0`** — both non-null arms are guarded by `.gt(0)` (`income-lib.ts:58`, `:70`). **No path returns 0 or negative.**
+
+Frontend `monthlyIncome = Number(safeToSpend?.monthly_income_kd || 0)` (:214): income `null` → `null || 0` → `0` → `<= 0` **true**; income `> 0` → `Number("1800.000")` → `<= 0` **false**.
+
+**So the two limbs of arm 2's disjunction are provably EQUIVALENT, not independent** — both true ⟺ income null, both false ⟺ income non-null. Arm 2 therefore absorbs the entire income-absent case, and:
+
+> **ARM 3 HAS EXACTLY ONE CAUSE: income resolved (> 0) AND the month's budget total = 0.**
+
+**The channel's expectation is CONFIRMED.** I tried to break it and could not; the redundant second limb is the thing that makes it airtight rather than coincidental. No STOP-AND-ASK is triggered.
+
+**One theoretical path, named rather than dismissed:** a non-numeric `monthly_income_kd` yields `NaN`, and `NaN <= 0` is **false**, so it would reach arm 3. `formatKd` cannot emit that, so it requires a contract violation or a corrupted cache entry. **It is not a second reachable cause**, but you should know it exists rather than have me assert "exactly one" without qualification.
+
+**CTA: already correct, so this is copy-only.** Arm 3's button is `primaryAction` = `{ label: "Open Plan", onClick: onOpenPlan }` (:219), and `onOpenPlan={() => navigate("/plan")}` (`DashboardPage.tsx:813`, `:830`). For a budgets cause, "Open Plan" routes exactly where a budget is set. **No CTA change proposed** — a copy-only fix is smaller than one touching both.
+
+### Proposed change — two strings, `sections.tsx:382` and `:383-385`
+
+```
+:382  - No income detected yet.
+      + No budget set for this month.
+
+:383  - Categorize your income transactions so the app can calculate how much you
+      -   have to spend each day.
+      + Safe-to-spend compares your income against your planned budget. Add at least
+      +   one budget category for this month to start seeing a daily figure.
+```
+
+Rationale: arm 3's sole cause is a missing budget, and the backend already emits `budgets_not_set` (`aggregation.ts:706`) on exactly this state — so the new copy names a condition the system independently reports. **Copy requires your approval before it ships.**
+
+**Alternative considered, not proposed:** key the branch on `warnings.includes("budgets_not_set")` instead of relying on the reachability proof. Rejected as larger — it changes control flow to re-derive a fact the proof already establishes.
+
+### Test plan
+
+`components/pages/dashboard/safe-to-spend.test.tsx` — 6 cases today, **none reaches arm 3** (`:67` and `:90` both set `warnings: ["income_not_set"]` → arm 2). Confirmed independently: `rg "No income detected"` across all test files returns **no file**.
+
+**+1 case.** Fixture: `data_complete: false`, `monthly_income_kd: "1800.000"`, `income_source: "declared_in_profile"`, `warnings: ["budgets_not_set"]`. Asserts the new title renders.
+
+**RED-first proof:** written against unfixed code, the assertion fails because the DOM contains `No income detected yet.` — the failure message prints the old string, which is the proof the test reaches arm 3 rather than passing vacuously somewhere else. **Negative case:** had the change not landed, `getByText(/No budget set for this month/)` throws "Unable to find an element". Positive and negative differ.
+
+**REPORT ONLY, not fixed (convention scope):** `safe-to-spend.test.tsx:90-98` uses `monthly_income_kd: "0.000"` **with** `warnings: ["income_not_set"]` — a wire state the backend cannot emit (invariants 1–3 above). A false-premise fixture, FIND-S5(b) class. It still validly unit-tests arm 2's second limb. Not touched.
+
+---
+
+## ITEM 2 — `InsightsPage.tsx:357`
+
+```jsx
+- <div className="grid items-start gap-6 xl:grid-cols-[1.05fr_0.95fr]">
++ <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+```
+
+**What stretched looks like.** Removing `items-start` restores CSS Grid's default `align-items: stretch`, so both `section-panel` cards grow to the row's height. Bottom edges align. Content inside stays top-aligned, so the shorter card (Month Snapshot) gains trailing empty space *inside* its border rather than the card ending early. Below the `xl` breakpoint the grid is single-column and there is **no visible change at all** — one item per row, nothing to equalise.
+
+**Does any child depend on shrink-to-content height? No — verified, not assumed.** Neither `WeeklyDigestSection.tsx` nor `SpendForecastWidget.tsx` contains `h-full`, `flex-1`, `min-h-`, `absolute`, `inset-`, or `sticky` (single sweep returned one hit: `SpendForecastWidget.tsx:74`, an `overflow-hidden rounded-full` progress bar whose children carry explicit `h-4`, unaffected by parent height). `.section-panel` (`index.css:184-191`) is `position: relative; overflow: hidden` with no height rule — `overflow: hidden` clips nothing new, since a taller box cannot cause content to exceed it.
+
+**Flagged for your call:** `items-start` may have been chosen deliberately to avoid a stretched card looking empty at the bottom. Removing it is correct for edge alignment and is a plausible aesthetic regression. **This is a judgement I should not make silently** — it is the same element class FF-R5 sends to the design track for Item 3's sibling.
+
+**Test plan: NO new test, and I want that approved rather than assumed.** jsdom computes no layout, so the only assertable artefact is the Tailwind class string — an assertion that `className` lacks `items-start` is a restatement of the diff, not a behaviour check, and its negative case is indistinguishable from its positive one in any real sense. **Predicted delta: 0 tests.** Recorded as a deliberate coverage gap.
+
+---
+
+## ITEM 3 — `WeeklyDigestSection.tsx:116` *(FF-R5 says :121; corrected above)*
+
+```jsx
+:115    <p className="financial-number whitespace-nowrap text-lg font-semibold">{formatKD(digest.safe_to_spend_today_kd)}</p>   ← UNCHANGED
+:116  - <p className="whitespace-nowrap text-sm text-muted-foreground">
+      + <p className="text-sm text-muted-foreground">
+:117    Days until payday: {digest.days_until_payday === null ? "N/A" : digest.days_until_payday}
+```
+
+**Prose label only; the number at :115 keeps its `whitespace-nowrap`,** per FF-R5's correction — and the correction is right: `KD 1,800.000` broken across lines is worse than a tight fit.
+
+**Why this is the actual remedy, and why `min-w-0` is not.** The tile grid is `grid gap-3 md:grid-cols-3` (`:82`), so clipping occurs at `md` and above only. Grid items default to `min-width: auto`, so the track cannot shrink below the item's min-content width — and with `whitespace-nowrap`, min-content width is *the whole string*. Adding `min-w-0` would let the track shrink but the text still would not wrap, converting overflow into clipping. **Removing `nowrap` is what lets the string wrap to two lines inside the tile.** No `min-w-0` is proposed.
+
+**Test plan: 0 new tests; existing test stays green AND untouched.** `WeeklyDigestSection.test.tsx:50` asserts `getByText(/Days until payday: 27/)` and `:61` asserts the `N/A` variant. Both match on **text content**, which this change does not touch. **Negative case:** had I changed the text instead of the class, both regexes would fail — so the fact they stay green is a genuine signal that the edit was class-only, not a vacuous pass.
+
+### `SpendForecastWidget.tsx:68` — REPORT ONLY, no fix proposed
+
+Three constraints converge on one element: the ink-and-brass **brass slot** (`text-accent-strong`), an **overflow site**, and the **R6 WCAG enlargement** to `text-[1.25rem]` (20px clears the 18.66px large-text threshold at accent-strong's 3.39 contrast). Options I can see, **choosing none**:
+
+| Option | Collides with |
+|---|---|
+| Reduce font size | R6 WCAG ruling — 20px is the floor that makes 3.39 contrast legal |
+| Drop `whitespace-nowrap` | breaks a money value across lines |
+| `formatCompactKD` above a threshold | the money-convention work, deferred to the mobile track |
+| Widen the tile / change grid template | affects all three tiles; layout work |
+| Stack tiles below a breakpoint | mobile-track work by definition |
+| `min-w-0` + accept clipping | trades overflow for truncation of a money value |
+
+Every option lands in the design or mobile track. Correctly deferred.
+
+---
+
+## ITEM 4 — the no-current-data delta case
+
+### Does a "current period has no data" signal exist? **No. It must be derived.**
+
+- **`manual_entry_summary.transactions_mtd` is the only `COUNT(*)` on the wire** (`aggregation.ts:796`) and it is scoped `eq(transactions.source, "manual")` (`:800`). Production writes three source values — `manual` (`transactions.ts` ×2), `csv_import` (`import-lib.ts`), `demo` (`demo-data-lib.ts:43`, `"demo"`). **A demo-seeded or CSV-imported month reports 0 with rows present.** It is disqualified, and disqualified precisely in the scenario that produced this whole track.
+- **R3 `monthly[]` rows are `{ month, income_kd, expense_kd }`** (`types/api.ts:83-89`) — **no count field**.
+- `hasRecordedTransactions` (`DashboardPage.tsx`) spans *all* months, not the selected one.
+
+### The derivation is sound AND complete — and this is a proof, not a heuristic
+
+`monthIncome === 0 && monthExpenses === 0` ⟺ **the selected month has zero rows**, because:
+
+1. **The category filters are exhaustive and mutually exclusive.** `expenseCategoryFilter()` is literally `NOT (incomeCategoryFilter())` (`payday-lib.ts:16-23`), and both are NULL-safe (`IS TRUE`, `COALESCE(name,'')`), so the predicate is never NULL and every row lands in exactly one bucket — including uncategorised rows, which fall to expense.
+2. **Every persisted amount is strictly positive** — DB CHECK `chk_transactions_amount_positive` (`amount_kd > 0`), and **it is in applied DDL**, not just the schema file: `migrations/0000_cultured_jimmy_woo.sql:70`, carried through `meta/0007_snapshot.json`. (I checked this specifically because a constraint that never reached a migration is unenforced — the "committed ≠ active" class.)
+
+Therefore any month with ≥ 1 row has `income + expenses > 0` strictly. Contrapositive: both zero ⟺ no rows.
+
+> **FF-R5's "SAY SO" clause, answered: suppression would NOT hide a legitimately-zero period that genuinely has rows — the database forbids such a period from existing.** No trade-off to rule on.
+
+**One thing that could have made this fix wrong, checked and cleared.** Current-month figures come from R4 `account_overview` when present (`DashboardPage.tsx:153-158`), previous-month from R3 via `monthlyKpiMap`. Had R4's `*_mtd` been true month-to-date, we would be comparing a partial current month against a full previous month, every delta would be structurally negative, and suppression would have been treating a symptom. **They are not MTD:** both queries bound `date >= monthStart AND date <= monthEnd` (`aggregation.ts:771-793`). The name is a Flask-inherited misnomer. Windows are like-for-like; suppression is the right fix.
+
+### Proposed mechanism — symmetry, not new policy
+
+In `heroDeltas` (`DashboardPage.tsx:253-265`), add a guard mirroring the one `prevMonthKpis` already applies at **`:249`** (`if (income === 0 && expenses === 0) return null`):
+
+```js
+const heroDeltas = useMemo(() => {
+  if (!prevMonthKpis) return null
++ if (monthIncome === 0 && monthExpenses === 0) return null   // current period has no rows
+  const delta = (curr, prev) => { ... }
+```
+
+The existing rule — *no baseline → no chips* — becomes *no baseline **or** no current data → no chips*. All four chips vanish together, matching the existing whole-row behaviour rather than inventing per-metric styling or new wording. **No new colour, no new copy, no new prop.**
+
+### Test plan
+
+`dashboard-hero.test.tsx` has 5 cases and **every one passes `deltas={null}`** — `HeroDelta` has **zero** existing coverage, and `rg "vs last month"` across all test files returns **no file**. So there is nothing to break, and nothing that currently proves the chips render at all.
+
+The fix lives in the **derivation** (DashboardPage), not the presentational component, so the test belongs in `DashboardPage.test.tsx` — which **already** mocks `./dashboard/sections` (`:47`) and spies the hero's props (`:48-49`, `mocks.dashboardHero(props)`). **No new mock infrastructure.**
+
+**+1 case:** previous month has rows, current month has none → assert the captured `deltas` prop is `null`.
+
+**RED-first proof:** against unfixed code the captured prop is `{ incomeDelta: -100, expensesDelta: -100, remainingDelta: -100, savingsRateDelta: … }`, so `expect(props.deltas).toBeNull()` fails and prints that object — which simultaneously demonstrates the −100 the fix exists to suppress. **Negative case:** without the change the assertion reads a populated object; a weaker assertion ("renders without crashing") would read identically in both worlds and would not be a check.
+
+---
+
+## Test-impact prediction — a claim to be verified, not an allowance
+
+| Item | File | Δ tests | Negative case (what the check reads if the change did NOT land) |
+|---|---|---|---|
+| 1 | `dashboard/safe-to-spend.test.tsx` | **+1** | `getByText(/No budget set for this month/)` throws; DOM shows the old string |
+| 2 | — | **0** | n/a — deliberate gap, approval requested |
+| 3 | `insights/WeeklyDigestSection.test.tsx` | **0** (stays green **and untouched**) | text-content regexes would fail only if text changed — they don't, proving class-only |
+| 4 | `DashboardPage.test.tsx` | **+1** | captured `deltas` prop is a populated `-100` object instead of `null` |
+
+**Predicted frontend baseline: 209 → 211 tests, 41 files unchanged.** API untouched — but `apps/api` **must still be run**, because `apps/api/src/contract/frontend-contract.test.ts` reads the frontend fixture; no `api.ts` call changes here, so the fixture should hold at 66 with the ALLOWLIST empty, and I will verify rather than assume.
+
+**Predicted NAMED FORCED EDITS: none.** If any test goes red, or any selector/class edit to a test is forced, I stop and ask before it ships.
+
+**Three named regression files:** none of the four items touches `AppShell`, `PrivacyPolicyPage`, or `TermsPage`. Predicted green **and** untouched.
+
+## Constraint compliance
+
+- **CLAUDE.md:482** — Items 2 and 3 **remove** classes; Items 1 and 4 add none. **Zero physical-property additions.** The 32 pre-existing sites are not touched.
+- **CLAUDE.md:470 (CSP)** — no new external origin; **no `deploy/Caddyfile` change**.
+- No renames. QuickAdd internals untouched. Pinned strings untouched (the two legal testids and the FAB aria-label/tooltip are nowhere near these four sites).
+- **No convention work performed in passing** — the three formatters, two decimal conventions, two separator conventions, three delta systems, two date formats, M10 divergences and 32 physical-property sites are all left exactly as they are.
+
+## Still OPEN — recorded, not resolved
+
+1. **The Subscriptions decision** — three candidates, none chosen. The channel declined to recommend, so there is no recommendation for the delegation to have landed on.
+2. **The KPI visual-vs-informational question** — an assessment was offered, not an action.
+3. **FF-R4 is not in my possession** (above). Needed before Phase B's persistence commit.
+
+## Stop-and-ask before any code
+
+- **Item 1 copy strings** — exact wording needs approval.
+- **Item 2** — confirm that equal-height cards are wanted, given `items-start` may have been deliberate; and approve the zero-test gap.
+- **Item 3** — confirm the corrected line (`:116`, not `:121`), and that FF-R5's reference and the persisted Phase A document will be amended.
+
+**HARD STOP.** No file written, no commit, nothing pushed. Tree clean at `a39a0cb`.
+
+---
+
+## Phase B close-out, verbatim as submitted
+
+# PHASE B — close-out
+
+## Step 0
+
+```
+Khaleds-MacBook-Air.local
+/Users/khaledalrashidi/DevLocal/public-statera
+
+a39a0cb phase-4: phase4-frontend-fixes Phase A persistence — FF-R1…FF-R3 + measurement report
+$ git status --short  → [no output]
+ahead of origin/main: 0        ← you pushed it; SHA identical, content unchanged
+```
+
+**Hostname `Khaleds-MacBook-Air.local`** (matches my last report; the first said `Mac`). Continuity established by artifact: same path, HEAD `a39a0cbee4f3e1698e6cc9e2b200234fcb0be244`, 688-line doc.
+
+**Open enumeration:** I hold **FF-R1, FF-R2, FF-R3, FF-R4, FF-R5, FF-R6** — six, contiguous 1→6, none outside, none missing. FF-R4's gap is closed by the reissue.
+
+## Item 4 gate — reported before the guard was written
+
+**Came back the right way. Value condition suffices; no presence condition.**
+
+- **(a) NO, `selectedMonth` cannot fall outside `monthly[]` — structurally.** `dashboard-snapshot-lib.ts:244` builds `monthly` as `monthKeys.map(...)` and `:259` returns `months: monthKeys` — **the same array**, 1:1, **zero-filled** for empty months. `monthOptions` derives from `months` and `selectedMonth` is constrained to it. Post-load a miss is impossible; pre-load `prevMonthKpis` returns null and `heroDeltas` short-circuits first.
+- **(b) NO, the fallback does not distinguish absent from zero.** `?.income || 0` conflates them — **real, but unreachable given (a)**. Recorded as a latent hazard that goes live the moment `months` and `monthly` diverge.
+- **(c) YES, both operands are numbers on both paths**, statically guaranteed by `Map<string, { income: number; expenses: number }>` and `Number(...)`. `=== 0` cannot silently never-fire.
+- **One check beyond the mandate:** no `placeholderData`/`keepPreviousData` on the bundle query (`hooks.ts:44-49`), so a month switch drops `accountOverview` to `undefined` rather than serving the prior month's figures. Had it cached, the guard could have read one month's numbers against another's.
+
+## The four items
+
+| # | File:line | Change |
+|---|---|---|
+| 1 | `dashboard/sections.tsx:382` + body | copy only; CTA unchanged |
+| 2 | `InsightsPage.tsx:357` | `items-start` removed |
+| 3 | `insights/WeeklyDigestSection.tsx:116` | `whitespace-nowrap` removed from the prose label; `:115` number keeps it |
+| 4 | `DashboardPage.tsx:253-265` | empty-current-period guard |
+
+Production diff is **exactly** those four edits (6 added lines at Item 4, of which 5 are the rationale comment; 1↔1 at each of the other three). No convention work.
+
+## RED-first, red captured
+
+**Item 1** — `Unable to find an element with the text: No budget set for this month.` with the **old string present twice in the dumped DOM**, which is what proves the case reaches arm 3 rather than failing somewhere else. Then 7 passed, exit 0.
+
+**Item 4** — `expected { incomeDelta: -100, …(3) } to be null`, received `expensesDelta: -100` — the exact value that renders the green success pill. The control case **passed in the same red run**, so the two cases were already discriminating before the fix. Then 8 passed, exit 0.
+
+## Mandatory sections (CLAUDE.md:436)
+
+**Resolution proofs (10e-R246):** `statera-frontend` → `MATCHED-FRONTEND` rc 0; `statera-api` → `MATCHED-API` rc 0; negative control `--filter statera-nope` → `No projects matched the filters…` **rc 0**.
+
+**(1) Test tails, verbatim, with exit codes**
+```
+ Test Files  41 passed (41)
+      Tests  212 passed (212)
+      WEB_TEST_EXIT:0
+
+ Test Files  51 passed | 10 skipped (61)
+      Tests  873 passed | 34 skipped (907)
+      API_TEST_EXIT:0
+```
+Errors instrument **0** on both; fires **1** on a synthetic control line.
+
+**(2) `tsc --noEmit`, verbatim, with exit codes**
+```
+WEB_TSC_EXIT:0   bytes: 0   (no output)
+API_TSC_EXIT:0   bytes: 0   (no output)
+```
+
+**(3) Baseline** — frontend **209/41 → 212/41**; API **873/34/61 unchanged**. Contract fixture **66** (derived from the file), `ALLOWLIST = []` — verified, not assumed. Three named regression files **green and untouched** (empty `git diff --stat`; 6/4/3 tests passing).
+
+## Prediction miss — raised as a question, not adjusted
+
+**+3 tests against +2 predicted (212, not 211).** Cause: Item 4 shipped a **second, unrequested control case** — *"still passes hero deltas when the selected month has rows"*.
+
+My reasoning: **no existing test asserts `deltas` at all**, so a guard that returned `null` unconditionally would have passed the target assertion. Without the control, the Item 4 test is not discriminating. I judged that shipping a knowingly-weak assertion was worse than a +1 overshoot — but that judgement was mine and it was not in the approved plan. **Flagged for you to accept or have removed;** removing it is a one-case deletion returning the count to 211.
+
+## Constraints
+
+Zero physical-property additions (positive control confirms the pattern matches a synthetic `ml-2` line); no `deploy/Caddyfile` change; **no CLAUDE.md edit** — `git status --short -- CLAUDE.md` = **0**, the negative deliverable tested positively per FF-R4; no renames; QuickAdd untouched; pinned strings untouched; the formatters, decimal/separator conventions, delta systems, date formats, M10 divergences and 32 physical-property sites left exactly as they were.
+
+## Carried to the close-out commit
+
+- **Persistence of FF-R4, FF-R5, FF-R6** (FF-R6 ruled it rides the close-out, not this commit) — including FF-R6's adjacent correction of the `:121`/`:116` line number, which must persist beside FF-R5's uncorrected text.
+- **Queued, not opened:** FF-R6's observation that Home suppresses a card Insights renders from the same payload — R9 computes free-to-spend fine with `committed = 0`. Product decision, yours.
+- The CLAUDE.md baseline line moves at track close, not per sub-commit.
+
+Tree clean, 1 commit ahead of `origin/main`. The push is yours.
