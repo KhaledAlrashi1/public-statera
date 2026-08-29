@@ -379,9 +379,9 @@ export function SafeToSpendHero({
           </div>
         ) : (
           <div className="inner-card space-y-3">
-            <p className="text-sm font-semibold">No income detected yet.</p>
+            <p className="text-sm font-semibold">No budget set for this month.</p>
             <p className="text-sm text-muted-foreground">
-              Categorize your income transactions so the app can calculate how much you have to spend each day.
+              Safe-to-spend compares your income against your planned budget. Set a budget for this month to start seeing a daily figure.
             </p>
             <Button type="button" variant="outline" onClick={primaryAction.onClick}>
               {primaryAction.label}

@@ -252,6 +252,12 @@ export default function DashboardPage() {
 
   const heroDeltas = useMemo(() => {
     if (!prevMonthKpis) return null
+    // Symmetric with prevMonthKpis' own empty-period guard above: a month with no
+    // rows produces income = expenses = 0, which yields a -100% delta that the
+    // inverted Expenses tile renders as a green success pill. Both category
+    // filters are exhaustive and every amount is > 0 (DB CHECK
+    // chk_transactions_amount_positive), so 0/0 means no rows, never a real zero.
+    if (monthIncome === 0 && monthExpenses === 0) return null
     const delta = (curr: number, prev: number) => {
       if (prev === 0) return curr > 0 ? 100 : 0
       return ((curr - prev) / prev) * 100

@@ -104,6 +104,36 @@ describe("SafeToSpendHero", () => {
     expect(screen.getByText("Set your income")).toBeInTheDocument()
   })
 
+  // Arm 3 of the branch chain (sections.tsx:380) has exactly one cause: income
+  // resolved AND the month's budget total = 0. Arm 2 absorbs every income-absent
+  // case, because warnings.includes("income_not_set") and monthlyIncome <= 0 are
+  // provably equivalent — resolveIncomeForPeriod returns null or strictly > 0.
+  // The copy therefore names the budget, not income.
+  it("names the missing budget, not income, when income is resolved but no budget exists", () => {
+    render(
+      <SafeToSpendHero
+        isLoading={false}
+        safeToSpend={makeSafeToSpend({
+          data_complete: false,
+          monthly_income_kd: "1800.000",
+          income_auto_detected: false,
+          income_source: "declared_in_profile",
+          total_budget_kd: "0.000",
+          committed_kd: "0.000",
+          committed_breakdown_kd: { budget_allocations: "0.000" },
+          warnings: ["budgets_not_set"],
+        })}
+        onOpenPlan={vi.fn()}
+      />
+    )
+
+    expect(screen.getByText("No budget set for this month.")).toBeInTheDocument()
+    expect(
+      screen.getByText(/Safe-to-spend compares your income against your planned budget/i)
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/No income detected yet/i)).not.toBeInTheDocument()
+  })
+
   it("shows income nudge when income_source is not_set", () => {
     render(
       <SafeToSpendHero

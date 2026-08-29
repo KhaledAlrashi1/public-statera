@@ -354,7 +354,7 @@ export default function InsightsPage() {
         </section>
       ) : null}
 
-      <div className="grid items-start gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <WeeklyDigestSection
           digest={weeklyDigestQuery.data}
           loading={weeklyDigestQuery.isLoading}

@@ -113,7 +113,7 @@ export function WeeklyDigestSection({
                   Safe-to-spend today
                 </div>
                 <p className="financial-number whitespace-nowrap text-lg font-semibold">{formatKD(digest.safe_to_spend_today_kd)}</p>
-                <p className="whitespace-nowrap text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Days until payday: {digest.days_until_payday === null ? "N/A" : digest.days_until_payday}
                 </p>
               </article>

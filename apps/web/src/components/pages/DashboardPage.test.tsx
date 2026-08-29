@@ -415,4 +415,53 @@ describe("DashboardPage", () => {
 
     expect(mocks.navigate).toHaveBeenCalledWith("/activity?import=1")
   })
+
+  // heroDeltas already suppresses the chips when the PREVIOUS period is empty
+  // (prevMonthKpis returns null). The same treatment applied to the CURRENT
+  // period keeps a -100% delta caused by absent rows from rendering as a green
+  // "100.0% vs last month" success pill on the inverted Expenses tile.
+  it("suppresses the hero deltas when the selected month has no rows", () => {
+    // Reuse the beforeEach fixture rather than restating ~35 unrelated fields.
+    const base = mocks.useDashboardPageQueries() as Record<string, unknown>
+    mocks.useDashboardPageQueries.mockReturnValue({
+      ...base,
+      dashboardMetrics: {
+        months: ["2026-03", "2026-02"],
+        monthly: [
+          { month: "2026-02", income_kd: "1800.000", expense_kd: "500.000" },
+          { month: "2026-03", income_kd: "0.000", expense_kd: "0.000" },
+        ],
+        expense_by_category: {},
+      },
+      accountOverview: { total_income_mtd: "0.000", total_spend_mtd: "0.000" },
+    })
+
+    renderPage()
+
+    const props = mocks.dashboardHero.mock.calls.at(-1)?.[0] as { deltas: unknown }
+    expect(props.deltas).toBeNull()
+  })
+
+  // Control for the case above: with rows in the selected month the chips must
+  // still render, so the guard cannot pass by suppressing everything.
+  it("still passes hero deltas when the selected month has rows", () => {
+    const base = mocks.useDashboardPageQueries() as Record<string, unknown>
+    mocks.useDashboardPageQueries.mockReturnValue({
+      ...base,
+      dashboardMetrics: {
+        months: ["2026-03", "2026-02"],
+        monthly: [
+          { month: "2026-02", income_kd: "1800.000", expense_kd: "500.000" },
+          { month: "2026-03", income_kd: "1800.000", expense_kd: "250.000" },
+        ],
+        expense_by_category: {},
+      },
+      accountOverview: { total_income_mtd: "1800.000", total_spend_mtd: "250.000" },
+    })
+
+    renderPage()
+
+    const props = mocks.dashboardHero.mock.calls.at(-1)?.[0] as { deltas: unknown }
+    expect(props.deltas).not.toBeNull()
+  })
 })
