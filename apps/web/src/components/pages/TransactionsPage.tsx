@@ -155,10 +155,8 @@ export default function TransactionsPage() {
     queryClient.invalidateQueries({ queryKey: ["auth-profile"] })
     queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] })
     queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
-    queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] })
+    queryClient.invalidateQueries({ queryKey: ["insights"] })
     queryClient.invalidateQueries({ queryKey: ["budgets"] })
-    queryClient.invalidateQueries({ queryKey: ["analytics-account-overview"] })
-    queryClient.invalidateQueries({ queryKey: ["snapshot"] })
     setRefreshSignal((v) => v + 1)
   }, [queryClient])
 
@@ -218,10 +216,8 @@ export default function TransactionsPage() {
         queryClient.invalidateQueries({ queryKey: ["merchants"] }),
         queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] }),
         queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] }),
-        queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] }),
+        queryClient.invalidateQueries({ queryKey: ["insights"] }),
         queryClient.invalidateQueries({ queryKey: ["budgets"] }),
-        queryClient.invalidateQueries({ queryKey: ["analytics-account-overview"] }),
-        queryClient.invalidateQueries({ queryKey: ["snapshot"] }),
       ])
       setPreviewOpen(false)
       setImportOpen(false)

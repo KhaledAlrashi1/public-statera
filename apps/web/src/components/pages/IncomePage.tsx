@@ -482,7 +482,7 @@ export default function IncomePage() {
         queryClient.invalidateQueries({ queryKey: ["transactions", "income", "recent"] })
         queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] })
         queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
-        queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] })
+        queryClient.invalidateQueries({ queryKey: ["insights"] })
       } catch {
         toast.error("We couldn't delete that income entry right now.")
         queryClient.invalidateQueries({ queryKey: ["transactions", "income", "recent"] })

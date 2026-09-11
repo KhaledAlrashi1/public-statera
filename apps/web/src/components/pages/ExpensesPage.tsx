@@ -823,7 +823,7 @@ export default function ExpensesPage() {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] }),
       queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] }),
-      queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] }),
+      queryClient.invalidateQueries({ queryKey: ["insights"] }),
       queryClient.invalidateQueries({ queryKey: ["transactions", "expenses"] }),
       queryClient.invalidateQueries({ queryKey: ["categories"] }),
     ])

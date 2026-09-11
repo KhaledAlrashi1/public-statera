@@ -236,7 +236,7 @@ export default function BudgetPage() {
     queryClient.invalidateQueries({ queryKey: ["budgets", month] })
     queryClient.invalidateQueries({ queryKey: ["budget-metrics"] })
     queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
-    queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] })
+    queryClient.invalidateQueries({ queryKey: ["insights"] })
     setEditIndex(null)
     setSelectedMonth(month)
     toast.success(editIndex !== null ? "Budget updated." : "Budget added.")
@@ -259,7 +259,7 @@ export default function BudgetPage() {
       queryClient.invalidateQueries({ queryKey: ["budgets", selectedMonth] })
       queryClient.invalidateQueries({ queryKey: ["budget-metrics"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
-      queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] })
+      queryClient.invalidateQueries({ queryKey: ["insights"] })
       setDeleteOpen(false)
       setDeleteIndex(null)
       toast.success(`Budget for "${catName}" deleted.`, {
@@ -271,7 +271,7 @@ export default function BudgetPage() {
             queryClient.invalidateQueries({ queryKey: ["budgets", selectedMonth] })
             queryClient.invalidateQueries({ queryKey: ["budget-metrics"] })
             queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
-            queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] })
+            queryClient.invalidateQueries({ queryKey: ["insights"] })
             toast.success(`Budget for "${catName}" restored.`)
           } catch (error) {
             toast.error(error instanceof Error ? error.message : "We couldn't restore that budget right now.")
@@ -304,7 +304,7 @@ export default function BudgetPage() {
       queryClient.invalidateQueries({ queryKey: ["budgets", selectedMonth] })
       queryClient.invalidateQueries({ queryKey: ["budget-metrics"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
-      queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] })
+      queryClient.invalidateQueries({ queryKey: ["insights"] })
       setCopyOpen(false)
       setCopyPreview(null)
       toast.success(

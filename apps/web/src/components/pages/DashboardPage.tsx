@@ -441,10 +441,8 @@ export default function DashboardPage() {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] }),
       queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] }),
-      queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] }),
+      queryClient.invalidateQueries({ queryKey: ["insights"] }),
       queryClient.invalidateQueries({ queryKey: ["budgets"] }),
-      queryClient.invalidateQueries({ queryKey: ["analytics-account-overview"] }),
-      queryClient.invalidateQueries({ queryKey: ["snapshot"] }),
       queryClient.invalidateQueries({ queryKey: ["auth-profile"] }),
       queryClient.invalidateQueries({ queryKey: ["transactions"] }),
       queryClient.invalidateQueries({ queryKey: ["categories"] }),
@@ -458,7 +456,11 @@ export default function DashboardPage() {
       setDismissingAlertId(alertKey)
       try {
         await notificationsApi.dismissBudgetAlert(alertKey)
-        await queryClient.invalidateQueries({ queryKey: ["budget-alerts"] })
+        // Alerts are served inside the dashboard bundle (R8 -> listActiveBudgetAlerts),
+        // which filters out keys with a budget_alert_dismissed event. Invalidating the
+        // bundle is what makes the dismissed alert disappear; there is no ["budget-alerts"]
+        // query to invalidate.
+        await queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
       } finally {
         setDismissingAlertId(null)
       }
@@ -652,7 +654,7 @@ export default function DashboardPage() {
       queryClient.invalidateQueries({ queryKey: ["budget-items", month] }),
       queryClient.invalidateQueries({ queryKey: ["budget-metrics"] }),
       queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] }),
-      queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] }),
+      queryClient.invalidateQueries({ queryKey: ["insights"] }),
     ])
     setSelectedMonth(month)
     setBudgetDialogOpen(false)
