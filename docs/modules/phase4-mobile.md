@@ -150,6 +150,51 @@ The amendment above is left as it stands. This is the live index from here forwa
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** The count stays at
   **SIX**.
 
+### Amendment — MOB-R7/R8 persistence commit, 2026-09-11
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R8**, complete and contiguous: first **1**, last **8**,
+  **0** duplicates, **0** breaks in 1…8, derived from this file.
+- **MOB-R7 provenance: RELAYED. MOB-R8 provenance: RELAYED.**
+- **MOB-F1 CACHE-INVALIDATION is OPEN** (operator ruling, 2026-08-29, direct), running **before**
+  MOB-1 RESPONSIVE. Sequence: **MOB-F1 → MOB-1 RESPONSIVE → MOB-2 ZERO-VS-NO-DATA → MOB-3
+  CONVENTIONS**. Phase A ran as measurement-and-proposal in ONE report (a deliberate compression,
+  named at MOB-R7 so it is not read as a precedent) and is **accepted in full** at MOB-R8.
+- **THREE CHANNEL CLAIMS WERE FALSIFIED by Phase A and are recorded as falsifications** (MOB-R8),
+  because the cycle's own justification rested on them:
+  - **(i)** The screenshot-instrument rationale is a **CROSS-TAB** hazard, and the `QueryClient` is
+    a module-level singleton — one per JS context, one per tab — so key repair cannot touch it.
+  - **(ii)** "Eleven broken behaviours" is **false**: 19 of the 20 dead sites are **SHADOWED** by
+    an adjacent live invalidation covering the same payload. Dead **code**, not dead **behaviour**.
+  - **(iii)** The in-tab divergence window is **bounded**, not unbounded: `refetchOnMount` defaults
+    to `true` and was never overridden.
+  **The decision to run this cycle first STANDS; only its reason is corrected** — the
+  right-action-wrong-reason class, named on this track for the second time.
+- **PROCEDURAL MITIGATION replacing the code one (MOB-R8), binding on MOB-1 RESPONSIVE:** operator
+  UI observations are taken **in ONE tab, from a fresh load, navigating between pages**, and the
+  report **states that this was done**. It also inherits the standing requirement that any operator
+  UI observation state **the deploy completed first**.
+- **The client-cache regime, measured and recorded** (Phase A F7): global `staleTime 30_000`,
+  `retry 1`, `refetchOnWindowFocus: false`; **`gcTime` never declared** → default 5 min;
+  `refetchOnMount`/`refetchOnReconnect` never declared → default `true`; **no `refetchInterval`
+  anywhere**. The matching rule is pinned to **`@tanstack/query-core@5.100.9`** and derived from
+  that package on disk, not from memory.
+- **THREE ITEMS WITH THE OPERATOR, none blocking implementation** (MOB-R8), each a channel
+  recommendation **offered and not adopted**:
+  - **Item A** — the three dead lines inside `QuickAddContext.tsx` (`:54`, `:58`, `:59`), a
+    **protected surface**. Recommendation: DELETE. Withholding them was correct.
+  - **Item B** — the four unreachable `["budgets", <month>]` sites. Recommendation: FOLD IN, with
+    their own per-site P1 entry, quantified behaviour change and discriminating test.
+  - **Item C** — the cross-tab regime. Recommendation: **QUEUE, DO NOT OPEN.** Trigger recorded:
+    any requirement that two simultaneously-open contexts agree.
+- **The tripwire continues to earn its place.** This payload's sweep was **strict 2 / tripwire 2,
+  agreeing**, with one further column-0 `MOB-` line read and classified — a wrapped phase handle
+  (`MOB-2 ZERO-VS-NO-DATA, then MOB-3 CONVENTIONS.`) matching neither operative pattern. Both
+  numbers are reported at every sweep, per the MOB-R5 instrument ruling.
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** The count stays at
+  **SIX**.
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
@@ -1112,3 +1157,550 @@ cycle before the responsive phase. No phase opens until the operator rules it. T
 recommendation is offered and four cycles have not adopted it.
 
 NOTHING IS IMPLEMENTED BY THIS BLOCK.
+
+MOB-R7 — MOB-F1 CACHE-INVALIDATION IS OPENED BY OPERATOR RULING. Phase A is MEASUREMENT AND
+PROPOSAL IN ONE REPORT, deliberately compressed, hard stop before any code. adf5fd5 is accepted.
+
+adf5fd5 IS ACCEPTED and this is the acknowledgement riding the next substantive block, which is
+the lightened cadence operating for the first time. Pre-append 1/1 with the single column-0 line
+printed and read; post-append 6/6 agreeing, enumeration in file order, first 1, last 6, zero
+duplicates, zero breaks, ascending checked, both routes landing on 6; nine column-0 lines carrying
+the prefix printed and classified. The provenance correction was made ADJACENT with the persisted
+note's wording left intact, which is the right disposition for a historical record.
+
+OPERATOR RULING, 2026-08-29, DIRECT. The dead-invalidation-key fix opens as a short cycle BEFORE
+the responsive phase. The channel recommendation is therefore ADOPTED BY OPERATOR RULING and stops
+being offered-and-not-adopted. The sequence is now: this cycle, then MOB-1 RESPONSIVE, then
+MOB-2 ZERO-VS-NO-DATA, then MOB-3 CONVENTIONS.
+
+WHY IT RUNS FIRST, RESTATED SO THE MANDATE CARRIES ITS OWN REASON. Every phase behind it is
+verified in part by the operator LOOKING at screens. With refetch-on-focus disabled, no polling
+anywhere in src, and an invalidation that should freshen one of the two surfaces landing on
+nothing, two open pages can hold client caches of arbitrarily different ages and never
+self-correct. A screenshot is then evidence about a cache generation, not about the build. That is
+the push-is-not-a-deploy class one layer further in, and it corrupts the only instrument the
+responsive phase has.
+
+THE COMPRESSION IS DELIBERATE AND IS NAMED SO IT IS NOT READ AS A PRECEDENT. The frontend-fixes
+track ran measurement and proposal as two report cycles. This one runs them as one report. The
+reason is scope: the surface is a small, enumerable set of call sites in one package, and a
+separate proposal round would cost a relay cycle for a fix whose shape the measurement already
+determines. THE HARD STOP IS NOT COMPRESSED. No code is written, nothing is committed, nothing is
+pushed, and the proposal half requires explicit approval before implementation. If the measurement
+finds the surface is larger or more entangled than the report anticipates, SPLIT IT BACK INTO TWO
+CYCLES AND SAY SO — that is a report, not a failure.
+
+STEP 0, REPORTED, IN THIS ORDER.
+  (0.1) `hostname; pwd` as the first line, without exception.
+  (0.2) HEAD SHA and `git status --short`, both pasted, emptiness marked between printed
+        delimiters rather than asserted.
+  (0.3) OPEN ENUMERATION: state which MOB-numbered blocks you hold. Enumerate what you hold; do
+        not confirm a list supplied to you.
+  (0.4) BASELINES, RE-DERIVED FROM THE ARTIFACT AT EXECUTION. Resolution proof per selector plus a
+        non-matching negative control shown exiting 0. Capture the return code on its own line
+        after a NON-PIPED command. Report the Test Files summary line, not only the Tests line.
+        STATED SO A MISS IS A QUESTION AND NEVER AN ADJUSTMENT: frontend 212 passed / 41 files;
+        api hermetic 873 passed / 34 skipped / 61 files; both tsc 0 errors and 0 bytes; contract
+        fixture 66; ALLOWLIST length 0, derived FROM THE FILE. INTEGRATION is NOT owed and NOT run
+        — no db.transaction() boundary, no integration case, no code. State the omission and its
+        reason.
+
+═══ THE MEASUREMENT ═══
+
+F1 — ENUMERATE EVERY DECLARED QUERY KEY IN apps/web, AND PRINT THE WHOLE LIST. This is the
+  load-bearing step and its form is ruled, not left to judgement. The defect under investigation
+  was PRODUCED by a search that found nothing and was believed; "no declared query matches this
+  prefix" established by searching for an absence is the same instrument that created the bug.
+  DERIVE THE LIST, THEN READ IT. For each: file:line, the literal key array as written, whether
+  any segment is a variable, and the hook that declares it. Sorted and printed in full. A search
+  confirms presence and never completeness, and its silence confirms nothing.
+
+F2 — ENUMERATE EVERY INVALIDATION CALL SITE IN apps/web. Every `invalidateQueries`,
+  `removeQueries`, `resetQueries`, `refetchQueries` and `setQueryData` call. For each: file:line,
+  the key argument as written, any options passed alongside it, and the user action that triggers
+  it. Do not scope this to the eleven sites already named — the eleven came from a search, and
+  whether they are the COMPLETE set of invalidations is exactly what this step decides.
+
+F3 — THE MATCHING SEMANTICS, DERIVED FROM THE INSTALLED VERSION AND NOT FROM MEMORY. Establish, at
+  execution, the exact TanStack Query version resolved in this repo from the lockfile, then
+  establish its key-matching rule from that version's own source or types in node_modules — not
+  from recollection of the library's behaviour and not from documentation for a different major.
+  State the rule precisely enough that a reader can apply it by hand to any pair of keys.
+
+F4 — CROSS-MATCH F2 AGAINST F1 AND CLASSIFY EVERY INVALIDATION. Three buckets, each site in
+  exactly one, each assignment shown rather than asserted: LIVE, it matches at least one declared
+  key under the F3 rule and you name which; DEAD, it matches nothing declared; AMBIGUOUS, matching
+  depends on a runtime value. Report the counts and the per-site table. THE DEAD SET IS THIS
+  CYCLE'S SUBJECT and the other two buckets are what prove the dead set was found by classification
+  rather than by looking for it.
+
+F5 — WAS IT EVER LIVE. From git history, determine whether any query was ever declared under the
+  dead key, or whether these sites never matched anything. State which, with the commit that
+  changed it if one exists. A regression and a never-wired call site are different defects with
+  different lessons, and the record should not have to guess later.
+
+F6 — THE BLAST RADIUS OF THE DEAD SET. For each dead invalidation: which declared query or queries
+  the site was evidently INTENDED to refresh, inferred from the surrounding write and stated as an
+  inference with its basis. Then: what a user actually observes today because the refresh does not
+  happen — which surface shows stale figures, after which action, and for how long given the
+  declared staleTime, the global refetch-on-focus setting and the absence of polling.
+
+F7 — THE REGIME, REPORTED AND NOT OPENED. Report the client-cache configuration as it stands:
+  every staleTime and gcTime declared, the global defaults, refetch-on-focus, refetch-on-mount,
+  refetch-on-reconnect, and any polling. State plainly whether repairing the keys is SUFFICIENT to
+  make a write visible on both surfaces, or whether the regime itself would also have to change.
+  IF THE REGIME WOULD ALSO HAVE TO CHANGE, THAT IS A FINDING AND A REQUEST, NOT A SELF-GRANT — say
+  so and propose nothing for it in this cycle.
+
+═══ THE PROPOSAL ═══
+
+Only for the DEAD set from F4. Nothing else is in scope.
+
+P1 — THE CHANGE, PER SITE. Exact file:line, the key as written now, the key proposed, and the
+  declared query from F1 it will then match under the F3 rule. Prefer the narrowest key that
+  reaches the intended queries; where a broader segment is the right answer, say why and state
+  what else it will sweep in. If two sites want different answers, they get different answers —
+  do not unify eleven call sites onto one key because uniformity looks tidier than correctness.
+
+P2 — THE BEHAVIOUR CHANGE, QUANTIFIED, BECAUSE THE OPERATOR WAS TOLD IT EXISTS. These queries do
+  not currently refetch on these writes and will begin to. State, per user action: how many queries
+  newly refetch and which routes they hit. This is a deliberate change in network behaviour, not a
+  silent side effect of a bug fix, and it ships named.
+
+P3 — THE PROTECTED-SURFACE CHECK, RUN BEFORE PROPOSING AND NOT AFTER. QuickAdd internals are
+  UNTOUCHABLE. One invalidation already sits inside QuickAddContext. If any proposed edit falls
+  inside a protected surface, that edit is a STOP-AND-ASK and is proposed to nobody until the
+  operator rules it. Report explicitly whether any does.
+
+P4 — THE TEST PLAN, WITH ITS NEGATIVE CASE STATED PER TEST. Establish first whether ANY existing
+  test asserts invalidation behaviour, by enumeration rather than by a search for its absence. For
+  each proposed test: the file, what it asserts, and WHAT THE ASSERTION WOULD READ IF THE CHANGE
+  HAD NOT LANDED. A check whose negative case equals its positive case is not a check. RED-FIRST
+  with the red captured is required for every new case.
+  ONE HAZARD NAMED IN ADVANCE, because it is this project's recurring shape: a test that asserts
+  "invalidate was called with key K" restates the diff and passes against a key that still matches
+  nothing. The discriminating assertion is about the OUTCOME — that the target query is marked
+  stale, or refetches — which requires the real matching rule to run rather than a mock of it.
+  Propose the discriminating form or state why it is not reachable here.
+
+P5 — PREDICTED TEST DELTA, per file, with the frontend baseline movement stated as a DELTA and its
+  absolute re-derived at execution. Predicted NAMED FORCED EDITS: state them, and state none if
+  none. Any red test, or any forced selector or class edit to a test, STOPS and asks before it
+  ships. The three named regression files stay green AND untouched.
+
+CONSTRAINTS, cited not restated: logical properties only, zero physical-property additions; CSP
+enforcing, no new external origin and therefore no Caddyfile change expected — say so explicitly
+rather than leaving it unmentioned; no renames; QuickAdd internals untouchable; pinned strings
+untouched; the three named regression files green and untouched. NO CONVENTION WORK, NO RESPONSIVE
+WORK, NO ZERO-VS-NO-DATA WORK IN PASSING. The month-mismatch finding and the formatter one-ulp
+divergence are QUEUED ELSEWHERE and are not touched here. The e2e suite is not run, repaired,
+revived or deleted.
+
+PREDICTIONS, STATED IN ADVANCE SO A MISS BECOMES A QUESTION, AND OFFERED TO BE FALSIFIED RATHER
+THAN CONFIRMED. The channel expects F4's dead set to be LARGER than the eleven already named,
+because eleven came from a search and F4 comes from a classification. It expects F5 to find these
+sites were never live rather than broken by a rename. It expects F7 to find key repair SUFFICIENT.
+TRY TO BREAK ALL THREE. Report what is measured, not whether it agrees. A dead set of exactly
+eleven is a fine result and is reported as a met prediction, not as a confirmation.
+
+INSTRUMENT DISCIPLINE. Every zero paired with a positive control on a pattern known to match, with
+what a populated result would have looked like stated. Every glob-bearing argument quoted; an
+unquoted glob that matches nothing errors before the search runs and prints an empty result
+indistinguishable from a real one. Scope every search to src and say so. Derive every figure from
+the FILE, never from a document about the file, including the prior report and this block. Paste
+captured output; a pointer to a result the reader cannot resolve is functionally identical to an
+uncaptured claim, and the failure is invisible from inside your own session.
+
+PERSISTENCE, AND IT IS DEFERRED DELIBERATELY. This block and the Phase A report persist together in
+the commit that PRECEDES any implementation, following the frontend-fixes track's own precedent
+where Phase A ran before its persistence commit and implementation followed it. Persist-first
+governs IMPLEMENTATION, not measurement, so nothing is at risk and a commit is saved. Provenance
+RELAYED. If a session boundary approaches before that commit, PERSIST IMMEDIATELY AND SAY SO — no
+ruling crosses a boundary in an implementer's context, and a saved commit is not worth a lost
+block.
+
+HARD STOP after the report. No file written, no commit, no push. Implementation begins only on an
+explicit approval of the proposal half.
+
+MOB-R8 — PHASE A IS ACCEPTED. THREE CHANNEL CLAIMS ARE FALSIFIED. Seventeen sites approved, one of
+them GATED on a pre-check. Three items go to the operator and none blocks implementation.
+
+CADENCE. Issued under test (b) — it rules things the implementer cannot proceed without — and
+under (c). The acceptance of adf5fd5 rode the preceding block; this one carries no separate
+acceptance ceremony.
+
+PHASE A IS ACCEPTED IN FULL. Step 0 complete with all six figures matched. The compression into one
+report was correct and the surface was as enumerable as it was predicted to be.
+
+THREE CHANNEL CLAIMS ARE FALSIFIED, RECORDED AS FALSIFICATIONS RATHER THAN QUIETLY DROPPED.
+  (i) THE SCREENSHOT-INSTRUMENT RATIONALE IS THE BIG ONE AND IT WAS THIS CHANNEL'S JUSTIFICATION
+      FOR THE ENTIRE CYCLE'S PLACEMENT. The stated hazard was two open pages holding caches of
+      arbitrarily different ages. That is the CROSS-TAB case, and the client is a module-level
+      singleton — one per JS context, one per tab — so an invalidation in one tab is STRUCTURALLY
+      INCAPABLE of reaching another. Key repair does not touch it and cannot. The implementer
+      established this from the artifact and stated that it bears on the ruling's own rationale,
+      which is the report reading the mandate rather than only executing it.
+  (ii) "ELEVEN BROKEN BEHAVIOURS" IS FALSE. Nineteen of the twenty dead sites are SHADOWED — each
+      sits in a block that also invalidates a live key covering the same payload. The refreshes
+      happen. This is dead CODE, not dead BEHAVIOUR, and the channel described it to the operator
+      as the latter.
+  (iii) THE IN-TAB DIVERGENCE WINDOW IS BOUNDED, NOT UNBOUNDED. Refetch-on-mount defaults to true
+      and was never overridden, so navigating to a surface after the stale time has elapsed
+      refetches it regardless of any invalidation. The unbounded case requires sitting on a MOUNTED
+      page without navigating, which is narrower than what was claimed.
+
+THE DECISION STANDS AND THE REASON IS CORRECTED, AND THE DISTINCTION IS THE POINT. Opening this
+cycle before the responsive phase was right — it cost one cycle and found a real user-visible
+defect that no other phase would have gone looking for. It was right for reasons other than the
+ones given. That is the right-action-wrong-reason class this track already named once, and the
+reason is recorded because a wrong reason recurs attached to a case where it does not hold.
+  THE OPERATOR-FACING CORRECTION HAS BEEN MADE IN PLAIN LANGUAGE AND IS NOT RESTATED HERE.
+  THE PROCEDURAL MITIGATION REPLACES THE CODE ONE: during the responsive phase, operator UI
+  observations are taken in ONE tab, from a fresh load, navigating between pages, and the report
+  states that this was done. That closes the cross-tab hazard for the only instrument it threatens,
+  at zero cost and with no behaviour change. It also inherits the standing requirement that any
+  operator UI observation state that the deploy completed first.
+
+PREDICTIONS SCORED HONESTLY: two met, one half-falsified, and the half-falsification is the
+valuable one. Dead set larger than eleven — MET at twenty. Never-wired rather than a regression —
+MET. Key repair sufficient — HALF FALSIFIED, sufficient in-tab, structurally impossible cross-tab.
+
+TWO INSTRUMENT NOTES RATIFIED, THE FIRST OF THEM UNPROMPTED AND THE BETTER ONE.
+  F5's METHOD. The obvious history search was tried, RECOGNISED AS NON-DISCRIMINATING because the
+  substring occurs in invalidations as well as declarations, and DISCARDED — the false-positive
+  rider named explicitly. It was replaced by parsing declared keys at every frontend-touching
+  commit, which answers the question the search could not. Discarding a working-looking instrument
+  because it cannot separate the two cases is the discipline, and it was applied without being
+  asked for.
+  F3's DERIVATION. The matching rule was read out of the installed package on disk at the resolved
+  version, with the lockfile and the installed manifest shown agreeing, and stated precisely enough
+  to apply by hand. Deriving library semantics from the artifact rather than from recollection is
+  what makes the F4 classification a computation instead of a belief.
+
+THE FOUR AMBIGUOUS SITES ARE A SECOND REAL DEFECT AND WERE CORRECTLY REPORTED SEPARATELY. Comparing
+a year-month string against a literal segment cannot match, so budget writes never invalidate the
+setup-progress query, which carries a five-minute stale time. Holding them out of the strict dead
+set was the right call under this cycle's scope. THEY GO TO THE OPERATOR, below.
+
+═══ THE GATE — REPORT BEFORE WRITING THE BUDGET-ALERT FIX ═══
+
+THE ONE GENUINE USER-VISIBLE DEFECT IS ALSO THE ONE PLACE THIS PROPOSAL COULD SHIP A NO-OP. The fix
+invalidates the bundle so the alert list refetches. THAT ONLY CLEARS THE ALERT IF THE SERVER STOPS
+RETURNING IT. Nothing in the report establishes that it does.
+  ESTABLISH FROM SOURCE, BEFORE WRITING ANY CODE: does the bundle's budget-alerts payload EXCLUDE
+  alerts the user has dismissed? Trace the dismissal write to the field or table it sets, then trace
+  the bundle's alert query to whether it filters on that field. Show the code both ways.
+  IF IT DOES NOT EXCLUDE THEM, STOP AND REPORT. The fix would then add a request per dismissal and
+  change nothing on screen, and the correct remedy is a different one — likely local suppression of
+  the dismissed id, which is a larger change than this cycle approved.
+  STATE IN ADVANCE WHAT THE CHECK WOULD READ IF THE SERVER DID NOT FILTER, so the check has a
+  negative case distinct from its positive one. The other sixteen sites proceed independently of
+  this gate.
+
+═══ APPROVED ═══
+
+P1 IS APPROVED AS PROPOSED, all three answers, and the refusal to unify them is ratified.
+  THE TEN REPOINTED TO THE BROAD SEGMENT — APPROVED, and the reasoning is the load-bearing part.
+  The narrowest matching key would refresh one of two surfaces that read THE SAME BUILDER, which
+  reproduces the exact divergence the preceding measurement cycle was opened to investigate. A
+  narrower key is not automatically a better key; it is better only when it does not split a pair
+  that must move together. The broader segment also agrees with what the QuickAdd path already
+  does, so the two write paths converge rather than diverge.
+  THE SIX DELETED RATHER THAN REPOINTED — APPROVED. Each already sits beside a live line covering
+  the same payload; repointing would issue a second invalidation of a query just invalidated.
+  Deletion is narrower and truer, and a line that does nothing is worse than absent because a reader
+  believes it.
+  THE ONE REPOINTED ALERT SITE — APPROVED SUBJECT TO THE GATE ABOVE.
+
+P2 IS ACCEPTED AND THE QUANTIFICATION IS THE RIGHT SHAPE. Zero new requests at write time because
+the target surface is unmounted and the default refetch type is active-only; six queries refetching
+at next navigation that previously could serve cache; one request per alert dismissal, which is the
+point of the fix. Named, not silent.
+
+P4 IS APPROVED WITH TWO SHARPENINGS, BOTH ABOUT KEEPING THE TESTS DISCRIMINATING LATER.
+  THE OUTCOME FORM IS THE RIGHT CHOICE AND THE REASONING FOR IT IS RATIFIED. Asserting that a spy
+  was called with a key restates the diff and passes against a key matching nothing — the defect
+  under repair would survive its own test. Seeding a real client under a real declared key and
+  asserting the invalidated state routes through the library's actual matching rule, which makes it
+  a measurement.
+  SHARPENING 1 — NAME THE CONTROL KEY AND PROVE IT IS OUTSIDE BOTH FILTERS. "An unrelated key" is
+  not specified enough to be checkable. State the literal key, and show it shares no first segment
+  with either filter used in the same block. A control that turns out to be swept by the broad
+  segment would pass for the wrong reason and the failure would be invisible.
+  SHARPENING 2 — THE WEEKLY-DIGEST SEEDING IS LOAD-BEARING AND MUST SAY SO IN THE FILE. That case
+  is what fails if a later reader "simplifies" the broad segment to the narrow one. Comment it with
+  WHY it is seeded under that specific key, or a future tidy deletes the only thing pinning the
+  breadth decision. Same discipline as commenting a mock boundary that looks gratuitous.
+  RED-FIRST WITH THE RED CAPTURED for every new case, and the red must show the discriminating
+  value, not merely a failure.
+
+P5 IS ACCEPTED. Plus three tests, no file movement, absolute re-derived at execution against the
+measured baseline and stated as a delta. A MISS IS A QUESTION, NEVER AN ADJUSTMENT. Named forced
+edits predicted NONE; any red test or any forced selector or class edit STOPS and asks BEFORE it
+ships. The three named regression files stay green AND untouched.
+
+═══ THREE ITEMS FOR THE OPERATOR — NONE BLOCKS IMPLEMENTATION ═══
+
+  ITEM A — THE THREE DEAD LINES INSIDE THE PROTECTED SURFACE. Withholding them was CORRECT; the
+  constraint requires an operator ruling and the implementer does not hold one. Channel
+  recommendation, offered and not adopted: DELETE. They match nothing, so no behaviour can change,
+  and leaving a misleading string inside the most protected journey in the app is the exact defect
+  this cycle exists to remove. If the operator rules delete, they ride the SAME commit; if the
+  ruling arrives later, they are a separate one-line commit and that cost is accepted rather than
+  pre-empted.
+  ITEM B — THE FOUR UNREACHABLE BUDGET SITES. Channel recommendation, offered and not adopted:
+  FOLD IN. Same files, same class, same cycle, and a five-minute stale window on a setup indicator
+  is a real if small user-visible defect. If folded in, they carry their own per-site P1 entry, their
+  own quantified behaviour change and their own discriminating test, exactly as the seventeen do —
+  not appended as an afterthought to an approved set.
+  ITEM C — THE CROSS-TAB REGIME. Channel recommendation, offered and not adopted: QUEUE IT, DO NOT
+  OPEN IT. The procedural mitigation above closes the only instrument it threatens at zero cost. A
+  regime change — focus-refetching or a cross-tab broadcast — is an app-wide behaviour change
+  affecting every query, and it deserves its own measurement rather than riding a key-repair commit.
+  QUEUED WITH ITS TRIGGER: any requirement that two simultaneously-open contexts agree.
+
+═══ IMPLEMENTATION ═══
+
+ONE COMMIT. The sixteen ungated sites proceed immediately and independently. The seventeenth
+proceeds when the gate closes. Items A and B enter the commit only if the operator rules them in
+before it is written.
+
+CONSTRAINTS: zero physical-property additions, with a positive control proving the pattern matches;
+no new external origin and no Caddyfile change — assert it rather than omit it; no renames; QuickAdd
+internals untouched absent an Item A ruling; pinned strings untouched. NO CONVENTION WORK, NO
+RESPONSIVE WORK, NO ZERO-VS-NO-DATA WORK IN PASSING. The month mismatch and the formatter
+divergence stay queued elsewhere and are not tidied. The e2e suite is not run, repaired, revived or
+deleted.
+
+CLOSE-OUT CARRIES THE THREE MANDATORY SECTIONS, and a close-out missing any is auto-returned: the
+verbatim test tail INCLUDING the Test Files summary line with its captured exit code for the exact
+commands CI runs, each carrying a resolution proof and a non-matching negative control; the verbatim
+typecheck output with its captured exit code and byte count for BOTH packages; and the baseline
+hunk old-to-new shown as the diff itself, not as prose. The api suite is RUN even though no api file
+is touched, because the contract test reads the frontend fixture. Assert the fixture count and the
+allowlist length derived FROM THE FILE. Assert the negative deliverable positively: the standing
+rules file is untouched, shown by an empty status on that path. Re-derive every figure AFTER THE
+LAST EDIT, not after the largest one.
+
+PERSISTENCE. The preceding mandate block, this block and the Phase A report persist in the commit
+that PRECEDES implementation — that clause is now due. Sweep the payload before appending under both
+operative patterns; the Phase A report contains bracketed key literals but no track-prefixed
+column-0 lines, so the payload is predicted clean rather than assumed clean, and any disagreement
+between the two forms halts the write. Predicted payload strict 2 and tripwire 2, AGREEING; after
+the append, strict 8 and tripwire 8, first 1, last 8, no duplicates, no breaks in 1 to 8, reconciled
+two ways, enumeration PRINTED IN FILE ORDER. Derive the totals from what is actually present; if
+these figures are wrong, yours are right and you show the reconciliation. Provenance for both blocks
+RELAYED. Amend the completeness note. That commit is docs-only under the standing permanent licence
+— state the skip and its reason, prove docs-only by exclusion with the exclusion shown
+discriminating, carry the bytes.
+
+NOTHING ELSE IS OPENED BY THIS BLOCK.
+
+---
+
+## MOB-F1 CACHE-INVALIDATION — Phase A report (executed 2026-09-11, accepted by MOB-R8)
+
+Measurement and proposal in one report, per MOB-R7. Hard stop: no file written, no commit, no push.
+
+### Step 0
+
+**(0.1)** `Khaleds-MacBook-Air.local` / `/Users/khaledalrashidi/DevLocal/public-statera`
+
+**(0.2)** HEAD `adf5fd5361f7014b1dba69debfd558642713ff23`, branch `main`; `git status --short`
+printed no lines between printed delimiters.
+
+**(0.3) Held at execution: MOB-R1 … MOB-R7.** R1–R6 persisted at `adf5fd5`; R7 held, unpersisted,
+deferred deliberately per its own persistence clause.
+
+**(0.4)** Resolution proofs `MATCHED-frontend` / `MATCHED-api`, both exit 0; negative control
+`statera-web` → `No projects matched the filters`, exit 0. Frontend `Test Files 41 passed (41)` /
+`Tests 212 passed (212)`, exit 0. API `Test Files 51 passed | 10 skipped (61)` /
+`Tests 873 passed | 34 skipped (907)`, exit 0. Errors-instrument 0 on both, control fires = 1.
+Both `tsc` exit 0, 0 bytes. Fixture 66. ALLOWLIST `= []`. All six matched. INTEGRATION not run and
+not owed — no `db.transaction()` boundary, no integration case, no code.
+
+### F1 — every declared query key (28), derived then read
+
+`useQuery` is the ONLY declaring hook present. No `useInfiniteQuery`, `useSuspenseQuery`,
+`queryOptions`, `prefetchQuery`, `fetchQuery`, `ensureQueryData`, and NO `useMutation` anywhere —
+writes are plain async functions with manual invalidation. 28 call sites, 0 without a key.
+
+| file:line | key as written |
+|---|---|
+| BudgetPage.tsx:107 | `["budget-items", comparisonMonth]` |
+| BudgetPage.tsx:117 | `["budget-metrics", comparisonMonth, "month"]` |
+| ExpensesPage.tsx:560 | `["dashboard-metrics", 60]` |
+| ExpensesPage.tsx:590 | `["categories"]` |
+| ExpensesPage.tsx:628 | `["transactions","expenses","recent",debouncedSearch,filterCategory,rangeFrom]` |
+| ExpensesPage.tsx:657 | `["transactions","expenses","category",activeCategory,selectedMonth,categoryOffset]` |
+| IncomePage.tsx:344 | `["dashboard-metrics", 24]` |
+| IncomePage.tsx:408 | `["transactions","income","recent",debouncedSearch,rangeFrom]` |
+| InsightsPage.tsx:102 | `["insights","month-options",currentMonth]` |
+| InsightsPage.tsx:124 | `["insights","recurring-patterns",120]` |
+| InsightsPage.tsx:129 | `["insights","month-delta",selectedMonth]` |
+| InsightsPage.tsx:134 | `["insights","readiness",selectedMonth]` |
+| InsightsPage.tsx:139 | `["insights","safe-to-spend",selectedMonth]` |
+| InsightsPage.tsx:144 | `["insights","weekly-digest"]` |
+| TransactionsPage.tsx:70 / :80 / :90 | `["categories"]` / `["merchants"]` / `["auth-profile","activity"]` |
+| budget/hooks.ts:78 / :111 / :133 | `["budget-active-months"]` / `["categories"]` / `["budget-metrics",selectedMonth,range]` |
+| dashboard/hooks.ts:23 / :33 / :45 | `["dashboard-metrics",24]` / `["auth-profile","dashboard"]` / `["dashboard-bundle",selectedMonth]` |
+| dashboard/hooks.ts:57 | `["transactions","dashboard","category",activeCategory,selectedMonth,categoryOffset]` |
+| dashboard/hooks.ts:81 | `["budgets","setup-progress",setupMonth]` |
+| BulkEditDialog.tsx:69 | `["transactions","bulk-edit",selectedIds]` |
+| TransactionsTable.tsx:68 | `["transactions","search",debouncedQ,category,merchant,dateFrom,dateTo,transactionType,offset]` |
+| QuickAddContext.tsx:27 | `["categories"]` |
+
+11 distinct first segments: `auth-profile`, `budget-active-months`, `budget-items`,
+`budget-metrics`, `budgets`, `categories`, `dashboard-bundle`, `dashboard-metrics`, `insights`,
+`merchants`, `transactions`.
+
+### F2 — every cache-mutating call site
+
+`queryClient.invalidateQueries(` 76, `setQueryData(` 5, `clear(` 2, and ZERO `removeQueries` /
+`resetQueries` / `refetchQueries` / `cancelQueries` / `getQueryData` / `getQueriesData` /
+`setQueriesData`. All 76 enumerated with keys. No site passes `exact`, `predicate`, `type`,
+`refetchType` or `stale` (control: the same window finds `queryKey` 75 times — the 76th is
+`WorkspaceChoicePage.tsx:34`, a bare `invalidateQueries()` after demo-data load).
+
+### F3 — the matching rule, from `@tanstack/query-core@5.100.9` on disk
+
+Lockfile and installed manifest agree on 5.100.9. From `build/modern/utils.js`:
+
+```js
+} else if (!partialMatchKey(query.queryKey, queryKey)) { return false; }
+...
+function partialMatchKey(a, b) {
+  if (a === b) return true;
+  if (typeof a !== typeof b) return false;
+  if (a && b && typeof a === "object" && typeof b === "object")
+    return Object.keys(b).every((key) => partialMatchKey(a[key], b[key]));
+  return false;
+}
+```
+
+Rule, applicable by hand: a declared key D matches a filter key F iff for every index i in F,
+`D[i]` deep-partial-equals `F[i]`. `Object.keys(b)` over an array yields exactly F's own indices,
+so F must be an element-wise PREFIX of D; D may be longer, never shorter; primitives compare by
+`===`. A filter with no `queryKey` skips the check and matches every query.
+
+### F4 — classification of all 76, computed not asserted
+
+LIVE 51 / DEAD 20 / AMBIGUOUS 5, sum 76.
+
+| filter key | n | verdict |
+|---|---|---|
+| `["safe-to-spend"]` | 11 | DEAD — nothing declared |
+| `["analytics-account-overview"]` | 4 | DEAD |
+| `["snapshot"]` | 4 | DEAD |
+| `["budget-alerts"]` | 1 | DEAD |
+| `["budgets", <month>]` | 4 | AMBIGUOUS → unreachable in fact |
+| `["budget-items", <month>]` | 1 | AMBIGUOUS, genuinely reachable |
+| 13 other key shapes + the bare call | 51 | LIVE |
+
+Prediction met: the dead set is 20, not 11. The four `["budgets", <month>]` sites are AMBIGUOUS
+under the rule but can never match: the only declared `budgets` query is
+`["budgets","setup-progress",setupMonth]`, and index 1 compares a `YYYY-MM` string
+(`toYearMonth(today())`) against the literal `"setup-progress"`.
+
+### F5 — never live
+
+The obvious history search (`git log -S'queryKey: ["safe-to-spend"'`) was tried and DISCARDED as
+non-discriminating: that substring occurs in invalidations too. Re-derived by parsing declared keys
+at every one of the 50 commits that touched the frontend src. Only four distinct declared-segment
+sets ever existed:
+
+```
+160ae90 | auth-profile,bank,budget-active-months,budget-items,budget-metrics,budgets,categories,
+          dashboard-bundle,dashboard-metrics,debt-accounts,insights,merchants,savings-goals,
+          spending-intelligence,transactions
+b1cc009 | (minus spending-intelligence)
+6565a68 | (minus bank)
+0f27745 | (minus debt-accounts, savings-goals)
+```
+
+None of the four dead segments ever appeared. Prediction met: never-wired call sites, not a
+regression. The set only ever shrank, by feature removals.
+
+### F6 — blast radius
+
+19 of the 20 dead sites are SHADOWED: every `["safe-to-spend"]`, `["analytics-account-overview"]`
+and `["snapshot"]` line sits in a block that also invalidates `["dashboard-bundle"]`, which is
+LIVE — and account-overview, snapshot and safe-to-spend all arrive inside that bundle
+(`hooks.ts:99`, `:113`, `:92`). Those refreshes happen; the keys are dead CODE, not dead BEHAVIOUR.
+
+The exception: `["budget-alerts"]` at DashboardPage:461 is ALONE in `dismissBudgetAlert` — no
+companion invalidation. Alerts render from `dashboardBundle.budget_alerts.items` with no local
+filtering of the dismissed id (`dismissingAlertId` only drives the spinner). Observed today: the
+user clicks dismiss, the server records it, and the alert stays on screen until the bundle's 60s
+`staleTime` elapses AND the component remounts. With `refetchOnWindowFocus: false` and no polling,
+sitting on the Dashboard never clears it.
+
+Second consequence: `["insights",…]` is invalidated from exactly one place
+(`QuickAddContext.tsx:60`). A write from Budget / Dashboard / Expenses / Income / Transactions
+leaves all six Insights queries untouched — which is what the dead `["safe-to-spend"]` line was
+evidently reaching for (inference; basis: it is paired with the bundle line that already covers
+Home's copy, so the only safe-to-spend query it could add is the Insights one).
+
+### F7 — the regime
+
+Global: `staleTime 30_000`, `retry 1`, `refetchOnWindowFocus: false`. `gcTime` NEVER declared →
+default 5 min. `refetchOnMount` / `refetchOnReconnect` never declared → default `true`. No
+`refetchInterval` anywhere. Overrides: 5 min on `auth-profile` ×2, `categories` (QuickAdd),
+`budgets/setup-progress`; 60 s on `dashboard-bundle`; 30 s on `budget-active-months`; 0 on
+`bulk-edit`.
+
+`invalidateQueries` marks matches stale then refetches
+`type: filters?.refetchType ?? filters?.type ?? "active"` — inactive queries are marked stale and
+refetch at next mount.
+
+Is key repair sufficient? IN-TAB, yes. CROSS-TAB, no — and it cannot be, by construction:
+`new QueryClient` is a module-level singleton in `App.tsx`, one client per JS context = one per
+browser tab, so invalidation in tab A is structurally incapable of reaching tab B. Reported as a
+FINDING and a REQUEST with nothing proposed for it.
+
+### The proposal
+
+P3 first, because it gates the rest: YES, a protected surface is touched. Three dead lines live
+inside `QuickAddContext.tsx` (`:54` safe-to-spend, `:58` account-overview, `:59` snapshot). Nothing
+proposed for them — STOP-AND-ASK. 17 sites proposed, 3 withheld.
+
+**P1 — per site**
+
+| sites | now | proposed | matches then |
+|---|---|---|---|
+| BudgetPage 239,262,274,307; DashboardPage 444,655; ExpensesPage 826; IncomePage 485; TransactionsPage 158,221 (10) | `["safe-to-spend"]` | `["insights"]` | all six `["insights",…]` queries |
+| DashboardPage 446,447; TransactionsPage 160,161,223,224 (6) | `["analytics-account-overview"]`, `["snapshot"]` | DELETE the line | — |
+| DashboardPage 461 (1) | `["budget-alerts"]` | `["dashboard-bundle"]` | `["dashboard-bundle", selectedMonth]` |
+
+Why the broader segment for the 10: the narrowest key reaching the intended query is
+`["insights","safe-to-spend"]`, and it is wrong here. `["insights","weekly-digest"]` carries
+`safe_to_spend_today_kd`, the same figure from the same builder. Refreshing one and not the other
+reproduces the divergence MOB-0 was opened to investigate. `["insights"]` additionally sweeps in
+`month-options`, `recurring-patterns`, `month-delta`, `readiness` — 6 queries total — and matches
+what QuickAddContext already does.
+
+Why deletion for the 6, not repointing: each already sits beside a live `["dashboard-bundle"]`
+line; repointing would issue a second invalidation of a query just invalidated.
+
+**P2 — behaviour change, quantified.** The 10 repointed: zero new requests at write time (Insights
+unmounted; `refetchType` defaults to `"active"`); the change is at next navigation to Insights, 6
+queries that previously served ≤30 s-old cache now refetch — routes `dashboardMetrics` ×3
+(months 24 / 2 / 3), `recurringPatterns(days:120)`, `safeToSpend(month)` (R9), `weeklyDigest()`
+(R10). The 6 deleted: zero change. The 1 repointed alert site: +1 request per dismissal, fired
+immediately because the Dashboard is mounted and the query active.
+
+**P4 — tests.** Enumerated, not searched-for-absence: `invalidateQueries` appears in test files 0
+times (control: `queryClient` appears 20 times, all constructing a client + provider). There is no
+existing invalidation coverage at all. The discriminating form: mount with a REAL `QueryClient`,
+seed a query under the real declared key, run the write, assert
+`queryClient.getQueryState(key)?.isInvalidated === true` — routing through the real
+`partialMatchKey` rather than a spy.
+
+**P5 — predicted delta.** Frontend +3 tests, +0 files; absolute re-derived at execution. Predicted
+named forced edits: NONE. No `apps/api` change, no contract-fixture change, no `deploy/Caddyfile`
+change and no new external origin. No renames, no physical properties, no pinned strings.
+
+### Predictions, scored
+
+Dead set larger than eleven — MET (20). Never live rather than renamed — MET. Key repair
+sufficient — HALF FALSIFIED: sufficient in-tab, structurally impossible cross-tab.
