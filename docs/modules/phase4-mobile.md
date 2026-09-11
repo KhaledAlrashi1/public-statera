@@ -247,6 +247,48 @@ The amendments above are left as they stand. This is the live index from here fo
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** The count stays at
   **SIX**.
 
+### Amendment — MOB-R10 persistence commit, 2026-09-11
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R10**, complete and contiguous: first **1**, last **10**,
+  **0** duplicates, **0** breaks in 1…10, derived from this file. **MOB-R10 provenance: RELAYED.**
+- **MOB-F1 CACHE-INVALIDATION IS CLOSED.** Three commits: `fa59ee6` (persistence), `90c65ec`
+  (implementation, 17 sites), `b198386` (close-out record), plus this one. **NOT DEPLOYED** — the
+  deploy is the operator's and no block has authorised it. Any later UI observation of this fix
+  **states that the deploy completed first**.
+- **CONTROL-PROVENANCE ITEM — DISPOSED: the command changed, and the implementer changed it.**
+  MOB-R10 offered two readings; the answer is the worse one. `| head -3` and `| head -2` were
+  appended to the docs-only positive control in two successive reports to keep output compact, and
+  neither was declared — a **silently modified instrument**, not a transcription elision. Prior
+  form re-run verbatim against the same immutable input returns **6** paths; the 3 and the 2 are
+  its first 3 and first 2, confirmed by running all three forms side by side. **The docs-only
+  claims are unaffected** — three paths discriminate against zero exactly as six do; what was
+  damaged was the control's provenance, not the conclusion.
+  **DURABLE FORM: a control is run in ONE form and that form does not change between cycles; if its
+  output must be shortened, the shortening is named in the same breath.** A control whose output
+  moves for an undeclared reason stops being a control, because its entire function is to prove the
+  instrument *could* have reported — and an instrument quietly narrowed cannot support that proof.
+  This is the **second reporting defect** this track has caught as distinct from a verification
+  defect; both were caught by the channel re-deriving a figure rather than reading the report.
+- **FIFTH COLUMN-0 INSTANCE, AND THE FIRST AUTHORED BY THE IMPLEMENTER.** The MOB-R10 payload swept
+  **strict 1 / tripwire 2** — a disagreement, so the write halted. The extra match was in the
+  implementer's own close-out prose (`MOB-R10 offered two possibilities…` opening at column 0), not
+  in any verbatim block. Because it was the implementer's own text it was **rewrapped rather than
+  escalated** — the reissue licence question does not arise when the author and the editor are the
+  same party — and the re-sweep returned **1/1, agreeing**. The four prior instances were
+  channel-authored; the instrument is now shown catching both parties.
+- **THE DEFERRED BASELINE OBLIGATION REMAINS LIVE**, unchanged and carrying its trigger: the
+  standing-rules frontend baseline line moves at **TRACK CLOSE** with its `git diff` old→new hunk
+  (**212/41 → 215/42**), never a prose restatement.
+- **Still open, none ruled:** **Item A** (three protected QuickAdd lines), **Item B** (four
+  unreachable budget sites — now **its own commit**, no longer a free ride-along), **Item C**
+  (cross-tab regime), and **the deploy**. Cycles passing does not adopt any of them.
+- **NO PHASE ADVANCES.** MOB-1 RESPONSIVE opens on its own block, after the operator disposes of
+  the open items or explicitly leaves them open and says so.
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** The count stays at
+  **SIX across four tracks**.
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
@@ -2031,3 +2073,181 @@ frontend fixture (66, ALLOWLIST `[]`, both from the file). Both `tsc` exit 0 at 
 Baseline moved **212/41 → 215/42**; the hunk form is deferred to track close per MOB-R9, with its
 trigger stated. Predicted +3 tests / +0 files; measured **+3 / +1**, the file miss reported as a
 question, not adjusted.
+
+MOB-R10 — THE OWED EVIDENCE IS SUPPLIED AND THE HOLD IS DISCHARGED. MOB-F1 CACHE-INVALIDATION IS
+CLOSED. One control's output changed on an immutable input and needs one line. Three operator items
+and the deploy remain open; no phase advances.
+
+CADENCE. Issued under test (a) — it closes a cycle — and (c).
+
+EVERY OWED ITEM IS SUPPLIED AND EVERY PREDICTED FIGURE IS MET. The persistence commit's pre-append
+sweep at 2/2 agreeing and its post-append composite at 8/8, enumerated in file order, first 1, last
+8, zero duplicates, zero breaks, both reconciliation routes landing on 8; the same for this cycle's
+own persistence at 9/9; both stats; both statuses between printed delimiters; the production diff;
+the gate skips stated with their reason rather than performed silently.
+
+AN INDEPENDENT ARITHMETIC CROSS-CHECK, RUN BY THE CHANNEL AND REPORTED BECAUSE A CHANNEL THAT ONLY
+ACCEPTS IS NOT AN INSTRUMENT. The implementation stat reports 224 insertions and 17 deletions across
+six files, of which the new test file is 209 insertions. The production half is therefore 15
+insertions against 17 deletions. The approved shape predicts exactly that: ten repoints contribute
+ten and ten, six deletions contribute zero and six, and the alert repoint contributes one and one,
+totalling eleven insertions against seventeen deletions, with the remaining four insertions being the
+explanatory comment the proposal required. SEVENTEEN DELETIONS IS THE DISCRIMINATING FIGURE — it is
+the sum the approved site count predicts and no other distribution of seventeen sites produces it by
+accident. The stat independently corroborates the diff.
+
+═══ THE ONE THING THAT NEEDS A LINE ═══
+
+THE DOCS-ONLY POSITIVE CONTROL CHANGED ITS OUTPUT ON AN IMMUTABLE INPUT. The same exclusion run
+against the same code commit has returned SIX paths in every prior cycle of this track — the two
+dashboard files, the insights page, the safe-to-spend test, the dashboard sections file and the
+weekly-digest section. This cycle it returned THREE, the first three of that six. THE COMMIT CANNOT
+HAVE CHANGED, so either the command changed or the capture was abbreviated in transcription.
+  THIS IS NOT A RETURN AND THE INSTRUMENT IS NOT IMPUGNED. Three paths discriminate against zero
+  exactly as six do, so the docs-only claim stands on its own evidence in both commits. What is at
+  issue is the CONTROL'S OWN PROVENANCE, and a control whose output moved unexplained is not a
+  control until the movement is explained — the control is the only thing separating an empty result
+  from an instrument that cannot report.
+  THE LIKELY CAUSE IS AN UNNAMED ELISION, and that is precisely the distinction the standing rule
+  draws: when a payload is too long, paste the discriminating portion and SAY WHAT WAS ELIDED AND
+  WHY — a named elision is still evidence, a silent one is indistinguishable from a changed command.
+  SUPPLY IN ONE LINE: which it was. If elided, say so and the matter closes. If the command changed,
+  state the change and re-run the prior form once so the two are reconciled.
+  RECORDED AS THE SECOND TIME THIS TRACK HAS CAUGHT A REPORTING DEFECT RATHER THAN A VERIFICATION
+  ONE. Those call for different fixes and this project already separates them.
+
+═══ ACCEPTED ═══
+
+THE MOUNTING ANSWER IS ACCEPTED AND IT IS THE STRONGER OF THE TWO POSSIBLE ANSWERS. The real page is
+mounted with its real write handlers; the ten mock targets are all DEPENDENCIES and the page is never
+among them; the three exercised handlers are named at their lines. The stand-ins are presentational
+children invoking the real handler prop.
+  THE RED-RUN DISCRIMINATOR IS THE PART WORTH KEEPING. The red was produced by reverting ONLY the
+  five production files with the test file untouched on disk, and all three cases went red. A test
+  measuring a reconstruction of the handler would have been unaffected by a change to the handler.
+  That is an instrument distinguishing the two hypotheses rather than an assertion that they differ,
+  and it was not asked for in that form.
+  THE NAMED GAP IS CORRECT AND IS NOT A DEFECT: these tests do not establish that the real
+  presentational children render a control wired to that prop, nor its label or reachability. Stating
+  what a test does not reach is what makes what it does reach believable.
+
+THE WITHDRAWAL IS RATIFIED AND THE REPLACEMENT IS THE RIGHT INSTRUMENT. The count-held argument was
+non-discriminating and was withdrawn rather than defended. Its replacement — an empty name-only diff
+over the pre-existing test pathspec, with the SAME pathspec shown returning two files on a known
+test-touching commit — proves the pathspec was capable of reporting, which is the half that turns an
+empty result into an observation. The pathspec-that-matched-nothing failure has cost this project a
+cycle before.
+
+THE TWO SUITE LIMITATIONS ARE ACCEPTED AS MEASURED, WITH THEIR REMOVAL COSTS STATED. Both page
+harnesses construct their client without returning it, so no test in either file can reach the cache;
+both stub their sections inert, so no trigger seam exists. TOGETHER THEY ARE WHY THE SUITE WAS
+STRUCTURALLY INCAPABLE OF CATCHING THIS CLASS, and this cycle routed around them rather than removing
+them — which was correct and is now on the record instead of being rediscovered. Same family as the
+earlier frontend finding that a suite can be incapable by construction of catching the defect it
+appears to cover.
+
+A FOURTH INSTANCE OF CHANNEL TEXT AT COLUMN 0, AND THE TRIPWIRE HANDLED IT SILENTLY. A wrapped phase
+handle sat at column 0 in the persistence payload and matched NEITHER pattern — read and classified
+rather than inferred from a count agreeing. THIS IS THE CASE THE SEQUENCING BLOCK ANTICIPATED when it
+ruled that phase labels carry their content word, on the ground that a phase handle and a ruling
+number differ by one character in a file swept for the second. The anticipation was correct and the
+instrument was already right. Nothing owed.
+
+═══ MOB-F1 CACHE-INVALIDATION CLOSES ═══
+
+SEVENTEEN SITES SHIPPED IN ONE COMMIT: ten repointed to the broad segment, six deleted, one repointed
+behind a gate that closed with the server's filtering shown both ways. Frontend 212 across 41 files
+moving to 215 across 42. Three tests added, RED-first with the discriminating value captured, zero
+pre-existing test files touched, proven by a pathspec shown capable of reporting.
+  WHAT THE CYCLE ACTUALLY BOUGHT, STATED PLAINLY BECAUSE THE CHANNEL'S ORIGINAL JUSTIFICATION FOR IT
+  WAS FALSIFIED: one real user-visible defect fixed — an alert that did not clear when dismissed —
+  nineteen misleading dead call sites removed or repointed, a second defect found and held for the
+  operator, a structural cross-tab limit established, and two suite limitations measured. The
+  screenshot-instrument rationale that justified running it first did not survive contact with the
+  measurement, and the procedural mitigation replaced it.
+  NO NEW STANDING LINE. The count stays at SIX across four tracks.
+  THE DEFERRED BASELINE OBLIGATION IS LIVE AND CARRIES ITS TRIGGER: the standing-rules baseline line
+  moves at TRACK CLOSE, shipping with its diff hunk old-to-new, not with a prose restatement.
+
+═══ OPEN — THREE ITEMS AND A DEPLOY, NONE RULED HERE ═══
+
+Items A, B and C are unchanged and unadopted; cycles passing does not adopt them, and Item B's price
+is now its own commit rather than a ride-along. THE DEPLOY IS THE OPERATOR'S AND IS NOT AUTHORISED BY
+THIS BLOCK. Any later UI observation of this fix states that the deploy completed first.
+
+NO PHASE ADVANCES. The responsive phase opens on its own block after the operator disposes of the
+open items, or explicitly leaves them open and says so.
+
+PERSISTENCE. This block persists with the close-out record. Predicted payload strict 1 and tripwire 1
+agreeing; after the append, strict 10 and tripwire 10, first 1, last 10, no duplicates, no breaks in
+1 to 10, reconciled 9 + 1 = 10 and 10 minus 1 plus 1 = 10, enumeration PRINTED IN FILE ORDER. Derive
+from what is present; if these figures are wrong, yours are right and you show the reconciliation.
+Provenance RELAYED. Amend the completeness note to record the persisted set, the cycle's close, and
+the control-provenance item with its disposition once the one line arrives. Docs-only under the
+standing permanent licence — state the skip and its reason, prove docs-only by exclusion with the
+exclusion shown discriminating AND WITH ITS CAPTURE COMPLETE OR ITS ELISION NAMED, carry the bytes.
+
+NOTHING IS OPENED BY THIS BLOCK.
+
+---
+
+## Control-provenance disposition — THE COMMAND CHANGED (2026-09-11)
+
+Two possibilities were offered and the answer is the second: **the command changed, and the
+implementer changed it.** `| head -3` was appended to the docs-only positive control in the
+`fa59ee6` evidence reply, and `| head -2` in the `b198386` commit block, to keep output compact.
+Neither was declared. This was **not** a transcription elision — it was a silently modified
+instrument, which is the worse of the two readings MOB-R10 offered.
+
+Prior form re-run verbatim to reconcile, against the same immutable input
+(`eb036c2 phase-4: frontend-fixes Phase B — four items …`):
+
+```
+git show --name-only --format='' eb036c2 | grep -v '^docs/'
+apps/web/src/components/pages/DashboardPage.test.tsx
+apps/web/src/components/pages/DashboardPage.tsx
+apps/web/src/components/pages/InsightsPage.tsx
+apps/web/src/components/pages/dashboard/safe-to-spend.test.tsx
+apps/web/src/components/pages/dashboard/sections.tsx
+apps/web/src/components/pages/insights/WeeklyDigestSection.tsx
+count: 6
+```
+
+The 3 and the 2 are the first 3 and first 2 of that same 6 — confirmed by re-running both
+truncated forms side by side. **The docs-only claims in `fa59ee6` and `b198386` are unaffected**:
+three paths discriminate against zero exactly as six do. What was damaged was the control's
+provenance, not the conclusion.
+
+**Durable form: a control is run in ONE form and that form does not change between cycles. If its
+output must be shortened, the shortening is named in the same breath.** A control whose output
+moves for an undeclared reason stops being a control, because the whole function of a positive
+control is to prove the instrument could have reported — and an instrument that was quietly
+narrowed cannot support that proof. This is the **second reporting defect** this track has caught
+as distinct from a verification defect; both were caught by the channel re-deriving a figure rather
+than reading the report.
+
+## MOB-F1 CACHE-INVALIDATION — CLOSED
+
+Three commits: `fa59ee6` (persistence), `90c65ec` (implementation, 17 sites), `b198386`
+(close-out record). **Not deployed.**
+
+**What shipped:** ten `["safe-to-spend"]` sites repointed to `["insights"]`; six
+`["analytics-account-overview"]` / `["snapshot"]` lines deleted as shadowed duplicates; one
+`["budget-alerts"]` site repointed to `["dashboard-bundle"]` behind a gate that closed with the
+server's dismissal filtering shown both ways.
+
+**What the cycle bought**, with the channel's original justification recorded as falsified: one
+real user-visible defect fixed (a dismissed alert that did not clear), nineteen misleading dead
+call sites removed or repointed, a second defect found and held for the operator, a structural
+cross-tab limit established (one `QueryClient` per JS context — key repair cannot reach a second
+tab), and two suite limitations measured.
+
+**Channel arithmetic cross-check, recorded because it corroborates independently:** the stat's
+**17 deletions** is the discriminating figure — ten repoints contribute 10/10, six deletions 0/6,
+the alert repoint 1/1, totalling 11 insertions against 17 deletions, with the remaining four
+insertions being the required explanatory comment. 209 of the 224 insertions are the new test file.
+
+**No new standing rule. The count stays at SIX across four tracks.**
+
+**Live deferred obligation:** the standing-rules frontend baseline line moves at **track close**,
+shipping with its `git diff` old→new hunk (212/41 → 215/42), never a prose restatement.
