@@ -195,6 +195,58 @@ The amendments above are left as they stand. This is the live index from here fo
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** The count stays at
   **SIX**.
 
+### Amendment — MOB-R9 persistence commit, 2026-09-11
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R9**, complete and contiguous: first **1**, last **9**,
+  **0** duplicates, **0** breaks in 1…9, derived from this file. **MOB-R9 provenance: RELAYED.**
+- **MOB-F1 CACHE-INVALIDATION has SHIPPED CODE** — `90c65ec`, 17 of the 20 dead sites repaired,
+  preceded by its persistence commit `fa59ee6`. The close-out record with all carried evidence is
+  persisted below. **Deploy is NOT authorised by MOB-R9 and has not happened.**
+- **DEFERRED OBLIGATION, WITH ITS TRIGGER SO IT CANNOT EVAPORATE (MOB-R9).** The frontend baseline
+  moved **212 tests / 41 files → 215 / 42**. The standing-rules baseline line was NOT edited,
+  because MOB-R8 required both "show the baseline hunk as a diff" and "show the standing-rules file
+  untouched" — and the figure lives in that file, so the two cannot both hold in one commit. That
+  contradiction was a **channel error**, resolved at MOB-R9: the diff-hunk form is **deferred to
+  TRACK CLOSE, not waived**. **TRIGGER: at this track's close, the CLAUDE.md baseline edit ships
+  with its `git diff` old→new hunk**, per the standing requirement that a baseline change is
+  confirmed with the hunk itself and never with a prose restatement.
+  **General form, recorded so it does not recur:** a close-out requirement written for a commit that
+  MOVES a figure does not apply unchanged to a commit that moves the figure's SUBJECT while freezing
+  the file recording it. When a block imposes both, **the block is wrong and the implementer reports
+  the collision rather than choosing.** The baseline line is a LIVE INDEX, and a live index
+  deliberately frozen must carry a stated release point — now stated.
+- **TWO MEASURED SUITE LIMITATIONS (MOB-R9), recorded with the cost of removing them:**
+  - **`DashboardPage.test.tsx` and `BudgetPage.test.tsx` cannot assert cache state at all** — each
+    constructs its `QueryClient` inside `renderPage()` and never returns it. Cost of removal:
+    change both signatures and update their existing call sites, an edit to two shared harnesses.
+  - **Both stub their sections inert**, so no trigger seam exists for a user action that issues an
+    invalidation. Cost of removal: add trigger-rendering stubs to two `vi.mock` factories — the
+    enumerating-factory class this project has already been bitten by on the api side.
+  Together these are **why the suite was structurally incapable of catching this defect class**,
+  the same family as the earlier frontend finding. MOB-F1's new test file routed around them by
+  carrying its own harness; the limitation itself is untouched and is recorded so a future cycle
+  does not pay for it twice.
+- **A WITHDRAWN ARGUMENT, recorded as a withdrawal (MOB-R9).** The implementer first argued that the
+  test count holding at 212/41 proved no existing test was force-edited. **That reasoning is
+  NON-DISCRIMINATING and is withdrawn**: an edit adding and removing no case leaves the count
+  identical, so it agreed with the hypothesis and its negation equally. Re-established with the
+  discriminating instrument — an **empty diff over all pre-existing test paths (count 0)**, behind a
+  positive control showing the same pathspec reporting two files on a commit that did edit tests.
+  The claim was true; the reasoning was not evidence, and those are different problems.
+- **The new tests mount the REAL page.** `DashboardPage` is rendered for real with its real write
+  handlers; every `vi.mock` targets a dependency, never the page. The two stand-ins are
+  presentational children invoking the real handler props. Proven discriminating by the RED run,
+  which reverted only the five production files and reddened all three cases. **This is a
+  strengthening over the existing harnesses**, recorded as such per MOB-R9.
+- **Item B's price has CHANGED (MOB-R9).** The four unreachable `["budgets", <month>]` sites can no
+  longer ride an approved commit — they are **their own commit** now. The recommendation to fold
+  them in still stands on the merits, restated at the new price rather than carried at the old one.
+  **Items A and C are unchanged**, offered and not adopted; cycles passing does not adopt them.
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** The count stays at
+  **SIX**.
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
@@ -1704,3 +1756,278 @@ change and no new external origin. No renames, no physical properties, no pinned
 
 Dead set larger than eleven — MET (20). Never live rather than renamed — MET. Key repair
 sufficient — HALF FALSIFIED: sufficient in-tab, structurally impossible cross-tab.
+
+MOB-R9 — 90c65ec IS ACCEPTED SUBSTANTIVELY. The baseline collision was a CHANNEL ERROR and is
+resolved. fa59ee6's ruled evidence is OWED. One question decides whether the new tests measure the
+app or a reconstruction. Nothing is returned.
+
+CADENCE. Issued under test (b) and (c).
+
+THE GATE CLOSED THE RIGHT WAY AND IT IS THE BEST-CONSTRUCTED CHECK IN THE CYCLE. The dismissal write
+and the listing path were traced to the SAME constant, shown filtering at the listing site, and the
+bundle shown calling that listing. The negative case was stated IN ADVANCE and it differs from the
+positive: had the server not filtered, the constant would appear nowhere in the listing lib. It
+appears six times, three in the listing path, with a positive control proving the file was actually
+searched. That is a check whose failure output is distinguishable from its success output, which is
+the whole requirement and is the thing most checks quietly fail.
+
+THE THREE MANDATORY SECTIONS ARE PRESENT AND GREEN. Resolution proofs with a non-matching negative
+control shown exiting 0; both test tails carrying the Test Files summary line with captured exit
+codes; the Errors instrument zero on both; both typechecks exit 0 at 0 bytes; the api suite RUN
+despite no api file being touched, with the fixture count and empty allowlist derived from the file.
+
+═══ THE BASELINE COLLISION IS A CHANNEL ERROR AND IS RESOLVED HERE ═══
+
+THE IMPLEMENTER IS RIGHT AND THE CONTRADICTION IS MINE. The preceding block required the baseline
+movement shown AS A DIFF HUNK and, in the same paragraph, required the standing-rules file shown
+UNTOUCHED. The figure lives in that file. Both requirements cannot hold in one commit, and the
+report surfaced the collision and declined to resolve it silently rather than satisfying whichever
+was easier and leaving the other unmentioned. THAT IS THE CORRECT HANDLING OF A CONTRADICTORY
+MANDATE and it is worth more than the figure it was about.
+
+RULING: THE DIFF-HUNK FORM IS NOT OWED THIS CYCLE AND IS NOT WAIVED. Item (3) is satisfied for this
+commit by the measured old and new stated with both figures derived at execution — 212 tests across
+41 files moving to 215 across 42. The hunk form is DEFERRED TO TRACK CLOSE, which is where the
+standing-rules baseline line actually moves, exactly as the frontend-fixes track did: that track made
+its only two edits to the standing-rules file at its close, and its baseline line moved there and
+nowhere else. THE OBLIGATION CARRIES ITS TRIGGER SO IT CANNOT EVAPORATE: at this track's close the
+baseline edit ships with its `git diff` old-to-new hunk, per the standing requirement that the change
+is confirmed with the hunk itself and not with a prose restatement of the counts.
+  THE GENERAL FORM, RECORDED SO THIS DOES NOT RECUR: a close-out requirement written for a commit
+  that MOVES a figure does not apply unchanged to a commit that moves the figure's SUBJECT while
+  freezing the file that records it. When a block imposes both, the block is wrong, and the
+  implementer reports the collision rather than choosing. Cited against the existing rule that a
+  doc line is either a live index or a historical record and the two are updated by opposite rules —
+  the baseline line is a LIVE INDEX, and a live index that is deliberately frozen has a stated
+  release point, which is now stated.
+
+═══ OWED, AND IT IS A SHORT REPLY RATHER THAN A REDO ═══
+
+fa59ee6's RULED EVIDENCE DID NOT REACH THE REPORT. The preceding block predicted, for the
+persistence commit, a payload sweep of strict 2 and tripwire 2 agreeing; a post-append composite of
+strict 8 and tripwire 8; first 1, last 8, zero duplicates, zero breaks in 1 to 8; both reconciliation
+routes; the enumeration PRINTED IN FILE ORDER; the docs-only exclusion shown discriminating; the gate
+skip stated with its reason; and the bytes carried. THE REPORT CARRIES THE SHA AND NOTHING ELSE.
+  THIS IS NOT AN AUTO-RETURN AND THE DISTINCTION MATTERS. The three mandatory sections govern the
+  IMPLEMENTATION close-out and they are complete. What is missing is a DIFFERENT commit's ruled
+  deliverable, and the correct response to a missing deliverable is to ask for it, not to reject work
+  that satisfied its own requirements.
+  IT IS NAMED RATHER THAN ABSORBED BECAUSE OF WHAT IT IS AN INSTANCE OF. N ruled items close with N
+  per-item presence assertions, and reading a finished report and finding it plausible is not a
+  presence check — the omitted item is precisely the one not on the list being read. This project has
+  already lost a ruled four-entry record to exactly this, past three parties, while every block-level
+  check passed. A report that is complete about the commit it foregrounds and silent about the one it
+  mentions in its first line is the same shape.
+  SUPPLY, IN ONE REPLY, FOR fa59ee6 AND FOR 90c65ec BOTH: the stat output naming the changed paths;
+  the status output with emptiness marked between PRINTED delimiters rather than asserted in prose;
+  for fa59ee6 the full pre-append and post-append sweep under both operative patterns with the
+  enumeration in file order and both reconciliation routes, plus the docs-only exclusion shown
+  discriminating and the gate-skip statement; and for 90c65ec the production diff. If any predicted
+  figure missed, it is a QUESTION and never an adjustment.
+  THE STANDARD WAS SET THREE CYCLES AGO AND HELD FOR THREE CYCLES. A report that points at a captured
+  result transmits a pointer the reader cannot resolve, which is functionally identical to an
+  uncaptured claim however genuinely the capture happened — and the failure is invisible from inside
+  the implementing session, because there the pointer resolves.
+
+═══ THE QUESTION THAT DECIDES WHAT THE NEW TESTS ESTABLISH ═══
+
+THE NEW-FILE ROUTE IS THE RIGHT INSTINCT AND IT WAS DECLARED WITH ITS COST, WHICH IS WHAT MAKES IT A
+REQUEST RATHER THAN A SELF-GRANT. Avoiding edits to two existing harnesses is a real benefit and the
++1 file was reported against its prediction rather than adjusted away.
+  BUT A NEW FILE BUILDS ITS OWN HARNESS, AND A HARNESS THE TEST AUTHOR CONSTRUCTED CAN AGREE WITH THE
+  CODE BY CONSTRUCTION. State, per new case, WHAT IS MOUNTED: the real page component with its real
+  write handler, or a constructed stand-in that reproduces the handler's behaviour. If the real
+  component is mounted, say so — that is a STRENGTHENING over the existing harnesses, which mock the
+  sections as inert stubs and are therefore structurally incapable of this assertion, and it should be
+  recorded as such rather than left implicit. IF A STAND-IN IS MOUNTED, name what it stands in for and
+  state plainly what the test therefore does NOT establish: that the real page issues that
+  invalidation on that user action. A test proving the library's matching rule works is not the test
+  that was approved.
+  THE STANDING GAP EITHER WAY: the two page harnesses remain incapable of asserting cache state,
+  because they construct their client without returning it. Record it as a measured limitation with
+  the cost of removing it stated. It is the family the earlier frontend finding already named — a
+  suite structurally unable to catch a class of defect — and an unrecorded limitation is one a future
+  cycle pays for twice.
+
+THE NO-FORCED-EDITS PROOF IS NON-DISCRIMINATING AS ARGUED, AND THE RIGHT INSTRUMENT IS CHEAP. The
+report reasons that the count holding at 212/41 before the new file was added proves no existing test
+was force-edited. IT DOES NOT: an edit to an existing test's assertions or selectors that adds and
+removes no case leaves the count identical, so the observation agrees with the hypothesis and its
+negation equally. The discriminating instrument is an EMPTY DIFF over the existing test paths, which
+the report already ran for the three named regression files and did not extend to the rest. Run it
+across all pre-existing test files and report it. THE CLAIM IS ALMOST CERTAINLY TRUE; the reasoning
+offered for it is not evidence, and this project treats those as different problems.
+
+THE P5 MISS IS ACCEPTED AND THE FINDING INSIDE IT IS THE VALUABLE PART. Tests met exactly at plus
+three; files missed by one, reported and not adjusted. The cause — two harnesses that construct their
+client without returning it and stub their sections inert — is a measured property of the suite, not
+an excuse, and it belongs in the record beside the gap above.
+
+THE TWO SHARPENINGS LANDED. The control key is NAMED, declared at a stated site, and shown to share
+no first segment with the single filter the dismiss path issues, so it cannot be swept by the filter
+it exists to be outside of. The breadth decision is pinned by a seeding comment explaining why that
+key and what narrowing would unguard — which is the one thing standing between a future tidy and the
+silent return of the divergence this whole cycle began with.
+
+CONSTRAINTS RECONCILE. Zero physical-property additions with the pattern shown matching 27 elsewhere,
+so the zero is discriminating. No Caddyfile change and no new external origin, asserted rather than
+omitted. No renames, pinned strings untouched, QuickAdd untouched. No convention, responsive or
+zero-vs-no-data work; the month mismatch and the formatter divergence left alone. The e2e suite
+untouched.
+
+═══ STILL OPEN, AND ONE OF THEM HAS CHANGED PRICE ═══
+
+Items A, B and C are unruled and none entered this commit, correctly.
+  ITEM B'S COST HAS MOVED and the operator has been told so. The four unreachable budget sites can no
+  longer ride an approved commit; they are their own commit now. The channel recommendation to fold
+  them in STANDS on the merits — same files, same class, a real if small stale window on a setup
+  indicator — but it is no longer free, and a recommendation whose price changed is re-stated with the
+  new price rather than carried at the old one.
+  ITEMS A AND C ARE UNCHANGED, offered and not adopted, and cycles passing does not adopt them.
+
+DEPLOY IS NOT AUTHORISED BY THIS BLOCK AND IS NOT TOUCHED BY IT. A push of main is a deploy. Any
+later UI observation of this fix must state that the deploy completed first; a screenshot taken after
+a push and before the run lands shows the pre-fix build, which this project has already recorded
+once at the operator seam.
+
+PERSISTENCE. This block persists with the close-out record. Sweep the payload under both operative
+patterns before appending — predicted strict 1 and tripwire 1, agreeing; after the append, strict 9
+and tripwire 9, first 1, last 9, no duplicates, no breaks in 1 to 9, reconciled 8 + 1 = 9 and 9 minus
+1 plus 1 = 9, enumeration PRINTED IN FILE ORDER. Derive from what is present; if these figures are
+wrong, yours are right and you show the reconciliation. Provenance RELAYED. Amend the completeness
+note to record the persisted set, the deferred baseline obligation WITH ITS TRIGGER, and the two
+measured suite limitations above. Docs-only under the standing permanent licence — state the skip and
+its reason, prove docs-only by exclusion with the exclusion shown discriminating, carry the bytes.
+
+NOTHING IS OPENED BY THIS BLOCK AND NO PHASE ADVANCES UNTIL THE OWED EVIDENCE AND THE MOUNTING
+QUESTION ARE ANSWERED.
+
+---
+
+## MOB-F1 — implementation close-out record (2026-09-11)
+
+Two commits: `fa59ee6` (persistence, docs-only) and `90c65ec` (implementation). The evidence below
+was supplied in reply to MOB-R9 and is persisted here so it is not a pointer.
+
+### The gate, closed from source before any code was written
+
+Stated in advance: had the server NOT filtered dismissed alerts, the dismissal constant would appear
+nowhere in the listing lib. Measured — it appears six times, three in the listing path:
+
+```
+notifications.ts:61        await recordEvent(userId, BUDGET_ALERT_DISMISSED_EVENT_NAME, { alert_key: alertKey }, db)
+budget-alerts-lib.ts:197   if (row.eventName === BUDGET_ALERT_DISMISSED_EVENT_NAME) { dismissedKeys.add(key); continue }
+budget-alerts-lib.ts:228   .filter((item) => !dismissedKeys.has(item.alert_key))
+aggregation.ts:1133        items: await listActiveBudgetAlerts(userId, month, db),
+```
+
+Positive control: `alert` occurs 22 times in that file, so the file was genuinely searched. The fix
+is real, not a no-op; all 17 approved sites proceeded.
+
+### `fa59ee6` — the persistence commit
+
+```
+ docs/modules/phase4-mobile.md | 592 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 592 insertions(+)
+```
+
+Docs-only by exclusion, shown discriminating — paths NOT under `docs/`: none (rc=1, empty); the same
+exclusion on the known code commit `eb036c2` returns six paths.
+
+PRE-APPEND payload sweep: **strict 2, tripwire 2, AGREEING** (headers at payload lines 1 and 165).
+One further column-0 `MOB-` line read and classified: `MOB-2 ZERO-VS-NO-DATA, then MOB-3
+CONVENTIONS.` — a wrapped phase handle, matching neither operative pattern.
+
+POST-APPEND composite, measured against the file AS COMMITTED at that SHA:
+
+```
+224:MOB-R1  292:MOB-R2  379:MOB-R3  477:MOB-R4  631:MOB-R5  1039:MOB-R6  1161:MOB-R7  1325:MOB-R8
+strict: 8   tripwire: 8   AGREE? YES
+numbers in file order: 1 2 3 4 5 6 7 8
+first 1  last 8  dups 0  ascending IN-ORDER  breaks-in-1..8 0
+reconcile route A: 6 + 2 = 8    route B: 8 - 1 + 1 = 8    measured: 8
+```
+
+Every predicted figure met. Both test gates deliberately skipped under the standing docs-only
+licence, stated rather than silent: the commit touches no package, so no baseline could move.
+
+### `90c65ec` — the implementation commit
+
+```
+ apps/web/src/components/pages/BudgetPage.tsx       |   8 +-
+ apps/web/src/components/pages/DashboardPage.tsx    |  12 +-
+ apps/web/src/components/pages/ExpensesPage.tsx     |   2 +-
+ apps/web/src/components/pages/IncomePage.tsx       |   2 +-
+ apps/web/src/components/pages/TransactionsPage.tsx |   8 +-
+ .../components/pages/cache-invalidation.test.tsx   | 209 +++++++++++++++++++++
+ 6 files changed, 224 insertions(+), 17 deletions(-)
+```
+
+Working tree clean after both commits (empty `git status --short` between printed delimiters).
+
+### WHAT IS MOUNTED — the mounting question, answered
+
+**The REAL `DashboardPage` component is mounted, with its REAL write handlers.** The test file
+imports `DashboardPage from "./DashboardPage"` (`:21`) and renders `<DashboardPage />` (`:138`).
+Every `vi.mock` targets a DEPENDENCY of the page — `react-router-dom`, `toaster`, `QuickAddContext`,
+`@/lib/api`, `./dashboard/hooks`, `./budget/hooks`, `./budget/sections`, `category-detail-modal`,
+`./dashboard/sections`, `demo-workspace-banner` — and never the page itself. The handlers exercised
+are the real ones: `invalidateFinancialQueries` (`DashboardPage.tsx:440`), `dismissBudgetAlert`
+(`:453`), `clearDemoWorkspace` (`:619`).
+
+**The two stand-ins are PRESENTATIONAL CHILDREN only.** `HomeAttentionCenter` and
+`DemoWorkspaceBanner` are replaced by stubs that render a button invoking the REAL handler prop
+(`onDismissBudgetAlert`, `onClearDemoWorkspace`). They stand in for the real sections' *rendering*.
+
+**What the tests therefore do NOT establish:** that the real `HomeAttentionCenter` and
+`DemoWorkspaceBanner` render a control wired to that prop, nor its label or reachability. Stated
+plainly rather than left implicit.
+
+**The discriminating evidence that the real page is under test, not a reconstruction:** the RED run
+reverted ONLY the five production `.tsx` files via `git stash push` — the test file was untouched and
+remained on disk — and all three cases went red with `expected false to be true`. A test measuring a
+constructed reproduction of the handler would have been unaffected by reverting production source.
+
+**This is a STRENGTHENING over the existing harnesses** and is recorded as such.
+
+### MEASURED SUITE LIMITATIONS (two, recorded with the cost of removal)
+
+1. **`DashboardPage.test.tsx` and `BudgetPage.test.tsx` cannot assert cache state at all.** Each
+   constructs its `QueryClient` inside `renderPage()` and does not return it, so no test in either
+   file can reach the cache. Cost of removal: change both `renderPage()` signatures to return the
+   client and update their existing call sites — an edit to two shared harnesses, which is why this
+   cycle routed around it instead.
+2. **Both files stub their sections inert**, so no trigger seam exists for a user action that issues
+   an invalidation. Cost of removal: add trigger-rendering stubs to two `vi.mock` factories, the
+   enumerating-factory class this project has been bitten by on the api side.
+   Together these are why the suite was structurally incapable of catching this defect class — the
+   same family as the earlier frontend finding, and recorded so a future cycle does not pay twice.
+
+### THE NO-FORCED-EDITS CLAIM, re-established with the discriminating instrument
+
+The original argument — that the count holding at 212/41 proved no existing test was force-edited —
+was **NON-DISCRIMINATING and is withdrawn**: an edit that adds and removes no case leaves the count
+identical, so the observation agreed with the hypothesis and its negation equally. Re-run as an
+empty diff over all pre-existing test paths:
+
+```
+git diff --name-only fa59ee6 HEAD -- 'apps/web/src/**/*.test.ts' 'apps/web/src/**/*.test.tsx'
+  (minus the new file)  ->  count: 0
+POSITIVE CONTROL, same pathspec on eb036c2~1..eb036c2:
+  apps/web/src/components/pages/DashboardPage.test.tsx
+  apps/web/src/components/pages/dashboard/safe-to-spend.test.tsx
+```
+
+**Zero pre-existing test files touched**, and the pathspec is shown capable of reporting two.
+
+### Verification
+
+Resolution proofs `MATCHED-frontend` / `MATCHED-api` (exit 0); negative control `statera-web` →
+`No projects matched the filters`, exit 0. Frontend `Test Files 42 passed (42)` /
+`Tests 215 passed (215)`, exit 0, Errors 0. API `Test Files 51 passed | 10 skipped (61)` /
+`Tests 873 passed | 34 skipped (907)`, exit 0, Errors 0 — run because the contract test reads the
+frontend fixture (66, ALLOWLIST `[]`, both from the file). Both `tsc` exit 0 at 0 bytes.
+
+Baseline moved **212/41 → 215/42**; the hunk form is deferred to track close per MOB-R9, with its
+trigger stated. Predicted +3 tests / +0 files; measured **+3 / +1**, the file miss reported as a
+question, not adjusted.
