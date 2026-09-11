@@ -95,6 +95,61 @@ they stood. This amendment is the live index from here forward, and it **superse
   Migration-status entry and the baseline line land at track close, as the FF track did.
 - **No new CLAUDE.md standing rule is earned.** The count stays at **SIX** (MOB-R4, MOB-R5).
 
+### Amendment — MOB-R6 persistence commit, 2026-09-11
+
+The amendment above is left as it stands. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R6**, complete and contiguous: first **1**, last **6**,
+  **0** duplicates, **0** breaks in 1…6, derived from this file.
+- **MOB-R6 provenance: RELAYED.**
+- **PROVENANCE WORDING, CORRECTED (MOB-R6), and the correction travels adjacent rather than as an
+  edit.** The MOB-R5 cycle's report and the halt-report note below both say the four blocks were
+  "rebuilt from conversation context." That phrase is ambiguous between the two classes this
+  apparatus exists to separate. **The correct class is RECOVERED** — read back verbatim out of the
+  author's own emission, which is legitimate and precedented — **not RECONSTRUCTED** from prose,
+  summaries or close-out reports, which is the class excluded outright. The act was correct; only
+  the word was wrong, and a later reader has only the word. **From here on, provenance lines say
+  the CLASS, not the mechanism.**
+- **THE SCRATCHPAD IS NOT A RECORD AND ITS LOSS IS NOT A LOSS (MOB-R6).** The canonical source of a
+  ruling block is the relay message in which the channel emitted it; the scratchpad is a staging
+  convenience downstream of that. When it is absent, recover from the emission and **say
+  RECOVERED**. The real loss would be the emission being gone, and the answer to that is the
+  persistence commit already in force.
+- **The two byte-fidelity claims are SEPARATE and only one is discharged (MOB-R6).** "Appended by
+  redirect, retyped at no point" is true and establishes the **scratchpad→file** hop. It does
+  **not** reach the **emission→scratchpad** hop, which is performed by transcription. **The
+  transcription seam is therefore UNDISCHARGED** and remains this track's bounded unknown, on
+  unchanged terms: derive any load-bearing string from the source a block CITES, never by retyping
+  it from here. Recorded because a true claim sitting adjacent to an undischarged one reads as
+  discharging it.
+- **PROBE-COLLISION TECHNIQUE, recorded as durable technique (MOB-R6).** Evidence that demonstrates
+  a pattern-based instrument is **header-shaped by construction** — that is what makes it a probe —
+  so it is the one artifact guaranteed to trip the instrument it demonstrates. Never write a probe
+  into the file whose pattern it probes without neutralising it first. **The remedy: persist it in
+  a line-numbered rendering so no line begins at column 0, and MARK THE NUMBERING LOAD-BEARING**
+  (as the probe section below does) so a later reader does not tidy it back and reintroduce the
+  collision. An unexplained formatting quirk gets normalised by the next person who touches the
+  file. This cycle's measured hazard: the probe would have added strict **+1** and tripwire **+3**.
+  **No new standing rule was minted** — the existing sweep-the-payload-before-appending rule
+  already covered it, the payload was swept, and the rule fired.
+- **STANDING OBLIGATION ON THE CHANNEL, not on the implementer (MOB-R6):** any block instructing
+  that pattern-shaped evidence be persisted states its neutralisation **in the same block**.
+  Channel-authored text has engaged the collision instrument **three times** on this track — the
+  phase-handle body line, the possessive citation, and the probe — two near-misses failing on one
+  character and one genuine collision.
+- **ACCEPTANCE CADENCE, LIGHTENED from the cycle after MOB-R6.** A docs-only persistence commit
+  that meets every predicted figure **does not earn its own ruling block**: the implementer reports
+  it, the channel acknowledges it in the message, and the acknowledgement rides the next
+  substantive block. A block is issued only when it **(a)** opens or closes a phase, **(b)** rules
+  something the operator or implementer cannot proceed without, or **(c)** records a finding costly
+  to relearn. **Persistence is not relaxed** — every block issued still persists before any
+  boundary; what changes is how many blocks are issued, not how they are kept.
+- **Still open, still ONE item:** whether **MOB-F1** opens as a short fix cycle before MOB-1
+  RESPONSIVE. No phase opens until the operator rules it. Four cycles have not adopted the channel
+  recommendation.
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** The count stays at
+  **SIX**.
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
@@ -935,3 +990,125 @@ bare     '^MOB-R[0-9]'     : 4
 **The tripwire catches all 3 and does not fire on the possessive.** The bare form fires on the
 possessive, which is why it is retired. Against the real four-block payload the tripwire returns 4,
 agreeing with strict.
+
+MOB-R6 — e95d155 IS ACCEPTED. The probe collision is the finding and it was authored by this
+channel. One provenance classification is corrected. Two byte-fidelity claims are separated. The
+acceptance cadence is LIGHTENED from the next cycle, and this block is the last of its kind.
+
+e95d155 IS ACCEPTED. Pre-append sweep 4/4 agreeing as predicted; post-append 5/5 agreeing; the
+enumeration PRINTED IN FILE ORDER with first 1, last 5, zero duplicates, zero breaks, and the
+ascending check run rather than eyeballed; both reconciliation routes landing on 5. All eight
+column-0 lines carrying the track prefix printed and READ — five headers and three classified body
+lines — rather than inferred from a count agreeing. The retired bare form reported once and not
+again, exactly as ruled.
+
+THE PROBE COLLISION IS THIS CYCLE'S FINDING, AND THE CHANNEL CAUSED IT. The preceding block
+required the tripwire probe persisted as the ruling's evidence. That probe's lines are
+HEADER-SHAPED BY CONSTRUCTION — that is what makes it a probe — so appending it as captured would
+have written phantom headers into the very index the tripwire exists to protect, measured at
+strict +1 and tripwire +3. Caught before the write.
+  THE SHAPE IS NEW AND IT IS WORTH STATING PLAINLY: a ruling's own evidence attacked the
+  instrument the ruling was written to repair. Evidence demonstrating a pattern-based instrument is
+  the ONE artifact guaranteed to trip that instrument, and persisting it into the swept file is
+  therefore not an ordinary append. The generalisation — never write a probe into the file whose
+  pattern it probes without neutralising it first — holds beyond this project.
+  NO NEW CLAUDE.md STANDING LINE, AND THE COUNT STAYS AT SIX. The existing sweep-the-payload-
+  before-appending rule ALREADY COVERED THIS: the probe was in the payload, the payload was swept,
+  and the rule fired. A rule minted for a case an existing rule caught is inflation, and it would
+  make the record worse by suggesting the existing rule was insufficient when it was not. Cited,
+  not minted. Three tracks have now earned zero standing lines between them.
+  THE REMEDY IS THE DURABLE PART AND IT IS RECORDED AS TECHNIQUE: persist the probe in a
+  line-numbered rendering so no line begins at column 0, and MARK THE NUMBERING LOAD-BEARING in
+  the note so a later reader does not tidy it back and reintroduce the collision. Marking it is
+  what makes the remedy survive; an unexplained formatting quirk gets normalised by the next person
+  who touches the file.
+  THIS IS THE THIRD TIME IN THIS TRACK THAT CHANNEL-AUTHORED TEXT HAS ENGAGED THE COLLISION
+  INSTRUMENT: the phase-handle body line at column 0, the possessive citation at column 0, and now
+  the probe. Two were near-misses failing on one character; the third was a genuine collision. The
+  common cause is that this channel writes prose that opens paragraphs by naming ruling numbers and
+  phase handles. STANDING OBLIGATION ON THE CHANNEL, not on the implementer: any block instructing
+  that pattern-shaped evidence be persisted states its neutralisation IN THE SAME BLOCK. The
+  preceding block did not, and the implementer absorbed the cost.
+
+THE PROVENANCE CLASSIFICATION IS CORRECTED, AND THE CORRECTION IS NOT PEDANTIC. The report says the
+four blocks were "rebuilt from conversation context." That phrase is AMBIGUOUS between the two
+classes this entire apparatus exists to separate: RECONSTRUCTED from prose, summaries or close-out
+reports — the one class excluded outright, rated worse than an uncheckable block because it is
+checkable and wrong — and RECOVERED by reading verbatim out of the author's own emission, which is
+legitimate and has precedent twice in this project.
+  WHAT HAPPENED WAS RECOVERY. The four blocks were read back out of the relay messages in which
+  this channel emitted them verbatim. That is the author's own emission, not prose about it, and it
+  is the same mechanism that recovered two prior sets. THE WORD MATTERS MORE THAN THE ACT HERE: the
+  act was correct, and a reader a year from now has only the word.
+  SAY THE CLASS, NOT THE MECHANISM, in every future provenance line.
+
+THE TWO BYTE-FIDELITY CLAIMS ARE SEPARATED, BECAUSE TOGETHER THEY READ AS MORE THAN EITHER PROVES.
+The report states the payload was appended with a redirect and "retyped at no point." That is TRUE
+and it establishes the SCRATCHPAD-TO-FILE hop: no corruption between the staged payload and the
+committed file, which is exactly the hop the never-retype rule was written for.
+  IT DOES NOT REACH THE EMISSION-TO-SCRATCHPAD HOP, which this cycle performed by transcription
+  because the scratchpad had not survived. THE TRANSCRIPTION SEAM IS THEREFORE UNDISCHARGED and
+  remains this track's bounded unknown on unchanged terms: derive any load-bearing string from the
+  source a block CITES, never by retyping it from the block. The mitigation is strong here for the
+  same reason it was on the prior track — this track's load-bearing content is predominantly
+  file:line citations and measured figures, every one checkable against the tree.
+  RECORDED BECAUSE A TRUE CLAIM ADJACENT TO AN UNDISCHARGED ONE READS AS DISCHARGING IT, and that
+  is the integrity-instrument-reading-as-a-completeness-instrument class on a single sentence.
+
+THE SCRATCHPAD LOSS IS RATIFIED AND THEN DEFUSED. The self-report is correct that surviving on
+context is luck rather than method, and correct to name it as the no-ruling-crosses-a-boundary
+lesson applying to a working artifact. The durable disposition, stated so this does not recur as an
+anxiety each cycle: THE SCRATCHPAD IS NOT A RECORD AND ITS LOSS IS NOT A LOSS. The canonical source
+of a ruling block is the relay message in which this channel emitted it; the scratchpad is a
+staging convenience downstream of that. When it is absent, recover from the emission and SAY
+RECOVERED. What would be a real loss is the emission being gone, and the answer to that is the
+persistence commit, which is the rule already in force.
+
+TWO RELAY DISPOSITIONS RATIFIED, BOTH HANDLED CORRECTLY AND KEPT DISTINCT. The preceding block
+arrived as TWO COMPLETE COPIES, both terminating properly, reading identically — a duplicate at the
+RECIPIENT, which is the re-relay case and not the dangerous variant, since the dangerous variant
+requires two complete copies that DISAGREE. No halt was correct. The block before it arrived as a
+TRUNCATED PREFIX FOLLOWED BY A COMPLETION, resolved by the termination instrument. Logging them
+separately rather than collapsing them into "arrived twice" is right: they have different causes
+and different dispositions, and a merged record would teach the wrong one.
+
+THE DANGLING LINE NUMBERS ARE HANDLED CORRECTLY. The halt report's figures describe a payload that
+no longer exists as a standalone artifact, which is the self-falsifying-structural-figure class:
+the figures were true when measured and were falsified by the append that persisted them. Recording
+the note ADJACENT, where a reader meets them, rather than editing the report, is the correct
+disposition for a historical record.
+
+THE ACCEPTANCE CADENCE IS LIGHTENED, EFFECTIVE FROM THE NEXT CYCLE. Five blocks have been issued on
+this track and NO PRODUCT WORK HAS SHIPPED. One of the five did the work it was written for — the
+source-side measurement, which surfaced a dead invalidation key across eleven sites, a structural
+month mismatch between two routes, and a client-cache regime that never self-corrects. The
+remainder have largely adjudicated the track's own machinery, and two of the three problems
+adjudicated were authored by this channel. That is a real cost and it is named rather than absorbed.
+  THE RULE FROM HERE. A docs-only persistence commit that meets every predicted figure does NOT
+  earn its own ruling block. The implementer reports it; the channel acknowledges it in the message
+  and the acknowledgement rides the NEXT substantive block. A block is issued only when it (a)
+  opens or closes a phase, (b) rules something the operator or the implementer cannot proceed
+  without, or (c) records a finding that would be costly to relearn.
+  THIS BLOCK IS ISSUED UNDER (c) AND IS THE LAST OF ITS KIND. The probe collision, the provenance
+  classification and the seam separation are all durable; the acceptance itself would not have been.
+  The inconsistency of ruling a lighter cadence in a block the cadence would have suppressed is
+  noted rather than hidden — the cadence takes effect from the next cycle, and this block carries
+  the findings that justify writing it at all.
+  PERSISTENCE IS NOT RELAXED BY ANY OF THIS. Every block issued still persists before any boundary;
+  what changes is how many blocks get issued, not how they are kept.
+
+PERSISTENCE. Append this block alone, verbatim, Format A. Payload strict 1, tripwire 1, AGREEING —
+and note that this block contains NO pattern-shaped evidence, so the payload sweep is predicted
+clean rather than assumed clean. After the append: strict 6 and tripwire 6, first 1, last 6, no
+duplicates, no breaks in 1 to 6, reconciled 5 + 1 = 6 and 6 minus 1 plus 1 = 6, with the
+enumeration PRINTED IN FILE ORDER. Derive the totals from what is actually present; if these
+figures are wrong, yours are right and you show the reconciliation rather than forcing agreement.
+Provenance: RELAYED. Amend the completeness note to record the persisted set and the lightened
+cadence. Docs-only under the standing permanent licence — state the skip and its reason, prove
+docs-only by exclusion with the exclusion shown discriminating, carry the bytes.
+
+WHAT IS OPEN, AND IT IS STILL ONE ITEM. Whether the dead-invalidation-key fix opens as a short
+cycle before the responsive phase. No phase opens until the operator rules it. The channel
+recommendation is offered and four cycles have not adopted it.
+
+NOTHING IS IMPLEMENTED BY THIS BLOCK.
