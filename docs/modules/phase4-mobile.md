@@ -289,6 +289,59 @@ The amendments above are left as they stand. This is the live index from here fo
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** The count stays at
   **SIX across four tracks**.
 
+### Amendment — MOB-R11/R12 persistence commit, 2026-09-12
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R12**, contiguous: first **1**, last **12**, **0**
+  duplicates, **0** breaks in 1…12. **MOB-R11 provenance: RELAYED, RE-RELAYED AFTER TWO
+  NON-DELIVERIES** — number and date unchanged, re-sent verbatim, never reconstructed.
+  **MOB-R12 provenance: RELAYED**, carrying an adjacent correction from MOB-R13 (below).
+- **MOB-R13 IS HELD, NOT PERSISTED, AND THE REASON IS MECHANICAL.** Its Provenance sentence wraps
+  so that a line begins `MOB-R11 RELAYED, …` at column 0 — a **genuine wrap**, tripwire-only,
+  which made the three-block payload sweep read **strict 3 / tripwire 4** and halted the write.
+  The pre-persistence rewrap licence is the **author's**, not the implementer's, so it was reported
+  with its minimal layout-only remedy rather than applied. MOB-R11's own persistence clause
+  instructs persisting **R11 + R12**, which is executable and swept clean at **2/2**, so that is
+  what shipped. **MOB-R13 appends at 13 once reissued**; the index will then read 1…13.
+- **THE SIXTH COLUMN-0 INSTANCE IS THE FIRST GENUINE WRAP.** The five prior were authored paragraph
+  openers, a possessive citation, or the probe. MOB-R4's original diagnosis — *"a body line has
+  wrapped to column 0"* — was **false when written and is true now**. The instrument has caught the
+  thing it was once wrongly said to have caught, on both parties' text.
+- **THE THREE ITEMS ARE RULED** (operator, by delegation, 2026-08-29): **Item A DELETE**,
+  **Item B FOLD IN**, **Item C QUEUE**. One implementation commit carries A and B.
+  - **Item A** lifts the protected-surface constraint for **those three lines and nothing else**;
+    QuickAdd internals stay untouchable in every other respect and the FAB topology is unmoved.
+  - **Item C carries its trigger:** any requirement that two simultaneously-open contexts agree, or
+    any operator staleness report that survives a single-tab fresh load. **The procedural
+    mitigation stands in its place** — UI observations in ONE tab, fresh load, navigating between
+    pages, and the report says so.
+- **THE CONTROL FORM IS ADOPTED FOR THIS TRACK (MOB-R11):** a control runs in **ONE FORM ACROSS
+  CYCLES**, and if its output must be shortened the shortening is **named in the same breath**. A
+  control's value is entirely its comparability across runs, so a silently changed control is not a
+  weaker control — it is not a control at all, and the page cannot tell the two apart. **No new
+  standing rule minted**; this is the named-elision rule's instrument-side twin, cited.
+- **THE COMMIT COUNT IS MEASURED, AND TWO EARLIER FIGURES WERE WRONG — not merely unmeasured.**
+  Measured against a real `origin/main` (`eba7385`): `git rev-list --count origin/main..HEAD` = **7**,
+  and the enumerated `git log --oneline` = **7**, agreeing.
+
+  | report | stated | actual | verdict |
+  |---|---|---|---|
+  | MOB-R9 close-out | FOUR | **6** at `b198386` | **wrong by 2** |
+  | MOB-R10 close-out | FIVE | **7** at `74676a7` | **wrong by 2** |
+  | MOB-R12 halt | SEVEN | **7** | correct |
+
+  **4 → 5 → 7 grew monotonically while two of its three terms were off by the same amount** — the
+  plausible-growth shape the channel named, and nothing in a report could have caught it. **Durable
+  form: a commit count is derived from the range, never from what the session remembers adding.**
+  The implementer had personally made every one of those commits and still got it wrong twice;
+  recency is not enumeration.
+- **NOTHING IS PUSHED.** Seven commits unpushed at this amendment; the push is the operator's, and
+  the channel's recommendation changed from *push now* to *wait and bundle A/B* — stated as a
+  changed recommendation, not made quietly.
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** The count stays at
+  **SIX across four tracks**.
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
@@ -2251,3 +2304,268 @@ insertions being the required explanatory comment. 209 of the 224 insertions are
 
 **Live deferred obligation:** the standing-rules frontend baseline line moves at **track close**,
 shipping with its `git diff` old→new hunk (212/41 → 215/42), never a prose restatement.
+
+MOB-R11 — ITEMS A, B AND C ARE RULED. 74676a7 IS ACCEPTED. The control disclosure is RATIFIED as
+the correct handling of a self-caused instrument fault. A carried commit count is MEASURED before
+any push. One implementation commit is authorised.
+
+CADENCE. Issued under test (b).
+
+OPERATOR RULING BY DELEGATION, 2026-08-29, on the channel recommendations stated in the message
+immediately preceding it and on nothing else: Item A DELETE, Item B FOLD IN, Item C QUEUE. The
+push was part of the same recommendation and its disposition is restated below with a changed
+reason, which is the operator's to accept or reject.
+
+74676a7 IS ACCEPTED. Pre-append 1/1 after the halt and rewrap; post-append 10/10 agreeing,
+enumerated in file order, first 1, last 10, zero duplicates, zero breaks, both routes landing on
+10; docs-only exclusion empty; both gates skipped with the reason stated.
+
+THE CONTROL DISCLOSURE IS RATIFIED AND IT IS THE BEST THING IN THIS CYCLE. The instrument was
+modified by appending a truncation to it, the modification was not declared, and the implementer
+named it AGAINST ITSELF as the worse of the two readings the channel had offered rather than
+taking the benign one that was equally available. The uncut form was then re-run verbatim against
+the same immutable commit and the shortened outputs shown to be its first three and first two.
+  THE DURABLE FORM RECORDED WITH IT IS THE CORRECT GENERALISATION AND IS ADOPTED FOR THIS TRACK: a
+  control runs in ONE FORM ACROSS CYCLES, and if its output must be shortened the shortening is
+  named in the same breath. A control's value is entirely in its comparability across runs, so a
+  silently changed control is not a weaker control — it is not a control at all, and the page
+  cannot tell the two apart.
+  WHY THIS IS RATIFIED RATHER THAN MERELY ACCEPTED: a silently shortened capture and a broken
+  instrument are indistinguishable in a report, and the ONLY thing that ever separates them is a
+  party volunteering which it was. That volunteering cannot be compelled by any rule, which is
+  exactly why it is recorded when it happens.
+  NO NEW CLAUDE.md STANDING LINE. The count stays at SIX across four tracks. The existing rule
+  already governs — a named elision is still evidence, a pointer is not — and this is that rule's
+  instrument-side twin, cited rather than minted.
+
+THE FIFTH COLUMN-0 INSTANCE IS THE INSTRUMENT'S FIRST CATCH ON THE IMPLEMENTER'S OWN TEXT, and it
+is worth recording for that reason alone. The tripwire was built to catch this channel's habit of
+opening paragraphs with a ruling number; it has now fired on both parties. An instrument that
+catches only its author's known habit is a pattern fitted to a sample; one that catches an
+unrelated party is measuring the property it claims to measure. The rewrap was correct — author
+and editor were the same party, so the licence question does not arise — and the halt-then-re-sweep
+sequence was run in the right order.
+
+═══ THE CARRIED COUNT — MEASURED FIRST, BEFORE ANY PUSH ═══
+
+TWO FIGURES FOR THE SAME QUANTITY APPEAR FOUR LINES APART IN ONE REPORT: four commits named for
+this cycle, and five commits stated as unpushed. The prior cycle said four. NEITHER IS TREATED AS
+CORRECT AND NEITHER IS RECONCILED BY ARGUMENT.
+  THIS IS THE DERIVE-DON'T-CARRY CLASS ON ITS CANONICAL SUBJECT. This project has already recorded
+  an unshipped-commit count incremented from memory across three cycles — thirteen, then a reported
+  fifteen, then a reported sixteen — with the wrong figure inherited into a charter, and one command
+  settled it at fourteen. The figure is not carried; it is derived.
+  MEASURE AND REPORT, AS THE FIRST ACTION OF THE NEXT REPORT:
+      git rev-list --count origin/main..HEAD
+      git log --oneline origin/main..HEAD
+  Both outputs pasted. Reconcile the count against the enumerated list — two routes, and a
+  disagreement is investigated rather than averaged. If the enumeration shows a commit neither the
+  channel nor the implementer expected, that is a finding and it is reported before anything is
+  pushed.
+
+═══ ITEM A AND ITEM B — ONE COMMIT, AND ONE PRE-CHECK GATES HALF OF IT ═══
+
+ITEM A — THE THREE PROTECTED-SURFACE LINES ARE DELETED. The operator ruling lifts the constraint
+for these three lines and for nothing else; QuickAdd internals remain untouchable in every other
+respect, and the FAB topology is unmoved.
+  DELETION, NOT REPOINTING, AND THE REASON IS THE SAME ONE THAT GOVERNED THE SIX. The broad
+  insights segment is ALREADY invalidated in that same file, so repointing would issue a second
+  invalidation of a query invalidated one line earlier. Deletion is narrower and truer.
+  PRE-CHECK, REPORTED IN THE SAME REPORT AND NOT ASSUMED: confirm from the file that each of the
+  three deletions sits beside a live invalidation covering the same payload, naming which line
+  covers which. If any of the three is NOT shadowed, deleting it is a behaviour change rather than
+  dead-code removal — STOP AND REPORT that one; the other two proceed.
+  ZERO TESTS ARE OWED FOR ITEM A if the pre-check confirms shadowing, because a deletion of a line
+  that matched nothing and was shadowed by a live sibling changes no observable behaviour, and a
+  test asserting that nothing changed reads identically in both worlds. State that reasoning rather
+  than leaving the absence of a test unexplained.
+
+ITEM B — THE FOUR UNREACHABLE BUDGET SITES ARE FOLDED IN, and they carry their own per-site
+treatment rather than riding Item A's coat-tails.
+  PROPOSE AND IMPLEMENT IN ONE REPORT, compressed on the same grounds the preceding cycle was: the
+  surface is four sites and one target query. The hard stop is not compressed — if the pre-check
+  below shows the choice is not clean, STOP AND REPORT rather than choosing.
+  PER-SITE P1 ENTRY: file:line, the key as written, the key proposed, and the declared query it
+  will then match under the matching rule already derived at the installed version. Prefer the
+  narrowest key that reaches the intended query.
+  THE HAZARD, NAMED IN ADVANCE SO IT IS NOT DISCOVERED AFTER THE CHOICE. The declared key carries a
+  month segment, and the month the setup-progress query was mounted with is not necessarily the
+  month the write targets. A key that pins the month matches only when the two coincide and fails
+  silently when they do not — which is this defect's own mechanism recurring one segment over.
+  Establish from source whether they can differ. If they can, the month segment is omitted from the
+  filter and you say so; if they cannot, say how that is guaranteed.
+  QUANTIFY THE BEHAVIOUR CHANGE per user action, as the approved sites did: how many queries newly
+  refetch, which routes they hit, and whether the target is mounted at write time.
+  ONE DISCRIMINATING TEST, OUTCOME FORM NOT SPY FORM: seed the real declared key on a real client,
+  run the real write handler, assert the invalidated state. Plus a named control key shown to share
+  no first segment with the filter. State what each reads IF THE CHANGE HAD NOT LANDED. RED-first
+  with the discriminating value captured.
+  IF THE PAGE HARNESS CANNOT REACH THE CACHE — and the measured limitation says both page harnesses
+  construct their client without returning it — use the new-file route already established, mount
+  the REAL page with its REAL handler, and state which components are mocked and that none of them
+  is the page. Do not edit an existing harness; if the only workable route requires it, that is a
+  NAMED FORCED EDIT and it stops and asks before it ships.
+
+ONE COMMIT CARRIES BOTH. Constraints as before: zero physical-property additions with a positive
+control; no Caddyfile change and no new external origin, asserted rather than omitted; no renames;
+pinned strings untouched; the FAB topology untouched; the three named regression files green AND
+untouched. No convention, responsive or zero-vs-no-data work in passing. The e2e suite untouched.
+CLOSE-OUT CARRIES THE THREE MANDATORY SECTIONS, with the api suite RUN because the contract test
+reads the frontend fixture, and the fixture count and allowlist length derived FROM THE FILE.
+Predicted deltas stated in advance; A MISS IS A QUESTION, NEVER AN ADJUSTMENT. Re-derive every
+figure AFTER THE LAST EDIT.
+
+ITEM C — THE CROSS-TAB REGIME IS QUEUED, NOT OPENED, AND IT CARRIES ITS TRIGGER. The client is a
+module-level singleton, one per browser context, so no key repair can make two contexts agree; the
+remedies are app-wide behaviour changes — focus-refetching, or a cross-tab broadcast — affecting
+every query in the application. TRIGGER: any requirement that two simultaneously-open contexts
+agree, or any operator report of staleness that survives a single-tab fresh load. THE PROCEDURAL
+MITIGATION STANDS IN ITS PLACE for this track: operator UI observations are taken in ONE tab, from
+a fresh load, navigating between pages, and the report states that this was done.
+
+═══ THE PUSH — RESTATED WITH A CHANGED REASON, THE OPERATOR'S TO ACCEPT OR REJECT ═══
+
+THE CHANNEL RECOMMENDED PUSH NOW AND NOW RECOMMENDS WAITING, and the change is stated rather than
+made quietly. Items A and B are small and already ruled, so bundling them yields ONE deploy record
+and ONE verification instead of two, and the ride-along diff against the deployed ref is simpler to
+read for one push than for two. The alert defect is real but not urgent — an alert that clears on
+the next page load.
+  NOTHING STALLS ON THIS EITHER WAY. The implementer proceeds with the count measurement and the
+  A/B commit regardless; the push is the operator's action at the moment he chooses.
+  WHEN IT HAPPENS, THE DEPLOY DISCIPLINE IS UNCHANGED AND IS NOT WAIVED BY THE PUSH BEING SMALL.
+  Diff against ORIGIN/MAIN, not local main — local main is not a reliable proxy for what production
+  runs, and this project has already missed a riding commit exactly that way. Enumerate every riding
+  commit and name any that is not this track's own work, with its CSP check. A PUSH IS NOT A DEPLOY:
+  no UI observation of any fix in this push is evidence until the Actions run has LANDED, and the
+  report says that it had. The deploy record is written at the close of the push, not deferred.
+
+PERSISTENCE. This block persists together with the block following it. Sweep the payload under both
+operative patterns before appending — and note that the payload's prose opens paragraphs with
+ruling numbers and phase handles, which is now a five-instance class, so the sweep is predicted
+clean rather than assumed clean and a disagreement halts the write. Predicted payload strict 2 and
+tripwire 2 agreeing; after the append, strict 12 and tripwire 12, first 1, last 12, no duplicates,
+no breaks in 1 to 12, reconciled 10 + 2 = 12 and 12 minus 1 plus 1 = 12, enumeration PRINTED IN
+FILE ORDER. Derive from what is present; if these figures are wrong, yours are right and you show
+the reconciliation. Provenance for both blocks RELAYED. Amend the completeness note to record the
+persisted set, the three dispositions, the adopted control form, and the measured commit count once
+it exists. Docs-only under the standing permanent licence — state the skip and its reason, prove
+docs-only by exclusion with the exclusion shown discriminating AND ITS CAPTURE UNCUT, carry the
+bytes.
+
+MOB-R12 — PHASE MOB-1 RESPONSIVE IS OPENED. Phase A is SOURCE-SIDE MEASUREMENT, report only, hard
+stop. The rendered half is deliberately deferred and its reason is stated.
+
+CADENCE. Issued under test (a) — it opens a phase.
+
+THE CHARTER, IN THE OPERATOR'S OWN WORDS: "making the web app friendlier for mobile users." This is
+the second of the four items in his sequence and the first of this track's three shapes. It is what
+he actually asked for.
+
+THE SPLIT, AND WHY PHASE A CANNOT MEASURE EVERYTHING AT ONCE. Layout is a RENDERED property. jsdom
+computes no layout, which is why a prior item in this project shipped a deliberate zero-test gap
+and was verified only by operator observation; and the e2e suite has no backend provisioned and is
+not to be repaired, revived or deleted as a side effect of this work. THE IMPLEMENTER THEREFORE
+CANNOT OBSERVE THIS APPLICATION RENDERING AT ANY WIDTH. Phase A measures what source settles and
+produces the observation list for what it does not. Claiming a rendered property from a class name
+is inference, and this phase's whole risk is that inference looks like measurement.
+  EVERY FINDING IS LABELLED, PER ITEM, ONE OF TWO WAYS: DERIVED — settled by source, with the
+  source shown — or OBSERVABLE-ONLY — requiring a rendered check, with the check stated. An item
+  whose label is wrong is worse than an item omitted.
+
+STEP 0 AS USUAL: hostname and pwd first; HEAD and status pasted with emptiness marked between
+printed delimiters; OPEN ENUMERATION of held blocks, enumerated not confirmed; baselines re-derived
+with resolution proofs and a non-matching negative control shown exiting 0, absolutes stated so a
+miss is a question and never an adjustment, and the frontend figure re-derived rather than carried
+because the preceding commits moved it. INTEGRATION is not owed and not run; state the omission and
+its reason.
+
+L1 — THE VIEWPORT AND BREAKPOINT INVENTORY. Establish from source: whether a viewport meta tag
+  exists and what it declares; which Tailwind breakpoints are configured, including any customised
+  in the v4 CSS-first configuration rather than a JS config file; and the FULL COUNT AND
+  DISTRIBUTION of responsive-prefixed classes across src, by prefix, with the file list for the
+  least-used prefix. DERIVE THE PREFIX VOCABULARY FROM THE CONFIGURATION, not from what Tailwind's
+  defaults are assumed to be — a configured breakpoint absent from the assumed list is invisible to
+  a search built on the assumption.
+
+L2 — WHAT THE APP DOES BELOW THE SMALLEST BREAKPOINT. This is the question the charter is actually
+  about. For each of the four main pages, report the outermost layout container and its declared
+  column behaviour at the unprefixed base width. State which pages collapse to one column by
+  construction and which retain a multi-column track at every width. A grid template that names
+  fixed fractions with no unprefixed single-column fallback is the failure mode; report whether any
+  exists, with file:line.
+
+L3 — HORIZONTAL OVERFLOW SITES. Enumerate every element carrying a class that prevents shrinking or
+  wrapping — nowrap, fixed widths, min-widths, explicit whitespace control — and for each state
+  whether a shrink path exists. The two known sites are the starting point and not the answer: one
+  was fixed and one was deliberately deferred INTO this phase. Positive control required; an empty
+  result here is the likely one and is worth nothing without proof the pattern fires.
+
+L4 — TAP TARGETS. Enumerate interactive elements whose declared size falls below a 44px minimum, by
+  reading the size variants actually applied rather than by assuming a default. Report the variant
+  definitions themselves — the shared primitive's size table — and then the call sites using the
+  smallest ones. LABEL THIS CAREFULLY: a declared height in a variant is DERIVED; whether a
+  rendered control meets the threshold after padding, borders and line-height is OBSERVABLE-ONLY.
+
+L5 — THE TABLES. The transaction table is virtualised. Report its column construction, whether it
+  declares a minimum width, what its container does when the viewport is narrower than that
+  minimum, and whether any alternative narrow-width presentation exists anywhere in the tree.
+  Report the same for any other tabular surface found; enumerate rather than assuming there is one.
+
+L6 — DIALOGS AND MODALS AT NARROW WIDTHS. The transaction, import and settings dialogs are the
+  largest surfaces in the application. For each: declared width and max-width, whether it is
+  responsive, whether its content scrolls, and whether it can exceed the viewport height. The
+  import dialog file also holds the largest concentration of physical-property sites in the tree,
+  which is context for L8 and not a licence to touch it here.
+
+L7 — THE FAB, REPORT ONLY. Its topology is FIXED — icon-only at 56px, its z-index, its aria-label,
+  its tooltip, sole visible trigger, the global shortcut. IT DOES NOT MOVE WITHOUT AN OPERATOR
+  RULING and none exists. Report its declared position, what sits beneath it at narrow widths, and
+  whether any scrollable content or control can pass under it. A MOBILE PASS WILL WANT TO MOVE IT;
+  report the collision, propose nothing.
+
+L8 — THE PHYSICAL-PROPERTY BASELINE, RE-DERIVED. It was measured at thirty-two sites across twelve
+  files and the preceding commits touched five of those files. RE-DERIVE FROM THE TREE, do not
+  carry the figure, and report the movement as a delta against it with the cause of any change
+  named. The primitives directory was proven clean and its zero proven discriminating; re-derive
+  that too. THE STANDING RULE FORBIDS ADDITIONS AND THIS PHASE MUST ADD NONE — the pre-existing set
+  belongs to the conventions phase and is not swept here.
+
+L9 — THE BRASS-SLOT ELEMENT. It is now in scope and it is the hardest single element in this track:
+  simultaneously the rationed brass slot, an overflow site, and enlarged to clear the large-text
+  contrast threshold by a ruling. A six-option table already exists showing every remedy landing in
+  the design or mobile track. RE-DERIVE THAT TABLE FROM THE TREE rather than reading it out of the
+  document, confirm each collision still holds, and state whether any option has become available
+  that was not before. PROPOSE NOTHING.
+
+L10 — CHARTS AT NARROW WIDTHS. Report how the chart surfaces declare their dimensions, whether any
+  declares a minimum width, and what their tooltips and axis labels do when the container is
+  narrow. Note that the inline-style CSP allowance exists specifically for these components and
+  must not be disturbed.
+
+L11 — THE OBSERVATION LIST — THE PHASE'S MOST USEFUL DELIVERABLE. Produce a SHORT ORDERED LIST of
+  checks only the operator can perform: the exact widths to test, the page, what to look at, and
+  WHAT A PASS AND A FAIL EACH LOOK LIKE stated separately so the check is discriminating. Keep it
+  to the checks that source could not settle. Each carries the standing preconditions: the deploy
+  must have LANDED, not merely been pushed, and the observation is taken in ONE tab from a fresh
+  load, navigating between pages.
+
+REPORT FORMAT. One report, L1 through L11 in order, each with its evidence PASTED rather than
+pointed at, each finding labelled DERIVED or OBSERVABLE-ONLY. Where a figure is a count, show the
+command and its output. Where a claim is about a file, show the matched lines rather than a
+description. Every zero paired with a positive control and with a statement of what a populated
+result would have looked like. Every glob-bearing argument quoted. Every search scoped to src, and
+say so. Derive every figure FROM THE FILE, never from a document about the file — including the
+prior measurement report and this block.
+
+SCOPE. NOTHING IS FIXED, NOTHING IS STYLED, NOTHING IS COMMITTED, NOTHING IS PUSHED. No convention
+work, no zero-vs-no-data work, no cache work beyond what the preceding block authorises. The e2e
+suite is not run, repaired, revived or deleted. The queued items stay queued and are not tidied in
+passing. If a discovery would enlarge this mandate, that is a STOP-AND-ASK and a REQUEST, never a
+self-grant.
+
+SEQUENCING, STATED SO IT IS NOT AMBIGUOUS: the preceding block's commit lands FIRST; this
+measurement follows it. They are not gated on each other in substance, but they are not worked in
+parallel, and this phase's Phase A report is written against the tree as it stands AFTER that
+commit.
+
+HARD STOP after the report. A proposal is a separate cycle and is not written here.
