@@ -645,6 +645,59 @@ The amendments above are left as they stand. This is the live index from here fo
   deferred on it, item (iii)'s risk lives there. **Its absence is not a pass.**
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.**
 
+### Amendment — MOB-R20 persistence commit, 2026-09-12
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R20**, contiguous: first **1**, last **20**, **0**
+  duplicates, **0** breaks in 1…20. **Position DERIVED from the file (last was 19), not from the
+  clause** — this track has had two blocks predict their own position from a state that had
+  already moved, and one halt spent resolving it. **MOB-R20 provenance: RELAYED.**
+- **THE CADENCE IS WIDENED BY OPERATOR INSTRUCTION (2026-09-12, direct): larger cycles, more per
+  cycle, clarity preserved.** Measurement, proposal and implementation **collapse into one report**
+  where the surface is enumerable from source. The proposal half is still **written** — it is the
+  record of what was decided and why — but no longer waits a cycle. **NOT collapsed:** every named
+  gate is a **hard stop**; any red test or forced test edit stops and asks; any mandate-enlarging
+  discovery is a **REQUEST, never a self-grant** — *more* important as cycles widen, because an
+  unsupervised cycle compounds a silent self-grant; and **operator observation rounds cannot be
+  collapsed**, being the only instrument for layout. **Cost, stated:** more surface change per
+  verification round, so a failed observation is harder to attribute.
+- **THE SUITE IS THE INSTRUMENT; THE FLAG IS A PRIOR.** The Phase B flagged risk (a dialog selector
+  assumption) did **not** fire; the red came from the item thought safest — an invalid JSX comment
+  as a sibling expression inside `return()`, collapsing a whole file's collection (216 → 210). A
+  flag that does not fire is not wasted, but **the flagged item gets attention and the unflagged
+  items get its residue, so the marginal defect lands where nobody is looking.** Running the full
+  suite after the LAST edit is what caught it, not judgement about where risk lay.
+- **THE NUMBERING HALT IS VINDICATED.** Both blocks' figures were stale in the same way and neither
+  was wrong about its own number; picking either reading would have written a wrong number or a
+  wrong position permanently into the index. The distinction from the earlier gap — that one was
+  ambiguous about **which artifact was missing**, this one about **which artifact was wrong** — was
+  the implementer's, not supplied.
+- **GATE 1 PASSES, with a firing control.** The installed **tailwindcss 4.2.4** exposes the named
+  variant: a compiled probe emits `.pointer-coarse\:h-11 { @media (pointer: coarse) { … } }`. **My
+  first control did not fire** — I looked for `min-width` when v4 emits range syntax; corrected, the
+  control shows `lg:` → `@media (width >= 64rem)`. **No raw CSS, no new styling mechanism, no
+  structural change.**
+- **GATE 2 PASSES.** The touch minimum is `min-h-11` (44px) on the **base**, and `min-*` raises a
+  floor without capping, so the FAB's `h-14` (56px) is untouched. No stop-and-ask.
+- **GATE 4 FIRES — PART 2 (the profile header control) STOPS.** At 320 the **fixed** contributions
+  alone consume 216 of 280px (mark 40 + gap-3 12 + gap-4 16 + three 44px controls 132 + two gap-2
+  16), leaving **64px** for a two-line brand text block whose longer line is 17 characters and
+  whose shorter line alone is ~63px. With today's **two** controls the same arithmetic leaves
+  116px and fits. **Text width is a rendered property jsdom cannot measure — but the fixed subtotal
+  is DERIVED and sufficient on its own.** Nothing in that row was shrunk; the brand mark is a
+  rationed brass slot and was not touched.
+- **PART 2a's PRE-CHECK ANSWERED AND REFINED ITS OWN PREMISE.** The menu is **adequately labelled** —
+  entry `Profile` (then `Sign out`) inside `role="menu" aria-label="User menu"`, opened by a control
+  showing the user's first name. **The defect is that on mobile the user menu does not render at
+  all** (`hidden … lg:flex`), leaving only the hamburger; the command palette is likewise
+  `lg:inline-flex`. So the mobile header holds **two** controls, not the assumed two-plus-menu.
+  **No relabel is owed.**
+- **THE DEPLOY RECOMMENDATION IS OFFERED AND NOT ADOPTED:** push before further UI work, because
+  tap targets and the header control touch the **same surfaces** as the accepted responsive commit,
+  and stacking unverified layers makes a failed check unattributable.
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** Count stays **SIX**.
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
@@ -4326,3 +4379,222 @@ show the reconciliation, and persist both. Re-derive the unpushed count by both 
 it. Provenance RELAYED. Amend the completeness note to record the persisted set, both operator
 rulings with their classes, the menu-versus-placement pre-check, the coarse-pointer device-versus-
 width divergence, and the recommended sequence as offered-and-not-adopted.
+
+MOB-R20 — THE RESPONSIVE COMMIT IS ACCEPTED. THE CADENCE WIDENS BY OPERATOR INSTRUCTION: five items
+run in ONE cycle, with measure, propose and implement collapsed where the surface is enumerable and
+the stop-and-ask gates named explicitly in advance. The deploy is recommended BEFORE this cycle's UI
+work and the reason is attribution, not caution.
+
+CADENCE. Issued under test (a) and (b). OPERATOR INSTRUCTION, 2026-09-12, DIRECT: larger cycles,
+more per cycle, clarity preserved. This block is written to that instruction.
+
+THE COMMIT IS ACCEPTED. All three mandatory sections present and green: both test tails with the
+Test Files summary line and captured exit codes, resolution proofs with a non-matching negative
+control shown exiting 0, both typechecks at 0 bytes, the api suite run because the contract test
+reads the frontend fixture with the count and the empty allowlist derived FROM THE FILE, and the
+baseline stated as a delta of plus zero and plus zero as predicted. Physical-property additions zero
+with the control finding thirty-two in tree, and the baseline re-derived AFTER THE LAST EDIT at
+thirty-two across nine files. Primitives touched and declared touched, both direction-free.
+
+THE NUMBERING HALT IS VINDICATED AND THIS IS THE PART TO KEEP. Both blocks' persistence figures were
+written before the block preceding them had landed, so both were stale in the same way and neither
+was wrong about its own number. HAD THE IMPLEMENTER PICKED EITHER READING IT WOULD HAVE WRITTEN A
+WRONG NUMBER OR A WRONG POSITION PERMANENTLY INTO THE INDEX. It distinguished this case from the
+earlier recorded gap on the right ground — that one was unambiguous about WHICH artifact was
+missing, this one was ambiguous about WHICH artifact was wrong — and that distinction was the
+implementer's, not supplied by the channel. A held block is a smaller risk than a corrupted index.
+
+THE RED IS THE MOST INSTRUCTIVE THING IN THE REPORT. The flagged risk was a dialog selector
+assumption; it did not fire. THE ACTUAL RED CAME FROM THE ITEM THE IMPLEMENTER THOUGHT SAFEST — an
+invalid JSX comment placed as a sibling expression inside a return, collapsing a whole file's
+collection and taking the count from two hundred and sixteen to two hundred and ten. It was fixed in
+the implementer's OWN code with no test file edited, shown by an empty status on the test pathspec.
+  WHAT IT COSTS THE FLAGGING PRACTICE: nothing. A flag that does not fire is not a wasted flag, and
+  the dialog risk was real whether or not it materialised. WHAT IT ADDS: the flagged item gets extra
+  attention and the unflagged items get the residue of it, so the marginal defect lands where nobody
+  is looking. Running the full suite after the last edit is what caught this, not judgement about
+  where the risk was. THE SUITE IS THE INSTRUMENT; THE FLAG IS A PRIOR.
+  NO NEW STANDING LINE. The count stays at SIX across four tracks.
+
+THE FOUR DECLARED COVERAGE GAPS ARE ACCEPTED AS THE HONEST ANSWER. jsdom computes no layout, a class
+assertion restates the diff, and plus zero is stated as a gap rather than allowed to read as
+adequacy. THE OBSERVATION CHECKS ARE THE BEST-WRITTEN SET THIS TRACK HAS PRODUCED: seven checks,
+each stating its width AND HOW THE WIDTH IS ACHIEVED, pass and fail as different worlds, a desktop
+check for the clearance consequence that this phase did not otherwise touch, and a check covering
+the latent non-portal dropdown condition that was recorded and not opened. Four checks were
+mis-specified earlier in this phase, three by the channel; these are not.
+
+═══ WHAT THE WIDER CADENCE CHANGES, AND WHAT IT DOES NOT ═══
+
+COLLAPSED: measurement, proposal and implementation run in ONE report per item where the surface is
+enumerable from source. The proposal half is still WRITTEN — it is the record of what was decided
+and why — but it no longer waits a cycle for approval.
+NOT COLLAPSED, AND THESE ARE THE LOAD-BEARING EXCEPTIONS:
+  - EVERY NAMED GATE BELOW IS A HARD STOP. A gate is not a caution; it is a point where the report
+    ends and waits.
+  - ANY RED TEST, and any forced selector or class edit to an existing test, STOPS AND ASKS.
+  - ANY DISCOVERY ENLARGING THE MANDATE is a REQUEST, never a self-grant. Wider cycles make this
+    MORE important, not less: the further a cycle runs unsupervised, the more a silent self-grant
+    compounds before anyone sees it.
+  - THE OPERATOR'S OBSERVATION ROUNDS CANNOT BE COLLAPSED. They are the only instrument for layout.
+THE COST, STATED PLAINLY: more surface changes per verification round, so a failed observation is
+harder to attribute to a cause. That is the trade the operator is buying and it is the reason the
+deploy recommendation below is not a formality.
+
+═══ THE DEPLOY — RECOMMENDED BEFORE THIS CYCLE'S UI WORK ═══
+
+CHANNEL RECOMMENDATION, offered and not adopted: PUSH NOW, observe, then let this cycle land on
+verified ground. Sixteen commits are unpushed and nothing from this track is live.
+  THE REASON IS ATTRIBUTION. Tap targets and the header control touch the SAME SURFACES as the
+  commit just accepted — controls, headers, dialog footers. Implementing them before the responsive
+  work is observed stacks three unverified layers on one surface, and a failed check then cannot say
+  which layer caused it. Deploying first makes each layer separately falsifiable.
+  NOTHING IN THIS BLOCK WAITS ON IT. Parts 1 through 5 proceed either way. If the push has not
+  happened when the report is written, say so and state which observation checks are therefore
+  still outstanding, rather than letting their absence read as a pass.
+  WHEN IT HAPPENS: diff against ORIGIN/MAIN, never local main; enumerate every riding commit and
+  name any that is not this track's work with its CSP check; NO UI OBSERVATION IS EVIDENCE UNTIL THE
+  ACTIONS RUN HAS LANDED, and the report says that it had. Write the deploy record at the close of
+  the push, not later.
+
+═══ PART 1 — TAP TARGETS. Measure, propose and implement in one report. ═══
+
+RULED BY DELEGATION: the touch-only route. Raise controls on coarse-pointer devices; desktop
+unchanged.
+
+1a. RE-DERIVE THE STARTING POINT AT EXECUTION, do not carry it: the shared size table's variants,
+    the call-site distribution by size, the count below forty-four pixels by explicit value, the
+    content-dependent ones, and the FAB as the sole exception. The declared height IS the rendered
+    height because the preflight sets border-box — that is DERIVED and was established by the
+    implementer with the mechanism shown. Reconcile the call-site count two ways.
+1b. DERIVE THE MECHANISM FROM THE INSTALLED PACKAGE, not from what the framework is assumed to
+    offer. Establish whether a pointer or hover variant exists in the installed version's variant
+    set, whether any pointer or hover query already appears anywhere in the stylesheet, and whether
+    raw CSS is required. THAT ASSUMPTION CLASS HAS COST THIS PROJECT FOUR MISSES, most recently a
+    declaration cited without its render gate.
+    ** GATE 1 ** — IF THE VARIANT DOES NOT EXIST in the installed version and raw CSS is required,
+    STOP AND REPORT. Introducing a new styling mechanism into this stylesheet is a structural
+    change and is not authorised here.
+1c. RAISE THE CONTROLS. Every control below the threshold reaches at least forty-four pixels under a
+    coarse pointer. Include the raw button elements that declare no height, and the input primitive.
+    The six content-dependent ones are reported, not forced.
+    ** GATE 2 ** — THE FAB IS NOT RESIZED. Its size is part of a FIXED topology and it already
+    clears the threshold. If a change to the shared table would move it, STOP AND ASK.
+1d. MEASURE THE INTERACTION WITH WHAT JUST SHIPPED, EXPLICITLY. Taller controls inside a dialog that
+    just gained a maximum height and internal scroll: report per dialog whether the footer still
+    fits, and whether any toolbar or segmented control reflows to a second line. THIS IS THE
+    CROWDING THE RESPONSIVE COMMIT WAS FIXING and a fix that reintroduces it is a regression.
+    ** GATE 3 ** — IF ANY SURFACE REFLOWS WORSE THAN BEFORE, stop on that surface, report it, and
+    ship the rest.
+1e. REPORT THE DEVICE-VERSUS-WIDTH DIVERGENCE rather than resolving it silently. A coarse-pointer
+    query is a CAPABILITY switch: it fires on a touch laptop and does not fire on a narrow desktop
+    window, so it is NOT equivalent to the width threshold the rest of this track uses. Name the
+    surfaces where the two disagree and say whether the divergence is acceptable. The alternative is
+    a width threshold, which reaches desktop and is what the ruling was chosen to avoid.
+1f. OBSERVATION CHECKS in L11 form — width AND how it is achieved, pass and fail as different
+    worlds. At least one must be on a PHYSICAL touch device, because a desktop responsive mode does
+    not report a coarse pointer and therefore CANNOT verify this change at all. State that limit.
+
+═══ PART 2 — THE PROFILE HEADER CONTROL. Pre-check, then implement, both outcomes pre-authorised. ═══
+
+RULED DIRECT by the operator: a header control, chosen from three options.
+
+2a. THE PRE-CHECK LEADS, because it may change what the right remedy is. Report the header's current
+    contents with every label and accessible name; the menu's contents in order with their labels;
+    and whether the profile entry is labelled in a way a first-time user would read as
+    account-and-settings. REPORT THE STRINGS, not a description of them.
+2b. BOTH OUTCOMES ARE PRE-AUTHORISED SO NO CYCLE IS LOST AND NOTHING IS SUBSTITUTED FOR THE RULING:
+    - IF THE MENU IS ADEQUATELY LABELLED: implement the header control as ruled.
+    - IF THE MENU'S PROFILE ENTRY IS THE DEFECT: implement the header control AS RULED, and ALSO
+      relabel that ONE entry. The relabel is additive, cheap, and fixes the cause; the control is
+      what the operator ruled. AUTHORISED NARROWLY — that single entry's label only. A general menu
+      restructure is NOT authorised and is a stop-and-ask.
+2c. THE CONTROL CARRIES: the icon and its accessible label; placement relative to the two existing
+    controls; its size against the threshold Part 1 is setting, so the two do not disagree; and what
+    the header row does at 320 with three controls plus the brand block, MEASURED — the brand block
+    carries a mark and two lines of text.
+    ** GATE 4 ** — IF THE HEADER ROW OVERFLOWS OR CROWDS AT 320 with three controls, STOP AND
+    REPORT with the measurement. Do not solve it by shrinking anything already in that row.
+2d. THE BRAND MARK IS A RATIONED BRASS SLOT and the header is where the ration lives. Nothing
+    already in that row is restyled, recoloured or re-scaled.
+2e. Logical properties only. Header control sites are exactly where a physical-property addition
+    creeps in; the operative baseline is thirty-two sites across NINE files, delta zero, and the
+    rule forbids ADDITIONS.
+
+═══ PART 3 — THE GATE-CONDITIONAL FOLLOW-ON. Owed, narrow, report only. ═══
+
+Any OTHER finding that entered the responsive proposal or the observation list whose site sits behind
+a width, device or feature gate. DO NOT RE-RUN THE L-SERIES. Check what entered, and say which if
+any are gated. A string's presence in a file is not its presence on a screen.
+
+═══ PART 4 — THE ZERO-VERSUS-NO-DATA AND TENSE MEASUREMENT. Report only, no code. ═══
+
+RUN IN PARALLEL WITH PARTS 1 AND 2, and the reason it is safe to parallelise is specific: a
+MEASUREMENT produces no code, so it creates no second verification round and no attribution problem.
+Two implementations in flight would; a measurement beside an implementation does not.
+
+4a. THE ZERO CLASS. Seven faces were recorded in the preceding track's Phase A and ONE site was
+    fixed — the delta chips, now verified in production by the operator's month-switch. ENUMERATE
+    EVERY SITE, deriving the corpus FROM THE SURFACES and their builders, not from a guessed list of
+    markers. Reconcile against a SECOND CORPUS BUILT A DIFFERENT WAY and say how the two corpora
+    differ. TWO ROUTES OVER ONE CORPUS ARE ONE ROUTE — that finding came from this track's own tense
+    enumeration failing exactly that way, with clean arithmetic over the wrong scope.
+4b. THE ROOT CAUSE. Establish whether the application can distinguish zero from absent AT THE DATA
+    LAYER, or whether the distinction is lost before the components see it. That decides whether the
+    class is a presentation fix or a payload change, and it is the question the seven faces have
+    never been asked.
+4c. RE-SIZE T4, which stands WITHDRAWN on the implementer's own motion. Fifteen tense sites are
+    accepted as measured. One sentence: a handful of strings, or its own phase.
+4d. STATE THE RELATIONSHIP BETWEEN THE TWO CLASSES. They share surfaces and share narrative
+    builders, and the operator's September captures showed on-track copy on a month with no
+    transactions — which reads as both at once. Say whether they are one fix or two, and if two,
+    whether either is a prerequisite for the other. SEQUENCING IS THE OPERATOR'S and is not
+    proposed here.
+
+═══ PART 5 — RECOMMENDED TO THE OPERATOR, NOT AUTHORISED ═══
+
+THE DUPLICATE CATEGORY LABEL and the ORPHANED SEPARATOR BULLET on the activity rows. Both are render
+defects at every width, both referred out to the conventions phase, which is two phases away.
+CHANNEL RECOMMENDATION: fold them into this cycle. Two string-level defects in files this cycle is
+already touching, and the referral was made when the cycle was narrow. NOT AUTHORISED BY THIS BLOCK —
+if the operator rules them in, they ship with their own per-site treatment and their own check, not
+appended to an approved set.
+
+═══ THE COMMIT AND THE CLOSE-OUT ═══
+
+ONE IMPLEMENTATION COMMIT carries Parts 1 and 2. Parts 3 and 4 are report-only and ride the docs half.
+If a gate stops one part, THE OTHER PART STILL SHIPS — say which stopped and why.
+
+CLOSE-OUT CARRIES THE THREE MANDATORY SECTIONS; missing any is an auto-return. Both verbatim test
+tails with the Test Files summary line and captured exit codes, each command carrying a resolution
+proof and a non-matching negative control shown exiting 0; both verbatim typechecks with exit codes
+and byte counts; the baseline as a DELTA with its absolute RE-DERIVED AFTER THE LAST EDIT — after the
+LAST edit, not the largest, which is what caught this cycle's red. The api suite is RUN because the
+contract test reads the frontend fixture. Predicted deltas stated IN ADVANCE per part, and NAMED
+FORCED EDITS predicted with none being a valid answer. A MISS IS A QUESTION, NEVER AN ADJUSTMENT.
+  ASSERT THE NEGATIVE DELIVERABLES POSITIVELY: zero physical-property additions with the pattern
+  shown discriminating; no new external origin and no Caddyfile change; the standing-rules file
+  untouched; the three named regression files green AND untouched by empty status on those paths;
+  primitives direction-free if touched, and say whether they were.
+  DECLARE COVERAGE GAPS PER ITEM. Part 1 is a media-query change that jsdom cannot evaluate at all,
+  so its gap is wider than a layout gap — say so rather than letting a plus-zero delta read as
+  adequacy.
+
+CONSTRAINTS: no renames; pinned strings untouched including the FAB's label and tooltip and the two
+legal test identifiers; the FAB topology untouched; QuickAdd internals untouchable. No convention
+work, no cache work, and no ZERO or TENSE work — Part 4 measures and proposes nothing. The e2e suite
+is not run, repaired, revived or deleted. Queued items stay queued: the KPI enclosure with the design
+track, the cross-tab regime and the import column-mapping requirement with their triggers, item (vi)
+deferred pending the 320 observation. THE 320 TOP-UP REMAINS OUTSTANDING and its absence is not a
+pass.
+
+PERSISTENCE. This block persists ALONE — one block per message — appending after what is on disk.
+DERIVE THE POSITION FROM THE FILE, not from this clause: this track has now had two blocks predict
+their own position from a state that had already moved, and one halt spent resolving it. State the
+measured position, the payload sweep under both operative patterns with the two figures reported, and
+the post-append composite with first, last, duplicates, breaks and both reconciliation routes,
+enumeration PRINTED IN FILE ORDER. A disagreement between the two patterns HALTS THE WRITE AND IS
+REPORTED, not remedied, where the text is the channel's. Re-derive the unpushed count by both routes
+or do not state it. Provenance RELAYED. Amend the completeness note to record the persisted set, the
+widened cadence with its collapsed steps and its four named gates, the red's provenance and the
+suite-is-the-instrument finding, and the deploy recommendation as offered-and-not-adopted.
