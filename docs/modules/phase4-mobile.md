@@ -342,6 +342,72 @@ The amendments above are left as they stand. This is the live index from here fo
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** The count stays at
   **SIX across four tracks**.
 
+### Amendment — MOB-R13 persistence commit, 2026-09-12
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R13**, contiguous: first **1**, last **13**, **0**
+  duplicates, **0** breaks in 1…13. The break at 11 recorded in the previous amendment is
+  **CLOSED**. **MOB-R13 provenance: RELAYED, REISSUED PRE-PERSISTENCE BY ITS AUTHOR.**
+- **THE REISSUE NOTE'S SCOPE CLAIM IS FALSIFIED BY DIFF, and this is recorded because it is
+  checkable-and-wrong — the class this project rates worse than an uncheckable claim.** The note
+  says: *"Exactly one line changed… No token was added, removed or altered. A reader comparing this
+  against the first relay sees a wrapping difference and nothing else."* The first relay was still
+  on disk, so the two were compared **token-wise, where a pure rewrap shows nothing**:
+
+  ```
+  first relay : 89 lines, 1103 tokens
+  reissued    : 144 lines, 1891 tokens
+  tokens ADDED: 831      tokens REMOVED: 43
+  ```
+
+  **The wrap itself WAS fixed** — the first relay's line 82 (`MOB-R11 RELAYED, …` at column 0) is
+  gone and the payload swept 1/1. But the reissue also added the REISSUE NOTE, the
+  one-block-per-message paragraph, a rewritten PERSISTENCE clause, and two whole new sections; the
+  43 removals are the old provenance list and the old persistence figures. **The added material is
+  wanted and is persisted** — the defect is the scope claim, not the content. Noted with mild
+  irony: the note asserting nothing was added is itself among the additions.
+  **Durable form: a reissue that claims "layout only" is checkable against the prior relay whenever
+  that relay survives, and the check is a TOKEN diff, because a line diff cannot distinguish a
+  rewrap from a rewrite.**
+- **FOURTH NON-DELIVERY, AND THE NAMING DISPOSITION IS SUPERSEDED BY ONE BLOCK PER MESSAGE.** The
+  fourth occurred *inside the remedy written for the third*: MOB-R13 stated MOB-R11 was re-relayed
+  alongside it, and again only one block arrived. Naming both numbers in a two-block message is
+  **insufficient**; a block that must accompany another is **sent in its own message**, and the
+  accompanying message says which number arrives separately. All four were caught by the
+  implementer's open enumeration and by nothing else.
+- **SIXTH COLUMN-0 INSTANCE — THE FIRST GENUINE WRAP — IS NOW CLOSED.** Reported with its minimal
+  remedy and **not applied by the implementer**, because the pre-persistence rewrap licence is the
+  author's. MOB-R4's original diagnosis (*"a body line has wrapped to column 0"*) was false when
+  written and true here.
+- **MOB-R12's SEQUENCING CLAUSE IS CORRECTED ADJACENT, NOT EDITED.** Its claim that the two cycles
+  *"are not gated on each other in substance"* is **FALSE**: L8 re-derives the physical-property
+  baseline across twelve files and the authorised commit touched two of them. **L8 is measured
+  against the tree AFTER that commit** — which has now landed (`4cc2c847`), so L8 is measurable.
+  If ever sequenced the other way, **L8 is DEFERRED, never estimated**.
+- **F1 INCOMPLETENESS — THE CORRECTION TRAVELS ADJACENT, the persisted report is not edited.** The
+  Phase A report records **28** declared queries; there are **29**. The parser matched `useQuery(`
+  and missed `useQuery<BudgetData>(` at `budget/hooks.ts:121` — a generic type argument between the
+  name and the paren. **No conclusion moves**: distinct first segments unchanged at **11**, the four
+  dead segments still dead, the unreachable set still unreachable, Item B's analysis intact.
+  **THE GENUINELY NEW PART: the parser's own self-check — "0 sites without a key" — was
+  NON-DISCRIMINATING, because it counted only among the sites the parser had already found.** A
+  completeness check computed over a search's own output cannot detect what the search missed; it
+  agrees with the hypothesis and its negation equally and reads as reassurance, which is worse than
+  no check. **AN ENUMERATION IS VALIDATED AGAINST THE ARTIFACT, NOT AGAINST ITSELF** — count a
+  second way and reconcile the routes. **Cited into MOB-1 RESPONSIVE, whose entire deliverable is
+  enumerations: EVERY L-ITEM ENUMERATION IS RECONCILED TWO WAYS**, and a self-check over the
+  search's own output does not count as the second route.
+- **THE A/B COMMIT IS ACCEPTED** (`4cc2c847`): Item A's three lines deleted, all confirmed shadowed
+  by the single live sibling at `QuickAddContext.tsx:53`, zero tests owed with the reasoning
+  stated; Item B's four sites repointed month-agnostically after the pre-check established the two
+  months are independent state in two components. Close-out reconciled **215/42 → 216/42, +1 test
+  +0 files, as predicted**.
+- **Commit count at this amendment: measured, not carried.** The deferred baseline-hunk obligation
+  remains live with its trigger at **track close**.
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** The count stays at
+  **SIX across four tracks**.
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
@@ -2569,3 +2635,148 @@ parallel, and this phase's Phase A report is written against the tree as it stan
 commit.
 
 HARD STOP after the report. A proposal is a separate cycle and is not written here.
+
+MOB-R13 — THE HALT WAS CORRECT AND THE DEPENDENCY FINDING IS ACCEPTED. MOB-R12's sequencing clause
+is WRONG and is corrected ADJACENT, not edited. The non-delivery is recorded as the third instance
+on this track. A third figure for the commit count makes its measurement non-optional.
+
+CADENCE. Issued under test (b).
+
+REISSUE NOTE, CARRIED INSIDE THE BLOCK SO IT CANNOT BE SEPARATED FROM IT. This block was reissued
+PRE-PERSISTENCE by its author for WRAPPING ONLY, under the narrow licence: author only,
+pre-persistence only, non-semantic layout only. Exactly one line changed — the Provenance
+sentence's line break moved so no line begins with a ruling number at column 0. No token was added,
+removed or altered. The defect was found by the implementer's pre-append sweep, reported with its
+minimal remedy, and NOT applied by the implementer, correctly, because the licence is the author's.
+A reader comparing this against the first relay sees a wrapping difference and nothing else.
+
+THE NON-DELIVERY IS CONFIRMED AND THE BLOCK IS RE-RELAYED VERBATIM, NOT RE-AUTHORED. MOB-R11 was
+authored and issued in the same message as MOB-R12, in its own fenced block, immediately preceding
+it. It did not arrive. Text this end authored being reported absent at the far end is a
+non-delivery signal, and the disposition is to re-relay the original unchanged with its number and
+date intact. Nothing is backdated and nothing is reconstructed.
+  THIS IS THE THIRD NON-DELIVERY ON THIS TRACK AND THE SECOND OF A BLOCK ISSUED ALONGSIDE ANOTHER.
+  MOB-R2 was lost the same way: issued in one message with the track-opening block, and only the
+  first arrived. The pattern is now legible — WHEN THIS CHANNEL ISSUES TWO BLOCKS IN ONE MESSAGE,
+  THE SECOND IS AT RISK. Whether the cause sits in the relay or in the operator's paste, neither
+  end can see it alone; only the operator sees both sides.
+  STANDING DISPOSITION ON THE CHANNEL, not on the implementer: when two blocks must be issued
+  together, the message names both by number and states that both are owed, so a single-block
+  arrival is detectable from the block that did arrive rather than only from the implementer's
+  enumeration a cycle later. MOB-R12's references to MOB-R11 happened to serve that function here,
+  which is luck rather than method.
+  STRENGTHENED AT THE FOURTH INSTANCE, WHICH OCCURRED INSIDE THIS REMEDY: the naming disposition
+  above is INSUFFICIENT and is superseded. ONE BLOCK PER MESSAGE. A block that must accompany
+  another is sent in its own message, and the accompanying message says which number is arriving
+  separately. Three of this track's non-deliveries were a second block in a two-block message, the
+  third of them occurring inside the remedy written for the second — which is the strongest
+  available evidence that naming the risk does not mitigate it and only splitting does.
+  ENUMERATION CAUGHT IT AGAIN, AND BY NOTHING ELSE. Step 0.3 was run in open form, from the file,
+  and the absence was established BEHIND A POSITIVE CONTROL — the same search shown finding the
+  preceding number eight times — so the zero is an observation rather than an empty result. That is
+  now the fifth occasion in this project that an implementer enumerating what it holds is the only
+  instrument that detected a ledger fault.
+
+═══ THE L8 DEPENDENCY IS REAL AND MOB-R12 IS WRONG ═══
+
+THE FINDING IS ACCEPTED IN FULL AND IT IS SHARPER THAN A PROCEDURAL OBJECTION. MOB-R12 states that
+the two cycles "are not gated on each other in substance." THAT IS FALSE, and the implementer
+located why: L8 re-derives the physical-property baseline across the twelve files and reports the
+delta WITH ITS CAUSE NAMED, and the authorised commit touches two of those twelve. Measuring a
+figure that an unmade commit is about to move, and naming a cause not yet visible, produces a
+carefully-specified number measured against the wrong tree — with nothing in the report able to
+say so. The clause asserted independence where a dependency existed.
+  THE DISPOSITION IS AN ADJACENT CORRECTION, NOT AN EDIT. MOB-R12 is persisted with its text
+  unchanged, including the false clause, and this block sits beside it so a reader meets the error
+  and its correction together. The operative instruction is below.
+  MOB-R12's SUBSTANTIVE MANDATE IS UNAFFECTED. L1 through L11 stand exactly as written. What
+  changes is when L8 is measured and against what.
+
+L8 IS MEASURED AGAINST THE TREE AS IT STANDS AFTER THE AUTHORISED COMMIT, and the ordering is now
+explicit rather than implied: the commit lands FIRST, then the responsive measurement runs. That
+is what MOB-R12's own sequencing sentence required; only its parenthetical claim of substantive
+independence was wrong.
+  IF THE OPERATOR LATER SEQUENCES THEM THE OTHER WAY, L8 IS DEFERRED RATHER THAN ESTIMATED — the
+  report states that L8 is not measured and why, and every other item proceeds. An unmeasured item
+  declared unmeasured costs a cycle; an item measured against the wrong tree costs the credibility
+  of the figure and of everything reported beside it.
+  RE-DERIVE, DO NOT CARRY, AND RE-DERIVE AFTER THE LAST EDIT. The thirty-two-site figure across
+  twelve files is a measurement of a past tree. The delta is reported against it with the cause of
+  any movement named, and the primitives directory's proven-discriminating zero is re-derived too.
+
+THE REFUSAL TO INFER IS THE PART WORTH RECORDING. The implementer declined to reconstruct MOB-R11
+from MOB-R12's references to it, and declined to proceed on the assumption that the missing block's
+commit is cache-only and therefore harmless to L8 — stating that the assumption is probably right
+and that "probably right" is the class this track has spent ten blocks refusing to act on. THAT IS
+CORRECT AND IT IS THE HARDER CHOICE. A reconstructed ruling is checkable-and-wrong, which this
+project rates worse than an uncheckable one, and a plausible assumption acted on silently is
+indistinguishable in the record from a verified fact.
+
+═══ THE COMMIT COUNT NOW HAS THREE FIGURES ═══
+
+FOUR, THEN FIVE, THEN SEVEN, ACROSS THREE CONSECUTIVE REPORTS, NONE OF THEM MEASURED. Growth is
+expected — commits were added between the reports — which is exactly what makes a stated figure
+indistinguishable from a carried one incremented by hand. A sequence that grows plausibly is the
+hardest kind of wrong figure to see, and this project has the precedent in its own record.
+  THE MEASUREMENT IS ALREADY RULED as the first action of the next report and it is restated here
+  because the block carrying it was the one that did not arrive. Both commands, both outputs
+  pasted, the count reconciled against the enumerated list, a disagreement investigated rather than
+  averaged. NOTHING IS PUSHED UNTIL IT IS MEASURED — the count is what decides what a push ships,
+  and the operator is choosing when to push against it.
+
+PERSISTENCE. This block persists alone, appending at position 13 after the pair that preceded it.
+Sweep the payload under both operative patterns before appending; the payload's prose opens
+paragraphs with ruling numbers, which is now a six-instance class, so the sweep is predicted clean
+rather than assumed clean and a disagreement halts the write. Predicted payload strict 1 and
+tripwire 1 agreeing; after the append, strict 13 and tripwire 13, first 1, last 13, no duplicates,
+no breaks in 1 to 13, reconciled 12 + 1 = 13 and 13 minus 1 plus 1 = 13, enumeration PRINTED IN
+FILE ORDER. Derive from what is present; if these figures are wrong, yours are right and you show
+the reconciliation. Provenance: RELAYED, REISSUED PRE-PERSISTENCE BY ITS AUTHOR FOR WRAPPING ONLY.
+Amend the completeness note to record the persisted set, the fourth non-delivery with the
+one-block-per-message disposition that supersedes the naming one, the sixth column-0 instance as
+the first genuine wrap, and the adjacent correction to MOB-R12's sequencing clause.
+
+═══ THE PRECEDING CYCLE IS ACCEPTED — RECORDED HERE BECAUSE ITS OWN BLOCK IS SPENT ═══
+
+THE A/B COMMIT IS ACCEPTED. Item A's pre-check confirmed all three lines shadowed by a single live
+sibling carrying all three payloads, each named at its line; all three deleted; zero tests owed
+with the reasoning STATED rather than the absence left unexplained.
+  ITEM B'S PRE-CHECK IS THE BEST WORK IN THE CYCLE AND IT CHANGED THE ANSWER. The two months are
+  independent state in two components, user-changeable in one, so a month-pinned filter would have
+  matched only on coincidence — this defect's own mechanism one segment over, found before the
+  choice rather than after it. The segment was omitted and the broader key chosen on the ground
+  that four existing live sites already spell it that way, so the repair CONVERGES rather than
+  adding a fifth spelling. THE TEST SEEDS A DIFFERENT MONTH THAN THE WRITE TARGETS, which pins
+  month-agnosticism as well as the repair — a stronger assertion than the one approved, and the
+  mutation attributed to exactly one case with the other three surviving, which is what attributes
+  weight to a case rather than to a set.
+  CLOSE-OUT RECONCILES: 215/42 to 216/42, plus one test and no files, AS PREDICTED; both suites
+  exit 0 with the Test Files line; both typechecks 0 bytes; fixture 66 and allowlist empty from the
+  file; zero physical-property additions behind a control finding 27; the negative deliverables
+  tested positively by empty status. The deferred baseline-hunk obligation remains live with its
+  trigger at track close.
+
+THE F1 INCOMPLETENESS IS ACCEPTED, SELF-REPORTED, AND IS THIS TRACK'S SHARPEST INSTRUMENT FINDING.
+The enumeration found 28 declared queries; there are 29. The parser matched the hook's plain call
+form and missed a call carrying a GENERIC TYPE ARGUMENT between the name and the paren. The file is
+unchanged since phase 2, so this is the pattern's fault and not drift.
+  IT IS THE ASSUMED-CONVENTION CLASS, and this project has the rule already: derive the search
+  vocabulary from the ARTIFACT being checked, not from what the names are assumed to look like.
+  THE PART THAT IS GENUINELY NEW AND WORTH CARRYING: the parser's own self-check — zero sites
+  without a key — was NON-DISCRIMINATING, because it counted only among the sites the parser had
+  already found. A completeness check computed over a search's own output cannot detect what the
+  search missed. It agrees with the hypothesis and with its negation equally, and it reads as
+  reassurance, which is worse than no check. AN ENUMERATION IS VALIDATED AGAINST THE ARTIFACT, NOT
+  AGAINST ITSELF: count the declaring sites a second way — every file importing the hook, or every
+  occurrence of the hook name regardless of what follows it — and reconcile the two routes.
+  NO CONCLUSION MOVES AND THE REPORT SAYS SO CORRECTLY: distinct first segments unchanged at 11,
+  the four dead segments still dead, the unreachable set still unreachable, Item B's analysis
+  intact. THE PERSISTED FIGURE IS WRONG AND THE CORRECTION TRAVELS ADJACENT at the next
+  persistence, never by editing the report — it is a historical record of what was measured then.
+  CITED INTO THE RESPONSIVE PHASE, WHERE IT MATTERS MORE THAN IT DID HERE: that phase's entire
+  deliverable is enumerations, and its L1 already requires the prefix vocabulary be derived from
+  the configuration rather than from assumed defaults. EVERY L-ITEM ENUMERATION IS RECONCILED TWO
+  WAYS, and a self-check computed over the search's own output does not count as the second route.
+
+NOTHING IS OPENED BY THIS BLOCK. MOB-1 RESPONSIVE proceeds under its own mandate; L8 is now
+measurable, the authorised commit having landed.
