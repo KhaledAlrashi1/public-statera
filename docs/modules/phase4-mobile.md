@@ -553,6 +553,50 @@ The amendments above are left as they stand. This is the live index from here fo
   phase**. Queued, not opened, the operator's to place.
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.**
 
+### Amendment — MOB-R17 persistence commit, 2026-09-12
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R17**, contiguous: first **1**, last **17**, **0**
+  duplicates, **0** breaks in 1…17. **MOB-R17 provenance: RELAYED.**
+- **PHASE B IS PARTLY APPROVED: (i), (iv), (v) approved; (ii) and (iii) RETURNED; (vi) deferral
+  ratified.** Items (i) and (iv) **do not ship ahead of the returns** — one implementation commit
+  carries the approved set, because two commits means two verification rounds and two operator
+  observation passes for one phase.
+- **THE TENSE ENUMERATION HAD A SCOPE DEFECT AND ITS SIZING IS WITHDRAWN.** Four sites were
+  reported; re-measurement finds **15**. The cause: the corpus was built from strings that NAME A
+  MONTH, while the property is copy that is **present-tense or forward-looking ABOUT the selected
+  month** — different sets, and a forward-looking claim need not mention a month to be wrong about
+  one. **TWO ROUTES OVER ONE CORPUS ARE ONE ROUTE** — both routes were computed over the same
+  month-bearing corpus, so they agreed with each other and with the wrong scope. This is the
+  self-check-over-its-own-output finding recurring at the level of the **CORPUS** rather than the
+  **PATTERN**, and it is the more dangerous form because the arithmetic looks right. **T4's sizing
+  is WITHDRAWN; the sequencing decision is not put to the operator this cycle.**
+- **ITEM (v) IS WITHDRAWN ENTIRELY BY RE-MEASUREMENT** rather than answered: the 340px column sits
+  behind `isDesktop = useMinWidth(1024)` (`ImportDialogs.tsx:1324`, gate at `:2193`), so it never
+  renders at 320 or 390. The L-series entry cited the declaration **without checking its render
+  gate** — the same scope-error family as the tense defect.
+- **ITEM (ii)'s RETURN WAS CORRECT AND THE PREDICTED FAILURE IS REAL.** All 24 `section-header`
+  containers were parsed: **23 have two direct children, 1 has one.** But **4 of the 23 are
+  `[icon, h2]` sibling pairs** (`InsightsPage.tsx:347`, `MonthDeltaCard.tsx:70`,
+  `SpendForecastWidget.tsx:33`, `WeeklyDigestSection.tsx:45`) — stacking those puts the icon on its
+  own line, exactly the break predicted. Those 4 are precisely the sites carrying `justify-start
+  gap-2`. **The one-line change is falsified; the revised shape is 1 rule + 4 exceptions.**
+- **THE CASCADE CLAIM IS PROVEN STRUCTURALLY, NOT BY EMISSION ORDER.** `.section-header` sits in
+  `@layer components` (`index.css:183`), and the installed tailwindcss declares
+  `@layer theme, base, components, utilities;` at `index.css:1` — **utilities win by layer
+  precedence**, independent of source order or specificity.
+- **ITEM (iv)'s PORTAL PRE-CHECK FOUND A NON-PORTAL DROPDOWN AND CLEARED THE CHANGE ANYWAY.**
+  `Select`, `Tooltip` and `Dialog` all portal out; `suggestion-combobox.tsx:142` renders
+  `absolute z-50 … overflow-y-auto` **in place**. Its four consumers sit inside `dialogs.tsx:335`
+  and `:1006`, **both of which already declare `max-h-[92vh] overflow-y-auto`** — so **none of the
+  14 gaining the declaration contains a non-portal dropdown. No exclusion needed.** A latent
+  clipping condition in those two pre-existing dialogs is **recorded, not opened**.
+- **FOURTH MIS-SPECIFIED CHECK, AND THE FIRST AUTHORED BY THE IMPLEMENTER.** Item (iii)'s check was
+  written at 390 while the cost it names occurs at 320. Three of the four were the channel's; a
+  pattern belonging to one party is easier to dismiss than one belonging to both.
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.**
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
@@ -3763,3 +3807,198 @@ plus the one referral out.
 
 HARD STOP after the proposal. Implementation is a separate cycle and begins only on explicit
 approval.
+
+MOB-R17 — THE PROPOSAL IS PARTLY APPROVED. Three items approved, two RETURNED, one deferral
+ratified. The tense enumeration is INCOMPLETE and its sizing is withdrawn pending re-measurement.
+One persistence commit's evidence is owed. Referral (A) is recommended to the operator.
+
+CADENCE. Issued under test (b).
+
+WHAT IS STRONG IN THIS PROPOSAL AND SHOULD NOT BE LOST IN THE RETURNS. Grouping by root cause
+rather than symptom did exactly what it was asked to do: five distinct changes covering roughly
+forty-four sites, with the distinct-change count stated beside the site count so a reader can see
+which symptoms are one fix. Four of five items DECLARE A COVERAGE GAP and take an operator
+observation instead of shipping a class assertion that would restate the diff — that is the honest
+answer to the jsdom problem and it was chosen over the comfortable one. Item (ii) CORRECTED THE
+MANDATE'S PREMISE: the channel called the card header a React component and it is a CSS rule. Item
+(v) reported that L5 found nothing to fix in four of the five surfaces it was asked about, which is
+a null result delivered as a null result. And item (iii) NAMED A COST AGAINST ITS OWN PROPOSAL
+rather than burying it.
+
+═══ APPROVED ═══
+
+ITEM (i), THE FAB CLEARANCE, IS APPROVED. The arithmetic checks: one hundred and forty-four pixels
+clears a one hundred and thirty-six pixel upper edge at phone width, ninety-six clears eighty on
+desktop. A clearance change, not a position change, with the topology untouched. The observation
+check is DELIBERATELY BROADER THAN LAST ROUND'S and says so — it asks whether the last row can be
+read and tapped rather than whether an interactive element sits beneath, which is the correction to
+the channel's own defective check applied by the implementer without being asked.
+  ONE COST IS NAMED THAT THE PROPOSAL DID NOT NAME, and it is accepted rather than blocking: this
+  adds ninety-six pixels of blank space to the bottom of every DESKTOP page where there is
+  currently zero. That is a visible change to a surface this phase is not otherwise touching.
+  Accepted because the alternative is the position change the constraint forbids, but it is
+  recorded so it is not discovered as a surprise.
+
+ITEM (iv), THE DIALOG HEIGHT, IS APPROVED SUBJECT TO ONE PRE-CHECK REPORTED BEFORE THE EDIT. Fixing
+it in the shared primitive rather than at fourteen instances is the right call and the reasoning is
+right — fourteen edits are fourteen chances to miss one — and the seven that declare their own
+maximum override it through the class-merge utility, which knows the conflict group.
+  THE PRE-CHECK, AND IT IS A KNOWN FAILURE MODE RATHER THAN A HYPOTHETICAL: a vertical overflow
+  container on a dialog shell CLIPS ABSOLUTELY-POSITIONED CHILDREN that escape its bounds — select
+  menus, dropdowns, popovers, date pickers. Several of these twenty-one dialogs contain selects.
+  ESTABLISH FROM SOURCE whether any popover or menu inside a dialog renders in place rather than in
+  a portal, and name the dialogs affected. If any does, that dialog is EXCLUDED from the shared
+  change and handled separately, and you say which. If all portal out, say so and proceed — the
+  change is then safe and the check cost one command.
+  THE FLAGGED TEST RISK IS THE RIGHT FLAG. Twenty-one dialogs render in existing tests and a
+  maximum height on the shared primitive is the one change here that could surface a selector
+  assumption. Any red test STOPS AND ASKS.
+
+ITEM (v) IS APPROVED WITH ONE QUESTION ANSWERED IN THE SAME REPORT: why two hundred and twenty.
+The figure appears without derivation. If it is the measured width the column's content actually
+needs, say how it was measured. If it is a judgement, say that instead — a stated judgement is
+fine and an undifferentiated figure is not, because the next reader cannot tell which they are
+looking at.
+
+ITEM (vi)'s DEFERRAL IS RATIFIED. The three constraints were re-derived from the tree and all still
+hold; the element is unobserved at the width that matters. Deferring with the reason stated is the
+correct third report, and it is better than a third inconclusive one.
+
+═══ RETURNED — ITEM (ii), THE CARD HEADER ═══
+
+THE DIAGNOSIS IS RIGHT AND THE CHANGE IS PROBABLY RIGHT. It is returned because a one-line change
+to a rule used at TWENTY-FOUR SITES, switching them from a row to a column, is proposed WITHOUT THE
+CHILD STRUCTURE OF ANY OF THE TWENTY-FOUR BEING STATED.
+  WHY THAT IS THE WHOLE QUESTION AND NOT A DETAIL. A row-to-column switch renders differently
+  depending on how many children the container has and what they are. A header holding two children
+  stacks into title-above-meta, which is the intent. A header holding THREE — an icon, a title and
+  a meta block as siblings — stacks the icon onto its own line above the title, which is not the
+  intent and would look broken. The captures show an icon adjacent to the title on several cards
+  and do not settle whether it is a sibling of the title or nested with it. The proposal enumerates
+  the sites and reconciles their count, and then says nothing about what is inside them.
+  OWED: per site, the child count and what each child is, and the resulting stacked arrangement.
+  Group the twenty-four by structural shape; if they fall into two or three shapes, the answer may
+  still be one change plus a small number of exceptions, and that is a fine outcome. What is not
+  acceptable is one change applied to twenty-four containers whose contents were never read.
+  SECOND OWED ITEM, AND IT IS AN ASSERTION WHERE A MEASUREMENT IS CHEAP. The proposal states that
+  the four sites overriding the justification KEEP THEIR OVERRIDE above the threshold. That is a
+  cascade-order claim, not a fact about the source: the rule and the utility carry equal
+  specificity, so which wins depends on emission order in the COMPILED stylesheet. It is probably
+  correct, because those four override successfully today. PROVE IT FROM THE COMPILED CSS at the
+  four sites rather than reasoning about it — this project does not act on probably-correct, and
+  the whole apparatus exists because of it.
+  ALSO STATE WHAT THE ALIGNMENT CHANGE DOES. The rule moves from centred to start-aligned below the
+  threshold. That affects icon-to-text alignment wherever an icon is present, independently of the
+  stacking question.
+
+═══ RETURNED — ITEM (iii), AND THE REASON IS A CHECK THAT CANNOT SEE ITS OWN NAMED COST ═══
+
+CHANGE 2, DROPPING THE WRAP FROM THE DELTA CHIP, IS APPROVED. It is self-contained, the defect is
+observed, and it adds no overflow class.
+
+CHANGE 1, ADDING A NO-WRAP CLASS TO THE FOUR KPI VALUES, IS RETURNED. The proposal names the cost
+precisely — this adds two more members to a measured set of eighteen overflow sites, and at the
+narrow width a five-digit figure would then CLIP rather than wrap, trading a visible defect for an
+invisible one. Naming that was right. But the observation check is written at THREE HUNDRED AND
+NINETY PIXELS, and the cost it names occurs at THREE HUNDRED AND TWENTY.
+  THE CHECK CANNOT DETECT THE THING THE PROPOSAL FLAGS. That is the FOURTH check-in-this-track
+  whose pass does not settle the property in question, and the first authored by the implementer
+  rather than the channel — which is worth stating plainly, because three of the four were the
+  channel's and a pattern belonging to one party is easier to dismiss than one belonging to both.
+  ONE ALTERNATIVE WAS NOT CONSIDERED AND SHOULD BE, because it avoids the trade entirely: reduce
+  the type size below the threshold and restore it above — the figure then FITS instead of being
+  forbidden to wrap, and no overflow class is added. Cost: the KPI value is visually smaller on a
+  phone. Propose both options with their costs and let the operator choose, or recommend one and
+  say it is a recommendation. Rejecting the non-breaking-space change to the shared formatter was
+  correct and for the right reason: a string consumed at thirty-plus sites and asserted in tests.
+  EITHER WAY, THE CHECK FOR THIS ITEM IS WRITTEN AT THE WIDTH WHERE THE RISK LIVES.
+
+═══ THE TENSE ENUMERATION IS INCOMPLETE AND T4 IS WITHDRAWN ═══
+
+FOUR COPY SITES WERE REPORTED. THE OPERATOR'S CAPTURES CONTAIN AT LEAST NINE STRINGS OF THE CLASS,
+and the ones absent from the table include a present-tense pace badge, a projection stating a
+per-day rate with a full-month denominator, a forward-looking review prompt, a headline predicting
+how the month will finish, and a present-tense status pill. None of those is in the reported set.
+  THE CAUSE IS THE VOCABULARY'S SCOPE, AND IT IS THE ASSUMED-CONVENTION CLASS A FOURTH TIME. The
+  method was sound in form — extract the month-bearing string literals, READ them, take the tense
+  markers that actually appear — and its SCOPE was wrong: it enumerated strings that NAME A MONTH,
+  while the property under measurement is copy that is PRESENT-TENSE OR FORWARD-LOOKING ABOUT THE
+  SELECTED MONTH. Those are different sets, and the strings above sit in the difference. A
+  forward-looking claim does not have to mention a month to be wrong about one.
+  RECONCILING TWO WAYS DID NOT CATCH IT, AND THAT IS THE PART WORTH KEEPING. Both routes were
+  computed over the same month-bearing corpus, so they agreed with each other and with the wrong
+  scope. TWO ROUTES OVER ONE CORPUS ARE ONE ROUTE. This is the self-check-over-its-own-output
+  finding from the query enumeration, recurring at the level of the CORPUS rather than the
+  PATTERN — and it is the more dangerous form, because the arithmetic looks right.
+  T4'S SIZING IS WITHDRAWN, NOT DISPUTED. A handful of strings may still be the answer; it is not
+  established by an enumeration that missed more sites than it found. THE SEQUENCING DECISION RESTS
+  ON T4 AND IS THEREFORE NOT PUT TO THE OPERATOR THIS CYCLE.
+  RE-MEASURE. Enumerate the narrative and copy strings rendered on the month-scoped surfaces
+  WITHOUT filtering on month tokens — derive the corpus from the SURFACES and their builders, then
+  read every string they can emit. Reconcile against a second corpus built a different way, and say
+  how the two corpora differ rather than only that their counts agree. The nine strings above are
+  a FLOOR supplied from observation, not the target: an enumeration that returns exactly nine has
+  probably reproduced the channel's reading rather than measured the code.
+  T2 AND T3 ARE ACCEPTED AS MEASURED. The current-month signal exists twice, is client-derived, and
+  reaches neither reported site — one as a string rather than a boolean, one as a boolean trapped
+  inside a memo and never hoisted. The zero-days guard is shown at its line with the arithmetic:
+  clamping to one at zero days makes the per-day figure equal the whole runway, server-side. That
+  is the observed defect located exactly.
+
+═══ OWED, AND IT IS A SHORT REPLY ═══
+
+THE PRECEDING BLOCK'S PERSISTENCE EVIDENCE DID NOT REACH THE REPORT. It predicted a payload sweep
+of one and one agreeing, a post-append composite of sixteen and sixteen, first one, last sixteen,
+no duplicates, no breaks, both reconciliation routes, the enumeration printed in file order, the
+exclusion shown discriminating with its capture uncut, the gate skip stated, and the bytes carried.
+None arrived. The unpushed count moved from twelve to thirteen, which is CONSISTENT with the commit
+having been made and NOT EVIDENCE THAT IT WAS — a consistent figure is not a measurement, which is
+this track's most-repeated lesson.
+  NOT AN AUTO-RETURN. The three mandatory sections govern an implementation close-out and this was
+  a docs commit. Supply the evidence in one reply. If any predicted figure missed, it is a QUESTION.
+
+═══ REFERRALS ═══
+
+(A) TAP TARGETS. The channel RECOMMENDS the touch-only minimum to the operator, agreeing with the
+implementer: it is the only option that fixes touch without altering desktop and it introduces no
+new breakpoint. ONE CONSEQUENCE TO STATE IN THE PROPOSAL WHEN IT OPENS, and it is why this does not
+ride the current commit: raising every control on touch reflows dense toolbars and dialog footers —
+the same surfaces this phase is fixing for crowding — so it needs its own observation round rather
+than being verified by the checks already written. Operator's decision; nothing is opened.
+(B) KPI ENCLOSURE stays referred to the design track. The operator's observation is recorded
+against that referral. The value wrap is the defect and is item (iii).
+(C) PROFILE DISCOVERABILITY. Three options with their consequences, no recommendation from either
+side, correctly — this is navigation topology and the tab row plus the FAB is a settled
+arrangement. Operator's decision.
+The duplicate label and orphaned separator stay REFERRED OUT to the conventions phase, queued.
+
+═══ WHAT HAPPENS NEXT ═══
+
+ONE REPORT carrying: the persistence evidence owed above; the returned items (ii) and (iii) with
+their owed measurements; item (iv)'s portal pre-check; item (v)'s derivation of its figure; and the
+re-measured tense enumeration. NO CODE. Items (i) and (iv) are approved but DO NOT SHIP AHEAD of the
+returns — one implementation commit carries the approved set once the returns are resolved, because
+two commits here means two verification rounds and two operator observation passes for one phase.
+
+CONSTRAINTS UNCHANGED: zero physical-property additions against the operative baseline of thirty-two
+sites across NINE files, delta zero; primitives stay direction-free; no new external origin and no
+Caddyfile change, asserted rather than omitted; no renames; pinned strings untouched; the FAB
+topology untouched; QuickAdd internals untouchable. No convention, zero-versus-no-data or cache work.
+The e2e suite is not run, repaired, revived or deleted.
+
+PERSISTENCE. This block persists ALONE, one block per message, appending after the preceding one.
+Sweep the payload under both operative patterns first; the payload opens paragraphs with ruling
+numbers and phase handles, a six-instance class of which one was a genuine wrap, so the sweep is
+predicted clean rather than assumed clean and a disagreement HALTS THE WRITE AND IS REPORTED rather
+than remedied where the text is the channel's. Predicted payload strict 1 and tripwire 1 agreeing;
+after the append, strict 17 and tripwire 17, first 1, last 17, no duplicates, no breaks in 1 to 17,
+reconciled two ways. THAT PREDICTION ASSUMES THE PRECEDING BLOCK IS ALREADY ON DISK AT SIXTEEN; if
+it is not, the figures are wrong and yours are right — say so, show the reconciliation, and persist
+both. Enumeration PRINTED IN FILE ORDER. Re-derive the unpushed count by both routes or do not state
+it. Provenance RELAYED. Amend the completeness note to record the persisted set, the tense
+enumeration's scope defect with the two-routes-over-one-corpus finding, the withdrawn sizing, and the
+partial approval with its returns. Docs-only under the standing permanent licence — state the skip
+and its reason, prove docs-only by exclusion with the exclusion shown discriminating and its capture
+UNCUT, carry the bytes.
+
+HARD STOP after the report.
