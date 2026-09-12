@@ -513,6 +513,46 @@ The amendments above are left as they stand. This is the live index from here fo
   proposal, not new scope**.
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.**
 
+### Amendment — MOB-R16 persistence commit, 2026-09-12
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R16**, contiguous: first **1**, last **16**, **0**
+  duplicates, **0** breaks in 1…16. **MOB-R16 provenance: RELAYED.** **MOB-1 RESPONSIVE PHASE B is
+  OPENED as a proposal**, carrying the T1–T4 tense measurement.
+- **THE OBSERVATION ROUND IS BOUNDED AT 390 POINTS, NOT 320 — supersedes the MOB-R15 amendment's
+  coverage line.** Every check in the list specified **320**; the operator observed on a physical
+  iPhone at **390** points (1170×2532 at 3x). **Neither party noticed the widths did not match.**
+  **Checks 1–6, 8 and 9 are re-labelled OBSERVED-AT-390. The 320 case is UNOBSERVED** — and 320 is
+  where the measured tight layouts are likeliest to fail (the 232px dialog template inside a 304px
+  dialog; the non-wrapping money values). At 390 those templates have 86px more to work with.
+  Checks 7, 10, 11 remain unobserved at any width.
+- **THIRD CHECK-AUTHORING DEFECT IN ONE LIST**, after the two discounted at MOB-R15. The channel
+  specified a width, gave desktop instructions for achieving it, then offered a physical device as a
+  *better* alternative — **without noticing a physical device fixes the viewport and cannot deliver
+  the specified width at all.** Physical-device evidence is stronger in every respect except the one
+  the check was about; **the controlled variable was traded for realism without saying so.** All
+  three defects share one shape: **the check was narrower or looser than the property it was written
+  to settle, and the pass read as settling the broader property.** A list of individually well-formed
+  items can still fail collectively if **the mapping from check to claim** is not itself checked.
+  **No new standing rule** — the existing non-discriminating-check rule, with the failure located in
+  the SPECIFICATION rather than the instrument. Count stays **SIX**.
+- **A 320 TOP-UP IS RECOMMENDED AND IS THE OPERATOR'S, NOT OWED BY PHASE B:** four checks at 320 in
+  desktop responsive mode — the four pages, a transaction edit dialog, the settings dialog, and the
+  Insights money figures. **The proposal proceeds without it**, marking every 320-dependent item as
+  resting on the L-series source measurement rather than on observation.
+- **THREE REFERRALS TO THE OPERATOR, options proposed and none chosen:** **(A) tap-target policy**
+  (the size table is app-wide, so raising it is not a mobile-only change); **(B) KPI enclosure —
+  REFERRED TO THE DESIGN TRACK and NOT proposed here**, since KPI rework was reclassified as
+  design-track work under the ink-and-brass constraints; the operator's observation is recorded
+  against that referral so it is not lost, and **the value wrap is the part that is a defect and is
+  in scope**; **(C) profile discoverability**, whose remedy changes navigation topology.
+- **ONE ITEM REFERRED OUT OF THIS PHASE ENTIRELY:** the duplicate category label and the orphaned
+  separator bullet on activity rows are **render/label defects visible at every width**, not
+  responsive work. Channel recommendation, offered and not adopted: they belong to the **CONVENTIONS
+  phase**. Queued, not opened, the operator's to place.
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.**
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
@@ -3563,3 +3603,163 @@ present. The signal exists at one site and is unused at the site beside it.
 **CSV and spreadsheet import must let the user MAP THEIR COLUMNS to the application's fields.**
 Operator statement, this cycle. Belongs with the import surface; **NOT mobile-track work.**
 **TRIGGER: the next cycle that opens import.**
+
+MOB-R16 — THE OBSERVATION ROUND'S EVIDENCE IS BOUNDED TO 390 POINTS, NOT 320, AND THAT IS A
+CHANNEL ERROR. d50933a is accepted. MOB-1 RESPONSIVE PHASE B IS OPENED AS A PROPOSAL, carrying the
+tense measurement. Three items are referred to the operator and one is referred OUT of this phase.
+
+CADENCE. Issued under test (a) and (c). d50933a is accepted and this is its acknowledgement riding
+the next substantive block: 15/15 agreeing, enumeration in file order, first 1, last 15, zero
+duplicates, zero breaks, both routes at 15, exclusion empty with the control uncut at six paths,
+gates skipped with the reason stated, and the unpushed count re-derived by both routes after the
+last edit rather than restated.
+
+═══ THE OBSERVATION ROUND IS BOUNDED AT 390 POINTS AND THE RECORD MUST SAY SO ═══
+
+EVERY CHECK IN THE LIST SPECIFIED 320 PIXELS. The operator observed on a physical iPhone at 390
+points. Both parties recorded the round as satisfying the list; NEITHER NOTICED THE WIDTHS DID NOT
+MATCH. The captures settle it — 1170 by 2532 device pixels at 3x is a 390-point viewport.
+  THE OBSERVED PASSES ESTABLISH 390 AND NOT 320. Checks 1 through 6, 8 and 9 are re-labelled
+  OBSERVED-AT-390. The 320 case is UNOBSERVED, and it is the case the list was written for
+  precisely because it is where the measured tight layouts are likeliest to fail: the dialog row
+  templates with a 232-pixel fixed minimum inside a dialog 304 pixels wide at 320, and the
+  non-wrapping money values. At 390 the same templates have 86 pixels more to work with.
+  THIS IS A CHANNEL AUTHORING DEFECT AND THE SEQUENCE IS WORTH STATING BECAUSE IT IS INSTRUCTIVE.
+  The channel specified a width, gave instructions for achieving it in a DESKTOP browser, then
+  offered a physical device as a BETTER alternative and said two checks could be skipped on it —
+  without noticing that a physical device fixes the viewport at whatever the device is and cannot
+  deliver the specified width at all. PHYSICAL-DEVICE EVIDENCE IS STRONGER IN EVERY RESPECT EXCEPT
+  THE ONE THE CHECK WAS ABOUT, and the channel traded the controlled variable for realism without
+  saying so, which is not a trade a reviewer gets to make silently on the operator's behalf.
+  THIS IS THE THIRD CHECK-AUTHORING DEFECT IN ONE OBSERVATION LIST, after the two discounted at
+  MOB-R15. All three share a shape: THE CHECK WAS NARROWER OR LOOSER THAN THE PROPERTY IT WAS
+  WRITTEN TO SETTLE, and in all three the pass read as settling the broader property. A list whose
+  items are individually well-formed can still fail collectively if the mapping from check to claim
+  is not itself checked. NO NEW STANDING LINE; the count stays at SIX. This is the existing
+  non-discriminating-check rule with the failure located in the SPECIFICATION rather than in the
+  instrument.
+  A TOP-UP IS RECOMMENDED AND IS THE OPERATOR'S, NOT OWED BY THIS PHASE: four checks at 320 in a
+  desktop responsive mode — the four pages, a transaction edit dialog, the settings dialog, and the
+  Insights money figures. Those are where 320 and 390 plausibly diverge. THE PROPOSAL PROCEEDS
+  WITHOUT IT and marks every 320-dependent item as resting on the L-series source measurement
+  rather than on observation.
+
+═══ MOB-1 RESPONSIVE — PHASE B, PROPOSAL ONLY ═══
+
+PRODUCE ONE PROPOSAL. No code, no commit, no push. For each item: the exact change, the file and
+line, and the verification instrument. Deviations and discoveries are STOP-AND-ASK.
+
+GROUP BY ROOT CAUSE, NOT BY SYMPTOM. The L-series and the observation round together produced a
+symptom list; several symptoms trace to one component. The card-title squeeze appears on at least
+three cards and is one shared header; the dialog height problem is fourteen instances of one
+missing declaration. A proposal organised by symptom proposes the same fix repeatedly and hides
+which changes are actually one change. STATE THE COUNT OF DISTINCT CHANGES ALONGSIDE THE COUNT OF
+SITES THEY FIX.
+
+THE BREAKPOINT SKEW SHAPES THE PROPOSAL AND SHOULD BE USED. Eighty-five per cent of responsive
+styling sits at one breakpoint, with two uses above it. The application is effectively TWO-STATE,
+so this is a question about ONE threshold. Introducing a second or third breakpoint is a
+STRUCTURAL change to how the app is styled and it is not authorised here — if any item genuinely
+needs one, that item STOPS AND ASKS rather than introducing it in passing.
+
+THE ITEMS, EACH TO BE PROPOSED WITH ITS OWN TREATMENT:
+  (i)   THE FAB CLEARANCE. A clearance change, never a position change. The topology is FIXED —
+        size, stacking level, logical placement, label, tooltip, sole-trigger status, shortcut — and
+        does not move. Propose the clearance; state what it does at every width, including desktop
+        where the FAB sits lower and the tab bar is absent.
+  (ii)  THE CARD HEADER. One shared component, three or more observed call sites. Propose the stack
+        behaviour and the threshold. Enumerate EVERY call site and state what each looks like after,
+        because a shared-component change is an app-wide change and its blast radius is the point.
+  (iii) THE KPI VALUE WRAP. The currency prefix separating from its figure across a line break is
+        a layout defect and is in scope. Propose it. THE DELTA CHIPS WRAPPING TO UNEQUAL HEIGHTS
+        beside each other is the same item.
+  (iv)  THE DIALOG HEIGHT GAP. Fourteen of twenty-one instances declare no maximum height and no
+        internal scroll; two demonstrate the intended pattern. Propose whether the remedy belongs
+        in the shared primitive or per-instance, and say which fourteen.
+  (v)   THE TABLE AND SCROLLER CASES. The hard 340-pixel column inside a horizontal scroller, and
+        any table whose narrow-width strategy L5 found absent.
+  (vi)  THE BRASS-SLOT ELEMENT. Its three constraints were re-derived and all still hold; the
+        Insights money figures passed AT 390 and are unobserved at 320. PROPOSE NOTHING WITHOUT
+        THE 320 OBSERVATION — if the top-up has not happened, this item is DEFERRED AGAIN with that
+        stated as the reason, which is an honest deferral rather than a third inconclusive report.
+
+═══ THREE REFERRALS TO THE OPERATOR — PROPOSE OPTIONS, CHOOSE NONE ═══
+
+  (A) TAP TARGET POLICY. Every declared variant is below forty-four pixels; fifty-four call sites
+      are below by explicit value; six are content-dependent. The shared size table is used app-wide
+      including desktop, so raising it is NOT a mobile-only change. Lay out the options with their
+      blast radius each — raise the table globally; add a touch-only or narrow-width minimum; raise
+      only the call sites that matter on touch — and state for each how many sites move and what
+      desktop looks like after. RECOMMEND ONE IF YOU HAVE A VIEW AND SAY IT IS A RECOMMENDATION.
+      The operator rules it.
+  (B) KPI ENCLOSURE IS REFERRED TO THE DESIGN TRACK AND IS NOT PROPOSED HERE. The operator raised
+      it and he is right that the row reads as unbounded, but KPI rework was RECLASSIFIED AS
+      DESIGN-TRACK WORK under the ink-and-brass constraints in the preceding track and that
+      reclassification was confirmed by measurement. Enclosure is an accenting decision under a
+      rationed palette; it is not a responsive-layout decision. Record the operator's observation
+      against that referral so it is not lost, and DO NOT propose borders, fills or elevation here.
+      The value wrap at (iii) is the part that is a defect and it is in scope.
+  (C) PROFILE DISCOVERABILITY. The only route is the hamburger, now observed as well as derived.
+      Any remedy changes NAVIGATION TOPOLOGY, and the bottom tab bar's four entries and the FAB
+      are a settled arrangement. Propose options with their consequences — a fifth tab, a header
+      affordance, an entry elsewhere — and choose none. The operator rules it.
+
+ONE ITEM IS REFERRED OUT OF THIS PHASE ENTIRELY. The duplicate category label rendering twice in
+one activity row, and the separator bullet rendering with nothing after it, are RENDER AND LABEL
+defects visible at every width. They are not responsive work and folding them into a responsive
+commit would be the scope creep the preceding track's split exists to prevent. CHANNEL
+RECOMMENDATION, offered and not adopted: they belong to the CONVENTIONS phase, which already owns
+label and empty-state divergences. Queued, not opened, operator's to place.
+
+═══ THE VERIFICATION PROBLEM — STATE IT PER ITEM, DO NOT PAPER OVER IT ═══
+
+THIS IS THE PHASE'S CENTRAL RISK AND IT IS NOT THE LAYOUT WORK. jsdom COMPUTES NO LAYOUT. A test
+asserting that a class is present RESTATES THE DIFF and its negative case equals its positive case;
+the preceding track shipped a layout item with a DELIBERATE ZERO-TEST GAP for exactly this reason,
+and the operator's eyes were the only instrument that ever checked it.
+  PER ITEM, NAME THE INSTRUMENT and choose honestly between three: a unit test that genuinely
+  discriminates, with its negative case stated; a DELIBERATE COVERAGE GAP, declared as such with the
+  reasoning, which is a legitimate answer here and not a failure; or an OPERATOR OBSERVATION, with
+  the check written to L11's form — width, surface, and pass and fail stated SEPARATELY.
+  THE THIRD OPTION NOW CARRIES A WARNING EARNED THIS CYCLE: three of eleven checks in the last list
+  were mis-specified by the channel. WRITE EACH CHECK SO ITS FAIL IS A DIFFERENT WORLD FROM ITS
+  PASS, AND SO THE PROPERTY IT SETTLES IS THE PROPERTY IN QUESTION — not a narrower one that will
+  read as settling it. State the width explicitly and state how it is to be achieved, because a
+  device does not deliver an arbitrary width.
+  A PROPOSAL CLAIMING TEST COVERAGE IT CANNOT HAVE IS WORSE THAN ONE DECLARING GAPS.
+
+TEST-IMPACT PREDICTION PER ITEM, with the frontend absolute RE-DERIVED at execution and the movement
+stated as a DELTA. Predicted NAMED FORCED EDITS stated, and none is a valid answer. Any red test or
+any forced selector or class edit STOPS and asks BEFORE it ships. The three named regression files
+stay green AND untouched. A MISS IS A QUESTION, NEVER AN ADJUSTMENT.
+
+═══ THE TENSE MEASUREMENT RIDES THIS SAME REPORT ═══
+
+T1 through T4 as specified in the preceding block, REPORT-ONLY, nothing proposed. Derive the tense
+vocabulary FROM THE ARTIFACT — the copy strings and narrative builders — not from an assumed list of
+markers; that is the class that has already cost three misses here. Reconcile each enumeration two
+ways, and a self-check computed over a search's own output IS NOT the second route. T4's one-sentence
+sizing answer is the deliverable that decides sequencing, and sequencing is the operator's.
+
+CONSTRAINTS: zero physical-property additions, the operative baseline being thirty-two sites across
+NINE files, delta zero; primitives stay direction-free; no new external origin and no Caddyfile
+change — assert it rather than omit it; no renames; pinned strings untouched; the FAB topology
+untouched; QuickAdd internals untouchable. No convention work, no zero-versus-no-data work, no cache
+work. The e2e suite is not run, repaired, revived or deleted. Queued items stay queued and are not
+tidied in passing.
+
+PERSISTENCE. This block persists ALONE — one block per message — appending at sixteen. Sweep the
+payload under both operative patterns first; the payload's prose opens paragraphs with ruling
+numbers, a six-instance class of which one was a genuine wrap, so the sweep is predicted clean
+rather than assumed clean and a disagreement HALTS THE WRITE AND IS REPORTED rather than remedied
+where the text is the channel's. Predicted payload strict 1 and tripwire 1 agreeing; after the
+append, strict 16 and tripwire 16, first 1, last 16, no duplicates, no breaks in 1 to 16, reconciled
+15 + 1 = 16 and 16 minus 1 plus 1 = 16, enumeration PRINTED IN FILE ORDER. Derive from what is
+present; if these figures are wrong, yours are right and you show the reconciliation. Re-derive the
+unpushed count by both routes or do not state it. Provenance RELAYED. Amend the completeness note to
+record the persisted set, the 390-not-320 bound on the observation round with the three unobserved
+and the eight re-labelled OBSERVED-AT-390, the third check-authoring defect, and the three referrals
+plus the one referral out.
+
+HARD STOP after the proposal. Implementation is a separate cycle and begins only on explicit
+approval.
