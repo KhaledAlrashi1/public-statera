@@ -597,6 +597,54 @@ The amendments above are left as they stand. This is the live index from here fo
   pattern belonging to one party is easier to dismiss than one belonging to both.
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.**
 
+### Amendment — MOB-R18/R19 persistence commit, 2026-09-12
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R19**, contiguous: first **1**, last **19**, **0**
+  duplicates, **0** breaks in 1…19. **Both provenance: RELAYED.**
+- **BOTH BLOCKS' PREDICTED FIGURES WERE STALE AND THE IMPLEMENTER'S WERE RIGHT, per their own
+  clauses.** MOB-R18 predicted "appending at seventeen … 16+1=17" and MOB-R19 "appending at
+  eighteen … 17+1=18"; both were written before MOB-R17 landed at 17. **MOB-R19 also contradicted
+  itself** — a block numbered 19 cannot append at 18 with "no breaks in 1 to 18". **The implementer
+  HALTED on that contradiction rather than picking a reading**, and the arrival of MOB-R18 resolved
+  it: R18 → 18, R19 → 19, index contiguous. Renumbering a block or guessing which artifact was
+  wrong would have manufactured a ruling number.
+- **IMPLEMENTATION IS AUTHORISED (MOB-R18): items (i)–(iv) ship as ONE commit.** **Item (v) is
+  WITHDRAWN and ships nothing; item (vi) stays DEFERRED** pending a 320 observation.
+- **ITEM (v)'s WITHDRAWAL IS A SHARED DEFECT AND THE CHANNEL PROPAGATED IT FIRST.** The L5 report
+  cited the 340px declaration **without its render gate**; the channel then put it on the
+  observation list as a 320 check and into the proposal mandate as an item to fix, **without
+  checking the gate either**. Two parties, three cycles, one unchecked conditional. **A STRING'S
+  PRESENCE IN A FILE IS NOT ITS PRESENCE ON A SCREEN.**
+- **THE GATE-CONDITIONAL FOLLOW-ON IS DISCHARGED.** Every finding entering the proposal and the
+  observation list was checked for a width/device/feature gate: the four icon sites, the 19
+  two-block sites, the KPI tiles, the FAB and three of four dialog files carry **zero**
+  `useMinWidth`/`matchMedia`. `ImportDialogs.tsx` carries six, but `isDesktop` belongs to
+  `PreviewImportDialog` (`:1261`) alone, and the two in-scope dialogs at `:516`/`:1062` sit in
+  different components. **Item (v) was the only gated finding.**
+- **THE TENSE RE-MEASUREMENT IS ACCEPTED AT FIFTEEN.** Corpus from the surfaces (124 strings, 10
+  files) plus a structurally-built second corpus from the narrative builders, which **caught one
+  the first missed**. **T4's sizing stays WITHDRAWN on the implementer's own motion** — declining
+  to re-size in the same breath as correcting the measurement. Recorded for whenever it is sized:
+  15 copy sites + a server guard + a boolean to hoist **spans both packages**, which no mobile-track
+  phase has done.
+- **TWO OPERATOR RULINGS, DIFFERENT CLASSES (MOB-R19). Tap targets — BY DELEGATION**, the
+  touch-only minimum. **Profile discoverability — DIRECT**, the header control. **Neither opens
+  now**; each takes its own proposal cycle after the implementation commit.
+- **THE HEADER-CONTROL PRE-CHECK MAY FALSIFY ITS OWN REMEDY**, and leads that phase: the operator's
+  report is ambiguous between *the control is misplaced* and *the menu gives no indication of what
+  is inside*. **If the menu is the defect, relabelling it is proposed instead — that is a SUCCESS of
+  the pre-check, not a deviation from the ruling.**
+- **THE COARSE-POINTER HAZARD IS RECORDED IN ADVANCE:** it is a **device-capability** switch, not a
+  width switch — it fires on a touch laptop and not on a narrow desktop window, so it is **not
+  equivalent** to the narrow-width threshold the rest of this track uses. **That tension is reported,
+  not resolved silently.** The FAB is **not** resized by it; a global table change that would move
+  it is a STOP-AND-ASK.
+- **THE 320 TOP-UP REMAINS OUTSTANDING AND IS THE OPERATOR'S.** Three checks unobserved, item (vi)
+  deferred on it, item (iii)'s risk lives there. **Its absence is not a pass.**
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.**
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
@@ -4002,3 +4050,279 @@ and its reason, prove docs-only by exclusion with the exclusion shown discrimina
 UNCUT, carry the bytes.
 
 HARD STOP after the report.
+
+MOB-R18 — ALL RETURNS ARE RESOLVED AND IMPLEMENTATION IS AUTHORISED. Five items ship as one
+commit. Item (v) is WITHDRAWN and the channel propagated its defect first. The tense re-measurement
+is accepted at fifteen sites and T4 stays withdrawn on the implementer's own motion.
+
+CADENCE. Issued under test (a) — it authorises implementation.
+
+3ecd115's EVIDENCE IS SUPPLIED AND EVERY PREDICTED FIGURE MET: 16/16 agreeing, first 1, last 16,
+zero duplicates, zero breaks, both routes at 16, the exclusion empty with the control uncut at six
+paths. The preceding block's conditional prediction is discharged — the block WAS on disk at
+sixteen, so seventeen holds for this one.
+
+ITEM (ii) IS RESOLVED AND THE PREDICTED BREAK WAS REAL. Twenty-four containers parsed and READ:
+nineteen two-block, four icon-and-heading sibling pairs, one single-child. THE FOUR WOULD HAVE
+STACKED AN ICON ONTO ITS OWN LINE. One rule plus four exceptions is approved.
+  THE CASCADE PROOF IS BETTER THAN THE ONE ASKED FOR AND THE DIFFERENCE MATTERS. The channel asked
+  for emission order in the compiled stylesheet, which would have established the fact for TODAY'S
+  BUILD ONLY. The implementer established it STRUCTURALLY instead — the rule sits in a components
+  layer, utilities are declared in a later layer, and layer precedence decides independently of
+  source order and specificity. A structural proof survives a rebuild; an emission-order
+  observation does not. The channel asked for the weaker instrument and got the stronger one.
+  THE ALIGNMENT QUESTION IS ANSWERED AND CORRECTLY DISMISSED: the centre-to-start change is moot at
+  the four icon sites because they keep the row direction.
+
+ITEM (iii) IS RESOLVED. Both options presented with their costs; the recommendation is the
+type-size option and the channel AGREES — it removes the trade rather than managing it, and it adds
+nothing to the eighteen-member overflow set. The check is rewritten at THE WIDTH WHERE THE RISK
+LIVES, which is the defect it was returned for.
+  ONE CONSEQUENCE STATED SO IT IS NOT A SURPRISE: the KPI figures are visibly smaller on a phone.
+  That is the cost the operator is buying and it is a presentation change to the surface he asked
+  about. Accepted. IF HE DISLIKES IT THE FALLBACK IS THE OTHER OPTION, WITH ITS CLIPPING RISK AT
+  320, and that is a real choice rather than a reopening.
+
+ITEM (iv) IS RESOLVED AND THE PRE-CHECK EARNED ITS COMMAND. It found a genuine non-portal dropdown
+rendering in place, then established that its four consumers sit inside two dialogs that ALREADY
+declare the overflow container — so none of the fourteen gaining the declaration contains one, and
+no exclusion is needed. A CHECK THAT FINDS THE HAZARD AND THEN CLEARS THE CHANGE ANYWAY IS THE
+USEFUL OUTCOME, and it is only distinguishable from a check that found nothing because the finding
+was reported. The latent clipping condition in those two pre-existing dialogs is RECORDED AND NOT
+OPENED, correctly.
+
+═══ ITEM (v) IS WITHDRAWN, AND THE CHANNEL PROPAGATED THE DEFECT FIRST ═══
+
+THERE IS NO FIGURE TO DERIVE. The three-hundred-and-forty-pixel column sits behind a
+minimum-width-1024 gate and NEVER RENDERS AT 320 OR 390. The item was never a phone-width problem.
+  THE PROVENANCE IS THE CHANNEL'S AND IT IS STATED PLAINLY. The L5 mandate asked for tables and
+  scrollers and the L5 report cited the declaration without its render gate; the channel then read
+  that report, put the site on the observation list as a 320 check, and wrote it into the proposal
+  mandate as an item to fix — WITHOUT CHECKING THE GATE EITHER. Two parties, three cycles, one
+  unchecked conditional. The implementer withdrew the item rather than answer the question the
+  channel had asked about it, which is the right move: a derivation for a number that should not
+  exist would have been a well-evidenced answer to a question that was void.
+  THE CLASS IS DECLARED CORRECTLY — a declaration cited without its render condition is the
+  scope-error family, second consecutive cycle. A STRING'S PRESENCE IN A FILE IS NOT ITS PRESENCE
+  ON A SCREEN, and every enumeration in a responsive phase is an enumeration of things that may or
+  may not render at the width under discussion.
+  ONE FOLLOW-ON IS OWED AND IT IS NARROW: any OTHER L-series finding whose site sits behind a
+  width, device or feature gate is reported the same way. Do not re-run the L-series. Check the
+  findings that ENTERED THIS PROPOSAL and the observation list, and say which if any are gated.
+  NO NEW STANDING LINE. The count stays at SIX. This is the derive-from-the-artifact rule applied
+  to a conditional rather than to a name, cited not minted.
+
+═══ THE TENSE RE-MEASUREMENT IS ACCEPTED AT FIFTEEN ═══
+
+The corpus was derived FROM THE SURFACES rather than from month tokens — one hundred and twenty-four
+user-facing strings across ten files, read — and the second corpus was built STRUCTURALLY from the
+narrative builders' return values. FIFTEEN SITES, above the channel's floor of nine, so it is not
+reproducing the channel's reading.
+  THE SECOND CORPUS CAUGHT ONE THE FIRST MISSED, and that is the whole justification for building it
+  differently: a present-tense string matched by no textual marker. THE TWO CORPORA DIFFER AND THE
+  REPORT SAYS HOW. Two routes over one corpus are one route; two routes over two corpora built by
+  different methods are two.
+  T4 STAYS WITHDRAWN ON THE IMPLEMENTER'S OWN MOTION — declining to re-size in the same breath as
+  correcting the measurement. That is the right instinct and it is ratified. THE SEQUENCING
+  DECISION REMAINS OFF THE OPERATOR'S DESK until a sizing is offered that has survived a cycle.
+  ONE OBSERVATION FOR WHENEVER IT IS SIZED, NOT A MANDATE: fifteen copy sites plus a server-side
+  guard plus a boolean to hoist in two pages SPANS BOTH PACKAGES, which no mobile-track phase has
+  done. That is a fact about its shape rather than an argument about its size.
+
+═══ IMPLEMENTATION — ONE COMMIT ═══
+
+APPROVED AND SHIPPING TOGETHER: (i) the FAB clearance, (ii) one rule plus four exceptions,
+(iii) both changes with the type-size option, (iv) the shared-primitive height declaration.
+ITEM (v) IS WITHDRAWN AND SHIPS NOTHING. ITEM (vi) STAYS DEFERRED pending the 320 observation.
+
+ONE COMMIT, not two. Two commits means two verification rounds and two operator observation passes
+for one phase.
+
+CLOSE-OUT CARRIES THE THREE MANDATORY SECTIONS and a close-out missing any is auto-returned: both
+verbatim test tails INCLUDING the Test Files summary line with captured exit codes, each command
+carrying a resolution proof and a non-matching negative control shown exiting 0; both verbatim
+typecheck outputs with exit codes and byte counts; and the baseline movement stated as a DELTA with
+its absolute RE-DERIVED AFTER THE LAST EDIT. The api suite is RUN even though no api file is
+touched, because the contract test reads the frontend fixture — assert the fixture count and the
+allowlist length derived FROM THE FILE. Predicted delta is plus zero tests and plus zero files;
+A MISS IS A QUESTION, NEVER AN ADJUSTMENT.
+  FOUR OF FIVE ITEMS CARRY A DECLARED COVERAGE GAP and that is the honest answer, not a shortfall:
+  jsdom computes no layout, so a class assertion restates the diff and its negative case equals its
+  positive case. STATE THE GAP PER ITEM IN THE CLOSE-OUT rather than letting a plus-zero delta read
+  as adequacy. A previous phase in this project shipped a layout item with a deliberate zero-test
+  gap for exactly this reason and it was the correct call there too.
+  ASSERT THE NEGATIVE DELIVERABLES POSITIVELY: zero physical-property additions against the
+  operative baseline of thirty-two sites across NINE files with the pattern shown discriminating; no
+  Caddyfile change and no new external origin; the standing-rules file untouched; the three named
+  regression files green AND untouched, shown by empty status on those paths. Primitives stay
+  direction-free — the shared dialog and the stylesheet are both touched, so say so explicitly.
+  ONE RISK CARRIED FORWARD FROM THE PROPOSAL: twenty-one dialogs render in existing tests and a
+  maximum height on the shared primitive is the one change that could surface a selector assumption.
+  ANY RED TEST, OR ANY FORCED SELECTOR OR CLASS EDIT TO A TEST, STOPS AND ASKS BEFORE IT SHIPS.
+
+THE OBSERVATION CHECKS SHIP WITH THE CLOSE-OUT, in L11 form — width, surface, pass and fail stated
+SEPARATELY, and each stating HOW the width is achieved, because a physical device does not deliver an
+arbitrary width and that assumption cost this track a bounded observation round. Four checks have
+been mis-specified in this phase, three by the channel and one by the implementer; write these so
+each one's fail is a different world from its pass AND settles the property actually in question.
+  THE DESKTOP CONSEQUENCE OF (i) GETS ITS OWN CHECK: ninety-six pixels of bottom clearance appear on
+  every desktop page where there is currently zero. That is a visible change to a surface this phase
+  is not otherwise touching and it is verified rather than assumed benign.
+
+NOTHING IS PUSHED BY THIS BLOCK. A push is a deploy and it is the operator's. When it happens: diff
+against ORIGIN/MAIN rather than local main, enumerate every riding commit, name any that is not this
+track's work with its CSP check, and NO UI OBSERVATION IS EVIDENCE UNTIL THE ACTIONS RUN HAS LANDED.
+
+═══ OPEN — TWO OPERATOR DECISIONS, NEITHER BLOCKING ═══
+
+TAP TARGETS: the channel and the implementer both recommend the touch-only minimum. It fixes touch
+without altering desktop and needs no new breakpoint. ITS OWN CYCLE WITH ITS OWN OBSERVATION ROUND,
+because raising every control on touch reflows the dense toolbars and dialog footers this phase is
+fixing — the checks written here cannot verify it.
+PROFILE DISCOVERABILITY: three options, no recommendation from either side, correctly. Navigation
+topology is the operator's.
+KPI ENCLOSURE stays with the design track; the duplicate label and orphaned separator stay referred
+out to conventions; the cross-tab regime and the column-mapping requirement stay queued with their
+triggers. NONE OF THESE IS OPENED AND A CYCLE PASSING DOES NOT ADOPT ANY RECOMMENDATION.
+
+CONSTRAINTS: no renames, pinned strings untouched, the FAB topology untouched, QuickAdd internals
+untouchable. No convention work, no zero-versus-no-data work, no cache work, no tense work. The e2e
+suite is not run, repaired, revived or deleted. Queued items stay queued and are not tidied in
+passing. Any discovery enlarging this mandate is a STOP-AND-ASK and a REQUEST, never a self-grant.
+
+PERSISTENCE. This block persists ALONE, one block per message, appending at seventeen — and it may
+ride the implementation commit's docs half rather than taking a commit of its own, since the
+implementation commit follows immediately; if it does, say so and prove the docs half separately
+rather than claiming docs-only for a commit that touches code. Sweep the payload under both
+operative patterns first; the payload opens paragraphs with ruling numbers and phase handles, a
+six-instance class of which one was a genuine wrap, so the sweep is predicted clean rather than
+assumed clean and a disagreement HALTS THE WRITE AND IS REPORTED rather than remedied where the text
+is the channel's. Predicted payload strict 1 and tripwire 1 agreeing; after the append, strict 17 and
+tripwire 17, first 1, last 17, no duplicates, no breaks in 1 to 17, reconciled 16 + 1 = 17 and 17
+minus 1 plus 1 = 17, enumeration PRINTED IN FILE ORDER. Derive from what is present; if these figures
+are wrong, yours are right and you show the reconciliation. Re-derive the unpushed count by both
+routes or do not state it. Provenance RELAYED. Amend the completeness note to record the persisted
+set, item (v)'s withdrawal with the channel's prior propagation, the gate-conditional scope class,
+the tense re-measurement at fifteen with T4 still withdrawn, and the two open operator decisions.
+
+MOB-R19 — BOTH OPEN OPERATOR DECISIONS ARE RULED. Tap targets take the touch-only route. Profile
+discoverability takes a header control, with ONE PRE-CHECK that may falsify the whole approach.
+Neither opens now. The implementation commit authorised by the preceding block ships first.
+
+CADENCE. Issued under test (b).
+
+OPERATOR RULINGS, and the two are different classes.
+  TAP TARGETS — BY DELEGATION, landing on the recommendation both the channel and the implementer
+  made and on nothing else: the touch-only minimum, raising controls on coarse-pointer devices and
+  leaving desktop untouched.
+  PROFILE DISCOVERABILITY — DIRECT. The operator chose the header control from the three options,
+  in his own words, after the channel offered its view when asked. The view offered was the same
+  option, so nothing turns on the distinction here, but the ruling is HIS and is recorded as
+  direct rather than as a delegation to the channel's preference.
+
+NEITHER IS OPENED BY THIS BLOCK. The implementation commit carrying items (i) through (iv) ships
+first, with its close-out and its observation checks. Two phases in flight at once means two
+verification rounds interleaved and an operator observation pass that cannot attribute what it sees.
+
+═══ THE HEADER CONTROL — ONE PRE-CHECK THAT MAY MAKE IT UNNECESSARY ═══
+
+THE CHANNEL RAISED THIS AND IT IS NOT RESOLVED, SO IT LEADS THE PHASE RATHER THAN TRAILING IT. The
+operator's report was that he would have found Profile had he not known it existed. THAT IS AMBIGUOUS
+BETWEEN TWO DEFECTS WITH DIFFERENT REMEDIES: the control is in the wrong place, or the control is in
+the right place and the menu containing it gives no indication of what is inside. A third round
+button in a corner that already holds two is discoverable only to someone who looks there — which is
+the same property the current route has.
+  ESTABLISH FROM SOURCE, BEFORE PROPOSING ANY CONTROL: what the header currently renders and how
+  each item is labelled; what the menu contains, in order, with its labels and its accessible name;
+  and whether Profile is labelled inside it in a way a first-time user would recognise as
+  account-and-settings. Report the strings, not a description of them.
+  IF THE MENU IS THE DEFECT, SAY SO AND PROPOSE THAT INSTEAD. Relabelling or restructuring a menu
+  is cheaper than adding a control, adds nothing to the header, and fixes the cause rather than
+  routing around it. THAT OUTCOME IS A SUCCESS OF THIS PRE-CHECK AND NOT A DEVIATION FROM THE
+  OPERATOR'S RULING — he ruled on the remedy among three offered options, and this establishes
+  whether the problem those options addressed is the problem that exists. If it is, the header
+  control proceeds as ruled.
+  IF BOTH APPLY, propose both and say which does the work.
+
+WHEN THE HEADER CONTROL IS PROPOSED, IT CARRIES: the icon and its accessible label; its placement
+relative to the two existing controls; its size against the touch minimum that the tap-target cycle
+will be setting, so the two do not disagree; and what the header row does at 320 with three controls
+plus the brand block, MEASURED rather than assumed, since the brand block carries a logo mark and
+two lines of text. Logical properties only — the existing header controls are the kind of site that
+attracts a physical-property addition, and the standing rule forbids additions with the operative
+baseline at thirty-two sites across NINE files, delta zero.
+  THE BRAND MARK IS A RATIONED BRASS SLOT. The header is where the ration lives. Do not restyle,
+  recolour or re-scale anything already in that row while adding to it.
+
+═══ TAP TARGETS — WHAT THE PHASE MUST ESTABLISH ═══
+
+THE MEASURED STARTING POINT, TO BE RE-DERIVED AT EXECUTION AND NOT CARRIED: every declared variant
+in the shared size table is below forty-four pixels, none reaches the next step up, fifty-four call
+sites are below by explicit value, six are content-dependent and therefore OBSERVABLE-ONLY, and the
+FAB at fifty-six pixels is the sole exception. The declared height IS the rendered height because
+the preflight sets border-box — that is DERIVED, and it was upgraded from an observable-only label
+by the implementer with the mechanism shown.
+
+THE COARSE-POINTER QUERY IS A MECHANISM THIS CODEBASE HAS NOT USED, AND THAT IS THE PHASE'S RISK.
+  ESTABLISH FROM THE ARTIFACT whether any pointer or hover media query already exists anywhere in
+  the stylesheet or in the installed framework's variant set, and whether the framework version in
+  use exposes a variant for it or whether raw CSS is required. DERIVE THE VARIANT VOCABULARY FROM
+  THE INSTALLED PACKAGE, not from what the framework is assumed to offer — that assumption class
+  has now cost this project four separate misses, most recently a declaration cited without its
+  render gate.
+  THE HAZARD, NAMED IN ADVANCE: a coarse-pointer query is a DEVICE-CAPABILITY switch, not a width
+  switch. It fires on a touch-capable laptop and does not fire on a narrow desktop window. So it is
+  NOT equivalent to the narrow-width threshold the rest of this track uses, and the two will
+  disagree on real devices. State plainly which surfaces that affects and whether the divergence is
+  acceptable; if it is not, the alternative is a width threshold, which reaches desktop and is what
+  the operator's ruling was chosen to avoid. THAT TENSION IS REPORTED, NOT RESOLVED SILENTLY.
+  THE CONSEQUENCE ALREADY ON THE RECORD IS THE REASON THIS GETS ITS OWN CYCLE: raising every
+  control on touch REFLOWS THE DENSE TOOLBARS AND DIALOG FOOTERS this phase is currently fixing for
+  crowding. The checks written for the implementation commit cannot verify it, and a taller control
+  inside a dialog that just gained a maximum height interacts with that change. MEASURE THE
+  INTERACTION EXPLICITLY.
+  THE PINNED FAB IS NOT RESIZED BY THIS. Its fifty-six pixels are part of a FIXED topology and it
+  already clears the threshold. If a global change to the size table would move it, that is a
+  STOP-AND-ASK.
+
+═══ SEQUENCE, AND IT IS THE OPERATOR'S TO OVERRIDE ═══
+
+CHANNEL RECOMMENDATION, OFFERED AND NOT ADOPTED: the implementation commit ships and deploys and is
+observed; then the header control, because its pre-check may collapse it into a cheap menu change;
+then tap targets, which is the largest of the three and whose observation round should not be
+interleaved with another change to the same surfaces. Both remaining items are within MOB-1
+RESPONSIVE and neither displaces the two phases behind it.
+
+THE 320 TOP-UP IS STILL OUTSTANDING AND IS STILL THE OPERATOR'S. The observation round is bounded at
+390 points; three checks are unobserved; item (vi) is deferred specifically pending a 320
+observation, and item (iii)'s risk lives at 320. NOTHING WAITS ON IT, and every 320-dependent claim
+rests on source measurement rather than observation until it happens. Do not treat its absence as a
+pass.
+
+CONSTRAINTS, unchanged and binding both remaining items: zero physical-property additions with the
+pattern shown discriminating; primitives stay direction-free; no new external origin and no
+Caddyfile change, asserted rather than omitted; no renames; pinned strings untouched — including the
+FAB's label and tooltip and the two legal test identifiers; the FAB topology untouched; QuickAdd
+internals untouchable; the three named regression files green AND untouched. No convention work, no
+zero-versus-no-data work, no cache work, no tense work. The e2e suite is not run, repaired, revived
+or deleted. Queued items stay queued: the KPI enclosure with the design track, the duplicate label
+and orphaned separator with conventions, the cross-tab regime and the import column-mapping
+requirement with their triggers. T4's sizing remains WITHDRAWN and the tense sequencing decision is
+not on the operator's desk.
+
+NO CODE IS AUTHORISED BY THIS BLOCK. Each remaining item opens with a proposal cycle and a hard stop.
+
+PERSISTENCE. This block persists ALONE, one block per message, appending at eighteen — and it may
+ride the implementation commit's docs half if that commit follows immediately; if it does, say so and
+prove the docs half separately rather than claiming docs-only for a commit that touches code. Sweep
+the payload under both operative patterns first; the payload opens paragraphs with ruling numbers and
+phase handles, a six-instance class of which one was a genuine wrap, so the sweep is predicted clean
+rather than assumed clean and a disagreement HALTS THE WRITE AND IS REPORTED rather than remedied
+where the text is the channel's. Predicted payload strict 1 and tripwire 1 agreeing; after the
+append, strict 18 and tripwire 18, first 1, last 18, no duplicates, no breaks in 1 to 18, reconciled
+17 + 1 = 18 and 18 minus 1 plus 1 = 18, enumeration PRINTED IN FILE ORDER. THAT ASSUMES THE PRECEDING
+BLOCK IS ON DISK AT SEVENTEEN; if it is not, these figures are wrong and yours are right — say so,
+show the reconciliation, and persist both. Re-derive the unpushed count by both routes or do not state
+it. Provenance RELAYED. Amend the completeness note to record the persisted set, both operator
+rulings with their classes, the menu-versus-placement pre-check, the coarse-pointer device-versus-
+width divergence, and the recommended sequence as offered-and-not-adopted.
