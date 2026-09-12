@@ -408,6 +408,62 @@ The amendments above are left as they stand. This is the live index from here fo
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** The count stays at
   **SIX across four tracks**.
 
+### Amendment — MOB-R14 persistence commit, 2026-09-12
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R14**, contiguous: first **1**, last **14**, **0**
+  duplicates, **0** breaks in 1…14. **MOB-R14 provenance: RELAYED.** MOB-1 RESPONSIVE **Phase A is
+  COMPLETE and ACCEPTED**; the full report is persisted below. **No proposal is opened.**
+- **THE PHYSICAL-PROPERTY FIGURE IS 32 SITES ACROSS *NINE* FILES, DELTA ZERO. "Twelve files" is
+  FALSIFIED and anything citing it is citing a falsified number.** Two independent routes agree on
+  nine, and the second does not depend on the pattern being right: (1) re-measurement at `a39a0cb`,
+  the commit where the figure was recorded, gives 32/9 — identical to HEAD; (2) **the record's own
+  enumeration lists nine file paths while its prose immediately above says twelve**, and its site
+  count reconciles at 32 across those nine. **The figure was wrong when written, not moved by
+  intervening work**, and **the channel propagated it twice** — into the track-opening block and
+  into this phase's L8 mandate — without checking it against the enumeration directly beneath it in
+  the same document. That is derive-don't-carry's sharpest form: a figure taken from a *document
+  about* the artifact rather than from the artifact, committed in the block instructing the
+  implementer to re-derive rather than carry. **Three corrections in three places, none an edit** —
+  the Phase A report and both carrying blocks are historical records; the correction travels
+  adjacent. **The primitives zero is unaffected** and holds under both patterns, control 30.
+- **L4's LABEL IS UPGRADED, AND THE MANDATE WAS WRONG.** The Button size table is **DERIVED**, not
+  OBSERVABLE-ONLY: `preflight.css:12` sets `box-sizing: border-box`, so a declared height IS the
+  rendered box height. **Every variant is below 44px; none reaches `h-11`.** An implementer showing
+  a required label is unnecessarily weak, with the mechanism, is a report and not a deviation.
+  **The call-site gap MOB-R14 identified is now closed:** 190 `<Button>` tags, **61** override the
+  height in-tag, and **exactly ONE is above threshold** — `AppShell.tsx:562`, `h-14` = 56px, the FAB
+  — subtracted as a false member. 54 remain below by explicit value; **6 carry `h-auto` and are
+  reclassified OBSERVABLE-ONLY** (content-dependent). Two routes disagreed 187/27 vs 190/61; cause
+  named — route 1's regex stopped at a `>` inside a nested JSX expression — and route 2 is
+  operative because 190 matches the independent grep total.
+- **STANDING INSTRUCTION — THE UNPUSHED COUNT IS RE-DERIVED BY BOTH ROUTES AT THE TOP OF ANY REPORT
+  THAT STATES IT, OR IT IS NOT STATED.** It has now been wrong **four times** for one quantity, the
+  fourth arriving one cycle after the same reporter measured it and wrote that recency is not
+  enumeration. An omitted figure costs a command; a wrong one costs the credibility of the report
+  around it. Measured at this amendment: **10**, both routes agreeing.
+- **THE OBSERVATION LIST NEEDS NO DEPLOY, ESTABLISHED FROM THE DIFF AND REPORTED PER CHECK.** Every
+  added or removed source line across the unpushed range is an `invalidateQueries` key argument, a
+  deleted dead invalidation, or a four-line comment. **Zero lines match
+  `className|style=|<[A-Za-z]|grid-|h-[0-9]|max-w|whitespace|overflow`** — control: the same
+  pattern finds **9** on `eb036c2`, a commit that did change layout. **All eleven checks are
+  runnable against the currently live build**, per-check table in the report below. The
+  precondition is **satisfied differently, not waived**: the observed properties are identical in
+  both builds. **The one-tab fresh-load precondition stands unchanged** — the cross-tab staleness
+  limit (Item C) is queued unfixed.
+- **TWO FINDINGS THAT WILL SHAPE THE PROPOSAL.** (i) **The breakpoint skew** — 85% of all
+  responsive styling sits at `sm`, with two uses of `xl` and none above; the app is effectively
+  **two-state**, so a mobile pass here is a question about *one* threshold, not five. (ii) **The FAB
+  clearance gap** — the wrapper clears 64px while the FAB's upper edge sits at 136px, and the FAB
+  shares `z-40` with the tab bar, so content can pass beneath it. Topology is **FIXED**; the remedy
+  is a *clearance* question, not a *position* question, which matters because the obvious fix is
+  the one the constraint forbids.
+- **THE ASSUMED-CONVENTION CLASS NOW HAS THREE INSTANCES** in this project — the generic type
+  argument (F1, last cycle), the numeric-suffix assumption (L8, this cycle), and the earlier
+  vocabulary-derivation findings. Cited, not minted; the count stays at **SIX**.
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.**
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
@@ -2780,3 +2836,401 @@ unchanged since phase 2, so this is the pattern's fault and not drift.
 
 NOTHING IS OPENED BY THIS BLOCK. MOB-1 RESPONSIVE proceeds under its own mandate; L8 is now
 measurable, the authorised commit having landed.
+
+MOB-R14 — PHASE A IS ACCEPTED AND IT IS THE BEST REPORT OF THIS TRACK. The twelve-files figure is
+FALSIFIED and the channel propagated it twice. One DERIVED label is upgraded correctly and one is
+NOT YET EARNED. Three items are owed. The observation list may need no deploy and that is checked,
+not assumed. No proposal is opened.
+
+CADENCE. Issued under test (b) and (c).
+
+PHASE A IS ACCEPTED. Step 0 complete, all six figures matched, the held set reconciled two ways.
+L1 through L11 delivered in order with evidence pasted, every finding labelled, every enumeration
+reconciled two ways, and both route disagreements — 102 against 96 at L3, 27 against 32 at L8 —
+TRACED TO A NAMED CAUSE rather than averaged. That last discipline is what makes the rest of the
+figures worth reading.
+
+THREE INSTRUMENT SELF-REPORTS, ALL CAUGHT BEFORE USE, AND THE SECOND IS THE MOST VALUABLE THING IN
+THE REPORT. A shell classifier stripping to the last colon mislabelled every prefixed class as
+unprefixed, exposed because the two routes disagreed — which is the reconciliation requirement
+paying for itself in its first application. A filename-stripping flag made a following test-file
+exclusion INERT, voiding the non-test label on two counts; re-derived with filenames the figures
+were unchanged, AND THE REPORT SAYS WHY THAT IS NOT VINDICATION: those patterns appear in no test
+file, so the claim was right for a reason that had not been established. A CORRECT FIGURE BEHIND A
+BROKEN INSTRUMENT IS RECORDED AS A BROKEN INSTRUMENT. That is the distinction this project has
+spent four tracks trying to hold, stated unprompted about the reporter's own work.
+  THE THIRD IS THE ASSUMED-CONVENTION CLASS AGAIN, SECOND CONSECUTIVE CYCLE, and it is the one to
+  carry forward: a numeric-suffix assumption undercounted by five. Last cycle it was a generic type
+  argument between a hook name and its paren. Both times the pattern was built from what the code
+  was assumed to look like. THE STANDING FORM IS THE EXISTING RULE — derive the search vocabulary
+  from the artifact being checked — and it now has three instances in this project. Cited, not
+  minted. The count stays at SIX.
+
+═══ THE TWELVE-FILES FIGURE IS FALSIFIED, AND THE CHANNEL CARRIED IT TWICE ═══
+
+THE FINDING IS CONFIRMED INDEPENDENTLY AND BY A STRONGER INSTRUMENT THAN THE ONE THAT FOUND IT. The
+implementer re-measured at the commit where the figure was recorded and got nine files, identical
+to HEAD. The channel then checked the record itself: THE PHASE A REPORT'S OWN ENUMERATION LISTS
+NINE FILE PATHS while its prose immediately above says twelve. The document contradicts itself, and
+its site count reconciles at exactly thirty-two across those nine paths.
+  THAT IS A BETTER INSTRUMENT BECAUSE IT DOES NOT DEPEND ON THE PATTERN BEING RIGHT. A
+  re-measurement establishes nine under one pattern; the record's own enumeration establishes nine
+  under whatever pattern produced the record. Both agree, by independent routes, on the same digit.
+  THE FIGURE WAS WRONG WHEN WRITTEN. The baseline has not moved and the delta is ZERO — the
+  cache-invalidation commits added none, consistent with the zero-additions check run at each.
+  THE CHANNEL PROPAGATED IT TWICE, into the track-opening block and into this phase's own L8
+  mandate, without checking it against the enumeration sitting directly beneath it in the same
+  document. This is derive-don't-carry's sharpest form — a figure derived from a document about the
+  artifact rather than from the artifact — committed by the channel in the block that INSTRUCTED
+  the implementer to re-derive rather than carry. The instruction was right and its author did not
+  follow it.
+  DISPOSITION, AND IT IS THREE CORRECTIONS IN THREE PLACES, NONE OF THEM AN EDIT. The Phase A
+  report is a HISTORICAL RECORD and is not corrected in place; the correction travels adjacent in
+  this track's file. The two blocks that carried the figure are persisted historical records and
+  are likewise not edited; this block corrects them adjacent. THE OPERATIVE FIGURE IS
+  THIRTY-TWO SITES ACROSS NINE FILES, delta zero, and anything citing twelve is citing a
+  falsified number.
+  THE PRIMITIVES ZERO STILL HOLDS under both patterns with its control returning thirty. That
+  constraint is intact and was the load-bearing half.
+
+═══ ONE LABEL UPGRADED CORRECTLY, ONE NOT YET EARNED ═══
+
+L4's UPGRADE FROM OBSERVABLE-ONLY TO DERIVED IS ACCEPTED FOR THE VARIANT TABLE, and the argument is
+right: the preflight sets border-box, so a declared height is the rendered box height, padding and
+border inclusive. THE MANDATE SAID TO LABEL IT OBSERVABLE-ONLY AND THE MANDATE WAS WRONG. An
+implementer establishing that a required label is unnecessarily weak, with the mechanism shown, is
+a report and not a deviation. EVERY VARIANT IS BELOW FORTY-FOUR PIXELS and none reaches h-11 — the
+default at thirty-six, the most-used explicit size at thirty-two, the largest at forty.
+  BUT THE CALL-SITE CLAIM IS NOT YET EARNED AND THIS IS THE ONE GAP IN THE REPORT. The variant
+  table is DERIVED. The rendered height of the ninety call sites is NOT, because a class-merge
+  utility lets a call site's own className override the variant's height, and the report did not
+  check whether any does. A site passing a taller height would be a false member of the
+  below-threshold set, and the direction of the error is the dangerous one: it inflates the problem
+  and would put a site on a fix list that does not need fixing.
+  OWED: enumerate the call sites that pass an explicit height in their className and subtract them,
+  reconciled two ways, with the pattern derived from the artifact rather than from the height scale
+  assumed to be in use. IF THE ANSWER IS ZERO, the zero carries a positive control — the same
+  pattern shown firing on a synthetic override — because an empty result here is exactly the
+  expected one and is worth nothing without proof the search could have reported.
+
+═══ TWO SMALLER ITEMS OWED ═══
+
+L2's 232-PIXEL ARITHMETIC HAS AN UNSOURCED TERM. The fixed tracks sum to two hundred and eight
+pixels and that is checkable from the template. The gap term is stated as twenty-four pixels
+without naming the class that produces it, and a four-column grid has THREE gaps, so twenty-four
+implies one gap class and thirty-six implies another. NAME THE CLASS AT EACH OF THE SIX SITES and
+restate the minimum per site. The conclusion — whether it overflows at three hundred and twenty
+pixels is OBSERVABLE-ONLY — is unaffected either way, which is precisely why the figure should be
+right rather than defended: a stated number that nobody checks because it does not change the
+answer is how a wrong figure survives into a cycle where it does.
+
+THE COMMIT COUNT IS WRONG AGAIN, IN THE REPORT AFTER THE ONE THAT MEASURED IT. The observation
+list's preconditions say nine unpushed. The preceding report MEASURED ten by two agreeing routes
+and no commit has been removed since; this cycle committed nothing. That is the FOURTH wrong figure
+for one quantity, and it arrived one cycle after the same reporter measured it, diagnosed the cause
+and wrote that recency is not enumeration.
+  IT IS CONSEQUENTIAL OF NOTHING HERE — nothing is pushed either way — AND IT IS REPORTED ANYWAY,
+  because a figure that goes wrong when the stakes are zero is the same figure that will go wrong
+  when they are not. The diagnosis already on the record is correct and is now demonstrated twice:
+  this quantity does not survive being re-stated from memory, in either direction. OWED: re-derive
+  it at the top of every report that states it, by both routes, or DO NOT STATE IT AT ALL. An
+  omitted figure costs a command; a wrong one costs the credibility of the report around it.
+
+═══ THE OBSERVATION LIST MAY NEED NO DEPLOY — CHECKED, NOT ASSUMED ═══
+
+THE LIST IS THIS PHASE'S MOST USEFUL DELIVERABLE AND IT IS CORRECTLY BUILT: eleven checks, each
+with its width, its surface, and ITS PASS AND FAIL STATED SEPARATELY, which is what makes a check
+discriminating rather than a prompt to look at something.
+
+THE CHANNEL'S OBSERVATION, OFFERED FOR THE IMPLEMENTER TO ESTABLISH OR FALSIFY: the ten unpushed
+commits are documentation and cache-key edits, and NONE OF THE ELEVEN CHECKS READS ANYTHING THOSE
+COMMITS TOUCH. Every check reads layout, declared sizes, dialog heights, table presentation, chart
+containers or the FAB — and the cache work changed invalidation key arguments, added one test file,
+and deleted dead lines. IF THAT HOLDS, THE OPERATOR CAN RUN ALL ELEVEN AGAINST THE CURRENTLY LIVE
+BUILD TODAY, with no deploy and no waiting, in parallel with the proposal cycle.
+  THE PRECONDITION IS NOT WAIVED, IT IS SATISFIED DIFFERENTLY. "The deploy must have landed" exists
+  because an observation is only evidence against the build actually being served. Where the
+  property observed is IDENTICAL in both builds, the live build is a valid subject — but THAT
+  IDENTITY IS A CLAIM ABOUT THE DIFF AND IT IS ESTABLISHED, NOT ASSUMED. The channel has not read
+  the diff; the implementer has.
+  OWED: from the diff across the unpushed range, establish per check whether any of the eleven
+  reads a file, class, component or declared value that any unpushed commit changed. Report it per
+  check, not in aggregate — an aggregate answer hides the one check that fails it. IF ANY CHECK IS
+  AFFECTED, that check waits for the deploy and the other ten do not.
+  THE ONE-TAB FRESH-LOAD PRECONDITION STANDS UNCHANGED for every check, and it is load-bearing:
+  the cross-tab staleness limit is queued unfixed and a stale tab renders figures from an arbitrary
+  earlier moment.
+
+TWO FINDINGS I WANT KEPT BECAUSE THEY WILL SHAPE THE PROPOSAL AND ARE EASY TO LOSE.
+  THE BREAKPOINT SKEW. Eighty-five per cent of all responsive styling sits at one breakpoint, with
+  two uses of the next-widest and none above it. The application is effectively TWO-STATE. That is
+  a fact about the proposal's shape rather than a defect: a mobile pass on a two-state app is a
+  question about one threshold, not five.
+  THE FAB CLEARANCE GAP. The page wrapper clears sixty-four pixels while the FAB's upper edge sits
+  at one hundred and thirty-six, so content can pass beneath it, and the FAB shares its stacking
+  level with the tab bar. The topology is FIXED and does not move without an operator ruling; none
+  exists. REPORT ONLY, and the remedy is a clearance question rather than a position question —
+  which is worth saying now, because the obvious fix is the one the constraint forbids.
+
+NOTHING IS PROPOSED AND NO PHASE ADVANCES. The proposal is its own cycle and is not opened here.
+The queued items stay queued; the brass-slot element's three collisions were re-derived from the
+tree and all still hold, with no new option available, and nothing is proposed for it either.
+
+PERSISTENCE. This block persists ALONE, one block per message, appending at fourteen — together
+with the Phase A report in full and the adjacent twelve-files correction. Sweep the payload under
+both operative patterns before appending; the payload's prose opens paragraphs with ruling numbers
+and phase handles, a six-instance class of which one was a genuine wrap, so the sweep is predicted
+clean rather than assumed clean and a disagreement HALTS THE WRITE AND IS REPORTED, not remedied by
+the implementer where the text is the channel's. Predicted payload strict 1 and tripwire 1
+agreeing; after the append, strict 14 and tripwire 14, first 1, last 14, no duplicates, no breaks
+in 1 to 14, reconciled 13 + 1 = 14 and 14 minus 1 plus 1 = 14, enumeration PRINTED IN FILE ORDER.
+Derive from what is present; if these figures are wrong, yours are right and you show the
+reconciliation. Provenance RELAYED. Amend the completeness note to record the persisted set, the
+operative thirty-two-across-nine figure with its two independent routes and the channel's double
+propagation, the L4 label upgrade with its remaining call-site gap, and the standing instruction
+that the unpushed count is re-derived or omitted. Docs-only under the standing permanent licence —
+state the skip and its reason, prove docs-only by exclusion with the exclusion shown discriminating
+and its capture UNCUT, carry the bytes.
+
+---
+
+## MOB-1 RESPONSIVE — Phase A report (executed 2026-09-12, accepted by MOB-R14)
+
+Source-side measurement under MOB-R12, as corrected by MOB-R13. Report only; no file written, no
+commit, no push in the measuring cycle. Every finding labelled DERIVED or OBSERVABLE-ONLY; every
+enumeration reconciled two ways.
+
+### Step 0
+
+Host `Khaleds-MacBook-Air.local`, cwd `/Users/khaledalrashidi/DevLocal/public-statera`.
+HEAD `1161035c6907e4953b1d75eb32cf204c6dd0b143`, `main`, `git status --short` empty between printed
+delimiters. Held set MOB-R1…MOB-R13, reconciled two ways (strict 13, tripwire 13, 0 breaks).
+Resolution proofs `MATCHED-frontend`/`MATCHED-api` exit 0; negative control `statera-web` →
+`No projects matched the filters`, exit 0. Frontend `42 passed (42)` / `216 passed (216)`; API
+`51 | 10 skipped (61)` / `873 | 34 skipped (907)`; both exit 0, Errors 0. Both `tsc` exit 0 /
+0 bytes. Fixture 66, ALLOWLIST `[]`. All six matched. INTEGRATION not run and not owed — no
+`db.transaction()` boundary, no integration case, no code.
+
+### L1 — viewport and breakpoints — DERIVED
+
+`apps/web/index.html:6` `<meta name="viewport" content="width=device-width, initial-scale=1.0" />`
+(control: 2 `<meta>` in the file). No `tailwind.config.*`; v4 CSS-first with one stylesheet,
+`apps/web/src/index.css`, whose `@theme` contains no `--breakpoint-*` (control: 130 other custom
+properties). Defaults therefore apply, read from installed **tailwindcss 4.2.4**:
+`--breakpoint-sm: 40rem` (640px), `md: 48rem` (768), `lg: 64rem` (1024), `xl: 80rem` (1280),
+`2xl: 96rem` (1536).
+
+Distribution, reconciled two ways (333 = 333): **sm 284, md 28, lg 19, xl 2, 2xl 0.** The zero
+carries a positive control — a synthetic `2xl:grid-cols-4` probe matches. `xl`'s two sites are
+`InsightsPage.tsx:357` and `:372`. 30 of 84 non-test src files carry any responsive prefix.
+
+**THE FINDING IS THE SKEW: 85% of all responsive styling is a single breakpoint.** The app is
+effectively two-state — below and above 640px.
+
+### L2 — behaviour below the smallest breakpoint — DERIVED
+
+Shell: `AppShell.tsx:516` `<main … mx-auto flex w-full max-w-6xl flex-1 flex-col px-5 py-4 sm:px-6
+lg:px-8 lg:py-6>`. All four nav pages (`/`, `/activity`, `/plan`, `/insights`) return a `space-y-8`
+vertical stack as their outermost container — all four collapse to one column at the root by
+construction.
+
+`grid-cols-N`: 39 total, **33 prefixed / 6 unprefixed** (33+6=39; zero in test files). All six
+unprefixed are `grid-cols-2`; four pair with a larger prefixed count (deliberate mobile-first),
+`transactions/dialogs.tsx:352` is a 2-segment toggle, and `TwoFactorSetup.tsx:109` is a bare
+2-column backup-code grid.
+
+**The failure mode MOB-R12 named exists in six places, all dialogs**, with the gap class named per
+site (all `gap-2` = 8px):
+
+| site | template | tracks | minimum |
+|---|---|---|---|
+| `ImportDialogs.tsx:1155` | `[minmax(0,1fr)_minmax(80px,140px)_96px_32px]` | 4 (3 gaps) | 208 + 24 = **232px** |
+| `ImportDialogs.tsx:1167` | same | 4 (3 gaps) | **232px** |
+| `ImportDialogs.tsx:1913` | `[minmax(0,1fr)_minmax(80px,140px)_96px]` | 3 (2 gaps) | 176 + 16 = **192px** |
+| `ImportDialogs.tsx:2210` | 4-track | 4 (3 gaps) | **232px** |
+| `dialogs.tsx:722` | 4-track | 4 (3 gaps) | **232px** |
+| `dialogs.tsx:734` | 4-track | 4 (3 gaps) | **232px** |
+
+Whether these overflow at 320px is OBSERVABLE-ONLY.
+
+### L3 — horizontal overflow sites — DERIVED
+
+**96 distinct matched substrings** (non-test). Routes first disagreed 102 vs 96; the cause is that
+route 1 double-counts the 6 `min-w-[Npx]` strings satisfying both `min-w-\[` and `w-\[[0-9]+px\]`.
+102 − 6 = 96, reconciled. Breakdown: `whitespace-nowrap` 18, `min-w-[` 9, `w-[Npx]` 27,
+`overflow-x-auto` 1, `shrink-0` 47, `overflow-x-hidden` 0, `flex-nowrap` 0.
+
+The `whitespace-nowrap` set is dominated by money values (WeeklyDigestSection ×4,
+SpendForecastWidget ×3, MonthDeltaCard ×3, RecurringBillsCard ×2, RecurringCommitmentsCard ×1), and
+`button.tsx:8` applies it to every button in the app.
+
+### L4 — tap targets — variant table DERIVED; call sites resolved below
+
+Size table read from `components/ui/button.tsx`:
+`default h-9` (36px), `sm h-8` (32), `lg h-10` (40), `icon h-9 w-9` (36), `pill h-10` (40).
+**Every variant is below 44px; none reaches h-11.** This is DERIVED rather than OBSERVABLE-ONLY
+because `preflight.css:12` sets `box-sizing: border-box`, so a declared height IS the rendered box
+height. MOB-R12's required OBSERVABLE-ONLY label was unnecessarily weak; MOB-R14 accepted the
+upgrade.
+
+**CALL-SITE OVERRIDES (owed under MOB-R14, supplied here).** Two routes disagreed and the cause is
+named: route 1's regex `<Button\b((?:[^<>]|\n)*?)/?>` stops at the first `>`, including one inside
+a nested JSX expression, and inspected only a narrowed className blob — it found 187 tags / 27
+overrides. Route 2, a character state machine tracking `{}` depth over the whole tag, found **190
+tags / 61 overrides**, and 190 matches the independent plain-grep count of `<Button` occurrences.
+**Route 2 is operative.** Heights found: `h-8` ×36, `h-9` ×7, `h-10` ×6, `h-auto` ×6, `h-7` ×4,
+`h-14` ×1, `h-5` ×1.
+
+**Exactly ONE call site overrides above the threshold** — `AppShell.tsx:562`, `h-14` = 56px, the
+FAB. It is a false member of the below-threshold set and is subtracted. Of the remaining 60: 54
+carry an explicit value still below 44px, and **6 carry `h-auto`, which is content-dependent and
+therefore OBSERVABLE-ONLY**. The 129 sites with no override take the variant height. No positive
+control was needed for a zero because the answer was not zero.
+
+### L5 — tables — DERIVED
+
+**10 `<table>` elements**, not one. The transactions table has two presentations:
+`TransactionsTable.tsx:277` `<div className="space-y-3 p-4 md:hidden">` renders `<article>` cards;
+`:366` `<div className="hidden max-h-[560px] overflow-auto md:block">` renders the table — **the
+table is hidden below 768px.** Six of eight table-bearing files have a `md:hidden` card branch;
+`ImportDialogs` uses `overflow-x-auto` (`:741`); `BudgetPage:569` sits inside
+`surface-scroll-card max-h-72 overflow-auto` — initially misread as having no strategy and
+corrected in the same report, since `overflow-auto` covers both axes. No table declares `min-w`;
+all are `w-full`. One hard constraint: `ImportDialogs.tsx:2207` `<th style={{ minWidth: 340 }}>`.
+
+### L6 — dialogs — width DERIVED, height OBSERVABLE-ONLY
+
+`dialog.tsx:35` declares `w-[calc(100vw-1rem)] max-w-lg … sm:w-full`, so `max-w-*` binds only when
+the viewport is wide; at 320px every dialog is 304px regardless of a `max-w-5xl` override.
+**Vertical is the gap: 21 `DialogContent` instances, 7 declare a `max-h`, 14 do not**, and those 14
+can exceed viewport height with no internal scroll. `dialogs.tsx:336` (`max-h-[92vh] …
+overflow-y-auto`) and `SettingsDialog.tsx:1127` (`max-h-[88vh] … flex-col`) show the intended
+pattern.
+
+### L7 — the FAB — REPORT ONLY
+
+`AppShell.tsx:567` `fixed bottom-20 end-4 z-40 h-14 w-14 … lg:bottom-6 lg:end-8`, aria-label
+`Log transaction` (`:568`). 56px, logical `end-4` (RTL-safe). The mobile tab bar is `:524`
+`bottom-tabs fixed bottom-0 left-0 right-0 z-40 … lg:hidden`; the page wrapper is `:211`
+`relative min-h-screen bg-background pb-16 lg:pb-0`.
+
+**The collision: the FAB and the tab bar share `z-40`, and the wrapper clears 64px while the FAB's
+upper edge sits at 80 + 56 = 136px.** Content can therefore pass beneath the FAB. Whether anything
+interactive lands there is OBSERVABLE-ONLY. Topology is FIXED; nothing proposed.
+
+### L8 — physical-property baseline — DERIVED, and the record's file count is falsified
+
+Re-derived, not carried. The first pattern `\b(ml|mr|pl|pr)-[0-9]` gave 27/8 — an implementer error
+of the assumed-convention class, since the record's pattern includes non-numeric suffixes. Widened
+to `\b(ml|mr|pl|pr)-[a-z0-9\[]`: **32 sites / 9 files.** The five missed are all `ml-auto`/`mr-auto`
+(`TransactionsPage:374`, `ProfilePage:348,367`, `dialogs.tsx:562,1132`).
+
+**Sites reconcile with the record at exactly 32. Files do not: 9, not 12.** Measured at `a39a0cb`,
+the commit where the figure was recorded, the widened pattern gives **32 / 9 — identical to HEAD**.
+The baseline has not moved; the record's "12 files" was wrong when written. Variants tried and
+rejected: including tests (9), including css (9), all of `apps/web` (10). **Delta: 0 sites.**
+
+`components/ui/` is **0** under both patterns, control `components/pages/` = 30 (widened) / 25
+(narrow). The primitives zero is discriminating and holds.
+
+### L9 — the brass-slot element — DERIVED
+
+`SpendForecastWidget.tsx:68`
+`<p className="financial-number whitespace-nowrap text-[1.25rem] font-semibold text-accent-strong">`.
+Re-derived from the tree: **`text-accent-strong` has exactly ONE use in the entire application** —
+this line. All three collisions still hold simultaneously: the rationed brass slot, an L3 overflow
+site, and the 1.25rem enlargement clearing the WCAG large-text threshold at 3.39 contrast.
+**No option has become available that was not before.** Nothing proposed.
+
+### L10 — charts — declarations DERIVED, labels OBSERVABLE-ONLY
+
+Every chart uses `<ResponsiveContainer width="100%" height="100%">`; **no chart declares a minimum
+width.** Containers declare `minHeight: "400px"` (`DashboardPage:815`, `ExpensesPage:1006`). Axis
+and tooltip crowding at narrow widths is OBSERVABLE-ONLY. The `style-src 'unsafe-inline'` allowance
+exists for these and was not disturbed.
+
+### L11 — the observation list
+
+Eleven checks, each with width, surface, and PASS and FAIL stated separately. **Preconditions: one
+tab, fresh load, navigating between pages** — load-bearing because the cross-tab staleness limit is
+queued unfixed.
+
+| # | width | surface | PASS | FAIL |
+|---|---|---|---|---|
+| 1 | 320 | all four nav pages | no horizontal body scroll; cards full-width | page scrolls sideways or a card is cut off |
+| 2 | 320 | Edit-transaction and Import preview row grids | four columns visible, name readable | name column near-zero, or row scrolls sideways |
+| 3 | 320 | Import preview `minWidth: 340` column | horizontal scroll available AND discoverable | content clipped with no way to reach it |
+| 4 | 320 & 390 | the 14 dialogs without `max-h` | fits, or scrolls internally | taller than viewport, actions unreachable |
+| 5 | 320 | Home, bottom of a long list | nothing interactive under the FAB | last row's control covered by the FAB |
+| 6 | 320 | Profile → 2FA backup codes | both columns readable | codes wrap mid-token or overflow |
+| 7 | 320 | Insights money values | full figure visible | clipped, or pushes its card wider |
+| 8 | 320 | 32px `size="sm"` buttons | hit reliably first time | repeated mis-taps |
+| 9 | 768 | Transactions card↔table swap | table appears cleanly | both render, or neither |
+| 10 | 1024 & 1280 | Insights `xl:` panels | side-by-side from 1280 — confirm one column at 1024 is intended | unintended single column on a wide tablet |
+| 11 | 320 | any chart | labels legible, tooltip on-screen | labels overlap, tooltip escapes |
+
+---
+
+## Adjacent correction — THE TWELVE-FILES FIGURE IS FALSIFIED
+
+**Operative figure: 32 physical-property sites across 9 files. Delta zero.** Anything citing
+twelve files is citing a falsified number.
+
+Two independent routes agree on nine, and the second does not depend on the pattern being right:
+1. **Re-measurement** at `a39a0cb`, the commit where the figure was recorded, under a widened
+   pattern: 32 sites / 9 files — identical to HEAD.
+2. **The record's own enumeration** lists nine file paths while its prose immediately above says
+   twelve. The document contradicts itself, and its site count reconciles at 32 across those nine.
+
+**The figure was wrong when written**, not moved by intervening work. **The channel propagated it
+twice** — into the track-opening block and into this phase's own L8 mandate — without checking it
+against the enumeration directly beneath it in the same document. That is derive-don't-carry's
+sharpest form: a figure taken from a document about the artifact rather than from the artifact,
+committed in the block that instructed the implementer to re-derive rather than carry.
+
+**Three corrections in three places, none an edit.** The Phase A report and the two blocks that
+carried the figure are historical records; the correction travels adjacent, here.
+
+**The primitives zero is unaffected and holds** under both patterns, control returning 30.
+
+## Owed items, supplied
+
+**Commit count** — re-derived, both routes: `git rev-list --count origin/main..HEAD` = **10**,
+`git log --oneline origin/main..HEAD | wc -l` = **10**, agreeing. The Phase A report said nine and
+was wrong: **the fourth wrong figure for this quantity, one cycle after the same reporter measured
+it and wrote that recency is not enumeration.** Standing instruction adopted: **this count is
+re-derived by both routes at the top of any report that states it, or it is not stated.**
+
+**L2 gap classes** — supplied in the L2 table above. All six sites use `gap-2` (8px). The 24px term
+is three gaps on a four-track grid; the one three-track site (`ImportDialogs.tsx:1913`) has two gaps
+and a 192px minimum, not 232px.
+
+**L4 call-site subtraction** — supplied in L4 above. 190 tags, 61 overrides, **exactly one above
+threshold** (the FAB at 56px), 54 still below by explicit value, 6 `h-auto` reclassified
+OBSERVABLE-ONLY.
+
+**Deploy dependency, per check.** Files changed across the unpushed range: `BudgetPage.tsx`,
+`DashboardPage.tsx`, `ExpensesPage.tsx`, `IncomePage.tsx`, `TransactionsPage.tsx`,
+`QuickAddContext.tsx`, `cache-invalidation.test.tsx`, and this doc. **Every added or removed line
+in those source files is an `invalidateQueries` key argument, a deleted dead invalidation, or a
+four-line explanatory comment. Zero lines match `className|style=|<[A-Za-z]|grid-|h-[0-9]|max-w|
+whitespace|overflow`** — control: the same pattern finds **9** such lines on `eb036c2`, a commit
+that did change layout.
+
+| check | reads | file changed in range? | verdict |
+|---|---|---|---|
+| 1 | four page layouts | yes (4 pages) — but no layout line | **runnable now** |
+| 2 | `ImportDialogs`, `transactions/dialogs` grids | no | **runnable now** |
+| 3 | `ImportDialogs` preview table | no | **runnable now** |
+| 4 | 14 `DialogContent` sites | no | **runnable now** |
+| 5 | `AppShell` FAB + wrapper padding | no | **runnable now** |
+| 6 | `TwoFactorSetup` | no | **runnable now** |
+| 7 | Insights money spans | no | **runnable now** |
+| 8 | `button.tsx` + call sites | yes (call sites) — but no size line | **runnable now** |
+| 9 | `TransactionsTable` | no | **runnable now** |
+| 10 | `InsightsPage` xl grids | no | **runnable now** |
+| 11 | chart containers | yes (2 pages) — but no chart line | **runnable now** |
+
+**All eleven are runnable against the currently live build with no deploy.** The precondition is
+satisfied rather than waived: the observed properties are identical in both builds, established
+from the diff. **The one-tab fresh-load precondition stands unchanged.**
