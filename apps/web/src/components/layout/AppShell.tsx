@@ -207,8 +207,12 @@ function AppShellLayout() {
     }
   }, [closeDrawer, logout, navigate, toast])
 
+  // pb-36 (144px) clears the FAB, whose upper edge sits at bottom-20 + h-14 = 136px on mobile;
+  // lg:pb-24 (96px) clears it at lg:bottom-6 + h-14 = 80px on desktop, where the bottom-tabs are
+  // absent. Previously pb-16 cleared only the 64px tab bar, so content could pass beneath the
+  // FAB. Clearance change only — the FAB topology is unchanged.
   return (
-    <div className="relative min-h-screen bg-background pb-16 lg:pb-0">
+    <div className="relative min-h-screen bg-background pb-36 lg:pb-24">
       {/* Skip to content — a11y */}
       <a
         href="#main-content"

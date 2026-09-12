@@ -67,7 +67,7 @@ export function MonthDeltaCard({
 }) {
   return (
     <article className="section-panel">
-      <div className="section-header justify-start gap-2">
+      <div className="section-header flex-row items-center justify-start gap-2">
         <TrendingUp className="h-4 w-4 text-primary" />
         <h2 className="text-lg font-semibold">Spend vs Last Month</h2>
       </div>

@@ -119,7 +119,7 @@ function HeroDelta({
   const deltaText = `${Math.abs(value).toFixed(1)}${unit === "points" ? " pts" : "%"} vs last month`
   return (
     <div
-      className={`mt-2 inline-flex flex-wrap items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
+      className={`mt-2 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
         positive
           ? "border-success/25 bg-success/10 text-success"
           : "border-warning/25 bg-warning/10 text-warning"
@@ -811,22 +811,22 @@ export function DashboardHero({
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div className="min-w-0">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Income</div>
-              <div className="mt-1 font-mono text-xl font-semibold tabular-nums"><AnimatedKD value={monthIncome} /></div>
+              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl"><AnimatedKD value={monthIncome} /></div>
               {deltas && <HeroDelta value={deltas.incomeDelta} />}
             </div>
             <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Expenses</div>
-              <div className="mt-1 font-mono text-xl font-semibold tabular-nums"><AnimatedKD value={monthExpenses} /></div>
+              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl"><AnimatedKD value={monthExpenses} /></div>
               {deltas && <HeroDelta value={deltas.expensesDelta} inverted />}
             </div>
             <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Remaining</div>
-              <div className="mt-1 font-mono text-xl font-semibold tabular-nums"><AnimatedKD value={monthRemaining} /></div>
+              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl"><AnimatedKD value={monthRemaining} /></div>
               {deltas && <HeroDelta value={deltas.remainingDelta} />}
             </div>
             <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Savings rate</div>
-              <div className="mt-1 font-mono text-xl font-semibold tabular-nums"><AnimatedPercent value={savingsRate} /></div>
+              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl"><AnimatedPercent value={savingsRate} /></div>
               {deltas && <HeroDelta value={deltas.savingsRateDelta} unit="points" />}
             </div>
           </div>

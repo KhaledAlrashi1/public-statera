@@ -42,7 +42,7 @@ export function WeeklyDigestSection({
 
   return (
     <section className="section-panel">
-      <div className="section-header justify-start gap-2">
+      <div className="section-header flex-row items-center justify-start gap-2">
         <CalendarDays className="h-4 w-4 text-primary" />
         <h2 className="text-lg font-semibold">This Week</h2>
       </div>

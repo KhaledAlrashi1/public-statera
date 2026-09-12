@@ -215,8 +215,14 @@
       0 0 0 1px hsl(var(--primary) / 0.08) inset;
   }
 
+  /* Stacks below sm so a card title is not squeezed into a narrow column beside its meta
+     block. 24 call sites: 19 are two-block (title + meta) and stack as intended; 1 has a
+     single child (no-op). The 4 that are [icon, heading] SIBLING pairs would stack the icon
+     onto its own line, so they opt back out with flex-row — utilities beat this rule because
+     @layer utilities is declared after @layer components, independent of source order. */
   .section-header {
-    @apply flex items-center justify-between
+    @apply flex flex-col items-start gap-2
+      sm:flex-row sm:items-center sm:justify-between
       px-[var(--spacing-section-px)] py-[var(--spacing-section-header-py)];
   }
 

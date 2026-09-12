@@ -32,7 +32,13 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "dialog-shell fixed left-1/2 top-1/2 z-50 w-[calc(100vw-1rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-[var(--radius-hero)] border border-border/70 bg-card p-5 text-card-foreground shadow-[var(--shadow-level-3)] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-full sm:p-6 data-[state=open]:animate-in data-[state=closed]:animate-out",
+        // max-h-[90vh] + overflow-y-auto are the DEFAULT, not an override: 14 of 21 instances
+        // declared no height cap and could exceed the viewport with their actions unreachable.
+        // The 7 that declare their own (max-h-[88vh]/[92vh]) win via cn()'s conflict group.
+        // Safe for absolutely-positioned children: Select/Tooltip/Dialog all portal out, and
+        // the one non-portal dropdown (suggestion-combobox) lives only in two dialogs that
+        // already declared this pair.
+        "dialog-shell fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100vw-1rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[var(--radius-hero)] border border-border/70 bg-card p-5 text-card-foreground shadow-[var(--shadow-level-3)] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-full sm:p-6 data-[state=open]:animate-in data-[state=closed]:animate-out",
         className
       )}
       {...props}

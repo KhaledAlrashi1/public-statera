@@ -344,7 +344,7 @@ export default function InsightsPage() {
 
       {storyOfMonth ? (
         <section className="section-panel panel-featured">
-          <div className="section-header justify-start gap-2">
+          <div className="section-header flex-row items-center justify-start gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
             <h2 className="text-lg font-semibold">Story of the month</h2>
           </div>
