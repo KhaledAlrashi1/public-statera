@@ -19,12 +19,14 @@ import { MemoryRouter } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import DashboardPage from "./DashboardPage"
+import BudgetPage from "./BudgetPage"
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   useDashboardPageQueries: vi.fn(),
   dismissBudgetAlert: vi.fn(),
   clearDemoData: vi.fn(),
+  saveBudgets: vi.fn(),
   noop: vi.fn(),
 }))
 
@@ -52,10 +54,54 @@ vi.mock("./dashboard/hooks", () => ({
 
 vi.mock("./budget/hooks", () => ({
   findDuplicateCategory: () => null,
-  saveBudgets: vi.fn(),
+  saveBudgets: (...a: unknown[]) => mocks.saveBudgets(...a),
+  getBudgets: vi.fn(),
+  findMostRecentBudgetsBefore: vi.fn(),
+  useBudgetActiveMonths: () => ({
+    monthOptions: ["2026-03"],
+    activeMonthsError: null,
+    refetchActiveMonths: mocks.noop,
+    activeMonthsFetching: false,
+  }),
+  useBudgetPageQueries: () => ({
+    categories: [],
+    budgetMetrics: undefined,
+    budgets: [],
+    profileContext: null,
+    loadingBudgets: false,
+    loadingMetrics: false,
+    budgetsFetching: false,
+    metricsFetching: false,
+    budgetsError: null,
+    metricsError: null,
+    categoriesError: null,
+    refetchBudgets: mocks.noop,
+    refetchMetrics: mocks.noop,
+    refetchCategories: mocks.noop,
+  }),
 }))
 
-vi.mock("./budget/sections", () => ({ BudgetDialog: () => null }))
+// BudgetDialog is the save seam for the Item-B case. It renders its trigger unconditionally
+// (ignoring `open`) so the test does not have to drive the page's own open/close state; the
+// DashboardPage cases above also render this component, where the extra button is unused.
+vi.mock("./budget/sections", () => ({
+  BudgetDialog: ({
+    onSave,
+  }: {
+    onSave: (v: { month: string; category: string; amount_kd: string }) => Promise<void>
+  }) => (
+    <button
+      type="button"
+      onClick={() => void onSave({ month: "2026-03", category: "Food", amount_kd: "10.000" })}
+    >
+      save budget
+    </button>
+  ),
+  BudgetHero: () => null,
+  BudgetChart: () => null,
+  BudgetTable: () => null,
+  IncomePlanningCard: () => null,
+}))
 
 vi.mock("@/components/ui/category-detail-modal", () => ({ CategoryDetailModal: () => null }))
 
@@ -205,5 +251,53 @@ describe("MOB-F1 cache invalidation — outcomes, not spies", () => {
     await waitFor(() => {
       expect(invalidated(qc, ["insights", "weekly-digest"])).toBe(true)
     })
+  })
+})
+
+/** Render BudgetPage with a QueryClient the test owns. */
+function renderBudgetWithClient() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  render(
+    <MemoryRouter initialEntries={["/plan"]}>
+      <QueryClientProvider client={queryClient}>
+        <BudgetPage />
+      </QueryClientProvider>
+    </MemoryRouter>
+  )
+  return queryClient
+}
+
+describe("MOB-F1 Item B — budget writes reach the setup-progress query", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    window.localStorage.clear()
+    mocks.saveBudgets.mockResolvedValue({ items: [] })
+  })
+
+  it("a budget save invalidates setup-progress EVEN WHEN its month differs from the write's", async () => {
+    const qc = renderBudgetWithClient()
+
+    // The real declared key from dashboard/hooks.ts:81, seeded under a DIFFERENT month than
+    // the write targets. That difference is the point: `setupMonth` is DashboardPage's own
+    // state and the write's month is BudgetPage's, so the two are independent and can differ.
+    // A month-pinned filter would match only when they coincide and fail silently otherwise —
+    // this defect's own mechanism one segment over. The filter is therefore month-agnostic.
+    qc.setQueryData(["budgets", "setup-progress", "2026-01"], { items: [] })
+    // CONTROL KEY: ["merchants"] — declared at TransactionsPage.tsx:80. The save handler's
+    // filters are budgets / budget-metrics / dashboard-bundle / insights; "merchants" shares
+    // no first segment with any of them, so it must survive. Without it, the assertion above
+    // would also be satisfied by a blanket invalidateQueries() sweeping everything.
+    qc.setQueryData(["merchants"], [])
+
+    expect(invalidated(qc, ["budgets", "setup-progress", "2026-01"])).toBe(false)
+
+    fireEvent.click(screen.getByText("save budget"))
+
+    // WITHOUT the change the filter is ["budgets", "2026-03"], whose index 1 compares a month
+    // string against the literal "setup-progress" and can never match: this reads false.
+    await waitFor(() => {
+      expect(invalidated(qc, ["budgets", "setup-progress", "2026-01"])).toBe(true)
+    })
+    expect(invalidated(qc, ["merchants"])).toBe(false)
   })
 })

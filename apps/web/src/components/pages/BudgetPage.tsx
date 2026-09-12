@@ -233,7 +233,7 @@ export default function BudgetPage() {
 
     const saved = await saveBudgets(month, next)
     queryClient.setQueryData(["budget-items", month], saved)
-    queryClient.invalidateQueries({ queryKey: ["budgets", month] })
+    queryClient.invalidateQueries({ queryKey: ["budgets"] })
     queryClient.invalidateQueries({ queryKey: ["budget-metrics"] })
     queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
     queryClient.invalidateQueries({ queryKey: ["insights"] })
@@ -256,7 +256,7 @@ export default function BudgetPage() {
       const next = budgets.filter((_, i) => i !== deleteIndex)
       const saved = await saveBudgets(selectedMonth, next)
       queryClient.setQueryData(["budget-items", selectedMonth], saved)
-      queryClient.invalidateQueries({ queryKey: ["budgets", selectedMonth] })
+      queryClient.invalidateQueries({ queryKey: ["budgets"] })
       queryClient.invalidateQueries({ queryKey: ["budget-metrics"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
       queryClient.invalidateQueries({ queryKey: ["insights"] })
@@ -268,7 +268,7 @@ export default function BudgetPage() {
           try {
             const restored = await saveBudgets(selectedMonth, [...saved.items, deletedBudget])
             queryClient.setQueryData(["budget-items", selectedMonth], restored)
-            queryClient.invalidateQueries({ queryKey: ["budgets", selectedMonth] })
+            queryClient.invalidateQueries({ queryKey: ["budgets"] })
             queryClient.invalidateQueries({ queryKey: ["budget-metrics"] })
             queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
             queryClient.invalidateQueries({ queryKey: ["insights"] })
@@ -301,7 +301,7 @@ export default function BudgetPage() {
 
       const saved = await saveBudgets(selectedMonth, cloned)
       queryClient.setQueryData(["budget-items", selectedMonth], saved)
-      queryClient.invalidateQueries({ queryKey: ["budgets", selectedMonth] })
+      queryClient.invalidateQueries({ queryKey: ["budgets"] })
       queryClient.invalidateQueries({ queryKey: ["budget-metrics"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
       queryClient.invalidateQueries({ queryKey: ["insights"] })
