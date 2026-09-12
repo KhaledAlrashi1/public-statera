@@ -5,7 +5,13 @@ import { Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  // pointer-coarse:min-h-11 / min-w-11 put every button at the 44px touch minimum on
+  // coarse-pointer devices and leave desktop untouched. It lives on the BASE rather than in the
+  // size table so it covers all 190 call sites including the 61 that override the height
+  // in-tag; min-* raises without capping, so the FAB's h-14 (56px) is unaffected.
+  // NOTE: this is a device-capability switch, not a width switch — it fires on a touch laptop
+  // and does NOT fire in a narrow desktop window. See the close-out's divergence note.
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors pointer-coarse:min-h-11 pointer-coarse:min-w-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
