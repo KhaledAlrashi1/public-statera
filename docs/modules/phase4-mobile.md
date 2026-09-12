@@ -464,6 +464,55 @@ The amendments above are left as they stand. This is the live index from here fo
   vocabulary-derivation findings. Cited, not minted; the count stays at **SIX**.
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.**
 
+### Amendment — MOB-R15 persistence commit, 2026-09-12
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R15**, contiguous: first **1**, last **15**, **0**
+  duplicates, **0** breaks in 1…15. **MOB-R15 provenance: RELAYED.**
+- **THE OBSERVATION ROUND IS RECORDED AS AN OPERATOR OBSERVATION AGAINST THE LIVE BUILD**, taken on
+  a **physical phone, not a simulator**, in one session. The deploy precondition was **satisfied
+  differently, not waived** — MOB-R14's per-check diff analysis established the eleven checks read
+  nothing the unpushed commits touched. **Nine of eleven observed and passing (1–6, 8, 9); THREE
+  UNOBSERVED (7 untested; 10 and 11 need a resizable viewport). The unobserved are UNOBSERVED, not
+  passing.**
+- **TWO PASSES ARE DISCOUNTED, and the fault is the channel's authoring, not the observation.**
+  **Check 8** (32px tap targets) — one attentive person tapping deliberately hits a 32px control;
+  the 44px guideline is about **error rates** across users and conditions, so its pass and fail are
+  not different worlds. **The L4 measurement stands on its own and is NOT weakened by this pass.**
+  **Check 5** (FAB clearance) — passed while four of nine captures show the FAB overlapping content;
+  the check asked about **interactive** elements and the overlaps are non-interactive, so it
+  returned true while its underlying concern was real. **A check narrower than its concern reports
+  on the narrow thing and reads as reporting on the broad one.** Both met L11's *form* (pass and
+  fail stated separately) and failed its *purpose*. **No new standing rule** — the existing
+  negative-case-equals-positive-case rule applied to a check the channel wrote. Count stays **SIX**.
+- **A PREVIOUSLY-UNVERIFIED ITEM IS NOW VERIFIED IN PRODUCTION.** September captures show four KPIs
+  at zero **with no delta chips**; August captures show chips present. That is the **frontend-fixes
+  track's Item 4 empty-month delta guard**, which closed recorded explicitly as NOT verified in
+  production because no observed month had zero rows beside a populated previous month. **The
+  operator's unrequested month-switch produced exactly that state.** Verified by an observation
+  nobody planned.
+- **THE TENSE CLASS IS A DISTINCT DEFECT CLASS AND WAS MISFILED ONCE BY THE CHANNEL.** On a PAST
+  month the safe-to-spend card renders a per-day figure equal to the whole monthly runway above a
+  zero-days-remaining label, with on-pace/ahead-of-pace/"so far this month" copy about a finished
+  month, and forward-looking advice about August rendered in September. **The root cause is failing
+  to distinguish THE SELECTED MONTH from THE CURRENT MONTH — not zero-vs-absent.** Filing it under
+  the zero class would have buried a distinct cause inside a phase scoped to a different one.
+  **Severity corrected:** it requires a past month to be selected and the default view is
+  unaffected, so **it does not jump the queue and no phase is resequenced.** The September captures
+  ARE the zero class (on-track copy on a month with no transactions) — **two classes, one round,
+  kept separate.** **The application already knows:** the needs-attention card renders a this-month
+  badge vs a year-month badge correctly *in its own header*, then renders body copy assuming the
+  present — the signal exists at one site and is unused at the site beside it.
+- **QUEUED BY OPERATOR STATEMENT, NOT OPENED: CSV/spreadsheet import must let the user MAP THEIR
+  COLUMNS to the application's fields.** Belongs with the import surface; **NOT mobile-track work.**
+  **TRIGGER: the next cycle that opens import.**
+- **NEXT CYCLE (not opened here): the responsive proposal against L1–L11, carrying the T1–T4 tense
+  measurement IN THE SAME REPORT**, report-only, nothing proposed for T1–T4. The operator's three
+  observed findings and the channel's two are **observed instances to be addressed within that
+  proposal, not new scope**.
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.**
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
@@ -3234,3 +3283,283 @@ that did change layout.
 **All eleven are runnable against the currently live build with no deploy.** The precondition is
 satisfied rather than waived: the observed properties are identical in both builds, established
 from the diff. **The one-tab fresh-load precondition stands unchanged.**
+
+MOB-R15 — THE OBSERVATION ROUND IS COMPLETE AND ITS EVIDENCE CLASS IS STATED. Nine of eleven
+checks observed, TWO OF THEM BY CHECKS THE CHANNEL WROTE BADLY, and the passes are discounted
+accordingly. A NEW DEFECT CLASS IS FOUND AND IT IS NOT THE ONE IT WAS FIRST FILED UNDER. A small
+measurement rides the proposal cycle. No phase is resequenced.
+
+CADENCE. Issued under test (b) and (c).
+
+PHASE A's L1 THROUGH L11 WERE ACCEPTED AT MOB-R14 AND ALL FOUR OWED ITEMS CAME BACK CLEAN AT
+45d507b — the commit count re-derived by both routes with the standing instruction adopted, the L2
+gap classes named with ONE OF THE REPORTER'S OWN SITES CORRECTED FROM 232 TO 192 PIXELS, the L4
+call-site override gap closed with the two routes reconciled and the one above-threshold member
+subtracted, and the deploy-dependency claim ESTABLISHED FROM THE DIFF per check rather than in
+aggregate. That last one is why this round happened at all: it turned a deploy into a non-blocker
+and the operator observed against the live build the same day.
+
+═══ THE OBSERVATION ROUND — WHAT IT ESTABLISHES AND WHAT IT DOES NOT ═══
+
+THE OPERATOR OBSERVED ON A PHYSICAL PHONE, NOT A SIMULATOR, WHICH IS STRONGER EVIDENCE, and he ran
+a better test than the list asked for: HE SWITCHED BETWEEN A MONTH WITH DATA AND A MONTH WITHOUT,
+which no check specified. That single unrequested variation produced the most consequential finding
+of the round, and it is the reason two separate defect classes are distinguishable below rather than
+collapsed into one.
+
+OBSERVED AND PASSING: checks 1 through 6, 8 and 9. NOT OBSERVED: check 7, untested; checks 10 and
+11, both requiring a resizable viewport. The unobserved three are UNOBSERVED, not passing.
+
+TWO PASSES ARE DISCOUNTED AND THE FAULT IS THE CHANNEL'S. Check 5 asked whether the FAB covers
+anything interactive; check 8 asked whether small buttons can be tapped reliably. BOTH WERE WRITTEN
+SO THAT THEIR NEGATIVE CASE DOES NOT DISTINGUISH WHAT THEY CLAIM TO MEASURE.
+  CHECK 8 IS THE CLEARER ERROR. One attentive person tapping deliberately hits a 32-pixel control;
+  the forty-four-pixel guideline is about ERROR RATES across users, hands and conditions, not about
+  whether a careful self-test succeeds. The check's pass and its fail are therefore not different
+  worlds, and the L4 measurement — every declared variant below threshold, fifty-four sites below by
+  explicit value — STANDS ON ITS OWN AND IS NOT WEAKENED BY THIS PASS.
+  CHECK 5 PASSED WHILE THE SCREENSHOTS SHOW THE OPPOSITE. The operator reported the FAB may be
+  covering content, and four of the nine captures show it overlapping: a delta chip on Home, the
+  final axis tick of the category chart, and card content on Insights. The check asked whether
+  anything INTERACTIVE sits beneath it and the overlaps are non-interactive, so the check returned
+  true while the underlying concern was real. A check narrower than the concern it was written for
+  reports on the narrow thing and reads as reporting on the broad one.
+  RECORDED AS A CHANNEL AUTHORING DEFECT, not an observation defect. The operator's screenshots
+  carry more information than the checks he was answering, which is the correct way round but is
+  not a substitute for checks that discriminate. L11's own mandate required pass and fail stated
+  SEPARATELY so a check is discriminating; these two met the form and failed the purpose.
+  NO NEW STANDING LINE — this is the existing rule that a check whose negative case equals its
+  positive case is not a check, applied to a check the channel wrote rather than one it reviewed.
+  The count stays at SIX.
+
+═══ THE OPERATOR'S THREE, CONFIRMED FROM THE CAPTURES ═══
+
+(1) THE FAB OVERLAP IS REAL AND L7 ALREADY HOLDS THE MECHANISM: the page wrapper reserves
+sixty-four pixels of bottom clearance while the FAB's upper edge sits at one hundred and thirty-six.
+It is a CLEARANCE question, not a POSITION question, and that distinction is load-bearing because
+the position is the thing the constraint fixes. The topology does not move.
+
+(2) THE KPI BOUNDARY OBSERVATION IS ACCEPTED AND THERE IS A LAYOUT DEFECT UNDERNEATH IT THAT THE
+OPERATOR DID NOT ASK ABOUT. At four digits the money value WRAPS BETWEEN THE PREFIX AND THE NUMBER
+— the currency prefix on one line, the figure on the next — and the delta chips wrap too, leaving
+adjacent chips at visibly unequal heights. Enclosure is a design question; the wrap is a defect.
+The row needs layout work whether or not it gets borders.
+
+(3) PROFILE DISCOVERABILITY IS CONFIRMED: the only route is the hamburger. Navigation is in MOB-1's
+charter and this is now an observed instance rather than an inferred one.
+
+═══ THE CHANNEL'S FINDINGS FROM THE CAPTURES ═══
+
+THE CARD-HEADER SQUEEZE MAY BE THE MOST PERVASIVE MOBILE ISSUE IN THE BATCH. Card titles wrap to
+three lines inside a narrow column while their subtitles sit beside them with room to spare —
+visible on the safe-to-spend card, on top spending, and on expenses by category. A two-column
+header split that does not stack at phone width. MEASURE IT: the shared header component, whether
+the split is responsive, and every call site. It is one component and therefore possibly one fix.
+
+A DUPLICATE LABEL AND AN ORPHANED SEPARATOR ON THE ACTIVITY ROWS. A category label renders TWICE
+in one row, once as text and once as a chip; and a row with no category renders the separator
+bullet with nothing following it. Small, and it is the kind of thing that reads as unfinished.
+
+ONE POSITIVE OBSERVATION WORTH RECORDING AS EVIDENCE RATHER THAN AS GOOD NEWS. The September
+captures show all four KPIs at zero WITH NO DELTA CHIPS, while the August captures show chips
+present. THAT IS THE FRONTEND-FIXES TRACK'S ITEM 4 GUARD OBSERVED WORKING IN PRODUCTION. It closed
+recorded explicitly as NOT VERIFIED IN PRODUCTION, because no observed month had zero rows beside a
+populated previous month. The operator's month-switch produced exactly that state. A recorded
+unverified item is now verified, by an observation nobody planned.
+
+TWO PREVIOUSLY-QUEUED ITEMS ARE NOW OBSERVED LIVE, still queued, not opened: the headline rounding
+to a thousands abbreviation directly above the same figure at full precision, and the
+twelve-of-twelve months claim over a chart with five flat-zero months.
+
+═══ THE NEW CLASS — MISFILED ONCE BY THE CHANNEL, AND THE CORRECTION MATTERS ═══
+
+THE DEFECT. Viewing a PAST month, the safe-to-spend card renders a per-day figure IDENTICAL to the
+whole monthly runway, directly above a zero-days-remaining label — a division guard clamping zero
+days to one, so the per-day figure overstates by roughly the length of the month. Around it: an
+on-pace projection with a thirty-one-of-thirty-one-days denominator, an ahead-of-pace badge, and
+so-far-this-month copy, all about a month that has finished. Elsewhere, forward-looking advice that
+a category is climbing and is worth reviewing BEFORE IT GROWS, about August, in September.
+
+THE CHANNEL FILED THIS UNDER ZERO-VERSUS-NO-DATA AND THAT WAS WRONG. The root cause is not a
+failure to distinguish zero from absent; it is a failure to distinguish THE SELECTED MONTH from THE
+CURRENT MONTH. Present-tense and forward-looking copy is rendered about whatever month is selected.
+Filing it with the zero class because it was found beside the zero class would have buried a
+distinct cause inside a phase scoped to a different one.
+  THE SEVERITY FRAMING IS ALSO CORRECTED. The channel told the operator this appears on an ordinary
+  action. It requires a past month to be selected, which is deliberate rather than incidental, and
+  the default view is unaffected. IT DOES NOT JUMP THE QUEUE ON FREQUENCY and no phase is
+  resequenced for it.
+  THE OPERATOR'S SEPTEMBER CAPTURES ARE THE OTHER HALF AND THEY DO BELONG TO THE ZERO CLASS:
+  on-track and staying-inside-plan copy on a month with no transactions at all. TWO CLASSES, ONE
+  OBSERVATION ROUND, AND THEY ARE KEPT SEPARATE.
+
+THE FINDING THAT MAKES THIS CHEAP TO SIZE: THE APPLICATION ALREADY KNOWS. The needs-attention card
+renders a this-month badge on the current month and a year-month badge on a past one — the same
+component distinguishes the two correctly IN ITS OWN HEADER and then renders body copy assuming the
+present. The signal exists at one site and is unused at the site beside it.
+
+═══ WHAT THIS CYCLE DOES — A MEASUREMENT RIDING THE PROPOSAL, NOT A NEW PHASE ═══
+
+THE RESPONSIVE PROPOSAL PROCEEDS as its own cycle against L1 through L11, now informed by the
+observations above. Treat the operator's three and the channel's two as OBSERVED instances to be
+addressed within that proposal, not as new scope.
+
+AND MEASURE THE TENSE CLASS IN THE SAME REPORT, REPORT-ONLY, NOTHING PROPOSED FOR IT:
+  T1 — ENUMERATE EVERY SURFACE RENDERING PRESENT-TENSE OR FORWARD-LOOKING COPY ABOUT A MONTH. Both
+       static strings and computed narrative. Per site: file:line, the string or template, and which
+       month value it is rendered against. Reconcile two ways, and DERIVE THE SEARCH VOCABULARY
+       FROM THE ARTIFACT — the copy strings and narrative builders themselves — not from a guessed
+       list of tense markers. That is the class that has now cost three misses in this project, and
+       a tense vocabulary assumed rather than derived is exactly its shape.
+  T2 — IS THE CURRENT-MONTH SIGNAL AVAILABLE TO THEM. Establish from source how the badge computes
+       the distinction, whether that value is in scope at each T1 site, and whether it is server-
+       supplied or client-derived. If some sites cannot reach it, name them and state what reaching
+       it would require.
+  T3 — THE ZERO-DAYS GUARD. Locate the division producing the per-day figure, show the guard, and
+       state exactly what it does at zero days. Show the code; do not describe it.
+  T4 — SIZE IT, IN ONE SENTENCE. Is this a handful of strings, or its own phase? That answer is the
+       whole point of the measurement and it decides the sequencing, which is the operator's.
+  NOTHING IS PROPOSED FOR T1 THROUGH T4 AND NOTHING IS FIXED. A remedy that arrives with the
+  measurement forecloses the sequencing decision the measurement exists to inform.
+
+ALSO RECORD, QUEUED AND NOT OPENED: the operator's requirement that CSV and spreadsheet import let
+the user MAP THEIR COLUMNS to the application's fields. Operator statement, this cycle. It belongs
+with the import surface and is NOT mobile-track work. TRIGGER: the next cycle that opens import.
+
+CONSTRAINTS UNCHANGED. Nothing is fixed, styled, committed or pushed by the measurement half. The
+FAB topology does not move. Zero physical-property additions. No convention work, no zero-versus-
+no-data work. The e2e suite is not run, repaired, revived or deleted. The queued items stay queued.
+Any discovery enlarging the mandate is a STOP-AND-ASK and a REQUEST.
+
+PERSISTENCE. This block persists ALONE — one block per message — appending at fifteen, together
+with the operator's observation round recorded as an OPERATOR OBSERVATION against the live build,
+taken on a physical device in one session, with the two discounted checks named as discounted and
+the three unobserved checks named as unobserved. Sweep the payload under both operative patterns
+before appending; the payload's prose opens paragraphs with ruling numbers, a six-instance class of
+which one was a genuine wrap, so the sweep is predicted clean rather than assumed clean and a
+disagreement HALTS THE WRITE AND IS REPORTED rather than remedied where the text is the channel's.
+Predicted payload strict 1 and tripwire 1 agreeing; after the append, strict 15 and tripwire 15,
+first 1, last 15, no duplicates, no breaks in 1 to 15, reconciled 14 + 1 = 15 and 15 minus 1 plus
+1 = 15, enumeration PRINTED IN FILE ORDER. Derive from what is present; if these figures are wrong,
+yours are right and you show the reconciliation. Re-derive the unpushed count by both routes or do
+not state it. Provenance RELAYED. Amend the completeness note to record the persisted set, the
+tense class as DISTINCT from the zero class with the channel's misfiling recorded, the production
+verification of the previously-unverified delta guard, the two discounted checks, and the queued
+column-mapping requirement. Docs-only under the standing permanent licence — state the skip and its
+reason, prove docs-only by exclusion with the exclusion shown discriminating and its capture UNCUT,
+carry the bytes.
+
+---
+
+## MOB-1 RESPONSIVE — the observation round (operator, 2026-09-12)
+
+**EVIDENCE CLASS: OPERATOR OBSERVATION against the LIVE BUILD**, taken on a **physical phone, not a
+simulator**, in one session. The deploy precondition was satisfied differently rather than waived —
+the eleven checks were established from the diff to read nothing the eleven unpushed commits
+touched, so the live build was a valid subject (MOB-R14, per-check table). The one-tab fresh-load
+precondition applied.
+
+### Coverage — nine of eleven, and the unobserved are UNOBSERVED not passing
+
+| check | status |
+|---|---|
+| 1 — 320px, four nav pages | **observed, PASS** |
+| 2 — 320px, dialog row grids | **observed, PASS** |
+| 3 — 320px, import `minWidth:340` column | **observed, PASS** |
+| 4 — dialogs without `max-h` | **observed, PASS** |
+| 5 — FAB clearance | **observed, PASS — DISCOUNTED (see below)** |
+| 6 — 2FA backup codes | **observed, PASS** |
+| 7 — Insights money spans | **NOT OBSERVED — untested** |
+| 8 — 32px tap targets | **observed, PASS — DISCOUNTED (see below)** |
+| 9 — 768px card↔table swap | **observed, PASS** |
+| 10 — 1024/1280 Insights `xl:` panels | **NOT OBSERVED — needs a resizable viewport** |
+| 11 — charts at 320px | **NOT OBSERVED — needs a resizable viewport** |
+
+**The operator ran a better test than the list asked for:** he switched between a month WITH data
+and a month WITHOUT, which no check specified. That unrequested variation produced the round's most
+consequential finding and is why two defect classes below are separable rather than collapsed.
+
+### TWO PASSES ARE DISCOUNTED — CHANNEL AUTHORING DEFECT, not an observation defect
+
+- **Check 8** — one attentive person tapping deliberately hits a 32px control. The 44px guideline is
+  about **error rates** across users, hands and conditions, not whether a careful self-test
+  succeeds. Its pass and its fail are not different worlds. **The L4 measurement stands on its own
+  and is not weakened by this pass.**
+- **Check 5** — passed while the screenshots show the opposite. Four of nine captures show the FAB
+  overlapping content (a Home delta chip, the category chart's final axis tick, Insights card
+  content). The check asked whether anything **interactive** sits beneath it; the overlaps are
+  non-interactive, so it returned true while the concern it was written for was real. **A check
+  narrower than its concern reports on the narrow thing and reads as reporting on the broad one.**
+
+Both met L11's form — pass and fail stated separately — and failed its purpose. **No new standing
+rule:** this is the existing "a check whose negative case equals its positive case is not a check",
+applied to a check the channel wrote. Count stays at **SIX**.
+
+### The operator's three, confirmed from the captures
+
+1. **FAB overlap is real**, and L7 already holds the mechanism: wrapper clears 64px, FAB's upper
+   edge sits at 136px. **A CLEARANCE question, not a POSITION question** — load-bearing, because
+   the position is what the constraint fixes. Topology does not move.
+2. **KPI boundary — and a layout defect underneath it the operator did not ask about.** At four
+   digits the money value **wraps between the currency prefix and the number**, and the delta chips
+   wrap too, leaving adjacent chips at unequal heights. Enclosure is a design question; **the wrap
+   is a defect**, and the row needs layout work regardless.
+3. **Profile discoverability** — the only route is the hamburger. Navigation is in MOB-1's charter;
+   this is now an observed instance rather than an inferred one.
+
+### The channel's two, from the captures
+
+- **The card-header squeeze, possibly the most pervasive mobile issue in the batch.** Card titles
+  wrap to three lines in a narrow column while their subtitles sit beside them with room to spare —
+  safe-to-spend, top spending, expenses by category. A two-column header split that does not stack
+  at phone width. **One shared component, therefore possibly one fix.** To be measured in the
+  proposal cycle.
+- **A duplicate label and an orphaned separator on activity rows** — a category renders twice (text
+  and chip), and a row with no category renders the separator bullet with nothing after it.
+
+### A previously-UNVERIFIED item is now VERIFIED IN PRODUCTION
+
+The September captures show all four KPIs at zero **with no delta chips**; the August captures show
+chips present. **That is the frontend-fixes track's Item 4 empty-month delta guard, observed working
+in production.** That track closed recording item 4 explicitly as NOT verified in production,
+because no observed month had zero rows beside a populated previous month. The operator's
+month-switch produced exactly that state. **A recorded unverified item is now verified, by an
+observation nobody planned.**
+
+### Two previously-queued items observed live — still queued, not opened
+
+The headline rounding to a thousands abbreviation sitting directly above the same figure at full
+precision; and the twelve-of-twelve-months claim over a chart with five flat-zero months.
+
+### THE TENSE CLASS — a NEW class, and NOT the one it was first filed under
+
+**The defect.** On a PAST month the safe-to-spend card renders a per-day figure identical to the
+whole monthly runway, directly above a zero-days-remaining label — a division guard clamping zero
+days to one, so the per-day figure overstates by roughly the length of the month. Around it: an
+on-pace projection with a 31-of-31-days denominator, an ahead-of-pace badge, and "so far this
+month" copy, all about a finished month. Elsewhere, forward-looking advice that a category is
+climbing and worth reviewing *before it grows* — about August, in September.
+
+**THE CHANNEL FILED THIS UNDER ZERO-VS-NO-DATA AND THAT WAS WRONG.** The root cause is not failing
+to distinguish zero from absent; it is **failing to distinguish THE SELECTED MONTH from THE CURRENT
+MONTH**. Filing it with the zero class because it was found beside the zero class would have buried
+a distinct cause inside a phase scoped to a different one.
+
+**Severity framing also corrected:** it requires a past month to be selected — deliberate, not
+incidental — and the default view is unaffected. **It does not jump the queue and no phase is
+resequenced.**
+
+**The September captures are the other half and DO belong to the zero class:** on-track and
+staying-inside-plan copy on a month with no transactions at all. **Two classes, one observation
+round, kept separate.**
+
+**What makes it cheap to size: the application already knows.** The needs-attention card renders a
+this-month badge on the current month and a year-month badge on a past one — the same component
+distinguishes the two correctly **in its own header** and then renders body copy assuming the
+present. The signal exists at one site and is unused at the site beside it.
+
+### Queued by operator statement, not opened
+
+**CSV and spreadsheet import must let the user MAP THEIR COLUMNS to the application's fields.**
+Operator statement, this cycle. Belongs with the import surface; **NOT mobile-track work.**
+**TRIGGER: the next cycle that opens import.**
