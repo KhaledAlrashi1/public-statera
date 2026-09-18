@@ -466,9 +466,17 @@ function AppShellLayout() {
               size="sm"
               onClick={() => { closeDrawer(); navigate("/profile") }}
               className="h-auto w-full justify-start gap-2 px-0 text-xs text-muted-foreground hover:bg-transparent hover:text-foreground"
+              aria-label="Profile and settings"
             >
+              {/* The label was the user's first name alone, which a first-time user does not
+                  read as account-and-settings — this is the mobile route to Profile and the
+                  only one, since the desktop user menu is lg:flex. "Profile" leads and the
+                  name is retained as secondary context. Matches the desktop menu's "Profile". */}
               <User className="icon-inline" />
-              <span className="max-w-[200px] truncate">{getUserFirstName(user)}</span>
+              <span>Profile</span>
+              <span className="max-w-[140px] truncate text-muted-foreground/70">
+                {getUserFirstName(user)}
+              </span>
             </Button>
           )}
           <Button
