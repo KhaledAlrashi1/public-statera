@@ -698,6 +698,70 @@ The amendments above are left as they stand. This is the live index from here fo
   and stacking unverified layers makes a failed check unattributable.
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** Count stays **SIX**.
 
+### Amendment — MOB-R21 persistence commit, 2026-09-18
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R21**, contiguous: first **1**, last **21**, **0**
+  duplicates, **0** breaks in 1…21. **Position DERIVED from the file (last was 20), not from the
+  clause.** Both operative patterns AGREE at **21** — strict `'^MOB-R[0-9]+ — '` (INDEX) and
+  tripwire `'^MOB-R[0-9]+ '` (DIAGNOSTIC); payload sweep before the write was **1 and 1**, so no
+  header collision. **MOB-R21 provenance: RELAYED.**
+- **PROVENANCE FOOTNOTE — this block's bytes were RECOVERED, not held.** The conversation was
+  compacted between MOB-R21's arrival and its persistence, and the summary that survived is a
+  PARAPHRASE. A paraphrase cannot be persisted as a verbatim block, so the bytes were recovered
+  from the session transcript and appended by pipe, never retyped. This is precisely the failure
+  10e-R239 names — **a ruling that crosses a session boundary in an implementer's context is not
+  evidence it still holds** — and it is the second argument for persist-first being the FIRST
+  action of a cycle rather than its last.
+- **THE WIDER-CADENCE INSTRUCTION IS STANDING AND CARRIES INTO SUCCESSOR CONVERSATIONS**
+  (operator, 2026-09-12, direct; restated MOB-R21): more authorised per block, implementation
+  collapsed into the measuring cycle where the surface is enumerable, clarity preserved.
+  **NOT collapsible, and these are the condition the instruction runs on rather than a hedge
+  against it:** every named gate is a hard stop; any red test or forced test edit stops and asks;
+  any mandate-enlarging discovery is a REQUEST, never a self-grant; operator observation rounds
+  keep their own cycle. A wider cycle runs further before anyone sees it, which is what makes the
+  stopping points load-bearing.
+  - **CORRECTION, carried from MOB-R21 — MEASUREMENT DOES NOT PARALLELISE BEHIND IMPLEMENTATION.**
+    MOB-R20 reasoned that a measurement rides safely alongside an implementation because it emits
+    no code and so needs no second verification round. **That reasoning was about COMMITS; the
+    binding constraint is ATTENTION.** Measurement quality degrades when it runs behind
+    implementation in the same report, and **a degraded measurement is worse than a deferred one
+    because it looks like an answer.** Wider cycles mean more IMPLEMENTATION per cycle, not
+    measurement crammed behind it.
+- **GATE 4 FIRED, AND THE FINDING IS THAT TWO APPROVED CHANGES WERE IN DIRECT CONFLICT.** At 320,
+  280px survive the horizontal padding; brand mark 40 + gap 12 + block gap 16 + three icon controls
+  at the 44px minimum 132 + two inter-control gaps 16 = **216 fixed, leaving 64px for a two-line
+  brand block whose longer line is 17 characters** — under 4px per character. With today's TWO
+  controls the same arithmetic leaves 116 and fits. **Part 1's own 44px touch minimum is the term
+  that pushes the header over.** Both changes were approved in the same block by two separate
+  operator rulings, and **neither ruling could see the other's consequence**. It surfaced before
+  any code was written only because the block required the header row be MEASURED at 320 rather
+  than assumed to fit. **A DERIVED IMPOSSIBILITY NEEDS NO OBSERVATION**, and nothing in the header
+  row was shrunk to make it fit — the brand mark is a rationed brass slot and the ration lives in
+  that row.
+- **THE PRE-CHECK REFUTED THE RULING'S PREMISE, and both the unreported half and its remedy follow
+  from that.** The operator's three options and the channel's framing both assumed the mobile
+  header carried a dark-mode control, a menu, and room for a third. **It does not:** the user menu
+  and the command palette are BOTH desktop-gated, so the mobile header holds two controls and no
+  menu. The enumeration that established this then reported a menu **without composing it with its
+  own render gate** — the declaration-without-its-render-condition class, one cycle after an item
+  was withdrawn for exactly it. **The mobile route was therefore UNREPORTED while demonstrably
+  existing** (the operator had reached the profile page on his phone). Enumerated here as
+  **outcome 2A**: Profile IS in the mobile drawer, in the drawer footer, labelled with the user's
+  first name ALONE and carrying no accessible name; route = hamburger → drawer → first-name button,
+  **2 steps**. The remedy is therefore prominence and labelling inside a surface that costs no
+  header space and **clears Gate 4 entirely**.
+- **THE DEPLOY RECOMMENDATION IS ESCALATED AND STILL OFFERED-AND-NOT-ADOPTED.** Eighteen commits
+  unpushed (both routes, measured before this cycle's commits). **THREE UNVERIFIED LAYERS NOW SIT
+  ON THE SAME SURFACES** — the cache work, the responsive commit and the touch minimum — and
+  because the responsive change and the touch change both alter the same dialog footers and
+  toolbars, **the next observation round cannot attribute a failure between them**. This is no
+  longer caution: a failed check would establish that something is wrong without establishing
+  what, and the remedy would then be guesswork on a live surface. **Still the operator's, and
+  nothing waits on it.**
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** Count stays **SIX**.
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
@@ -4598,3 +4662,194 @@ REPORTED, not remedied, where the text is the channel's. Re-derive the unpushed 
 or do not state it. Provenance RELAYED. Amend the completeness note to record the persisted set, the
 widened cadence with its collapsed steps and its four named gates, the red's provenance and the
 suite-is-the-instrument finding, and the deploy recommendation as offered-and-not-adopted.
+
+MOB-R21 — PART 1 IS ACCEPTED. GATE 4's FIRING IS RATIFIED AND THE TWO APPROVED CHANGES ARE IN
+DIRECT CONFLICT. The pre-check enumerated a desktop-only menu and its mobile counterpart is
+UNREPORTED. Four parts are authorised in one cycle. The deploy recommendation is ESCALATED on new
+evidence.
+
+CADENCE. Issued under test (a) and (b). THE OPERATOR'S WIDER-CADENCE INSTRUCTION IS RECORDED AS
+STANDING AND CARRIES INTO THE HANDOFF PROMPT FOR SUCCESSOR CONVERSATIONS: more authorised per block,
+implementation collapsed into the measuring cycle where the surface is enumerable, clarity preserved,
+and the named gates and stop-and-asks NOT collapsed. That last clause is the condition the instruction
+runs on, not a hedge against it — a wider cycle runs further before anyone sees it, so the points where
+it must stop are what make the width safe.
+
+PART 1 IS ACCEPTED AND THE IMPLEMENTATION IS BETTER THAN THE MANDATE ASKED FOR. Two declarations on the
+shared button and input primitives cover all one hundred and ninety call sites INCLUDING THE SIXTY-ONE
+THAT OVERRIDE HEIGHT IN-TAG, which a per-variant change to the size table would have missed entirely.
+Using a minimum rather than a fixed height is what makes that work and is also what discharges Gate 2
+without a stop-and-ask: a floor raises without capping, so the pinned FAB is untouched by construction
+rather than by exclusion.
+  GATE 1's CONTROL CORRECTION IS THE BEST INSTRUMENT WORK IN THE REPORT. The first control DID NOT FIRE
+  because it searched for a legacy media-query form while the installed version emits range syntax. That
+  was noticed, named, and corrected — so the positive result rests on a control shown firing rather than
+  standing alone. A non-firing control reads exactly like a true negative, and this is the second time
+  in three cycles that an assumed output format nearly produced a confident wrong answer.
+  THE VARIANT WAS ESTABLISHED BY COMPILING A PROBE AGAINST THE INSTALLED PACKAGE rather than by grepping
+  a bundle. That is deriving the vocabulary from the artifact, on the axis where this project has now
+  taken five misses.
+  THE COVERAGE GAP IS CORRECTLY STATED AS WIDER THAN A LAYOUT GAP: jsdom cannot evaluate a media query
+  at all, so the change is invisible to the suite in BOTH directions, and a desktop responsive mode
+  reports a fine pointer and cannot verify it either. The only instrument is a physical touch device.
+  THE DEVICE-VERSUS-WIDTH DIVERGENCE IS REPORTED AND NOT RESOLVED, as instructed, and the observation
+  that the disagreeing surfaces are exactly the ones this phase has been fixing is the implementer's.
+  THE PERSIST-FIRST INVERSION IS ACCEPTED AND NAMED. One step ran before the block was on disk; both
+  commits landed in the same turn with the docs half first, and the inversion was declared rather than
+  passed over. Accepted because nothing crossed a boundary unpersisted, which is what the rule protects.
+
+PART 3 IS DISCHARGED. Item (v) was the only gated finding and was already withdrawn; everything else
+entering the proposal or the observation list carries no width or media gate, with the one file holding
+six shown to scope them to a single dialog component.
+
+PART 4 IS CORRECTLY NOT DONE AND THE REFUSAL IS RATIFIED. Delivering a zero-class enumeration, a
+data-layer root-cause question, a re-sizing and a two-class relationship thinly, behind two
+implementations, would have produced exactly the clean-arithmetic-over-wrong-scope failure that Part 4a
+was written to prevent — a failure this track has already paid for once. REPORTED AS NOT DONE RATHER
+THAN DONE BADLY IS THE CORRECT CHOICE.
+  AND IT IS A CORRECTION TO THE CHANNEL'S READING OF THE WIDER CADENCE. The preceding block reasoned
+  that a measurement parallelises safely with an implementation because it produces no code and
+  therefore no second verification round. THAT REASONING WAS ABOUT COMMITS AND THE BINDING CONSTRAINT
+  IS ATTENTION. Measurement quality degrades when it runs behind implementation in the same report, and
+  a degraded measurement is worse than a deferred one because it looks like an answer. WIDER CYCLES MEAN
+  MORE IMPLEMENTATION PER CYCLE, NOT MEASUREMENT CRAMMED BEHIND IMPLEMENTATION. Part 4 gets its own
+  cycle below with nothing else in it.
+
+═══ GATE 4 IS RATIFIED AND THE CONFLICT IS THE FINDING ═══
+
+THE ARITHMETIC IS CHECKED AND IT HOLDS. Two hundred and eighty available at 320 after the horizontal
+padding; forty for the brand mark, twelve for its gap, sixteen between the brand and action blocks, one
+hundred and thirty-two for three icon controls at the forty-four-pixel minimum, sixteen for the two gaps
+between them — sixty-four remaining for a two-line brand block whose longer line is seventeen characters.
+That is under four pixels per character and it does not fit. With today's two controls the same
+arithmetic leaves one hundred and sixteen and does fit.
+  THE FIXED SUBTOTAL IS DERIVED AND SUFFICIENT, and the report is right that the text width is a
+  rendered property jsdom cannot measure — it does not need to be measured, because the residue is
+  already too small by a wide margin. A DERIVED IMPOSSIBILITY DOES NOT NEED AN OBSERVATION.
+  PART 1 IS WHAT MADE PART 2 INFEASIBLE, AND THIS IS THE THING TO RECORD. Both were approved in the
+  same block, by two separate operator rulings, and neither ruling could see the other's consequence.
+  The forty-four-pixel minimum is the term that pushes the header over. TWO INDEPENDENTLY CORRECT
+  DECISIONS PRODUCED AN INFEASIBLE COMBINATION, and the only reason it surfaced before code was written
+  is that the block required the header row be MEASURED at 320 rather than assumed to fit.
+  NOTHING IN THE HEADER ROW WAS SHRUNK TO MAKE IT FIT, correctly. The brand mark is a rationed brass
+  slot and the ration lives in that row.
+
+THE PRE-CHECK REFUTED THE RULING'S PREMISE, AND THAT IS A SUCCESS. Both the operator's three options and
+the channel's framing assumed the mobile header held a dark-mode control, a menu, and room for a third.
+IT DOES NOT: the user menu and the command palette are both desktop-gated, so the mobile header holds
+two controls and no menu at all. The channel described this to the operator as "a third round button in
+a corner you already have two in" — the two are not what the channel said they were.
+
+═══ THE UNREPORTED HALF — OWED, AND IT MAY MAKE PART 2 MOOT ═══
+
+THE PRE-CHECK ENUMERATED A MENU AND THEN ESTABLISHED THAT THE MENU DOES NOT RENDER ON MOBILE. What
+renders on mobile in its place is NOT REPORTED. The operator reached the profile page on his phone, so a
+route exists and it is unenumerated.
+  THIS IS THE DECLARATION-WITHOUT-ITS-RENDER-CONDITION CLASS, one cycle after the item withdrawn for it
+  and in the same report that discharged Part 3 for exactly this property. The strings were read from a
+  container and the container's render gate was read separately, and the two were not composed.
+  OWED, AND IT IS THE LEAD ITEM BELOW: enumerate what the MOBILE header's second control opens — the
+  full contents in order, every label and accessible name, and whether a profile entry is among them.
+  Report the strings. Then state, for every route to the profile page that exists at phone width, what
+  it is and how many steps it takes.
+  IF PROFILE ALREADY SITS IN THE MOBILE DRAWER, THE OPERATOR'S PROBLEM IS PROMINENCE AND LABELLING
+  RATHER THAN ABSENCE, and the remedy is inside a surface that costs no header space and clears Gate 4
+  entirely. That is the outcome the channel expects and it is offered to be falsified.
+
+═══ PART 2 RE-SOLVED — FOUR OPTIONS, PRE-AUTHORISED BY OUTCOME ═══
+
+The operator ruled a header control from three options, none of which is feasible as ruled at 320
+alongside Part 1. HIS RULING IS NOT OVERRIDDEN; the options it chose between were built on a premise the
+pre-check has now refuted, so the choice is put again with the real premise.
+
+2A. PROFILE IS ALREADY IN THE MOBILE DRAWER. Implement prominence within that drawer — position, and the
+    ONE entry's label if it is not already recognisable as account-and-settings. AUTHORISED NARROWLY:
+    ordering and one label. A general restructure is a stop-and-ask. No header change, Gate 4 not
+    engaged.
+2B. PROFILE IS NOT IN THE MOBILE DRAWER. Add it there. AUTHORISED. One entry, matching the drawer's
+    existing entry pattern, with its accessible name stated. No header change.
+2C. THERE IS NO MOBILE DRAWER AT ALL — the second control is something else entirely. STOP AND REPORT
+    with the enumeration. A new mobile navigation surface is structural and is not authorised.
+2D. THE HEADER CONTROL AT 320 remains off the table while Gate 4 holds. Do not propose shrinking the
+    brand block, hiding the tagline, or reducing the touch minimum to make room — the first two are
+    design-track decisions under the brass ration and the third reverses an operator ruling. IF the
+    drawer route is implemented and the operator still wants a header control, that is a fresh
+    question with the arithmetic already on the record.
+
+═══ PART 5 — CONDITIONAL, AND IT SHIPS ONLY ON AN OPERATOR RULING ═══
+
+The duplicate category label and the orphaned separator bullet on the activity rows. Both were referred
+out to the conventions phase when this cycle was narrow. THE CHANNEL RECOMMENDS FOLDING THEM IN and the
+operator's ruling is pending.
+  IF RULED IN: ship them in the same commit with per-site treatment — file:line, the condition producing
+  the duplicate, the condition producing the orphan, and one discriminating test each with its negative
+  case stated. These are render defects at every width, so unlike the layout items they ARE testable and
+  a declared coverage gap is NOT the right answer here.
+  IF NOT RULED IN: untouched, still referred out.
+
+═══ PART 6 — ITS OWN CYCLE, NOTHING ELSE IN IT ═══
+
+THE ZERO-VERSUS-NO-DATA AND TENSE MEASUREMENT, carried forward unchanged and unshortened: enumerate
+every zero-class site with the corpus derived FROM THE SURFACES and their builders, reconciled against a
+SECOND CORPUS BUILT A DIFFERENT WAY with the difference between the two corpora stated; establish whether
+the application can distinguish zero from absent AT THE DATA LAYER, which decides whether the class is a
+presentation fix or a payload change; re-size T4, which stands withdrawn; and state whether the two
+classes are one fix or two and whether either gates the other. REPORT ONLY, no code, sequencing is the
+operator's. RUN IT AS ITS OWN CYCLE AFTER THIS ONE — not appended to it.
+
+═══ THE DEPLOY — ESCALATED FROM A RECOMMENDATION ON NEW EVIDENCE ═══
+
+THE CHANNEL HAS RECOMMENDED THIS TWICE AND THE GROUND HAS CHANGED, SO IT IS RESTATED RATHER THAN
+REPEATED. Eighteen commits are unpushed. THREE UNVERIFIED LAYERS NOW SIT ON THE SAME SURFACES: the cache
+work, the responsive commit, and the touch minimum. Gate 3 was DEFERRED TO THE OBSERVATION ROUND because
+the interaction it tests is rendered — and the implementer's own checks 2 and 3 CANNOT ATTRIBUTE A
+FAILURE between the responsive change and the touch change, because both alter the same dialog footers
+and toolbars.
+  THIS IS NO LONGER CAUTION. It is that the next observation round cannot produce an attributable result.
+  A failed check would establish that something is wrong without establishing what, and the remedy would
+  then be guesswork on a live surface.
+  STILL THE OPERATOR'S, AND NOTHING WAITS ON IT. Every part above proceeds. If the push has not happened
+  when the report is written, SAY SO and name which checks are therefore unattributable rather than
+  letting their absence read as a pass.
+
+═══ THE COMMIT AND THE CLOSE-OUT ═══
+
+ONE IMPLEMENTATION COMMIT carries the resolved Part 2 and, if ruled in, Part 5. The drawer enumeration
+rides the same report. If a gate stops a part, THE OTHER PARTS STILL SHIP and the report says which
+stopped and why.
+
+CLOSE-OUT CARRIES THE THREE MANDATORY SECTIONS; missing any is an auto-return. Both verbatim test tails
+with the Test Files summary line and captured exit codes, each command with a resolution proof and a
+non-matching negative control shown exiting 0; both verbatim typechecks with exit codes and byte counts;
+the baseline as a DELTA with its absolute RE-DERIVED AFTER THE LAST EDIT — after the last, not the
+largest, which is what caught the previous cycle's red. The api suite is RUN because the contract test
+reads the frontend fixture, with the count and the empty allowlist derived FROM THE FILE. Predicted
+deltas stated in advance per part; NAMED FORCED EDITS predicted, with none a valid answer. A MISS IS A
+QUESTION, NEVER AN ADJUSTMENT.
+  ASSERT THE NEGATIVE DELIVERABLES POSITIVELY: zero physical-property additions with the pattern shown
+  discriminating against the operative baseline of thirty-two sites across NINE files; no new external
+  origin and no Caddyfile change; the standing-rules file untouched; the three named regression files
+  green AND untouched by empty status on those paths; primitives direction-free if touched, and say
+  whether they were.
+  DECLARE COVERAGE GAPS PER ITEM — and note that the Part 2 remedies are MENU CONTENT rather than
+  layout, so they are testable and a declared gap is not the right answer for them.
+
+CONSTRAINTS: no renames; pinned strings untouched including the FAB's label and tooltip and the two legal
+test identifiers; the FAB topology untouched; QuickAdd internals untouchable; the brass ration holds and
+nothing in the header row is restyled, recoloured or re-scaled. No convention work beyond Part 5 if
+ruled in, no cache work, no zero or tense work. The e2e suite is not run, repaired, revived or deleted.
+Queued items stay queued: the KPI enclosure with the design track, the cross-tab regime and the import
+column-mapping requirement with their triggers, item (vi) deferred pending the 320 observation. THE 320
+TOP-UP REMAINS OUTSTANDING and its absence is not a pass.
+
+PERSISTENCE. This block persists ALONE — one block per message. DERIVE THE POSITION FROM THE FILE, never
+from this clause: this track has had two blocks predict their own position from a state that had already
+moved, and a halt spent resolving it. Report the measured position, the payload sweep under both
+operative patterns with both figures, and the post-append composite with first, last, duplicates, breaks
+and both reconciliation routes, enumeration PRINTED IN FILE ORDER. A disagreement between the patterns
+HALTS THE WRITE AND IS REPORTED, not remedied, where the text is the channel's. Re-derive the unpushed
+count by both routes or do not state it. Provenance RELAYED. Amend the completeness note to record the
+persisted set; the standing wider-cadence instruction with its non-collapsible gates AND its correction
+that measurement does not parallelise behind implementation; Gate 4's firing with the two-approved-
+changes-in-conflict finding; the refuted premise and the unreported mobile route; and the escalated
+deploy recommendation as offered-and-not-adopted.
