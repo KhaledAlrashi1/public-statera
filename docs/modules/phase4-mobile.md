@@ -843,6 +843,148 @@ The amendments above are left as they stand. This is the live index from here fo
   check; and **no UI observation is evidence until the Actions run has landed.**
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** Count stays **SIX**.
 
+## Part 6 — zero-versus-no-data measurement report (implementer, executed 2026-09-19, pending acceptance)
+
+Opened by MOB-R22. **REPORT ONLY — zero code changed.** Gate A PASSES, **Gate B FIRES**, so 6d does
+not proceed and the enumeration is reported with a proposed grouping instead.
+
+### 0 — the inherited count was wrong, and that is why the corpus was derived
+
+The block MOB-R22 records "seven faces … in the preceding track's Phase A".
+The source (`phase4-frontend-fixes.md:595-608`) does not reconcile: it says **EIGHT FINDINGS**, then **SEVEN
+OF THEM** are one root cause, then **THE REMAINING FOUR**. 7 + 4 = **11**, not 8. The root-cause
+sentence enumerates **four** faces; 4 + 4 = 8, which does close. **"Seven" is an error at source
+and the channel inherited it.** No corpus was taken from that list.
+
+### 6a — the two corpora, and how they DIFFER
+
+**CORPUS B (mechanism — where absence is materialised as 0): 81 sites / 14 files.** Construction:
+`(?? | ||) 0` co-occurring with a money token, noise-filtered.
+
+**CORPUS A (surface — where a CLAIM is asserted over money): 41 candidates / 8 files**, narrowed
+from 520/54 after the first vocabulary was found to be a superset (it matched `remaining`, `left`
+and `percent` in legal and auth pages). Construction: a comparative/ratio/count claim token AND a
+money token, on the surfaces that consume analytics payloads.
+
+**HOW THEY DIFFER — this is the part that matters.** They are not two routes over one corpus. B is
+built from *mechanism* and A from *assertion*, and neither contains the other:
+- **In B, not in A:** a collapse feeding a pure formatter. `formatKD(x ?? 0)` renders "KD 0.000",
+  which is wrong-looking but asserts nothing. The majority of B's 81 are this.
+- **In A, not in B:** a claim whose zero is manufactured **server-side**, so no client-side `|| 0`
+  exists to find. `monthsAhead` is the case — the zero is pre-seeded at
+  `dashboard-snapshot-lib.ts:223-227`, and **corpus B cannot see it at all.**
+- **The intersection is not the answer either:** the collapse and the claim are usually in
+  different files (`BudgetPage.tsx:206` collapses, `budget/sections.tsx:298` claims).
+
+**A single-corpus search would have missed a different site depending on which one was chosen**,
+which is the concrete form of "two routes over one corpus are one route."
+
+**INSTRUMENT FAILURE, NAMED.** Corpus B first returned **0** from a four-stage pipe. Bisection: the
+exclusion token `page` matched **109 of 112** lines — because `grep -rn` output begins
+`./components/pages/…`, so **the content filter was matching the FILE PATH.** Third instance of
+this family in the track, after `grep -h` stripping filenames and `${line##*:}` stripping to the
+last colon. Rebuilt with the content isolated from the `file:line:` prefix.
+
+### 6b — the root cause, traced end to end. **GATE A: the distinction SURVIVES.**
+
+**There is no single representative face — the two families answer differently**, which is why one
+trace would have given the wrong answer for the other.
+
+**Budget family — absence survives literally.** `BudgetPage.tsx:194-208` builds `budgetMap` from
+budget rows only, while `categoriesSet` is the UNION of budgeted and spent categories. A category
+with spend and no budget is therefore **absent from the map**, and the collapse happens in the
+client at `:206` (`budgetMap[cat] || 0`) and `:208`. The payload never lied.
+
+**Months family — absence is encoded, not lost.** `dashboard-snapshot-lib.ts:223-227` pre-seeds
+every month key to `new Decimal(0)` *before* folding in query rows, and
+`DashboardMetricsPayload` carries **no** count, has-data flag or row count.
+
+**What makes this a presentation fix rather than a contract change:**
+
+```
+apps/api/src/db/schema/transactions.ts:60
+  check("chk_transactions_amount_positive", sql`${t.amountKd} > 0`)
+apps/api/src/db/schema/budgets.ts:37
+  check("chk_budgets_amount_positive", sql`${t.amountKd} > 0`)
+```
+
+Both are in migration `0000` and are therefore enforced **by the database**. Zero is an
+**unattainable sum of strictly positive amounts**, so `income_kd === "0.000"` ⟺ no income rows and
+both series zero ⟺ **no transactions that month**. Every write path agrees independently
+(`parseKd` rejects `<= 0`; `import-lib.ts` call sites at `:735`/`:761` both reject non-positive,
+the permissive parse existing only to report auto-exclusions).
+
+**So the distinction is not REPRESENTED but is LOSSLESSLY RECOVERABLE, and the guarantee is a DB
+constraint rather than an application convention.** Gate A passes. **Stated precisely because it
+is close to the line:** for budgets absence survives as `undefined`; for months it survives only
+as an *encoding*, and any fix must carry a comment saying why zero means absent, because nothing
+at the call site shows it.
+
+### 6a result — the enumeration. **GATE B FIRES: 17 sites > 12.**
+
+**Budget family (7)** — `components/pages/budget/sections.tsx`
+| # | Site | Renders |
+|---|---|---|
+| B1 | `:170` | `% Used` shows `0.0%` beside real spend |
+| B2 | `:126-130` | caption "Over budget this month" with no budget |
+| B3 | `:181,:183` | progress-bar tone and width from `percentUsed` |
+| B4 | `:273` | `Budget / Income 0.0%` — the `!== null` guard catches income-absent ONLY |
+| B5 | `:296-301` | "X is KD N over plan" for a category with no plan |
+| B6 | `:499` | row utilisation tone from `r.pct = 0` |
+| B7 | `:609` | same, second table |
+
+**Dashboard family (5)** — `components/pages/dashboard/sections.tsx`
+| # | Site | Renders |
+|---|---|---|
+| D1 | `:1043,:1057` | "N of M visible months finished with income ahead of expenses" — `0 >= 0` counts as ahead |
+| D2 | `:1022-1026` | "You're on track. No categories are over budget right now." on an empty list |
+| D3 | `:159-176`, `:218` | `safeToSpendTone(0)` → "You're out of discretionary runway." |
+| D4 | `:1044-1055` | `expenseAverage` / `peakExpenseMonth` over zero-filled months |
+| D5 | `:836` | "On pace to spend … /day" computed from no data |
+
+**Insights family (5)**
+| # | Site | Renders |
+|---|---|---|
+| I1 | `InsightsPage.tsx:263-265` | "Committed spending is now overtaking…" when `remainingBudget` is 0 |
+| I2 | `InsightsPage.tsx:266-268` | "tracking about the same as last month" when both are absent |
+| I3 | `insights/MonthDeltaCard.tsx:13-18,:107` | delta 0 falls through to the "unchanged" tone |
+| I4 | `insights/WeeklyDigestSection.tsx:6-10,:106` | "Your weekly pace is unchanged." with no data either week |
+| I5 | `insights/SpendForecastWidget.tsx:23-28` | all three zero → `remaining_kd <= 0` → "overtaking" |
+
+**Not counted, with reasons:** `dashboardMomentumState` (`:134`) is **already guarded**
+(`monthRemaining <= 0 || savingsRate <= 0` returns null); `DashboardPage.tsx:150-151` is the
+FF-R7(a) mechanism, **unreachable today** because `months` and `monthly` are the same array; pure
+`formatKD` renders assert nothing.
+
+### Proposed grouping (Gate B deliverable) — three groups by the SIGNAL each needs
+
+- **GROUP 1 — "no budget exists" (10 sites: B1–B7, D2, I1, I5).** Signal **already exists and is
+  already in the right component**: `hasBudget = budgets.length > 0` (`BudgetPage.tsx:458`) is
+  computed, passed in, and applied to `status` but **not** to B1–B3. Lowest risk, largest count,
+  no new derivation.
+- **GROUP 2 — "this month has no transactions" (3 sites: D1, D4, D5).** Needs the derived
+  predicate plus a shared helper and the comment Gate A's wording requires.
+- **GROUP 3 — "both comparison periods absent" (4 sites: I2, I3, I4, D3).** Same derivation over a
+  PAIR of periods; D3 additionally has `income_source === 'not_set'` already available.
+
+### 6c — T4 re-size: **its own phase, not a handful of strings.**
+
+An independent re-derivation returns **61** present-tense claim sites across **13** files against
+the accepted **15**, so the two constructions disagree by 4×. The number is not the point — **the
+corpus boundary is unsettled**, and sizing a phase off an unsettled boundary is the
+clean-arithmetic-over-wrong-scope failure this track has already paid for once. Even at 15 the
+sites span at least six files and each needs its own copy decision.
+
+### 6e — the relationship: **ONE GUARD, TWO RENDERS — and the zero class GATES the tense class.**
+
+They are not one fix, and not two independent fixes. Both Group 2/3 and the tense class turn on the
+identical predicate — *does the selected period have data* — and neither can be written without it.
+A tense fix alone still asserts the present tense about an empty month; a zero guard alone renders
+a correct claim in the wrong tense. **The zero guard must land first**, because the tense rewrite
+cannot choose a tense until something tells it whether the period is empty. This is exactly the
+operator's September capture — on-track copy on a month with no transactions — being **both classes
+firing at one site**.
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
