@@ -919,6 +919,69 @@ The amendments above are left as they stand. This is the live index from here fo
     produced the case it was built for.
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** Count stays **SIX**.
 
+### Amendment — MOB-R24 persistence commit, 2026-09-19
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R24**, contiguous: first **1**, last **24**, **0**
+  duplicates, **0** breaks in 1…24. Both operative patterns AGREE at **24**. Position DERIVED from
+  the file (last was 23). Payload sweep before the write was **1 and 1**, shown DISCRIMINATING by
+  injecting a second header into a copy. **MOB-R24 provenance: RELAYED.**
+  - **Extraction finding, recorded because it is the same class as everything else here:** the
+    first transcript extractor reported MOB-R24 **ABSENT**. It was not — the extractor tested only
+    string-form message content while that message is list-form, so a narrow type check produced a
+    confident false negative. Caught by a second probe that enumerated the last user messages
+    instead of searching for one. **A search that can only see one of two shapes reports the other
+    as missing.**
+- **DEPLOY RECORD — 2026-09-19.** Pushed `eba7385..1f570eb`, **23 commits**, GitHub Actions run
+  **`35445606773`** on head **`1f570eb`**, conclusion **success**. All 23 were this track's own
+  work — **no foreign riders**, so no third-party CSP check was owed; **no `deploy/` change, no new
+  external origin, ZERO migrations** (each asserted with a firing positive control rather than
+  omitted). Pre-push gate: frontend 219/43 exit 0, api 873/34/61 exit 0, both `tsc` 0 bytes.
+  **UI observation is evidence again** and the operator's round is the next instrument.
+- **B6 AND B7 ARE WITHDRAWN — a count corrected DOWNWARD by its own author, mid-cycle.** `rows` is
+  built by mapping over `budgets` themselves (`BudgetPage.tsx:163-174`), so every row HAS a budget
+  and `allocated > 0` is guaranteed by `chk_budgets_amount_positive`, making the `: 0` branch
+  **unreachable**. **Group 1 is EIGHT sites; the class is FIFTEEN, not seventeen.** Gate B still
+  fires at fifteen. Recorded as the harder direction to move a number in.
+- **THE RED-PROOF CONTROL REQUIREMENT — adopted, cited not minted.** A red proof reported `exit 1`
+  **and no test had run**: an unquoted two-path variable arrived as a single argument (zsh does not
+  word-split unquoted parameter expansions), the runner exited 1 on **"No test files found"**, and
+  that is **the same exit code a genuinely red test produces**. Both red proofs in that batch were
+  no-ops that looked exactly like success at proving failure. **The instrument that failed was the
+  one verifying that the OTHER instruments discriminate**, and it failed in the reassuring
+  direction. **THE RULE: a red proof carries a POSITIVE CONTROL — before a non-zero exit may be
+  read as "the assertion failed", the same invocation is shown capable of FINDING AND RUNNING the
+  tests, by an unmutated run reporting a test COUNT or by the runner's collected-file line. A count
+  is the control; an exit code alone is not.** The mutation attribution for that batch rests
+  entirely on the redone runs. **No new standing line — this is the existing empty-result rule
+  reaching the verification instrument itself.** CLAUDE.md count stays at **SIX**.
+- **AN OUT-OF-CHANNEL RULING WAS CITED AND ITS TEXT IS NOW PERSISTED** — see the section
+  "Out-of-channel operator rulings — verbatim" below. The MOB-R23 cycle's report cited "per your
+  Option B ruling"; **no such ruling exists in the review channel.** The operator answered
+  directly, which is his right; the defect is **record integrity, not authority** — a ruling
+  citable only from a side exchange is, in the record, indistinguishable from a self-grant. **All
+  FOUR decisions taken that way are persisted, not only the one MOB-R24 named**, because all four
+  were acted on: ship Group 1, fold in Part 5, push now, and B4's Option B guard.
+  **STANDING DISPOSITION:** any ruling reaching the implementer outside the review channel is
+  persisted with its verbatim text and an OUT-OF-CHANNEL provenance **before** it is acted on in a
+  report.
+  - **The substance is accepted and is sharper than G1a's blanket preference** (MOB-R24): two
+    fields of the SAME payload object cannot disagree with each other, while a separate query can,
+    so the same-object field is the stronger guard at that site and the general preference was
+    wrong there.
+- **I5's PREDICATE WAS WIDENED, AND THE CATCH WAS LUCK.** The first form (`total === 0`) missed a
+  month with real spend and no budgets; the widened form (`committed_kd <= 0`) subsumes it and
+  matches the signal its sibling I1 already uses. **It was caught by ANOTHER component's test** —
+  `InsightsPage`'s I1 case firing on `SpendForecastWidget`'s guard, because both render on the same
+  page. **That is coincidence, not coverage**, and the lesson is the one MOB-R24 names: a guard's
+  predicate is DERIVED FROM THE SIGNAL ITS SIBLINGS USE, not invented per site.
+- **GATE C FIRED ON D2 and the wording is the operator's.** `dashboard/sections.tsx:1022-1026`
+  cannot be fixed by suppression without emptying the "Needs attention" panel it sits in, so it
+  needs NEW COPY, which is a product decision. **"No categories are over budget" is TRUE and
+  MISLEADING on an account with no budgets — which is the whole shape of this class.**
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** Count stays **SIX**.
+
 ## Part 6 — zero-versus-no-data measurement report (implementer, executed 2026-09-19, pending acceptance)
 
 Opened by MOB-R22. **REPORT ONLY — zero code changed.** Gate A PASSES, **Gate B FIRES**, so 6d does
@@ -1066,6 +1129,50 @@ a correct claim in the wrong tense. **The zero guard must land first**, because 
 cannot choose a tense until something tells it whether the period is empty. This is exactly the
 operator's September capture — on-track copy on a month with no transactions — being **both classes
 firing at one site**.
+
+## Out-of-channel operator rulings — verbatim (provenance: OPERATOR, DIRECT, OUT-OF-CHANNEL)
+Owed by MOB-R24 and persisted here before being relied on again. The MOB-R23 cycle's report cited
+"per your Option B ruling"; **no such ruling exists in the review channel.** The operator answered
+directly, which is entirely his right — the defect is RECORD INTEGRITY, not authority: a ruling
+citable only from a side exchange is, in the record, indistinguishable from a self-grant.
+
+**Standing disposition (MOB-R24):** any ruling reaching the implementer outside the review channel is
+persisted with its verbatim text and an OUT-OF-CHANNEL provenance BEFORE it is acted on in a report.
+
+Text below is recovered from the session transcript — a byte-exact conduit, not a transcription.
+Nothing here is re-decided; MOB-R24 has already accepted the substance of exchange 2.
+
+### Exchange 1 — transcript line 1942
+**QUESTION (implementer):** Group 1 (10 sites, "no budget exists") is authorised conditionally on your ruling. Ship it as its own cycle now?
+  - `Ship Group 1 now (Recommended)` — 10 sites, under the threshold on its own count. Needs NO new signal — hasBudget already exists and is already passed into the component holding 3 of the sites; the fix extends a partially-applied guard rather than adding a parallel one. Runs G1a–G1d with red-first tests and mutation attribution; Gate C stops any site needing new copy rather than suppression.
+  - `Hold Group 1` — Leave all 17 sites unfixed until you sequence the whole class. Nothing changes on screen; '% Used 0.0%' beside 'Over budget this month' stays live.
+  - `Ship Group 1 + Groups 2 and 3` — All 17 sites in one cycle. Exceeds MOB-R22's Gate B threshold of twelve, so this overrides that gate — Groups 2 and 3 also need a NEW derived predicate, which Group 1 does not.
+**QUESTION (implementer):** Part 5 (duplicate category label + orphaned separator bullet) has been unruled for three cycles. Fold it in?
+  - `Fold in with Group 1` — Ships in the same commit with per-site treatment: file:line, the condition producing the duplicate, the condition producing the orphan, and one discriminating test each with its negative case stated. These are render defects at every width, so they are testable and no coverage gap is declared.
+  - `Keep deferring to conventions` — Stays referred out to the conventions phase, untouched for a fourth cycle.
+  - `Fold in as its own cycle` — Ship it separately from Group 1 so a failed check is attributable to one change rather than two.
+**QUESTION (implementer):** Twenty-three commits are unpushed and three unverified layers sit on the same dialog footers and toolbars. Push now?
+  - `Push now (Recommended)` — Until this lands, the next observation round cannot attribute a failure between the cache work, the responsive commit and the touch minimum. I'd diff against origin/main (never local main), enumerate every riding commit with its CSP check, and treat no UI observation as evidence until the Actions run has landed.
+  - `Hold the push` — Checks stay unattributable and the 320 top-up plus item (vi) stay blocked. I will say so explicitly in each report rather than let their absence read as a pass.
+  - `Push after Group 1 lands` — One more commit on the same surfaces, then push — trading a slightly larger unattributable set for a single deploy cycle.
+
+**ANSWER (operator, verbatim tool result):**
+
+```
+Your questions have been answered: "Group 1 (10 sites, "no budget exists") is authorised conditionally on your ruling. Ship it as its own cycle now?"="Ship Group 1 now (Recommended)", "Part 5 (duplicate category label + orphaned separator bullet) has been unruled for three cycles. Fold it in?"="Fold in with Group 1", "Twenty-three commits are unpushed and three unverified layers sit on the same dialog footers and toolbars. Push now?"="Push now (Recommended)". You can now continue with these answers in mind.
+```
+
+### Exchange 2 — transcript line 2081
+**QUESTION (implementer):** B4's guard: which predicate should gate the Budget/Income ratio and its WITHIN INCOME badge?
+  - `Option B — derive from budgetTotal (Recommended)` — hasBudget = Number(budgetTotal) > 0, computed inside IncomePlanningCard from the SAME profile_context object that supplies budgetPct. Zero test edits, suite 219/219 exit 0, tsc 0. Departs from G1a's stated preference — hence the ask. Rationale: a guard built from the same payload as the claim it guards cannot disagree with it mid-load.
+  - `Option A — pass hasBudget as a prop` — Follows G1a literally: extends the exact predicate BudgetHero already receives (budgets.length > 0), passed down from BudgetPage. Costs one forced edit to budget/sections.test.tsx to supply the newly-required prop — which is the red test, and is why this stops and asks. The edit weakens no assertion.
+  - `Drop B4 from this cycle` — Ship the other six sites and report B4 alongside D2 as needing a ruling. The '0.0%' ratio and 'WITHIN INCOME' badge stay live on an account with no budgets.
+
+**ANSWER (operator, verbatim tool result):**
+
+```
+Your questions have been answered: "B4's guard: which predicate should gate the Budget/Income ratio and its WITHIN INCOME badge?"="Option B — derive from budgetTotal (Recommended)". You can now continue with these answers in mind.
+```
 
 ## Open at the time of writing — carried, not resolved
 
@@ -5491,3 +5598,115 @@ set; the four-not-seven correction with the channel's triple propagation and the
 figure pattern; Gate A's constraint-level proof and the two-families finding that refuted the
 representative-face instruction; Gate B's firing with the three-group keying; the partially-applied-
 guard finding; the zero-gates-tense dependency; and the third path-matching instrument failure.
+
+MOB-R24 — THE CYCLE IS ACCEPTED AND THE DEPLOY IS RECORDED. The red-proof instrument failure is the
+sharpest finding of this track. An out-of-channel ruling is cited and needs its text. Gate C's D2
+goes to the operator. Groups 2 and 3 are authorised.
+
+CADENCE. Issued under test (a) and (c).
+
+THE DEPLOY IS RECORDED. Twenty-three commits pushed, all this track's work with no foreign riders so
+no third-party CSP check was owed, no deploy-directory change, no new external origin, zero
+migrations. The Actions run completed success on the pushed head. UI OBSERVATION IS EVIDENCE AGAIN
+and the operator's round is the next instrument.
+
+THE CYCLE IS ACCEPTED. Seven sites shipped plus the two Part 5 defects. Frontend two hundred and
+nineteen across forty-three to two hundred and thirty-four across forty-four, PREDICTION MET EXACTLY
+and reconciled two ways — aggregate and per-file. Api unchanged, both typechecks at zero bytes,
+fixture and allowlist from the file in the restored standing form, physical properties unchanged at
+thirty-two across nine, named regression files untouched.
+
+═══ THE RED-PROOF INSTRUMENT FAILURE ═══
+
+A RED PROOF REPORTED EXIT ONE AND NO TEST HAD RUN. An unquoted two-path variable arrived as a single
+argument matching nothing, and the runner exited one on "no test files found" — THE SAME EXIT CODE A
+GENUINELY RED TEST PRODUCES. Both red proofs in that batch were no-ops that looked exactly like
+success at proving failure.
+  THIS IS THE CANONICAL CLASS AT ITS SHARPEST. An empty result is byte-identical to a command that
+  did not run — and here the instrument was the one verifying that the OTHER instruments
+  discriminate. A red proof that cannot distinguish "the test failed" from "the test never ran"
+  proves nothing, and it fails in the reassuring direction.
+  IT WAS FOUND AND REDONE WITH LITERAL PATHS, at which point the proofs were real. THE MUTATION
+  ATTRIBUTION FOR THAT BATCH RESTS ENTIRELY ON THE REDONE RUNS and the record says so.
+  THE DURABLE FORM, ADOPTED: A RED PROOF CARRIES A POSITIVE CONTROL. Before a non-zero exit means
+  "the assertion failed", the same invocation is shown CAPABLE OF FINDING AND RUNNING THE TESTS —
+  by an unmutated run reporting a test count, or by the runner's own collected-file line. A count is
+  the control; an exit code alone is not.
+  NO NEW STANDING LINE. The count stays at SIX. This is the existing empty-result rule reaching the
+  verification instrument itself, cited not minted.
+
+═══ TWO SELF-CORRECTIONS, BOTH ACCEPTED ═══
+
+B6 AND B7 ARE WITHDRAWN AND THE ARITHMETIC IS RIGHT. The rows are built by mapping over the budgets
+themselves, so every row HAS a budget, and the database check constraint guarantees the allocation is
+positive — making the zero branch unreachable. GROUP 1 IS EIGHT SITES AND THE CLASS IS FIFTEEN. Gate
+B still fires at fifteen. A count corrected downward by its own author, mid-cycle, against its own
+earlier report, is the harder direction to move and it is recorded as such.
+
+I5's PREDICATE WAS WIDENED AND THE CATCH IS THE INTERESTING PART. The first form missed a month with
+real spend and no budgets; the widened form subsumes it and matches the signal a sibling site
+already uses. IT WAS CAUGHT BY ANOTHER COMPONENT'S TEST — one file's assertion firing on a defect in
+a different component's guard, because both render on the same page. THAT IS COINCIDENCE, NOT
+COVERAGE, and it is worth naming as such: the catch was luck and the lesson is that a guard's
+predicate is derived from the signal its siblings use, not invented per site.
+
+EVERY GUARD READING ZERO AS ABSENT CARRIES A COMMENT NAMING THE DATABASE CONSTRAINT that makes zero
+unattainable. That is the right instinct and it is the thing that stops a future reader from
+"simplifying" a guard whose justification lives two layers down and is invisible at the call site.
+
+THE SIX MUTATIONS ARE ACCEPTED AND THE ONE THAT REDDENED THREE CASES IS REPORTED RATHER THAN
+SMOOTHED. One assertion also catches a widget's copy, so only the narrower mutation attributes that
+case to its own guard. Naming which mutation attributes which case — rather than reporting that all
+mutations produced red — is what makes the set evidence about individual assertions.
+
+═══ AN OUT-OF-CHANNEL RULING IS CITED AND ITS TEXT IS OWED ═══
+
+THE REPORT DECLARES A DEPARTURE FROM G1a "PER YOUR OPTION B RULING". NO SUCH RULING EXISTS IN THIS
+CHANNEL. The operator has confirmed he answered questions directly this cycle, which is entirely his
+right — he is the operator and he may rule anything at any time, through any surface.
+  THE PROBLEM IS RECORD INTEGRITY, NOT AUTHORITY. A ruling that exists only in a side exchange is
+  cited in a persisted report and cannot be found by a later reader, who then sees an implementer
+  departing from a channel instruction on the strength of an authority with no text. That is
+  indistinguishable, in the record, from a self-grant.
+  OWED, AND IT IS A PASTE RATHER THAN AN ARGUMENT: the operator's question and his answer, verbatim,
+  persisted adjacent with provenance OPERATOR, DIRECT, OUT-OF-CHANNEL. Nothing is re-decided.
+  THE SUBSTANCE IS ACCEPTED AND IS BETTER THAN G1a's BLANKET PREFERENCE. G1a said to prefer the
+  existing partially-applied guard over a parallel one. THE REPORT'S REASONING IS SHARPER: two
+  fields of the SAME payload object cannot disagree with each other, while a separate query can — so
+  the same-object field is the stronger guard here, and the general preference was wrong for this
+  site. Reversing its own earlier stated reasoning and saying so is the right handling.
+  STANDING DISPOSITION: any ruling reaching the implementer outside this channel is persisted with
+  its verbatim text and an OUT-OF-CHANNEL provenance before it is acted on in a report.
+
+═══ GATE C FIRES ON D2 — OPERATOR DECISION ═══
+
+The on-track sentence cannot be fixed by suppression without emptying the panel it sits in, so it
+needs NEW COPY. Correctly reported and not shipped — new user-facing sentences are a product
+decision. TO THE OPERATOR, with the channel recommendation offered and not adopted: on an empty
+period the panel should say there is nothing to assess yet rather than that nothing is wrong. "No
+categories are over budget" is TRUE and MISLEADING on an account with no budgets, which is the
+class's whole shape. THE OPERATOR RULES THE WORDING.
+
+═══ GROUPS 2 AND 3 — AUTHORISED ═══
+
+Seven sites across two signals. Same treatment as Group 1: per site the current condition, the
+condition that should render, and which existing signal supplies it; prefer the signal a sibling
+site already uses rather than inventing one per site; one discriminating test per distinct render
+path with its negative case stated; RED-FIRST WITH A POSITIVE CONTROL ON THE RED PROOF per the
+clause above; and state in words what each site renders after, because suppressing a wrong number is
+not the same as saying the right thing.
+  ** GATE C STILL APPLIES ** — any site needing new copy rather than suppression STOPS and is
+  reported. The others ship.
+  THE TENSE PHASE REMAINS GATED BEHIND THIS CLASS and is not opened.
+
+CONSTRAINTS unchanged: no renames; pinned strings untouched; the FAB topology untouched; QuickAdd
+internals untouchable; zero physical-property additions against thirty-two across nine; no new
+external origin and no Caddyfile change, asserted rather than omitted; the e2e suite untouched.
+Queued items stay queued.
+
+PERSISTENCE. This block persists ALONE, position DERIVED FROM THE FILE, with the payload sweep under
+both patterns shown discriminating and the post-append composite reconciled two ways, enumeration
+printed in file order. Persist alongside it: the deploy record with its run identifier and head, the
+withdrawn B6 and B7 with the corrected counts, the red-proof control requirement, and the
+out-of-channel ruling once its text arrives. Provenance RELAYED. Re-derive the unpushed count by both
+routes or do not state it.
