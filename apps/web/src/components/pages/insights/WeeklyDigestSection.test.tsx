@@ -61,3 +61,55 @@ describe("WeeklyDigestSection", () => {
     expect(screen.getByText(/Days until payday: N\/A/)).toBeInTheDocument()
   })
 })
+
+/**
+ * MOB-1 Group 3 — zero-versus-no-data on the weekly Spending delta.
+ *
+ * With no expenses in EITHER week both sums are "0.000" and delta_pct is 0, which fell through to
+ * "Your weekly pace is unchanged." — a pace comparison between two empty weeks. Expenses are
+ * strictly positive at the database (chk_transactions_amount_positive, migration 0000), so a zero
+ * sum means NO ROWS rather than a week that happened to cost nothing.
+ *
+ * These cases reuse makeDigest above rather than carrying a second fixture.
+ */
+describe("MOB-1 Group 3 — WeeklyDigestSection spending delta", () => {
+  const UNCHANGED = "Your weekly pace is unchanged."
+
+  it("I4 — says N/A rather than claiming the pace is unchanged between two empty weeks", () => {
+    render(
+      <WeeklyDigestSection
+        digest={makeDigest({ this_week_expense_kd: "0.000", last_week_expense_kd: "0.000", delta_pct: 0 })}
+        loading={false}
+      />
+    )
+    // WITHOUT the change delta_pct is 0, so this reads "Your weekly pace is unchanged." and shows
+    // "0.0%" for two weeks that have no expenses at all.
+    expect(screen.queryByText(UNCHANGED)).not.toBeInTheDocument()
+    expect(screen.queryByText(/0\.0%/)).not.toBeInTheDocument()
+    expect(screen.getByText("N/A")).toBeInTheDocument()
+  })
+
+  it("CONTROL — a genuinely unchanged week still says so", () => {
+    render(
+      <WeeklyDigestSection
+        digest={makeDigest({ this_week_expense_kd: "120.000", last_week_expense_kd: "120.000", delta_pct: 0 })}
+        loading={false}
+      />
+    )
+    // Real spend in both weeks and a real zero delta: the claim is TRUE here and must survive.
+    // Without this case the test above would pass against a component that deleted the sentence.
+    expect(screen.getByText(UNCHANGED)).toBeInTheDocument()
+  })
+
+  it("CONTROL — one empty week and one with spend still reports a direction", () => {
+    render(
+      <WeeklyDigestSection
+        digest={makeDigest({ this_week_expense_kd: "0.000", last_week_expense_kd: "80.000", delta_pct: -100 })}
+        loading={false}
+      />
+    )
+    // Only ONE week is empty, so the comparison is real: spending genuinely fell to nothing.
+    expect(screen.getByText("You spent less than last week.")).toBeInTheDocument()
+  })
+})
+

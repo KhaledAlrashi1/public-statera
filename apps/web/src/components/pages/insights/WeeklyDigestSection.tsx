@@ -39,6 +39,10 @@ export function WeeklyDigestSection({
   error?: string | null
 }) {
   const DeltaIcon = deltaIcon(digest?.delta_pct ?? 0)
+  // MOB-1 Group 2 — see the Spending delta article below. Both week sums are formatKd of real
+  // sums over strictly-positive amounts, so > 0 on either week means that week has rows.
+  const hasWeekExpenses =
+    Number(digest?.this_week_expense_kd ?? 0) > 0 || Number(digest?.last_week_expense_kd ?? 0) > 0
 
   return (
     <section className="section-panel">
@@ -94,17 +98,32 @@ export function WeeklyDigestSection({
                 </div>
               </article>
 
+              {/* MOB-1 Group 2 — with no expenses in EITHER week both sums are "0.000" and the
+                  delta is 0, which fell through to "Your weekly pace is unchanged." — a comparison
+                  between two empty weeks. Expenses are strictly positive at the database
+                  (chk_transactions_amount_positive, migration 0000), so a zero sum means NO ROWS
+                  rather than a week that happened to cost nothing. The article is KEPT rather than
+                  removed so the three-column grid does not lose a cell; the percentage falls back
+                  to "N/A", which is this file's existing null marker (see days_until_payday
+                  below), and the direction icon and sentence are suppressed because both assert a
+                  direction that does not exist. */}
               <article className="inner-card space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                   Spending delta
                 </p>
-                <p className={`inline-flex items-center gap-1 text-lg font-semibold tabular-nums ${deltaTone(digest.delta_pct)}`}>
-                  <DeltaIcon className="h-4 w-4" />
-                  {digest.delta_pct > 0 ? "+" : ""}{digest.delta_pct.toFixed(1)}%
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {digest.delta_pct < 0 ? "You spent less than last week." : digest.delta_pct > 0 ? "You spent more than last week." : "Your weekly pace is unchanged."}
-                </p>
+                {hasWeekExpenses ? (
+                  <>
+                    <p className={`inline-flex items-center gap-1 text-lg font-semibold tabular-nums ${deltaTone(digest.delta_pct)}`}>
+                      <DeltaIcon className="h-4 w-4" />
+                      {digest.delta_pct > 0 ? "+" : ""}{digest.delta_pct.toFixed(1)}%
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {digest.delta_pct < 0 ? "You spent less than last week." : digest.delta_pct > 0 ? "You spent more than last week." : "Your weekly pace is unchanged."}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-lg font-semibold tabular-nums text-muted-foreground">N/A</p>
+                )}
               </article>
 
               <article className="inner-card space-y-2">

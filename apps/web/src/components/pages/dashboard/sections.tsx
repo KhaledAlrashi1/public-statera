@@ -1040,11 +1040,23 @@ export function IncomeExpensesChart({
   isLoading: boolean
   trendData: Array<{ month: string; income: number; expenses: number }>
 }) {
-  const monthsAhead = trendData.filter((row) => row.income >= row.expenses).length
-  const expenseAverage = trendData.length > 0
-    ? trendData.reduce((sum, row) => sum + row.expenses, 0) / trendData.length
+  // MOB-1 Group 2 — zero-vs-no-data. The server zero-FILLS every month in the window before folding
+  // in any rows (lib/dashboard-snapshot-lib.ts:223-227), so a month with no transactions arrives
+  // here as income 0 / expenses 0 and is indistinguishable BY VALUE from a month that had activity
+  // netting to nothing. It is distinguishable by INVARIANT: amounts are strictly positive at the
+  // database (chk_transactions_amount_positive, migration 0000), so a sum of zero is unattainable
+  // from real rows and both series at zero means NO ROWS. Nothing at this call site shows that,
+  // hence the comment.
+  //
+  // Without this filter an empty month satisfied `income >= expenses` (0 >= 0) and was counted as a
+  // month that "finished with income ahead of expenses", and it dragged the expense average toward
+  // zero as though it were a frugal month.
+  const monthsWithData = trendData.filter((row) => row.income !== 0 || row.expenses !== 0)
+  const monthsAhead = monthsWithData.filter((row) => row.income >= row.expenses).length
+  const expenseAverage = monthsWithData.length > 0
+    ? monthsWithData.reduce((sum, row) => sum + row.expenses, 0) / monthsWithData.length
     : 0
-  const peakExpenseMonth = trendData.reduce<{ month: string; expenses: number } | null>(
+  const peakExpenseMonth = monthsWithData.reduce<{ month: string; expenses: number } | null>(
     (peak, row) => {
       if (!peak || row.expenses > peak.expenses) {
         return { month: row.month, expenses: row.expenses }
@@ -1053,8 +1065,8 @@ export function IncomeExpensesChart({
     },
     null
   )
-  const insightCaption = trendData.length > 0
-    ? `${monthsAhead} of ${trendData.length} visible months finished with income ahead of expenses.`
+  const insightCaption = monthsWithData.length > 0
+    ? `${monthsAhead} of ${monthsWithData.length} visible months finished with income ahead of expenses.`
     : "Compare how income and expenses move together across recent months."
 
   return (
