@@ -762,6 +762,87 @@ The amendments above are left as they stand. This is the live index from here fo
   nothing waits on it.**
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** Count stays **SIX**.
 
+### Amendment — MOB-R22 persistence commit, 2026-09-19
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R22**, contiguous: first **1**, last **22**, **0**
+  duplicates, **0** breaks in 1…22. **Position DERIVED from the file (last was 21), not from the
+  clause.** Both operative patterns AGREE at **22**. Payload sweep before the write was **1 and 1**,
+  with the sweep shown DISCRIMINATING by injecting a second header into a copy and watching strict
+  go to 2 — an all-clear from an instrument never shown able to fire is not an all-clear.
+  **MOB-R22 provenance: RELAYED.** Its bytes were taken from the session transcript rather than
+  transcribed out of context: the same emission, reached by a byte-exact conduit with no typing
+  step. **That is NOT the RECOVERED class** — nothing was lost to a boundary here; the transcript
+  was used to eliminate transcription risk (10e-R256), not to recover a missing artifact.
+- **THE ROOT CAUSE OF THE PROFILE COMPLAINT WAS A LABEL, AND THE OPTION SET WE RULED BETWEEN WAS
+  THE WRONG SET.** The entry existed at phone width, two steps in, carrying the account holder's
+  **first name as its only accessible name**. A control labelled with a person's name does not read
+  as a route to account settings — to a first-time user it reads as decoration or a greeting, and
+  the operator's report ("I would not have found it had I not known it existed") is exactly what a
+  correctly-placed control with the wrong label produces. Three PLACEMENTS were offered and ruled
+  between; **none of them was the defect.** The pre-check that refuted the premise, and the
+  enumeration that followed it, produced a remedy that costs no header space, engages no gate, and
+  fixes the cause. **The operator's ruling is not overridden — it was a ruling about placement, and
+  placement was not the problem.**
+- **A CONTAINER BOUNDARY IS THE EDGE OF "ORDERING", and the block did not spell that out.** The
+  authorisation read *"ordering and one label."* The entry sits in a **footer container**, not in
+  the navigation list, so changing its position means moving it **BETWEEN containers** — a
+  restructure, not a reorder, and therefore a stop-and-ask. **Reported rather than taken.** The
+  secondary point — that a footer is the conventional home for account controls — is a reason not
+  to want the move anyway, and it was offered as a reason rather than used as the authorisation.
+- **THE TWO-MUTATION ATTRIBUTION FORM, recorded as a reusable instrument.** Mutation 1 restored the
+  pre-change form and took **all three** cases red, proving the tests fail in the changed world's
+  absence. **That alone would NOT have proven the visible-label assertion does any work** — it
+  could have been carried entirely by the accessible-name assertion beside it. Mutation 2 retained
+  the accessible name and removed **only** the visible label, taking **exactly one** case red with
+  the other two **GREEN**. **THE GREEN IS THE EVIDENCE:** it attributes the failure to one
+  assertion rather than to the set (10e-R198). Both restorations verified byte-identical against a
+  backup. Companion point: the fixture helper **derives from its argument** rather than reproducing
+  the sibling harness's hardcoded value — a constant would have satisfied the assertion even if the
+  component passed nothing through, and an instrument sharing its value with what it measures
+  cannot detect a fault in it (10e-R168).
+- **THE RECOVERED PROVENANCE OF MOB-R21, WITH THE CONTROL THAT TURNED RECOVERY INTO EVIDENCE.** The
+  session compacted between that block's arrival and its persistence, leaving a **paraphrase** as
+  the surviving artifact. A paraphrase cannot be persisted as a verbatim block, and persisting one
+  would have written a **reconstructed ruling** into the permanent record — the class this project
+  rates WORSE than an uncheckable one, because it is checkable and wrong (10e-R71). Bytes were
+  recovered from the session transcript, appended by pipe, and the provenance recorded as
+  **RECOVERED**. **The verification is what makes it evidence:** the pre-append state was
+  reproduced byte-identically, **and a control deleting a different span of the same length was
+  shown NOT to reproduce it** — that control is what separates *"my reconstruction matches"* from
+  *"any reconstruction of that size would match"* (10e-R113). **Standing form: the canonical source
+  of a block is the channel's own emission; a working copy is a convenience downstream of it; when
+  it is gone, recover from the emission and SAY RECOVERED.**
+- **THE ENUMERATING-FACTORY CLASS NOW HAS AN INSTANCE WITH BOTH METHODS RUN SIDE BY SIDE.** A new
+  test file needed three mock factories completed before the component would render —
+  `QuickAddProvider`, `useDarkMode`, `getUserFirstName`. **Two were found by ITERATION** (run, fail,
+  add, repeat) **and the third by ENUMERATION** — listing every named import the component takes
+  from each mocked module in one pass — **which found it BEFORE it failed.** The first two are
+  named as **wasted cycles**, not folded into the narrative as progress. **Iteration on a mock
+  factory is a search whose stopping condition is "the last failure stopped," which is not a
+  stopping condition at all; enumeration has one.** Same closed-list mechanism as 10e-R37.
+- **REPORTING-FORM CHANGE, NAMED (raised by MOB-R22).** The empty allowlist was reported this cycle
+  as an **empty body** (a regex capturing between the brackets, yielding `''`) where every prior
+  cycle reported an **empty literal**. **The derivation CHANGED; the fact did not.** Re-run in both
+  forms against the same file, they agree: the literal at
+  `apps/api/src/contract/frontend-contract.test.ts:54` is `= []`, the standing form matches it
+  **1** time, and that form is shown discriminating by **0** matches against a non-empty allowlist.
+  **The standing form is restored going forward** — comparability across runs is the entire value
+  of a repeated figure, and a control whose form drifts silently is no longer the same control.
+- **THE DEPLOY INVENTORY — recorded as a count and an inventory, not as a fourth argument.** Twenty
+  commits unpushed at the close of the MOB-R21 cycle. **Waiting on one push and one observation
+  round:** the four responsive items, each carrying a declared coverage gap whose only instrument
+  is the operator's eyes; the touch minimum, invisible to the suite in both directions and
+  unverifiable in a desktop responsive mode; Gate 3's interaction between taller controls and the
+  dialogs that just gained internal scroll, deferred to observation because it is rendered; item
+  (vi), deferred pending a 320 observation; and eleven written checks across two close-outs. **The
+  three layers sit on the same dialog footers and toolbars, so a failure in the next round is not
+  attributable between them.** When the push happens: diff against **origin/main**, never local
+  main; enumerate every riding commit and name any that is not this track's work with its CSP
+  check; and **no UI observation is evidence until the Actions run has landed.**
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** Count stays **SIX**.
+
 ## Open at the time of writing — carried, not resolved
 
 Recorded here so a later reader meets the open questions in the ruling record rather than having to
@@ -4853,3 +4934,165 @@ persisted set; the standing wider-cadence instruction with its non-collapsible g
 that measurement does not parallelise behind implementation; Gate 4's firing with the two-approved-
 changes-in-conflict finding; the refuted premise and the unreported mobile route; and the escalated
 deploy recommendation as offered-and-not-adopted.
+
+MOB-R22 — OUTCOME 2A IS ACCEPTED AND THE ROOT CAUSE WAS A LABEL. The position-not-taken reading is
+RATIFIED and it is the sharpest judgement in the cycle. Part 6 OPENS as its own cycle, WIDENED to
+implement behind a named gate. One reporting form changed unannounced.
+
+CADENCE. Issued under test (a) and (c), under the standing wider-cadence instruction.
+
+THE CYCLE IS ACCEPTED. Three mandatory sections present and green, both suites with the Test Files
+summary line and captured exit codes, both typechecks at zero bytes, the api suite run because the
+contract test reads the frontend fixture, the baseline moved two hundred and sixteen across
+forty-two to two hundred and nineteen across forty-three and RECONCILED TWO WAYS — three test
+blocks counted against three tests, with the absence of parameterised cases checked rather than
+assumed, which is the step that makes a test count a measurement instead of a guess. Negative
+deliverables behind FIRING controls, including a physical-property control shown matching a real
+site and NOT matching two near-miss forms.
+
+THE ROOT CAUSE IS A LABEL AND IT EXPLAINS THE OPERATOR'S REPORT EXACTLY. The profile entry existed
+at phone width, two steps in, carrying the account holder's first name as its ONLY accessible name.
+A control labelled with a person's name does not read as a route to account settings — to a
+first-time user it reads as decoration or as a greeting. THE OPERATOR SAID HE WOULD HAVE FOUND IT
+HAD HE NOT KNOWN IT EXISTED, and that is precisely what a correctly-placed control with the wrong
+label produces.
+  THE OPTION SET WE WERE CHOOSING FROM WAS THE WRONG SET. Three placements were offered and ruled
+  between; none of them was the defect. The pre-check that refuted the premise, and the enumeration
+  that followed it, produced a remedy costing no header space, engaging no gate, and fixing the
+  cause. THE RULING IS NOT OVERRIDDEN — it was a ruling about placement, and placement was not the
+  problem.
+
+THE POSITION WAS NOT MOVED AND THE REASON IS RIGHT. The authorisation read "ordering and one label."
+The entry sits in a footer container rather than in the navigation list, so changing its position
+means moving it BETWEEN CONTAINERS, which is a restructure and not a reorder. Reporting that rather
+than taking it is the correct reading of a narrow authorisation, and reading a container boundary as
+the edge of "ordering" is a judgement the block did not spell out. The secondary point — that a
+footer is the conventional home for account controls — is a reason not to want the move anyway, and
+it is offered as a reason rather than used as the authorisation.
+
+THE TWO-MUTATION ATTRIBUTION IS THE PART TO KEEP. The first mutation restored the pre-change form
+and took all three cases red, which proves the tests fail in the changed world's absence. THAT ALONE
+WOULD NOT HAVE PROVEN THE VISIBLE-LABEL ASSERTION DOES ANY WORK — it could have been carried by the
+accessible-name assertion beside it. The second mutation retained the accessible name and removed
+only the visible label, taking EXACTLY ONE case red with the other two green. THE GREEN IS THE
+EVIDENCE: it attributes the failure to one assertion rather than to the set. Both restorations
+byte-identical.
+  AND THE FIXTURE HELPER DERIVES FROM ITS ARGUMENT rather than reproducing the sibling's hardcoded
+  value. A constant would have satisfied the assertion even if the component passed nothing through
+  — an instrument sharing its value with what it measures cannot detect a fault in it.
+
+THE RECOVERED PROVENANCE IS RATIFIED AND IT IS THE EVENT OF THIS CYCLE. The session compacted
+between the block's arrival and its persistence, leaving a PARAPHRASE as the surviving artifact. A
+paraphrase cannot be persisted as a verbatim block, and persisting one would have written a
+reconstructed ruling into the permanent record — the class this project rates WORSE than an
+uncheckable one, because it is checkable and wrong. The bytes were recovered from the session
+transcript, appended by pipe rather than retyped, and the provenance recorded as RECOVERED rather
+than as held.
+  THE RECONSTRUCTION WAS VERIFIED AGAINST THE FILE, which is the step that turns recovery into
+  evidence: the pre-append state was reproduced byte-identically, with a control deleting a
+  different span of the same length shown NOT to reproduce it. That control is what separates "my
+  reconstruction matches" from "any reconstruction of that size would match."
+  NO RULING CROSSES A BOUNDARY, AND THIS IS THAT RULE MEETING A BOUNDARY IT DID NOT CHOOSE. The
+  standing form holds: the canonical source of a block is the channel's own emission; the working
+  copy is a convenience downstream of it; when it is gone, recover from the emission and SAY
+  RECOVERED.
+
+THE THREE ENUMERATING-MOCK FACTORIES ARE A CORRECT SELF-REPORT AND THE LESSON IS IN THE STOPPING.
+Two were found by iteration — run, fail, add, repeat — and the third by ENUMERATING every named
+import the component takes from each mocked module in one pass, which found it BEFORE it failed.
+The first two were wasted cycles and are named as wasted rather than folded into the narrative as
+progress. Iteration on a mock factory is a search whose stopping condition is "the last failure
+stopped," which is not a stopping condition at all; enumeration has one. This is the
+enumerating-factory class and it now has an instance where the two methods ran side by side.
+
+ONE REPORTING FORM CHANGED WITHOUT BEING NAMED, and it is raised because the implementer itself
+adopted the rule. The allowlist has been reported as an empty literal in every prior cycle and is
+reported this cycle as an empty body. Both claim emptiness and the claim is almost certainly right.
+BUT A CONTROL RUNS IN ONE FORM ACROSS CYCLES AND A CHANGE TO ITS FORM IS NAMED IN THE SAME BREATH —
+comparability across runs is the entire value of a repeated figure. ONE LINE: was the derivation
+changed, or is this the same command reported differently? Not a return.
+
+═══ PART 5 — STILL CONDITIONAL ═══
+
+The duplicate category label and the orphaned separator bullet. No operator ruling has arrived and
+the channel's recommendation to fold them in STANDS UNADOPTED — a cycle passing does not adopt it.
+IF RULED IN: per-site treatment with the condition producing each defect named, and one
+discriminating test each with its negative case stated. These are render defects at every width and
+are therefore TESTABLE; a declared coverage gap is not the right answer for them.
+
+═══ PART 6 — OPENED, AND WIDENED TO IMPLEMENT BEHIND ONE GATE ═══
+
+ITS OWN CYCLE WITH NOTHING ELSE IN IT, as ruled when it was deferred. The widening is that it may
+IMPLEMENT rather than only report — but only through the gate below, because the root-cause question
+decides whether this is a presentation fix or a payload change, and those are not the same size of
+work.
+
+6a. ENUMERATE EVERY ZERO-CLASS SITE. Seven faces were recorded in the preceding track's Phase A and
+    ONE was fixed — the delta chips, now verified in production by the operator's month-switch.
+    DERIVE THE CORPUS FROM THE SURFACES AND THEIR BUILDERS, not from a guessed list of markers.
+    RECONCILE AGAINST A SECOND CORPUS BUILT A DIFFERENT WAY and state HOW THE TWO CORPORA DIFFER,
+    not merely that their counts agree. TWO ROUTES OVER ONE CORPUS ARE ONE ROUTE — that finding
+    came from this track's own tense enumeration failing exactly that way, with clean arithmetic
+    over the wrong scope, and the structural second corpus is what caught the site the textual one
+    missed.
+6b. THE ROOT CAUSE, AND IT IS THE QUESTION THE SEVEN FACES HAVE NEVER BEEN ASKED. Can the
+    application distinguish zero from absent AT THE DATA LAYER, or is the distinction lost before
+    the components see it? Trace one representative face end to end — payload field, wire type,
+    what an absent value serialises as, and what the component receives. SHOW THE CODE AT EACH HOP.
+    ** GATE A ** — IF THE DISTINCTION IS LOST AT OR BELOW THE PAYLOAD, STOP AND REPORT. That is a
+    contract change spanning both packages, it touches the contract fixture and the allowlist, and
+    it is NOT authorised here.
+    IF THE DISTINCTION SURVIVES TO THE COMPONENTS, the class is a presentation fix and 6d proceeds.
+6c. RE-SIZE T4, which stands withdrawn on the implementer's own motion. Fifteen tense sites are
+    accepted as measured. One sentence: a handful of strings, or its own phase.
+6d. IMPLEMENT, IF AND ONLY IF GATE A PASSES AND THE SITE COUNT IS TWELVE OR FEWER. Per site: the
+    condition that currently renders the wrong thing, the condition that should, and ONE
+    DISCRIMINATING TEST with its negative case stated — these are data-conditional render defects,
+    not layout, so they are testable in jsdom and a declared coverage gap is NOT the right answer.
+    ** GATE B ** — IF THE COUNT EXCEEDS TWELVE, stop and report the enumeration with a proposed
+    grouping. A larger set is its own phase and the operator sequences it.
+6e. STATE THE RELATIONSHIP BETWEEN THE TWO CLASSES. They share surfaces and share narrative
+    builders, and the operator's September captures showed on-track copy on a month with no
+    transactions — which reads as both classes at once. One fix or two; and if two, whether either
+    gates the other. THE TENSE CLASS IS NOT IMPLEMENTED IN THIS CYCLE regardless of its size —
+    sequencing is the operator's and he has not had a surviving sizing to rule on.
+
+═══ THE DEPLOY — STATED AS A COUNT, NOT AS A REPETITION ═══
+
+Twenty commits unpushed. THE CHANNEL HAS MADE THIS RECOMMENDATION THREE TIMES AND WILL NOT MAKE IT A
+FOURTH; what follows is the inventory rather than the argument. Waiting on one push and one
+observation round: the four responsive items, each carrying a declared coverage gap whose only
+instrument is the operator's eyes; the touch minimum, invisible to the suite in both directions and
+unverifiable in a desktop responsive mode; Gate 3's interaction between taller controls and the
+dialogs that just gained internal scroll, deferred to observation because it is rendered; item (vi),
+deferred pending a 320 observation; and eleven written checks across two close-outs. THE THREE
+LAYERS SIT ON THE SAME DIALOG FOOTERS AND TOOLBARS, so a failure in the next round is not
+attributable between them.
+  NOTHING WAITS ON IT. Part 6 proceeds. If the push has not happened when the report is written, say
+  so and name which checks remain unattributable rather than letting their absence read as a pass.
+  WHEN IT HAPPENS: diff against ORIGIN/MAIN, never local main; enumerate every riding commit and
+  name any that is not this track's work with its CSP check; NO UI OBSERVATION IS EVIDENCE UNTIL THE
+  ACTIONS RUN HAS LANDED, and the report says that it had.
+
+CONSTRAINTS: no renames; pinned strings untouched including the FAB's label and tooltip and the two
+legal test identifiers; the FAB topology untouched; QuickAdd internals untouchable; the brass ration
+holds. Zero physical-property additions against the operative baseline of thirty-two sites across
+NINE files, with the pattern shown discriminating. No new external origin and no Caddyfile change,
+asserted rather than omitted. No convention work beyond Part 5 if ruled in, no cache work, no
+responsive work, no tense implementation. The e2e suite is not run, repaired, revived or deleted.
+Queued items stay queued: the KPI enclosure with the design track, the cross-tab regime and the
+import column-mapping requirement with their triggers. THE 320 TOP-UP REMAINS OUTSTANDING and its
+absence is not a pass.
+
+PERSISTENCE. This block persists ALONE — one block per message. DERIVE THE POSITION FROM THE FILE,
+never from this clause. Report the measured position, the payload sweep under both operative patterns
+with both figures, and the post-append composite with first, last, duplicates, breaks and both
+reconciliation routes, enumeration PRINTED IN FILE ORDER. A disagreement between the patterns HALTS
+THE WRITE AND IS REPORTED, not remedied, where the text is the channel's. Re-derive the unpushed
+count by both routes or do not state it. Provenance RELAYED — and if this block's bytes are lost to a
+session boundary before persistence, RECOVER FROM THE EMISSION AND SAY RECOVERED, verifying the
+reconstruction against the file with a control as this cycle did. Amend the completeness note to
+record the persisted set; the label root cause with the refuted option set; the container-boundary
+reading of a narrow authorisation; the two-mutation attribution form; the recovered provenance with
+its verification control; the enumerating-factory instance with both methods side by side; and the
+deploy inventory.
