@@ -123,11 +123,19 @@ export function BudgetHero({
             detail: `You are spending below plan with ${formatCompactKD(remaining)} left this month.`,
           }
 
-  const pctUsedTrendLabel = isOver
-    ? "Over budget this month"
-    : percentUsed >= 85
-      ? "Approaching limit"
-      : "Spending within plan"
+  // MOB-1 Group 1 — zero-vs-no-data. With no budget rows `totalBudget` is 0, so `percentUsed`
+  // collapses to 0 and `isOver` is true against any spend at all: the tile read "% Used 0.0%"
+  // beside "Over budget this month". `hasBudget` is the EXISTING predicate — already computed in
+  // BudgetPage, already passed in, and already applied to `status` above but not here. Extending
+  // it rather than deriving a second one, because a second predicate for the same state is how
+  // this defect was born.
+  const pctUsedTrendLabel = !hasBudget
+    ? null
+    : isOver
+      ? "Over budget this month"
+      : percentUsed >= 85
+        ? "Approaching limit"
+        : "Spending within plan"
 
   return (
     <section className="float-in space-y-4" aria-label="Budget overview">
@@ -167,23 +175,31 @@ export function BudgetHero({
         </div>
         <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">% Used</div>
-          <div className="mt-1 font-mono text-xl font-semibold tabular-nums">{percentUsed.toFixed(1)}%</div>
-          <div className="mt-1 text-xs text-muted-foreground">{pctUsedTrendLabel}</div>
+          <div className="mt-1 font-mono text-xl font-semibold tabular-nums">
+            {hasBudget ? `${percentUsed.toFixed(1)}%` : "N/A"}
+          </div>
+          {pctUsedTrendLabel ? (
+            <div className="mt-1 text-xs text-muted-foreground">{pctUsedTrendLabel}</div>
+          ) : null}
         </div>
       </div>
 
-      {/* Progress bar — utilization tone (success/warning/destructive by pct), matching the table rows */}
-      <div>
-        <div className="h-2.5 w-full rounded-full bg-muted">
-          <div
-            className={cn(
-              "h-2.5 rounded-full transition-all duration-500",
-              getBudgetUtilizationTone(percentUsed).barClassName
-            )}
-            style={{ width: `${Math.min(100, percentUsed)}%` }}
-          />
+      {/* Progress bar — utilization tone (success/warning/destructive by pct), matching the table rows.
+          Suppressed without a budget: a utilization bar with no target measures nothing, and at 0%
+          an empty track reads as "nothing spent" when the truth is "nothing planned". */}
+      {hasBudget ? (
+        <div>
+          <div className="h-2.5 w-full rounded-full bg-muted">
+            <div
+              className={cn(
+                "h-2.5 rounded-full transition-all duration-500",
+                getBudgetUtilizationTone(percentUsed).barClassName
+              )}
+              style={{ width: `${Math.min(100, percentUsed)}%` }}
+            />
+          </div>
         </div>
-      </div>
+      ) : null}
     </section>
   )
 }
@@ -200,6 +216,19 @@ export function IncomePlanningCard({
   const monthlyIncome = profileContext?.monthly_income_kd ?? null
   const budgetTotal = profileContext?.budget_total_kd ?? 0
   const budgetPct = profileContext?.budget_to_income_pct ?? null
+  // MOB-1 Group 1 — with no budget rows the server sends budget_to_income_pct = "0", which is NOT
+  // null, so the null-guard below never caught it: the ratio read "0.0%" and the badge read
+  // "WITHIN INCOME" about a plan that does not exist. `budgetTotal === 0` means ABSENT rather than
+  // a plan totalling nothing, because budgets are strictly positive at the database
+  // (chk_budgets_amount_positive, migration 0000) — zero is not a value a real budget can hold.
+  // Nothing at this call site shows that, hence the comment.
+  //
+  // DERIVED here rather than passed as a prop (operator ruling, Option B). This is a DEPARTURE
+  // from G1a's "extend the existing guard" preference, made deliberately: budgetPct and
+  // budgetTotal are fields of the SAME profile_context object, so a guard built from one cannot
+  // disagree with the other mid-load, whereas BudgetPage's budgets.length comes from a different
+  // query and can.
+  const hasBudget = Number(budgetTotal) > 0
 
   if (monthlyIncome === null) {
     return (
@@ -224,9 +253,15 @@ export function IncomePlanningCard({
     )
   }
 
+  // MOB-1 Group 1 — with no budget rows the server sends budget_to_income_pct = 0, which is NOT
+  // null, so the existing null-guard below did not catch it: the badge read "WITHIN INCOME" and the
+  // ratio read "0.0%" for a plan that does not exist. The badge is suppressed rather than relabelled
+  // — naming the state needs a new sentence, and that is a product decision (Gate C).
   let toneClass = "text-success"
-  let status = "within income"
-  if ((Number(budgetPct) || 0) > 100) {
+  let status: string | null = "within income"
+  if (!hasBudget) {
+    status = null
+  } else if ((Number(budgetPct) || 0) > 100) {
     toneClass = "text-destructive"
     status = "above income"
   } else if ((Number(budgetPct) || 0) > 85) {
@@ -248,7 +283,7 @@ export function IncomePlanningCard({
         </div>
         <div className="flex items-center gap-2">
           <div className={cn("text-sm font-semibold uppercase tracking-wide", toneClass)}>
-            {status}
+            {status ?? ""}
           </div>
           {onOpenIncome ? (
             <Button type="button" variant="outline" size="sm" onClick={onOpenIncome}>
@@ -270,7 +305,10 @@ export function IncomePlanningCard({
           <div className="inner-card">
             <div className="text-xs text-muted-foreground">Budget / Income</div>
             <div className="mt-1 text-sm font-semibold">
-              {budgetPct !== null ? `${Number(budgetPct).toFixed(1)}%` : "N/A"}
+              {/* MOB-1 Group 1 — "N/A" is the branch this site already had; only the condition
+                  widened. budget_to_income_pct is 0 (not null) when no budgets exist, so the
+                  null-check alone let a ratio about a nonexistent plan render as "0.0%". */}
+              {budgetPct !== null && hasBudget ? `${Number(budgetPct).toFixed(1)}%` : "N/A"}
             </div>
           </div>
         </div>
@@ -287,6 +325,13 @@ export function BudgetChart({
   isLoading: boolean
 }) {
   const widestGap = data.reduce<{ category: string; delta: number } | null>((current, row) => {
+    // MOB-1 Group 1 — `data` is the UNION of budgeted and spent categories (BudgetPage.tsx:204),
+    // and an unbudgeted one arrives as `budget: 0` from the `budgetMap[cat] || 0` lookup miss. Its
+    // delta is then the whole of its spend, which rendered as "X is KD N over plan" for a category
+    // with no plan at all. `budget === 0` means ABSENT, not a plan of zero: budgets are strictly
+    // positive at the database (chk_budgets_amount_positive, migration 0000), so zero is not a
+    // value a real budget can hold. Nothing at this call site shows that, hence this comment.
+    if (row.budget === 0) return current
     const delta = row.spent - row.budget
     if (!current || Math.abs(delta) > Math.abs(current.delta)) {
       return { category: row.category, delta }

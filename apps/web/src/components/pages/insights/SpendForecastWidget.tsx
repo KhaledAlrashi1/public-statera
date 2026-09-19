@@ -21,12 +21,24 @@ export function SpendForecastWidget({
   error?: string | null
 }) {
   const total = Math.max(0, committed_kd) + Math.max(0, remaining_kd) + Math.max(0, spent_kd)
+  // MOB-1 Group 1 — every arm of this chain is a claim about COMMITMENTS against a budget, so
+  // none of them means anything when there are no commitments. `committed_kd` is budget
+  // allocations only (R9, post SC-1/2) and budgets are strictly positive at the database
+  // (chk_budgets_amount_positive, migration 0000), so 0 means NO BUDGETS rather than a plan
+  // totalling nothing. Without this the first arm fired on `remaining_kd <= 0` and asserted that
+  // committed spending was overtaking a budget that does not exist.
+  //
+  // This predicate is deliberately WIDER than a zero-total check, which was the first attempt: a
+  // month with real spend but no budgets has a non-zero total and still has nothing to say here.
+  // committed_kd > 0 implies total > 0, so this subsumes the no-data case as well.
   const guidance =
-    remaining_kd <= 0
-      ? "Committed spending is now overtaking the rest of this month's budget."
-      : remaining_kd >= committed_kd
-        ? "You're ahead of pace with healthy discretionary room still available."
-        : "You're still within plan, but discretionary room is tightening."
+    committed_kd <= 0
+      ? null
+      : remaining_kd <= 0
+        ? "Committed spending is now overtaking the rest of this month's budget."
+        : remaining_kd >= committed_kd
+          ? "You're ahead of pace with healthy discretionary room still available."
+          : "You're still within plan, but discretionary room is tightening."
 
   return (
     <article className="section-panel">
@@ -104,7 +116,9 @@ export function SpendForecastWidget({
                 Free to spend
               </span>
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">{guidance}</p>
+            {guidance ? (
+              <p className="mt-3 text-sm text-muted-foreground">{guidance}</p>
+            ) : null}
           </>
         )}
       </div>

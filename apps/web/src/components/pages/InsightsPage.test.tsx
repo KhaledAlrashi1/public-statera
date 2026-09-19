@@ -229,3 +229,63 @@ describe("InsightsPage", () => {
   })
 
 })
+
+/**
+ * MOB-1 Group 1 — the story-of-the-month pace note.
+ *
+ * `committed_kd` is budget allocations only (R9, post SC-1/2), and budgets are strictly positive at
+ * the database (chk_budgets_amount_positive, migration 0000), so 0 means NO BUDGETS rather than a
+ * plan totalling nothing. Clock pinned to 2026-03-15 by the shared beforeEach, so the selected
+ * month is 2026-03 and the comparison month 2026-02.
+ */
+describe("MOB-1 Group 1 — story-of-the-month pace note", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] })
+    vi.setSystemTime(new Date("2026-03-15"))
+    vi.clearAllMocks()
+    window.localStorage.clear()
+    mocks.analyticsApi.recurringPatterns.mockResolvedValue({ patterns: [] })
+    mocks.analyticsApi.weeklyDigest.mockResolvedValue(null)
+    mocks.analyticsApi.dashboardMetrics.mockResolvedValue({
+      months: ["2026-03", "2026-02"],
+      monthly: [],
+      expense_by_category: {
+        "2026-03": { Groceries: "160.000" },
+        "2026-02": { Groceries: "100.000" },
+      },
+    })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it("I1 — omits the pace note when there are no budgets, rather than claiming commitments overtake one", async () => {
+    mocks.analyticsApi.safeToSpend.mockResolvedValue({
+      committed_kd: "0.000",
+      remaining_budget_kd: "0.000",
+      actual_spend_kd: "160.000",
+    })
+
+    renderPage()
+
+    // The story itself must still render — otherwise this passes against a page showing nothing.
+    expect(await screen.findByText(/Groceries is 60% higher than last month/)).toBeInTheDocument()
+    // WITHOUT the change remainingBudget is 0, the else-arm fires, and the sentence continues
+    // "Committed spending is now overtaking the rest of this month's budget."
+    expect(screen.queryByText(/Committed spending is now overtaking/)).not.toBeInTheDocument()
+  })
+
+  it("CONTROL — with real commitments the pace note still renders", async () => {
+    mocks.analyticsApi.safeToSpend.mockResolvedValue({
+      committed_kd: "300.000",
+      remaining_budget_kd: "140.000",
+      actual_spend_kd: "160.000",
+    })
+
+    renderPage()
+
+    expect(await screen.findByText(/You still have .* free to spend after commitments/)).toBeInTheDocument()
+  })
+})
+

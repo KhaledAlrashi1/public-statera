@@ -260,13 +260,22 @@ export default function InsightsPage() {
       const lead = monthDeltaRows[0]
       const sameAsLastMonth = Math.abs(lead.delta_pct) < 0.5 || Math.abs(lead.delta_kd) < 0.001
       const direction = lead.delta_kd >= 0 ? "higher" : "lower"
-      const paceNote = remainingBudget > 0
-        ? `You still have ${formatKD(remainingBudget)} free to spend after commitments.`
-        : "Committed spending is now overtaking the rest of this month's budget."
-      if (sameAsLastMonth) {
-        return `${lead.category} is tracking about the same as last month. ${paceNote}`
-      }
-      return `${lead.category} is ${Math.abs(lead.delta_pct).toFixed(0)}% ${direction} than last month, a shift of ${formatKD(Math.abs(lead.delta_kd))}. ${paceNote}`
+      // MOB-1 Group 1 — `committedThisMonth` is budget allocations only (R9, post SC-1/2), and
+      // budgets are strictly positive at the database, so 0 means NO BUDGETS rather than a plan
+      // that happens to total nothing. Without that guard `remainingBudget` was also 0, the
+      // else-arm fired, and the sentence asserted that commitments were overtaking a budget the
+      // user had never set. Suppressed rather than relabelled — naming the state needs new copy.
+      const paceNote =
+        committedThisMonth <= 0
+          ? ""
+          : remainingBudget > 0
+            ? `You still have ${formatKD(remainingBudget)} free to spend after commitments.`
+            : "Committed spending is now overtaking the rest of this month's budget."
+      const lead1 = sameAsLastMonth
+        ? `${lead.category} is tracking about the same as last month.`
+        : `${lead.category} is ${Math.abs(lead.delta_pct).toFixed(0)}% ${direction} than last month, a shift of ${formatKD(Math.abs(lead.delta_kd))}.`
+      // Joined rather than interpolated so an empty paceNote leaves no trailing space.
+      return [lead1, paceNote].filter(Boolean).join(" ")
     }
 
     if (recurringRows.length > 0) {

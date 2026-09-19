@@ -321,10 +321,13 @@ function TransactionsTable({
                         {secondaryLabel}
                       </p>
                     ) : null}
+                    {/* MOB-1 Part 5 — the category used to render TWICE in this one card: as text
+                        here and as a CategoryBadge below. The separator bullet was emitted
+                        unconditionally, so an uncategorised row showed a bullet with nothing after
+                        it. Both removed: the badge is the richer rendering and is what the desktop
+                        table uses, and with the duplicate gone the bullet has nothing to separate. */}
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span>{formatDisplayDate(row.date)}</span>
-                      <span className="inline-block h-1 w-1 rounded-full bg-border" />
-                      <span>{row.category}</span>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">

@@ -170,3 +170,52 @@ describe("TransactionsTable", () => {
     })
   })
 })
+
+/**
+ * MOB-1 Part 5 — the mobile card row.
+ *
+ * The card rendered the category TWICE (as plain text beside the date, and again as a
+ * CategoryBadge below), and emitted the separator bullet unconditionally so an uncategorised row
+ * showed a bullet with nothing after it. The desktop table renders the category once and has no
+ * bullet, so both defects were mobile-card-only.
+ *
+ * Both layouts are in the DOM under jsdom (they are separated by CSS, which jsdom does not apply),
+ * so the category count below is card + table.
+ */
+describe("MOB-1 Part 5 — mobile card row", () => {
+  const oneRow = {
+    items: [
+      {
+        id: 11,
+        date: "2026-02-10",
+        name: "Market run",
+        category: "Groceries",
+        merchant: "Market",
+        amount_kd: "12.500",
+        memo: null,
+      },
+    ],
+    total: 1,
+    offset: 0,
+    limit: 20,
+    has_more: false,
+  }
+
+  it("renders the category ONCE per layout, not twice in the card", async () => {
+    mocks.transactionsApi.search.mockResolvedValue(oneRow)
+    renderTable()
+    await screen.findAllByText("Groceries")
+    // WITHOUT the change this is 3: the card's plain text, the card's badge, and the table's badge.
+    expect(screen.getAllByText("Groceries")).toHaveLength(2)
+  })
+
+  it("emits no orphaned separator bullet", async () => {
+    mocks.transactionsApi.search.mockResolvedValue(oneRow)
+    const { container } = renderTable()
+    await screen.findAllByText("Groceries")
+    // WITHOUT the change this bullet renders between the date and the duplicated category, and
+    // renders with nothing after it when a row has no category at all.
+    expect(container.querySelector(".h-1.w-1.rounded-full.bg-border")).toBeNull()
+  })
+})
+
