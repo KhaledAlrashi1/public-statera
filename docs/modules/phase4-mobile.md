@@ -843,6 +843,82 @@ The amendments above are left as they stand. This is the live index from here fo
   check; and **no UI observation is evidence until the Actions run has landed.**
 - **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** Count stays **SIX**.
 
+### Amendment — MOB-R23 persistence commit, 2026-09-19
+
+The amendments above are left as they stand. This is the live index from here forward.
+
+- **Persisted set is now MOB-R1 … MOB-R23**, contiguous: first **1**, last **23**, **0**
+  duplicates, **0** breaks in 1…23. Both operative patterns AGREE at **23**. **Position DERIVED
+  from the file (last was 22), not from the clause.** Payload sweep before the write was **1 and
+  1**, and the sweep was **shown discriminating** by injecting a second header into a copy and
+  watching strict go to 2. **MOB-R23 provenance: RELAYED.**
+- **"SEVEN FACES" IS FALSIFIED. THE OPERATIVE FIGURE IS FOUR, and the error was the CHANNEL'S,
+  carried through three consecutive blocks.** `phase4-frontend-fixes.md:595-608` declares **EIGHT**
+  findings, then **SEVEN** as one root cause, then **THE REMAINING FOUR** — 7 + 4 = **11**. The
+  root-cause sentence enumerates **FOUR**; 4 + 4 = **8**, which closes. The figure entered in this
+  track's handoff and was repeated three times **without the source record once being opened** —
+  including in the block instructing the implementer to derive the corpus from the surfaces rather
+  than from that list. **Nothing downstream inherited it:** the Part 6 corpus was derived from the
+  surfaces, so the enumeration is unaffected. **The source record is a HISTORICAL RECORD and is NOT
+  edited** (10e-R78); the correction lives in the Part 6 report and here.
+  - **THIRD INHERITED FIGURE THIS TRACK HAS FALSIFIED, and all three are one failure.** (i) "32
+    sites across twelve files", which was **nine**, contradicted by the record's own enumeration
+    two lines below the prose; (ii) a column width whose site sits behind a **desktop gate** and
+    never renders at phone width; (iii) this. **EACH WAS READ FROM A DOCUMENT ABOUT THE ARTIFACT
+    RATHER THAN FROM THE ARTIFACT** — which is [[10e-R182]], the rule the channel enforces on every
+    block it writes and was not applying to itself. **NO NEW STANDING LINE: the rule exists.** The
+    CLAUDE.md count stays at **SIX** across four tracks.
+- **GATE A PASSES ON A CONSTRAINT-LEVEL PROOF, which is stronger than the mandate asked for.** Two
+  DB CHECK constraints — `chk_transactions_amount_positive` and `chk_budgets_amount_positive`, both
+  in migration `0000` — make zero an **unattainable sum**, so both series at zero ⟺ no rows. That
+  invariant is enforced **below the application**: no component or serialiser can violate it, and
+  unlike an argument from how the code currently constructs a value, **construction can change and
+  a constraint cannot without a migration.**
+  - **THE "ONE REPRESENTATIVE FACE" INSTRUCTION WAS WRONG AND WAS REFUSED ON EVIDENCE.** There are
+    **TWO FAMILIES**: the **months** family pre-seeds zeros (`dashboard-snapshot-lib.ts:223-227`)
+    and carries no count or flag, losing the distinction in transit but leaving it losslessly
+    recoverable at the client; the **budget** family never loses it at all — an absent map key with
+    a client-side collapse at `BudgetPage.tsx:206`. **One trace would have given the wrong answer
+    for the other family.** The durable form: **a representative sample presupposes homogeneity,
+    and homogeneity was the thing being measured — asking for one representative asks the
+    measurement to assume its own result.**
+- **GATE B FIRES AT SEVENTEEN SITES and the grouping is KEYED ON THE SIGNAL, not the page.** Sites
+  needing the same signal are one change; sites on the same page needing different signals are not.
+  **Group 1** "no budget exists" **10**; **Group 2** "this month has no transactions" **3**;
+  **Group 3** "both comparison periods absent" **4**. Implementation does not proceed under
+  MOB-R22; the operator sequences it.
+- **THE PARTIALLY-APPLIED GUARD — the sharpest finding in the report.** Group 1 needs **no new
+  derivation**: `hasBudget = budgets.length > 0` already exists, is already passed into the
+  component holding three of its sites, and **is already applied to the status label at that very
+  site** — but not to the percentage, its caption, or the progress bar. **The guard is not missing;
+  it is PARTIALLY APPLIED.** That is why one card can say "Over budget this month" and "% Used
+  0.0%" simultaneously: **two renderings of one state, one guarded and one not.** Any fix extends
+  the existing predicate rather than introducing a parallel one — **a second predicate for the same
+  state is how this defect was born.**
+- **ZERO GATES TENSE — a dependency established from source, no longer an ordering preference.**
+  Both classes turn on the same predicate. A tense fix alone still asserts present tense about an
+  empty period; a zero guard alone renders a correct claim in the wrong tense; and **the tense
+  rewrite cannot choose a tense until something tells it the period is empty.** The operator's
+  September capture is both classes firing at one site. **Sequence: zero first, then tense** — the
+  operator retains the decision, but reversing it means doing the tense work twice. The tense class
+  is **its own phase**; declining to size it off an unsettled corpus boundary (61 re-derived against
+  15 accepted) is ratified for a second cycle running.
+- **THE THIRD PATH-MATCHING INSTRUMENT FAILURE, and the family is now legible.** A `grep` exclusion
+  token `page` matched **109 of 112** lines because the output begins `./components/pages/…` — the
+  content filter was matching the **FILE PATH**. With the earlier two — `grep -h` **stripping**
+  filenames, and `${line##*:}` **truncating** to the last delimiter — that is **three instances,
+  three different mechanisms, ONE CAUSE: the filter was written against the intended CONTENT rather
+  than against the tool's ACTUAL OUTPUT**, which carries more than the content being filtered. It
+  returned **0 from a four-stage pipe** and was found by **bisection**, the right instrument for a
+  pipeline whose failure is silent at every stage.
+  - **AND THE TRIPWIRE EARNED ITS KEEP ON LIVE TEXT FOR THE FIRST TIME.** Strict returned **0**,
+    tripwire **1**, and the patterns disagreed on the implementer's own line-wrapping in the Part 6
+    payload. **Rewrapped rather than halted because the text was the implementer's** — author and
+    editor the same party, so the licence question does not arise — then both re-measured with the
+    control still firing. Adopted on a synthetic probe; this is the first time the real file
+    produced the case it was built for.
+- **CLAUDE.md still deliberately NOT edited; no new standing rule earned.** Count stays **SIX**.
+
 ## Part 6 — zero-versus-no-data measurement report (implementer, executed 2026-09-19, pending acceptance)
 
 Opened by MOB-R22. **REPORT ONLY — zero code changed.** Gate A PASSES, **Gate B FIRES**, so 6d does
@@ -855,6 +931,12 @@ The source (`phase4-frontend-fixes.md:595-608`) does not reconcile: it says **EI
 OF THEM** are one root cause, then **THE REMAINING FOUR**. 7 + 4 = **11**, not 8. The root-cause
 sentence enumerates **four** faces; 4 + 4 = 8, which does close. **"Seven" is an error at source
 and the channel inherited it.** No corpus was taken from that list.
+
+**Provenance, added at MOB-R23:** the error is the CHANNEL'S, not the source record's alone — the
+figure entered this track's handoff and was repeated in **three consecutive blocks** without the
+source record once being opened, including in the block instructing that the corpus be derived from
+the surfaces rather than from that list. **The operative figure is FOUR.** The source record is a
+historical record and is NOT edited.
 
 ### 6a — the two corpora, and how they DIFFER
 
@@ -5238,3 +5320,174 @@ record the persisted set; the label root cause with the refuted option set; the 
 reading of a narrow authorisation; the two-mutation attribution form; the recovered provenance with
 its verification control; the enumerating-factory instance with both methods side by side; and the
 deploy inventory.
+
+MOB-R23 — GATE A PASSES, GATE B FIRES, AND THE SEQUENCING IS NOW SETTLED BY EVIDENCE. "Seven faces"
+is FALSIFIED and the channel propagated it three times. Group 1 is authorised CONDITIONALLY. The
+tense class is its own phase and the zero class gates it.
+
+CADENCE. Issued under test (a) and (b), under the standing wider-cadence instruction.
+
+THE PERSISTENCE IS ACCEPTED. 22/22 agreeing, contiguous, position DERIVED FROM THE FILE rather than
+from the clause — which is the correction that ends two cycles of blocks predicting their own
+position from a state that had already moved. The payload sweep was SHOWN DISCRIMINATING by
+injecting a second header into a copy, so the one-and-one is a measurement rather than a pattern
+that might not fire.
+
+THE PROVENANCE CORRECTION IS ACCEPTED AND THE IMPLEMENTER IS RIGHT. The preceding block instructed
+that bytes lost to a boundary be marked RECOVERED. Nothing was lost this cycle; the transcript was a
+BYTE-EXACT CONDUIT WITH NO TYPING STEP, which is the ordinary relay path and not recovery. THE
+DISTINCTION IS WHETHER THE WORKING COPY WAS LOST, not which surface the bytes travelled over.
+Marking an ordinary relay as RECOVERED would have inflated the record's count of boundary events and
+made the genuine one harder to find.
+
+THE ALLOWLIST FORM IS RESOLVED IN ONE LINE AS ASKED: the derivation changed, the fact did not, and
+the substitution was unnamed. Both forms re-run against the same file agree, the standing form is
+shown matching once and returning zero against a non-empty allowlist, and it is restored going
+forward. A CONTROL RUNS IN ONE FORM ACROSS CYCLES — that rule was adopted by the implementer two
+cycles ago and this is it catching its own author.
+
+═══ "SEVEN FACES" IS FALSIFIED AND THE CHANNEL CARRIED IT THREE TIMES ═══
+
+THE ARITHMETIC IS CONFIRMED INDEPENDENTLY FROM THE RECORD. It declares EIGHT findings, then SEVEN as
+one root cause, then THE REMAINING FOUR. Seven plus four is eleven. The root-cause sentence
+ENUMERATES FOUR EXAMPLES and four plus four closes at eight. THE OPERATIVE FIGURE IS FOUR, and no
+corpus was taken from that list — the enumeration was derived from the surfaces, so nothing
+downstream inherits the error.
+  THE PROVENANCE IS THE CHANNEL'S. "Seven faces" appeared in this track's handoff, and the channel
+  repeated it in three consecutive blocks without once opening the record it came from — including in
+  the block that instructed the implementer to derive the corpus from the surfaces rather than from
+  that list.
+  THIS IS THE THIRD INHERITED FIGURE THIS TRACK HAS FALSIFIED, and all three are the same failure:
+  thirty-two sites across twelve files, which was nine and was contradicted by the record's own
+  enumeration two lines below the prose; a column width whose site sits behind a desktop gate and
+  never renders at phone width; and now this. EACH WAS READ FROM A DOCUMENT ABOUT THE ARTIFACT
+  RATHER THAN FROM THE ARTIFACT, which is the rule the channel enforces on every block it writes.
+  NO NEW STANDING LINE. The count stays at SIX across four tracks. The rule exists; the channel was
+  not applying it to itself.
+  RECORD THE CORRECTION ADJACENT in this track's file. THE SOURCE RECORD IS A HISTORICAL RECORD AND
+  IS NOT EDITED.
+
+═══ GATE A PASSES, AND THE PROOF IS BETTER THAN THE MANDATE ASKED FOR ═══
+
+TWO DATABASE CHECK CONSTRAINTS, both in the initial migration, enforce strictly positive amounts on
+transactions and on budgets. ZERO IS THEREFORE AN UNATTAINABLE SUM and both series at zero is
+equivalent to no rows. That is an invariant enforced BELOW the application, which no component or
+serialiser can violate — stronger than an argument from how the code currently happens to construct
+the value, because construction can change and a constraint cannot without a migration.
+
+THE MANDATE'S "ONE REPRESENTATIVE FACE" INSTRUCTION WAS WRONG AND THE IMPLEMENTER SAID SO. There are
+TWO FAMILIES with different behaviour: the months family pre-seeds zeros and carries no count or
+flag in the payload, losing the distinction in transit but losslessly recoverable at the client; the
+budget family never loses it at all, with an absent key and a client-side collapse. ONE TRACE WOULD
+HAVE GIVEN THE WRONG ANSWER FOR THE OTHER FAMILY. A representative sample presupposes homogeneity,
+and homogeneity is the thing being measured — asking for one representative is asking the
+measurement to assume its own result.
+
+═══ GATE B FIRES AND THE GROUPING IS ACCEPTED ═══
+
+SEVENTEEN SITES, above the threshold of twelve, so implementation does not proceed under the
+preceding block and the operator sequences it. The grouping is KEYED ON THE SIGNAL EACH GROUP NEEDS
+rather than on the page each appears on, which is the right axis: sites needing the same signal are
+one change, and sites on the same page needing different signals are not.
+
+THE SHARPEST FINDING IN THE REPORT IS THAT GROUP 1 NEEDS NO NEW DERIVATION. The predicate already
+exists, is already passed into the component holding three of its sites, and IS ALREADY APPLIED TO
+THE STATUS LABEL AT THE SAME SITE — but not to the percentage, its caption, or the progress bar. The
+guard is not missing; it is PARTIALLY APPLIED. That is why the surface can say "over budget" and
+"0.0% used" in one card: two renderings of one state, one guarded and one not.
+
+═══ GROUP 1 — AUTHORISED CONDITIONALLY ON AN OPERATOR RULING ═══
+
+TEN SITES. CHANNEL RECOMMENDATION, offered and not adopted: ship Group 1 as its own cycle now. It is
+under the threshold on its own count, it introduces no new signal, and it is the majority of the
+class. IF THE OPERATOR RULES IT IN, everything needed is below so no cycle is lost.
+
+G1a. PER SITE: file:line, the condition currently rendering, the condition that should, and which
+     existing predicate supplies it. Prefer extending the EXISTING partially-applied guard over
+     introducing a parallel one — a second predicate for the same state is how this defect was born.
+G1b. ONE DISCRIMINATING TEST PER DISTINCT RENDER PATH, not per site. These are DATA-CONDITIONAL
+     RENDER defects, testable in jsdom, so a declared coverage gap is NOT the right answer. Each
+     test states what it reads IF THE CHANGE HAD NOT LANDED. RED-FIRST with the discriminating value
+     captured.
+     AND ATTRIBUTE THE RED as this track has twice done well: a mutation taking every case red proves
+     the set fails in the changed world's absence and proves nothing about which assertion carries
+     which claim. WHERE TWO ASSERTIONS COVER ONE SITE, run a second mutation that breaks only one and
+     show exactly one case red with the others green.
+G1c. STATE WHAT EACH SITE RENDERS AFTER, in words. A guard can be correct and still leave a blank
+     where a sentence should be — suppressing a wrong number is not the same as saying the right
+     thing. If any site's correct output is "show nothing", say so explicitly rather than leaving it
+     to be discovered on screen.
+     ** GATE C ** — IF ANY SITE NEEDS NEW COPY rather than suppression, STOP AND REPORT that site.
+     New user-facing sentences are a product decision and are not authorised here. The others ship.
+G1d. GROUPS 2 AND 3 ARE NOT TOUCHED. Seven sites across two signals, sequenced by the operator after
+     Group 1 lands.
+
+═══ 6c AND 6e — BOTH ACCEPTED, AND 6e SETTLES THE SEQUENCE ═══
+
+THE TENSE CLASS IS ITS OWN PHASE. An independent re-derivation returns sixty-one sites against the
+accepted fifteen, and the implementer's reading is right that THE NUMBER IS NOT THE POINT — the
+corpus boundary is unsettled, and sizing off an unsettled boundary is exactly the failure this track
+has already paid for once. DECLINING TO SIZE IT IS THE CORRECT ANSWER FOR A SECOND CYCLE RUNNING and
+it is ratified rather than pushed.
+
+6e IS ACCEPTED AND IT REPLACES A PREFERENCE WITH A FINDING. The zero class GATES the tense class:
+both turn on the same predicate; a tense fix alone still asserts present tense about an empty period;
+a zero guard alone renders a correct claim in the wrong tense; and THE TENSE REWRITE CANNOT CHOOSE A
+TENSE UNTIL SOMETHING TELLS IT THE PERIOD IS EMPTY. The operator's September capture is both classes
+firing at one site.
+  THE SEQUENCE IS THEREFORE ZERO FIRST, THEN TENSE, and that is no longer the channel's ordering
+  preference — it is a dependency established from source. The operator retains the sequencing
+  decision; what has changed is that reversing it would mean doing the tense work twice.
+
+═══ TWO INSTRUMENT SELF-REPORTS ═══
+
+THE PATH-MATCHING EXCLUSION IS THE THIRD OF ITS FAMILY and the family is now legible: a tool's output
+format carries more than the content being filtered, and a filter applied to the whole line matches
+the part nobody was thinking about. Filename prefixes, stripped filenames, and truncation to the
+last delimiter — three instances, three different mechanisms, ONE CAUSE: the filter was written
+against the intended content rather than against the actual output. IT RETURNED ZERO FROM A
+FOUR-STAGE PIPE AND WAS FOUND BY BISECTION, which is the right instrument for a pipeline whose
+failure is silent at every stage.
+
+THE TRIPWIRE EARNED ITS KEEP ON LIVE TEXT FOR THE FIRST TIME. Strict returned zero, the tripwire
+returned one, and the patterns disagreed on the implementer's own line-wrapping. IT WAS REWRAPPED
+RATHER THAN HALTED BECAUSE THE TEXT WAS THE IMPLEMENTER'S — author and editor the same party, so the
+licence question does not arise — and both patterns re-measured with the control still firing. The
+instrument was adopted on a synthetic probe; this is the first time the real file produced the case
+it was built for.
+
+═══ STILL OPEN ═══
+
+PART 5 IS UNRULED FOR A THIRD CYCLE and stays untouched. The recommendation to fold in STANDS
+UNADOPTED — cycles passing do not adopt it. If ruled in, per-site treatment with the condition
+producing each defect named and one discriminating test each.
+THE DEPLOY: twenty-two commits. The inventory was stated in the preceding block and is not restated.
+THE 320 TOP-UP is outstanding and its absence is not a pass; item (vi) waits on it.
+QUEUED, unchanged, with their triggers: the KPI enclosure with the design track, the cross-tab
+regime, the import column-mapping requirement, the month-mismatch product question, the formatter
+one-ulp divergence with the conventions phase.
+
+CONSTRAINTS: no renames; pinned strings untouched including the FAB's label and tooltip and the two
+legal test identifiers; the FAB topology untouched; QuickAdd internals untouchable; the brass ration
+holds. Zero physical-property additions against the operative baseline of thirty-two sites across
+NINE files, pattern shown discriminating. No new external origin and no Caddyfile change, asserted
+rather than omitted. No convention work beyond Part 5 if ruled in, no cache work, no responsive work,
+no tense implementation. The e2e suite is not run, repaired, revived or deleted.
+
+CLOSE-OUT, if Group 1 ships: the three mandatory sections, both suites with the Test Files summary
+line and captured exit codes behind resolution proofs and a non-matching negative control shown
+exiting 0, both typechecks with exit codes and byte counts, the baseline as a DELTA with its absolute
+RE-DERIVED AFTER THE LAST EDIT and reconciled two ways as this cycle did. The api suite is RUN
+because the contract test reads the frontend fixture. Predicted deltas in advance; named forced edits
+predicted, with none a valid answer. A MISS IS A QUESTION, NEVER AN ADJUSTMENT.
+
+PERSISTENCE. This block persists ALONE. DERIVE THE POSITION FROM THE FILE. Report the measured
+position, the payload sweep under both operative patterns with both figures and the sweep shown
+discriminating, and the post-append composite with first, last, duplicates, breaks and both
+reconciliation routes, enumeration PRINTED IN FILE ORDER. A disagreement between the patterns HALTS
+THE WRITE AND IS REPORTED where the text is the channel's. Re-derive the unpushed count by both
+routes or do not state it. Provenance RELAYED. Amend the completeness note to record the persisted
+set; the four-not-seven correction with the channel's triple propagation and the third-inherited-
+figure pattern; Gate A's constraint-level proof and the two-families finding that refuted the
+representative-face instruction; Gate B's firing with the three-group keying; the partially-applied-
+guard finding; the zero-gates-tense dependency; and the third path-matching instrument failure.
