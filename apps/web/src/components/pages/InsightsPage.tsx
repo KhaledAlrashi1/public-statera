@@ -21,7 +21,6 @@ import {
   type RecurringCommitmentRow,
 } from "@/components/pages/insights/RecurringCommitmentsCard"
 import { MonthDeltaCard, type MonthDeltaRow } from "@/components/pages/insights/MonthDeltaCard"
-import { SpendForecastWidget } from "@/components/pages/insights/SpendForecastWidget"
 import { WeeklyDigestSection } from "@/components/pages/insights/WeeklyDigestSection"
 
 function clampDate(year: number, monthIndex: number, dayOfMonth: number): Date {
@@ -369,13 +368,13 @@ export default function InsightsPage() {
           loading={weeklyDigestQuery.isLoading}
           error={queryErrorMessage(weeklyDigestQuery.error)}
         />
-        <SpendForecastWidget
-          committed_kd={committedThisMonth}
-          remaining_kd={remainingBudget}
-          spent_kd={actualSpend}
-          loading={safeToSpendQuery.isLoading}
-          error={queryErrorMessage(safeToSpendQuery.error)}
-        />
+        {/* MOB-R25 Stage 1 — the Month Snapshot panel (SpendForecastWidget) is removed FROM VIEW
+            by operator ruling. The component file, its tests and its api.ts method all stay;
+            deleting them is Stage 2. The grid wrapper is deliberately left at two columns: the
+            reflow (This Week now occupies only the 1.05fr column at xl, with the 0.95fr column
+            empty) is an ALLOWED consequence, and restyling to compensate is not authorised here.
+            safeToSpendQuery is NOT dropped — it still feeds storyOfMonth and the empty-state
+            gate, so its consumers are not exclusively this removed surface. */}
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">

@@ -1,4 +1,4 @@
-import { CalendarDays, TrendingDown, TrendingUp, Wallet } from "lucide-react"
+import { CalendarDays, TrendingDown, TrendingUp } from "lucide-react"
 
 import { formatDisplayDate, formatKD } from "@/lib/utils"
 import type { WeeklyDigestResponse } from "@/types/api"
@@ -126,16 +126,14 @@ export function WeeklyDigestSection({
                 )}
               </article>
 
-              <article className="inner-card space-y-2">
-                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                  <Wallet className="h-4 w-4" />
-                  Safe-to-spend today
-                </div>
-                <p className="financial-number whitespace-nowrap text-lg font-semibold">{formatKD(digest.safe_to_spend_today_kd)}</p>
-                <p className="text-sm text-muted-foreground">
-                  Days until payday: {digest.days_until_payday === null ? "N/A" : digest.days_until_payday}
-                </p>
-              </article>
+              {/* MOB-R25 Stage 1 — the SAFE-TO-SPEND TODAY tile is removed FROM VIEW by operator
+                  ruling; the rest of This Week stays, which is the load-bearing half of that
+                  ruling. The grid is deliberately left at md:grid-cols-3 with two children: the
+                  reflow is ALLOWED and restyling to compensate is not authorised here.
+                  NAMED LOSS: the "Days until payday" countdown lived inside this tile and goes
+                  with it. It is not itself a safe-to-spend figure and it renders nowhere else —
+                  reported rather than silently preserved, because keeping it would need a new
+                  tile heading, and new user-facing copy is a product decision. */}
             </div>
           </div>
         )}

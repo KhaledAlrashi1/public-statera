@@ -47,18 +47,28 @@ describe("WeeklyDigestSection", () => {
     expect(screen.getByText(/-27.1%/)).toBeInTheDocument()
     expect(screen.getByText("Food")).toBeInTheDocument()
     expect(screen.getByText("Transport")).toBeInTheDocument()
-    expect(screen.getByText(/Days until payday: 27/)).toBeInTheDocument()
     expect(screen.getByText(/Based on 6 days/)).toBeInTheDocument()
   })
 
-  it("renders payday as N/A when unavailable", () => {
-    render(
-      <WeeklyDigestSection
-        digest={makeDigest({ days_until_payday: null, days_observed: 7 })}
-        loading={false}
-      />
-    )
-    expect(screen.getByText(/Days until payday: N\/A/)).toBeInTheDocument()
+  // MOB-R25 Stage 1 — the SAFE-TO-SPEND TODAY tile is removed from view while the rest of the
+  // This Week panel stays. The two halves are asserted in ONE render deliberately: an
+  // absence assertion alone is equally satisfied by a component that rendered nothing at all,
+  // so the retained elements are what make the absence discriminating rather than vacuous.
+  it("drops the safe-to-spend tile while keeping the rest of This Week", () => {
+    render(<WeeklyDigestSection digest={makeDigest()} loading={false} />)
+
+    // ABSENT — the removed tile, by its label and by its figure.
+    expect(screen.queryByText(/Safe-to-spend today/i)).not.toBeInTheDocument()
+    expect(screen.queryByText("KD 7.590")).not.toBeInTheDocument()
+    // The payday countdown lived INSIDE that tile and goes with it (named in the report).
+    expect(screen.queryByText(/Days until payday/i)).not.toBeInTheDocument()
+
+    // PRESENT in the SAME render — the retained panel and its remaining contents.
+    expect(screen.getByText("This Week")).toBeInTheDocument()
+    expect(screen.getByText("Weekly insight")).toBeInTheDocument()
+    expect(screen.getByText("Weekly pace")).toBeInTheDocument()
+    expect(screen.getByText("Spending delta")).toBeInTheDocument()
+    expect(screen.getByText("Top categories this week")).toBeInTheDocument()
   })
 })
 

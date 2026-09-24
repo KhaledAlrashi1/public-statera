@@ -192,6 +192,42 @@ describe("InsightsPage", () => {
     })
   })
 
+  // MOB-R25 Stage 1 — Month Snapshot is removed from view, and so is the safe-to-spend tile
+  // inside This Week. Both absences are asserted in the SAME render as the retained This Week
+  // contents: absence on its own is equally satisfied by a page that failed to render at all,
+  // so the PRESENT half is what makes the ABSENT half evidence rather than a tautology.
+  it("removes Month Snapshot and the safe-to-spend tile while This Week stays", async () => {
+    mocks.analyticsApi.weeklyDigest.mockResolvedValue({
+      week_start: "2026-02-23",
+      week_end: "2026-03-01",
+      this_week_expense_kd: "45.200",
+      last_week_expense_kd: "62.000",
+      delta_pct: -27.1,
+      top_categories: [{ name: "Food", amount_kd: "18.000" }],
+      days_until_payday: 27,
+      safe_to_spend_today_kd: "7.590",
+      days_observed: 6,
+    })
+
+    renderPage()
+
+    // PRESENT first — establishes the page actually rendered before anything is claimed absent.
+    // Awaited on "Weekly pace" rather than the "This Week" heading: the heading renders while the
+    // digest query is still in flight, so asserting on it would pass during the loading state and
+    // let the absence checks below run against a page whose panels had not mounted yet.
+    expect(await screen.findByText("Weekly pace")).toBeInTheDocument()
+    expect(screen.getByText("This Week")).toBeInTheDocument()
+    expect(screen.getByText("Spending delta")).toBeInTheDocument()
+
+    // ABSENT — the Month Snapshot panel, by heading and by its tile labels.
+    expect(screen.queryByText("Month Snapshot")).not.toBeInTheDocument()
+    expect(screen.queryByText("Free to spend")).not.toBeInTheDocument()
+    expect(screen.queryByText("Already spent")).not.toBeInTheDocument()
+
+    // ABSENT — the safe-to-spend tile inside the retained This Week panel.
+    expect(screen.queryByText(/Safe-to-spend today/i)).not.toBeInTheDocument()
+  })
+
   it("updates month-scoped insights when a prior month is selected", async () => {
     renderPage()
 
