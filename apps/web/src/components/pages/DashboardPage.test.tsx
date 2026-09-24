@@ -66,6 +66,10 @@ vi.mock("./dashboard/sections", () => ({
   ),
   PlanSummaryPanel: () => null,
   SafeToSpendHero: () => <div>safe to spend</div>,
+  // MOB-R26 RM-1 — the income nudge relocated OUT of SafeToSpendHero to an unconditional
+  // position on Home. This factory enumerates its exports, so a mounted export missing from
+  // it resolves to undefined and throws; the entry is required by the mount, not optional.
+  IncomeNudge: () => <div>income nudge</div>,
   HomeAttentionCenter: () => <div>alerts</div>,
   IncomeExpensesChart: () => <div>income chart</div>,
   CategoryBreakdownChart: () => <div>category chart</div>,
@@ -101,10 +105,14 @@ function renderPage() {
 }
 
 describe("DashboardPage", () => {
+  // Hoisted to describe scope so the RM-1 relocation cases can spread it instead of restating
+  // all thirty-odd query fields. Existing cases build their own full objects and are unaffected.
+  let baseResult: Record<string, unknown>
+
   beforeEach(() => {
     vi.clearAllMocks()
     window.localStorage.clear()
-    const baseResult = {
+    baseResult = {
       dashboardMetrics: {
         months: ["2026-03"],
         monthly: [],
@@ -144,6 +152,51 @@ describe("DashboardPage", () => {
       refetchMonthBundle: mocks.refetchMonthBundle,
     }
     mocks.useDashboardPageQueries.mockReturnValue(baseResult)
+  })
+
+  // MOB-R26 RM-1 condition (4) — the income nudge must reach the user in the two states where
+  // the alternates (SetupProgressPanel / SetupGuideDialog) vanish. Both cases assert the nudge
+  // is PRESENT while the setup panel is ABSENT in the SAME render, so "nudge present" cannot be
+  // satisfied by a page that simply rendered everything.
+  //
+  // These are page-level MOUNT assertions, deliberately: this file mocks ./dashboard/sections
+  // wholesale, so the nudge's own gate, copy and dismissal are unobservable here and are pinned
+  // against the REAL component in dashboard/safe-to-spend.test.tsx instead.
+  it("mounts the income nudge when onboarding is dismissed on an empty account", () => {
+    mocks.useDashboardPageQueries.mockReturnValue({
+      ...baseResult,
+      // setup_guide_dismissed hides the SetupProgressPanel; with no transactions and no budgets
+      // this is also the state where SafeToSpendHero itself is gated out (noDashboardData), so
+      // before the relocation there was NO income prompt on this page at all.
+      profile: { setup_guide_dismissed: true },
+      safeToSpend: { income_source: "not_set" },
+    })
+
+    renderPage()
+
+    expect(screen.getByText("income nudge")).toBeInTheDocument()
+    expect(screen.queryByText("Import or add transactions")).not.toBeInTheDocument()
+  })
+
+  it("mounts the income nudge when setup was completed and the budget has since been deleted", () => {
+    mocks.useDashboardPageQueries.mockReturnValue({
+      ...baseResult,
+      // Real activity exists, so the hero is NOT gated out here — but the budget is gone
+      // (setupBudgetResp empty) and onboarding is dismissed, so the setup panel stays hidden.
+      dashboardMetrics: {
+        months: ["2026-03"],
+        monthly: [{ month: "2026-03", income_kd: "1500.000", expense_kd: "900.000" }],
+        expense_by_category: {},
+      },
+      profile: { setup_guide_dismissed: true, monthly_income_kd: "1500.000" },
+      safeToSpend: { income_source: "not_set" },
+      setupBudgetResp: { items: [] },
+    })
+
+    renderPage()
+
+    expect(screen.getByText("income nudge")).toBeInTheDocument()
+    expect(screen.queryByText("Import or add transactions")).not.toBeInTheDocument()
   })
 
   it("passes the analytics freshness timestamp to the dashboard hero", () => {

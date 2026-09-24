@@ -196,6 +196,73 @@ function safeToSpendTone(dailyRate: number) {
   }
 }
 
+/**
+ * MOB-R26 RM-1 — RELOCATED OUT OF SafeToSpendHero, not rewritten.
+ *
+ * The hero is being removed (Stage 1 hide), and it carried four affordances that are NOT
+ * safe-to-spend. This is the one of them whose copy names no removed feature, so it is the one
+ * that could move under RM-1 condition (1): every string below — the sentence, the "Go to
+ * Profile" label, the "Dismiss income reminder" aria-label — is carried VERBATIM from the hero,
+ * and the dismissal still writes the SAME localStorage key, "income_nudge_dismissed" (condition
+ * 3, no rename).
+ *
+ * It is mounted UNCONDITIONALLY on Home (condition 2). Inside the hero it sat behind
+ * `!noDashboardData`, so an account with no transactions and no budgets never saw it; combined
+ * with a dismissed setup panel that left no income prompt anywhere on the page.
+ *
+ * The only difference from the hero version is the dropped `mb-3`: spacing now comes from the
+ * page's existing `space-y-8` stack rather than from the hero's section-body.
+ */
+export function IncomeNudge({
+  safeToSpend,
+  onOpenPlan,
+  onOpenProfile,
+}: {
+  safeToSpend: SafeToSpendResponse | undefined
+  onOpenPlan: () => void
+  onOpenProfile?: () => void
+}) {
+  const [incomeNudgeDismissed, setIncomeNudgeDismissed] = useState(
+    () => typeof window !== "undefined" && window.localStorage.getItem("income_nudge_dismissed") === "1"
+  )
+  const showIncomeNudge = Boolean(
+    safeToSpend && safeToSpend.income_source === 'not_set' && !incomeNudgeDismissed
+  )
+
+  if (!showIncomeNudge) return null
+
+  return (
+    <div className="inner-card flex items-start gap-3 border-warning/20 bg-warning/6">
+      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+      <div className="min-w-0 flex-1 text-sm">
+        <span className="text-foreground">
+          Set your monthly income to see your full spending picture.
+        </span>{" "}
+        <button
+          type="button"
+          onClick={onOpenProfile ?? onOpenPlan}
+          className="font-medium text-primary underline underline-offset-2"
+        >
+          Go to Profile
+        </button>
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem("income_nudge_dismissed", "1")
+          }
+          setIncomeNudgeDismissed(true)
+        }}
+        className="text-muted-foreground transition-colors hover:text-foreground"
+        aria-label="Dismiss income reminder"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  )
+}
+
 export function SafeToSpendHero({
   isLoading,
   safeToSpend,
@@ -212,9 +279,6 @@ export function SafeToSpendHero({
   const warnings = safeToSpend?.warnings || []
   const dailyRate = Number(safeToSpend?.daily_rate_kd || 0)
   const monthlyIncome = Number(safeToSpend?.monthly_income_kd || 0)
-  const [incomeNudgeDismissed, setIncomeNudgeDismissed] = useState(
-    () => typeof window !== "undefined" && window.localStorage.getItem("income_nudge_dismissed") === "1"
-  )
   const dailyRateTone = safeToSpendTone(dailyRate)
   const primaryAction = { label: "Open Plan", onClick: onOpenPlan }
   const incomeNeedsSetup = Boolean(
@@ -224,9 +288,6 @@ export function SafeToSpendHero({
     label: "Add income",
     onClick: onOpenIncome ?? onOpenPlan,
   }
-  const showIncomeNudge = Boolean(
-    safeToSpend && safeToSpend.income_source === 'not_set' && !incomeNudgeDismissed
-  )
   const hasInfoNotes = Boolean(
     monthlyIncome > 0 &&
       (safeToSpend?.income_source === 'detected_from_transactions' ||
@@ -243,36 +304,10 @@ export function SafeToSpendHero({
         <div className="text-xs text-muted-foreground">Actionable runway for the rest of this month</div>
       </div>
       <div className="section-body">
-        {showIncomeNudge ? (
-          <div className="mb-3 inner-card flex items-start gap-3 border-warning/20 bg-warning/6">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-            <div className="min-w-0 flex-1 text-sm">
-              <span className="text-foreground">
-                Set your monthly income to see your full spending picture.
-              </span>{" "}
-              <button
-                type="button"
-                onClick={onOpenProfile ?? onOpenPlan}
-                className="font-medium text-primary underline underline-offset-2"
-              >
-                Go to Profile
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (typeof window !== "undefined") {
-                  window.localStorage.setItem("income_nudge_dismissed", "1")
-                }
-                setIncomeNudgeDismissed(true)
-              }}
-              className="text-muted-foreground transition-colors hover:text-foreground"
-              aria-label="Dismiss income reminder"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        ) : null}
+        {/* MOB-R26 RM-1 — the income nudge that stood here has MOVED to the IncomeNudge export
+            above, mounted unconditionally on Home. Removed here rather than duplicated:
+            condition (5)'s reason is that relocating without removing leaves two copies of the
+            same prompt on one page. */}
         {isLoading ? (
           <div className="skeleton h-28 w-full" role="status" aria-label="Loading safe-to-spend" />
         ) : !safeToSpend ? (

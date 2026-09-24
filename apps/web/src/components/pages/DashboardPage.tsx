@@ -19,6 +19,7 @@ import {
   DashboardHero,
   HomeAttentionCenter,
   IncomeExpensesChart,
+  IncomeNudge,
   SafeToSpendHero,
   SetupGuideDialog,
   SetupProgressPanel,
@@ -880,6 +881,16 @@ export default function DashboardPage() {
           />
         </div>
       ) : null}
+
+      {/* MOB-R26 RM-1 condition (2) — UNCONDITIONAL by design. This sits as a direct child of
+          the page's existing space-y-8 stack, outside the !noDashboardData branch that gates
+          SafeToSpendHero and outside the showSetupProgress gate, because those two gates are
+          precisely why the alternates did not cover the affordance. Do not wrap it in either. */}
+      <IncomeNudge
+        safeToSpend={safeToSpend}
+        onOpenPlan={() => navigate("/plan")}
+        onOpenProfile={() => navigate("/profile")}
+      />
 
       {showSetupProgress && (
         <SetupProgressPanel

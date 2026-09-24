@@ -112,6 +112,10 @@ vi.mock("./dashboard/sections", () => ({
   SetupProgressPanel: () => null,
   PlanSummaryPanel: () => null,
   SafeToSpendHero: () => <div>safe to spend</div>,
+  // MOB-R26 RM-1 — required because this factory ENUMERATES its exports rather than spreading
+  // the real module: a newly mounted export missing here resolves to undefined and throws.
+  // Inert, like every other section in this file.
+  IncomeNudge: () => null,
   HomeAttentionCenter: ({
     onDismissBudgetAlert,
   }: {
