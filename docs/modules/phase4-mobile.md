@@ -6004,3 +6004,170 @@ Nothing here adds to or reinterprets the ruling.
    updated to the measured figure in this cycle's commit, retaining the prior figure in the
    file's existing prior-baseline form, dated to THIS BLOCK rather than the session clock. The
    api line moves only if the api figure moves.
+
+MOB-R27 — THE CYCLE IS ACCEPTED AND THE COPY IS RULED. Six strings, operator-selected, verbatim
+below. The three blocked affordances relocate with their new sentences and THE HERO COMES DOWN in
+the same commit. The Insights prose, the payday counter and D2 all ship here. Gate C is discharged
+for D2 only.
+
+CADENCE. Issued under test (a) — it closes a cycle and authorises implementation — and (b).
+
+THE CYCLE IS ACCEPTED. Two hundred and forty-five across forty-five, plus three predicted and plus
+three measured, api unchanged, both typechecks at zero bytes, fixture sixty-six, physical properties
+thirty-two across nine after the last edit, regression files byte-untouched, every exclusion
+behind a positive control that listed the six touched files. The baseline line is discharged as
+ruled and cited by block identifier rather than a manufactured date — correct, and the reasoning
+is the attribution rule read properly rather than worked around.
+
+RM-6 FIRED CORRECTLY AND BOTH ROUTES WERE SHOWN CLOSED. Carrying the sentences reprints the feature
+on Home; dropping them is a copy decision the condition forbids. A stop with both exits named is an
+argument, not a refusal.
+
+THE RECONSTRUCTION FINDING IS THE INSTRUMENT LESSON. A malformed command and a failed reconstruction
+produced similar-looking output, and the cause was an untrimmed line-count variable carrying leading
+whitespace into the next command. The canonical class again: distinguish "the check failed" from
+"the check never ran" before reading either.
+
+THE ENUMERATION MISS IS ACCEPTED AND ITS DURABLE FORM IS THE PART TO KEEP. One declared mock-factory
+edit, two actual, three reddened tests outside the declared set — found by the suite, not by
+judgement. The structural difference is the finding: a factory that SPREADS the real module and
+overrides selectively tolerates a new export; one that ENUMERATES its exports cannot. This is the
+same shape as the four wholesale-mocked auth files that forced a helper's destination in an earlier
+module — CITED, NOT MINTED, and the standing count stays at SIX. THE ORDER IS THE REMEDY: derive the
+set of files mocking a module BEFORE adding an export to it, and enumerate that set in the report.
+
+CONDITION (4)'s SECOND STATE WAS WRONG AND THE CORRECTION IS ACCEPTED. Deleting a budget does not
+make the alternate vanish by completion — it drops the completed count and the panel returns.
+DISMISSAL is what makes it vanish. The channel wrote a state that does not exist; the implementer
+measured the real one and drove both cases through the dismissal flag. Recorded as the channel's
+error.
+
+═══ THE COPY — OPERATOR SELECTION, IN-SESSION 2026-09-24, RATIFIED HERE ═══
+
+PROVENANCE, STATED PRECISELY BECAUSE THE TWO HALVES HAVE DIFFERENT AUTHORS. The wording was DRAFTED
+BY THE REVIEW CHANNEL and SELECTED BY THE OPERATOR through the in-session question mechanism, not
+authored by him. This block ratifies it, so it is a channel ruling carrying an operator selection —
+not an operator-authored string, and not a self-grant. The verbatim exchange persists beside this
+block:
+
+  Q1 "Home — the three blocked prompts. Use my wording?"  → "Use my wording"
+  Q2 "Insights — the two surviving safe-to-spend mentions?"  → "Use my wording"
+  Q3 "Also approve these two smaller calls?"  → "Both"
+     (restore Days until payday; use the D2 wording)
+
+TRANSCRIPTION SEAM, STATED BECAUSE IT CANNOT BE CLOSED: these strings exist in no artifact on disk.
+This block is their only source. PASTE THEM, NEVER RETYPE THEM, and pin each one with an assertion
+on the exact string so a drifted character goes red rather than unnoticed. Report each rendered
+string verbatim, piped from the test output or the source, never re-keyed into prose.
+
+THE SIX STRINGS, WITH THEIR SITES.
+  (A2) sections.tsx:374 body, replacing the sentence naming the feature:
+       Set your monthly income so your plan and net figures are accurate.
+  (A3) sections.tsx:384 body, same treatment:
+       Set a budget for this month to see how your spending compares with your plan.
+  (A4) sections.tsx:281 error-state body:
+       We couldn't load your monthly figures right now.
+  (I-a) InsightsPage.tsx:272 — the sentence is DROPPED ENTIRELY, not reworded. The report already
+       established the join is built for an empty clause; show the passage before and after,
+       verbatim from source.
+  (I-b) InsightsPage.tsx:282 — replace the phrase naming the feature so the clause reads:
+       before what's left for everything else
+       Quote the whole sentence before and after; the replacement is a phrase inside it, and a
+       phrase substitution reported without its sentence cannot be checked.
+  (D2) sections.tsx:1022-1029, on an EMPTY period only:
+       Nothing to assess yet. Add a budget to see how your spending compares.
+       The non-empty render is UNCHANGED. The predicate is the one its siblings already use —
+       derive it, do not invent a parallel one; that is how this defect class was born.
+
+THE PAYDAY COUNTER — RESTORED. It returns inside This Week under its own heading:
+       Days until payday
+Same figure, same field, same formatting as before its removal. IF IT NEEDS A NEW DATA SOURCE, A NEW
+QUERY OR A NEW COMPUTATION, STOP — restoring a render is authorised; deriving a value is not.
+
+GATE C IS DISCHARGED FOR D2 AND FOR NOTHING ELSE. Any other site needing new copy still stops.
+
+═══ THEN THE HERO COMES DOWN ═══
+
+Affordances 2, 3 and 4 relocate with their new sentences, under MOB-R26's conditions (2), (3) and
+(5) UNCHANGED: unconditional on Home, no renames, and the hero unmounts IN THE SAME COMMIT so no
+prompt is ever on the page twice.
+CONFIRM WITH A POSITIVE CONTROL: after this commit the figure the operator saw at eighteen hundred
+has ZERO render paths, the "Monthly runway" render having gone with the hero. Show the control can
+match, then show the count is zero.
+And state it plainly in the report: "Safe to Spend Today" is now absent from every surface, which is
+what the operator ruled on 2026-09-19.
+
+═══ TESTS, GATES, CONSTRAINTS ═══
+
+TESTS. Derive the set of files mocking each touched module FIRST and enumerate it before mounting
+anything new. State the predicted delta WITH ITS SIGN before editing. One discriminating test per
+distinct render path, negative case stated. RED-FIRST with the positive control being a COUNT, and
+the red must fail for the reason under test — a red firing on a present assertion proves nothing,
+as this track has now demonstrated twice.
+GATE RM-6 STAYS LIVE for any further new string, heading or structure beyond the six ruled above.
+GATE RM-7 — GRAMMAR. If dropping the sentence at :272 leaves a dangling connective or an
+ungrammatical passage, STOP and report the exact text rather than patching it with an unruled word.
+CONSTRAINTS unchanged: Stage 1 hides, so components, api methods, types and their own tests stay;
+backend untouched with a positive control; no renames; pinned strings, FAB topology and clearance,
+QuickAdd internals untouched; logical properties only, thirty-two across nine re-derived AFTER THE
+LAST EDIT; components/ui/ untouched; no new external origin, no Caddyfile change; fixture and
+allowlist derived from the file. Update the CLAUDE.md frontend baseline line again, same form, cited
+to THIS block.
+THE E2E SUITE IS NOT TOUCHED — and re-state, report-only, that the hero's removal now rots the
+debt-flow selector that was still resolving last cycle.
+THE PUSH IS NOT AUTHORISED BY THIS BLOCK. Income remains NOT OPENED and is not prepared for.
+
+PERSISTENCE. This block persists ALONE, position DERIVED FROM THE FILE (last is expected to be 26),
+both sweeps shown discriminating, composite reconciled two ways, enumeration in file order.
+Provenance RELAYED. Persist alongside it, in the in-session-selection form: the three questions and
+answers verbatim, the six strings, and the condition-(4) correction as the channel's error.
+THE REPORT: three mandatory sections; per site the before, the after and the render gate; every
+ruled string quoted verbatim from source; any gate that fired at the TOP.
+
+## In-session operator selection — verbatim (provenance: REVIEW CHANNEL drafted, OPERATOR selected, 2026-09-24, ratified by the block above)
+
+**The two halves have different authors and the record says so.** The wording was DRAFTED BY THE
+REVIEW CHANNEL and SELECTED BY THE OPERATOR through the in-session question mechanism. It is a
+channel ruling carrying an operator selection — not an operator-authored string, and not a
+self-grant.
+
+### The exchange, verbatim
+
+```
+Q1 "Home — the three blocked prompts. Use my wording?"  → "Use my wording"
+Q2 "Insights — the two surviving safe-to-spend mentions?"  → "Use my wording"
+Q3 "Also approve these two smaller calls?"  → "Both"
+   (restore Days until payday; use the D2 wording)
+```
+
+### The six ruled strings — THIS DOCUMENT IS THEIR ONLY ON-DISK SOURCE
+
+They exist in no other artifact. The transcription seam cannot be closed, only bounded: each is
+pinned in the suite by an assertion on the exact string, so a drifted character goes RED rather
+than unnoticed.
+
+| id | site (re-derived at implementation) | string |
+|---|---|---|
+| A2 | `sections.tsx` income-setup body | `Set your monthly income so your plan and net figures are accurate.` |
+| A3 | `sections.tsx` no-budget body | `Set a budget for this month to see how your spending compares with your plan.` |
+| A4 | `sections.tsx` error-state body | `We couldn't load your monthly figures right now.` |
+| I-a | `InsightsPage.tsx` pace note | *(no string — the sentence is DROPPED ENTIRELY)* |
+| I-b | `InsightsPage.tsx` recurring sentence | `before what's left for everything else` |
+| D2 | `sections.tsx` empty-period arm | `Nothing to assess yet. Add a budget to see how your spending compares.` |
+
+The payday counter returns inside This Week under its own heading, `Days until payday`, with the
+same figure, field and formatting as before its removal.
+
+**Line numbers in the block above are NOT re-usable.** They were accurate when written and drifted
+before implementation — largely by this track's own preceding commit, which added the `IncomeNudge`
+export to `sections.tsx`. Every site was re-derived from source at implementation; see the cycle's
+report and commit for the measured positions.
+
+### The condition-(4) correction — recorded as the CHANNEL's error
+
+Condition (4) of MOB-R26 named "setup complete with the budget since deleted" as a state where
+the alternates vanish. **That state does not exist:** deleting a budget drops `setupCompleteCount`
+below `steps.length`, so `SetupProgressPanel` RETURNS rather than vanishing. DISMISSAL
+(`setup_guide_dismissed`) is what makes it vanish. The implementer measured the real predicate and
+drove both condition-(4) cases through the dismissal flag; the channel has recorded the error as
+its own.
