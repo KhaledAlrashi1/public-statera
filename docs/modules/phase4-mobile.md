@@ -5710,3 +5710,167 @@ printed in file order. Persist alongside it: the deploy record with its run iden
 withdrawn B6 and B7 with the corrected counts, the red-proof control requirement, and the
 out-of-channel ruling once its text arrives. Provenance RELAYED. Re-derive the unpushed count by both
 routes or do not state it.
+
+MOB-R25 — THE REMOVAL OPENS, STAGE 1 ONLY: HIDE, DO NOT DELETE. Month Snapshot goes; safe-to-spend
+goes everywhere it renders; the This Week panel STAYS minus its one safe-to-spend tile. Frontend
+only. One report: persist, measure, implement, verify — unless a named gate fires.
+
+CADENCE. Issued under test (a) — it opens a cycle and authorises implementation — and (b).
+
+═══ THE OPERATOR RULING, VERBATIM — provenance OPERATOR, DIRECT, 2026-09-19 ═══
+
+Given to the review channel in the prior conversation and relayed here. Persist it verbatim beside
+this block. The two "…" are elisions present in the text as it reached this channel; this channel
+cannot restore them and records them as elisions, not as the operator's punctuation.
+
+  (1) "I confirm that i want to remove the Safe-to-spend feature. the whole This Week panel stay
+      minus the safe-to-spend tile"
+  (2) "I would like to remove the feature/object, 'Month Snapshot' on the insight page. Also, I no
+      longer want to see the feature/object 'Safe to Spend Today' anywhere on the app… I want to
+      keep the app as simple as possible… we can turn off the feature for a quick fix and later we
+      can remove them off our codebase."
+
+The counter was put to him once — safe-to-spend was the app's distinctive idea and a module was
+built for it, so simplifying removes differentiation along with complexity — and he ruled anyway.
+Recorded, not re-litigated.
+
+═══ SCOPE ═══
+
+REMOVED FROM VIEW: (i) Month Snapshot on Insights, entirely; (ii) every safe-to-spend render in the
+app — the Home hero card, the Month Snapshot panel, and the SAFE-TO-SPEND TODAY tile inside This
+Week. "Anywhere on the app" is the operator's phrase and the corpus below is built to honour it.
+RETAINED: the This Week panel and its remaining contents — weekly insight, weekly pace, spending
+delta. THIS DISTINCTION IS LOAD-BEARING. Removing the panel is a defect, not a simplification.
+STAGE 1 = HIDE. Component files, api.ts methods, types and their unit tests STAY. Deleting code is
+Stage 2, a later cycle, NOT AUTHORISED HERE.
+BACKEND UNTOUCHED. No path under apps/api in this commit's diff, asserted with a positive control.
+R9 and _getSafeToSpendPayloadCached keep running. Contract fixture and ALLOWLIST untouched.
+
+═══ STEP 0 ═══
+
+hostname; pwd — REPORTED. HEAD and origin/main by SHA. Unpushed count BY TWO ROUTES
+(rev-list --count, and status -sb "ahead N"); the channel expects 3, carrying D1, D4, I4
+and the persistence of the previous block — a miss is a QUESTION. ENUMERATE
+WHAT YOU HOLD: every ruling, gate and outstanding item you believe is live, from your own record,
+not confirmed against a list from here.
+Baselines re-derived with resolution proofs and a non-matching negative control exiting 0, via the
+exact deploy.yml invocations (statera-api / statera-frontend — never statera-web). Expected, not
+adopted: frontend 241/45; api hermetic 873/34/61; INTEGRATION 897/10/61 with INTEGRATION="true";
+both tsc 0 bytes; fixture 66; ALLOWLIST empty at frontend-contract.test.ts:54; physical-property 32
+across 9. Collected-set invariance stated as such: both modes collect 907.
+
+═══ PERSISTENCE — FIRST, BEFORE ANY CODE ═══
+
+This block persists ALONE to docs/modules/phase4-mobile.md, position DERIVED FROM THE FILE (last is
+expected to be 24), payload swept under both patterns and shown discriminating, post-append
+composite reconciled two ways, enumeration printed in file order. Provenance RELAYED. The operator
+ruling above persists with it, verbatim, in the out-of-channel section's form but labelled DIRECT TO
+THE REVIEW CHANNEL. Persistence commit before the implementation commit.
+
+═══ PART 1 — THE CORPUS, BY TWO ROUTES ═══
+
+ROUTE A, STRINGS: every user-visible occurrence in apps/web/src non-test — text, aria-label, title,
+tooltip, document title, CommandPalette labels and keywords, empty-state and onboarding copy — of
+safe-to-spend / safe to spend / free to spend / month snapshot / runway, case-insensitive, with the
+search vocabulary DERIVED FROM THE RENDERED STRINGS of the three known surfaces, not assumed.
+ROUTE B, GRAPH: from each surface's component, every mount site by import, and every query whose
+ONLY consumers are those surfaces.
+STATE HOW THE ROUTES DIFFER and what each found that the other did not. Route A cannot see a
+surface whose label is data-driven; Route B cannot see a stray string in unrelated copy.
+PER SITE: file:line, its RENDER GATE (a declaration is not a render), and what renders after.
+
+═══ PART 2 — ITEM (vi), IDENTITY FROM SOURCE ═══
+
+Confirm from source whether SpendForecastWidget.tsx:68 — the sole text-accent-strong use, the
+whitespace-nowrap figure the operator saw overflow its FREE TO SPEND tile at DESKTOP width — sits
+inside a removed surface, naming its mount chain.
+  INSIDE: item (vi) CLOSES BY REMOVAL; the six-option table is moot. Say so.
+  NOT INSIDE: say so plainly. It stays open and is re-derived later against a DESKTOP failure,
+  since the deferral's premise that the risk lived at 320 is falsified. Propose nothing this cycle.
+BRASS: the removal retires the free-to-spend slot. The ration becomes logo mark and eyebrows. DO NOT
+reassign the freed slot, do not delete the accent-strong token (Stage 2), restyle nothing in
+the header row.
+
+═══ PART 3 — WHAT GOES DARK, CLASSIFIED, NOT RE-SIZED ═══
+
+For each shipped or open site this track has named — B1–B5, D1–D5, I1–I5 — state INSIDE or OUTSIDE
+a removed surface, by render gate. SOME OF THIS CYCLE'S SHIPPED WORK WILL BE HIDDEN; that is
+expected, not a regression. Also state: (a) whether the 1,800 FREE TO SPEND figure has any
+remaining render path; (b) whether ANY remaining surface still exhibits the R10-current-month vs
+R8-selected-month mismatch. REPORT ONLY. THE RE-SIZE OF THE ZERO AND TENSE CLASSES IS NOT THIS
+REPORT — it is the next cycle, opened by a later block after this one lands. Measurement does not
+parallelise behind implementation.
+
+═══ PART 4 — IMPLEMENT ═══
+
+Mechanism: remove the MOUNTS; leave the components. A query whose only consumers are removed
+surfaces is dropped from the page so no request fires for an invisible surface; its api.ts method
+stays, so the contract fixture should hold at 66 — predict it, and a move is a QUESTION.
+The This Week panel losing a tile may reflow. Reflow is ALLOWED and is observation-only; restyling
+the panel to compensate is NOT authorised — name any layout consequence you can see from source.
+
+TESTS. Before editing, state per file: what changes, why, and the predicted count delta WITH ITS
+SIGN. The channel's inherited expectation was negative; it assumed deletion. Component-level tests
+that render a hidden component directly STAY UNTOUCHED — the component still exists. Page-level
+assertions of presence are what change. Derive the sign; do not adopt it.
+THE HIDE GETS A DISCRIMINATING TEST: at page level the removed surfaces are ABSENT while, in the
+SAME render, the This Week panel's retained elements are PRESENT — so absence cannot be satisfied by
+a page that never rendered. RED-FIRST, with the positive control on the red proof (a count, not an
+exit code). The three named regression files stay green AND byte-untouched.
+
+═══ GATES — HARD STOPS, NAMED IN ADVANCE ═══
+
+GATE RM-1 — COLLATERAL. If a removed surface also carries something that is NOT safe-to-spend — an
+income nudge, a set-your-budget or Open Plan CTA, a data-completeness prompt, anything a user acts
+on — STOP on that surface and report it with where else (if anywhere) the affordance exists.
+Removing it silently takes a feature the operator did not rule on. Other surfaces proceed.
+GATE RM-2 — LEGAL OR PINNED COPY. If safe-to-spend appears in Privacy or Terms text, a pinned
+string, or a legal data-testid slot, STOP and report. Legal copy is operator-owned and under
+lawyer review.
+GATE RM-3 — any red test outside the declared set, any forced edit, any edit to a regression file.
+GATE RM-4 — any change reaching apps/api, the contract fixture, the ALLOWLIST, deploy/, or the
+Caddyfile.
+GATE RM-5 — THE PANEL. If the SAFE-TO-SPEND TODAY tile cannot be removed without restructuring This
+Week or losing a retained element, STOP.
+
+═══ CONSTRAINTS, UNCHANGED ═══
+
+No renames. Pinned strings untouched. FAB topology and clearance untouched; QuickAdd internals
+untouchable. Logical properties only, zero physical additions, 32 across 9 re-derived AFTER THE
+LAST EDIT. components/ui/ untouched and direction-free. No new external origin, no Caddyfile change,
+both asserted. The e2e suite is NOT touched — but LIST, report-only, the spec files that reference
+the removed surfaces, since this removal rots it further. Queued items stay queued. The push is NOT
+authorised by this block.
+
+═══ THE REPORT ═══
+
+Three mandatory sections (CLAUDE.md:436) with Test Files lines, captured exit codes, both tsc, and
+the baseline hunk. Parts 1–3 as specified. Per implemented surface: before, after, render gate.
+Artifacts piped, never retyped. Any gate that fired is at the TOP of the report.
+
+## Ruling relayed DIRECT TO THE REVIEW CHANNEL — verbatim (provenance: OPERATOR, DIRECT, 2026-09-19)
+
+Persisted in the out-of-channel section's FORM, per MOB-R25, but the provenance is **DIRECT TO THE
+REVIEW CHANNEL** — not out-of-channel. The operator gave this to the review channel in the prior
+conversation; it reached this channel by relay inside MOB-R25 and is persisted verbatim beside the
+block that carries it, so a later reader finds the operator's own words rather than the channel's
+paraphrase of them.
+
+The two `…` are **elisions present in the text as it reached this channel.** This channel cannot
+restore them and records them as elisions, not as the operator's punctuation.
+
+**(1)**
+
+```
+I confirm that i want to remove the Safe-to-spend feature. the whole This Week panel stay minus the safe-to-spend tile
+```
+
+**(2)**
+
+```
+I would like to remove the feature/object, 'Month Snapshot' on the insight page. Also, I no longer want to see the feature/object 'Safe to Spend Today' anywhere on the app… I want to keep the app as simple as possible… we can turn off the feature for a quick fix and later we can remove them off our codebase.
+```
+
+**The counter was put once and the operator ruled anyway** — safe-to-spend was the app's distinctive
+idea and a module was built for it, so simplifying removes differentiation along with complexity.
+Recorded, not re-litigated.
