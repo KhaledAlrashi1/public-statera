@@ -5874,3 +5874,133 @@ I would like to remove the feature/object, 'Month Snapshot' on the insight page.
 **The counter was put once and the operator ruled anyway** — safe-to-spend was the app's distinctive
 idea and a module was built for it, so simplifying removes differentiation along with complexity.
 Recorded, not re-litigated.
+
+MOB-R26 — THE CYCLE IS ACCEPTED AND BOTH GATES FIRED CORRECTLY. RM-2 is ratified permanently: legal
+copy is not edited in any stage. RM-1 is ratified and resolved — the four affordances RELOCATE, then
+the Home hero comes down. Three copy items are held with the operator. The stale shared baseline is
+ruled and discharged here.
+
+CADENCE. Issued under test (a) — it closes a cycle and authorises implementation — and (c).
+
+THE CYCLE IS ACCEPTED. The prediction was met exactly at two hundred and forty-two across
+forty-five, fixture held at sixty-six, physical properties thirty-two across nine re-derived after
+the last edit, regression files byte-untouched, gate RM-4 clear behind a pathspec shown able to
+match. Persistence reconciled two ways with the deleted-region reconstruction. THE BEST PART IS THE
+INSTRUMENT WORK, and it is worth naming three times over: a physical-property pattern that returned
+a plausible partial set, an unquoted glob that printed zero from a command that never ran, and two
+enumeration routes disagreeing at twenty-five against twenty-six because the looser one omitted the
+em-dash — the last being the header-collision hazard caught by the routes disagreeing rather than by
+either route alone. Each was reported as the instrument's fault, not the tree's.
+
+THE NON-ATTRIBUTABLE RED IS THE OTHER THING TO KEEP. A red that fires on a PRESENT assertion because
+a heading resolves while the query is still in flight is a red proving nothing about the removal. It
+was re-pointed at a digest-dependent element and only then did the red read as absence. A red proof
+must fail for the reason under test, not merely fail.
+
+═══ RM-2 — RATIFIED, AND WIDER THAN THIS CYCLE ═══
+
+The Terms clause stays untouched. STANDING FOR THIS TRACK: legal copy is never edited by an
+implementation cycle, in Stage 1 or Stage 2, whatever the surfaces do. The clause becomes STALE once
+the surfaces go — that is a queue item against the lawyer-review checklist's Terms section, carried
+and not acted on. Record it; do not fix it.
+
+═══ RM-1 — RATIFIED, AND RESOLVED: RELOCATE, THEN REMOVE ═══
+
+THE STOP WAS CORRECT AND THE CONSEQUENCE WAS STATED RATHER THAN SMOOTHED — that "Safe to Spend
+Today" is still on Home, contrary to the operator's own words, is the gate working. The alternates
+being dismissible and completion-gated is the finding that settles it: a user who finished setup and
+later deleted a budget would lose the prompt entirely.
+
+AUTHORISED THIS CYCLE: move the four affordances out of the hero, then unmount the hero.
+  CONDITIONS, and they are what keep this a move rather than a redesign.
+  (1) EXISTING STRINGS CARRIED VERBATIM. No new sentence, no reworded label, no new heading. A move
+      is not a copy decision; the moment it needs one it stops.
+  (2) THE DESTINATION IS UNCONDITIONAL ON HOME — not behind the setup-progress gate, not behind a
+      dialog, not behind a dismiss. That gating is the whole reason the alternates do not cover it.
+  (3) THE INCOME NUDGE KEEPS ITS DISMISS BEHAVIOUR AND ITS EXISTING STORAGE KEY. No rename.
+  (4) EACH RELOCATED AFFORDANCE GETS A DISCRIMINATING TEST IN THE TWO STATES WHERE THE ALTERNATES
+      VANISH: onboarding dismissed, and setup complete with the budget since deleted. Negative case
+      stated. Red-first with the positive control being a count.
+  (5) THE HERO COMES DOWN IN THE SAME COMMIT, not a later one. A commit that relocates without
+      removing leaves two copies of the same prompt on one page.
+GATE RM-6 — NEW COPY OR NEW STRUCTURE. If any affordance cannot be relocated without a new string, a
+new heading, or a layout container beyond a plain stack in existing page rhythm, STOP on that
+affordance, report it, and leave the hero up until it is ruled. The others proceed.
+
+CONFIRM WITH THE HERO'S REMOVAL: sections.tsx:332 "Monthly runway" is one of the two remaining
+render paths for the figure the operator saw at eighteen hundred. Say whether it goes with the hero.
+The other path is held below.
+
+═══ ITEM (vi) — CLOSED BY REMOVAL ═══
+
+Accepted on the mount chain. The line correction, :68 at the cited commit against :80 at HEAD, is
+accepted and its cause is ours: our own guard comment moved it last cycle. Derive-don't-carry,
+demonstrated against this channel's own citation.
+BRASS: the ration is now logo mark and eyebrows. The accent-strong token survives UNUSED until
+Stage 2 — do not delete it, do not reassign the freed slot, restyle nothing.
+
+THE QUERY WAS CORRECTLY NOT DROPPED. The ruling's condition evaluated false and the report showed
+which other consumers make it false. That is the conditional being read rather than obeyed.
+
+═══ HELD WITH THE OPERATOR — DO NOT SHIP ═══
+
+Four items, each needing a user-facing sentence, which is a product decision: the Insights prose at
+:272 and :282; the lost "days until payday"; and D2, still at Gate C. A later block carries the
+wording. Suppressing :272 cleanly is available and is STILL NOT AUTHORISED, because suppressing one
+half of a two-sentence passage changes what the other half reads as.
+
+═══ THE STALE SHARED BASELINE — RULED ═══
+
+The report was right to stop and right that the track convention puts per-cycle baselines in the
+module file. But the CLAUDE.md frontend line is a LIVE INDEX, and nothing in the convention licenses
+a shared index rotting thirty tests and four files behind the tree.
+AUTHORISED: in this cycle's commit, update that line to the measured figure, retaining the previous
+figure as a prior-baseline clause in the form the file already uses, dated to THIS BLOCK, never the
+session clock. The api line moves only if the api figure moves; it did not.
+That discharges mandatory section (3) for this cycle: the hunk is the CLAUDE.md diff together with
+the module-file baseline line.
+
+═══ CONSTRAINTS AND CLOSE ═══
+
+Stage 1 still means HIDE: components, api methods, types and their own tests stay. Backend
+untouched, asserted with a positive control. No renames; pinned strings, FAB topology and
+clearance, QuickAdd internals untouched. Logical properties only, thirty-two across nine
+re-derived after the LAST edit.
+components/ui/ untouched and direction-free. No new external origin, no Caddyfile change, fixture
+and allowlist derived from the file. The e2e suite is NOT touched — but re-state, report-only,
+that the debt-flow spec targets the hero's aria-label and that this commit rots it further.
+THE PUSH IS NOT AUTHORISED BY THIS BLOCK. It comes when the hero is down and the held items are
+ruled.
+NAMED SO IT IS NOT A SURPRISE AND NOT ANTICIPATED: the operator has ruled that income becomes
+USER-ENTERED and that income DETECTION goes. That work touches apps/api, is its own cycle, and is
+NOT OPENED HERE. Do not prepare for it.
+
+PERSISTENCE. This block persists ALONE, position DERIVED FROM THE FILE (last is expected to be 25),
+payload swept under both patterns with the discrimination shown, post-append composite reconciled
+two ways, enumeration printed in file order. Provenance RELAYED. Persist alongside it: RM-2's
+standing line on legal copy, the RM-1 disposition, item (vi)'s closure with its line correction,
+and the baseline ruling.
+THE REPORT: three mandatory sections; per relocated affordance the before, the after and the render
+gate; any gate that fired at the TOP. Artifacts piped, never retyped.
+
+## Dispositions carried by the block above — implementer's index, not the channel's text
+
+The four items the block directs to be persisted alongside it all live INSIDE the verbatim block
+above; this index exists so a later reader finds them by name rather than by re-reading the block.
+Nothing here adds to or reinterprets the ruling.
+
+1. **RM-2 standing line — legal copy is never edited by an implementation cycle**, Stage 1 or
+   Stage 2, whatever the surfaces do. See the RM-2 section. The Terms "not advice" clause
+   (`legal/TermsPage.tsx:37`) becomes STALE once the safe-to-spend surfaces are gone; that is a
+   QUEUE ITEM against the lawyer-review checklist's Terms section — recorded, deliberately not
+   acted on.
+2. **RM-1 disposition — RELOCATE, THEN REMOVE, in one commit**, under conditions (1)-(5) and
+   GATE RM-6. See the RM-1 section.
+3. **Item (vi) — CLOSED BY REMOVAL**, on the mount chain, with the `:68`-versus-`:80` line
+   correction accepted and its cause attributed to this track's own guard comment from the
+   preceding cycle. Brass ration is now logo mark and eyebrows; `--accent-strong` survives UNUSED
+   until Stage 2 and is not to be deleted or reassigned.
+4. **The stale shared baseline — RULED.** The CLAUDE.md frontend line is a LIVE INDEX and is
+   updated to the measured figure in this cycle's commit, retaining the prior figure in the
+   file's existing prior-baseline form, dated to THIS BLOCK rather than the session clock. The
+   api line moves only if the api figure moves.
