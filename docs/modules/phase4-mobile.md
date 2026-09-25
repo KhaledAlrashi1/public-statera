@@ -6312,3 +6312,169 @@ Frontend **256 tests / 47 files**; api hermetic **873 passed / 34 skipped / 61 f
 throughout because no cycle touched `apps/api`; both `tsc --noEmit` 0 bytes; contract fixture
 **66** with the ALLOWLIST empty; physical properties **32 across 9**, delta zero across all four
 cycles.
+
+MOB-R29 — THREE PIECES OF WORK, IN ORDER: enumerate Home, move Needs attention below the two
+spending cards, and REMOVE THE THIS WEEK PANEL FROM INSIGHTS. Stage 1 rules still apply — hide,
+do not delete. Separate commits, one report.
+
+CADENCE. Issued under test (a) — it authorises implementation — and (b).
+
+THE CLOSE-OUT IS ACCEPTED. The run landed rather than started, and the report says so with the
+watch step named. Both endpoints round-tripped through rev-parse and identified by what they are.
+The range instrument found twenty files before reporting its zeros, so the zeros discriminate.
+The absent baseline hunk is the right answer BECAUSE its condition was stated: a docs-only commit
+moves no count, and the rule conditions the hunk on counts moving.
+THE COUNT DEVIATION IS RATIFIED. Nine authorised, ten pushed, the tenth being this protocol's own
+persistence commit. STANDING: when a block authorises a push of N commits, its own persistence
+commit rides with it and the pushed count is N+1.
+
+═══ THE TWO OPERATOR RULINGS, VERBATIM — provenance OPERATOR, DIRECT, 2026-09-25 ═══
+
+  (1) "On the home page, I want to push down the object, 'Needs attention' and have it below the
+      two objects, 'Income vs Expenses' and 'Expenses by Category'."
+  (2) "You know I don't see much value coming from the object/feature 'This Week'. Let's remove
+      it."
+His verdict on the observation round was also DIRECT: "the page, Home looks fine". The
+rearrangement sits on top of an accepted page; it is not a defect report.
+
+THIS SUPERSEDES A RULING RATHER THAN EXTENDING ONE, AND THE RECORD MUST SAY SO. When
+safe-to-spend was removed, retention of This Week minus its one tile was explicit and
+load-bearing, and a later block restored the payday counter INTO it. Ruling (2) reverses that.
+Persist it as a supersession with both dates, not as a continuation.
+
+═══ PART 1 — ENUMERATE HOME BEFORE MOVING ANYTHING ═══
+
+From source, enumerate every section Home renders IN ORDER, with its component, its rendered
+heading string, and its render gate. The operator names two cards by labels that may not be their
+headings, and a reorder aimed at a guessed target reorders the wrong thing.
+GATE RM-9 — NAME MAPPING. Map "Income vs Expenses" and "Expenses by Category" to exact sections.
+If either fails to resolve to exactly one section — no match, several plausible matches, or the
+two are not adjacent siblings — STOP, report the enumeration, name the candidates, do not pick
+the closest.
+REPORT, DO NOT ACT ON: whether more than one Home section can prompt for a budget at the same
+time. The screenshots show the Needs-attention empty state, a relocated prompt and the setup
+panel all capable of co-rendering. If they can, say so with the gates that allow it. Deduplicating
+prompts is a product decision and is not authorised here.
+
+═══ PART 2 — THE REORDER (first commit) ═══
+
+The Needs-attention section moves below both spending cards. Nothing else changes.
+  (1) THE TWO SPENDING CARDS KEEP THEIR RELATIVE ORDER.
+  (2) NO RESTYLE — no spacing token, no new wrapper, no card chrome.
+  (3) NO BEHAVIOUR CHANGE — every render gate stays exactly as it is.
+  (4) EVERY WIDTH. Derive whether Home renders one ordered list or several width-specific ones.
+      If several, the order changes in ALL of them and the report enumerates which.
+GATE RM-8 — STRUCTURE. If the move cannot be made by reordering siblings — positional grid
+placement, or one section nested inside another's container — STOP and report the structure with
+the options. Reordering is authorised; restructuring is not.
+
+═══ PART 3 — REMOVE THIS WEEK (second commit) ═══
+
+The whole panel goes from Insights: heading, weekly insight, weekly pace, spending delta, and the
+payday counter with it. STAGE 1 AS ALWAYS: unmount it; the component, its own tests, the api
+method and the types all stay. Stage 2 deletion remains unauthorised.
+THE PAYDAY COUNTER GOES WITH THE PANEL. It was restored into this panel two cycles ago and the
+operator has now ruled the panel out. Re-homing it elsewhere is a placement decision nobody has
+made — do not re-home it, and state its loss plainly in the report.
+DROP THE QUERY IF AND ONLY IF the panel is its sole consumer. Derive that from source and show
+the derivation; last cycle the same conditional evaluated FALSE for a different query and the
+correct action was to leave it. The api method stays either way, so predict the fixture holds at
+sixty-six.
+THE EMPTY CONTAINER. This panel is the surviving child of the Insights wrapper that lost Month
+Snapshot. If removing it leaves that wrapper with no children at any width, removing the now-empty
+wrapper is AUTHORISED as part of the same hide — it is dead markup, not a restyle. If the wrapper
+still holds anything at any width, or holds a heading or spacer of its own, LEAVE IT and report.
+GATE RM-10 — ANY OTHER CONSUMER. If any surface outside this panel renders the weekly digest, or
+the panel contains an affordance the user acts on that exists nowhere else, STOP and report it
+before removing — the collateral lesson from the Home hero, applied before it costs a cycle.
+
+═══ THE TWO RECORDED OBSERVATIONS — NOW RE-SCOPED, NOT CARRIED FORWARD AS WRITTEN ═══
+
+Both of the operator's observations from this round live INSIDE the panel Part 3 removes: the
+three different empty-state conventions in one row (a bare zero, N/A, and KD 0.000), and the
+weekly insight asserting sameness between two empty weeks. Persist them with provenance OPERATOR
+OBSERVATION, DIRECT, 2026-09-25, AND persist that they were dissolved by ruling (2) rather than
+fixed. WHEN THE ZERO-CLASS RE-SIZE OPENS, it starts by deriving whether those strings were in the
+shipped corpus and survived, or were never enumerated — both answers are findings, and the
+removal must not be allowed to erase the question. DO NOT FIX, DO NOT ENUMERATE THE CLASS NOW.
+
+═══ TESTS, CONSTRAINTS, CLOSE ═══
+
+TESTS. Per commit, state the predicted delta WITH ITS SIGN before editing. Part 2's discriminating
+test asserts DOM ORDER in one render, not presence — presence passes under the old order and is
+therefore not a check. Part 3's asserts the panel is ABSENT while, in the same render, a retained
+Insights section is PRESENT, so absence cannot be satisfied by a page that never rendered. Derive
+the mocking-file set for any touched module FIRST. RED-FIRST IS A SEQUENCE, with a COUNT as the
+positive control. A control falsified by this ruling is re-aimed at the property it protected, not
+deleted.
+CONSTRAINTS UNCHANGED. No renames; pinned strings, FAB topology and clearance, QuickAdd internals
+untouched. Logical properties only, thirty-two across nine re-derived AFTER THE LAST EDIT.
+components/ui/ untouched. No new external origin, no Caddyfile change, backend untouched, fixture
+and allowlist derived from the file. The e2e suite is not touched — note report-only whether this
+removal rots any further selector. Update the CLAUDE.md frontend baseline line if the counts move.
+THE PUSH IS NOT AUTHORISED BY THIS BLOCK. Income remains NOT OPENED and is not prepared for.
+
+PERSISTENCE. This block persists ALONE, position DERIVED FROM THE FILE (last is expected to be
+28), the wrap check BEFORE the append, both sweeps shown discriminating, composite reconciled two
+ways, enumeration in file order. Provenance RELAYED, with both operator rulings verbatim under
+provenance OPERATOR, DIRECT, the supersession noted with both dates, and the N+1 push-count rule
+alongside.
+THE REPORT: three mandatory sections; the Home enumeration with headings and gates; order before
+and after, quoted from source; for Part 3 the panel's contents as they were, the payday loss
+stated, and the wrapper disposition; any gate that fired at the TOP.
+
+## Operator rulings — verbatim (provenance: OPERATOR, DIRECT, 2026-09-25)
+
+Relayed into this channel by the block above and persisted here so a later reader finds the
+operator's own words rather than the channel's paraphrase.
+
+**(1)**
+
+```
+On the home page, I want to push down the object, 'Needs attention' and have it below the two objects, 'Income vs Expenses' and 'Expenses by Category'.
+```
+
+**(2)**
+
+```
+You know I don't see much value coming from the object/feature 'This Week'. Let's remove it.
+```
+
+**His verdict on the observation round, also DIRECT:** `the page, Home looks fine`. The
+rearrangement therefore sits on top of an ACCEPTED page — it is not a defect report, and must not
+be recorded as one.
+
+### SUPERSESSION — This Week was explicitly RETAINED, and ruling (2) reverses that
+
+This is a reversal, not a continuation, and the record says so with both dates:
+
+| date | ruling | effect on This Week |
+|---|---|---|
+| **2026-09-19** | operator, direct (persisted at block 25) | `the whole This Week panel stay minus the safe-to-spend tile` — retention was EXPLICIT and load-bearing; removing the panel would have been a defect |
+| **2026-09-24** | channel ruling carrying an operator selection (block 27) | the `Days until payday` counter was RESTORED **into** this panel |
+| **2026-09-25** | operator, direct (this block) | the panel is REMOVED, and the payday counter goes with it |
+
+The payday counter is therefore removed one cycle after being deliberately restored. That is the
+operator's call and it is recorded as a reversal rather than smoothed into a sequence that never
+changed direction.
+
+### PUSH-COUNT RULE — standing
+
+When a block authorises a push of **N** commits, its own persistence commit rides with it and the
+pushed count is **N+1**. Ratified after nine were authorised and ten pushed.
+
+## Operator observations — verbatim (provenance: OPERATOR OBSERVATION, DIRECT, 2026-09-25)
+
+Recorded from the observation round, and **DISSOLVED BY RULING (2) RATHER THAN FIXED** — both live
+inside the panel Part 3 removes:
+
+1. **Three different empty-state conventions in one row** — a bare zero, `N/A`, and `KD 0.000`.
+2. **The weekly insight asserting sameness between two empty weeks.**
+
+**Neither was repaired.** The surface carrying them was removed, which is not the same thing.
+
+**Obligation on the zero-class re-size, when it opens:** it begins by deriving whether these
+strings were in the shipped zero-class corpus and SURVIVED it, or were never enumerated at all.
+Both answers are findings — the first says the corpus was checked and the guard missed them, the
+second says the enumeration was incomplete. The removal must not be allowed to erase the question.
+Do not fix and do not enumerate the class now.
