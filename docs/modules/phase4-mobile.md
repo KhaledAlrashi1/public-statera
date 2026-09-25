@@ -6171,3 +6171,144 @@ below `steps.length`, so `SetupProgressPanel` RETURNS rather than vanishing. DIS
 (`setup_guide_dismissed`) is what makes it vanish. The implementer measured the real predicate and
 drove both condition-(4) cases through the dismissal flag; the channel has recorded the error as
 its own.
+
+MOB-R28 — STAGE 1 IS CLOSED AND THE PUSH IS AUTHORISED. Nine commits go to origin/main, the
+Actions run must LAND before any observation, and then implementation STOPS for an operator
+observation round. No new surface work is authorised by this block.
+
+CADENCE. Issued under test (a) — it closes a phase — and (b).
+
+STAGE 1 IS COMPLETE AND ACCEPTED. Two hundred and fifty-six across forty-seven, plus eleven
+predicted and plus eleven measured across five files, api unchanged, both typechecks at zero
+bytes, fixture sixty-six, physical properties thirty-two across nine after the last edit,
+regression files byte-untouched, every exclusion behind a control listing the nine touched files.
+The zero-render-path claim is properly shaped: the same instrument finds four live mounts and
+zero for both removed surfaces, so the zero discriminates. Month Snapshot and Safe to Spend Today
+render on no surface.
+
+FOUR THINGS IN THIS REPORT ARE WORTH MORE THAN THE FEATURE WORK.
+  THE MOCK-FACTORY SET WAS DERIVED FIRST AND COST NOTHING, the same derivation that cost three
+  red tests when it was done afterwards. The remedy working one cycle after it was written.
+  THE FIRST CLASSIFIER WAS NON-DISCRIMINATING and was caught by its own author: matching the
+  helper anywhere in the file called all three factories tolerant, because those files use it
+  for routing. Re-scoped to the factory block with a control proving the window is the factory.
+  AN INSTRUMENT THAT RETURNS THE SAME ANSWER FOR EVERY INPUT IS NOT AN INSTRUMENT, and it read
+  plausibly.
+  THE COLUMN-0 TRAP WAS CAUGHT BEFORE THE WRITE. A wrapped body line took a header's shape — the
+  exact thing that made the two routes disagree at line 1513 last cycle. It was rewrapped rather
+  than persisted. STANDING, ADDED TO THE PERSISTENCE PROTOCOL: the wrap check runs BEFORE the
+  append, because after it the trap sits in the file for every future sweep to trip on.
+  THE FILENAME-STRIPPING MISCOUNT is the fourth separate instance of a filter written against
+  intended content rather than actual tool output — stripped filenames, then a filter matching
+  lines instead of files. Recorded as the fourth.
+
+THE ORDERING DEVIATION IS ACCEPTED AS REPORTED AND NOT AS PRACTICE. Source was edited before the
+tests, so red-first did not hold in SEQUENCE. The recovery is genuine evidence — stashing only the
+four source files and running the new tests against the pre-change tree, eleven failing and
+twenty-four passing, the count being the control — and it establishes the assertions
+discriminate. It does NOT establish what red-first exists to establish: that the test was written
+without the implementation in view. Those are different claims. The report separated them itself,
+which is why this is a ratification and not a return. RED-FIRST IS A SEQUENCE, and the stash
+recovery is its remedy, never its equivalent.
+
+THE FALSIFIED CONTROL WAS HANDLED CORRECTLY. A control asserting the sentence this ruling dropped
+was re-pointed at the surviving arm rather than deleted, because its purpose — proving the guard
+is not a blanket mute — still holds. A control falsified BY A RULING is re-aimed at the property
+it was protecting. A control falsified by a defect is a finding. Distinguish them by asking what
+changed. A4's rendered string is pinned by an exact-string assertion and its source-level escape
+is the file's existing convention — accepted.
+
+═══ THE PUSH — AUTHORISED, WITH CONDITIONS ═══
+
+Push main to origin. Then, and only then:
+  (1) Report the Actions run id and its conclusion. A PUSH IS NOT A DEPLOY. No observation is
+      evidence until the run has LANDED, and the report must say that it had.
+  (2) Diff against ORIGIN/MAIN after the push, never local main, and state the deployed range with
+      both endpoint SHAs round-tripped against the repository.
+  (3) Confirm from the diff of that range: no migration, no Caddyfile change, no foreign
+      riders, no path under apps/api.
+  (4) If the run does not conclude success, STOP and report. Do not re-run, do not push again.
+
+═══ THEN STOP ═══
+
+NO IMPLEMENTATION AFTER THE PUSH. The next instrument is the operator's eyes, and it is the only
+instrument this track has for layout. He will look at Home, Insights and This Week in ONE tab
+from a fresh load, navigating between pages, because the cross-tab cache regime is queued unfixed
+and a stale tab renders an arbitrary earlier moment.
+What his round will settle, stated in advance so the answers are checkable: whether the two
+relocated prompts read naturally where they now sit, whether Home looks unbalanced with the hero
+gone, whether This Week reads correctly with the payday cell refilled, and whether anything still
+names a feature that no longer exists.
+
+CARRIED, NOT OPENED, AND RANKED. The zero-class and tense-class re-size was ordered after the
+removal landed; it is now owed and it is BEHIND the operator's own path — user-entered income,
+then CSV column mapping, then the friends. It is not forgotten; it is ranked. Say so in the
+close-out rather than letting it sit unnamed.
+STILL OPEN AND UNCHANGED: the Terms clause naming a feature nothing renders, carried against the
+lawyer-review checklist and deliberately not acted on; Stage 2 deletion, unauthorised; the e2e
+selector this commit rotted, untouched.
+
+PERSISTENCE. This block persists ALONE, position DERIVED FROM THE FILE (last is expected to be
+27), the WRAP CHECK RUNNING BEFORE THE APPEND, both sweeps shown discriminating, composite
+reconciled two ways, enumeration in file order. Provenance RELAYED. Persist alongside it the
+Stage 1 closure: what was removed, what was relocated, what was restored, and the six ruled
+strings as shipped.
+THE CLOSE-OUT: three mandatory sections, the deploy evidence above, and the carried items named.
+
+## Stage 1 closure record — safe-to-spend removal, as shipped
+
+Persisted per the block above so a later reader finds the end state without reassembling it from
+four cycles of commits. Every line here describes the tree as committed at the Stage 1 close.
+
+### Removed from view — components KEPT, mounts deleted (Stage 1 hides, Stage 2 deletes)
+
+| surface | component | mount deleted from | proof of zero render paths |
+|---|---|---|---|
+| Month Snapshot | `SpendForecastWidget` | `InsightsPage.tsx` | `<SpendForecastWidget` → **0** non-test mounts |
+| Safe to Spend Today (Home hero) | `SafeToSpendHero` | `DashboardPage.tsx` | `<SafeToSpendHero` → **0** non-test mounts |
+| SAFE-TO-SPEND TODAY tile | *(markup inside `WeeklyDigestSection`)* | `WeeklyDigestSection.tsx` | label and figure asserted absent |
+
+The zero is DISCRIMINATING rather than merely empty: the same instrument, over the same non-test
+file set, returns **1** for each of `<IncomeNudge`, `<PlanSetupPrompts`, `<HomeAttentionCenter`
+and `<WeeklyDigestSection`. `SafeToSpendHero` still contains the literal "Safe to Spend Today" at
+one source line, unreachable because the component has no mount.
+
+### Relocated — affordances that were NOT safe-to-spend
+
+| affordance | from | to | conditions |
+|---|---|---|---|
+| Income nudge + "Go to Profile" + dismiss | inside the hero, gated `!noDashboardData` | `IncomeNudge`, unconditional on Home | strings verbatim; key `income_nudge_dismissed` unchanged |
+| "Set your income" / "Add income" | hero body | `PlanSetupPrompts` | heading and button verbatim; body = ruled A2 |
+| "No budget set for this month." / "Open Plan" | hero body | `PlanSetupPrompts` | heading and button verbatim; body = ruled A3 |
+| error-state "Open Plan" | hero body | `PlanSetupPrompts` | button verbatim; body = ruled A4 |
+
+Each relocation removed the original in the SAME commit, so no prompt was ever on the page twice.
+
+### Restored
+
+The **Days until payday** counter, removed at MOB-R25 as collateral of the tile it shared, returns
+inside This Week under its own ruled heading with the same field (`days_until_payday`), the same
+figure and the same `N/A` null marker. No new data source, query or computation. It also refills
+the third grid cell, so the `md:grid-cols-3` reflow named at MOB-R25 resolved without restyling.
+
+### The six ruled strings AS SHIPPED
+
+Five are byte-identical between source and this document. A4 differs at SOURCE level only by the
+file's existing `&apos;` escape; its RENDERED form is pinned by a passing exact-string assertion.
+
+| id | shipped string |
+|---|---|
+| A2 | `Set your monthly income so your plan and net figures are accurate.` |
+| A3 | `Set a budget for this month to see how your spending compares with your plan.` |
+| A4 | `We couldn't load your monthly figures right now.` |
+| I-a | *(the sentence was DROPPED ENTIRELY — no replacement string)* |
+| I-b | `before what's left for everything else` |
+| D2 | `Nothing to assess yet. Add a budget to see how your spending compares.` |
+| payday heading | `Days until payday` |
+
+### Baselines at the Stage 1 close
+
+Frontend **256 tests / 47 files**; api hermetic **873 passed / 34 skipped / 61 files**, unchanged
+throughout because no cycle touched `apps/api`; both `tsc --noEmit` 0 bytes; contract fixture
+**66** with the ALLOWLIST empty; physical properties **32 across 9**, delta zero across all four
+cycles.
