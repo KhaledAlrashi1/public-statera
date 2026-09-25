@@ -6730,3 +6730,142 @@ in file order, predicted 31 and contiguous, closed with grep -n output rather th
 Read back what was written. The commit message is piped from a file, never retyped. COMMIT; DO NOT
 PUSH. It rides with the next authorised push, counted N+1. State the unpushed count by both routes
 or do not state it.
+
+MOB-R32 — THE OPERATOR HAS ANSWERED THE THREE OPEN QUESTIONS. PHASE A IS ACCEPTED. RM-13, RM-14,
+RM-17 AND RM-18 ARE RULED BELOW. RM-16 STANDS. THIS BLOCK AUTHORISES A REVISED PROPOSAL AND A STRING
+INVENTORY ONLY. NO EDIT TO ANY TRACKED FILE EXCEPT THIS BLOCK'S OWN PERSISTENCE.
+
+CADENCE. Tier 1, unchanged. The revised proposal is a hard stop. Implementation is authorised by a
+later block that also carries the operator-selected copy.
+
+═══ OPERATOR SELECTIONS — PROVENANCE OPERATOR, DIRECT, IN THE EXCHANGE FOLLOWING THE PHASE A REPORT ═══
+
+These are SELECTIONS FROM A CHANNEL-DRAFTED SET, made on tappable options. The question and option
+wording is the CHANNEL'S, including every "(recommended)" marker. The choices are the OPERATOR'S.
+They are ratified by this block. Verbatim, question then selected option:
+  "Income transactions — can people still log them?" → "Keep loggable (recommended)"
+  "Your one typed income — how does it apply to past months?" → "Same figure every month
+  (recommended)"
+  "Weekly digest — nothing shows it now. What next?" → "Leave off screen for now (recommended)"
+The unselected options were: "Hide — allow one Quick Add change"; "This month only; past shows Not
+set"; "Give it a new place".
+
+A CHANNEL DEFAULT, NOT A RULING. The channel told the operator it would treat his "net figures on
+Home" as the hero's Remaining unless he said otherwise. He did not say otherwise. Record this as the
+channel's stated default, uncontradicted. It is NOT an operator ruling and must not be cited as one.
+
+═══ PHASE A IS ACCEPTED ═══
+
+Three routes agreed, and the third — the runtime capture — is built differently from the two source
+routes, so the agreement is real evidence. The findings that shaped the rulings are recorded:
+  - NO UI WRITE PATH FOR THE TYPED INCOME EXISTS. The Home prompts send users to a Profile page with
+    nothing to set. This is the central finding. The Profile field is the core of the cycle, not a
+    side item.
+  - THE NOT-FILTER CONSTRAINT IS ACCEPTED. expenseCategoryFilter is NOT incomeCategoryFilter, so
+    "detection goes" means the resolver's detected arm and the R11 surface, never the category
+    filter.
+  - THE A6 SPLIT IS ACCEPTED. heroDeltas and canLoadDemoData would break silently if the hero
+    variable became the typed figure. Their re-key onto row-derived values is part of the cycle.
+  - THE INSIGHTS paceNote FINDING IS ACCEPTED: a sentence that newly fires for every
+    detected-income user is exactly the class this track exists to catch.
+  - THE LOOSE HEADER PATTERN'S COLLISION at line 1513 is recorded. The strict pattern is the
+    instrument.
+
+TWO SHORTFALLS, NOTED AND NOT RETURNED:
+  (i) Step 0 arrived as a results table, not as each command with its verbatim output as MOB-R31
+  asked. It is accepted as orientation for planning, not as evidence. The implementation report
+  re-derives Step 0 and carries the verbatim output.
+  (ii) "Roughly 267/48" is not a prediction. The revised proposal states exact figures with sign.
+
+═══ RULINGS ═══
+
+RM-14 DOES NOT FIRE. Income stays loggable. QuickAdd internals and the FAB are untouched. The
+parseFloat at transactions/dialogs.tsx:231 stays QUEUED and is not touched.
+
+RM-17 — FLAT. The one typed figure applies to every month, current and past. Consequences accepted
+by the operator's selection: editing the figure changes past months' income-derived figures. The
+Home Income-vs-Expenses chart draws the typed income as ONE REFERENCE LINE against expenses, not as a
+per-month series. R3 and R4 KEEP their logged-sum meaning, so every A6 guard that stays true stays
+true. IncomePage's own chart keeps plotting logged income, because that page is about logged income.
+When income is not set, the chart draws no reference line and shows the not-set display (copy under
+RM-16).
+
+RM-18 — OFF SCREEN. No new surface for the weekly digest. R10 stays mounted and keeps its current
+role feeding Insights readiness and the empty state. Its income-derived field follows the resolver.
+No R10 code is removed.
+
+RM-13 — FIRES AND IS RULED, as the direct consequence of the operator's instruction to drop
+detection:
+  (a) The detected arm goes from lib/income-lib.ts AND from the local copy in routes/budgets.ts.
+  Delete detectMonthlyIncome only after re-deriving at implementation that it has no other caller.
+  (b) "detected_from_transactions" STOPS BEING EMITTED. The frontend type union NARROWS to the
+  values still emitted. Use the narrowing as the completeness instrument: PREDICT the tsc error set
+  BEFORE the flip, then show the captured set against the prediction. The money-string sweep is the
+  precedent.
+  (c) income_auto_detected is KEPT as a constant false. It is a deliberate survivor pending a later
+  deletion stage, the same shape as safe-to-spend Stage 2.
+  (d) The R11 route and its api.ts method stay mounted. Once the Profile section is replaced they
+  have NO CALLER. That departs from the recorded no-caller-no-method rule, and it is accepted ONLY as
+  a two-stage removal on the Stage 1 / Stage 2 precedent. The record must say so in those words, so
+  a later reader does not take the survivor for an oversight.
+  (e) AUTHORISED FORCED TEST EDITS, NAMED AND NO OTHERS: R9 F1–F5, R11 I1–I6 (including the
+  sequenced-mock slot shift), and budgets.test.ts:144. Each is shown as a diff with the old and new
+  expectation and the reason. ANY FORCED EDIT OUTSIDE THIS LIST STOPS AND ASKS.
+  (f) THE CAPTURE FIXTURE RE-SEED IS A CONTROL RE-AIMED BY A RULING, NOT A NEW CONTROL. State the
+  property it protected — the wire shape of R9's money fields. Show that seeding the profile arm
+  still protects it. Record the not_set arm, whose money field is null, as an UNCAPTURED ARM under
+  CF8, with its revisit trigger: the TB-R13 cycle that would relax the NULL fail-loud guard. The
+  prediction that the JSON and assert files come out byte-identical stands, and is checked with cmp.
+  (g) Unifying budgets.ts onto income-lib is NOT in this cycle. It is queued together with the
+  profile_context.income_source typed-drift finding (the frontend type lacks null; the wire sends
+  it).
+
+THE SINGLE-DEPLOY CONSTRAINT IS ACCEPTED: the resolver commit and the Profile field ship in the same
+deploy, or every detected-income user becomes "not set" with nowhere to set it. The 300 s cache
+window around the deploy is recorded as expected, not a defect.
+
+RM-16 STANDS. Nothing is built until the copy is selected.
+
+═══ WHAT THE REVISED PROPOSAL MUST CONTAIN ═══
+
+R1. THE STRING INVENTORY for RM-16. Every user-facing sentence this cycle adds or must change. For
+    each: site, current text DUMPED FROM SOURCE (not retyped), render gate, and why it changes under
+    the rulings. At minimum: the Profile section and its field label, hint, save and clear; ProfilePage
+    :422; the hero and chart not-set display; the Plan card's "Detected Income", "Budget vs detected
+    income" and "Add income transactions in Activity"; PlanSetupPrompts' income arm; the setup step and
+    guide helper; the income nudge; WorkspaceChoicePage :115; and IncomePage's note that logged income
+    does not drive planning. Anything the inventory finds beyond this list is added, and marked as
+    found. The channel drafts from this inventory; the operator selects.
+R2. THE HERO'S INCOME SOURCE. The proposal reads R9 through R8. R9 is the payload of the feature the
+    operator removed, and Stage 2 would delete it. Compare it against reading the profile value
+    directly, and against profile_context. For each, state: the Stage 2 entanglement, the not-set
+    signal it carries, the added fetches, and what the flat ruling does to any month parameter. Choose
+    one with reasons. The channel rules.
+R3. THE CHART under RM-17: the reference-line rendering, its not-set state, and the discriminating
+    test with its negative case. No new external origin; the chart's inline-style allowance is
+    untouched.
+R4. REMAINING WHEN SPENDING EXCEEDS THE TYPED INCOME. Remaining is clamped with max(0, …). Under a
+    typed figure, overspending renders as KD 0.000. MEASURE what renders and report it. Do not change
+    it; if it needs new copy or a new rule, that is a question for the operator.
+R5. EXACT PREDICTIONS WITH SIGN, per package and per mode: tests, files, collected counts, fixture,
+    allowlist, migrations, capture and assert bytes, the tsc error set from (b), and the
+    physical-property delta. The only sentences left open are those that depend on the copy, and
+    each is named.
+R6. THE COMMIT SEQUENCE under "kept". The hide set is gone. Name which commits must share a deploy.
+
+═══ CONSTRAINTS, UNCHANGED ═══
+
+Logical properties only; zero ml-/mr-/pl-/pr- additions against 32 across 9, re-derived after the
+LAST edit. CSP enforcing; no new external origin; no Caddyfile change. The FAB topology is fixed and
+QuickAdd internals are untouchable. No renames; pinned strings and the two legal data-testids are
+untouched. The three named regression files stay green and untouched. The e2e suite is untouched,
+income specs included. Legal copy is never edited (RM-2). Stage 2 remains unauthorised. Queued items
+stay queued.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, position DERIVED FROM THE FILE. THE WRAP CHECK RUNS BEFORE THE APPEND.
+After the append: the strict header count, predicted 32, contiguous, printed in file order and
+closed with grep -n output. Read back what was written. The commit message is piped from a file.
+COMMIT; DO NOT PUSH. State the unpushed count by both routes, predicted 2: the MOB-R31 and MOB-R32
+persistence commits.
