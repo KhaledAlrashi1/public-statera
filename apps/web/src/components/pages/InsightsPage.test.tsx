@@ -196,7 +196,14 @@ describe("InsightsPage", () => {
   // inside This Week. Both absences are asserted in the SAME render as the retained This Week
   // contents: absence on its own is equally satisfied by a page that failed to render at all,
   // so the PRESENT half is what makes the ABSENT half evidence rather than a tautology.
-  it("removes Month Snapshot and the safe-to-spend tile while This Week stays", async () => {
+  // MOB-R29 Part 3 — this case was FALSIFIED BY THE RULING, not by a defect. Its PRESENT half
+  // asserted the This Week panel, which ruling (2) removes, so the assertions had to move; the
+  // PROPERTY it protects does not, and that is what is preserved here: Month Snapshot is absent
+  // because it was REMOVED, not because the page failed to render. The PRESENT half is therefore
+  // re-aimed at a retained Insights section rather than deleted — deleting it would leave the
+  // Month Snapshot absence assertions vacuous, which is the one thing this case exists to prevent.
+  // Its title is updated because the old one now describes behaviour the app no longer has.
+  it("removes Month Snapshot and the safe-to-spend tile while the rest of Insights renders", async () => {
     mocks.analyticsApi.weeklyDigest.mockResolvedValue({
       week_start: "2026-02-23",
       week_end: "2026-03-01",
@@ -212,19 +219,18 @@ describe("InsightsPage", () => {
     renderPage()
 
     // PRESENT first — establishes the page actually rendered before anything is claimed absent.
-    // Awaited on "Weekly pace" rather than the "This Week" heading: the heading renders while the
-    // digest query is still in flight, so asserting on it would pass during the loading state and
-    // let the absence checks below run against a page whose panels had not mounted yet.
-    expect(await screen.findByText("Weekly pace")).toBeInTheDocument()
-    expect(screen.getByText("This Week")).toBeInTheDocument()
-    expect(screen.getByText("Spending delta")).toBeInTheDocument()
+    // Awaited on a RETAINED section's content (the recurring card's "Netflix") rather than on a
+    // This Week label, since This Week is itself removed now; awaiting settled content, not a
+    // heading, still keeps the absence checks from running against a page mid-flight.
+    expect(await screen.findByText("Netflix")).toBeInTheDocument()
 
     // ABSENT — the Month Snapshot panel, by heading and by its tile labels.
     expect(screen.queryByText("Month Snapshot")).not.toBeInTheDocument()
     expect(screen.queryByText("Free to spend")).not.toBeInTheDocument()
     expect(screen.queryByText("Already spent")).not.toBeInTheDocument()
 
-    // ABSENT — the safe-to-spend tile inside the retained This Week panel.
+    // ABSENT — the safe-to-spend tile. It went with MOB-R25; the panel that held it went with
+    // MOB-R29, so this now has two independent reasons to be absent and still must be.
     expect(screen.queryByText(/Safe-to-spend today/i)).not.toBeInTheDocument()
   })
 
@@ -255,6 +261,38 @@ describe("InsightsPage", () => {
     expect(screen.queryByText(/free-to-spend money is calculated/)).not.toBeInTheDocument()
     // I-a: the dropped sentence, in the branch that used to render it.
     expect(screen.queryByText(/free to spend after commitments/)).not.toBeInTheDocument()
+  })
+
+  // MOB-R29 Part 3 — the This Week panel is removed from Insights by operator ruling. The digest
+  // payload is deliberately made AVAILABLE here: the panel would render from it under the old
+  // code, so its absence is a removal rather than an empty-data accident. A retained section is
+  // asserted PRESENT in the same render, so "absent" cannot be satisfied by a page that failed.
+  it("removes the This Week panel while the rest of Insights stays", async () => {
+    mocks.analyticsApi.weeklyDigest.mockResolvedValue({
+      week_start: "2026-02-23",
+      week_end: "2026-03-01",
+      this_week_expense_kd: "45.200",
+      last_week_expense_kd: "62.000",
+      delta_pct: -27.1,
+      top_categories: [{ name: "Food", amount_kd: "18.000" }],
+      days_until_payday: 27,
+      safe_to_spend_today_kd: "7.590",
+      days_observed: 6,
+    })
+
+    renderPage()
+
+    // PRESENT — a retained Insights section, awaited so the page has actually rendered.
+    expect(await screen.findByText("Netflix")).toBeInTheDocument()
+
+    // ABSENT — the panel, by its heading and by each of its contents.
+    expect(screen.queryByText("This Week")).not.toBeInTheDocument()
+    expect(screen.queryByText("Weekly insight")).not.toBeInTheDocument()
+    expect(screen.queryByText("Weekly pace")).not.toBeInTheDocument()
+    expect(screen.queryByText("Spending delta")).not.toBeInTheDocument()
+    // The payday counter goes WITH the panel — restored into it one cycle ago, removed with it
+    // now, and deliberately NOT re-homed (placement is a decision nobody has made).
+    expect(screen.queryByText("Days until payday")).not.toBeInTheDocument()
   })
 
   it("updates month-scoped insights when a prior month is selected", async () => {

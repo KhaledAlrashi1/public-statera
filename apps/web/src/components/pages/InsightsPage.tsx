@@ -21,7 +21,6 @@ import {
   type RecurringCommitmentRow,
 } from "@/components/pages/insights/RecurringCommitmentsCard"
 import { MonthDeltaCard, type MonthDeltaRow } from "@/components/pages/insights/MonthDeltaCard"
-import { WeeklyDigestSection } from "@/components/pages/insights/WeeklyDigestSection"
 
 function clampDate(year: number, monthIndex: number, dayOfMonth: number): Date {
   const daysInMonth = new Date(year, monthIndex + 1, 0).getDate()
@@ -368,20 +367,23 @@ export default function InsightsPage() {
         </section>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <WeeklyDigestSection
-          digest={weeklyDigestQuery.data}
-          loading={weeklyDigestQuery.isLoading}
-          error={queryErrorMessage(weeklyDigestQuery.error)}
-        />
-        {/* MOB-R25 Stage 1 — the Month Snapshot panel (SpendForecastWidget) is removed FROM VIEW
-            by operator ruling. The component file, its tests and its api.ts method all stay;
-            deleting them is Stage 2. The grid wrapper is deliberately left at two columns: the
-            reflow (This Week now occupies only the 1.05fr column at xl, with the 0.95fr column
-            empty) is an ALLOWED consequence, and restyling to compensate is not authorised here.
-            safeToSpendQuery is NOT dropped — it still feeds storyOfMonth and the empty-state
-            gate, so its consumers are not exclusively this removed surface. */}
-      </div>
+      {/* MOB-R29 Part 3 — the This Week panel (WeeklyDigestSection) is removed FROM VIEW by
+          operator ruling, SUPERSEDING the 2026-09-19 ruling that explicitly retained it. The
+          whole panel goes: weekly insight, weekly pace, spending delta, and the "Days until
+          payday" counter that was restored INTO it one cycle earlier. The counter is NOT
+          re-homed — where it should live instead is a placement decision nobody has made.
+          Stage 1 hides: the component, its own tests, analyticsApi.weeklyDigest and the types
+          all stay; Stage 2 deletion remains unauthorised.
+
+          weeklyDigestQuery is NOT dropped. The conditional is "drop iff the panel is its sole
+          consumer", and it evaluates FALSE: the query still feeds hasInsightsErrors,
+          hasAnyInsightsData and showInsightsEmptyState. Same shape as safeToSpendQuery last
+          cycle, and the same answer.
+
+          The grid wrapper that held this panel IS removed with it. After MOB-R25 took Month
+          Snapshot out, this panel was its only remaining child, so the wrapper now has no
+          children at any width — dead markup rather than a restyle, which the ruling authorises
+          as part of the same hide. */}
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <MonthDeltaCard
