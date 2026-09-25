@@ -6576,3 +6576,157 @@ transcription step, and transcription is where bytes change silently.
 **Why no new rule was minted:** the commit message is another surface for the same failure, not a
 different failure. Minting a rule per surface inflates the standing count and cheapens it; the
 count stays at SIX.
+
+MOB-R31 — THE INCOME CYCLE OPENS. TIER 1, BACKEND IN SCOPE. THIS BLOCK AUTHORISES STEP 0, A FULL
+MEASUREMENT AND A PROPOSAL. IT AUTHORISES NO EDIT TO ANY TRACKED FILE EXCEPT THIS BLOCK'S OWN
+PERSISTENCE. The proposal is a hard stop.
+
+CADENCE. TIER 1. The wide cadence of 2026-09-12 does NOT apply: this cycle changes backend money
+arithmetic and payload shape, which are irreversible or invisible. Propose, approve, implement and
+verify are SEPARATE reports. Measurement does not run behind implementation.
+
+═══ OPERATOR RULINGS — PROVENANCE OPERATOR, DIRECT, 2026-09-25, RELAYED BY THE REVIEW CHANNEL ═══
+
+Verbatim, as relayed to this channel:
+  "Can you forget about income transactions? Let's make the user enter them. Focus mainly on the
+  expenses. Forget about the detect income feature as well."
+  "It's clearer if we ask the user to enter the income instead of getting it wrong from the
+  transactions… So, it's zero until the user enters the income. We suggest for the user to type
+  their averaged income if they have multiple sources of income."
+  "These three 'the Budget/Income ratio on Plan, income-vs-expense and net figures on Home, the
+  weekly digest' can continue and would be calculated from the user input of their income."
+  THE ELLIPSIS IS IN THE TEXT AS RELAYED. It marks an elision this channel did not make and cannot
+  restore. Persist it as shown; do not reconstruct the missing words.
+
+THE SETTLED SHAPE — CHANNEL-PROPOSED, OPERATOR-ADOPTED, RATIFIED BY THIS BLOCK. Record it as both:
+  (i) ONE typed monthly income, entered in Profile, drives every income-derived figure.
+  (ii) INCOME DETECTION GOES. The server uses only the typed figure.
+  (iii) BEFORE INCOME IS SET, SURFACES SHOW "NOT SET", NOT ZERO. Zero income renders net as minus
+  spending and the ratio as 0.0% — true and misleading, the zero-vs-no-data class exactly. This
+  refines his "it's zero until the user enters the income": the stored value may be absent; the
+  RENDERED value must not read as zero.
+  THIS IS A DELIBERATE EXCEPTION TO THE FOUNDING PRINCIPLE that every number Statera shows comes from
+  logged transactions. It is the operator's ruling. It is recorded, not re-litigated.
+
+OPEN, NOT YET RULED: WHETHER LOGGING INCOME TRANSACTIONS IS HIDDEN OR KEPT. His first answer kept it;
+his adoption of the single-figure model points to hiding it. The question is with him now. PHASE A
+MEASURES BOTH ANSWERS so that neither waits on the other. Nothing is built until he answers.
+
+═══ STEP 0 ═══
+
+Before anything else, ENUMERATE WHAT YOU HOLD — open items, owed artifacts, unpersisted rulings,
+unpushed commits — as your own list, not a confirmation of any list in this block.
+Then, each with its command and verbatim output:
+  - HEAD and origin/main, round-tripped against the repository. Unpushed count by TWO routes.
+  - docs/modules/phase4-mobile.md: the ruling-block count under ^MOB-R[0-9]+ — , shown contiguous
+    1..N with the last block named. Predicted: 30, last MOB-R30. Gate names used, derived from the
+    file. Predicted: RM-1 through RM-10.
+  - Baselines, run with the CI invocations from .github/workflows/deploy.yml, each selector with its
+    resolution proof and a non-matching negative control exiting 0. Predicted, stated so a miss is a
+    QUESTION: frontend 258 / 47; api hermetic 873 / 34 skipped / 61; api INTEGRATION (the string
+    "true") 897 / 10 skipped / 61; tsc both packages 0 errors 0 bytes. The cross-check is
+    873 + 34 − 10 = 897 and its content is COLLECTED-SET INVARIANCE, 907 collected in both modes.
+  - Contract fixture count (predicted 66) and the ALLOWLIST, from the file, with its line number
+    re-derived (last recorded frontend-contract.test.ts:54, empty).
+  - Physical-property sites, predicted 32 across 9, components/ui/ 0.
+
+═══ PHASE A — MEASURE. ENUMERATE FROM SOURCE; A SEARCH IS A CANDIDATE LIST, NOT A CORPUS ═══
+
+For every enumeration below that sizes a class, build a SECOND CORPUS BY A DIFFERENT ROUTE and state
+how the two routes differ. Two routes over one corpus are one route.
+
+A1. EVERY INCOME-PRODUCING PATH IN apps/api. detectMonthlyIncome, resolveIncomeForPeriod, every
+    caller, and every route whose payload carries an income-derived field — at minimum R3
+    dashboard-metrics, R4, R8 bundle, R9, R10 weekly digest, R11, R13, and budgets profile_context,
+    and any the enumeration finds that this list does not name. Per field: its producing ARMS today
+    (enumerate every arm; a capture proves only the arm it took), and what it produces under
+    typed-only. R9 stays mounted — Stage 2 is unauthorised — so state what the shared resolver
+    change does to it even though nothing renders it.
+A2. WHERE THE TYPED INCOME LIVES TODAY. income_source already carries "declared_in_profile", so a
+    stored figure exists. Column, type, nullability, write route, validation, and what the demo
+    writes to it. PREDICTION, WITH SIGN: ZERO migrations are needed. Confirm or refute from the
+    schema file, not from this sentence.
+A3. THE DETECTION SURFACE. The R11 income-pattern route, its frontend callers, every test pinning
+    it — including Flask-equivalence expectations hardcoded in-file — the capture tool's
+    income-pattern subcommand, and the confidence enum. What removal touches. Predicted fixture and
+    allowlist movement, with sign.
+A4. FRONTEND CONSUMERS of every field in A1, EACH WITH ITS RENDER GATE. A declaration in a file is
+    not a render on a screen. Specifically the three surfaces he named: the Budget/Income ratio on
+    Plan, income-vs-expense and net on Home, and the weekly digest. THE THIS WEEK PANEL THAT
+    RENDERED THE DIGEST WAS REMOVED. Re-derive what, if anything, renders R10 now. If nothing does,
+    say so plainly — what "the weekly digest continues" means is his call, not a derivation.
+A5. THE "NOT SET" SIGNAL. Which existing discriminator can carry it — income_source "not_set" is
+    the candidate — and every site where an unset income currently renders as 0, 0.0%, KD 0.000 or
+    net-equals-minus-spending. CONSTRAINT: money fields do NOT become nullable. The B4-1 NULL
+    fail-loud guard forbids capturing a null money field, and relaxing it is a blocking-clause
+    change under TB-R13 — its own chartered cycle. If "not set" cannot be carried without a
+    nullable money field, that is RM-13.
+A6. ZERO-CLASS GUARDS THAT READ INCOME AS "NO INCOME ROWS". The shipped sites rely on
+    income_kd === "0.000" meaning no income transactions exist. Enumerate every guard keyed on an
+    income field and state what its predicate MEANS once income stops coming from transactions. A
+    guard whose justification changes silently is this track's defect class.
+A7. INCOME-LOGGING SURFACES, for the pending answer: IncomePage, its route and nav entry,
+    CommandPalette entries, QuickAdd's type selection, ImportDialogs' handling of income rows, and
+    the income transactions demo-data-lib seeds. For each: what "hidden" would touch. QuickAdd
+    internals are untouchable — if hiding requires them, that is RM-14, reported now, not later.
+A8. EXISTING INCOME ROWS in user data and the demo seed: after detection is gone, which totals,
+    lists and charts do they still feed? Report only. No deletion proposed; any data disposition is
+    RM-15.
+A9. THE THREE SIMULTANEOUS BUDGET PROMPTS (sections.tsx:1140, sections.tsx:330 in PlanSetupPrompts,
+    DashboardPage.tsx:215) and the income nudge, lines re-derived. How the income change alters each
+    gate. They are carried into this cycle; measure, do not rewrite.
+A10. PAYDAY. Whether payday-lib or anything computing a payday depends on income detection. Report
+    only. The counter's placement stays an open operator decision.
+A11. LEGAL COPY. Search Privacy and Terms for any claim about detected income or figures derived
+    from transactions. Report with line numbers. RM-2 STANDS: no edit. Anything found is a queue
+    item against docs/legal/lawyer-review-checklist.md.
+A12. CLAUDE.md LINES THIS CYCLE WILL FALSIFY — the income_source stable-enum contract line, the
+    income-lib entry, the R11 lines, and any others. Classify each LIVE INDEX or HISTORICAL RECORD.
+    Do not edit.
+
+═══ THE PROPOSAL — SAME REPORT, AFTER PHASE A ═══
+
+Per site: current behaviour → proposed behaviour → the signal it keys on (prefer the signal a
+sibling site already uses) → the test that discriminates it, with its negative case stated. Tests
+RED-FIRST AS A SEQUENCE, each red proof with a POSITIVE CONTROL THAT IS A COUNT, each red failing FOR
+THE REASON UNDER TEST. Before adding any export to a module, derive the set of files mocking it.
+Predictions IN ADVANCE, WITH SIGN: test and file deltas per package and per mode, fixture, allowlist,
+migrations, money-wire-shape capture and assert regeneration, physical-property delta (zero), CSP
+change (none — asserted, not omitted). Propose the commit sequence. If any contract change needs the
+two-deploy discipline, say which and why. Propose the proposal under BOTH answers to A7 where they
+differ, and only where they differ.
+
+═══ GATES — HARD STOPS. REPORT AND STOP; DO NOT RESOLVE ═══
+
+RM-11  Any schema change or migration, predicted or discovered.
+RM-12  The contract fixture moving off 66, or the ALLOWLIST becoming non-empty.
+RM-13  Any public-API-contract change: an enum value removed (income_source's
+       "detected_from_transactions" is the expected case), a field added, removed or renamed, a
+       money field changing type or nullability, a Flask-equivalence expectation changed or deleted.
+RM-14  Any touch to QuickAdd internals or the FAB.
+RM-15  Any disposition of existing income rows, in user data or the demo seed.
+RM-16  Any new or changed user-facing sentence — the "not set" wording, the Profile field's label
+       and hint, the averaged-income suggestion, every prompt rewrite. The channel drafts; the
+       operator selects; the record says both.
+RM-17  How ONE typed figure applies to months other than the current one. The income-vs-expense
+       series spans several months, and applying today's figure to past months is a money-
+       arithmetic product decision. Present the options with their consequences; choose none.
+RM-18  Any of the three surfaces he named turning out to have no render site.
+RM-2 stands for legal copy.
+
+═══ CONSTRAINTS, UNCHANGED ═══
+
+Logical properties only; zero ml-/mr-/pl-/pr- additions against 32 across 9, re-derived after the
+LAST edit. CSP enforcing; no new external origin; no Caddyfile change. The FAB topology is fixed and
+QuickAdd internals are untouchable. No renames; pinned strings and the two legal data-testids
+untouched. The three named regression files stay green and untouched. The e2e suite untouched.
+Stage 2 unauthorised; text-accent-strong survives unused. Queued items stay queued.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, position DERIVED FROM THE FILE. THE WRAP CHECK RUNS BEFORE THE APPEND: no
+body line may match the header shape. After the append: the header count by both patterns, printed
+in file order, predicted 31 and contiguous, closed with grep -n output rather than a hunk header.
+Read back what was written. The commit message is piped from a file, never retyped. COMMIT; DO NOT
+PUSH. It rides with the next authorised push, counted N+1. State the unpushed count by both routes
+or do not state it.
