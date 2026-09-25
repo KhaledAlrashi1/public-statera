@@ -6478,3 +6478,101 @@ strings were in the shipped zero-class corpus and SURVIVED it, or were never enu
 Both answers are findings — the first says the corpus was checked and the guard missed them, the
 second says the enumeration was incomplete. The removal must not be allowed to erase the question.
 Do not fix and do not enumerate the class now.
+
+MOB-R30 — ACCEPTED AND THE PUSH IS AUTHORISED. Three commits plus this block's persistence, four
+pushed under the N+1 rule. The run must LAND before any observation. Then implementation STOPS for
+an operator observation round. Nothing else is authorised.
+
+CADENCE. Issued under test (a) — it closes a cycle — and (b).
+
+ACCEPTED. Two hundred and fifty-eight across forty-seven, both parts predicted and met per commit,
+api unchanged, both typechecks at zero bytes, fixture sixty-six, physical properties thirty-two
+across nine after the last edit, regression files byte-untouched, exclusions behind a control that
+listed the three touched files.
+RM-9 RESOLVED WITHOUT GUESSING, which is the point of having enumerated first: the operator's two
+labels matched rendered headings byte-for-byte and the sections were adjacent siblings. Had they
+not matched, the same enumeration would have been the stop.
+THE QUERY WAS AGAIN CORRECTLY NOT DROPPED. The conditional evaluated false for the second time in
+three cycles, on a different query, for the same structural reason — the panel was a consumer, not
+the consumer. A conditional that is read rather than obeyed is worth more than one that happens to
+be true.
+THE WRAPPER REMOVAL IS RATIFIED on the reasoning given: no children at any width makes it dead
+markup rather than a restyle, and the neighbouring grid was correctly identified as a different
+wrapper and left alone.
+THE FALSIFIED CONTROL WAS RE-AIMED, NOT DELETED, and the reason is exactly right — deleting it
+would have left the absence assertions it protects vacuous. Second time this track; the handling
+is now a pattern rather than a judgement call.
+
+THE RETYPED FIGURE IS THE FINDING OF THIS CYCLE. A reconstruction total was typed into a commit
+message instead of piped, and it landed ONE OFF — the direction that makes an error look like a
+no-op rather than a fault. Self-caught, amended before the push, and the error recorded in the
+message rather than silently corrected. STANDING, ADDED TO THE EXISTING RULE RATHER THAN MINTED AS
+A NEW ONE, so the count stays at SIX: when the artifact is the evidence it is piped, redirected or
+dumped — AND COMMIT MESSAGES ARE NOT AN EXCEPTION. A figure retyped into prose about the work is
+the same class as a figure retyped into a report.
+THE JSX COMMENT FAILURE IS WORTH ITS LINE. A comment containing a close-comment sequence broke the
+build and the suite collected NO TESTS at a non-zero exit. That is loud in the right way and could
+not be mistaken for a failed assertion — which is precisely why "no test files found" needs a
+count as its control when it is NOT that obvious.
+THE BASELINE WAS STALE FOR EXACTLY ONE COMMIT and was corrected forward rather than backdated.
+Correct: backdating would have made that commit claim a figure it never measured.
+
+THE THREE SIMULTANEOUS BUDGET PROMPTS ARE A REAL FINDING, REPORTED AND NOT ACTED ON — correctly,
+and the reachability argument is what makes it a finding rather than a curiosity: an ordinary user
+state satisfies all three gates at once. CARRIED TO THE INCOME CYCLE, which rewrites those prompts
+anyway. Do not deduplicate them now; do not re-derive them now.
+
+═══ THE PUSH — AUTHORISED, WITH CONDITIONS ═══
+
+Push main to origin. Expect FOUR commits: persistence, Part 2, Part 3, and nothing else. Then:
+  (1) Report the Actions run id and its conclusion, having WAITED for completed. A push is not a
+      deploy, and no observation is evidence until the run has landed.
+  (2) Diff against ORIGIN/MAIN after the push, never local main; state the deployed range with
+      both endpoint SHAs round-tripped and identified.
+  (3) Confirm from the range: no migration, no Caddyfile change, no foreign riders, no path under
+      apps/api — each behind a control shown able to match.
+  (4) If the run does not conclude success, STOP and report. Do not re-run, do not push again.
+
+═══ THEN STOP ═══
+
+NO IMPLEMENTATION AFTER THE PUSH. The operator's eyes are the only instrument this track has for
+layout. ONE tab, fresh load, navigating between pages — the cross-tab cache regime is queued
+unfixed and a stale tab renders an arbitrary earlier moment.
+Stated in advance so the answers are checkable: does Home read correctly with Needs attention
+below both cards; does Insights read correctly with This Week gone and no gap where it sat; is
+anything on Insights now stranded or unbalanced above the Spend-vs-Last-Month row.
+
+CARRIED, UNCHANGED, RANKED BEHIND user-entered income and CSV column mapping: the zero-class and
+tense-class re-size, which must open by deriving whether the two dissolved observations were ever
+in the shipped corpus; the three budget prompts; the Terms clause; Stage 2 deletion; the rotted
+debt-flow selector. NONE of these are opened here.
+
+PERSISTENCE. This block persists ALONE, position DERIVED FROM THE FILE (last is expected to be
+29), the wrap check BEFORE the append, both sweeps shown discriminating, composite reconciled two
+ways, enumeration in file order, EVERY FIGURE IN THE COMMIT MESSAGE PIPED. Provenance RELAYED.
+Persist alongside it the commit-message clause added to the piping rule.
+THE CLOSE-OUT: three mandatory sections, the deploy evidence above, and the carried items named.
+
+## The piping rule — commit-message clause (added by the block above)
+
+**The rule is AMENDED, not replaced, and the standing count stays at SIX.** The existing rule reads:
+*when the artifact is the evidence, it is piped, redirected or dumped — never retyped.* The clause
+added here:
+
+> **AND COMMIT MESSAGES ARE NOT AN EXCEPTION.** A figure retyped into prose *about* the work is the
+> same class as a figure retyped into a report.
+
+**Earned 2026-09-25**, persisting block 29: a reconstruction total was typed into a commit message
+rather than piped and landed **one off** — `6314+165=6479` against a measured `6314+166=6480`. The
+direction matters and is why this is worth a clause: an off-by-one on a reconstruction total makes
+a real edit look like a no-op, which is the failure mode that reads as success. It was self-caught,
+amended before any push, and the error recorded in the amended message rather than silently
+corrected.
+
+**The practical form:** capture the figure into a shell variable from the command that measures it,
+and let the heredoc interpolate it. A commit message assembled by hand from numbers on screen is a
+transcription step, and transcription is where bytes change silently.
+
+**Why no new rule was minted:** the commit message is another surface for the same failure, not a
+different failure. Minting a rule per surface inflates the standing count and cheapens it; the
+count stays at SIX.
