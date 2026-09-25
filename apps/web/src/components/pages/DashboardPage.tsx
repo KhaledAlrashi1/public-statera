@@ -819,22 +819,6 @@ export default function DashboardPage() {
               the component and its tests remain in dashboard/sections.tsx; its three non
               safe-to-spend affordances now render from PlanSetupPrompts, mounted unconditionally
               below. This is the last safe-to-spend render path on Home. */}
-          {/* Position 3: the single "what needs attention" story */}
-          <HomeAttentionCenter
-            isLoading={isLoading}
-            monthLabel={monthLabel}
-            overBudgetCount={overBudgetCount}
-            overBudgetAmount={overBudgetAmount}
-            risingCategory={risingCategory}
-            budgetAlerts={budgetAlerts}
-            alertsLoading={budgetAlertsLoading}
-            dismissingAlertId={dismissingAlertId}
-            budgetPressureItems={budgetTop}
-            onDismissBudgetAlert={dismissBudgetAlert}
-            onOpenPlan={() => navigate("/plan")}
-            onOpenActivity={() => navigate("/activity?type=all")}
-          />
-
           <TopExpensesPanel
             isLoading={isLoading}
             topExpenses={topExpensesWithSparklines}
@@ -850,6 +834,27 @@ export default function DashboardPage() {
               onSliceClick={(name) => setActiveCategory(name)}
             />
           </div>
+
+          {/* MOB-R29 Part 2 — "Needs attention" moved BELOW both spending cards by operator
+              ruling. This is a SIBLING REORDER inside the page's existing space-y-8 stack:
+              the element is byte-identical to the one that stood above TopExpensesPanel, only
+              its position in the list changed. No restyle, no wrapper, no gate change — the
+              two spending cards keep their own relative order inside their grid, and the outer
+              stack carries no order- or reverse utilities, so this order holds at every width. */}
+          <HomeAttentionCenter
+            isLoading={isLoading}
+            monthLabel={monthLabel}
+            overBudgetCount={overBudgetCount}
+            overBudgetAmount={overBudgetAmount}
+            risingCategory={risingCategory}
+            budgetAlerts={budgetAlerts}
+            alertsLoading={budgetAlertsLoading}
+            dismissingAlertId={dismissingAlertId}
+            budgetPressureItems={budgetTop}
+            onDismissBudgetAlert={dismissBudgetAlert}
+            onOpenPlan={() => navigate("/plan")}
+            onOpenActivity={() => navigate("/activity?type=all")}
+          />
 
           <CategoryDetailModal
             open={Boolean(activeCategory)}

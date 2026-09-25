@@ -225,6 +225,45 @@ describe("DashboardPage", () => {
     expect(screen.queryByText("safe to spend")).not.toBeInTheDocument()
   })
 
+  // MOB-R29 Part 2 — "Needs attention" moves BELOW both spending cards.
+  //
+  // This asserts DOM ORDER, not presence. Presence passes under the old order too, so a
+  // presence test would be green before and after and would check nothing. compareDocumentPosition
+  // is the instrument: DOCUMENT_POSITION_FOLLOWING means the second node comes after the first
+  // in document order, which is exactly the claim.
+  //
+  // Home renders ONE width-independent ordered list — the outer stack is a plain `space-y-8`
+  // with no order-*/reverse utilities anywhere — so this single assertion covers every width.
+  // The two spending cards share a `grid lg:grid-cols-2` wrapper, which changes how THEY sit
+  // relative to each other, never where the attention section sits relative to them.
+  it("renders Needs attention below both spending cards", () => {
+    mocks.useDashboardPageQueries.mockReturnValue({
+      ...baseResult,
+      dashboardMetrics: {
+        months: ["2026-03"],
+        monthly: [{ month: "2026-03", income_kd: "1500.000", expense_kd: "900.000" }],
+        expense_by_category: {},
+      },
+    })
+
+    renderPage()
+
+    const attention = screen.getByText("alerts")
+    const incomeVsExpenses = screen.getByText("income chart")
+    const expensesByCategory = screen.getByText("category chart")
+
+    const follows = (first: HTMLElement, second: HTMLElement) =>
+      Boolean(
+        first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING
+      )
+
+    // Both spending cards precede the attention section.
+    expect(follows(incomeVsExpenses, attention)).toBe(true)
+    expect(follows(expensesByCategory, attention)).toBe(true)
+    // And the two cards keep their own relative order (condition 1).
+    expect(follows(incomeVsExpenses, expensesByCategory)).toBe(true)
+  })
+
   it("passes the analytics freshness timestamp to the dashboard hero", () => {
     mocks.useDashboardPageQueries.mockReturnValue({
       dashboardMetrics: {
