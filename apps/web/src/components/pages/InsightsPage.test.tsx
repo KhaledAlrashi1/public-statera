@@ -228,6 +228,35 @@ describe("InsightsPage", () => {
     expect(screen.queryByText(/Safe-to-spend today/i)).not.toBeInTheDocument()
   })
 
+  // MOB-R27 I-a / I-b — the last two safe-to-spend renders on Insights. I-a's sentence is
+  // DROPPED entirely; I-b's feature-naming phrase is replaced inside an otherwise unchanged
+  // sentence. Both are asserted in one render against a payload that would have produced the
+  // OLD text, so "absent" cannot be satisfied by a story that never rendered — the I-b sentence
+  // being present is what proves storyOfMonth ran.
+  it("drops the free-to-spend prose from the month story", async () => {
+    mocks.analyticsApi.dashboardMetrics.mockResolvedValue({
+      months: ["2026-03", "2026-02"],
+      monthly: [],
+      expense_by_category: {},
+    })
+    // committed > 0 and remaining > 0 is exactly the branch that used to emit I-a's sentence.
+    mocks.analyticsApi.safeToSpend.mockResolvedValue({
+      committed_kd: "50.000",
+      remaining_budget_kd: "200.000",
+      actual_spend_kd: "10.000",
+    })
+
+    renderPage()
+
+    // I-b: present, with the ruled phrase and without the one it replaced.
+    expect(
+      await screen.findByText(/before what's left for everything else/)
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/free-to-spend money is calculated/)).not.toBeInTheDocument()
+    // I-a: the dropped sentence, in the branch that used to render it.
+    expect(screen.queryByText(/free to spend after commitments/)).not.toBeInTheDocument()
+  })
+
   it("updates month-scoped insights when a prior month is selected", async () => {
     renderPage()
 
@@ -312,16 +341,26 @@ describe("MOB-1 Group 1 — story-of-the-month pace note", () => {
     expect(screen.queryByText(/Committed spending is now overtaking/)).not.toBeInTheDocument()
   })
 
+  // MOB-R27 I-a — this CONTROL was falsified BY THE RULING, not by a defect. It asserted the
+  // "You still have … free to spend after commitments." sentence, and I-a drops that sentence
+  // entirely. Its PURPOSE survives and is what is preserved here: prove I1's guard suppresses
+  // only the no-budget case rather than silencing the pace note altogether. It is therefore
+  // re-pointed at the arm that still renders — commitments real, nothing left over — instead of
+  // being deleted, which would have removed the only evidence that I1 is not a blanket mute.
   it("CONTROL — with real commitments the pace note still renders", async () => {
     mocks.analyticsApi.safeToSpend.mockResolvedValue({
       committed_kd: "300.000",
-      remaining_budget_kd: "140.000",
+      remaining_budget_kd: "0.000",
       actual_spend_kd: "160.000",
     })
 
     renderPage()
 
-    expect(await screen.findByText(/You still have .* free to spend after commitments/)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/Committed spending is now overtaking the rest of this month's budget/)
+    ).toBeInTheDocument()
+    // And the dropped sentence does not come back on this arm either.
+    expect(screen.queryByText(/free to spend after commitments/)).not.toBeInTheDocument()
   })
 })
 

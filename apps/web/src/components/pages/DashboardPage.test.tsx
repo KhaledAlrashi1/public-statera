@@ -70,6 +70,8 @@ vi.mock("./dashboard/sections", () => ({
   // position on Home. This factory enumerates its exports, so a mounted export missing from
   // it resolves to undefined and throws; the entry is required by the mount, not optional.
   IncomeNudge: () => <div>income nudge</div>,
+  // MOB-R27 — the three relocated prompts. Same closed-list reason as IncomeNudge above.
+  PlanSetupPrompts: () => <div>plan setup prompts</div>,
   HomeAttentionCenter: () => <div>alerts</div>,
   IncomeExpensesChart: () => <div>income chart</div>,
   CategoryBreakdownChart: () => <div>category chart</div>,
@@ -197,6 +199,30 @@ describe("DashboardPage", () => {
 
     expect(screen.getByText("income nudge")).toBeInTheDocument()
     expect(screen.queryByText("Import or add transactions")).not.toBeInTheDocument()
+  })
+
+  // MOB-R27 — the hero is UNMOUNTED and its three surviving affordances render from
+  // PlanSetupPrompts instead. Both halves asserted in the SAME render: "safe to spend" absent
+  // cannot be satisfied by a page that failed to render, because the relocated prompts and the
+  // rest of the dashboard body are present alongside it.
+  it("no longer mounts the safe-to-spend hero and mounts the relocated prompts instead", () => {
+    mocks.useDashboardPageQueries.mockReturnValue({
+      ...baseResult,
+      // Real activity, so the dashboard body renders — this is the state in which the hero
+      // used to appear. Its absence here is therefore a removal, not a gating accident.
+      dashboardMetrics: {
+        months: ["2026-03"],
+        monthly: [{ month: "2026-03", income_kd: "1500.000", expense_kd: "900.000" }],
+        expense_by_category: {},
+      },
+      safeToSpend: { income_source: "not_set", data_complete: false },
+    })
+
+    renderPage()
+
+    expect(screen.getByText("plan setup prompts")).toBeInTheDocument()
+    expect(screen.getByText("alerts")).toBeInTheDocument()
+    expect(screen.queryByText("safe to spend")).not.toBeInTheDocument()
   })
 
   it("passes the analytics freshness timestamp to the dashboard hero", () => {

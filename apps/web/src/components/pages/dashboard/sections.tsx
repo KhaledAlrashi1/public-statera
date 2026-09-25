@@ -263,6 +263,81 @@ export function IncomeNudge({
   )
 }
 
+/**
+ * MOB-R27 — the three affordances RM-6 blocked last cycle, relocated out of SafeToSpendHero with
+ * the sentences ruled by MOB-R27. Each headline and button label is the hero's EXISTING string,
+ * carried verbatim; only the three body sentences that named the removed feature are replaced,
+ * and those replacements are the ruled A2/A3/A4 text.
+ *
+ * The branch ORDER is the hero's own, minus its data_complete arm (that arm rendered the
+ * safe-to-spend figure, which is what Stage 1 removes). Reproducing the order rather than
+ * re-deriving it is deliberate: these arms are mutually exclusive and were already correct, so
+ * the relocation must not become a rewrite of the decision.
+ *
+ * Renders NOTHING while loading and NOTHING when data_complete — there is no longer a figure to
+ * stand in for, so a skeleton would promise something that never arrives.
+ */
+export function PlanSetupPrompts({
+  isLoading,
+  safeToSpend,
+  onOpenPlan,
+  onOpenIncome,
+}: {
+  isLoading: boolean
+  safeToSpend: SafeToSpendResponse | undefined
+  onOpenPlan: () => void
+  onOpenIncome?: () => void
+}) {
+  const warnings = safeToSpend?.warnings || []
+  const monthlyIncome = Number(safeToSpend?.monthly_income_kd || 0)
+  const incomeNeedsSetup = Boolean(
+    safeToSpend && !safeToSpend.data_complete && (warnings.includes("income_not_set") || monthlyIncome <= 0)
+  )
+
+  if (isLoading) return null
+
+  if (!safeToSpend) {
+    return (
+      <div className="inner-card space-y-3">
+        <p className="text-sm text-muted-foreground">
+          We couldn&apos;t load your monthly figures right now.
+        </p>
+        <Button type="button" variant="outline" onClick={onOpenPlan}>
+          Open Plan
+        </Button>
+      </div>
+    )
+  }
+
+  if (safeToSpend.data_complete) return null
+
+  if (incomeNeedsSetup) {
+    return (
+      <div className="inner-card space-y-3">
+        <p className="text-sm font-semibold">Set your income</p>
+        <p className="text-sm text-muted-foreground">
+          Set your monthly income so your plan and net figures are accurate.
+        </p>
+        <Button type="button" variant="outline" onClick={onOpenIncome ?? onOpenPlan}>
+          Add income
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="inner-card space-y-3">
+      <p className="text-sm font-semibold">No budget set for this month.</p>
+      <p className="text-sm text-muted-foreground">
+        Set a budget for this month to see how your spending compares with your plan.
+      </p>
+      <Button type="button" variant="outline" onClick={onOpenPlan}>
+        Open Plan
+      </Button>
+    </div>
+  )
+}
+
 export function SafeToSpendHero({
   isLoading,
   safeToSpend,
@@ -1052,6 +1127,17 @@ export function HomeAttentionCenter({
               <span className="text-lg font-semibold tabular-nums">({Math.abs(risingCategory.deltaPct).toFixed(1)}%)</span>
             </div>
             <p className="text-xs text-muted-foreground">Worth a quick review before it grows.</p>
+          </div>
+        ) : budgetPressureItems.length === 0 ? (
+          /* MOB-R27 D2 — Gate C discharged for THIS SITE ONLY. "You're on track. No categories
+             are over budget right now." is TRUE and MISLEADING on an account with no budgets:
+             nothing is over plan because there is no plan. The predicate is derived, not
+             invented — budgetPressureItems is built from budgetResp.items (DashboardPage
+             budgetTop) and only sliced, never filtered, so an empty list means NO BUDGETS
+             rather than budgets that happen to be quiet. It is the same-payload signal this
+             track already preferred over a parallel query. */
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">Nothing to assess yet. Add a budget to see how your spending compares.</p>
           </div>
         ) : (
           <div className="space-y-2">

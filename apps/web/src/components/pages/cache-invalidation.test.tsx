@@ -116,6 +116,8 @@ vi.mock("./dashboard/sections", () => ({
   // the real module: a newly mounted export missing here resolves to undefined and throws.
   // Inert, like every other section in this file.
   IncomeNudge: () => null,
+  // MOB-R27 — enumerated for the same reason; inert here.
+  PlanSetupPrompts: () => null,
   HomeAttentionCenter: ({
     onDismissBudgetAlert,
   }: {

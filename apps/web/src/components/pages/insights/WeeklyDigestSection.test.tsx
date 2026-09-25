@@ -60,8 +60,10 @@ describe("WeeklyDigestSection", () => {
     // ABSENT — the removed tile, by its label and by its figure.
     expect(screen.queryByText(/Safe-to-spend today/i)).not.toBeInTheDocument()
     expect(screen.queryByText("KD 7.590")).not.toBeInTheDocument()
-    // The payday countdown lived INSIDE that tile and goes with it (named in the report).
-    expect(screen.queryByText(/Days until payday/i)).not.toBeInTheDocument()
+    // MOB-R27 — the payday countdown is RESTORED under its own heading, so it is now one of the
+    // RETAINED elements rather than collateral of the tile's removal. Asserted present here on
+    // purpose: this is the case that proves the tile went and the counter did not go with it.
+    expect(screen.getByText("Days until payday")).toBeInTheDocument()
 
     // PRESENT in the SAME render — the retained panel and its remaining contents.
     expect(screen.getByText("This Week")).toBeInTheDocument()
@@ -69,6 +71,30 @@ describe("WeeklyDigestSection", () => {
     expect(screen.getByText("Weekly pace")).toBeInTheDocument()
     expect(screen.getByText("Spending delta")).toBeInTheDocument()
     expect(screen.getByText("Top categories this week")).toBeInTheDocument()
+  })
+
+  // MOB-R27 — the counter returns under its own ruled heading, with the same field, figure and
+  // null marker it had before MOB-R25 removed it. No new data source: days_until_payday was
+  // already on the digest this panel receives.
+  it("restores the payday counter under its own heading", () => {
+    render(<WeeklyDigestSection digest={makeDigest()} loading={false} />)
+
+    expect(screen.getByText("Days until payday")).toBeInTheDocument()
+    expect(screen.getByText("27")).toBeInTheDocument()
+    // The figure it used to share a tile with does NOT come back with it.
+    expect(screen.queryByText(/Safe-to-spend today/i)).not.toBeInTheDocument()
+    expect(screen.queryByText("KD 7.590")).not.toBeInTheDocument()
+  })
+
+  it("renders payday as N/A when unavailable", () => {
+    render(
+      <WeeklyDigestSection
+        digest={makeDigest({ days_until_payday: null, days_observed: 7 })}
+        loading={false}
+      />
+    )
+    expect(screen.getByText("Days until payday")).toBeInTheDocument()
+    expect(screen.getByText("N/A")).toBeInTheDocument()
   })
 })
 

@@ -126,14 +126,21 @@ export function WeeklyDigestSection({
                 )}
               </article>
 
-              {/* MOB-R25 Stage 1 — the SAFE-TO-SPEND TODAY tile is removed FROM VIEW by operator
-                  ruling; the rest of This Week stays, which is the load-bearing half of that
-                  ruling. The grid is deliberately left at md:grid-cols-3 with two children: the
-                  reflow is ALLOWED and restyling to compensate is not authorised here.
-                  NAMED LOSS: the "Days until payday" countdown lived inside this tile and goes
-                  with it. It is not itself a safe-to-spend figure and it renders nowhere else —
-                  reported rather than silently preserved, because keeping it would need a new
-                  tile heading, and new user-facing copy is a product decision. */}
+              {/* MOB-R27 — the payday counter RESTORED under its own ruled heading, the named
+                  loss from MOB-R25 now discharged. Same field (days_until_payday), same figure,
+                  same null marker as before its removal; no new data source, query or
+                  computation — the value was already on the digest this panel receives.
+                  The safe-to-spend label and figure that shared its old tile do NOT return.
+                  This also refills the third cell, so the md:grid-cols-3 reflow named last
+                  cycle resolves on its own rather than by restyling. */}
+              <article className="inner-card space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                  Days until payday
+                </p>
+                <p className="text-lg font-semibold tabular-nums">
+                  {digest.days_until_payday === null ? "N/A" : digest.days_until_payday}
+                </p>
+              </article>
             </div>
           </div>
         )}

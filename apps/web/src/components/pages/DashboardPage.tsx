@@ -20,7 +20,7 @@ import {
   HomeAttentionCenter,
   IncomeExpensesChart,
   IncomeNudge,
-  SafeToSpendHero,
+  PlanSetupPrompts,
   SetupGuideDialog,
   SetupProgressPanel,
   TopExpensesPanel,
@@ -815,15 +815,10 @@ export default function DashboardPage() {
           }`}
           style={{ minHeight: "400px" }}
         >
-          {/* Position 2: the app's most actionable number */}
-          <SafeToSpendHero
-            isLoading={safeToSpendLoading}
-            safeToSpend={safeToSpend}
-            onOpenPlan={() => navigate("/plan")}
-            onOpenIncome={() => openQuickAdd("income")}
-            onOpenProfile={() => navigate("/profile")}
-          />
-
+          {/* MOB-R27 — SafeToSpendHero is UNMOUNTED here. Stage 1 hides rather than deletes, so
+              the component and its tests remain in dashboard/sections.tsx; its three non
+              safe-to-spend affordances now render from PlanSetupPrompts, mounted unconditionally
+              below. This is the last safe-to-spend render path on Home. */}
           {/* Position 3: the single "what needs attention" story */}
           <HomeAttentionCenter
             isLoading={isLoading}
@@ -890,6 +885,16 @@ export default function DashboardPage() {
         safeToSpend={safeToSpend}
         onOpenPlan={() => navigate("/plan")}
         onOpenProfile={() => navigate("/profile")}
+      />
+
+      {/* MOB-R27 — the three affordances RM-6 blocked, now unconditional (MOB-R26 condition 2)
+          and mounted in the SAME commit that unmounts the hero (condition 5), so neither prompt
+          is ever on the page twice. */}
+      <PlanSetupPrompts
+        isLoading={safeToSpendLoading}
+        safeToSpend={safeToSpend}
+        onOpenPlan={() => navigate("/plan")}
+        onOpenIncome={() => openQuickAdd("income")}
       />
 
       {showSetupProgress && (

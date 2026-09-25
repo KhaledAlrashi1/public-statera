@@ -264,12 +264,15 @@ export default function InsightsPage() {
       // that happens to total nothing. Without that guard `remainingBudget` was also 0, the
       // else-arm fired, and the sentence asserted that commitments were overtaking a budget the
       // user had never set. Suppressed rather than relabelled — naming the state needs new copy.
+      // MOB-R27 I-a — the free-to-spend sentence is DROPPED ENTIRELY, not reworded: it was the
+      // last render path on Insights for the figure the operator asked to stop seeing. The
+      // remaining arm is unchanged. Grammar is safe by construction rather than by inspection —
+      // the join below filters empty clauses, so dropping this one leaves lead1 standing alone,
+      // and lead1 is a complete sentence in both of its forms.
       const paceNote =
-        committedThisMonth <= 0
+        committedThisMonth <= 0 || remainingBudget > 0
           ? ""
-          : remainingBudget > 0
-            ? `You still have ${formatKD(remainingBudget)} free to spend after commitments.`
-            : "Committed spending is now overtaking the rest of this month's budget."
+          : "Committed spending is now overtaking the rest of this month's budget."
       const lead1 = sameAsLastMonth
         ? `${lead.category} is tracking about the same as last month.`
         : `${lead.category} is ${Math.abs(lead.delta_pct).toFixed(0)}% ${direction} than last month, a shift of ${formatKD(Math.abs(lead.delta_kd))}.`
@@ -278,7 +281,10 @@ export default function InsightsPage() {
     }
 
     if (recurringRows.length > 0) {
-      return `${recurringRows[0].name} is your next recurring commitment, and your monthly plan already protects ${formatKD(committedThisMonth)} before free-to-spend money is calculated.`
+      // MOB-R27 I-b — phrase substitution inside an otherwise unchanged sentence: the clause
+      // "before free-to-spend money is calculated" becomes "before what's left for everything
+      // else", so the sentence no longer names the removed feature.
+      return `${recurringRows[0].name} is your next recurring commitment, and your monthly plan already protects ${formatKD(committedThisMonth)} before what's left for everything else.`
     }
 
     return null
