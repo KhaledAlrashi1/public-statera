@@ -7332,3 +7332,148 @@ This block persists ALONE, position DERIVED FROM THE FILE. THE WRAP CHECK RUNS A
 BEFORE THE APPEND. After the append: strict count predicted 36, contiguous; loose count predicted 38,
 the known body lines being 1513 and 6934. Any third match stops. Close with grep -n output, read back
 what was written, and pipe the commit message from a file.
+
+MOB-R37 — THE STOP IS CORRECT. THE THREE TEST EDITS ARE GRANTED, WITH A DISCRIMINATION PROOF FOR
+THE REPURPOSED ONE. THE CORRECTED COUNT IS ACCEPTED WITH ONE FURTHER CORRECTION. PART A IS
+ACCEPTED. THIS BLOCK ALSO PERSISTS THE OPERATOR'S RULINGS ON THE FRIEND'S FILE, THE NEXT CYCLE AND
+A LIGHTER TIER FOR FRONTEND-ONLY WORK. PART B PROCEEDS ON THIS BLOCK. NOTHING IS PUSHED.
+
+CADENCE. Tier 1 for Part B, unchanged.
+
+═══ PART A — ACCEPTED ═══
+
+Every section carries file:line, and the five-row sample was run, not read. RM-19 correctly did
+not fire: import writes only transactions, categories and merchants, and income-category rows
+feed only the logged-income sums, as C1 and ruling #22 intend.
+RECORDED GAPS, NOT BLOCKING:
+  - The .xlsx result was asserted identical to the CSV result, not shown. The operator's
+    spare-account import after the deploy measures the .xlsx path directly and supersedes it.
+  - The relayed report did not carry the persistence close for 90af66f (grep -n output and
+    read-back). This block's persistence census re-measures the whole file and supersedes it.
+  - Source-only, and labelled as such: A6's length limits and "no default categories". A7's
+    idempotency results ran against a recording mock.
+QUEUED, NOT ACTED ON. The importer is not edited.
+  - The capped-import warning advises batches of 10,000 (ImportDialogs.tsx:2065), but the preview
+    caps at 2,000 (upload.ts:130). Rows from 2,001 onward are silently not imported.
+  - A third income test: the frontend isIncome regex (lib/utils.ts:148) differs from the backend's
+    LIKE 'income%' (payday-lib.ts:16–18). This joins the budgets.ts unification item.
+  - Arabic-digit dates: parseDateStr accepts them, but the preview guard rejects them (:574).
+  - A comma decimal imports silently ×10: "12,5" becomes 125.000.
+  - A header offset between two numeric-looking columns can misassign values with no error.
+  - A re-saved copy of an imported file imports again, because the row hash includes the file
+    hash and the commit never checks existing transactions. The duplicate warning is advisory.
+  - Replacing the demo clears a real typed income that equals 1800.000. The typed figure is now
+    the only income source, so this edge matters more than it did.
+
+═══ PART B — THE STOP, AND THE THREE EDITS ═══
+
+Stopping before C3, rather than partway through C4, is correct: three test edits fall outside
+the granted list. GRANTED, each shown as a diff:
+  (i) plan-setup-prompts.test.tsx:93. The expected name "Add income" becomes "Set income", per
+      #17. This is the same class of edit as the granted budget/sections.test.tsx:51/:57.
+  (ii) DashboardPage.test.tsx:565, the FF-R7 CONTROL. Its fixture gains
+      profile: { monthly_income_kd: "1800.000" }, and the expectation is unchanged. POSITIVE
+      CONTROL: at C4, run it once without the fixture line and show it red for the not-set reason,
+      then show it green with the line. This proves the line is load-bearing.
+  (iii) DashboardPage.test.tsx:541, the FF-R7 empty-month test, gains the same profile line. A test
+      that stays green for the wrong reason is the exact failure the discrimination rule exists
+      for, so the edit is right, and it carries a proof. With the line in place, remove the
+      empty-row guard in an uncommitted replay and show :541 red. Then restore the guard and show
+      it green. Without that replay, this test is not accepted as coverage for the re-key.
+  The separate re-key test is withdrawn, as proposed. The re-key is then covered by three cases
+  together: not set gives null (new); set with rows gives deltas (:565); set with an empty month
+  gives null (:541). State that mapping in the close-out.
+  None of the three edited files is a named regression file (AppShell.test.tsx,
+  legal/PrivacyPolicyPage.test.tsx, legal/TermsPage.test.tsx). Assert this. The stop-and-ask rule
+  still applies to any fourth edit.
+
+═══ THE COUNT — CORRECTED AND ACCEPTED ═══
+
+The revised proposal's table sums to +14, not +15, and the inherited base was miscounted.
+Correcting it before the first edit is the right order.
+GOVERNING PREDICTION: frontend 258 / 47 → 277 / 49, which is +19 tests and +2 files. Per commit:
+C3 +6 (new ProfilePage.test.tsx); C4 +3 hero, +5 DashboardPage, +2 chart; C5 +1 BudgetPage,
++1 Insights, +1 (new TransactionsPage.test.tsx).
+ONE FURTHER CORRECTION: if both test files are new, the corrected base "273 / 48" is itself one
+file short, and its own table implies 49. Before C3, show by listing that neither file exists.
+If either one does exist, the prediction is wrong, and that is a QUESTION.
+The two added cases are ACCEPTED. The #7 validation case covers a ruled string. The
+canLoadDemoData case covers a ruled re-key that had no test.
+
+═══ THE CHART SPECIFICATION — ACCEPTED, WITH ONE RULING ═══
+
+Case 1 is red against the old code for the reason under test: there is no income line, and
+logged income reads 2 of 2. Case 2 is its negative. The fixture's average of 1100 differs from the
+typed income of 1000, and both are stated.
+A CHANNEL RULING, NOT AN OPERATOR RULING: an empty window keeps the existing fallback caption at
+:1191 even when income is not set. The not-set caption #10 applies only when there is data,
+because asking the user to add expenses is the more useful first instruction. CONTROL-2 staying
+green and untouched is the proof.
+
+═══ UNCHANGED FROM THE PREVIOUS BLOCK ═══
+
+API: 873 / 34 / 62 hermetic and 897 / 10 / 62 integration. The api suite is run because the
+contract test reads the frontend fixture. Fixture 66, ALLOWLIST empty. tsc 0 bytes in both
+packages. Physical properties +0, re-derived after the last edit; ProfilePage's two existing
+ml-auto sites are not touched. No CSP or Caddyfile change, asserted. Every commit is green on its
+own. New cases are red-first as a sequence. The close-out has the three mandatory sections,
+including the frontend baseline hunk, and confirms that the RM-13(d) record now describes live
+state.
+UNPUSHED, CORRECTED: the report's "9, 10 and 11" omits this block's persistence. Predicted: 9 after
+this block persists, then 10, 11 and 12 as C3, C4 and C5 land. NO PUSH.
+
+═══ OPERATOR RULINGS — RECORDED ═══
+
+Provenance: OPERATOR, DIRECT, in the exchanges after the Part A report. The options are the
+CHANNEL'S; the selections are the OPERATOR'S. The selections, verbatim:
+  "What goes in her file?" → "All history, expenses only"
+  "Transfers / savings rows in her sheet?" → "Drop them (Recommended)"
+  "Before she imports:" → "Wait for deploy + test in a spare account (Recommended)"
+  "Next cycle after the push:" → "All three first-session fixes in one cycle (Recommended)"
+  "Frontend-only cycles currently use the full-rigour process (built for money changes). Lighten
+  it to go faster?" → "Lighter process for frontend-only (Recommended)"
+  "Deploy freeze before you meet her:" → "No deploys the day before (Recommended)"
+The operator's framing, verbatim: "So, I am not going to meet her soon. Probably next weekend. So,
+how about we keep going in the development while having the app ready for her to start using it?"
+RECORDED CONSEQUENCES:
+  - The operator builds the friend's file; CC does not. There is no importer change before she
+    imports.
+  - The push block carries two additions to the observation round: Import at phone width, and the
+    operator's spare-account import on the day of the deploy.
+  - The first-session cycle fixes three things:
+      - the three simultaneous budget prompts, re-measured after C5;
+      - the S10 string at sections.tsx:145–146, "You're under budget this month", which actually
+        means under income;
+      - a first-run hint for the label-less FAB.
+    Wording and design are ruled in that cycle's block, after the operator's own first-session
+    walk-through.
+  - No deploy on the day before the operator meets the friend. The date is not yet fixed.
+  - Deferred until after her feedback: Stage 2 removals, budgets.ts unification, any importer
+    change, and Module 11.
+TIER 2 — ADOPTED BY THE OPERATOR; THE DEFINITION IS THE CHANNEL'S. It applies from the
+first-session cycle onward, not to Part B or to the push.
+  KEPT:
+    - persist-first;
+    - baselines re-derived, never carried;
+    - every commit green on the exact CI command, with tsc at 0;
+    - new tests red-first;
+    - user-facing strings ruled verbatim;
+    - close-outs carry artifacts;
+    - no push without a block.
+  LIGHTER:
+    - measurement and implementation go in ONE report, which stops only when a gate fires;
+    - there is no separate proposal round: the block rules the scope and CC builds it;
+    - the api suite is not run. API figures are recorded as NOT MEASURED, never as unchanged.
+  ESCALATION: a Tier 2 cycle STOPS and reports if it touches any of apps/api, the wire contract or
+  its fixture, money arithmetic or formatting, the importer, auth, CSP or the Caddyfile, or
+  migrations. Reassigning the tier is the channel's call, never the implementer's. The gate is
+  numbered when it is first armed.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, BEFORE C3, at a position DERIVED FROM THE FILE. The wrap check runs as
+its own step before the append: no body line may begin with the block prefix. After the append:
+the strict count is predicted at 37, contiguous; the loose count at 39, with the known body lines
+1513 and 6934. Any third match stops. Close with the grep -n output, a read-back of what was
+written, git show --stat, and git status --porcelain, all pasted in full. Pipe the commit message
+from a file.
