@@ -6989,3 +6989,77 @@ close.
 This block persists ALONE, BEFORE any C1 edit, position DERIVED FROM THE FILE. THE WRAP CHECK RUNS
 BEFORE THE APPEND. After the append: the strict header count, predicted 33, contiguous, closed with
 grep -n output. Read back what was written.
+
+MOB-R34 — THE STOP WAS CORRECT. THE OBSERVER RE-AIM IS GRANTED WITH A DISCRIMINATION PROOF AND A
+SECOND-ROUTE UNIQUENESS CHECK. TWO COMMENT-AND-TITLE EDITS ARE GRANTED. C1 RESUMES; C2 FOLLOWS.
+THE PERSISTENCE COMMIT MUST NOT SWEEP UP THE UNCOMMITTED C1 WORK.
+
+CADENCE. Tier 1, unchanged. MOB-R33 still governs C1 and C2 except where this block amends it.
+Nothing is pushed.
+
+═══ THE STOP ═══
+
+Correct. The observer check at money-wire-shape.test.ts:916 is a control that MOB-R33's list did not
+name, and editing it is exactly the kind of edit that stops. Showing the per-route call signature,
+HEAD against now, is what makes the cause visible rather than argued: the call count is unchanged
+and one slot changed kind. And naming the NULL-guard line in the same run as a deliberate negative
+control, rather than leaving it for the reader to wonder about, is the right instinct.
+
+═══ THE RE-AIM — GRANTED ═══
+
+This is A CONTROL FALSIFIED BY A RULING. RM-13(a) removed the detect SUM that the check was
+counting. The property it protected is unchanged: the safe-to-spend builder RAN for R8, R9 and R10
+rather than replaying from cache. The re-aim points at that property. It is not a new control.
+
+GRANTED: replace select{total} ≥ 2 with select{total} ≥ 1 AND select{monthlyIncomeKd} ≥ 1, per
+route, and update the comment at :937–938 to match. The comment names MOB-R34 and the property.
+
+TWO CONDITIONS, both shown in the close-out:
+  (1) DISCRIMINATION, SHOWN AGAINST THE NEW CODE. The recorded replay signature (13/2/6) is a HEAD
+  measurement. It is not carried. Force a cache replay under the C1 tree and show: the per-route
+  signature; BOTH new assertions red, for the reason under test (zero of each kind, not some other
+  failure); and a positive control that is a COUNT from the same invocation. A check whose negative
+  case equals its positive case is not a check.
+  (2) UNIQUENESS BY TWO ROUTES. The claim that select{monthlyIncomeKd} with exactly that column set
+  appears only in the resolver across R8, R9 and R10 is a search result until a second route agrees.
+  Route one: an enumeration from source of every select whose column set is exactly
+  {monthlyIncomeKd}. Route two: the runtime signatures the capture already records for all three
+  routes. State how the two routes differ. If they disagree, stop.
+
+═══ OTHER ITEMS ═══
+
+THE :350 → :351 PREDICTION MISS is accepted as investigated. The miss was in the prediction, a
+miscount of the file, not in the code. The comparison is the one predicted. It is recorded as a miss,
+not smoothed.
+
+income-lib T4. The report shows it failing against HEAD's code and passing against yours. That
+proves the assertion DISCRIMINATES. It does not establish that T4 was red before your
+implementation existed. Those are different claims, and the budgets case is the one that was
+red-first as a sequence. The close-out says so in those words. T4's red also carries its count.
+
+GRANTED, comments and titles only, with no expectation change: the slot comments in budgets.test.ts's
+:148 case, and the :181 case's title. Both now describe things that no longer exist. Each is shown as a
+diff. Any edit touching an expectation stops.
+
+THE aggregation.test.ts HEADER NOTE recording that F1, F3, F4 and WC3 now deviate from the Flask
+capture is accepted. It is the RM-13 record at the site. I1, I2, I3 and I6 now expecting not-set
+income, while every detection-output field keeps its captured value, is also accepted.
+
+═══ PREDICTIONS ═══
+
+UNCHANGED from MOB-R33. The observer test is edited, not added. API hermetic 873 / 34 / 62,
+INTEGRATION 897 / 10 / 62, 907 collected in both modes. Frontend 258 / 47. tsc 0 errors, 0 bytes, in
+both packages. Fixture 66, ALLOWLIST empty, migrations 0, capture JSON and assert file cmp-identical,
+physical properties 32 across 9.
+UNPUSHED, AMENDED: 4 after this block's persistence. 6 after C1 and C2. MOB-R33's figure of 5 is
+superseded by this block, which adds a fourth persistence commit.
+
+═══ PERSISTENCE — THE WORKING TREE IS DIRTY ═══
+
+Nine C1 files are modified and uncommitted. The persistence commit carries docs/modules/
+phase4-mobile.md ONLY. Show git status --porcelain before staging. Show git diff --cached --name-only
+listing exactly that one file before committing. Show git status --porcelain after committing, with
+the same nine C1 files still modified and nothing else changed. THE WRAP CHECK RUNS BEFORE THE
+APPEND. Position DERIVED FROM THE FILE. After the append: the strict header count, predicted 34,
+contiguous, closed with grep -n output. Read back what was written. The commit message is piped from
+a file.
