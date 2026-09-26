@@ -7162,3 +7162,173 @@ thirteen C1 paths and nothing else. THE WRAP CHECK RUNS AS ITS OWN STEP, BEFORE 
 DERIVED FROM THE FILE. After the append: the strict count, predicted 35, contiguous; the loose count,
 predicted two above it (1513 and 6934) — any third match stops. Close with grep -n output and read
 back what was written.
+
+MOB-R36 — C1 AND C2 ARE ACCEPTED. THE OPERATOR HAS RE-ROUTED THE PATH TO HIS FRIENDS: A ONE-TIME
+MANUAL IMPORT THROUGH THE EXISTING IMPORTER REPLACES THE MAPPING UI FOR NOW. THIS BLOCK AUTHORISES
+TWO SEPARATE REPORTS: PART A, A READ-ONLY IMPORT-FORMAT REPORT; THEN PART B, C3–C5 WITH THE
+OPERATOR-SELECTED COPY. NOTHING IS PUSHED.
+
+CADENCE. Tier 1 for Part B. Part A edits nothing. Measurement and implementation are SEPARATE
+REPORTS.
+
+═══ C1 AND C2 — ACCEPTED ═══
+
+R8's replay is now measured, not carried. select{total} was dropped from R8 under the grant because
+the replay showed it green. The final observer gives seven red lines for exactly the seven assertions
+that remain, none stays green under replay, and the normal run is 9 of 9. That is the discrimination
+rule applied to every route, not asserted for one. Removing a drafted clause that was not verified is
+right. The old-to-new table was taken from git show. Both close-outs carry all three mandatory
+sections, and every prediction was met.
+C2's :465 fix removes a dead branch in an unmounted component rather than casting back to string.
+ACCEPTED: a cast would reintroduce the literal RM-13(b) removed. Stage 2 remains unauthorised.
+QUEUED, not acted on: the seventh stale reference at money-wire-shape.test.ts:764, which joins the
+inventory-rot item; and intelligence.test.ts:69, which still mocks income_auto_detected: true against
+a contract that is now constant false. It is harmless as a pass-through, but it misdescribes the
+contract.
+
+═══ OPERATOR RULING — THE PATH TO HIS FRIENDS ═══
+
+Provenance OPERATOR, DIRECT, in the exchange after MOB-R35 was issued. Verbatim:
+  "We can figure out how to teach the app to ingest bank statements such as the ones from NBK.
+  Nevertheless, I want to keep that as a separate step/phase. Can we now have the app ingest
+  csv/excel files. I can have her download the excel file as a csv file. What's important is the
+  column mapping. As a quick step, I can do that manually. For instance, you tell me which columns
+  are mandatory and their names and I create a new excel file, following these columns and make sure
+  the data format is the same. The friend then will continue logging her transactions on the app.
+  It's a one time thing. So, not deep and advanced exporting is necessary because it's a one time
+  thing for my friend and we would benefit from her feedback on the app."
+RECORDED CONSEQUENCES:
+  - The column-mapping UI is DEFERRED, NOT CANCELLED. The operator maps one friend's file by hand,
+    one time, into the format the existing 10b-3 importer already accepts.
+  - Bank-statement ingestion, NBK and others, is a SEPARATE LATER PHASE.
+  - The path is now: the income cycle deploys → the operator prepares one file → the friend imports
+    it and keeps logging in the app → her feedback.
+  - NO IMPORTER CODE CHANGES under this block.
+
+═══ PART A — THE IMPORT FORMAT. READ-ONLY. ITS OWN REPORT ═══
+
+The operator builds a file by hand from this report. Every claim is therefore FROM SOURCE with its
+file:line, and the sample is PROVEN BY RUNNING, not by reading. Report from import-lib.ts,
+routes/upload.ts, ImportDialogs.tsx and everything they call:
+  A1. Accepted file types, size limit and magic-byte checks. For .xlsx: which sheet is read, where
+  the header row is expected, and how formulas, merged cells and empty rows are handled.
+  A2. Every column the importer reads: exact header spelling, case and whitespace sensitivity,
+  accepted aliases, required or optional, and what happens to an unrecognised column.
+  A3. Dates: every accepted format. HOW AN AMBIGUOUS DATE SUCH AS 03/04/2026 IS READ — day-first or
+  month-first. Kuwait writes day-first. How exceljs date-typed cells and Excel serial numbers are read.
+  A4. Amounts: accepted formats, decimals, thousands separators, currency text, and the SIGN
+  CONVENTION — whether an expense is positive or negative, and whether sign plays any part in type.
+  A5. Categories: how a name is matched, what happens to an unknown name, and which names make a row
+  income. MOB-R31's Phase A found that income is decided by category name alone. List those names as
+  the code defines them.
+  A6. The description, merchant and notes fields, and any length limits.
+  A7. Duplicates: within one file, against existing rows, and a second import of the same file. Is
+  re-importing the same file safe?
+  A8. The user's path: where Import is reached, whether it works at phone width, what the preview
+  shows, whether rows can be corrected in the preview, the atomic option, the demo-replace guard, and
+  what a row error looks like.
+  A9. A MINIMAL SAMPLE, RUN. Five rows: an expense with the ambiguous date 03/04/2026, a 3-decimal
+  amount, a category that exists by default, a category that does not, and one deliberately malformed
+  row. Run it through the real parse → validate → preview path in an uncommitted scratch harness,
+  hermetic, with no database writes. Show the parsed output verbatim, and state what each row became.
+  Repeat for the same rows saved as .xlsx.
+  A10. Anything where the frontend's accept list and the backend's checks disagree.
+MANDATE: NO EDIT TO ANY TRACKED FILE. Scratch files go only in an untracked, ignored location. Show
+git status --porcelain before and after; the only difference is this block's persistence commit.
+RM-19: if Part A finds that importing interacts with income in a way that conflicts with C1 or with
+C3–C5 as ruled below, STOP AFTER PART A and report it.
+Otherwise, after the Part A report, Part B proceeds on the operator's word "continue". This block
+pre-authorises that. The word carries no new ruling and need not be persisted.
+
+═══ PART B — OPERATOR SELECTIONS ═══
+
+Provenance OPERATOR, DIRECT, in the exchanges after MOB-R33 was issued. The wording and the options
+are the CHANNEL'S. The selections are the OPERATOR'S. Ratified by this block. Verbatim:
+  On the channel's copy list #1–#23: "All ok."
+  "When spending is more than income, Home shows Remaining KD 0.000. Change it?" → "Show "Over by
+  KD X" (recommended)"
+  "The Income tile's "vs last month" chip will always read 0.0% now. What should happen to it?" →
+  "Remove the chip (recommended)"
+  "Setup text promises a payday setting that doesn't exist. What should we do?" → "Drop "payday"
+  from the text (recommended)"
+
+═══ PART B — THE STRINGS. RM-16 IS DISCHARGED FOR EXACTLY THESE; ANY OTHER NEW OR CHANGED SENTENCE
+STOPS ═══
+
+  #1  ProfilePage.tsx:391 heading → "Monthly income"
+  #2  :393 → "Statera uses this for your plan, Home, and budget ratios. Income you log as
+      transactions doesn't change it."
+  #3  field label → "Monthly income (KD)"
+  #4  hint → "If your income varies or comes from several sources, enter your average month."
+  #5  buttons → "Save income" / "Clear"
+  #6  toasts → "Monthly income saved." / "Monthly income cleared."
+  #7  validation, only where the field shows one → "Enter an amount above zero, with up to 3
+      decimals."
+      REMOVED WITH NO REPLACEMENT: :399, :405, :410, :415, :420, :422, :426.
+  #8  hero, income not set → Income "Not set"; Remaining "—"; Savings rate "—"
+  #9  chart reference-line label → "Your income"
+  #10 chart caption when not set → "Set your monthly income in Profile to see it on this chart."
+  #11 sections.tsx:1210 → "Add a few expense transactions to start seeing your monthly trend."
+  #12 :1259 → "The dashed line shows your average monthly spending. The solid line is your monthly
+      income."
+      The :1230 tooltip "Income" goes with the removed series.
+  #13 budget/sections.tsx:243 → "Set income"; :290 → "Edit income". Both open Profile.
+  #14 :249 → "Set your monthly income in Profile to compare your {monthLabel} budgets against it."
+  #15 :281 → "Budget vs your income for {monthLabel}"
+  #16 :302 → "Monthly Income"
+  #17 sections.tsx:322 → "Set income", opening Profile. :317 and :319 are unchanged.
+  #18 DashboardPage.tsx:200 → "Add your monthly income in Profile so planning starts with a real
+      baseline."
+  #19 sections.tsx:678 → "Set your monthly income first so the rest of the product has a planning
+      baseline."
+  #20 WorkspaceChoicePage.tsx:115 → "Enter your monthly income so planning starts from your real
+      numbers". The site's existing list-marker convention is kept; the words are what is ruled.
+  #21 IncomePage.tsx:157 → "Record a paycheck, transfer, or other income."
+  #22 A new note on the Activity income header, beside TransactionsPage :239 → "Logged income is for
+      your records. Planning uses the monthly income in Profile."
+  #23 Remaining when spending exceeds income → "Over by KD {amount}", where amount is expenses minus
+      income, formatted by the formatter the Remaining tile already uses (for example "Over by KD
+      200.000").
+  REMOVED: the Income tile's "vs last month" chip.
+  UNCHANGED BY RULING: sections.tsx :899, :1190, :1191, :715; budget/sections.tsx :239, :261, :266,
+  :269, :278; the income nudge; WorkspaceChoicePage :111; DashboardPage :199, :202. S10 stays queued.
+  PRECEDENCE: not set wins over overspent. With no income, Remaining is "—".
+  A CHANNEL RULING BY ANALOGY, NOT AN OPERATOR RULING: Remaining's "vs last month" chip is suppressed
+  when either month is overspent, because a clamped or negative Remaining is not a comparable
+  quantity. The operator removed the INCOME chip only. Record the distinction.
+
+═══ PART B — IMPLEMENTATION ═══
+
+C3, C4 and C5 as proposed in the revised proposal's R6, under every ruling in MOB-R33: the hero
+predicate mirrors the resolver (set only if present AND greater than zero, with a comment naming the
+arm); heroDeltas and canLoadDemoData re-keyed; prompt targets go to /profile; the chart mock
+distinguishes the two lines, with the fixture's average different from its typed income and both
+stated; the complete chart test specification; and the granted edits to D1, CONTROL-1 and
+budget/sections.test.tsx:51/:57, shown as diffs.
+PREDICTIONS, STATED BEFORE THE FIRST EDIT, WITH SIGN: frontend 258 / 47 → 274 / 48 as the base (the
+revised proposal's +16, with #22 selected). AMEND IT, per named test, for the items that proposal did
+not cover: #23, the Income chip removal, and the Remaining chip suppression. API unchanged at 873 /
+34 / 62 and 897 / 10 / 62, and the api suite IS run because the contract test reads the frontend
+fixture. Fixture 66, ALLOWLIST empty. tsc 0 bytes in both packages. Physical properties delta zero,
+re-derived after the LAST edit. No CSP or Caddyfile change, asserted.
+EVERY COMMIT GREEN ON ITS OWN: the frontend suite and frontend tsc are captured per commit, and both
+api modes after C5. New cases are RED-FIRST AS A SEQUENCE, each red with a count as its positive
+control and failing for the reason under test.
+CLOSE-OUT: the three mandatory sections. The frontend baseline line moves, so its hunk is required.
+Confirm that the RM-13(d) record now describes live state, since C3 removes the last caller of R11.
+UNPUSHED, predicted: 8 after this block's persistence, 11 after C5. NO PUSH. The push block follows
+the close-out.
+
+═══ CONSTRAINTS, UNCHANGED ═══
+
+Logical properties only. CSP enforcing; no new external origin. QuickAdd internals and the FAB are
+untouched. No renames; pinned strings and the legal data-testids are untouched. The three named
+regression files stay green and untouched. The e2e suite is untouched. Legal copy is not edited
+(RM-2). Stage 2 remains unauthorised. The importer is not edited. Queued items stay queued.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, position DERIVED FROM THE FILE. THE WRAP CHECK RUNS AS ITS OWN STEP,
+BEFORE THE APPEND. After the append: strict count predicted 36, contiguous; loose count predicted 38,
+the known body lines being 1513 and 6934. Any third match stops. Close with grep -n output, read back
+what was written, and pipe the commit message from a file.
