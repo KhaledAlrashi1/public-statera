@@ -400,5 +400,23 @@ describe("MOB-1 Group 1 — story-of-the-month pace note", () => {
     // And the dropped sentence does not come back on this arm either.
     expect(screen.queryByText(/free to spend after commitments/)).not.toBeInTheDocument()
   })
+
+  // MOB-R31 Phase A finding, MOB-R36 C5 — with the income NOT SET, R9 counts it as 0, so
+  // remaining_budget_kd is 0 and the pace note would claim commitments overtake a budget measured
+  // against an income that does not exist. The CONTROL above (no income_source) is the negative.
+  it("omits the pace note when the income is not set", async () => {
+    mocks.analyticsApi.safeToSpend.mockResolvedValue({
+      committed_kd: "300.000",
+      remaining_budget_kd: "0.000",
+      actual_spend_kd: "160.000",
+      income_source: "not_set",
+    })
+
+    renderPage()
+
+    // The story still renders — otherwise this passes against a page showing nothing.
+    expect(await screen.findByText(/Groceries is 60% higher than last month/)).toBeInTheDocument()
+    expect(screen.queryByText(/Committed spending is now overtaking/)).not.toBeInTheDocument()
+  })
 })
 

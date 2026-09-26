@@ -227,6 +227,7 @@ export default function InsightsPage() {
   const committedThisMonth = Number(safeToSpendQuery.data?.committed_kd ?? 0)
   const remainingBudget = Number(safeToSpendQuery.data?.remaining_budget_kd || 0)
   const actualSpend = Number(safeToSpendQuery.data?.actual_spend_kd || 0)
+  const incomeNotSet = safeToSpendQuery.data?.income_source === "not_set"
 
   const hasInsightsErrors = Boolean(
     monthOptionsQuery.error
@@ -268,8 +269,11 @@ export default function InsightsPage() {
       // remaining arm is unchanged. Grammar is safe by construction rather than by inspection —
       // the join below filters empty clauses, so dropping this one leaves lead1 standing alone,
       // and lead1 is a complete sentence in both of its forms.
+      // MOB-R36 C5 — with the income NOT SET, R9 counts it as 0, so remainingBudget is 0 and this
+      // sentence would claim commitments overtake a budget measured against no income. Keyed on R9's
+      // own income_source, the same signal the sibling IncomeNudge uses.
       const paceNote =
-        committedThisMonth <= 0 || remainingBudget > 0
+        committedThisMonth <= 0 || remainingBudget > 0 || incomeNotSet
           ? ""
           : "Committed spending is now overtaking the rest of this month's budget."
       const lead1 = sameAsLastMonth
@@ -287,7 +291,7 @@ export default function InsightsPage() {
     }
 
     return null
-  }, [committedThisMonth, monthDeltaRows, recurringRows, remainingBudget])
+  }, [committedThisMonth, incomeNotSet, monthDeltaRows, recurringRows, remainingBudget])
 
   return (
     <div className="space-y-8">

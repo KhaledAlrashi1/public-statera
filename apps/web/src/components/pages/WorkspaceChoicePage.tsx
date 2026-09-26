@@ -112,7 +112,7 @@ export default function WorkspaceChoicePage() {
               </p>
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                 <li>- Add your first transaction or import your own CSV</li>
-                <li>- Categorize your income transactions so planning uses real inflows</li>
+                <li>- Enter your monthly income so planning starts from your real numbers</li>
                 <li>- Build a budget from your own categories</li>
               </ul>
               <Button

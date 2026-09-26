@@ -281,6 +281,13 @@ export default function TransactionsPage() {
         )}
       />
 
+      {/* MOB-R36 #22 — income is typed-only; logged income no longer feeds any planning figure. */}
+      {activityType === "income" ? (
+        <p className="-mt-4 text-sm text-muted-foreground">
+          Logged income is for your records. Planning uses the monthly income in Profile.
+        </p>
+      ) : null}
+
       {referenceDataErrorMessage ? (
         <Alert variant="warning">
           <AlertTitle>Transaction tools unavailable</AlertTitle>

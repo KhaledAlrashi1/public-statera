@@ -240,13 +240,13 @@ export function IncomePlanningCard({
           </div>
           {onOpenIncome ? (
             <Button type="button" variant="outline" size="sm" onClick={onOpenIncome}>
-              Open income activity
+              Set income
             </Button>
           ) : null}
         </div>
         <div className="section-body">
           <div className="text-sm text-muted-foreground">
-            Add income transactions in Activity to compare your {monthLabel} budgets against actual inflows.
+            Set your monthly income in Profile to compare your {monthLabel} budgets against it.
           </div>
         </div>
       </section>
@@ -278,7 +278,7 @@ export function IncomePlanningCard({
             Income Context
           </div>
           <div className="mt-1 text-xs text-muted-foreground">
-            Budget vs detected income for {monthLabel}
+            Budget vs your income for {monthLabel}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -287,7 +287,7 @@ export function IncomePlanningCard({
           </div>
           {onOpenIncome ? (
             <Button type="button" variant="outline" size="sm" onClick={onOpenIncome}>
-              View income activity
+              Edit income
             </Button>
           ) : null}
         </div>
@@ -299,7 +299,7 @@ export function IncomePlanningCard({
             <div className="financial-number mt-1 text-sm font-semibold">{formatCompactKD(budgetTotal)}</div>
           </div>
           <div className="inner-card">
-            <div className="text-xs text-muted-foreground">Detected Income</div>
+            <div className="text-xs text-muted-foreground">Monthly Income</div>
             <div className="financial-number mt-1 text-sm font-semibold">{formatCompactKD(monthlyIncome)}</div>
           </div>
           <div className="inner-card">

@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { fireEvent, render, screen } from "@testing-library/react"
-import { MemoryRouter } from "react-router-dom"
+import { act, fireEvent, render, screen } from "@testing-library/react"
+import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import BudgetPage from "./BudgetPage"
@@ -17,6 +17,8 @@ const mocks = vi.hoisted(() => ({
     findMostRecentBudgetsBefore: vi.fn(),
     findDuplicateCategory: vi.fn(),
   },
+  // MOB-R36 — records IncomePlanningCard's props; the mock's rendered output is unchanged.
+  incomePlanningCard: vi.fn(),
 }))
 
 vi.mock("@/lib/api", () => ({
@@ -43,7 +45,10 @@ vi.mock("./budget/hooks", () => ({
 
 vi.mock("./budget/sections", () => ({
   BudgetHero: () => <div>budget hero</div>,
-  IncomePlanningCard: () => <div>income planning</div>,
+  IncomePlanningCard: (props: unknown) => {
+    mocks.incomePlanningCard(props)
+    return <div>income planning</div>
+  },
   BudgetChart: () => <div>budget chart</div>,
   BudgetTable: () => <div>budget table</div>,
   BudgetDialog: ({ open }: { open: boolean }) => (open ? <div>budget dialog</div> : null),
@@ -134,5 +139,24 @@ describe("BudgetPage", () => {
 
     expect(await screen.findByText("Planning data unavailable")).toBeInTheDocument()
     expect(screen.getByText(/Month options offline/)).toBeInTheDocument()
+  })
+
+  // MOB-R36 #13 — the Plan card's income buttons ("Set income" / "Edit income") open Profile, where
+  // the typed income is set; they used to open the income activity list.
+  it("the income card's action opens Profile", () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <MemoryRouter initialEntries={["/plan"]}>
+        <QueryClientProvider client={queryClient}>
+          <Routes>
+            <Route path="/plan" element={<BudgetPage />} />
+            <Route path="/profile" element={<div>profile page</div>} />
+          </Routes>
+        </QueryClientProvider>
+      </MemoryRouter>
+    )
+    const props = mocks.incomePlanningCard.mock.calls.at(-1)?.[0] as { onOpenIncome?: () => void }
+    act(() => props.onOpenIncome?.())
+    expect(screen.getByText("profile page")).toBeInTheDocument()
   })
 })

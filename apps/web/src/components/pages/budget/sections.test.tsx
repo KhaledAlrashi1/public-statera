@@ -48,13 +48,13 @@ describe("IncomePlanningCard — profile_context string fields (typed-drift regr
     // The card must actually render (guard-defeat: a string income is !== null),
     // not merely avoid throwing — its presence is part of the contract.
     expect(screen.getByText("Income Context")).toBeInTheDocument()
-    expect(screen.getByText("Budget vs detected income for July 2026")).toBeInTheDocument()
+    expect(screen.getByText("Budget vs your income for July 2026")).toBeInTheDocument()
     expect(screen.getByText("45.5%")).toBeInTheDocument()
   })
 
   it("shows the add-income prompt when profile_context is null (empty account)", () => {
     render(<IncomePlanningCard monthLabel="July 2026" profileContext={null} />)
-    expect(screen.getByText(/Add income transactions/)).toBeInTheDocument()
+    expect(screen.getByText(/Set your monthly income in Profile/)).toBeInTheDocument()
   })
 })
 

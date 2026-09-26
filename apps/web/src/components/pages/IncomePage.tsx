@@ -154,7 +154,7 @@ function RecentIncome({
       ? "No income in the last 30 days"
       : "No income matches this view"
   const emptyDescription = isAllHistoryView
-    ? "Record a paycheck, transfer, or other income so cash inflow shows up in your plan."
+    ? "Record a paycheck, transfer, or other income."
     : isDefaultRecentView
       ? "Add a new income entry or widen the range to bring recent cash inflow into view."
       : "Try widening the range or clearing your search to bring income back into view."

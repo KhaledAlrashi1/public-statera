@@ -461,7 +461,7 @@ export default function BudgetPage() {
           <IncomePlanningCard
             monthLabel={labelForYM(selectedMonth)}
             profileContext={profileContext}
-            onOpenIncome={() => navigate("/activity?type=income")}
+            onOpenIncome={() => navigate("/profile")}
           />
 
           {showBudgetEmptyState ? (
