@@ -134,7 +134,7 @@ export interface SafeToSpendResponse {
   days_remaining: number
   monthly_income_kd: string | null
   income_auto_detected: boolean
-  income_source: 'detected_from_transactions' | 'declared_in_profile' | 'not_set'
+  income_source: 'declared_in_profile' | 'not_set'
   total_budget_kd: string
   committed_kd: string
   committed_breakdown_kd: {
@@ -162,7 +162,7 @@ export interface DashboardBundleResponse {
 export interface IncomePatternResponse {
   detected: boolean
   monthly_income_kd: string | null
-  income_source: 'detected_from_transactions' | 'declared_in_profile' | 'not_set'
+  income_source: 'declared_in_profile' | 'not_set'
   income_auto_detected: boolean
   suggested_monthly_income_kd: string | null
   suggested_payday_day: number | null
@@ -252,7 +252,7 @@ export interface BudgetResponse {
     // typed-drift fix-forward (2026-07-10); coerce with Number(...) at use.
     budget_total_kd: string
     monthly_income_kd: string | null
-    income_source: 'detected_from_transactions' | 'declared_in_profile' | 'not_set'
+    income_source: 'declared_in_profile' | 'not_set'
     budget_to_income_pct: string | null
     payday_day: number | null
   }

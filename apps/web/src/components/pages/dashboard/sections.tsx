@@ -365,8 +365,7 @@ export function SafeToSpendHero({
   }
   const hasInfoNotes = Boolean(
     monthlyIncome > 0 &&
-      (safeToSpend?.income_source === 'detected_from_transactions' ||
-        safeToSpend?.income_source === 'declared_in_profile')
+      safeToSpend?.income_source === 'declared_in_profile'
   )
 
   return (
@@ -462,11 +461,6 @@ export function SafeToSpendHero({
                     <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
                   </summary>
                   <div className="mt-2 space-y-1">
-                    {safeToSpend.monthly_income_kd && safeToSpend.income_source === 'detected_from_transactions' && (
-                      <p className="text-xs text-muted-foreground">
-                        Income of {formatKD(safeToSpend.monthly_income_kd)} is automatically detected from your income transactions.
-                      </p>
-                    )}
                     {safeToSpend.monthly_income_kd && safeToSpend.income_source === 'declared_in_profile' && (
                       <p className="text-xs text-muted-foreground">
                         Income of {formatKD(safeToSpend.monthly_income_kd)} is from your profile setting. Add income transactions to use auto-detection.
