@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { useQueryClient } from "@tanstack/react-query"
 import { LogOut } from "lucide-react"
-import { analyticsApi, authApi } from "@/lib/api"
+import { authApi } from "@/lib/api"
 import { validateOptionalTextMaxLength } from "@/lib/validation"
-import { formatKD } from "@/lib/utils"
 import { useAuth } from "@/contexts/AuthContext"
 import { usePreferences } from "@/contexts/PreferencesContext"
 import { useToast } from "@/components/ui/toaster"
@@ -15,9 +15,16 @@ import { TwoFactorSetup, type TwoFactorSetupData } from "@/components/auth/TwoFa
 import DataPrivacySection from "@/components/pages/profile/DataPrivacySection"
 import PageHeader from "@/components/layout/PageHeader"
 import { panelSection } from "@/components/ui/patterns"
-import type { IncomePatternResponse } from "@/types/api"
 
 const PROFILE_NAME_MAX_LENGTH = 64
+
+// MOB-R36 #7. The field accepts what the server's parseKd accepts: a positive amount with at most
+// three decimals (apps/api/src/lib/kd.ts). A value of zero is rejected there too.
+const MONTHLY_INCOME_INVALID_MESSAGE = "Enter an amount above zero, with up to 3 decimals."
+function isValidMonthlyIncome(raw: string): boolean {
+  const s = raw.trim()
+  return /^\d+(\.\d{1,3})?$/.test(s) && !/^0+(\.0+)?$/.test(s)
+}
 const DEFAULT_PROFILE_TIMEZONE = "Asia/Kuwait"
 const COMMON_TIMEZONE_SUGGESTIONS = [
   "Asia/Kuwait",
@@ -93,15 +100,18 @@ export default function ProfilePage() {
   const navigate = useNavigate()
   const { darkMode, setDarkMode } = usePreferences()
   const toast = useToast()
+  const queryClient = useQueryClient()
 
   // ── Account ──
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [savingName, setSavingName] = useState(false)
 
-  // ── Income pattern ──
-  const [incomePattern, setIncomePattern] = useState<IncomePatternResponse | null>(null)
-  const [loadingIncomePattern, setLoadingIncomePattern] = useState(false)
+  // ── Monthly income (typed-only; the one figure every income-derived number uses) ──
+  const [monthlyIncome, setMonthlyIncome] = useState("")
+  const [savedMonthlyIncome, setSavedMonthlyIncome] = useState<string | null>(null)
+  const [savingIncome, setSavingIncome] = useState(false)
+  const [incomeInvalid, setIncomeInvalid] = useState(false)
 
   // ── Preferences ──
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState<boolean | null>(null)
@@ -131,6 +141,9 @@ export default function ProfilePage() {
     try {
       const res = await authApi.profile()
       setEmailNotificationsEnabled(res.profile?.email_notifications_enabled ?? true)
+      const storedIncome = res.profile?.monthly_income_kd ?? null
+      setSavedMonthlyIncome(storedIncome)
+      setMonthlyIncome(storedIncome ?? "")
       const nextTimezone = res.profile?.timezone?.trim() || DEFAULT_PROFILE_TIMEZONE
       setTimezone(nextTimezone)
       setSavedTimezone(nextTimezone)
@@ -151,25 +164,44 @@ export default function ProfilePage() {
     void loadProfilePreferences()
   }, [loadProfilePreferences, user])
 
-  useEffect(() => {
-    if (!user) return
-    let cancelled = false
-    const run = async () => {
-      setLoadingIncomePattern(true)
-      try {
-        const data = await analyticsApi.incomePattern()
-        if (!cancelled) setIncomePattern(data)
-      } catch {
-        if (!cancelled) setIncomePattern(null)
-      } finally {
-        if (!cancelled) setLoadingIncomePattern(false)
-      }
-    }
-    run()
-    return () => { cancelled = true }
-  }, [user])
-
   // ─── Handlers ─────────────────────────────────────────────────────────────
+
+  // The typed income feeds Home (the profile query), Plan (budgets' profile_context, also carried in
+  // the dashboard bundle) and Insights (R9 safe-to-spend). Invalidate all of them on change; the
+  // server clears R9's Redis cache on the same write (MOB-R33 C1).
+  const invalidateIncomeQueries = useCallback(async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["auth-profile"] }),
+      queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] }),
+      queryClient.invalidateQueries({ queryKey: ["budgets"] }),
+      queryClient.invalidateQueries({ queryKey: ["insights"] }),
+    ])
+  }, [queryClient])
+
+  const writeMonthlyIncome = async (value: string | null) => {
+    setSavingIncome(true)
+    try {
+      const res = await authApi.updateProfile({ monthly_income_kd: value })
+      const stored = res.profile?.monthly_income_kd ?? null
+      setSavedMonthlyIncome(stored)
+      setMonthlyIncome(stored ?? "")
+      setIncomeInvalid(false)
+      await invalidateIncomeQueries()
+      toast.success(value === null ? "Monthly income cleared." : "Monthly income saved.")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : String(err))
+    } finally {
+      setSavingIncome(false)
+    }
+  }
+
+  const saveMonthlyIncome = async () => {
+    if (!isValidMonthlyIncome(monthlyIncome)) {
+      setIncomeInvalid(true)
+      return
+    }
+    await writeMonthlyIncome(monthlyIncome.trim())
+  }
 
   const handleLogout = async () => {
     try {
@@ -388,42 +420,42 @@ export default function ProfilePage() {
 
       {/* ── 2. Income ────────────────────────────────────────────────── */}
       <section className={panelSection({ animated: true, stagger: "2", className: "p-5" })}>
-        <h2 className="text-lg font-semibold">Income Detection</h2>
+        <h2 className="text-lg font-semibold">Monthly income</h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Review the income transactions the app is using. Planning now follows categorized income automatically.
+          Statera uses this for your plan, Home, and budget ratios. Income you log as transactions doesn't change it.
         </p>
-        {loadingIncomePattern ? (
-          <div className="mt-3 skeleton h-14" />
-        ) : incomePattern?.detected ? (
-          <div className="inner-card mt-3 space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Detected monthly income</p>
-            <p className="text-xl font-semibold leading-tight tabular-nums">
-              {incomePattern.suggested_monthly_income_kd ? formatKD(incomePattern.suggested_monthly_income_kd) : "—"}
-            </p>
-            {incomePattern.suggested_payday_day ? (
-              <p className="text-xs text-muted-foreground">
-                Payday around day {incomePattern.suggested_payday_day}
-                {incomePattern.suggested_payday_day >= 29 ? " (short months use the last calendar day)" : ""}
-              </p>
-            ) : null}
-            <p className="text-xs text-muted-foreground capitalize">
-              {incomePattern.confidence} confidence · {incomePattern.evidence_months} month{incomePattern.evidence_months === 1 ? "" : "s"} of data
-            </p>
-          </div>
-        ) : (
-          <div className="surface-dashed-card mt-3 p-4 text-center text-sm text-muted-foreground">
-            No income detected yet. Categorize income transactions to enable automatic income tracking.
-          </div>
-        )}
-        <div className="inner-card mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold">Automatic income source</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Safe to Spend, budget context, and dashboard planning use income-category transactions instead of a manual profile value.
-            </p>
-          </div>
-          <Button type="button" variant="outline" onClick={() => navigate("/activity?type=income")}>
-            Open income activity
+        <div className="mt-4 grid max-w-sm gap-2">
+          <Label htmlFor="profile-monthly-income">Monthly income (KD)</Label>
+          <Input
+            id="profile-monthly-income"
+            inputMode="decimal"
+            autoComplete="off"
+            value={monthlyIncome}
+            onChange={(e) => {
+              setMonthlyIncome(e.target.value)
+              if (incomeInvalid) setIncomeInvalid(false)
+            }}
+            disabled={loadingProfilePreferences}
+            aria-invalid={incomeInvalid}
+            aria-describedby="profile-monthly-income-hint"
+            className={validationInputClass(incomeInvalid ? "error" : undefined)}
+          />
+          <p id="profile-monthly-income-hint" className="text-xs text-muted-foreground">
+            If your income varies or comes from several sources, enter your average month.
+          </p>
+          <FieldFeedback tone={incomeInvalid ? "error" : undefined} message={incomeInvalid ? MONTHLY_INCOME_INVALID_MESSAGE : undefined} />
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button onClick={saveMonthlyIncome} loading={savingIncome} disabled={savingIncome || loadingProfilePreferences}>
+            Save income
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => writeMonthlyIncome(null)}
+            disabled={savingIncome || loadingProfilePreferences || savedMonthlyIncome === null}
+          >
+            Clear
           </Button>
         </div>
       </section>
