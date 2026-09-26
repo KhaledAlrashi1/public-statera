@@ -65,7 +65,7 @@ describe("GET /api/analytics/income-pattern", () => {
     vi.mocked(buildIncomePatternPayload).mockResolvedValue({
       detected: true,
       monthly_income_kd: "1000.000",
-      income_source: "detected_from_transactions",
+      income_source: "declared_in_profile",
       income_auto_detected: true,
       suggested_monthly_income_kd: "1000.000",
       suggested_payday_day: 1,
@@ -84,7 +84,7 @@ describe("GET /api/analytics/income-pattern", () => {
     expect(body.meta).toEqual({})
     expect(body.data.detected).toBe(true)
     expect(body.data.monthly_income_kd).toBe("1000.000")
-    expect(body.data.income_source).toBe("detected_from_transactions")
+    expect(body.data.income_source).toBe("declared_in_profile")
     expect(body.data.confidence).toBe("high")
     expect(body.data.evidence_months).toBe(3)
     expect(body.data.largest_income_name).toBe("Salary")

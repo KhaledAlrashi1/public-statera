@@ -1207,6 +1207,19 @@ router.post("/profile/update", requireAuth, async (c) => {
   }
   // else: no recognized fields — no-op; re-fetch and return current state
 
+  // MOB-R33 — income is typed-only, so this column is what R9 (safe-to-spend) resolves, and R9
+  // is cached for 300 s. When the income is written (set or cleared), clear R9's cache so the
+  // next read reflects it. Same invalidation the demo-data routes call, fire-and-forget.
+  if ("monthlyIncomeKd" in profileSet) {
+    ;(async () => {
+      try {
+        await cacheBustSafeToSpend(userId)
+      } catch (err) {
+        Sentry.captureException(err, { tags: { handler: "auth.profileUpdate.cacheBust", userId } })
+      }
+    })()
+  }
+
   const [[updatedUser], [updatedProfile]] = await Promise.all([
     db
       .select({

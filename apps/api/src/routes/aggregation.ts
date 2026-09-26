@@ -713,7 +713,10 @@ async function _buildSafeToSpendPayload(
     days_elapsed: daysElapsed,
     days_remaining: daysRemaining,
     monthly_income_kd: monthlyIncome !== null ? formatKd(monthlyIncome) : null,
-    income_auto_detected: incomeSource === "detected_from_transactions",
+    // MOB-R33 RM-13(c) — CONSTANT false. Income is typed-only, so nothing is auto-detected. The
+    // field is a deliberate survivor pending a later deletion stage (the Stage 1 / Stage 2 shape),
+    // not an oversight.
+    income_auto_detected: false,
     income_source: incomeSource,
     total_budget_kd: formatKd(totalBudget),
     committed_kd: formatKd(committed),

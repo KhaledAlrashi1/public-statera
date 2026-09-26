@@ -187,26 +187,28 @@ describe("classifyRecurringGroup", () => {
 //
 // Each test seeds db rows that match the capture seed exactly (same dates,
 // amounts, category is_income=true). The sequential mock provides two await
-// results: first is detectMonthlyIncome (income sum for 2025-11), second is
-// the 90-day income transaction query for pattern analysis.
+// results: first is the profile (resolveIncomeForPeriod), second is the 90-day
+// income transaction query for pattern analysis.
+//
+// MOB-R33 — income is TYPED-ONLY, so the resolver no longer issues the detect SUM and
+// every sequence lost its first slot. The capture's seeds give ONLY I4 a profile row
+// (tools/capture-flask-fixtures.py:357), so under typed-only I1/I2/I3/I6 resolve to
+// not_set: their monthly_income_kd / income_source / income_auto_detected expectations
+// DEVIATE from the Flask capture by ruling. Every detection-output field (suggested_*,
+// confidence, evidence_months, largest_income_name, detected) is still the captured value.
 
 describe("buildIncomePatternPayload — Flask fixture equivalence", () => {
   const OPTS = { currentMonth: "2025-11", todayDate: "2025-11-10" }
 
-  // Detect-income query rows (first await in resolveIncomeForPeriod)
-  // Pattern query rows (second await in buildIncomePatternPayload, after resolve)
-  // resolveIncomeForPeriod makes 1 await for detect; if detect=0 makes another for profile.
-  // buildIncomePatternPayload then awaits the 90-day pattern query.
-  //
   // Sequence positions:
-  //   seq[0] = detectMonthlyIncome (SUM for 2025-11)
-  //   seq[1] = 90-day pattern rows   (OR seq[1] = profile, seq[2] = pattern rows if detect=0)
+  //   seq[0] = profile row (resolveIncomeForPeriod) — [] when the seed has no profile
+  //   seq[1] = 90-day pattern rows (buildIncomePatternPayload, after resolve)
 
   it("I1: detected, high confidence — 3 identical monthly incomes", async () => {
-    // detect: 1000 KD in Nov → detected_from_transactions
+    // profile: none in the seed → not_set (typed-only; Flask detected 1000 KD in Nov)
     // pattern: 3 × Salary 1000 on Sep-01, Oct-01, Nov-01
     const db = makeSequentialDb([
-      [{ total: "1000.000" }],
+      [], // no profile row
       [
         { txDate: "2025-09-01", incomeName: "Salary", amountKd: "1000.000" },
         { txDate: "2025-10-01", incomeName: "Salary", amountKd: "1000.000" },
@@ -216,9 +218,9 @@ describe("buildIncomePatternPayload — Flask fixture equivalence", () => {
     const result = await buildIncomePatternPayload(1, db, OPTS)
 
     expect(result.detected).toBe(true)
-    expect(result.monthly_income_kd).toBe("1000.000")
-    expect(result.income_source).toBe("detected_from_transactions")
-    expect(result.income_auto_detected).toBe(true)
+    expect(result.monthly_income_kd).toBeNull()
+    expect(result.income_source).toBe("not_set")
+    expect(result.income_auto_detected).toBe(false)
     expect(result.suggested_monthly_income_kd).toBe("1000.000")
     expect(result.suggested_payday_day).toBe(1)
     expect(result.confidence).toBe("high")
@@ -227,11 +229,11 @@ describe("buildIncomePatternPayload — Flask fixture equivalence", () => {
   })
 
   it("I2: detected, medium confidence — 2 months, deviation ≈ 0.0244", async () => {
-    // detect: 1050 KD in Nov
+    // profile: none in the seed → not_set (typed-only; Flask detected 1050 KD in Nov)
     // pattern: Salary 1000 on Oct-05, Salary 1050 on Nov-05
     // avg=1025, max_dev=|1050-1025|/1025≈0.0244 > 0.02, evidence_months=2 → medium
     const db = makeSequentialDb([
-      [{ total: "1050.000" }],
+      [], // no profile row
       [
         { txDate: "2025-10-05", incomeName: "Salary", amountKd: "1000.000" },
         { txDate: "2025-11-05", incomeName: "Salary", amountKd: "1050.000" },
@@ -240,8 +242,8 @@ describe("buildIncomePatternPayload — Flask fixture equivalence", () => {
     const result = await buildIncomePatternPayload(1, db, OPTS)
 
     expect(result.detected).toBe(true)
-    expect(result.monthly_income_kd).toBe("1050.000")
-    expect(result.income_source).toBe("detected_from_transactions")
+    expect(result.monthly_income_kd).toBeNull()
+    expect(result.income_source).toBe("not_set")
     expect(result.suggested_monthly_income_kd).toBe("1025.000")
     expect(result.suggested_payday_day).toBe(5)
     expect(result.confidence).toBe("medium")
@@ -250,10 +252,10 @@ describe("buildIncomePatternPayload — Flask fixture equivalence", () => {
   })
 
   it("I3: detected, low confidence — 2 months, deviation ≈ 0.2308", async () => {
-    // detect: 1600 KD in Nov
+    // profile: none in the seed → not_set (typed-only; Flask detected 1600 KD in Nov)
     // pattern: Salary 1000 Oct-01, Salary 1600 Nov-01 → avg=1300, max_dev≈0.2308 → low
     const db = makeSequentialDb([
-      [{ total: "1600.000" }],
+      [], // no profile row
       [
         { txDate: "2025-10-01", incomeName: "Salary", amountKd: "1000.000" },
         { txDate: "2025-11-01", incomeName: "Salary", amountKd: "1600.000" },
@@ -262,8 +264,8 @@ describe("buildIncomePatternPayload — Flask fixture equivalence", () => {
     const result = await buildIncomePatternPayload(1, db, OPTS)
 
     expect(result.detected).toBe(true)
-    expect(result.monthly_income_kd).toBe("1600.000")
-    expect(result.income_source).toBe("detected_from_transactions")
+    expect(result.monthly_income_kd).toBeNull()
+    expect(result.income_source).toBe("not_set")
     expect(result.suggested_monthly_income_kd).toBe("1300.000")
     expect(result.suggested_payday_day).toBe(1)
     expect(result.confidence).toBe("low")
@@ -272,10 +274,9 @@ describe("buildIncomePatternPayload — Flask fixture equivalence", () => {
   })
 
   it("I4: not detected — 1 month only, source=declared_in_profile", async () => {
-    // detect: 0 (no Nov income) → falls to profile → 1800 KD
+    // profile → 1800 KD (the only seed with a profile row)
     // pattern: 1 entry (Oct-15 only) → overall_months=1 < 2 → early return
     const db = makeSequentialDb([
-      [{ total: "0" }],
       [{ monthlyIncomeKd: "1800.000" }], // profile
       [
         { txDate: "2025-10-15", incomeName: "Salary", amountKd: "1800.000" },
@@ -296,10 +297,9 @@ describe("buildIncomePatternPayload — Flask fixture equivalence", () => {
 
   it("I5: not detected — 2 months but all groups singleton, source=not_set", async () => {
     // Flask returns income_source=null → Hono maps to "not_set" (documented deviation).
-    // detect: 0; profile: empty → not_set
+    // profile: empty → not_set
     // pattern: "Salary" Oct-01 and "Bonus" Sep-15 → each name_key appears once → no candidates
     const db = makeSequentialDb([
-      [{ total: "0" }],
       [], // no profile row
       [
         { txDate: "2025-09-15", incomeName: "Bonus", amountKd: "500.000" },
@@ -321,13 +321,13 @@ describe("buildIncomePatternPayload — Flask fixture equivalence", () => {
   })
 
   it("I6: detected, bi-weekly multiplier — median_gap=16 → multiplier=2, suggested=1400", async () => {
-    // detect: 700 KD in Nov
+    // profile: none in the seed → not_set (typed-only; Flask detected 700 KD in Nov)
     // pattern: 5 × Salary 700 on Sep-01, Sep-15, Oct-01, Oct-15, Nov-01
     // gaps=[14,16,14,17] sorted=[14,14,16,17], median=sorted[2]=16 ≤ 18 → ×2
     // evidence_months=3 (Sep,Oct,Nov), max_dev=0 → high
     // suggested=700×2=1400; payday_day=1 (3 occurrences vs day-15 twice)
     const db = makeSequentialDb([
-      [{ total: "700.000" }],
+      [], // no profile row
       [
         { txDate: "2025-09-01",  incomeName: "Salary", amountKd: "700.000" },
         { txDate: "2025-09-15",  incomeName: "Salary", amountKd: "700.000" },
@@ -339,8 +339,8 @@ describe("buildIncomePatternPayload — Flask fixture equivalence", () => {
     const result = await buildIncomePatternPayload(1, db, OPTS)
 
     expect(result.detected).toBe(true)
-    expect(result.monthly_income_kd).toBe("700.000")
-    expect(result.income_source).toBe("detected_from_transactions")
+    expect(result.monthly_income_kd).toBeNull()
+    expect(result.income_source).toBe("not_set")
     expect(result.suggested_monthly_income_kd).toBe("1400.000")
     expect(result.suggested_payday_day).toBe(1)
     expect(result.confidence).toBe("high")

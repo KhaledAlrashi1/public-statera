@@ -122,7 +122,7 @@ describe("GET /api/budgets", () => {
           return (..._args: unknown[]) => {
             callCount++
             if (callCount === 1) return makeChain([budgetRow])          // budget rows
-            if (callCount === 2) return makeChain([{ total: "2000.000" }]) // income from transactions
+            if (callCount === 2) return makeChain([{ monthlyIncomeKd: "2000.000", paydayDay: 25 }]) // profile (typed income)
             if (callCount === 3) return makeChain([{ paydayDay: 25 }])  // profile for payday_day
             return makeChain([])
           }
@@ -141,7 +141,7 @@ describe("GET /api/budgets", () => {
     expect(Array.isArray(data.items)).toBe(true)
     const ctx = data.profile_context as Record<string, unknown>
     expect(ctx.budget_total_kd).toBe("500.000")
-    expect(ctx.income_source).toBe("detected_from_transactions")
+    expect(ctx.income_source).toBe("declared_in_profile")
     expect(ctx.payday_day).toBe(25)
     // 500 / 2000 * 100 = 25.0
     expect(ctx.budget_to_income_pct).toBe("25.0")
@@ -157,9 +157,9 @@ describe("GET /api/budgets", () => {
           return (..._args: unknown[]) => {
             callCount++
             if (callCount === 1) return makeChain([budgetRow])           // budget rows
-            if (callCount === 2) return makeChain([{ total: "0" }])      // income from transactions (none)
-            if (callCount === 3) return makeChain([{ monthlyIncomeKd: null, paydayDay: null }]) // profile
-            if (callCount === 4) return makeChain([{ paydayDay: null }]) // paydayDay query
+            if (callCount === 2) return makeChain([{ total: "0" }])      // read by the income resolver's profile query (no monthlyIncomeKd → not set)
+            if (callCount === 3) return makeChain([{ monthlyIncomeKd: null, paydayDay: null }]) // read by the paydayDay query
+            if (callCount === 4) return makeChain([{ paydayDay: null }]) // no longer reached (typed-only resolver issues one query)
             return makeChain([])
           }
         },
@@ -176,7 +176,7 @@ describe("GET /api/budgets", () => {
     expect(profileCtx.budget_to_income_pct).toBeNull()
   })
 
-  it("profile_context uses declared income fallback when no transactions", async () => {
+  it("profile_context uses the declared profile income", async () => {
     const budgetRow = { id: 1, month: "2026-04", amountKd: "400.000", categoryName: "Food" }
     let callCount = 0
     vi.mocked(getDb).mockImplementation(() => {
@@ -186,9 +186,8 @@ describe("GET /api/budgets", () => {
           return (..._args: unknown[]) => {
             callCount++
             if (callCount === 1) return makeChain([budgetRow])                              // budget rows
-            if (callCount === 2) return makeChain([{ total: "0" }])                         // no income txns
-            if (callCount === 3) return makeChain([{ monthlyIncomeKd: "1000.000", paydayDay: null }]) // profile with declared income
-            if (callCount === 4) return makeChain([{ paydayDay: null }])                    // paydayDay query
+            if (callCount === 2) return makeChain([{ monthlyIncomeKd: "1000.000", paydayDay: null }]) // profile with declared income
+            if (callCount === 3) return makeChain([{ paydayDay: null }])                    // paydayDay query
             return makeChain([])
           }
         },
@@ -204,6 +203,44 @@ describe("GET /api/budgets", () => {
     expect(ctx.monthly_income_kd).toBe("1000.000")
     // 400 / 1000 * 100 = 40.0
     expect(ctx.budget_to_income_pct).toBe("40.0")
+  })
+
+  // MOB-R31/R33 — income is TYPED-ONLY. Income-category transactions exist for the month, but
+  // there is no profile value, so income is NOT SET. The mock answers by the COLUMNS SELECTED
+  // rather than by call order: a `total` select is the transaction-income SUM, a
+  // `monthlyIncomeKd` select is the profile. Call-order routing could not tell "the resolver
+  // ignored the income rows" from "the resolver read a different slot", which is the property
+  // under test.
+  it("profile_context ignores income transactions: income rows present, no profile value → null", async () => {
+    const budgetRow = { id: 1, month: "2026-04", amountKd: "500.000", categoryName: "Food" }
+    let incomeSumQueries = 0
+    vi.mocked(getDb).mockImplementation(() => {
+      const proxy: ReturnType<typeof getDb> = new Proxy({}, {
+        get(_t, prop: string) {
+          if (prop === "transaction") return async (cb: unknown) => (cb as (tx: unknown) => Promise<unknown>)(proxy)
+          return (...args: unknown[]) => {
+            const cols = prop === "select" && args[0] ? Object.keys(args[0] as object) : []
+            if (cols.includes("amountKd")) return makeChain([budgetRow])
+            if (cols.includes("total")) {
+              incomeSumQueries++
+              return makeChain([{ total: "2000.000" }]) // income-category transactions DO exist
+            }
+            if (cols.includes("monthlyIncomeKd")) return makeChain([{ monthlyIncomeKd: null, paydayDay: null }])
+            if (cols.includes("paydayDay")) return makeChain([{ paydayDay: null }])
+            return makeChain([])
+          }
+        },
+      }) as ReturnType<typeof getDb>
+      return proxy
+    })
+    const res = await app.request("/api/budgets?month=2026-04", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const ctx = (((await res.json()) as Record<string, unknown>).data as Record<string, unknown>).profile_context as Record<string, unknown>
+    expect(ctx.monthly_income_kd).toBeNull()
+    expect(ctx.budget_to_income_pct).toBeNull()
+    expect(incomeSumQueries).toBe(0)
   })
 })
 

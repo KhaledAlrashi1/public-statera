@@ -348,7 +348,9 @@ export async function buildIncomePatternPayload(
   const monthlyIncomeKd =
     incomeResolution.amountKd !== null ? formatKd(incomeResolution.amountKd) : null
   const incomeSource = incomeResolution.source
-  const incomeAutoDetected = incomeSource === "detected_from_transactions"
+  // MOB-R33 RM-13(c) — CONSTANT false; income is typed-only. Deliberate survivor, same shape as
+  // income_auto_detected on R9 (aggregation.ts).
+  const incomeAutoDetected = false
 
   const cutoff = cutoffDateStr(todayStr, 90)
 

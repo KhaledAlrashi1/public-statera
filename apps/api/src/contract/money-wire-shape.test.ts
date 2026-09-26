@@ -42,11 +42,17 @@
  * record wire type, not semantics) but NOT for BRANCH: a shared row can send a
  * route down an arm that emits fewer leaves — case (ii) arriving by another door.
  * Where a shared key-set could change arm selection:
- *   - `select{total}` (R4 x3, R5, R9 x2, R10, budgets income): feeds
- *     `resolveIncomeForPeriod`. A ZERO row takes the "fall through to profile"
- *     arm and can end at `amountKd: null`, nulling R9/R11/R8 `monthly_income_kd`
- *     and `budget_to_income_pct`. The fixture is NON-ZERO so the detected arm is
- *     taken. This is the N1/N2/N4 nullable requirement.
+ *   - `select{monthlyIncomeKd}` / `select{monthlyIncomeKd,paydayDay}` (the income
+ *     resolvers in lib/income-lib.ts and routes/budgets.ts): the profile rows at
+ *     `monthlyIncomeKd` / `monthlyIncomeKd,paydayDay` below. A NULL or zero value takes
+ *     the not-set arm and ends at `amountKd: null`, nulling R9/R11/R8
+ *     `monthly_income_kd` and `budget_to_income_pct`. The fixture is NON-NULL
+ *     ("1800.000"), so the resolvers take the profile (declared) arm. This is the
+ *     N1/N2/N4 nullable requirement. MOB-R35, corrected adjacent: this note formerly
+ *     said `select{total}` fed `resolveIncomeForPeriod` and that the fixture took the
+ *     "detected arm". Both became false when MOB-R33 C1 made income typed-only: the
+ *     resolvers no longer issue the transaction SUM at all. `select{total}` (R4 x3,
+ *     R5, R9, R10) still feeds the expense and logged-income sums.
  *   - `select{amount,catName}` (R9 budget rows): a zero/empty result makes
  *     `totalBudget` 0, which flips `data_complete` and adds a `budgets_not_set`
  *     warning. Non-zero fixture takes the funded arm.
@@ -436,24 +442,30 @@ const MULTI_PATH: MultiPath[] = [
   {
     id: "MP-2",
     wirePath: "R9 / R11 / R8.safe_to_spend data.monthly_income_kd",
+    // MOB-R33 RM-13(f) — a control RE-AIMED BY A RULING, not a new control. The property it
+    // protects is unchanged: the WIRE TYPE of R9/R11/R8's monthly_income_kd. RM-13(a) removed the
+    // detected arm, so the fixture now takes the declared arm — served by the profile row the
+    // fixture always carried (`monthlyIncomeKd` below) and never reached while detection won —
+    // and the captured type is still "string" through the same formatKd call sites.
     arms: [
-      "detected_from_transactions: lib/income-lib.ts resolveIncomeForPeriod -> aggregation.ts:710 / intelligence-lib.ts:349 (formatKd)",
-      "declared_in_profile: same call sites, Decimal sourced from user_profiles.monthly_income_kd",
-      "not_set: null literal",
+      "declared_in_profile: lib/income-lib.ts resolveIncomeForPeriod -> aggregation.ts:715 / intelligence-lib.ts:349 (formatKd), Decimal sourced from user_profiles.monthly_income_kd",
+      "not_set: null literal — UNCAPTURED ARM under CF8",
     ],
-    fixtureArm: "detected_from_transactions — select{total} returns a non-zero row, so detectMonthlyIncome > 0 and the profile query is never reached",
+    fixtureArm: "declared_in_profile — select{monthlyIncomeKd} returns the fixture's \"1800.000\" profile row, so the resolver takes the declared arm",
     disposition: "GAP-RECORDED",
     divergenceRisk: "none (same serializer)",
-    revisit: "Capture the declared_in_profile arm if the resolver's serialization ever stops being shared across arms. The not_set arm is forbidden by the NULL guard.",
+    revisit: "The not_set arm (null) is UNCAPTURED under CF8: the NULL fail-loud guard forbids capturing it. Revisit trigger: the TB-R13 cycle that would relax the NULL fail-loud guard.",
   },
   {
     id: "MP-3",
     wirePath: "R8 data.budget.profile_context.monthly_income_kd and .budget_to_income_pct",
+    // MOB-R33 RM-13(f) — re-aimed with MP-2: the detected arm is gone from budgets.ts's local
+    // resolver too, so the fixture takes the declared arm.
     arms: [
-      "detected / declared: routes/budgets.ts:151/152 (.toFixed(3)) and :147 (.toFixed(1))",
-      "not_set: null literal (:152 ternary; :147 skipped when income is null or zero)",
+      "declared: routes/budgets.ts:127/128 (.toFixed(3)) and :123 (.toFixed(1))",
+      "not_set: null literal (:128 ternary; :123 skipped when income is null or zero) — UNCAPTURED ARM under CF8, same revisit trigger as MP-2",
     ],
-    fixtureArm: "detected — budgets.ts has its OWN resolveIncomeForPeriod (budgets.ts:76), a second implementation distinct from lib/income-lib.ts",
+    fixtureArm: "declared — select{monthlyIncomeKd,paydayDay} returns the fixture's \"1800.000\" profile row. budgets.ts has its OWN resolveIncomeForPeriod (budgets.ts:76), a second implementation distinct from lib/income-lib.ts",
     disposition: "GAP-RECORDED",
     divergenceRisk: "none (null arm forbidden by the NULL guard)",
     revisit: "budgets.ts's local resolver is already a SECOND implementation of the same concept. If it ever diverges from lib/income-lib.ts in serialization, capture both.",
@@ -765,19 +777,23 @@ const PRIMITIVE_BASELINES: Array<{ file: string; sites: number; feeds: string }>
 // comments and imports).
 const NON_WIRE_PRIMITIVE: Array<{ site: string; why: string }> = [
   {
-    site: "routes/budgets.ts:306",
+    site: "routes/budgets.ts:282", // MOB-R35: was :306; moved when C1 deleted the local resolver's detect SUM
     why: "formatKd() formatting an INSERT value inside POST /api/budgets (toInsert.push), not a response field.",
   },
 ]
 
 // Money emitted without any serializer primitive. No grep can re-derive these;
 // pinned explicitly (F3, accepted as load-bearing by the 2026-08-06 ruling).
+// MOB-R35 — line numbers corrected. The two aggregation.ts sites were ALREADY STALE BEFORE this
+// cycle (they read :341 and :1047 while HEAD had :346 and :1052); C1 then moved :1052 to :1055.
+// The three budgets.ts sites were correct at HEAD (:147/:151/:152) and C1 moved them. Only the
+// COUNT of this list is asserted (the 47 total), so these strings rot by construction — queued.
 const NON_PRIMITIVE_SITES: Array<{ site: string; field: string }> = [
-  { site: "routes/aggregation.ts:341", field: "R6 series[].total_kd — zero-fill literal `byMonth[mk] ?? 0`" },
-  { site: "routes/aggregation.ts:1047", field: "R10 safe_to_spend_today_kd — `String(...)` pass-through of R9 daily_rate_kd" },
-  { site: "routes/budgets.ts:147", field: "R8 budget.profile_context.budget_to_income_pct — `.toFixed(1)`" },
-  { site: "routes/budgets.ts:151", field: "R8 budget.profile_context.budget_total_kd — `.toFixed(3)`" },
-  { site: "routes/budgets.ts:152", field: "R8 budget.profile_context.monthly_income_kd — `.toFixed(3)`" },
+  { site: "routes/aggregation.ts:346", field: "R6 series[].total_kd — zero-fill literal `byMonth[mk] ?? 0`" },
+  { site: "routes/aggregation.ts:1055", field: "R10 safe_to_spend_today_kd — `String(...)` pass-through of R9 daily_rate_kd" },
+  { site: "routes/budgets.ts:123", field: "R8 budget.profile_context.budget_to_income_pct — `.toFixed(1)`" },
+  { site: "routes/budgets.ts:127", field: "R8 budget.profile_context.budget_total_kd — `.toFixed(3)`" },
+  { site: "routes/budgets.ts:128", field: "R8 budget.profile_context.monthly_income_kd — `.toFixed(3)`" },
 ]
 
 function countPrimitiveSites(relFile: string): number {
@@ -934,12 +950,35 @@ describe("B4-1 money wire-shape capture", () => {
       expect(kinds, `${id} must run the safe-to-spend builder, not replay a cached payload`).toContain(
         "select{amount,catName}",
       )
-      // ...plus its two select{total} queries. The measured replay signature is
-      // exactly -3 db calls per route (16/5/9 -> 13/2/6).
+      // ...plus the income resolver's profile read, and (on R9 only) its expense-sum select{total}.
+      // MOB-R34 re-aim — a control falsified by a ruling, not a new control. The property is
+      // unchanged: the safe-to-spend builder RAN for this route rather than replaying from the
+      // cache. It used to count two select{total} queries; RM-13(a) removed one of them (the
+      // resolver's detect SUM), and the resolver now issues select{monthlyIncomeKd} in that slot.
+      // That exact column set is unique to lib/income-lib.ts resolveIncomeForPeriod across
+      // R8/R9/R10 (verified by a source enumeration and by these runtime signatures).
+      //
+      // MOB-R35 — an assertion stays on a route ONLY where a forced replay shows it red. Measured
+      // under the C1 tree with a forced replay, each route losing exactly 3 db calls: R8 16 -> 13
+      // (R9 the writer), R9 5 -> 2 and R10 9 -> 6 (R8 the writer). Which assertions carry which
+      // route:
+      //   R8  — toContain + select{monthlyIncomeKd}. R8 issues three select{total} of its own
+      //         (R4 and the budgets context), so select{total} stays green under replay: dropped.
+      //   R9  — toContain + select{total} + select{monthlyIncomeKd}; all three red under replay.
+      //   R10 — toContain + select{monthlyIncomeKd}. R10 issues two select{total} of its own (its
+      //         weekly expense sums), so select{total} stays green under replay: dropped.
+      // FINDING against B4-1c-R4, recorded without editing that ruling: its select{total} >= 2
+      // never discriminated on R10 (measured at HEAD) — R10 was only ever caught by toContain.
+      if (id === "R9") {
+        expect(
+          kinds.filter((k) => k === "select{total}").length,
+          `${id} safe-to-spend builder select{total} count`,
+        ).toBeGreaterThanOrEqual(1)
+      }
       expect(
-        kinds.filter((k) => k === "select{total}").length,
-        `${id} safe-to-spend builder select{total} count`,
-      ).toBeGreaterThanOrEqual(2)
+        kinds.filter((k) => k === "select{monthlyIncomeKd}").length,
+        `${id} safe-to-spend builder select{monthlyIncomeKd} count`,
+      ).toBeGreaterThanOrEqual(1)
     }
   })
 

@@ -11,7 +11,6 @@ import { getDb } from "../db/connection"
 import { zodErrorToEnvelope } from "./route-helpers"
 import { budgets } from "../db/schema/budgets"
 import { categories } from "../db/schema/categories"
-import { transactions } from "../db/schema/transactions"
 import { userProfiles } from "../db/schema/users"
 import { requireAuth } from "../middleware/auth"
 import { readRateLimit, heavyWriteRateLimit } from "../lib/rate-limit"
@@ -66,13 +65,13 @@ function serializeBudgetItem(row: { id: number; month: string; amountKd: string;
 }
 
 // ── Income resolution ─────────────────────────────────────────────────────────
-// Single source of truth for a user's income for a given month.
-// Precedence: (1) sum of income-category transactions, (2) declared profile value.
+// Income is TYPED-ONLY (MOB-R31/R33): the declared profile value, or not set. Income-category
+// transactions are still logged, but no longer resolve to income. The `month` parameter is
+// accepted and ignored — one typed figure applies to every month (MOB-R32, RM-17 flat).
 //
-// TODO(localization): The income detection filter pattern-matches against the
-// English string 'income'. Users with non-English category names will not have
-// their income detected, causing budget_to_income_pct to be null. Revisit when
-// localizing or when is_income flag is reliably set on all income categories.
+// This is a SECOND copy of lib/income-lib.ts resolveIncomeForPeriod, and its unset arm returns
+// `source: null` where income-lib returns "not_set". Unifying the two is QUEUED (MOB-R32
+// RM-13(g)), together with the frontend profile_context.income_source type that lacks null.
 
 async function resolveIncomeForPeriod(
   userId: number,
@@ -80,29 +79,6 @@ async function resolveIncomeForPeriod(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   db: any,
 ): Promise<{ amountKd: Decimal | null; source: string | null }> {
-  const [year, mon] = month.split("-").map(Number)
-  const monthStart = `${month}-01`
-  const nextMonth = mon === 12 ? `${year + 1}-01-01` : `${year}-${String(mon + 1).padStart(2, "0")}-01`
-  const monthEnd = new Date(new Date(nextMonth).getTime() - 86_400_000).toISOString().slice(0, 10)
-
-  const [incomeRow] = await db
-    .select({ total: sql<string>`COALESCE(SUM(${transactions.amountKd}), '0')` })
-    .from(transactions)
-    .leftJoin(categories, eq(transactions.categoryId, categories.id))
-    .where(
-      and(
-        eq(transactions.userId, userId),
-        sql`${transactions.date} >= ${monthStart}`,
-        sql`${transactions.date} <= ${monthEnd}`,
-        sql`(${categories.isIncome} = 1 OR LOWER(COALESCE(${categories.name}, '')) LIKE 'income%')`,
-      ),
-    )
-
-  const detected = new Decimal(incomeRow?.total ?? "0")
-  if (detected.gt(0)) {
-    return { amountKd: detected, source: "detected_from_transactions" }
-  }
-
   const [profile] = await db
     .select({ monthlyIncomeKd: userProfiles.monthlyIncomeKd, paydayDay: userProfiles.paydayDay })
     .from(userProfiles)

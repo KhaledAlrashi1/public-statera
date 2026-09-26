@@ -883,6 +883,12 @@ describe("GET /api/analytics/account-overview", () => {
 // savings_goals_unscheduled_optional warnings no longer exist. F4/WC3 (the cap scenarios)
 // re-source their former debt contribution into the budget so committed still clears the
 // 40% cap. WC4 (which tested the two now-removed optional warnings) is deleted.
+//
+// MOB-R33 — income is typed-only, so "detected_from_transactions" is no longer emitted and
+// income_auto_detected is a constant false. F1/F3/F4 (and WC3) therefore DEVIATE from the Flask
+// capture on exactly those two fields, by ruling: each now reads income_source
+// "declared_in_profile" and income_auto_detected false. Every arithmetic field is unchanged —
+// the resolver's amount feeds the same calculation whichever arm produced it.
 
 // F1: today WITHIN cycle. Seed: month=2025-11, today=2025-11-10.
 // Nov cycle: Nov 1–30 (30 days). days_elapsed=10, days_remaining=20.
@@ -894,8 +900,8 @@ const FIXTURE_F1 = {
   days_elapsed: 10,
   days_remaining: 20,
   monthly_income_kd: "1500.000",
-  income_auto_detected: true,
-  income_source: "detected_from_transactions",
+  income_auto_detected: false,
+  income_source: "declared_in_profile",
   total_budget_kd: "500.000",
   committed_kd: "500.000",
   committed_breakdown_kd: {
@@ -943,8 +949,8 @@ const FIXTURE_F3 = {
   days_elapsed: 30,
   days_remaining: 0,
   monthly_income_kd: "1500.000",
-  income_auto_detected: true,
-  income_source: "detected_from_transactions",
+  income_auto_detected: false,
+  income_source: "declared_in_profile",
   total_budget_kd: "500.000",
   committed_kd: "500.000",
   committed_breakdown_kd: {
@@ -968,8 +974,8 @@ const FIXTURE_F4 = {
   days_elapsed: 10,
   days_remaining: 20,
   monthly_income_kd: "1000.000",
-  income_auto_detected: true,
-  income_source: "detected_from_transactions",
+  income_auto_detected: false,
+  income_source: "declared_in_profile",
   total_budget_kd: "450.000",
   committed_kd: "450.000",
   committed_breakdown_kd: {
@@ -1065,8 +1071,8 @@ const FIXTURE_WC3 = {
   days_elapsed: 30,
   days_remaining: 0,
   monthly_income_kd: "1000.000",
-  income_auto_detected: true,
-  income_source: "detected_from_transactions",
+  income_auto_detected: false,
+  income_source: "declared_in_profile",
   total_budget_kd: "450.000",
   committed_kd: "450.000",
   committed_breakdown_kd: {
@@ -1110,7 +1116,7 @@ describe("GET /api/analytics/safe-to-spend", () => {
     vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(new Date(Date.UTC(2025, 10, 10)))
     vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
       amountKd: new Decimal("1500.000"),
-      source: "detected_from_transactions",
+      source: "declared_in_profile",
     })
     vi.mocked(getDb).mockReturnValue(
       makeR9Db(
@@ -1166,7 +1172,7 @@ describe("GET /api/analytics/safe-to-spend", () => {
     vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(new Date(Date.UTC(2025, 10, 10)))
     vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
       amountKd: new Decimal("1500.000"),
-      source: "detected_from_transactions",
+      source: "declared_in_profile",
     })
     vi.mocked(getDb).mockReturnValue(
       makeR9Db(
@@ -1212,7 +1218,7 @@ describe("GET /api/analytics/safe-to-spend", () => {
     vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(new Date(Date.UTC(2025, 11, 1)))
     vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
       amountKd: new Decimal("1500.000"),
-      source: "detected_from_transactions",
+      source: "declared_in_profile",
     })
     vi.mocked(getDb).mockReturnValue(
       makeR9Db(
@@ -1235,7 +1241,7 @@ describe("GET /api/analytics/safe-to-spend", () => {
     vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(new Date(Date.UTC(2025, 10, 10)))
     vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
       amountKd: new Decimal("1000.000"),
-      source: "detected_from_transactions",
+      source: "declared_in_profile",
     })
     vi.mocked(getDb).mockReturnValue(
       makeR9Db(
@@ -1319,7 +1325,7 @@ describe("GET /api/analytics/safe-to-spend", () => {
     it("WC3: commitments_over_40pct_cap (stable-month) — daily_rate=500", async () => {
       vi.mocked(resolveIncomeForPeriod).mockResolvedValue({
         amountKd: new Decimal("1000.000"),
-        source: "detected_from_transactions",
+        source: "declared_in_profile",
       })
       vi.mocked(getDb).mockReturnValue(
         makeR9Db(
