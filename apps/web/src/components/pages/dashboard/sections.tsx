@@ -319,7 +319,7 @@ export function PlanSetupPrompts({
           Set your monthly income so your plan and net figures are accurate.
         </p>
         <Button type="button" variant="outline" onClick={onOpenIncome ?? onOpenPlan}>
-          Add income
+          Set income
         </Button>
       </div>
     )
@@ -669,7 +669,7 @@ export function SetupProgressPanel({
 function setupGuideHelper(stepKey: string): string {
   switch (stepKey) {
     case "income":
-      return "Set your monthly income and payday first so the rest of the product has a planning baseline."
+      return "Set your monthly income first so the rest of the product has a planning baseline."
     case "transactions":
       return "You can import a CSV or add transactions manually. Either path gives the dashboard real activity to work with."
     case "budget":
@@ -818,6 +818,7 @@ export function DashboardHero({
   monthIncome,
   monthExpenses,
   monthRemaining,
+  overBy = null,
   savingsRate,
   dailyPace,
   deltas,
@@ -825,12 +826,17 @@ export function DashboardHero({
 }: {
   isLoading: boolean
   monthLabel: string
-  monthIncome: number
+  // MOB-R36 — the TYPED monthly income; null when not set. Not set wins over overspent.
+  monthIncome: number | null
   monthExpenses: number
   monthRemaining: number
-  savingsRate: number
+  // Expenses minus income when spending exceeds the typed income (#23); null otherwise.
+  overBy?: number | null
+  savingsRate: number | null
   dailyPace: { avgDaily: number; projected: number; daysElapsed: number; daysInMonth: number } | null
-  deltas: { incomeDelta: number; expensesDelta: number; remainingDelta: number; savingsRateDelta: number } | null
+  // The Income chip is removed (MOB-R36: under RM-17 flat it always read 0.0%). remainingDelta is
+  // null when either month is overspent (a channel ruling by analogy, MOB-R36).
+  deltas: { expensesDelta: number; remainingDelta: number | null; savingsRateDelta: number } | null
   analyticsUpdatedAt?: string | null
 }) {
   const freshness = useMemo(() => {
@@ -865,7 +871,8 @@ export function DashboardHero({
       stale,
     }
   }, [analyticsUpdatedAt])
-  const momentum = dashboardMomentumState(monthRemaining, savingsRate)
+  const incomeSet = monthIncome !== null
+  const momentum = incomeSet ? dashboardMomentumState(monthRemaining, savingsRate ?? 0) : null
 
   return (
     <section className="float-in stagger-1 space-y-4" aria-label="Monthly overview">
@@ -915,8 +922,9 @@ export function DashboardHero({
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div className="min-w-0">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Income</div>
-              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl"><AnimatedKD value={monthIncome} /></div>
-              {deltas && <HeroDelta value={deltas.incomeDelta} />}
+              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl">
+                {monthIncome === null ? "Not set" : <AnimatedKD value={monthIncome} />}
+              </div>
             </div>
             <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Expenses</div>
@@ -925,12 +933,20 @@ export function DashboardHero({
             </div>
             <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Remaining</div>
-              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl"><AnimatedKD value={monthRemaining} /></div>
-              {deltas && <HeroDelta value={deltas.remainingDelta} />}
+              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl">
+                {!incomeSet
+                  ? "—"
+                  : overBy !== null && overBy > 0
+                    ? `Over by ${formatKD(overBy)}`
+                    : <AnimatedKD value={monthRemaining} />}
+              </div>
+              {deltas && deltas.remainingDelta !== null && <HeroDelta value={deltas.remainingDelta} />}
             </div>
             <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Savings rate</div>
-              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl"><AnimatedPercent value={savingsRate} /></div>
+              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl">
+                {savingsRate === null ? "—" : <AnimatedPercent value={savingsRate} />}
+              </div>
               {deltas && <HeroDelta value={deltas.savingsRateDelta} unit="points" />}
             </div>
           </div>
@@ -1151,9 +1167,14 @@ export function HomeAttentionCenter({
 export function IncomeExpensesChart({
   isLoading,
   trendData,
+  typedIncome = null,
 }: {
   isLoading: boolean
+  // `income` is the LOGGED income sum (R3). It is used only to tell a month with rows from an empty
+  // one; it is no longer drawn (MOB-R36, RM-17 flat).
   trendData: Array<{ month: string; income: number; expenses: number }>
+  // The TYPED monthly income, drawn as one reference line; null when not set.
+  typedIncome?: number | null
 }) {
   // MOB-1 Group 2 — zero-vs-no-data. The server zero-FILLS every month in the window before folding
   // in any rows (lib/dashboard-snapshot-lib.ts:223-227), so a month with no transactions arrives
@@ -1167,7 +1188,10 @@ export function IncomeExpensesChart({
   // month that "finished with income ahead of expenses", and it dragged the expense average toward
   // zero as though it were a frugal month.
   const monthsWithData = trendData.filter((row) => row.income !== 0 || row.expenses !== 0)
-  const monthsAhead = monthsWithData.filter((row) => row.income >= row.expenses).length
+  // MOB-R36 — RM-17 flat: every month is compared against the one typed income.
+  const monthsAhead = typedIncome === null
+    ? 0
+    : monthsWithData.filter((row) => typedIncome >= row.expenses).length
   const expenseAverage = monthsWithData.length > 0
     ? monthsWithData.reduce((sum, row) => sum + row.expenses, 0) / monthsWithData.length
     : 0
@@ -1180,9 +1204,14 @@ export function IncomeExpensesChart({
     },
     null
   )
-  const insightCaption = monthsWithData.length > 0
-    ? `${monthsAhead} of ${monthsWithData.length} visible months finished with income ahead of expenses.`
-    : "Compare how income and expenses move together across recent months."
+  // An empty window keeps the existing fallback even when income is not set (MOB-R37, a channel
+  // ruling): asking for expenses first is the more useful instruction. The not-set caption (#10)
+  // applies only when there is data.
+  const insightCaption = monthsWithData.length === 0
+    ? "Compare how income and expenses move together across recent months."
+    : typedIncome === null
+      ? "Set your monthly income in Profile to see it on this chart."
+      : `${monthsAhead} of ${monthsWithData.length} visible months finished with income ahead of expenses.`
 
   return (
     <section className="section-panel float-in stagger-2" aria-label="Income vs Expenses chart">
@@ -1201,7 +1230,7 @@ export function IncomeExpensesChart({
           <div className="skeleton h-[240px] w-full sm:h-[320px]" />
         ) : trendData.length === 0 ? (
           <div className="flex h-[240px] items-center justify-center rounded-xl border border-border bg-muted/40 text-sm text-muted-foreground sm:h-[320px]">
-            Add a few income and expense transactions to start seeing your monthly trend.
+            Add a few expense transactions to start seeing your monthly trend.
           </div>
         ) : (
           <>
@@ -1218,24 +1247,24 @@ export function IncomeExpensesChart({
                     strokeOpacity={0.5}
                     ifOverflow="extendDomain"
                   />
+                  {typedIncome !== null ? (
+                    <ReferenceLine
+                      y={typedIncome}
+                      className="income-reference-line"
+                      stroke={CHART_STROKES.income}
+                      strokeWidth={2}
+                      ifOverflow="extendDomain"
+                      label={{ value: "Your income", position: "insideTopRight", fill: CHART_STROKES.legendText, fontSize: 12 }}
+                    />
+                  ) : null}
                   <RechartsTooltip
-                    formatter={(value: number, name: string) => [
-                      `KD ${value.toFixed(3)}`,
-                      name === "income" ? "Income" : "Expenses",
-                    ]}
+                    formatter={(value: number) => [`KD ${value.toFixed(3)}`, "Expenses"]}
                     contentStyle={chartTooltipStyle}
                   />
                   <Legend
                     verticalAlign="bottom"
                     height={24}
                     wrapperStyle={{ fontSize: 12, color: CHART_STROKES.legendText }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="income"
-                    stroke={CHART_STROKES.income}
-                    strokeWidth={2.5}
-                    dot={{ r: 3 }}
                   />
                   <Line
                     type="monotone"
@@ -1250,7 +1279,12 @@ export function IncomeExpensesChart({
             {peakExpenseMonth ? (
               <p className="mt-3 text-sm text-muted-foreground">
                 Highest expense month in view: <span className="font-semibold text-foreground">{peakExpenseMonth.month}</span>{" "}
-                at <span className="tabular-nums text-foreground">{formatCompactKD(peakExpenseMonth.expenses)}</span>. The dashed line shows your average monthly expense pace.
+                at <span className="tabular-nums text-foreground">{formatCompactKD(peakExpenseMonth.expenses)}</span>.{" "}
+                {/* MOB-R36 #12. Its second sentence names the income line, which is only drawn when the
+                    income is set; without it the sentence would be false, so it is omitted. */}
+                {typedIncome !== null
+                  ? "The dashed line shows your average monthly spending. The solid line is your monthly income."
+                  : "The dashed line shows your average monthly spending."}
               </p>
             ) : null}
           </>

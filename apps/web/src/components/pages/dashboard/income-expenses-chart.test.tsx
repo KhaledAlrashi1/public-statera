@@ -35,8 +35,16 @@ vi.mock("@/lib/recharts", async () => {
     // Rendering it as a Leaf made the D4 assertion non-discriminating: the first attempt asserted
     // the peak month instead, which is 2026-03 with or without the fix. Captured so the average
     // itself can be asserted.
-    ReferenceLine: ({ y }: { y?: number }) =>
-      React.createElement("div", { "data-testid": "avg-line" }, String(y)),
+    // MOB-R36/R37 — two ReferenceLines now: the dashed expense average and the solid typed-income
+    // line. Rendering both as "avg-line" would make them one testid — an instrument sharing a
+    // mechanism with what it measures — so the mock tells them apart by the className the
+    // component sets on the income line.
+    ReferenceLine: ({ y, className }: { y?: number; className?: string }) =>
+      React.createElement(
+        "div",
+        { "data-testid": className === "income-reference-line" ? "income-line" : "avg-line" },
+        String(y),
+      ),
     Area: Leaf,
     AreaChart: Pass,
     PieChart: Pass,
@@ -56,7 +64,7 @@ const MIXED = [
 
 describe("MOB-1 Group 2 — IncomeExpensesChart", () => {
   it("D1 — counts only months that HAVE data, in both the numerator and the denominator", () => {
-    render(<IncomeExpensesChart isLoading={false} trendData={MIXED} />)
+    render(<IncomeExpensesChart isLoading={false} trendData={MIXED} typedIncome={1000} />)
     // WITHOUT the change this reads "3 of 4": the two empty months satisfy 0 >= 0 and are counted
     // as months that finished with income ahead of expenses.
     expect(screen.getByText("1 of 2 visible months finished with income ahead of expenses.")).toBeInTheDocument()
@@ -82,6 +90,7 @@ describe("MOB-1 Group 2 — IncomeExpensesChart", () => {
           { month: "2026-01", income: 1000, expenses: 800 },
           { month: "2026-02", income: 900, expenses: 1200 },
         ]}
+        typedIncome={1000}
       />
     )
     // Same shape as MIXED's non-empty rows, so the count must be identical — this is what shows
@@ -105,5 +114,32 @@ describe("MOB-1 Group 2 — IncomeExpensesChart", () => {
     expect(screen.queryByText(/visible months finished/)).not.toBeInTheDocument()
     // And the peak sentence must not name an empty month as the highest-expense one.
     expect(screen.queryByText(/Highest expense month in view/)).not.toBeInTheDocument()
+  })
+})
+
+// MOB-R36/R37 — RM-17 flat: the typed income is drawn as ONE reference line against expenses, not
+// as a per-month series. Fixture: logged incomes 2000 and 2000, expenses 800 and 1400, typed income
+// 1000 — so the expense average is 1100, which differs from the typed income. The caption compares
+// the TYPED income: 1000 >= 800 but 1000 < 1400, so "1 of 2". The old code has no income line and
+// uses the logged incomes, reading "2 of 2" — red for the reason under test.
+const TYPED_FIXTURE = [
+  { month: "2026-01", income: 2000, expenses: 800 },
+  { month: "2026-02", income: 2000, expenses: 1400 },
+]
+
+describe("MOB-R36 — IncomeExpensesChart typed-income reference line", () => {
+  it("draws the typed income as a reference line and compares months against it", () => {
+    render(<IncomeExpensesChart isLoading={false} trendData={TYPED_FIXTURE} typedIncome={1000} />)
+    expect(screen.getByTestId("income-line").textContent).toBe("1000")
+    expect(screen.getByTestId("avg-line").textContent).toBe("1100")
+    expect(screen.getByText("1 of 2 visible months finished with income ahead of expenses.")).toBeInTheDocument()
+  })
+
+  it("NEGATIVE — with income not set there is no income line and the not-set caption shows", () => {
+    render(<IncomeExpensesChart isLoading={false} trendData={TYPED_FIXTURE} typedIncome={null} />)
+    expect(screen.queryByTestId("income-line")).not.toBeInTheDocument()
+    expect(screen.getByTestId("avg-line").textContent).toBe("1100")
+    expect(screen.getByText("Set your monthly income in Profile to see it on this chart.")).toBeInTheDocument()
+    expect(screen.queryByText(/visible months finished/)).not.toBeInTheDocument()
   })
 })

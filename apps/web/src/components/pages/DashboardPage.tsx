@@ -4,7 +4,6 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
 import { prevMonth as prevMonthUtil, labelForYM } from "@/lib/utils"
 import { authApi, notificationsApi } from "@/lib/api"
-import { useQuickAdd } from "@/contexts/QuickAddContext"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { CategoryDetailModal } from "@/components/ui/category-detail-modal"
@@ -36,7 +35,6 @@ const ONBOARDING_DISMISSED_KEY = "onboarding-dismissed"
 export default function DashboardPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { openQuickAdd } = useQuickAdd()
   const toast = useToast()
   const now = new Date()
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
@@ -151,16 +149,32 @@ export default function DashboardPage() {
   const monthIncomeRaw = selectedMonth ? (monthlyKpiMap.get(selectedMonth)?.income || 0) : 0
   const monthExpensesRaw = selectedMonth ? (monthlyKpiMap.get(selectedMonth)?.expenses || 0) : 0
 
-  const monthIncome = accountOverview
+  // The LOGGED income sum (R4 when present, else R3). MOB-R36: it no longer feeds any displayed
+  // figure; it is kept only for the empty-row guards, where 0/0 still means "no rows".
+  const loggedMonthIncome = accountOverview
     ? Number(accountOverview.total_income_mtd || 0)
     : monthIncomeRaw
   const monthExpenses = accountOverview
     ? Number(accountOverview.total_spend_mtd || 0)
     : monthExpensesRaw
 
-  const monthRemaining = Math.max(0, monthIncome - monthExpenses)
+  // MOB-R36 — the TYPED monthly income. Mirrors lib/income-lib.ts resolveIncomeForPeriod's
+  // declared_in_profile arm: income is set only when the profile value is present AND greater than
+  // zero (MOB-R33, R2 correction — the sibling signal wins over the write-path argument). Under
+  // RM-17 flat the same figure applies to every month.
+  const typedIncome = useMemo(() => {
+    const raw = profile?.monthly_income_kd
+    if (raw === null || raw === undefined || String(raw).trim() === "") return null
+    const n = Number(raw)
+    return Number.isFinite(n) && n > 0 ? n : null
+  }, [profile?.monthly_income_kd])
 
-  const savingsRate = monthIncome > 0 ? ((monthIncome - monthExpenses) / monthIncome) * 100 : 0
+  const monthIncome = typedIncome
+  const monthRemaining = typedIncome === null ? 0 : Math.max(0, typedIncome - monthExpenses)
+  // #23 — "Over by KD {amount}", amount = expenses minus income. Not set wins over overspent.
+  const monthOverBy = typedIncome !== null && monthExpenses > typedIncome ? monthExpenses - typedIncome : null
+
+  const savingsRate = typedIncome === null ? null : ((typedIncome - monthExpenses) / typedIncome) * 100
 
   const monthLabel = labelForYM(selectedMonth)
   const monthBundleErrorMessage = monthBundleError instanceof Error
@@ -197,7 +211,7 @@ export default function DashboardPage() {
       {
         key: "income",
         title: "Set your income",
-        description: "Add your monthly income and payday in Profile so planning starts with a real baseline.",
+        description: "Add your monthly income in Profile so planning starts with a real baseline.",
         done: hasIncome,
         actionLabel: "Set Income",
         onAction: () => navigate("/profile"),
@@ -243,33 +257,43 @@ export default function DashboardPage() {
   const prevMonthKpis = useMemo(() => {
     if (!prevMonthVal) return null
     const prev = monthlyKpiMap.get(prevMonthVal)
-    const income = prev?.income || 0
+    // The empty-period guard stays on the LOGGED sums: 0/0 means the month has no rows.
+    const loggedIncome = prev?.income || 0
     const expenses = prev?.expenses || 0
-    const remaining = Math.max(0, income - expenses)
-    const sr = income > 0 ? ((income - expenses) / income) * 100 : 0
-    if (income === 0 && expenses === 0) return null
-    return { income, expenses, remaining, savingsRate: sr }
-  }, [monthlyKpiMap, prevMonthVal])
+    if (loggedIncome === 0 && expenses === 0) return null
+    if (typedIncome === null) return null
+    // RM-17 flat: the previous month is measured against the same typed income.
+    const remaining = Math.max(0, typedIncome - expenses)
+    const sr = ((typedIncome - expenses) / typedIncome) * 100
+    return { expenses, remaining, savingsRate: sr, overspent: expenses > typedIncome }
+  }, [monthlyKpiMap, prevMonthVal, typedIncome])
 
   const heroDeltas = useMemo(() => {
+    // Income not set: Remaining and Savings rate have no value, so nothing is compared.
+    if (typedIncome === null || savingsRate === null) return null
     if (!prevMonthKpis) return null
     // Symmetric with prevMonthKpis' own empty-period guard above: a month with no
-    // rows produces income = expenses = 0, which yields a -100% delta that the
+    // rows produces logged income = expenses = 0, which yields a -100% delta that the
     // inverted Expenses tile renders as a green success pill. Both category
     // filters are exhaustive and every amount is > 0 (DB CHECK
     // chk_transactions_amount_positive), so 0/0 means no rows, never a real zero.
-    if (monthIncome === 0 && monthExpenses === 0) return null
+    // MOB-R36 re-key: this must read the LOGGED income, not the typed figure — the typed income
+    // is never 0 once set, so keying on it would silently disable the guard.
+    if (loggedMonthIncome === 0 && monthExpenses === 0) return null
     const delta = (curr: number, prev: number) => {
       if (prev === 0) return curr > 0 ? 100 : 0
       return ((curr - prev) / prev) * 100
     }
+    // The Income chip is removed (MOB-R36 operator selection). Remaining's chip is suppressed when
+    // either month is overspent: a clamped Remaining is not a comparable quantity (a channel ruling
+    // by analogy, MOB-R36 — not an operator ruling).
+    const eitherOverspent = monthOverBy !== null || prevMonthKpis.overspent
     return {
-      incomeDelta: delta(monthIncome, prevMonthKpis.income),
       expensesDelta: delta(monthExpenses, prevMonthKpis.expenses),
-      remainingDelta: delta(monthRemaining, prevMonthKpis.remaining),
+      remainingDelta: eitherOverspent ? null : delta(monthRemaining, prevMonthKpis.remaining),
       savingsRateDelta: savingsRate - prevMonthKpis.savingsRate,
     }
-  }, [monthIncome, monthExpenses, monthRemaining, savingsRate, prevMonthKpis])
+  }, [typedIncome, loggedMonthIncome, monthExpenses, monthRemaining, monthOverBy, savingsRate, prevMonthKpis])
 
   const trendData = useMemo(() => {
     return monthlyMetrics.slice(Math.max(0, monthlyMetrics.length - 12)).map((row) => ({
@@ -512,9 +536,14 @@ export default function DashboardPage() {
     && !hasRecordedTransactions
     && !setupBudgetResp?.items?.length
   const showDashboardEmptyState = noDashboardData && !showSetupProgress
+  // MOB-R36 re-key (MOB-R33 correction (iii)) — mirror the backend's hasFinancialData
+  // (apps/api/src/lib/demo-data-lib.ts:312): the demo is refused (409) once the profile holds an
+  // income or a payday, or rows exist. Keying on the logged income being 0 offered a demo the
+  // backend then refused, and a typed income makes that common.
   const canLoadDemoData = !loadingDemoData
     && !hasRecordedTransactions
-    && monthIncome === 0
+    && profile?.monthly_income_kd == null
+    && profile?.payday_day == null
     && !setupBudgetResp?.items?.length
 
   const loadDemoData = useCallback(async () => {
@@ -782,6 +811,7 @@ export default function DashboardPage() {
         monthIncome={monthIncome}
         monthExpenses={monthExpenses}
         monthRemaining={monthRemaining}
+        overBy={monthOverBy}
         savingsRate={savingsRate}
         dailyPace={dailyPace}
         deltas={heroDeltas}
@@ -827,7 +857,7 @@ export default function DashboardPage() {
           />
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <IncomeExpensesChart isLoading={isLoading} trendData={trendData} />
+            <IncomeExpensesChart isLoading={isLoading} trendData={trendData} typedIncome={typedIncome} />
             <CategoryBreakdownChart
               isLoading={isLoading}
               categoryData={categoryData}
@@ -899,7 +929,7 @@ export default function DashboardPage() {
         isLoading={safeToSpendLoading}
         safeToSpend={safeToSpend}
         onOpenPlan={() => navigate("/plan")}
-        onOpenIncome={() => openQuickAdd("income")}
+        onOpenIncome={() => navigate("/profile")}
       />
 
       {showSetupProgress && (

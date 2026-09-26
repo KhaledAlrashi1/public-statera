@@ -122,3 +122,61 @@ describe("DashboardHero", () => {
     expect(screen.getByText("Updated 45 minutes ago")).toBeInTheDocument()
   })
 })
+
+// MOB-R36 — the typed income. Not set wins over overspent; the Income tile's "vs last month" chip is
+// removed (under RM-17 flat it would always read 0.0%).
+describe("DashboardHero — typed income (MOB-R36)", () => {
+  it("income not set: Income reads Not set, Remaining and Savings rate read —", () => {
+    render(
+      <DashboardHero
+        isLoading={false}
+        monthLabel="March 2026"
+        monthIncome={null}
+        monthExpenses={250}
+        monthRemaining={0}
+        savingsRate={null}
+        dailyPace={null}
+        deltas={null}
+      />
+    )
+    expect(screen.getByText("Not set")).toBeInTheDocument()
+    expect(screen.getAllByText("—")).toHaveLength(2)
+    expect(screen.queryByText("KD 0.000")).not.toBeInTheDocument()
+    expect(screen.queryByText("0.0%")).not.toBeInTheDocument()
+  })
+
+  it("spending above income: Remaining reads Over by KD {amount}", () => {
+    render(
+      <DashboardHero
+        isLoading={false}
+        monthLabel="March 2026"
+        monthIncome={1000}
+        monthExpenses={1200}
+        monthRemaining={0}
+        overBy={200}
+        savingsRate={-20}
+        dailyPace={null}
+        deltas={null}
+      />
+    )
+    expect(screen.getByText("Over by KD 200.000")).toBeInTheDocument()
+  })
+
+  it("the Income tile has no vs-last-month chip; the Expenses tile still does", () => {
+    render(
+      <DashboardHero
+        isLoading={false}
+        monthLabel="March 2026"
+        monthIncome={1000}
+        monthExpenses={600}
+        monthRemaining={400}
+        savingsRate={40}
+        dailyPace={null}
+        // incomeDelta is what the OLD hero rendered as the Income chip; 0 is what RM-17 flat gives.
+        deltas={{ incomeDelta: 0, expensesDelta: 10, remainingDelta: 5, savingsRateDelta: 2 }}
+      />
+    )
+    expect(screen.getByText("10.0% vs last month")).toBeInTheDocument()
+    expect(screen.queryByText("0.0% vs last month")).not.toBeInTheDocument()
+  })
+})

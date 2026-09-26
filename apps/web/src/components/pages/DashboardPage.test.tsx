@@ -14,6 +14,10 @@ const mocks = vi.hoisted(() => ({
   refetchSetupBudget: vi.fn(),
   refetchCategoryRows: vi.fn(),
   dashboardHero: vi.fn(),
+  // MOB-R36 — prop recorders, same pattern as dashboardHero. They record props only; each mock's
+  // rendered output is unchanged, so no existing case can see a difference.
+  planSetupPrompts: vi.fn(),
+  setupProgressPanel: vi.fn(),
 }))
 
 vi.mock("react-router-dom", async () => {
@@ -50,20 +54,22 @@ vi.mock("./dashboard/sections", () => ({
     return <div>dashboard hero</div>
   },
   SetupGuideDialog: () => null,
-  SetupProgressPanel: ({
-    steps,
-  }: {
+  SetupProgressPanel: (props: {
     steps: Array<{ key: string; title: string; done: boolean; actionLabel: string }>
-  }) => (
-    <div>
-      {steps.map((step) => (
-        <div key={step.key}>
-          <span>{step.title}</span>
-          <span>{step.done ? "Done" : step.actionLabel}</span>
-        </div>
-      ))}
-    </div>
-  ),
+  }) => {
+    mocks.setupProgressPanel(props)
+    const { steps } = props
+    return (
+      <div>
+        {steps.map((step) => (
+          <div key={step.key}>
+            <span>{step.title}</span>
+            <span>{step.done ? "Done" : step.actionLabel}</span>
+          </div>
+        ))}
+      </div>
+    )
+  },
   PlanSummaryPanel: () => null,
   SafeToSpendHero: () => <div>safe to spend</div>,
   // MOB-R26 RM-1 — the income nudge relocated OUT of SafeToSpendHero to an unconditional
@@ -71,7 +77,10 @@ vi.mock("./dashboard/sections", () => ({
   // it resolves to undefined and throws; the entry is required by the mount, not optional.
   IncomeNudge: () => <div>income nudge</div>,
   // MOB-R27 — the three relocated prompts. Same closed-list reason as IncomeNudge above.
-  PlanSetupPrompts: () => <div>plan setup prompts</div>,
+  PlanSetupPrompts: (props: unknown) => {
+    mocks.planSetupPrompts(props)
+    return <div>plan setup prompts</div>
+  },
   HomeAttentionCenter: () => <div>alerts</div>,
   IncomeExpensesChart: () => <div>income chart</div>,
   CategoryBreakdownChart: () => <div>category chart</div>,
@@ -552,6 +561,9 @@ describe("DashboardPage", () => {
         expense_by_category: {},
       },
       accountOverview: { total_income_mtd: "0.000", total_spend_mtd: "0.000" },
+      // MOB-R37 (iii) — a typed income, so the null below is caused by the EMPTY-ROW guard, not by
+      // "income not set" (which also yields null deltas and would pass this for the wrong reason).
+      profile: { monthly_income_kd: "1800.000" },
     })
 
     renderPage()
@@ -575,11 +587,94 @@ describe("DashboardPage", () => {
         expense_by_category: {},
       },
       accountOverview: { total_income_mtd: "1800.000", total_spend_mtd: "250.000" },
+      // MOB-R37 (ii) — a typed income; without it the hero is "not set" and deltas are null.
+      profile: { monthly_income_kd: "1800.000" },
     })
 
     renderPage()
 
     const props = mocks.dashboardHero.mock.calls.at(-1)?.[0] as { deltas: unknown }
     expect(props.deltas).not.toBeNull()
+  })
+
+  // ── MOB-R36 C4 — the hero reads the TYPED income (profile), mirroring the resolver's declared arm.
+  const TWO_MONTHS = {
+    months: ["2026-03", "2026-02"],
+    monthly: [
+      { month: "2026-02", income_kd: "1800.000", expense_kd: "800.000" },
+      { month: "2026-03", income_kd: "1800.000", expense_kd: "250.000" },
+    ],
+    expense_by_category: {},
+  }
+  type HeroProps = {
+    monthIncome: number | null
+    deltas: { expensesDelta: number; remainingDelta: number | null; savingsRateDelta: number } | null
+  }
+  const lastHero = () => mocks.dashboardHero.mock.calls.at(-1)?.[0] as HeroProps
+
+  it("the hero shows the typed income, not the logged R4 sum", () => {
+    mocks.useDashboardPageQueries.mockReturnValue({
+      ...baseResult,
+      dashboardMetrics: TWO_MONTHS,
+      accountOverview: { total_income_mtd: "1800.000", total_spend_mtd: "250.000" },
+      profile: { monthly_income_kd: "1500.000" },
+    })
+    renderPage()
+    expect(lastHero().monthIncome).toBe(1500)
+  })
+
+  it("income not set: the hero gets null income and null deltas", () => {
+    mocks.useDashboardPageQueries.mockReturnValue({
+      ...baseResult,
+      dashboardMetrics: TWO_MONTHS,
+      accountOverview: { total_income_mtd: "1800.000", total_spend_mtd: "250.000" },
+      profile: null,
+    })
+    renderPage()
+    expect(lastHero().monthIncome).toBeNull()
+    expect(lastHero().deltas).toBeNull()
+  })
+
+  it("the Set income prompt opens Profile", () => {
+    renderPage()
+    const props = mocks.planSetupPrompts.mock.calls.at(-1)?.[0] as { onOpenIncome?: () => void }
+    props.onOpenIncome?.()
+    expect(mocks.navigate).toHaveBeenCalledWith("/profile")
+  })
+
+  it("Remaining's vs-last-month chip is suppressed when a month is overspent; the others stay", () => {
+    mocks.useDashboardPageQueries.mockReturnValue({
+      ...baseResult,
+      dashboardMetrics: {
+        months: ["2026-03", "2026-02"],
+        monthly: [
+          { month: "2026-02", income_kd: "1800.000", expense_kd: "800.000" },
+          { month: "2026-03", income_kd: "1800.000", expense_kd: "1200.000" },
+        ],
+        expense_by_category: {},
+      },
+      accountOverview: { total_income_mtd: "1800.000", total_spend_mtd: "1200.000" },
+      profile: { monthly_income_kd: "1000.000" }, // March spending 1200 exceeds the typed 1000
+    })
+    renderPage()
+    const deltas = lastHero().deltas
+    expect(deltas).not.toBeNull()
+    expect(deltas?.remainingDelta).toBeNull()
+    expect(typeof deltas?.expensesDelta).toBe("number")
+  })
+
+  it("canLoadDemoData: once a typed income exists the demo is not offered; with nothing set it is", () => {
+    // The backend's hasFinancialData refuses the demo (409) once the profile holds an income.
+    mocks.useDashboardPageQueries.mockReturnValue({ ...baseResult, profile: { monthly_income_kd: "1500.000" } })
+    renderPage()
+    const withIncome = mocks.setupProgressPanel.mock.calls.at(-1)?.[0] as { demoAction?: unknown }
+    expect(withIncome.demoAction ?? null).toBeNull()
+
+    // NEGATIVE — nothing set, no rows, no budgets: the demo IS offered.
+    mocks.setupProgressPanel.mockClear()
+    mocks.useDashboardPageQueries.mockReturnValue({ ...baseResult, profile: null })
+    renderPage()
+    const withNothing = mocks.setupProgressPanel.mock.calls.at(-1)?.[0] as { demoAction?: unknown }
+    expect(withNothing.demoAction).not.toBeNull()
   })
 })

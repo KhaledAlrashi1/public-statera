@@ -90,7 +90,7 @@ describe("PlanSetupPrompts", () => {
       screen.getByText("Set your monthly income so your plan and net figures are accurate.")
     ).toBeInTheDocument()
     expect(screen.getByText("Set your income")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Add income" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Set income" })).toBeInTheDocument()
     expect(screen.queryByText(/Safe to Spend/i)).not.toBeInTheDocument()
   })
 
