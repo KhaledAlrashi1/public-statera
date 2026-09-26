@@ -6869,3 +6869,123 @@ After the append: the strict header count, predicted 32, contiguous, printed in 
 closed with grep -n output. Read back what was written. The commit message is piped from a file.
 COMMIT; DO NOT PUSH. State the unpushed count by both routes, predicted 2: the MOB-R31 and MOB-R32
 persistence commits.
+
+MOB-R33 — THE REVISED PROPOSAL IS ACCEPTED WITH FOUR CORRECTIONS. THE FORCED-EDIT REQUEST IS
+GRANTED IN FULL. OPTION B IS RULED FOR THE HERO. THE CACHE BUST IS AUTHORISED. C1 AND C2 ARE
+AUTHORISED FOR IMPLEMENTATION NOW. C3, C4 AND C5 WAIT FOR THE OPERATOR-SELECTED COPY IN THE NEXT
+BLOCK.
+
+CADENCE. Tier 1. C1 and C2 are implemented and verified in ONE report, because C2 exists only to
+capture C1's type consequence on the web side. NOTHING IS PUSHED. C1 must not deploy without C3, and
+no push is authorised until all five commits exist.
+
+═══ THE REVISED PROPOSAL IS ACCEPTED ═══
+
+The string inventory was dumped from source, not retyped, and it FOUND sites the channel's list did
+not name (S3 :1210/:1230/:1259, S9 :157, the S9 note's real home on the Activity income header, S10,
+and S6 :715). Each is marked as found, which is the discipline working. The R2 comparison is sound,
+and the staleness row — R9's cache is not cleared by /profile/update — is the kind of cost a source
+choice hides. The tsc prediction set is stated site by site and in advance.
+
+═══ DECISION 1 — FORCED EDITS OUTSIDE RM-13(e): GRANTED, NAMED, AND NO OTHERS ═══
+
+Every edit on this list is a consequence of the operator's instruction to drop detection. Each is
+shown in the close-out as a diff with its old and new expectation and a one-line reason:
+  - aggregation.test.ts:1113 (B2-1), and WC3 at :1322 with its fixture at :1068–1069.
+  - intelligence.test.ts:68 and :87.
+  - budgets.test.ts: the :115 case's call-count re-sequencing including :147, and the :181 case's
+    expected amount. These are in addition to the :144 already granted.
+  - income-lib.test.ts in full. ITEMISE it per test — deleted, edited, added — so that 7 → 4 is
+    reconciled test by test, not as a net figure.
+  - sections.tsx:368 and :465 in the unmounted SafeToSpendHero. COMPILE-ONLY: the minimum edit that
+    clears the predicted TS2367 and nothing else. Stage 2 remains unauthorised.
+  - Granted now, executed under the next block: chart tests D1 and CONTROL-1 (add the income prop;
+    expectations unchanged), and budget/sections.test.tsx:51/:57 (they follow the selected copy).
+ANY FORCED EDIT NOT ON THIS LIST STILL STOPS AND ASKS.
+
+═══ R2 — OPTION B, WITH ONE CORRECTION TO ITS PREDICATE ═══
+
+The hero reads the profile value. The reasons are accepted: it has no Stage 2 entanglement, no
+server staleness, and it matches the sibling setupSteps.hasIncome.
+  CORRECTION. "Non-null means greater than zero" rests on parseKd guarding every write that exists
+  TODAY. It says nothing about rows written before parseKd, by the Flask era, or by the demo's own
+  clear path. The resolver's profile arm keys on the value being GREATER THAN ZERO. The frontend
+  predicate MIRRORS THE RESOLVER: income is set only when the value is present AND greater than
+  zero. The sibling signal wins over the write-path argument. The guard carries a comment naming the
+  resolver arm it mirrors.
+  Three readers of one column are accepted — the hero from the profile, Plan from profile_context,
+  and Insights from R9. After C1, all three apply the same greater-than-zero rule to the same column.
+
+═══ THE CACHE BUST — AUTHORISED, IN C1 ═══
+
+/profile/update clears R9's cache, reusing the invalidation the demo routes already call at
+auth.ts:1351/1387. Do not write a new mechanism. A user who types an income and opens Insights must
+not see the old figure for five minutes. The new route-test file is the FIRST route-level test of
+/profile/update anywhere, and it is recorded as such. RED-FIRST, with a positive control that is a
+COUNT.
+
+═══ CORRECTIONS FOR C4 — RULED NOW, EXECUTED LATER ═══
+
+(i) THE CHART TEST SPECIFICATION IS UNFINISHED. The sentence 'draws lines with values
+["1000"(avg? no), …]' carries an open thought into a proposal. Restate it complete.
+(ii) THE CHART MOCK MUST TELL THE TWO LINES APART. Today it renders every ReferenceLine as avg-line,
+so the typed line and the average line are one testid. That is an instrument sharing a mechanism
+with what it measures. D4 staying unique only because its fixture has no income set is the
+MOB-R24 shape exactly: coincidence, not coverage. The mock distinguishes the lines by a prop the
+component sets, and that mock edit is AUTHORISED as a named test edit in C4. The fixture's average
+expense must differ from its typed income, with both values stated.
+(iii) canLoadDemoData RE-KEY — ACCEPTED. Offering a demo that the backend refuses with 409 is a
+reachable-but-broken path, and the typed field makes it common. Mirror hasFinancialData: profile
+value plus rows. Discriminating test, negative case stated.
+(iv) REMAINING WHEN OVERSPENT, THE FLAT INCOME CHIP, AND THE PAYDAY PROMISE go to the operator.
+Their answers arrive with the copy.
+
+═══ C1 AND C2 — AUTHORISED ═══
+
+C1, API: the resolver becomes typed-only in both copies; income_auto_detected becomes a constant
+false; the RM-13(e) and decision-1 edits; the RM-13(f) re-aim (MP-2/MP-3 prose, and the not_set arm
+recorded as UNCAPTURED under CF8 with its TB-R13 revisit trigger); the cache bust.
+  THE FLIP IS THE INSTRUMENT. Narrow IncomeSource and remove the detected arm FIRST, with nothing
+  else touched, and capture the tsc error set to a file BEFORE fixing anything. Predicted: 8
+  (aggregation.ts:716, intelligence-lib.ts:350, aggregation.test.ts :1113/:1169/:1215/:1238/:1322,
+  intelligence.test.ts:68), then +1 TS2305 after deleting detectMonthlyIncome. Show captured against
+  predicted. A miss is a question.
+  NEW CASES ARE RED-FIRST AS A SEQUENCE: budgets' "income rows present, no profile → null" and the
+  cache-bust cases. Each red has a count as its positive control and fails FOR THE REASON UNDER
+  TEST.
+  CLAUDE.md, LIVE INDEXES ONLY: :553 (income-lib) and :625 (the income_source enum), updated in C1,
+  with each correction ADJACENT. The :625 correction also fixes the already-false R10 attribution,
+  adjacent, and says so. The RM-13(d) record wording goes in exactly as proposed. The historical
+  lines (:48 :53 :78 :175 :312–313 :405) are not touched.
+C2, web: the frontend IncomeSource narrowing on its own, with the tsc set captured before the fix
+(predicted 2: sections.tsx:368 and :465, both TS2367), then the two compile-only edits.
+
+PREDICTIONS, WITH SIGN:
+  API hermetic: 873 passed / 34 skipped / 61 files → 873 / 34 / 62. INTEGRATION: 897 / 10 / 61 →
+  897 / 10 / 62. Collected 907 in both modes. This is −2 from income-lib and budgets and +2 from the
+  new route-test file, and it is reconciled per file.
+  Frontend UNCHANGED at 258 / 47: C2 edits source only. tsc 0 errors, 0 bytes, in both packages
+  after the fixes.
+  Fixture 66; ALLOWLIST at :54 empty; migrations 0; capture JSON and assert file cmp-identical;
+  physical properties 32 across 9, re-derived after the LAST edit; no CSP or Caddyfile change,
+  asserted.
+  The CLAUDE.md api baseline line moves (files 61 → 62). That hunk is close-out section (3).
+
+CLOSE-OUT: the three mandatory sections (CLAUDE.md:436), the Test Files line included, verbatim and
+piped. Step 0 re-derived with verbatim output. Commit messages piped from files. DO NOT PUSH.
+Unpushed predicted at 5: three persistence commits, C1 and C2. Stated by both routes.
+
+═══ CONSTRAINTS, UNCHANGED ═══
+
+Logical properties only. CSP enforcing; no new external origin. QuickAdd internals and the FAB
+untouched; the parseFloat at dialogs.tsx:231 stays queued. No renames; pinned strings and the legal
+data-testids untouched. The three named regression files stay green and untouched. The e2e suite is
+untouched. Legal copy is not edited (RM-2). Stage 2 remains unauthorised. Queued items stay queued,
+now including: /profile/update's missing route-test history, which the cache-bust file begins to
+close.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, BEFORE any C1 edit, position DERIVED FROM THE FILE. THE WRAP CHECK RUNS
+BEFORE THE APPEND. After the append: the strict header count, predicted 33, contiguous, closed with
+grep -n output. Read back what was written.
