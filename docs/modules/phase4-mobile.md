@@ -7063,3 +7063,102 @@ the same nine C1 files still modified and nothing else changed. THE WRAP CHECK R
 APPEND. Position DERIVED FROM THE FILE. After the append: the strict header count, predicted 34,
 contiguous, closed with grep -n output. Read back what was written. The commit message is piped from
 a file.
+
+MOB-R35 — C1 IS ACCEPTED ON ITS NUMBERS AND HELD FOR ONE MEASUREMENT. THE R10 HALF IS RULED BY
+DISCRIMINATION, NOT BY OPTION: THE select{total} ASSERTION STAYS ONLY WHERE A FORCED REPLAY SHOWS IT
+RED. THREE LIVE DESCRIPTIONS FALSIFIED BY C1 ARE GRANTED FOR CORRECTION. THE FAULTS ARE RECORDED,
+ONE OF THEM THE CHANNEL'S. C1 THEN COMMITS AND C2 PROCEEDS UNDER MOB-R33.
+
+CADENCE. Tier 1, unchanged. Nothing is pushed.
+
+═══ C1 — ACCEPTED ON ITS FIGURES ═══
+
+All three close-out sections are present, with the Test Files lines and captured exit codes: 873 / 34
+/ 62 hermetic and 897 / 10 / 62 INTEGRATION, 907 collected in both modes, tsc 0 bytes, and the
+baseline hunk. Per-file reconciliation closes: −3 + 1 + 2 = 0 tests, +1 file. Capture JSON and
+assert file were rewritten and are cmp-identical. Fixture 66. No new migration. Physical properties 32
+across 9. The Caddyfile and apps/web are unchanged, by an instrument shown able to fail. The tsc flip
+matched 8 of 8 in count, with the :351 miss recorded as the channel asked. The RED-first record is in
+the ruling's words: budgets and the cache bust were red-first as a sequence; T4 discriminates and
+nothing more.
+Correcting your own re-aim comment — "13/2/6 measured under the C1 tree" was true only for R9 and
+R10, because R8 was the writer — is the kind of self-correction that keeps the record usable.
+
+═══ CONDITION (1) — THE R10 HALF, RULED ═══
+
+None of the three options as offered. The rule is the one the check exists to obey: an assertion
+stays on a route ONLY where a forced replay shows it red.
+  R10: R10 issues two select{total} of its own, outside the builder. The select{total} assertion is
+  therefore non-discriminating on R10 and is REMOVED from R10. R10's builder-ran property rests on
+  the two assertions shown red under replay: toContain('select{amount,catName}') and
+  select{monthlyIncomeKd} ≥ 1.
+  Option (iii) is declined. A count that subtracts R10's own sums encodes that route's internal
+  query layout into the instrument, and it breaks silently the next time R10 changes.
+  R8 IS UNMEASURED UNDER REPLAY, in both the HEAD probe and the C1 probe, because R8 was the writer
+  both times. The bundle composes R4 and the budgets context, so non-builder select{total} calls are
+  plausible there. MEASURE IT: make another route the writer, force R8 to replay, and show R8's
+  signature with each assertion's result under expect.soft and a count control from the same run.
+  Keep the select{total} assertion on R8 ONLY if it goes red. The same test applies to R8's
+  select{monthlyIncomeKd} assertion.
+  If R8's select{total} is green under replay, drop it from R8 as for R10 and report it. That is
+  within this grant. ANY OTHER OUTCOME STOPS.
+  RECORDED AS A FINDING AGAINST B4-1c-R4, with no retroactive edit to that ruling: the original
+  select{total} ≥ 2 never discriminated on R10. R10 was only ever caught by toContain. The observer
+  comment says which assertions carry which route, and cites this block.
+
+CONDITION (2) — accepted. Two routes built differently: a static parse over all 141 production
+selects, with a {paydayDay} control finding its 4, and the runtime signatures. They agree on one
+site, income-lib.ts:34, and the difference between the routes is stated.
+
+═══ GRANTED — THREE DESCRIPTIONS C1 FALSIFIED OR TOUCHED ═══
+
+(i) THE EMIT-SITE INVENTORY, money-wire-shape.test.ts:768 and :776–780. Correct all six file:line
+strings: the four budgets.ts sites made stale by C1, and the two aggregation.ts sites, which were
+already stale at HEAD and moved again under C1 (:1052 → :1055). An adjacent comment records that the
+aggregation.ts pair was stale BEFORE this cycle. The asserted count stays 47, and this is shown.
+QUEUED, not acted on: the inventory stores line numbers that nothing asserts, so it rots by
+construction.
+(ii) THE CF4 "N1" HEADER NOTE, money-wire-shape.test.ts:45–49. Both of its claims are now false.
+Correct it to what the fixture actually does now — the resolver reads the monthlyIncomeKd rows at
+:213/:214 and takes the profile arm — with an adjacent note of what it said before and why it changed.
+(iii) The observer comment, per condition (1) above.
+No expectation other than the observer assertions changes. Anything else stops.
+
+═══ FAULTS — RECORDED ═══
+
+(a) THE zsh WORD-SPLITTING SLIP in the HEAD probe. The damage check was done before the redo, and the
+redo used a bash array, backups and a restore trap. The discarded output stays discarded. This is
+the standing zsh rule — unquoted parameter expansions do not split — reaching a loop.
+(b) auth.profile-update.test.ts WAS CREATED WITHOUT CHECKING THE PATH FIRST. It was untracked, so no
+harm was done. This is the shape of the one destroyed file on this track. The existence check comes
+BEFORE every Write, including for paths believed to be new.
+(c) THE MOB-R33 WRAP CHECK DID NOT GATE THE APPEND. Recorded for the implementer. THE TRAP ITSELF WAS
+AUTHORED BY THE REVIEW CHANNEL: MOB-R33's text wrapped so that a body line begins "MOB-R24 shape
+exactly". The channel's own pre-send check failed first. The strict pattern is unaffected at 33. The
+loose-pattern collision now sits at file line 6934, beside 1513. It is persisted, and both remedies
+are bad after persistence, so it is LEFT AS IS and recorded here. The channel now checks every block
+for body lines in header shape before sending. This block was checked.
+
+═══ SEQUENCE ═══
+
+1. Persist this block, as below.
+2. The R8 replay measurement, then the observer edits, (i) and (ii).
+3. RE-RUN AFTER THE LAST EDIT: both api modes, api tsc, and the capture cmp. The C1 figures above
+   are the prediction and are unchanged. A miss is a question.
+4. Commit C1, with the message piped from a file.
+5. C2, exactly as MOB-R33 specified: the frontend narrowing alone, the tsc set captured before any
+   fix (predicted 2: sections.tsx:368 and :465, both TS2367), then the two compile-only edits.
+   Frontend 258 / 47 unchanged. tsc 0 bytes in both packages. Full frontend run. Commit C2.
+6. One close-out covering steps 2–5, with the three mandatory sections.
+UNPUSHED, predicted: 5 after this block's persistence, 6 after C1, 7 after C2. Stated by both
+routes.
+
+═══ PERSISTENCE — THE TREE IS DIRTY ═══
+
+Twelve modified files and one new file belong to C1. The persistence commit carries
+docs/modules/phase4-mobile.md ONLY. Show git status --porcelain before staging, and git diff --cached
+--name-only listing exactly that file. After committing, show git status --porcelain with the same
+thirteen C1 paths and nothing else. THE WRAP CHECK RUNS AS ITS OWN STEP, BEFORE THE APPEND. Position
+DERIVED FROM THE FILE. After the append: the strict count, predicted 35, contiguous; the loose count,
+predicted two above it (1513 and 6934) — any third match stops. Close with grep -n output and read
+back what was written.
