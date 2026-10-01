@@ -527,7 +527,7 @@ describe("DashboardPage", () => {
     expect(screen.getByText("Import or add transactions")).toBeInTheDocument()
     expect(screen.getByText("Set your first budget")).toBeInTheDocument()
     expect(screen.getByText("Add Activity")).toBeInTheDocument()
-    expect(screen.getByText("Set Budget")).toBeInTheDocument()
+    expect(screen.getByText("Set budget")).toBeInTheDocument()
     expect(screen.getByText("Done")).toBeInTheDocument()
   })
 

@@ -212,7 +212,7 @@ export default function DashboardPage() {
         title: "Set your income",
         description: "Add your monthly income in Profile so planning starts with a real baseline.",
         done: hasIncome,
-        actionLabel: "Set Income",
+        actionLabel: "Set income",
         onAction: () => navigate("/profile"),
       },
       {
@@ -228,7 +228,7 @@ export default function DashboardPage() {
         title: "Set your first budget",
         description: "Add at least one budget category so the dashboard can compare plan versus actual spending.",
         done: hasBudget,
-        actionLabel: "Set Budget",
+        actionLabel: "Set budget",
         onAction: () => setBudgetDialogOpen(true),
       },
     ]
