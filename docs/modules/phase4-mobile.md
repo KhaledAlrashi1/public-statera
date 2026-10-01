@@ -7477,3 +7477,105 @@ the strict count is predicted at 37, contiguous; the loose count at 39, with the
 1513 and 6934. Any third match stops. Close with the grep -n output, a read-back of what was
 written, git show --stat, and git status --porcelain, all pasted in full. Pipe the commit message
 from a file.
+
+MOB-R38 — PART B IS ACCEPTED ON ITS NUMBERS. THE FOUR JUDGEMENT CALLS ARE RULED. TWO READ-BACKS
+RUN BEFORE THE PUSH. THE PUSH IS AUTHORISED: THIRTEEN COMMITS. AFTER THE DEPLOY LANDS, A READ-ONLY
+MEASUREMENT FEEDS THE FIRST-SESSION CYCLE. NO SOURCE EDIT UNDER THIS BLOCK.
+
+CADENCE. Tier 1. The push report and the measurement report are SEPARATE REPORTS.
+
+═══ PART B — ACCEPTED ═══
+
+Every prediction was met at its commit: 264 / 48 after C3, 274 / 48 after C4, 277 / 49 after C5.
+API 873 / 34 / 62 and 897 / 10 / 62. tsc 0 bytes in both packages. Fixture 66, ALLOWLIST empty.
+Physical properties 32 across 9, ui 0.
+Red-first ran per commit, and each failure reason was stated.
+Both required proofs were run and read correctly: :565 was red without its fixture line, :541 was
+red with the empty-row guard removed, and both files were restored cmp-equal. The re-key mapping
+is stated.
+The listing before C3 used a control that finds a known file, so the 49 was measured, not
+assumed. The named-regression check discriminates, because all three files are tracked.
+The persistence close is complete: strict 37, contiguous; loose 39, at 1513 and 6934 only;
+reconstruction and cmp both exact.
+FAULT RECORDED, SELF-CAUGHT: the first string census misplaced -g after --, so its non-test
+filter did nothing. A filter that silently does nothing is the instrument class. Re-running it
+was right.
+
+═══ THE FOUR JUDGEMENT CALLS ═══
+
+  1. #12 IS SHOWN PARTIALLY WHEN INCOME IS NOT SET. ACCEPTED, AS A CHANNEL RULING. A ruled
+     sentence that would be false in a given state is not rendered in that state, and no word is
+     added. The conditional is untested. It is QUEUED as a test for the first-session cycle, and
+     it is added to the operator's observation round now.
+  2. PROP-RECORDING MOCKS. ACCEPTED. The rule is clarified for every later cycle: adding prop
+     recording to an existing mock is PLUMBING only when the mock's rendered output and every
+     existing expectation are unchanged. Plumbing is declared in the close-out but is not a stop.
+     Any change to rendered output or to an expectation remains a stop-and-ask edit. Declaring
+     these mocks rather than folding them in silently was right.
+  3. canLoadDemoData ALSO CHECKS PAYDAY. ACCEPTED. It was re-keyed to mirror hasFinancialData,
+     and demo-data-lib.ts:312 refuses the demo on a payday, so this is the letter of that ruling.
+     The payday arm has no test, and no UI can reach it, because paydayDay has no setter. It
+     joins the existing payday queue item.
+  4. useQuickAdd() IS REMOVED FROM DashboardPage. ACCEPTED CONDITIONALLY. Removing an unused
+     caller is not an edit to QuickAdd internals. But a hook call can carry an effect, and if the
+     DashboardPage suite mocks the hook, no test could see that effect disappear. Read-back R2
+     settles it.
+
+═══ BEFORE THE PUSH — TWO READ-BACKS, NO EDITS ═══
+
+  R1. Paste the RM-13(d) hunk in CLAUDE.md from git show, in full. The earlier block asked for a
+      CONFIRMATION that the record describes live state; it did not name an edit. The hunk is
+      accepted if it changes only that record's tense or status to reflect C3. Anything else
+      STOPS.
+  R2. Paste the definition of useQuickAdd with its file:line, and state whether the DashboardPage
+      suite mocks it. If the hook only reads context, the removal stands. If it runs an effect or
+      registers anything, STOP before the push.
+
+═══ THE PUSH — AUTHORISED ═══
+
+Predicted before the push: 13 unpushed by both routes, which is the 12 plus this block's
+persistence. Any other count STOPS. Push main to origin. Then:
+  (1) WAIT until the Actions run has completed. Report its id and conclusion. A push is not a
+      deploy.
+  (2) Diff against ORIGIN/MAIN after the push, never against local main. State the deployed
+      range from a4be856.
+  (3) Show 0 unpushed by both routes.
+If the run fails, STOP. No retry push and no fix under this block.
+
+═══ AFTER THE DEPLOY — THE OPERATOR'S OBSERVATION ROUND ═══
+
+The round is authorised on the live site: one tab, fresh load. Its results are recorded in the
+next block. The additions to the handoff's list are Import at phone width; #12's partial
+paragraph; the FAB on Home still opening QuickAdd; and the operator's spare-account import on the
+same day. The operator then sets his own income.
+
+═══ PART B — READ-ONLY MEASUREMENT FOR THE FIRST-SESSION CYCLE. ITS OWN REPORT ═══
+
+Runs only after the deploy has landed, on the deployed tree. NO EDIT TO ANY TRACKED FILE.
+git status --porcelain before and after: identical and empty.
+  M1. THE BUDGET PROMPTS. List every prompt on Home and the Budget page that asks the user to set
+      income or create a budget, with its file:line and its exact gate after C5. Then, for each
+      of these four users, state which prompts render at the same time:
+        - a new user with no data;
+        - income not set, with transactions;
+        - income set, with no budgets;
+        - income set, with budgets.
+      The earlier finding named sections.tsx:1140, sections.tsx:330 and DashboardPage.tsx:215.
+      Re-derive those lines; do not carry them.
+  M2. S10. The string "You're under budget this month", last recorded at sections.tsx:145–146
+      and re-derived here. Report the exact condition behind it, what it compares, and every
+      other string in that component that uses the same comparison.
+  M3. THE FAB ON FIRST RUN. Report its aria-label and visible text. Report whether any first-run,
+      onboarding or dismissible-hint mechanism already exists anywhere in apps/web, with
+      file:line, and how it persists a dismissal: a server field, localStorage, or nothing.
+      Report what exists; propose nothing.
+  M4. Name the test that would pin #12's conditional. Do not write it.
+Report only. Wording and design are ruled after the operator's walk-through.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, BEFORE R1, at a position DERIVED FROM THE FILE. The wrap check runs as
+its own step before the append. After the append: the strict count is predicted at 38,
+contiguous; the loose count at 40, with the known body lines 1513 and 6934. Any third match
+stops. Close with the grep -n output, a read-back of what was written, git show --stat and
+git status --porcelain, all pasted in full. Pipe the commit message from a file.
