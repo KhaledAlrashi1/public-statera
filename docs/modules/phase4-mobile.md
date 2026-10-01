@@ -7637,3 +7637,129 @@ This block persists ALONE, BEFORE R3. The wrap check runs as its own step. After
 strict count is predicted at 39, contiguous; the loose count at 41, whose only non-header lines
 are 1513 and 6934. Any third match stops. Close in the standing read-back form above, with
 git show --stat and git status --porcelain pasted in full.
+
+MOB-R40 — THE PUSH LANDED AND IS ACCEPTED. THE MEASUREMENT IS ACCEPTED. THE FIRST-SESSION CYCLE
+OPENS UNDER TIER 2, ITS FIRST USE: THREE FIXES AND TWO FOLD-INS, IN ONE REPORT. RM-20 IS ARMED.
+NOTHING IS PUSHED.
+
+CADENCE. TIER 2, as defined in MOB-R37's operator-rulings section. ONE report: Step 0, then the
+implementation, then the close-out. It stops only when a gate fires. API figures are recorded as
+NOT MEASURED.
+
+═══ THE PUSH — ACCEPTED ═══
+
+Actions run 36871352967 completed with success. The range a4be856..7186a8b is 14 commits, 33
+files, +2134 / −362. /healthz and /readyz both report 7186a8b. 0 unpushed by both routes.
+The persistence of the previous block is accepted in the standing form: 57 lines, which matches
+the channel's own count of the block as issued; cmp equal; strict 39; loose 41, at 1513 and 6934.
+R3 IS ACCEPTED. The control is PlanSetupPrompts' "Set income" button, it now opens Profile, and
+DashboardPage.test.tsx:638 and plan-setup-prompts.test.tsx:93 pin it.
+FAULT RECORDED, ON THE IMPLEMENTER'S EARLIER CLOSE-OUT: it said C4 "took out" onOpenIncome. The
+diff shows the handler was changed to navigate("/profile"), not removed. Prose described a
+change the diff does not contain, and the channel issued R3 on that prose. Describe every change
+from its diff hunk.
+
+═══ THE MEASUREMENT — ACCEPTED ═══
+
+Every claim carries file:line. The three earlier citations were re-derived rather than carried.
+The tree was clean before and after. The four-user table is the basis for F1 below. P7, which
+the earlier finding had not named, was found by enumeration rather than taken from the list.
+
+═══ OPERATOR RULINGS ═══
+
+The options are the CHANNEL'S; the selections are the OPERATOR'S. Verbatim:
+  "Income is asked 3–4 times on Home. Fix:" → "Checklist owns the asks; remove the nudge banner
+  (Recommended)"
+  ""You're under budget this month" really means under income. New wording:" → "You're spending
+  less than you earn (Recommended)"
+  "How should she find the + button?" → "Visible "Log" label on the button (Recommended)"
+CHANNEL RULINGS, NOT THE OPERATOR'S: the fold-ins in F4, and keeping P6 and P7. P6 and P7 explain
+why a panel is empty or a line is missing, in the place where that happens; they are not
+standalone asks.
+
+═══ STEP 0 — BEFORE THE FIRST EDIT ═══
+
+  - Re-derive: frontend tests (predicted 277 / 49), tsc in apps/web (0 bytes), physical
+    properties (32 across 9, ui 0), and the contract fixture count from the file (66, ALLOWLIST
+    empty). A miss is a QUESTION.
+  - Re-derive every line cited below. All of them were last measured at 7186a8b.
+  - Report the S10 detail line (last measured at dashboard/sections.tsx:146) VERBATIM. If it
+    contains the word "budget", STOP: the detail needs ruled copy too.
+  - State the commit plan, and the predicted test and file delta per commit WITH ITS SIGN,
+    including every test removed with the nudge. The prediction is not revised after the first
+    edit.
+
+═══ THE WORK ═══
+
+F1. ONE OWNER FOR THE SETUP ASKS ON HOME.
+  (a) Remove IncomeNudge: the component (last measured at dashboard/sections.tsx:225–256) and its
+      mount (DashboardPage.tsx:919). Its localStorage key income_nudge_dismissed is then neither
+      read nor written. Its tests go with it, counted in the prediction.
+  (b) While showSetupProgress (DashboardPage.tsx:524) is true, PlanSetupPrompts renders nothing:
+      neither the income card nor the budget card. When it is false, PlanSetupPrompts is
+      unchanged.
+  (c) UNCHANGED: SetupProgressPanel, SetupGuideDialog, HomeAttentionCenter (P6), the chart
+      caption (P7), and every prompt on the Budget page.
+  TESTS: a user with the checklist showing and income not set sees the checklist and no
+  PlanSetupPrompts card. The negative: the checklist is not showing and income is not set, and
+  the "Set income" card renders. IncomeNudge is absent in both. Red-first.
+
+F2. S10. The label at dashboard/sections.tsx:145, "You're under budget this month", becomes
+  "You're spending less than you earn". The comparison, the gate and the detail line are
+  unchanged, subject to Step 0. "You're doing well this month" is unchanged.
+  TEST: income set, with a savings rate above 0 and below 15. The new label is present and the
+  old one is absent. Red-first.
+
+F3. THE FAB. Add the visible text "Log" beside the Plus icon (AppShell.tsx:571–587). The
+  aria-label stays "Log transaction", which contains the visible word. The tooltip and
+  placement are unchanged. Any spacing uses logical properties.
+  AppShell.test.tsx is a named regression file and stays UNTOUCHED. Its existing cases find the
+  FAB by its accessible name, which does not change. The label test goes in a NEW test file. If
+  it cannot be written without editing AppShell.test.tsx, STOP.
+  TEST: the FAB shows the text "Log" and keeps the accessible name "Log transaction". Red-first.
+
+F4. FOLD-INS.
+  (a) Sentence case: "Set Income" becomes "Set income" and "Set Budget" becomes "Set budget"
+      (last measured at DashboardPage.tsx:216 and within :227–234). Census every user-facing
+      occurrence in apps/web non-test source, before and after the edit.
+  (b) The #12 test, to the measurement's M4 specification: TYPED_FIXTURE; with income set, both
+      sentences are present; with income null, the dashed-line sentence is present and "The
+      solid line is your monthly income." is absent; a substring matcher. The behaviour already
+      exists, so red-first is impossible. PROOF INSTEAD: in an uncommitted replay, make the solid
+      line sentence render unconditionally and show the test red. Restore the file cmp-equal and
+      show it green.
+
+PRE-GRANTED EXISTING-TEST EDITS, each one declared in the close-out: any expectation of the
+exact old S10 label, or of the exact "Set Income" or "Set Budget" labels, may be updated to the
+ruled copy. Removing IncomeNudge's own tests is also pre-granted. ANY OTHER EDIT TO AN EXISTING
+TEST STOPS. Prop-recording mocks remain plumbing, under the rule in MOB-R38.
+
+═══ RM-20 — THE TIER 2 ESCALATION GATE, ARMED ═══
+
+STOP and report if the cycle touches apps/api, the wire contract or its fixture, money
+arithmetic or formatting, the importer, auth, CSP or the Caddyfile, migrations, or a named
+regression file. F2 changes a string beside money values. That is copy, not arithmetic: any
+change to the comparison, or to a computed value, fires RM-20. Reassigning the tier is the
+channel's call, never the implementer's.
+
+═══ THE CLOSE-OUT ═══
+
+  - For each commit: the frontend test tail with its exit code, and the red-first output or the
+    replay output.
+  - tsc for apps/web, 0 bytes.
+  - Physical properties re-derived after the last edit (predicted +0).
+  - The string census before and after, for every ruled string and every removed string.
+  - The three named regression files untouched, using a check that can discriminate.
+  - The contract fixture unchanged at 66, with the ALLOWLIST empty.
+  - The frontend baseline hunk in CLAUDE.md, cited by block identifier.
+  - The API line: NOT MEASURED.
+  - Unpushed by both routes: 1 after this block persists, then one more per commit. NO PUSH.
+    The push comes in its own block, after the operator's walk-through, and never on the day
+    before the operator meets the friend.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, BEFORE STEP 0. The wrap check runs as its own step. After the
+append: the strict count is predicted at 40, contiguous; the loose count at 42, whose only
+non-header lines are 1513 and 6934. Any third match stops. Close in the standing read-back form,
+with git show --stat and git status --porcelain pasted in full.
