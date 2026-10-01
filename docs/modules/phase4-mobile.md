@@ -7579,3 +7579,61 @@ its own step before the append. After the append: the strict count is predicted 
 contiguous; the loose count at 40, with the known body lines 1513 and 6934. Any third match
 stops. Close with the grep -n output, a read-back of what was written, git show --stat and
 git status --porcelain, all pasted in full. Pipe the commit message from a file.
+
+MOB-R39 — R1'S STOP WAS CORRECT, AND THE CLAUSE IS ACCEPTED. R2 PASSES. ONE MORE READ-BACK, R3,
+COVERS THE REMOVED onOpenIncome HANDLER. THE PUSH IS RE-AUTHORISED AT FOURTEEN COMMITS. EVERYTHING
+ELSE IN THE PREVIOUS BLOCK STANDS.
+
+CADENCE. Tier 1, unchanged.
+
+═══ PERSISTENCE OF THE PREVIOUS BLOCK — ACCEPTED ═══
+
+Strict 38, contiguous; loose 40. Head cmp HEAD: equal. Appended region cmp payload: equal.
+THE READ-BACK SUBSTITUTION IS ACCEPTED AND BECOMES THE STANDING FORM. Retyping a block adds
+transcription risk, and cmp is the stronger evidence. The channel checked independently: the
+block as issued is 101 lines, from its header to "Pipe the commit message from a file.", which
+matches lines 7481–7581. From now on a read-back consists of:
+  - the appended line count;
+  - the header line and the last line, verbatim;
+  - cmp of the appended region against the payload.
+The full sed output is not required.
+PRESENTATION NOTE: the loose listing printed the new header at 7481 beside the two body lines.
+The counts are consistent (40 = 38 + 2). In future, list only the non-header matches.
+
+═══ R1 — THE STOP WAS CORRECT; THE CLAUSE IS ACCEPTED ═══
+
+The added clause, "the contract harness still exercises the method", is a new factual claim, so
+stopping on it was the letter of the rule. It is true on the evidence given:
+apps/web/src/lib/api.ts:578, apps/web/src/contract/capture.ts:108 and
+apps/web/contract/frontend-calls.json:56 are the only non-test references. The clause is ACCEPTED
+as it stands, because it explains why a method with no caller still appears in the contract. No
+removal commit.
+
+═══ R2 — PASSES ═══
+
+useQuickAdd (QuickAddContext.tsx:94–98) reads context, and throws only outside the provider. The
+effect search returned 0, against a control that returned 14 on AppShell.tsx. The removal stands.
+
+═══ R3 — ONE MORE READ-BACK BEFORE THE PUSH. NO EDITS ═══
+
+C4 also removed onOpenIncome={() => openQuickAdd("income")}. Before the push, report:
+  - which component received that prop, and which control it drove;
+  - what that control does now, with file:line;
+  - the test that pins the new behaviour, by name.
+The read-back is ACCEPTED, and the push proceeds, if that control is a ruled "Set income" control
+that now opens Profile and a C3–C5 test pins it. STOP if the control is anything else, if it is
+now dead, or if nothing pins it. Income stays loggable through QuickAdd, per the earlier ruling;
+the operator's observation round checks the FAB on the live site.
+
+═══ THE PUSH — RE-AUTHORISED ═══
+
+Predicted before the push: 14 unpushed by both routes, which is the 13 plus this block's
+persistence. Any other count STOPS. The push conditions, the measurement report and the
+observation round in the previous block stand unchanged.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, BEFORE R3. The wrap check runs as its own step. After the append: the
+strict count is predicted at 39, contiguous; the loose count at 41, whose only non-header lines
+are 1513 and 6934. Any third match stops. Close in the standing read-back form above, with
+git show --stat and git status --porcelain pasted in full.
