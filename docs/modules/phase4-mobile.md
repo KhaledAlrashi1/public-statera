@@ -7763,3 +7763,73 @@ This block persists ALONE, BEFORE STEP 0. The wrap check runs as its own step. A
 append: the strict count is predicted at 40, contiguous; the loose count at 42, whose only
 non-header lines are 1513 and 6934. Any third match stops. Close in the standing read-back form,
 with git show --stat and git status --porcelain pasted in full.
+
+MOB-R41 — THE STOP IS CORRECT. OPTION A IS GRANTED WITH TWO FIXTURE EDITS. BOTH CLASSIFICATIONS
+ARE CONFIRMED. THE STALE COMMENT IS EDITED, NOT LEFT. THE PREDICTION IS 277 / 50. F1 TO F4
+PROCEED UNDER THE PREVIOUS BLOCK. NOTHING IS PUSHED.
+
+CADENCE. Tier 2, unchanged. This report continues as the same single report.
+
+═══ STEP 0 — ACCEPTED ═══
+
+Every baseline met its prediction. The S10 detail line contains no "budget", against a control
+on :145 that returns 1, so the S10 gate did not fire. The cites were re-derived, and where the
+block's range was incomplete the report said so rather than editing to the old range.
+THE GATE WAS READ CORRECTLY: a mount gate would redden two tests the block did not pre-grant.
+Stopping before the first edit, with both options and their costs, is the protocol working.
+MISSING: the persistence read-back for the previous block. Paste it in the close-out, in the
+standing form. Predicted: 125 lines, strict 40 contiguous, loose 42 at 1513 and 6934 only.
+
+═══ F1(b) — OPTION A, GRANTED ═══
+
+Gate the mount in DashboardPage: PlanSetupPrompts renders only while showSetupProgress is false.
+The component is untouched. Option B is REJECTED: a test that passes on its mock while the user
+sees nothing is the exact failure this track exists to prevent (10e-R168).
+GRANTED EXISTING-TEST EDITS, one fixture line each, with every expectation unchanged:
+  - DashboardPage.test.tsx:217, "no longer mounts the safe-to-spend hero and mounts the
+    relocated prompts instead";
+  - DashboardPage.test.tsx:638, "the Set income prompt opens Profile".
+  Each gets the minimum fixture change that makes showSetupProgress false, for example
+  profile: { setup_guide_dismissed: true }. If either test needs any expectation changed, STOP.
+POSITIVE CONTROL for each, after C1: run it once without its fixture line and show it red; then
+show it green with the line. This is the same proof as the one granted at MOB-R37.
+
+═══ THE CLASSIFICATIONS ═══
+
+  - DashboardPage.test.tsx:176 and :192, "mounts the income nudge when …": CONFIRMED as
+    IncomeNudge's own tests. Their comment at :168–175 says they exist only to pin that mount.
+    Removed under the pre-grant, together with that comment.
+  - The three safe-to-spend.test.tsx cases (:147, :157, :173): IncomeNudge's own tests, removed
+    under the pre-grant.
+  - setup-progress.test.tsx (:13, :29, :42, :51, :120): CONFIRMED left untouched. They feed the
+    component its own labels and do not test the page's strings. Declare them in the close-out.
+  - THE STALE COMMENT, safe-to-spend.test.tsx:34–35: EDIT IT so it no longer names the nudge.
+    This is a comment-only change, with no code change, and is declared. A comment describing
+    something that no longer exists is documentation drift, and leaving it is not neutral.
+  - IncomeNudge is removed in full: the function (sections.tsx:216–264), its doc comment
+    (:199–215), its import (DashboardPage.tsx:21) and its mount (:919).
+
+═══ THE PREDICTION — ACCEPTED AS STATED FOR OPTION A ═══
+
+Per commit, signed: C1 274 / 49 (−3); C2 275 / 49; C3 276 / 50; C4 276 / 50; C5 277 / 50.
+Final: 277 / 50. A miss is a QUESTION.
+After the edits, the string census must show these at 0 in source:
+  - "You're under budget this month";
+  - "Set Income";
+  - "Set Budget";
+  - "Set your monthly income to see your full spending picture.";
+  - "Dismiss income reminder";
+  - income_nudge_dismissed.
+"Go to Profile" will be 0 at sections.tsx; report every remaining occurrence anywhere in source.
+These must read 1 or more: "You're spending less than you earn", "Set income", "Set budget".
+
+═══ UNCHANGED ═══
+
+The previous block governs everything else: F2–F4, RM-20, the close-out list, and NO PUSH.
+Unpushed predicted: 2 after this block persists, then 7 after C5.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, BEFORE C1. The wrap check runs as its own step. After the append: the
+strict count is predicted at 41, contiguous; the loose count at 43, whose only non-header lines
+are 1513 and 6934. Any third match stops. Close in the standing read-back form.
