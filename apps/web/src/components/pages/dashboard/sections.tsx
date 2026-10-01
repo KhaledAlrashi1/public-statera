@@ -142,7 +142,7 @@ function dashboardMomentumState(monthRemaining: number, savingsRate: number) {
   }
 
   return {
-    label: "You're under budget this month",
+    label: "You're spending less than you earn",
     detail: `You still have ${formatCompactKD(monthRemaining)} protected. A steady pace keeps the month comfortably on track.`,
   }
 }

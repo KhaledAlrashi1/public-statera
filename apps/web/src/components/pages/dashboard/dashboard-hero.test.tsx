@@ -180,3 +180,25 @@ describe("DashboardHero — typed income (MOB-R36)", () => {
     expect(screen.queryByText("0.0% vs last month")).not.toBeInTheDocument()
   })
 })
+
+describe("DashboardHero — S10 label (MOB-R40 F2)", () => {
+  // The branch below 15% compares typed income with logged expenses; no budget is involved, so
+  // the label names what is compared. Its gate and its detail line are unchanged.
+  it("a savings rate above 0 and below 15 reads as spending less than you earn", () => {
+    render(
+      <DashboardHero
+        isLoading={false}
+        monthLabel="March 2026"
+        monthIncome={1000}
+        monthExpenses={900}
+        monthRemaining={100}
+        savingsRate={10}
+        dailyPace={null}
+        deltas={null}
+      />
+    )
+    expect(screen.getByText("You're spending less than you earn")).toBeInTheDocument()
+    expect(screen.queryByText("You're under budget this month")).not.toBeInTheDocument()
+    expect(screen.getByText(/You still have KD 100 protected/)).toBeInTheDocument()
+  })
+})
