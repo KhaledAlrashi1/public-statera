@@ -1,0 +1,116 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { render, screen, within } from "@testing-library/react"
+import { MemoryRouter, Route, Routes } from "react-router-dom"
+import type { ReactNode } from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
+import AppShell from "./AppShell"
+import { TooltipProvider } from "@/components/ui/tooltip"
+
+// MOB-R40 F3 — the FAB's visible "Log" label. Kept out of AppShell.test.tsx, which is a named
+// regression file and stays untouched; the mocks and the render below mirror that file's.
+
+const mocks = vi.hoisted(() => ({
+  navigate: vi.fn(),
+  openQuickAdd: vi.fn(),
+  logout: vi.fn(),
+  auth: {
+    user: {
+      id: 1,
+      email: "user@example.com",
+      first_name: "Alya",
+      last_name: "Test",
+      display_name: "Alya Test",
+      totp_enabled: false,
+      created_at: "2026-03-10T00:00:00Z",
+    },
+    flags: {
+      enable_template_suggestions: false,
+      enable_open_banking: false,
+    },
+  },
+}))
+
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom")
+  return {
+    ...actual,
+    useNavigate: () => mocks.navigate,
+  }
+})
+
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({
+    user: mocks.auth.user,
+    flags: mocks.auth.flags,
+    logout: mocks.logout,
+  }),
+  getUserFirstName: () => "Alya",
+}))
+
+vi.mock("@/components/ui/toaster", () => ({
+  useToast: () => ({
+    success: vi.fn(),
+    error: vi.fn(),
+    warning: vi.fn(),
+    info: vi.fn(),
+  }),
+}))
+
+vi.mock("@/contexts/QuickAddContext", () => ({
+  QuickAddProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+  useQuickAdd: () => ({
+    openQuickAdd: mocks.openQuickAdd,
+    closeQuickAdd: vi.fn(),
+  }),
+}))
+
+vi.mock("@/lib/useDarkMode", () => ({
+  useDarkMode: () => ({
+    isDark: false,
+    toggleDarkMode: vi.fn(),
+  }),
+}))
+
+vi.mock("./CommandPalette", () => ({
+  default: () => null,
+}))
+
+function renderShell() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  })
+
+  return render(
+    <MemoryRouter initialEntries={["/"]}>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Routes>
+            <Route element={<AppShell />}>
+              <Route index element={<div>home screen</div>} />
+            </Route>
+          </Routes>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </MemoryRouter>
+  )
+}
+
+describe("AppShell FAB label (MOB-R40 F3)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    window.scrollTo = vi.fn()
+  })
+
+  it("shows the visible text Log and keeps the accessible name Log transaction", () => {
+    renderShell()
+
+    const fab = screen.getByRole("button", { name: "Log transaction" })
+    const label = within(fab).getByText("Log")
+    // Visible, not screen-reader-only text: the point of the label is that a person can see it.
+    expect(label).not.toHaveClass("sr-only")
+    expect(fab).toHaveAttribute("aria-label", "Log transaction")
+  })
+})

@@ -576,10 +576,13 @@ function AppShellLayout() {
               variant="default"
               size="icon"
               onClick={handleQuickAdd}
-              className="fixed bottom-20 end-4 z-40 h-14 w-14 rounded-[var(--radius-card)] bg-primary shadow-elevation-3 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 lg:bottom-6 lg:end-8"
+              className="fixed bottom-20 end-4 z-40 h-14 w-auto ps-4 pe-5 rounded-[var(--radius-card)] bg-primary shadow-elevation-3 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 lg:bottom-6 lg:end-8"
               aria-label="Log transaction"
             >
               <Plus className="icon-hero" />
+              {/* MOB-R40 F3 — a visible word, so the button is findable without hovering. The
+                  aria-label above still names it, and contains this word. */}
+              <span>Log</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>Log transaction — L</TooltipContent>
