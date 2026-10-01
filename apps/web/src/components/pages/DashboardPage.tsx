@@ -18,7 +18,6 @@ import {
   DashboardHero,
   HomeAttentionCenter,
   IncomeExpensesChart,
-  IncomeNudge,
   PlanSetupPrompts,
   SetupGuideDialog,
   SetupProgressPanel,
@@ -912,25 +911,20 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      {/* MOB-R26 RM-1 condition (2) — UNCONDITIONAL by design. This sits as a direct child of
-          the page's existing space-y-8 stack, outside the !noDashboardData branch that gates
-          SafeToSpendHero and outside the showSetupProgress gate, because those two gates are
-          precisely why the alternates did not cover the affordance. Do not wrap it in either. */}
-      <IncomeNudge
-        safeToSpend={safeToSpend}
-        onOpenPlan={() => navigate("/plan")}
-        onOpenProfile={() => navigate("/profile")}
-      />
-
-      {/* MOB-R27 — the three affordances RM-6 blocked, now unconditional (MOB-R26 condition 2)
-          and mounted in the SAME commit that unmounts the hero (condition 5), so neither prompt
-          is ever on the page twice. */}
-      <PlanSetupPrompts
-        isLoading={safeToSpendLoading}
-        safeToSpend={safeToSpend}
-        onOpenPlan={() => navigate("/plan")}
-        onOpenIncome={() => navigate("/profile")}
-      />
+      {/* MOB-R27 — the three affordances RM-6 blocked, mounted in the SAME commit that unmounts
+          the hero (condition 5), so neither prompt is ever on the page twice.
+          MOB-R40 F1 — ONE owner for the setup asks: while the checklist (SetupProgressPanel)
+          shows, it owns the income and budget asks, so these are not mounted; once it is
+          dismissed or complete, they carry them. The income nudge that stood above was removed
+          in the same commit. */}
+      {!showSetupProgress && (
+        <PlanSetupPrompts
+          isLoading={safeToSpendLoading}
+          safeToSpend={safeToSpend}
+          onOpenPlan={() => navigate("/plan")}
+          onOpenIncome={() => navigate("/profile")}
+        />
+      )}
 
       {showSetupProgress && (
         <SetupProgressPanel

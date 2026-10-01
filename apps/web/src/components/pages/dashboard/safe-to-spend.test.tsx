@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import type { SafeToSpendResponse } from "@/types/api"
-import { IncomeNudge, SafeToSpendHero } from "./sections"
+import { SafeToSpendHero } from "./sections"
 
 function makeSafeToSpend(
   overrides: Partial<SafeToSpendResponse> = {}
@@ -31,8 +31,7 @@ function makeSafeToSpend(
 }
 
 describe("SafeToSpendHero", () => {
-  // The dismissal case writes income_nudge_dismissed, and IncomeNudge reads that key at mount.
-  // Without this the nudge cases would pass or fail according to their order in the file.
+  // Clears web storage before each case, so that no case depends on state left by another.
   beforeEach(() => {
     window.localStorage.clear()
   })
@@ -138,49 +137,5 @@ describe("SafeToSpendHero", () => {
       screen.getByText(/Safe-to-spend compares your income against your planned budget/i)
     ).toBeInTheDocument()
     expect(screen.queryByText(/No income detected yet/i)).not.toBeInTheDocument()
-  })
-
-  // MOB-R26 RM-1 — these two cases are RE-POINTED, not rewritten: the nudge moved out of
-  // SafeToSpendHero to the IncomeNudge export, so the same assertions now render the component
-  // at its new home. Fixtures and expectations are unchanged, which is what makes them evidence
-  // that the move preserved behaviour rather than merely that something still renders.
-  it("shows income nudge when income_source is not_set", () => {
-    render(
-      <IncomeNudge
-        safeToSpend={makeSafeToSpend({ income_source: "not_set" })}
-        onOpenPlan={vi.fn()}
-      />
-    )
-    expect(screen.getByText(/Set your monthly income/i)).toBeInTheDocument()
-  })
-
-  it("does not show income nudge when income_source is detected_from_transactions", () => {
-    render(
-      <IncomeNudge
-        safeToSpend={makeSafeToSpend({ income_source: "detected_from_transactions" })}
-        onOpenPlan={vi.fn()}
-      />
-    )
-    expect(
-      screen.queryByText(/Set your monthly income/i)
-    ).not.toBeInTheDocument()
-  })
-
-  // RM-1 condition (3) — the dismissal must keep its behaviour AND its existing storage key.
-  // The key is asserted by its literal name because a rename is invisible to a test that only
-  // checks the nudge disappeared: the component would still hide, and every returning user who
-  // had already dismissed it would silently see it again.
-  it("dismissal hides the nudge and writes the existing income_nudge_dismissed key", () => {
-    render(
-      <IncomeNudge
-        safeToSpend={makeSafeToSpend({ income_source: "not_set" })}
-        onOpenPlan={vi.fn()}
-      />
-    )
-
-    fireEvent.click(screen.getByRole("button", { name: "Dismiss income reminder" }))
-
-    expect(screen.queryByText(/Set your monthly income/i)).not.toBeInTheDocument()
-    expect(window.localStorage.getItem("income_nudge_dismissed")).toBe("1")
   })
 })

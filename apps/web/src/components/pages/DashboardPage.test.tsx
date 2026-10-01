@@ -165,49 +165,50 @@ describe("DashboardPage", () => {
     mocks.useDashboardPageQueries.mockReturnValue(baseResult)
   })
 
-  // MOB-R26 RM-1 condition (4) — the income nudge must reach the user in the two states where
-  // the alternates (SetupProgressPanel / SetupGuideDialog) vanish. Both cases assert the nudge
-  // is PRESENT while the setup panel is ABSENT in the SAME render, so "nudge present" cannot be
-  // satisfied by a page that simply rendered everything.
+  // MOB-R40 F1 — ONE owner for the setup asks on Home. While the checklist (SetupProgressPanel)
+  // shows, it owns the income and budget asks, so PlanSetupPrompts is not mounted; once it is
+  // gone, PlanSetupPrompts carries them. The income nudge is removed outright, and the IncomeNudge
+  // mock entry above is what lets "income nudge" absent be observed rather than assumed: if the
+  // page still mounted it, the mock would render that text.
   //
-  // These are page-level MOUNT assertions, deliberately: this file mocks ./dashboard/sections
-  // wholesale, so the nudge's own gate, copy and dismissal are unobservable here and are pinned
-  // against the REAL component in dashboard/safe-to-spend.test.tsx instead.
-  it("mounts the income nudge when onboarding is dismissed on an empty account", () => {
+  // The negative case can only see the MOUNT and the payload it receives, because this file mocks
+  // ./dashboard/sections wholesale. That a not-set payload renders the "Set income" card is pinned
+  // against the REAL component in dashboard/plan-setup-prompts.test.tsx.
+  const notSetSafeToSpend = {
+    income_source: "not_set",
+    data_complete: false,
+    warnings: ["income_not_set"],
+  }
+
+  it("the checklist owns the asks: while it shows, no PlanSetupPrompts card and no nudge", () => {
     mocks.useDashboardPageQueries.mockReturnValue({
       ...baseResult,
-      // setup_guide_dismissed hides the SetupProgressPanel; with no transactions and no budgets
-      // this is also the state where SafeToSpendHero itself is gated out (noDashboardData), so
-      // before the relocation there was NO income prompt on this page at all.
-      profile: { setup_guide_dismissed: true },
-      safeToSpend: { income_source: "not_set" },
+      safeToSpend: notSetSafeToSpend,
     })
 
     renderPage()
 
-    expect(screen.getByText("income nudge")).toBeInTheDocument()
-    expect(screen.queryByText("Import or add transactions")).not.toBeInTheDocument()
+    // The checklist is showing, with its income step not done.
+    expect(screen.getByText("Set your income")).toBeInTheDocument()
+    expect(screen.queryByText("plan setup prompts")).not.toBeInTheDocument()
+    expect(mocks.planSetupPrompts).not.toHaveBeenCalled()
+    expect(screen.queryByText("income nudge")).not.toBeInTheDocument()
   })
 
-  it("mounts the income nudge when setup was completed and the budget has since been deleted", () => {
+  it("NEGATIVE — with the checklist gone and income not set, the Set income card is mounted", () => {
     mocks.useDashboardPageQueries.mockReturnValue({
       ...baseResult,
-      // Real activity exists, so the hero is NOT gated out here — but the budget is gone
-      // (setupBudgetResp empty) and onboarding is dismissed, so the setup panel stays hidden.
-      dashboardMetrics: {
-        months: ["2026-03"],
-        monthly: [{ month: "2026-03", income_kd: "1500.000", expense_kd: "900.000" }],
-        expense_by_category: {},
-      },
-      profile: { setup_guide_dismissed: true, monthly_income_kd: "1500.000" },
-      safeToSpend: { income_source: "not_set" },
-      setupBudgetResp: { items: [] },
+      profile: { setup_guide_dismissed: true },
+      safeToSpend: notSetSafeToSpend,
     })
 
     renderPage()
 
-    expect(screen.getByText("income nudge")).toBeInTheDocument()
-    expect(screen.queryByText("Import or add transactions")).not.toBeInTheDocument()
+    expect(screen.queryByText("Set your income")).not.toBeInTheDocument()
+    expect(screen.getByText("plan setup prompts")).toBeInTheDocument()
+    const props = mocks.planSetupPrompts.mock.calls.at(-1)?.[0] as { safeToSpend?: unknown }
+    expect(props.safeToSpend).toEqual(notSetSafeToSpend)
+    expect(screen.queryByText("income nudge")).not.toBeInTheDocument()
   })
 
   // MOB-R27 — the hero is UNMOUNTED and its three surviving affordances render from
@@ -225,6 +226,7 @@ describe("DashboardPage", () => {
         expense_by_category: {},
       },
       safeToSpend: { income_source: "not_set", data_complete: false },
+      profile: { setup_guide_dismissed: true },
     })
 
     renderPage()
@@ -636,6 +638,7 @@ describe("DashboardPage", () => {
   })
 
   it("the Set income prompt opens Profile", () => {
+    mocks.useDashboardPageQueries.mockReturnValue({ ...baseResult, profile: { setup_guide_dismissed: true } })
     renderPage()
     const props = mocks.planSetupPrompts.mock.calls.at(-1)?.[0] as { onOpenIncome?: () => void }
     props.onOpenIncome?.()

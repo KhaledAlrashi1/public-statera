@@ -271,7 +271,8 @@ export default function InsightsPage() {
       // and lead1 is a complete sentence in both of its forms.
       // MOB-R36 C5 — with the income NOT SET, R9 counts it as 0, so remainingBudget is 0 and this
       // sentence would claim commitments overtake a budget measured against no income. Keyed on R9's
-      // own income_source, the same signal the sibling IncomeNudge uses.
+      // own income_source, the same signal Home's IncomeNudge used (that nudge was removed at
+      // MOB-R40 F1).
       const paceNote =
         committedThisMonth <= 0 || remainingBudget > 0 || incomeNotSet
           ? ""
