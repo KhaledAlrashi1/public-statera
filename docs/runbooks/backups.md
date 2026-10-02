@@ -96,8 +96,10 @@ An alert that has never fired is the 8e silent-rot lesson in a new hat. 8f-3 is 
 ## Manual run
 
 ```bash
-# As deploy user on the production server:
-bash /home/deploy/statera/deploy/backup-db.sh
+# As deploy user on the production server. Runs backup-db.sh under the same environment the
+# daily timer uses (sops-sourced MYSQL_ROOT_PASSWORD, rclone temp-file credentials) — do not call
+# the script by hand (MOB-R46; proven at the 10e deploy, phase4-10e.md:6019–6024):
+sudo systemctl start statera-backup.service
 ```
 
 ---

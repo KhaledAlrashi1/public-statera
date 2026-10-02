@@ -287,6 +287,7 @@ export function SplitTransactionDialog({
                       <div className="grid gap-2">
                         <Label>Amount (KD)</Label>
                         <Input
+                          inputMode="decimal"
                           value={item.amount_kd}
                           onChange={(e) => updateItem(idx, { amount_kd: e.target.value })}
                           onBlur={() => markTouched(idx, "amount")}

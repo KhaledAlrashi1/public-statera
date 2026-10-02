@@ -35,13 +35,6 @@ import { FieldFeedback, validationInputClass } from "@/components/ui/field-feedb
 import { Input } from "@/components/ui/input"
 import { MoneyInput } from "@/components/ui/money-input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Separator } from "@/components/ui/separator"
@@ -50,7 +43,9 @@ import {
   tempId,
   useSuggestions,
 } from "./helpers"
-import { SuggestionCombobox } from "./suggestion-combobox"
+import { SuggestionCombobox, type ExtraOption } from "./suggestion-combobox"
+import { CategoryCombobox } from "./category-combobox"
+import { SUGGESTED_MERCHANTS, suggestedMerchantsFor } from "@/lib/suggested-names"
 
 export function DuplicateWarningDialog({
   open,
@@ -329,6 +324,19 @@ export function AddTransactionDialog({
   const applyToForm = (s: TransactionSuggestion) =>
     applyTransactionSuggestion(s, setExpenseName, setCategory, setMerchant, merchant, category)
 
+  // MOB-R46 — suggested merchants follow the user's own suggestions, minus any merchant those
+  // already show. Picking one fills its default category only when the category is still empty.
+  const suggestedMerchantOptions: ExtraOption[] = suggestedMerchantsFor(
+    merchant,
+    suggestions.map((s) => s.merchant?.name ?? "").filter(Boolean),
+  ).map((m) => ({ name: m.name, detail: m.category }))
+
+  const applySuggestedMerchant = (o: ExtraOption) => {
+    setMerchant(o.name)
+    const suggested = SUGGESTED_MERCHANTS.find((m) => m.name === o.name)
+    if (suggested && !category.trim()) setCategory(suggested.category)
+  }
+
   return (
     <>
       <Dialog open={open && !dupMeta} onOpenChange={onOpenChange}>
@@ -500,6 +508,8 @@ export function AddTransactionDialog({
                       onSelect={applyToForm}
                       onAfterSelect={() => saveButtonRef.current?.focus()}
                       onOpenChange={trackDropdown}
+                      extraOptions={suggestedMerchantOptions}
+                      onSelectExtra={applySuggestedMerchant}
                     />
                     <SuggestionCombobox
                       id="expense-name"
@@ -518,21 +528,13 @@ export function AddTransactionDialog({
                     />
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Category</Label>
-                      <Select value={category} onValueChange={setCategory}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select…" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories.map((entry) => (
-                            <SelectItem key={entry} value={entry}>
-                              {entry}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <CategoryCombobox
+                      id="add-category"
+                      value={category}
+                      onValueChange={setCategory}
+                      categories={categories}
+                      onOpenChange={trackDropdown}
+                    />
                     <div className="space-y-2">
                       <Label htmlFor="add-date">Date</Label>
                       <Input
@@ -1074,21 +1076,13 @@ export function EditTransactionDialog({
                   />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Category</Label>
-                    <Select value={category} onValueChange={setCategory}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select…" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((entry) => (
-                          <SelectItem key={entry} value={entry}>
-                            {entry}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <CategoryCombobox
+                    id="edit-category"
+                    value={category}
+                    onValueChange={setCategory}
+                    categories={categories}
+                    onOpenChange={trackDropdown}
+                  />
                   <div className="space-y-2">
                     <Label htmlFor="edit-date">Date</Label>
                     <Input

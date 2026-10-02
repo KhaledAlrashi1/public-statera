@@ -25,7 +25,17 @@ interface SuggestionComboboxProps {
   className?: string
   /** FieldFeedback node rendered under the input. */
   feedback?: ReactNode
+  /**
+   * Constant suggestions listed after the user's own (MOB-R46: suggested merchants). The parent
+   * filters them against the typed text; picking one calls onSelectExtra, not onSelect.
+   */
+  extraOptions?: readonly ExtraOption[]
+  onSelectExtra?: (option: ExtraOption) => void
 }
+
+export type ExtraOption = { name: string; detail?: string }
+
+const NO_EXTRAS: readonly ExtraOption[] = []
 
 /**
  * Shared merchant/name autocomplete field. Full combobox ARIA (role=combobox on
@@ -50,6 +60,8 @@ export const SuggestionCombobox = forwardRef<HTMLInputElement, SuggestionCombobo
       invalid,
       className,
       feedback,
+      extraOptions = NO_EXTRAS,
+      onSelectExtra,
     },
     ref,
   ) {
@@ -57,11 +69,14 @@ export const SuggestionCombobox = forwardRef<HTMLInputElement, SuggestionCombobo
     const [highlighted, setHighlighted] = useState(0)
     const listboxId = useId()
     const optionId = (i: number) => `${listboxId}-opt-${i}`
+    const total = suggestions.length + extraOptions.length
+    // A string key, so a parent that rebuilds the extras array each render does not reset the highlight.
+    const extrasKey = extraOptions.map((o) => o.name).join("\u0000")
 
     // Re-highlight the top row whenever the option set changes.
     useEffect(() => {
       setHighlighted(0)
-    }, [suggestions])
+    }, [suggestions, extrasKey])
 
     // Report open/close to the parent (for dialog-level Escape gating) without
     // re-subscribing on every render.
@@ -77,18 +92,29 @@ export const SuggestionCombobox = forwardRef<HTMLInputElement, SuggestionCombobo
       onAfterSelect?.()
     }
 
+    const acceptExtra = (o: ExtraOption) => {
+      onSelectExtra?.(o)
+      setOpen(false)
+      onAfterSelect?.()
+    }
+
+    const acceptAt = (i: number) => {
+      if (i < suggestions.length) accept(suggestions[i])
+      else acceptExtra(extraOptions[i - suggestions.length])
+    }
+
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "ArrowDown") {
         e.preventDefault()
-        if (!open && suggestions.length) setOpen(true)
-        setHighlighted((h) => Math.min(h + 1, suggestions.length - 1))
+        if (!open && total) setOpen(true)
+        setHighlighted((h) => Math.min(h + 1, total - 1))
       } else if (e.key === "ArrowUp") {
         e.preventDefault()
         setHighlighted((h) => Math.max(h - 1, 0))
       } else if (e.key === "Enter") {
-        if (open && suggestions.length > 0 && highlighted >= 0) {
+        if (open && total > 0 && highlighted >= 0) {
           e.preventDefault()
-          accept(suggestions[highlighted])
+          acceptAt(highlighted)
         }
         // otherwise: let the surrounding <form> submit natively
       } else if (e.key === "Escape") {
@@ -113,7 +139,7 @@ export const SuggestionCombobox = forwardRef<HTMLInputElement, SuggestionCombobo
             aria-expanded={open}
             aria-controls={listboxId}
             aria-autocomplete="list"
-            aria-activedescendant={open && suggestions.length ? optionId(highlighted) : undefined}
+            aria-activedescendant={open && total ? optionId(highlighted) : undefined}
             placeholder={placeholder}
             value={value}
             onChange={(e) => {
@@ -127,7 +153,7 @@ export const SuggestionCombobox = forwardRef<HTMLInputElement, SuggestionCombobo
               }
             }}
             onFocus={() => {
-              if (suggestions.length) setOpen(true)
+              if (total) setOpen(true)
             }}
             onBlur={() => setTimeout(() => setOpen(false), 150)}
             onKeyDown={handleKeyDown}
@@ -141,7 +167,7 @@ export const SuggestionCombobox = forwardRef<HTMLInputElement, SuggestionCombobo
               role="listbox"
               className="absolute z-50 mt-2 max-h-60 w-full overflow-y-auto rounded-xl border border-border bg-card py-1 shadow-lg"
             >
-              {suggestions.length === 0 ? (
+              {total === 0 ? (
                 <li className="px-3 py-2 text-sm text-muted-foreground">No suggestions</li>
               ) : (
                 suggestions.map((s, i) => (
@@ -169,6 +195,29 @@ export const SuggestionCombobox = forwardRef<HTMLInputElement, SuggestionCombobo
                   </li>
                 ))
               )}
+              {extraOptions.map((o, j) => {
+                const i = suggestions.length + j
+                return (
+                  <li
+                    key={`extra-${o.name}`}
+                    id={optionId(i)}
+                    role="option"
+                    aria-selected={i === highlighted}
+                    onMouseEnter={() => setHighlighted(i)}
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      acceptExtra(o)
+                    }}
+                    className={cn(
+                      "flex cursor-pointer flex-col items-start gap-0.5 px-3 py-2 text-sm",
+                      i === highlighted ? "bg-muted" : "hover:bg-muted",
+                    )}
+                  >
+                    <span className="font-medium">{o.name}</span>
+                    {o.detail ? <span className="text-xs text-muted-foreground">{o.detail}</span> : null}
+                  </li>
+                )
+              })}
             </ul>
           ) : null}
         </div>
