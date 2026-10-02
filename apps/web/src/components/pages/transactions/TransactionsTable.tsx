@@ -167,16 +167,16 @@ function TransactionsTable({
     : transactionType === "expense"
       ? {
           title: "No expenses yet",
-          description: "Add or import your first expense to start tracking where your money goes.",
+          description: "Tap Log to record a purchase in a few seconds.",
         }
       : transactionType === "income"
         ? {
             title: "No income entries yet",
-            description: "Record a paycheck, transfer, or other income so cash inflow appears in your history.",
+            description: "Log salary and other income to see what comes in.",
           }
         : {
             title: "No transactions yet",
-            description: "Import your first transactions or add one manually to start building your money timeline.",
+            description: "Every expense and income you log or import lands here.",
           }
   return (
     <section className="section-panel panel-featured overflow-hidden float-in stagger-2">

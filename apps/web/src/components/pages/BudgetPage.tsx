@@ -476,7 +476,7 @@ export default function BudgetPage() {
               <EmptyState
                 icon={<Target className="h-8 w-8" />}
                 title="Set your first budget plan"
-                description="Add a monthly category limit so Plan can compare what you intended to spend with what actually happened."
+                description="Give each category a monthly limit; Plan tracks spending against it."
                 action={(
                   <Button
                     type="button"

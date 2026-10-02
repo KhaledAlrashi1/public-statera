@@ -331,7 +331,7 @@ export default function InsightsPage() {
           <EmptyState
             icon={<Sparkles className="h-8 w-8" />}
             title="No insights yet"
-            description="Import or add transactions so we can surface recurring bills, merchant patterns, and month-over-month changes."
+            description="After a few weeks of logging, Insights spots recurring bills and changes."
             action={(
               <Button
                 type="button"

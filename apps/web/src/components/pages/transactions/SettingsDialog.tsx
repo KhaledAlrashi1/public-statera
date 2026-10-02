@@ -1078,7 +1078,7 @@ function ManageMemorized() {
         <p className="py-6 text-center text-sm text-muted-foreground">
           {searchQ
             ? "No memorized transactions match your search."
-            : "No memorized transactions yet. Repeated transactions will appear here as you use the app."}
+            : "No memorized transactions yet. Statera remembers what you log and suggests it next time."}
         </p>
       ) : null}
 

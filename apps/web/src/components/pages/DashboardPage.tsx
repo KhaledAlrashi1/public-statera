@@ -825,7 +825,7 @@ export default function DashboardPage() {
           <EmptyState
             icon={<LayoutDashboard className="h-8 w-8" />}
             title="Import activity to unlock Home"
-            description="Bring in transactions or reopen guided setup so Home can show safe-to-spend, budget pressure, and category trends instead of placeholders."
+            description="Home shows this month's spending, income and what's left."
             action={(
               <div className="flex flex-wrap items-center justify-center gap-2">
                 <Button type="button" onClick={openImportFlow}>
