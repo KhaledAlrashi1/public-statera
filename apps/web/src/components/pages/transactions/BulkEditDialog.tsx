@@ -192,7 +192,7 @@ export function BulkEditDialog({
                 value={applyMerchant}
                 onChange={(e) => setApplyMerchant(e.target.value)}
                 list="bulk-merchants"
-                className="h-8 text-sm"
+                className="h-8 text-base sm:text-sm"
               />
               <datalist id="bulk-merchants">
                 {merchants.map((m) => <option key={m} value={m} />)}
@@ -218,7 +218,7 @@ export function BulkEditDialog({
                 placeholder="Leave blank to keep existing"
                 value={applyName}
                 onChange={(e) => setApplyName(e.target.value)}
-                className="h-8 text-sm"
+                className="h-8 text-base sm:text-sm"
               />
             </div>
           </div>
@@ -296,7 +296,7 @@ export function BulkEditDialog({
                         <Input
                           value={row.name}
                           onChange={(e) => updateRow(row.id, "name", e.target.value)}
-                          className="h-9 text-sm"
+                          className="h-9 text-base sm:text-sm"
                         />
                       </div>
                       <div className="grid gap-1.5">
@@ -305,7 +305,7 @@ export function BulkEditDialog({
                           value={row.merchant}
                           onChange={(e) => updateRow(row.id, "merchant", e.target.value)}
                           list="bulk-merchants"
-                          className="h-9 text-sm"
+                          className="h-9 text-base sm:text-sm"
                         />
                       </div>
                       <div className="grid gap-1.5">
@@ -347,7 +347,7 @@ export function BulkEditDialog({
                           <Input
                             value={row.name}
                             onChange={(e) => updateRow(row.id, "name", e.target.value)}
-                            className="h-8 text-sm"
+                            className="h-8 text-base sm:text-sm"
                           />
                         </td>
                         <td className="px-3 py-2">
@@ -355,7 +355,7 @@ export function BulkEditDialog({
                             value={row.merchant}
                             onChange={(e) => updateRow(row.id, "merchant", e.target.value)}
                             list="bulk-merchants"
-                            className="h-8 text-sm"
+                            className="h-8 text-base sm:text-sm"
                           />
                         </td>
                         <td className="px-3 py-2">

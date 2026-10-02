@@ -107,7 +107,7 @@ export function RecurringCommitmentsCard({
                           <button
                             type="button"
                             onClick={() => onDismiss(row.name)}
-                            className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                            className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground pointer-coarse:min-h-11 pointer-coarse:min-w-11"
                             aria-label={`Dismiss ${row.name} as non-recurring`}
                             title="Dismiss as non-recurring"
                           >

@@ -211,7 +211,7 @@ function ManageCategories({
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && void handleAdd()}
-            className="h-10 text-sm"
+            className="h-10 text-base sm:text-sm"
           />
           <Button
             variant="default"
@@ -592,7 +592,7 @@ function ManageMerchants({
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && void handleAdd()}
-            className="h-10 text-sm"
+            className="h-10 text-base sm:text-sm"
           />
           <Button
             variant="default"
@@ -620,7 +620,7 @@ function ManageMerchants({
                         if (e.key === "Enter") void handleEditSave()
                         if (e.key === "Escape") setEditId(null)
                       }}
-                      className="h-8 text-sm"
+                      className="h-8 text-base sm:text-sm"
                       autoFocus
                     />
                     <Button
@@ -925,13 +925,13 @@ function ManageMemorized() {
             placeholder="Search by name, merchant, or category…"
             value={searchQ}
             onChange={(e) => setSearchQ(e.target.value)}
-            className="h-10 pr-8 text-sm"
+            className="h-10 pr-8 text-base sm:text-sm"
           />
           {searchQ && (
             <button
               type="button"
               onClick={() => setSearchQ("")}
-              className="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground"
+              className="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground pointer-coarse:-me-3.5 pointer-coarse:min-w-11 pointer-coarse:justify-center"
               aria-label="Clear search"
             >
               <X className="h-4 w-4" />

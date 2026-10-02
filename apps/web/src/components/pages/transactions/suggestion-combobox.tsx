@@ -165,7 +165,7 @@ export const SuggestionCombobox = forwardRef<HTMLInputElement, SuggestionCombobo
             <ul
               id={listboxId}
               role="listbox"
-              className="absolute z-50 mt-2 max-h-60 w-full overflow-y-auto rounded-xl border border-border bg-card py-1 shadow-lg"
+              className="absolute z-50 mt-2 max-h-60 max-sm:max-h-[min(15rem,40dvh)] w-full overflow-y-auto rounded-xl border border-border bg-card py-1 shadow-lg"
             >
               {total === 0 ? (
                 <li className="px-3 py-2 text-sm text-muted-foreground">No suggestions</li>
@@ -183,7 +183,7 @@ export const SuggestionCombobox = forwardRef<HTMLInputElement, SuggestionCombobo
                       accept(s)
                     }}
                     className={cn(
-                      "flex cursor-pointer flex-col items-start gap-0.5 px-3 py-2 text-sm",
+                      "flex cursor-pointer flex-col items-start gap-0.5 px-3 py-2 text-sm pointer-coarse:min-h-11 pointer-coarse:justify-center",
                       i === highlighted ? "bg-muted" : "hover:bg-muted",
                     )}
                   >
@@ -209,7 +209,7 @@ export const SuggestionCombobox = forwardRef<HTMLInputElement, SuggestionCombobo
                       acceptExtra(o)
                     }}
                     className={cn(
-                      "flex cursor-pointer flex-col items-start gap-0.5 px-3 py-2 text-sm",
+                      "flex cursor-pointer flex-col items-start gap-0.5 px-3 py-2 text-sm pointer-coarse:min-h-11 pointer-coarse:justify-center",
                       i === highlighted ? "bg-muted" : "hover:bg-muted",
                     )}
                   >

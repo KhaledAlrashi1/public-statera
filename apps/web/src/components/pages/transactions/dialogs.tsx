@@ -341,7 +341,7 @@ export function AddTransactionDialog({
     <>
       <Dialog open={open && !dupMeta} onOpenChange={onOpenChange}>
         <DialogContent
-          className="max-h-[92vh] w-[calc(100vw-1rem)] max-w-2xl space-y-5 overflow-y-auto sm:w-full"
+          className="max-h-[92dvh] w-[calc(100vw-1rem)] max-w-2xl space-y-5 overflow-y-auto sm:w-full"
           onOpenAutoFocus={(e) => {
             e.preventDefault()
             requestAnimationFrame(() => amountRef.current?.focus())
@@ -560,8 +560,10 @@ export function AddTransactionDialog({
               )}
             </div>
 
-            <DialogFooter className="mt-5 flex-col-reverse gap-2 pt-3 sm:flex-row sm:items-center">
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground sm:mr-auto">
+            {/* MOB-R47 E1 — below sm the footer sticks to the dialog's bottom edge so Save stays in view
+                while the fields scroll; -mx-5/-mb-5 with px-5/pb-5 cancel and restore the dialog's p-5. */}
+            <DialogFooter className="mt-5 flex-col-reverse gap-2 pt-3 sm:flex-row sm:items-center max-sm:sticky max-sm:bottom-0 max-sm:z-10 max-sm:-mx-5 max-sm:-mb-5 max-sm:border-t max-sm:border-border/70 max-sm:bg-card max-sm:px-5 max-sm:pb-5">
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground pointer-coarse:min-h-11 sm:mr-auto">
                 <input
                   type="checkbox"
                   checked={keepOpen}
@@ -739,14 +741,14 @@ export function SplitTransactionDialog({
                 value={split.name}
                 onChange={(e) => updateSplit(idx, "name", e.target.value)}
                 placeholder="Name"
-                className="h-9 text-sm"
+                className="h-9 text-base sm:text-sm"
               />
               <Input
                 value={split.category}
                 onChange={(e) => updateSplit(idx, "category", e.target.value)}
                 placeholder="Category"
                 list={catListId}
-                className="h-9 text-sm"
+                className="h-9 text-base sm:text-sm"
               />
               <Input
                 type="text"
@@ -754,7 +756,7 @@ export function SplitTransactionDialog({
                 placeholder="0.000"
                 value={split.amount_kd}
                 onChange={(e) => updateSplit(idx, "amount_kd", e.target.value)}
-                className="h-9 text-right text-sm tabular-nums"
+                className="h-9 text-right text-base sm:text-sm tabular-nums"
               />
               <Button
                 type="button"
@@ -1006,7 +1008,7 @@ export function EditTransactionDialog({
     <>
       <Dialog open={open && !confirmDelete && !showSplit} onOpenChange={onOpenChange}>
         <DialogContent
-          className="max-h-[92vh] w-[calc(100vw-1rem)] max-w-2xl space-y-5 overflow-y-auto sm:w-full"
+          className="max-h-[92dvh] w-[calc(100vw-1rem)] max-w-2xl space-y-5 overflow-y-auto sm:w-full"
           onOpenAutoFocus={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => {
             if (openDropdownCount.current > 0) e.preventDefault()
@@ -1117,7 +1119,7 @@ export function EditTransactionDialog({
               </div>
             )}
 
-            <DialogFooter className="mt-5 flex-col-reverse gap-2 pt-3 sm:flex-row">
+            <DialogFooter className="mt-5 flex-col-reverse gap-2 pt-3 sm:flex-row max-sm:sticky max-sm:bottom-0 max-sm:z-10 max-sm:-mx-5 max-sm:-mb-5 max-sm:border-t max-sm:border-border/70 max-sm:bg-card max-sm:px-5 max-sm:pb-5">
               <Button
                 type="button"
                 variant="destructive"

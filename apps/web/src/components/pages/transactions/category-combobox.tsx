@@ -95,7 +95,7 @@ export function CategoryCombobox({ id, value, onValueChange, categories, onOpenC
           <ul
             id={listboxId}
             role="listbox"
-            className="absolute z-50 mt-2 max-h-60 w-full overflow-y-auto rounded-xl border border-border bg-card py-1 shadow-lg"
+            className="absolute z-50 mt-2 max-h-60 max-sm:max-h-[min(15rem,40dvh)] w-full overflow-y-auto rounded-xl border border-border bg-card py-1 shadow-lg"
           >
             {isNewName ? (
               <li className="px-3 py-2 text-xs text-muted-foreground">
@@ -115,7 +115,7 @@ export function CategoryCombobox({ id, value, onValueChange, categories, onOpenC
                   accept(name)
                 }}
                 className={cn(
-                  "cursor-pointer px-3 py-2.5 text-sm",
+                  "cursor-pointer px-3 py-2.5 text-sm pointer-coarse:flex pointer-coarse:min-h-11 pointer-coarse:items-center",
                   i === highlighted ? "bg-muted" : "hover:bg-muted",
                 )}
               >

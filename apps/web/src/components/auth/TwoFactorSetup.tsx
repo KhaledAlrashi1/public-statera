@@ -121,7 +121,7 @@ export function TwoFactorSetup({
             </div>
           </div>
           <form onSubmit={submitConfirm} className="space-y-3">
-            <label className="flex items-start gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-sm">
+            <label className="flex items-start gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-sm pointer-coarse:min-h-11">
               <input
                 type="checkbox"
                 checked={backupCodesSaved}

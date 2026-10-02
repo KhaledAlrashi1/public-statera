@@ -1171,14 +1171,14 @@ function SplitRowEditor({
               onChange={(e) => updateSplit(idx, "name", e.target.value)}
               placeholder={idx === 0 ? originalRow.name || "Name" : "Name"}
               list={nameListId}
-              className="h-8 border-border/35 bg-background/70 text-sm shadow-none hover:border-border/60 focus:bg-background"
+              className="h-8 border-border/35 bg-background/70 text-base sm:text-sm shadow-none hover:border-border/60 focus:bg-background"
             />
             <Input
               value={split.category}
               onChange={(e) => updateSplit(idx, "category", e.target.value)}
               placeholder={idx === 0 ? originalRow.category || "Category" : "Category"}
               list={catListId}
-              className="h-8 border-border/35 bg-background/70 text-sm shadow-none hover:border-border/60 focus:bg-background"
+              className="h-8 border-border/35 bg-background/70 text-base sm:text-sm shadow-none hover:border-border/60 focus:bg-background"
             />
             <MoneyInput
               showCurrency={false}
@@ -1718,13 +1718,13 @@ export function PreviewImportDialog({
                     date: e.target.value,
                   }))
                 }
-                className="h-9 border-border/45 bg-background/70 text-sm shadow-none hover:border-border/70 focus:bg-background"
+                className="h-9 border-border/45 bg-background/70 text-base sm:text-sm shadow-none hover:border-border/70 focus:bg-background"
               />
             </div>
           </div>
           <div className="space-y-2 text-right">
             <div className="text-base font-semibold tabular-nums">KD {fmt3(rowTotal)}</div>
-            <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+            <label className="inline-flex items-center gap-2 text-xs text-muted-foreground pointer-coarse:min-h-11">
               <input
                 type="checkbox"
                 checked={!row.excluded}
@@ -1748,7 +1748,7 @@ export function PreviewImportDialog({
             }}
             list={previewMerchantListId}
             placeholder="Optional"
-            className="h-9 border-border/45 bg-background/70 text-sm shadow-none hover:border-border/70 focus:bg-background"
+            className="h-9 border-border/45 bg-background/70 text-base sm:text-sm shadow-none hover:border-border/70 focus:bg-background"
           />
         </div>
 
@@ -1763,7 +1763,7 @@ export function PreviewImportDialog({
                   onBlur={() => handleNameBlur(rowIdx)}
                   placeholder="Item name"
                   list={previewNameListId}
-                  className="h-9 border-border/35 bg-background/70 text-sm shadow-none hover:border-border/60 focus:bg-background"
+                  className="h-9 border-border/35 bg-background/70 text-base sm:text-sm shadow-none hover:border-border/60 focus:bg-background"
                 />
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -1774,7 +1774,7 @@ export function PreviewImportDialog({
                     onChange={(e) => updateRow(rowIdx, (r) => ({ ...r, category: e.target.value }))}
                     placeholder="Category"
                     list={previewCatListId}
-                    className="h-9 border-border/35 bg-background/70 text-sm shadow-none hover:border-border/60 focus:bg-background"
+                    className="h-9 border-border/35 bg-background/70 text-base sm:text-sm shadow-none hover:border-border/60 focus:bg-background"
                   />
                 </div>
                 <div className="grid gap-1.5">
@@ -1785,7 +1785,7 @@ export function PreviewImportDialog({
                     placeholder="0.000"
                     value={row.amount_kd}
                     onChange={(e) => updateRow(rowIdx, (r) => ({ ...r, amount_kd: e.target.value }))}
-                    className="h-9 border-border/35 bg-background/70 text-right text-sm tabular-nums shadow-none hover:border-border/60 focus:bg-background"
+                    className="h-9 border-border/35 bg-background/70 text-right text-base sm:text-sm tabular-nums shadow-none hover:border-border/60 focus:bg-background"
                   />
                 </div>
               </div>
@@ -1892,7 +1892,7 @@ export function PreviewImportDialog({
                 date: e.target.value,
               }))
             }
-            className="h-9 border-border/45 bg-background/70 text-sm shadow-none hover:border-border/70 focus:bg-background"
+            className="h-9 border-border/45 bg-background/70 text-base sm:text-sm shadow-none hover:border-border/70 focus:bg-background"
           />
         </td>
         <td className="p-3 align-top">
@@ -1906,7 +1906,7 @@ export function PreviewImportDialog({
             }}
             list={previewMerchantListId}
             placeholder="Optional"
-            className="h-9 border-border/45 bg-background/70 text-sm shadow-none hover:border-border/70 focus:bg-background"
+            className="h-9 border-border/45 bg-background/70 text-base sm:text-sm shadow-none hover:border-border/70 focus:bg-background"
           />
         </td>
         <td className="px-2 py-1 align-top">
@@ -1917,7 +1917,7 @@ export function PreviewImportDialog({
               onBlur={() => handleNameBlur(rowIdx)}
               placeholder="Name"
               list={previewNameListId}
-              className="h-8 border-border/20 bg-background/30 text-sm shadow-none hover:border-border/55 hover:bg-background/60 focus:border-ring focus:bg-background"
+              className="h-8 border-border/20 bg-background/30 text-base sm:text-sm shadow-none hover:border-border/55 hover:bg-background/60 focus:border-ring focus:bg-background"
             />
             <Input
               value={row.category}
@@ -1926,7 +1926,7 @@ export function PreviewImportDialog({
               }
               placeholder="Category"
               list={previewCatListId}
-              className="h-8 border-border/20 bg-background/30 text-sm shadow-none hover:border-border/55 hover:bg-background/60 focus:border-ring focus:bg-background"
+              className="h-8 border-border/20 bg-background/30 text-base sm:text-sm shadow-none hover:border-border/55 hover:bg-background/60 focus:border-ring focus:bg-background"
             />
             <Input
               type="text"
@@ -1936,7 +1936,7 @@ export function PreviewImportDialog({
               onChange={(e) =>
                 updateRow(rowIdx, (r) => ({ ...r, amount_kd: e.target.value }))
               }
-              className="h-8 border-border/20 bg-background/30 text-right text-sm tabular-nums shadow-none hover:border-border/55 hover:bg-background/60 focus:border-ring focus:bg-background"
+              className="h-8 border-border/20 bg-background/30 text-right text-base sm:text-sm tabular-nums shadow-none hover:border-border/55 hover:bg-background/60 focus:border-ring focus:bg-background"
             />
           </div>
         </td>
@@ -1945,7 +1945,7 @@ export function PreviewImportDialog({
         </td>
         <td className="p-3 text-right align-top">
           <div className="flex flex-col items-end gap-2">
-            <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+            <label className="inline-flex items-center gap-2 text-xs text-muted-foreground pointer-coarse:min-h-11">
               <input
                 type="checkbox"
                 checked={!row.excluded}
@@ -2048,7 +2048,7 @@ export function PreviewImportDialog({
                   so your first real import starts from a clean account.
                 </p>
               </div>
-              <label className="flex shrink-0 items-center gap-2 text-sm font-medium">
+              <label className="flex shrink-0 items-center gap-2 text-sm font-medium pointer-coarse:min-h-11">
                 <input
                   type="checkbox"
                   checked={replaceDemoData}

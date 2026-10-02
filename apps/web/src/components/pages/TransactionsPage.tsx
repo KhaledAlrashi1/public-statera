@@ -378,7 +378,7 @@ export default function TransactionsPage() {
           <button
             type="button"
             onClick={() => setSelectedIds(new Set())}
-            className="ml-auto flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
+            className="ml-auto flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-muted pointer-coarse:min-h-11 pointer-coarse:min-w-11"
             aria-label="Clear selection"
           >
             <XIcon className="h-4 w-4" />

@@ -332,13 +332,17 @@ function TransactionsTable({
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     {onToggleSelect ? (
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => onToggleSelect(txnId)}
-                        className="h-4 w-4 rounded border-border accent-primary"
-                        aria-label={`Select transaction ${row.name}`}
-                      />
+                      // MOB-R47 E2 — 44px hit area on touch (padding + matching negative margin), so
+                      // the checkbox's visible size and the row's layout stay as they were.
+                      <label className="inline-flex pointer-coarse:-m-3.5 pointer-coarse:p-3.5">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => onToggleSelect(txnId)}
+                          className="h-4 w-4 rounded border-border accent-primary"
+                          aria-label={`Select transaction ${row.name}`}
+                        />
+                      </label>
                     ) : null}
                     <div className={cn("text-base font-semibold", amountMeta.className)}>
                       {amountMeta.text}
@@ -372,13 +376,15 @@ function TransactionsTable({
             <tr>
               <th className="w-10 px-3 py-2.5 text-left">
                 {onSelectAll && (
-                  <input
-                    type="checkbox"
-                    checked={allSelected}
-                    onChange={() => onSelectAll(allVisibleIds)}
-                    className="h-4 w-4 rounded border-border accent-primary"
-                    aria-label="Select all transactions"
-                  />
+                  <label className="inline-flex pointer-coarse:-m-3.5 pointer-coarse:p-3.5">
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      onChange={() => onSelectAll(allVisibleIds)}
+                      className="h-4 w-4 rounded border-border accent-primary"
+                      aria-label="Select all transactions"
+                    />
+                  </label>
                 )}
               </th>
               <th className="th-standard">
@@ -449,13 +455,15 @@ function TransactionsTable({
                   >
                       <td className="w-10 px-3 py-3">
                         {onToggleSelect && (
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => onToggleSelect(txnId)}
-                            className="h-4 w-4 rounded border-border accent-primary"
-                            aria-label={`Select transaction ${row.name}`}
-                          />
+                          <label className="inline-flex pointer-coarse:-m-3.5 pointer-coarse:p-3.5">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => onToggleSelect(txnId)}
+                              className="h-4 w-4 rounded border-border accent-primary"
+                              aria-label={`Select transaction ${row.name}`}
+                            />
+                          </label>
                         )}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">

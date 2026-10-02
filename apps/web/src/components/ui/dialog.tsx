@@ -44,7 +44,9 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogClose className="absolute end-5 top-5 rounded-full p-1 text-muted-foreground transition hover:bg-muted">
+      {/* MOB-R47 E2 — the Button primitive's pointer-coarse:min-h-11/min-w-11 pattern: 44px on touch,
+          desktop untouched. -m-2.5 keeps the icon's centre where the 24px box had it. */}
+      <DialogClose className="absolute end-5 top-5 rounded-full p-1 text-muted-foreground transition hover:bg-muted pointer-coarse:-m-2.5 pointer-coarse:flex pointer-coarse:min-h-11 pointer-coarse:min-w-11 pointer-coarse:items-center pointer-coarse:justify-center">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogClose>
