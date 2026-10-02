@@ -7964,3 +7964,45 @@ Step 5 — Close, then stop
   walk-through tonight, or the operator rolls it back as in section 2.
 - Final state predicted: strict 43, loose 45, unpushed 0, origin/main and both probes at this
   block's persistence commit.
+
+MOB-R44 — THE PUSH OF c6f92d3 IS ACCEPTED ON THE OPERATOR'S REPORT. THE MEETING RULE IS RETIRED.
+THE FIRST-SESSION CYCLE (MOB-R40 TO MOB-R43) IS CLOSED. PERSIST, CHECK THE PROBES, STOP. TIER 2.
+
+Operator words, after the meeting (quoted verbatim):
+- "She tried it and enjoyed it. It's casual demo. Let's keep going with the development plan."
+
+1. Acceptance (channel ruling)
+- The push under MOB-R43 (7186a8b..c6f92d3, Actions run 36999766691, all four jobs success)
+  is accepted. No rollback was started.
+- Basis, stated exactly: the operator's report that the friend used the live site and enjoyed
+  it. The itemised walk-through listed for MOB-R43 was not reported item by item, so this
+  acceptance does not claim that each item was observed. Anything found wrong later is a new
+  finding, not a reopening of this push.
+
+2. The meeting rule is retired (channel ruling)
+- The standing rule "no deploy on the day before the operator meets the friend", and section 2
+  of MOB-R43 (rollback only until the meeting), have both lapsed: the meeting has happened.
+- Deploys return to the normal rule: a push only under a block, predicted N+1, the run
+  completed, and both probes checked.
+
+3. What carries forward, unchanged
+- The three test-side leftovers named in section 1 of MOB-R42.
+- The importer, income, payday and Stage-2 queue items as already recorded. Nothing in the
+  queue was acted on in this cycle.
+- The friend's detailed feedback is not yet captured. The next cycle's scope waits for the
+  operator's selection in the review channel.
+
+Step 1 — Persist this block alone, in the standing read-back form.
+- Append at 7968, after a blank line at 7967. Report the appended line count; the channel
+  checks it against its own count.
+- Predict: strict 44, contiguous; loose 46 (body lines 1513 and 6934 only); unpushed 1 by
+  both routes. Paste git show --stat and git status --porcelain in full.
+
+Step 2 — Probes (read-only)
+- curl the live /healthz and /readyz and paste both responses. Predicted on both:
+  c6f92d3b65c2e6cd32e831233de75e7e64b7af92.
+- Anything else: STOP and report. It would mean a deploy this block does not know about.
+
+Step 3 — Stop
+- No push. This persistence commit rides with the next cycle's push.
+- Close in the standing read-back form: unpushed 1, origin/main at c6f92d3.
