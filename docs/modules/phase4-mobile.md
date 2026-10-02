@@ -7833,3 +7833,76 @@ Unpushed predicted: 2 after this block persists, then 7 after C5.
 This block persists ALONE, BEFORE C1. The wrap check runs as its own step. After the append: the
 strict count is predicted at 41, contiguous; the loose count at 43, whose only non-header lines
 are 1513 and 6934. Any third match stops. Close in the standing read-back form.
+
+MOB-R42 — THE MOB-R40/R41 CLOSE-OUT IS ACCEPTED. NO PUSH UNDER THIS BLOCK: THE OPERATOR MEETS
+THE FRIEND TOMORROW. ONE CLAUDE.md COMMIT, THEN READ-ONLY EVIDENCE. CHANNEL RULING, TIER 2.
+
+Operator answers, 2026-10-01, to the channel's options (quoted verbatim):
+- "When do you meet the friend?" → "Tomorrow (Fri)", i.e. Fri 2026-10-02.
+- "Push scope for MOB-R42" → "7 commits + CLAUDE.md FAB fix (recommended)". The option and the
+  recommendation are the channel's; the selection is the operator's.
+- "Which of these are done and clean?" (live-site round on 7186a8b, spare-account import,
+  walk-through of the 4 fixes) → "I don't know for sure. Ask CC for any information you need by
+  writing a prompt".
+
+1. Review of the MOB-R40/R41 close-out (channel ruling)
+- Accepted. Read-backs reconcile: 125 lines (stat 126) and 69 lines (stat 70); strict 41,
+  loose 43; unpushed 0 → 1 → 2 → 7. Per-commit counts 274/49, 275/49, 276/50, 276/50, 277/50
+  were all met. RM-20 did not fire.
+- The three comment-only source edits are accepted as live-index corrections, subject to the
+  hunks shown in Step 3.
+- The self-caught zsh pathspec fault is recorded as a 10f-class catch. It was closed correctly:
+  re-run with separate arguments and a positive control.
+- Findings: the stale CLAUDE.md FAB line is fixed in Step 2. The three test-side leftovers
+  (DashboardPage.test.tsx:75–78 comment, cache-invalidation.test.tsx:118 mock,
+  dashboard-hero.test.tsx:12 title) go to the queue and stay untouched.
+
+2. No push (channel ruling, applying the standing rule)
+- Standing rule: no deploy on the day before the operator meets the friend. Today is
+  Thu 2026-10-01 and the meeting is Fri 2026-10-02, so nothing is pushed under this block.
+- The friend's first session therefore runs on 7186a8b, without F1–F4.
+- The push gets its own later block, no earlier than Sat 2026-10-03.
+- git push, or anything else that starts a deploy, is a STOP under this block.
+
+Step 1 — Persist this block alone, in the standing read-back form.
+- Append at 7837, after a blank line at 7836. Report the appended line count; the channel
+  checks it against its own count.
+- Predict: strict 42, contiguous; loose 44 (body lines 1513 and 6934 only); unpushed 8 by
+  both routes. Paste git show --stat and git status --porcelain in full.
+
+Step 2 — C6: the stale FAB constraint in CLAUDE.md (live index, channel ruling)
+- First run: grep -n "icon-only FAB" CLAUDE.md, and paste the output verbatim.
+- Exactly 1 match: rewrite only the FAB description on that line, so it states what F3
+  shipped: 56px high, a visible "Log" label, width auto with logical padding (ps-4 pe-5), and
+  aria-label "Log transaction" unchanged. Leave the rest of the line as it is.
+- 0 matches, or more than 1: STOP, paste the output, and edit nothing.
+- Predict: 1 file changed, 1 insertion(+), 1 deletion(-). Paste git show --stat and the hunk
+  in full. Unpushed 9 by both routes.
+- A CLAUDE.md-only commit needs no test run. Say so in the report; don't run one.
+
+Step 3 — Pre-push evidence, read-only
+- Paste git diff --name-status origin/main..HEAD verbatim.
+- Expected: paths only under apps/web (not apps/web/contract), plus
+  docs/modules/phase4-mobile.md and CLAUDE.md.
+- STOP if any path is under apps/api, apps/web/contract, deploy/ or migrations.
+- STOP if the list names AppShell.test.tsx, legal/PrivacyPolicyPage.test.tsx or
+  legal/TermsPage.test.tsx.
+- State the IncomeNudge component file's status from that list. The channel predicts D.
+  Any other status is a question, not a stop.
+- Paste, from git diff origin/main..HEAD, the hunks of the three comment-only edits:
+  sections.tsx (inside SafeToSpendHero), InsightsPage.tsx near :274, and the comment above the
+  PlanSetupPrompts mount.
+
+Step 4 — Facts the operator asked for (read-only)
+- curl the live /healthz and /readyz and paste the sha each reports. The channel predicts
+  7186a8b for both.
+- Run grep -n -i -E "observation round|spare account|spare-account|walk-through" on
+  docs/modules/phase4-mobile.md and on CLAUDE.md. Paste every match verbatim as file:line.
+  If either file returns 0 matches, show the same command finding "7186a8b" in that file, so
+  the 0 can be trusted.
+- CC cannot see the operator's browser session or his spare account. Say so plainly, and
+  infer neither result from logs or the database.
+
+Step 5 — Close
+- Final state predicted: strict 42, loose 44, unpushed 9 by both routes, origin/main 7186a8b,
+  nothing pushed. Close in the standing read-back form.
