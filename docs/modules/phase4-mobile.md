@@ -8086,3 +8086,78 @@ Step 3 — Close
   would touch, whether it can reuse the Profile save call unchanged, and its predicted test
   count with signs.
 - Final state predicted: strict 45, loose 47, unpushed 2, porcelain empty, nothing pushed.
+
+MOB-R46 — QUICK WINS (TIER 2): INCOME POP-UP, SUGGESTED NAMES, TYPE-YOUR-OWN CATEGORY; PROPOSALS FOR EMPTY-SCREEN LINES AND MOBILE
+Source: channel ruling on CC's MOB-R45 report (dce650a). Tier 2: frontend only, one report, API NOT MEASURED (MOB-R37; escalation gate RM-20). No new gate; the next gate stays RM-22.
+
+Review (channel)
+- MOB-R44 accepted on MOB-R45's precondition (7968–8008, origin/main c6f92d3) and on lines 1–8008 cmp-equal to HEAD.
+- MOB-R45 accepted: 79 lines at 8010–8088, stat 80, strict 45, loose 47, unpushed 2, porcelain empty.
+- Gap in MOB-R45: counts were stated without their command and exit code. This report shows both for every count.
+
+Operator selections (channel options; operator's selection verbatim)
+- "Demo before sign-up: which kind?" → "Sample dashboard, no account (recommended)"
+- "Categories and merchants for new users:" → "Show as suggestions, saved on first use (recommended)"
+- "Order of work after the recon:" → "Quick wins → budgets → demo-first (recommended)"
+- "Which phone screens feel most awkward? (pick up to 3)" → operator: "I don't think one of the pages felt awkward. I just think we can enhance the mobile version much more."
+- "How should the app explain its features?" → "One line on each empty screen (recommended)"
+- "Category list:" → "Add Domestic Help + Family Support → 22 (recommended)"
+
+Channel rulings
+- RM-21 does not fire for Part A or Part B, under the gates in Step 2. A failed gate is a STOP for the part it gates only.
+- Suggestions follow R2 option (a): a constant list in the frontend. A row is created only when the user saves, through the existing getOrCreate path. Nothing is seeded into any account.
+- Canonical on-demand backup: `systemctl start statera-backup.service` (proven at the 10e deploy, phase4-10e.md:6019–6024). The 10e record is not edited; MOB-R45 R7's finding stands next to it as the correction.
+- The 1800.000 demo-clear defect stays with demo-first; the month-replace budget save stays with the budget track. Both Tier 1.
+
+Step 1 — Persist this block alone, before any work. Standing read-back. Predicted: 74 lines at 8090–8163 after a blank at 8089, stat 75; strict 46, loose 48, unpushed 3.
+
+Step 2 — Gates before code (read-only; quote file:line in the report)
+- G1 (gates A): quote auth.ts:1114–1206 showing that a key absent from the payload leaves its column unchanged, and ProfilePage.tsx:184's call body verbatim. If an absent key is nulled or overwritten: STOP A.
+- G2 (gates B): quote the name-matching predicate of getOrCreateCategory and getOrCreateMerchant (transaction-lib.ts:77–123). If it uses LIKE or ILIKE: STOP B ("%Arabica" would act as a wildcard).
+- G3 (gates B): list every existing test that queries the category field (dialogs.tsx:523–534, :1079), with a positive control. Any hit: STOP B and report each hit with the edit it would need.
+- G4 (gates A): list every test asserting navigate("/profile"), with a positive control. Only DashboardPage.test.tsx:639–645 is granted. Any other hit that A would break: STOP A.
+
+Part A — Income pop-up (CC's MOB-R45 proposal, accepted)
+- New IncomeQuickDialog.tsx. isValidMonthlyIncome and the four-key invalidation move to a shared helper; ProfilePage imports it, behaviour unchanged, its tests unchanged.
+- Opens from all four entry points: checklist step (DashboardPage.tsx:216), setup guide (same handler), PlanSetupPrompts (:925), Plan income card (BudgetPage.tsx:464, both "Set income" and "Edit income").
+- Sends only monthly_income_kd through authApi.updateProfile. Empty or invalid input shows an error and sends nothing; it never sends null. "Edit income" prefills the current value.
+- Grant: DashboardPage.test.tsx:639–645 changes from navigate("/profile") to "opens the income dialog".
+
+Part B — Suggested names and type-your-own category
+- A constant list in a new lib file: the 22 categories and 50 merchants below. Nothing is saved until the user saves a transaction.
+- The category field (dialogs.tsx:523–534 and :1079) becomes pick-or-type: the user's own categories first, then suggestions not already owned (case-insensitive); a typed new name is accepted.
+- The merchant combobox (dialogs.tsx:492–503) adds the merchant suggestions after the user's own.
+- Picking a suggested merchant fills its default category only when the category is empty.
+- Categories (22): Groceries, Dining Out, Food Delivery, Coffee, Transport, Fuel, Car, Rent & Housing, Utilities, Phone & Internet, Shopping, Home, Health & Fitness, Personal Care, Entertainment, Subscriptions, Travel, Education, Gifts & Occasions, Charity, Domestic Help, Family Support.
+- Merchants (50), by default category:
+  Groceries: The Sultan Center, Lulu Hypermarket, Carrefour, City Centre, Oncost, Co-op.
+  Food Delivery: Talabat, Deliveroo, Jahez. Coffee: Starbucks, Caribou Coffee, Tim Hortons, %Arabica, Costa Coffee.
+  Dining Out: McDonald's, KFC, Burger King, Hardee's, Shake Shack, Slider Station, Mais Alghanim.
+  Transport: Careem. Fuel: KNPC, Oula, Soor Fuel. Phone & Internet: Zain, Ooredoo, stc. Utilities: MEW.
+  Shopping: H&M, Zara, Centrepoint, Nike, Sephora, Bath & Body Works, Noon, Amazon, X-cite, Eureka, Best Al-Yousifi.
+  Home: IKEA, Home Centre. Health & Fitness: Boots. Education: Jarir Bookstore. Entertainment: Cinescape.
+  Travel: Kuwait Airways, Jazeera Airways. Subscriptions: Netflix, Spotify, Shahid.
+
+Part C — Small fixes
+- expenses/dialogs.tsx:289–296: add inputMode="decimal". Census predicted 0 after.
+- backups.md:96–100: the Manual run becomes the canonical command above.
+
+Part D — Proposal only, no code: one line on each empty screen
+- Every empty state the app renders: file:line, current copy, the feature it should explain, a proposed line of 12 words or fewer, test predictions.
+
+Part E — Proposal only, no code: mobile enhancements
+- Census, each with a positive control: (1) interactive elements under 44px (size "sm"/"icon", h-9 and smaller); (2) controls shown only on hover; (3) inputs under 16px font, which iOS zooms on focus; (4) fixed or bottom elements without safe-area insets; (5) dialogs whose save button can scroll out of view.
+- Then the top 5 enhancements ranked by daily-use impact, each with files, test predictions and RM-21 status.
+
+Tests (frontend; each new test red-first or by a mutation replay restored cmp-equal)
+- Baseline 277 / 50, exit 0, tsc 0 bytes.
+- A: +4 in IncomeQuickDialog.test.tsx (new), +2 in DashboardPage.test.tsx, +1 in BudgetPage.test.tsx.
+- B: +5 in the list's test file (new): 22 categories; 50 merchants; none starts with "income" (case-insensitive); no case-insensitive duplicates; every default category is in the list.
+- B: +5 in a new dialog test file: a zero-category user sees the 22; own categories first, no duplicate; a typed name reaches the payload; a suggested merchant fills an empty category; it does not overwrite a chosen one.
+- Predicted: 294 / 53 with A and B; 284 / 51 if B stops; 287 / 52 if A stops. tsc 0 bytes, exit 0.
+- Named regression files untouched: AppShell.test.tsx, legal/PrivacyPolicyPage.test.tsx, legal/TermsPage.test.tsx. No other existing-test edits.
+
+Commit and final state
+- One implementation commit after the suite is green. git diff --stat c6f92d3..HEAD -- apps/api/ is empty, with a positive control.
+- Predicted final: strict 46, loose 48, unpushed 4 by both routes, porcelain empty, origin/main c6f92d3. Nothing pushed; the push comes under its own block.
+- Report: every count with its command and exit code; G1–G4 with quotes; diff stat per part; the test tail; Parts D and E.
