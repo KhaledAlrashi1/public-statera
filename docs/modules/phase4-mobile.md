@@ -8161,3 +8161,59 @@ Commit and final state
 - One implementation commit after the suite is green. git diff --stat c6f92d3..HEAD -- apps/api/ is empty, with a positive control.
 - Predicted final: strict 46, loose 48, unpushed 4 by both routes, porcelain empty, origin/main c6f92d3. Nothing pushed; the push comes under its own block.
 - Report: every count with its command and exit code; G1–G4 with quotes; diff stat per part; the test tail; Parts D and E.
+
+MOB-R47 — PART A UNBLOCKED BY A SECOND GRANT; EMPTY-SCREEN LINES (D) AND MOBILE FIXES E1–E4 IMPLEMENTED; NO PUSH
+Source: channel ruling on CC's MOB-R46 report (8fb06d8, 0e174f8). Tier 2: frontend only, one report, API NOT MEASURED (MOB-R37; escalation gate RM-20). No new gate; the next gate stays RM-22.
+
+Review (channel)
+- MOB-R46 accepted: 74 lines at 8090–8163, stat 75, both regions cmp-equal; G1–G3 passed with quotes and controls; G4 stopped Part A as designed; 287 / 52, exit 0, tsc 0 bytes, exactly the "if A stops" prediction; strict 46, loose 48, unpushed 4, origin/main c6f92d3.
+- Channel miss: MOB-R46 put the Plan income card in Part A and predicted +1 in BudgetPage.test.tsx, but granted only DashboardPage.test.tsx:639–645. G4 caught it. CC's MOB-R45 proposal had also missed BudgetPage.test.tsx:146–161.
+- Departure, flagged openly by CC: backups.md's Manual run now reads "sudo systemctl start statera-backup.service". MOB-R46 ruled it without sudo, and the 10e record shows it without sudo (phase4-10e.md:6021, :6069). Held, not reverted: the operator runs the command on the server before the push block, and that block sets the runbook line from his result.
+- CLAUDE.md's frontend baseline line (277/50 → 287/52) accepted as the standing baseline record.
+
+Ratified (CC's MOB-R46 choices)
+- A suggested merchant sets the merchant, and the category only when it is empty; the transaction name is untouched.
+- Merchant suggestions appear from 2 typed characters, the existing threshold.
+- De-duplication against the shown suggestions only: accepted, because G2's LOWER(name) = LOWER(?) match means picking "Talabat" when the user owns "talabat" reuses that row. No duplicate row is possible.
+
+Step 1 — Persist this block alone, before any work. Standing read-back. Predicted: 55 lines at 8165–8219 after a blank at 8164, stat 56; strict 47, loose 49, unpushed 5.
+
+Part A — Income pop-up, exactly as ruled in MOB-R46 Part A
+- Grant added: BudgetPage.test.tsx:146–161 changes from "opens Profile" to "opens the income dialog". The full grant list is now DashboardPage.test.tsx:639–645 and BudgetPage.test.tsx:146–161.
+- G1 stands as passed. Re-run G4 against the two grants, with its control, before code. Any other breaking hit: STOP A.
+- Own commit.
+
+Part D — One line on each empty screen (CC's proposal, approved)
+- Replace only the description, titles unchanged, with CC's lines verbatim:
+  Home, DashboardPage.tsx:822: Home shows this month's spending, income and what's left.
+  Activity all, TransactionsTable.tsx:177: Every expense and income you log or import lands here.
+  Activity expense, TransactionsTable.tsx:169: Tap Log to record a purchase in a few seconds.
+  Activity income, TransactionsTable.tsx:174: Log salary and other income to see what comes in.
+  Plan, BudgetPage.tsx:469: Give each category a monthly limit; Plan tracks spending against it.
+  Insights, InsightsPage.tsx:331: After a few weeks of logging, Insights spots recurring bills and changes.
+  Memorized list, SettingsDialog.tsx:1081: Statera remembers what you log and suggests it next time.
+- First check whether budget/sections.tsx:522 and :629 render. If they render the old Plan description, they take the Plan line too. Report either way, with the census count adjusted and stated.
+- The test-asserted and already-explanatory lines stay as they are.
+- Census with a positive control: old descriptions 7 → 0, new lines 0 → 7. +0 tests. Own commit.
+
+Part E — Mobile fixes E1–E4 (CC's top 4)
+- Rule for all four: touch or small screens only (pointer-coarse: or below sm:), so desktop renders as before. Follow the Button component's pointer-coarse:min-h-11 pattern.
+- E1: the Add and Edit transaction dialogs get a sticky footer, so Save stays visible; dialog heights move from vh to dvh. iOS does not shrink dvh for the keyboard; the phone check decides whether a follow-up is needed.
+- E2: 44px touch targets for every dialog's close X, the 17 SelectTriggers, the 8 checkboxes (hit area, not visual size) and the 3 small icon buttons.
+- E3: the 26 inputs under 16px become text-base sm:text-sm.
+- E4: combobox list rows reach 44px on touch screens; the open list's max height uses dvh. No keyboard-tracking script this cycle.
+- Censuses before and after, each with a positive control: uncovered elements under 44px → 0; inputs under 16px 26 → 0; vh heights in the touched dialogs → 0. Physical properties stay 32 across 9, components/ui 0.
+- +0 tests: jsdom cannot lay out, so the censuses here and the operator's phone check after deploy are the instruments. Any existing test that breaks: STOP that item and report it.
+- Own commit.
+
+Tests and final state
+- Baseline 287 / 52, exit 0, tsc 0 bytes. Predicted 294 / 53 (A +7, D +0, E +0); 287 / 52 if A stops.
+- Named regression files untouched. No existing-test edits beyond the two grants.
+- git diff --stat c6f92d3..HEAD -- apps/api/ is empty, with a positive control.
+- Predicted final: strict 47, loose 49, unpushed 8 by both routes (one fewer per stopped part), porcelain empty, origin/main c6f92d3. Nothing pushed; the push comes under its own block.
+- Report: every count with its command and exit code; G4 with its control; diff stat per part; the test tail; the budget/sections.tsx finding.
+
+Queued, not acted on
+- Dead code with no renderer: ConnectedAccountsPanel (sections.tsx:899, empty state "Connect your first bank"), RecurringBillsCard; SafeToSpendHero under the two-stage removal.
+- Legacy /expenses and /income still route, because the redirect flag defaults to false.
+- E5, the add-to-home-screen app (manifest, icon, viewport-fit=cover, insets): its own cycle.
