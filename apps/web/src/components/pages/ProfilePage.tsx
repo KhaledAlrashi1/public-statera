@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useQueryClient } from "@tanstack/react-query"
 import { LogOut } from "lucide-react"
 import { authApi } from "@/lib/api"
+import {
+  MONTHLY_INCOME_INVALID_MESSAGE,
+  isValidMonthlyIncome,
+  useInvalidateIncomeQueries,
+} from "@/lib/monthly-income"
 import { validateOptionalTextMaxLength } from "@/lib/validation"
 import { useAuth } from "@/contexts/AuthContext"
 import { usePreferences } from "@/contexts/PreferencesContext"
@@ -18,13 +22,6 @@ import { panelSection } from "@/components/ui/patterns"
 
 const PROFILE_NAME_MAX_LENGTH = 64
 
-// MOB-R36 #7. The field accepts what the server's parseKd accepts: a positive amount with at most
-// three decimals (apps/api/src/lib/kd.ts). A value of zero is rejected there too.
-const MONTHLY_INCOME_INVALID_MESSAGE = "Enter an amount above zero, with up to 3 decimals."
-function isValidMonthlyIncome(raw: string): boolean {
-  const s = raw.trim()
-  return /^\d+(\.\d{1,3})?$/.test(s) && !/^0+(\.0+)?$/.test(s)
-}
 const DEFAULT_PROFILE_TIMEZONE = "Asia/Kuwait"
 const COMMON_TIMEZONE_SUGGESTIONS = [
   "Asia/Kuwait",
@@ -100,7 +97,6 @@ export default function ProfilePage() {
   const navigate = useNavigate()
   const { darkMode, setDarkMode } = usePreferences()
   const toast = useToast()
-  const queryClient = useQueryClient()
 
   // ── Account ──
   const [firstName, setFirstName] = useState("")
@@ -166,17 +162,8 @@ export default function ProfilePage() {
 
   // ─── Handlers ─────────────────────────────────────────────────────────────
 
-  // The typed income feeds Home (the profile query), Plan (budgets' profile_context, also carried in
-  // the dashboard bundle) and Insights (R9 safe-to-spend). Invalidate all of them on change; the
-  // server clears R9's Redis cache on the same write (MOB-R33 C1).
-  const invalidateIncomeQueries = useCallback(async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["auth-profile"] }),
-      queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] }),
-      queryClient.invalidateQueries({ queryKey: ["budgets"] }),
-      queryClient.invalidateQueries({ queryKey: ["insights"] }),
-    ])
-  }, [queryClient])
+  // Shared with the income pop-up (lib/monthly-income.ts): the four query keys the typed income feeds.
+  const invalidateIncomeQueries = useInvalidateIncomeQueries()
 
   const writeMonthlyIncome = async (value: string | null) => {
     setSavingIncome(true)

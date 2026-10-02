@@ -25,6 +25,7 @@ import {
 } from "./dashboard/sections"
 import { useDashboardPageQueries } from "./dashboard/hooks"
 import { BudgetDialog } from "./budget/sections"
+import { IncomeQuickDialog } from "./profile/IncomeQuickDialog"
 import { findDuplicateCategory, saveBudgets } from "./budget/hooks"
 
 const DASHBOARD_CATEGORY_PAGE_SIZE = 100
@@ -57,6 +58,8 @@ export default function DashboardPage() {
   const [loadingDemoData, setLoadingDemoData] = useState(false)
   const [clearingDemoData, setClearingDemoData] = useState(false)
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false)
+  // MOB-R47 Part A — the income asks open the income pop-up instead of sending the user to Profile.
+  const [incomeDialogOpen, setIncomeDialogOpen] = useState(false)
   const [setupGuideOpen, setSetupGuideOpen] = useState(false)
 
   const {
@@ -213,7 +216,7 @@ export default function DashboardPage() {
         description: "Add your monthly income in Profile so planning starts with a real baseline.",
         done: hasIncome,
         actionLabel: "Set income",
-        onAction: () => navigate("/profile"),
+        onAction: () => setIncomeDialogOpen(true),
       },
       {
         key: "transactions",
@@ -922,7 +925,7 @@ export default function DashboardPage() {
           isLoading={safeToSpendLoading}
           safeToSpend={safeToSpend}
           onOpenPlan={() => navigate("/plan")}
-          onOpenIncome={() => navigate("/profile")}
+          onOpenIncome={() => setIncomeDialogOpen(true)}
         />
       )}
 
@@ -953,6 +956,12 @@ export default function DashboardPage() {
           }}
         />
       )}
+
+      <IncomeQuickDialog
+        open={incomeDialogOpen}
+        onOpenChange={setIncomeDialogOpen}
+        initialValue={profile?.monthly_income_kd ?? null}
+      />
 
       <BudgetDialog
         open={budgetDialogOpen}

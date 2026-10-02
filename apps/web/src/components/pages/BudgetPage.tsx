@@ -1,7 +1,6 @@
 import { Target } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useNavigate } from "react-router-dom"
 import { analyticsApi } from "@/lib/api"
 import { cn, fmt3, formatDeltaLabel, today, toYearMonth, isIncome, isEditableMonth, labelForYM, prevMonth as prevMonthUtil } from "@/lib/utils"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -25,6 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import PageHeader from "@/components/layout/PageHeader"
+import { IncomeQuickDialog } from "./profile/IncomeQuickDialog"
 import {
   BudgetChart,
   BudgetDialog,
@@ -46,7 +46,8 @@ import {
 export default function BudgetPage() {
   const toast = useToast()
   const queryClient = useQueryClient()
-  const navigate = useNavigate()
+  // MOB-R47 Part A — "Set income" / "Edit income" open the income pop-up instead of Profile.
+  const [incomeDialogOpen, setIncomeDialogOpen] = useState(false)
   const [selectedMonth, setSelectedMonth] = useState(toYearMonth(today()))
   const [addOpen, setAddOpen] = useState(false)
   const [editIndex, setEditIndex] = useState<number | null>(null)
@@ -461,7 +462,13 @@ export default function BudgetPage() {
           <IncomePlanningCard
             monthLabel={labelForYM(selectedMonth)}
             profileContext={profileContext}
-            onOpenIncome={() => navigate("/profile")}
+            onOpenIncome={() => setIncomeDialogOpen(true)}
+          />
+
+          <IncomeQuickDialog
+            open={incomeDialogOpen}
+            onOpenChange={setIncomeDialogOpen}
+            initialValue={profileContext?.monthly_income_kd ?? null}
           />
 
           {showBudgetEmptyState ? (

@@ -637,12 +637,37 @@ describe("DashboardPage", () => {
     expect(lastHero().deltas).toBeNull()
   })
 
-  it("the Set income prompt opens Profile", () => {
+  it("the Set income prompt opens the income dialog", async () => {
     mocks.useDashboardPageQueries.mockReturnValue({ ...baseResult, profile: { setup_guide_dismissed: true } })
     renderPage()
     const props = mocks.planSetupPrompts.mock.calls.at(-1)?.[0] as { onOpenIncome?: () => void }
     props.onOpenIncome?.()
-    expect(mocks.navigate).toHaveBeenCalledWith("/profile")
+    expect(await screen.findByRole("dialog", { name: "Monthly income" })).toBeInTheDocument()
+    expect(mocks.navigate).not.toHaveBeenCalledWith("/profile")
+  })
+
+  // MOB-R47 Part A — the checklist step (and guided setup, which is passed the same steps) opens
+  // the income dialog instead of sending the user to Profile.
+  it("the checklist's Set income step opens the income dialog", async () => {
+    mocks.useDashboardPageQueries.mockReturnValue({ ...baseResult, profile: null })
+    renderPage()
+    const { steps } = mocks.setupProgressPanel.mock.calls.at(-1)?.[0] as {
+      steps: Array<{ key: string; onAction: () => void }>
+    }
+    steps.find((step) => step.key === "income")?.onAction()
+    expect(await screen.findByRole("dialog", { name: "Monthly income" })).toBeInTheDocument()
+    expect(mocks.navigate).not.toHaveBeenCalledWith("/profile")
+  })
+
+  it("Cancel closes the income dialog and stays on Home", async () => {
+    mocks.useDashboardPageQueries.mockReturnValue({ ...baseResult, profile: { setup_guide_dismissed: true } })
+    renderPage()
+    const props = mocks.planSetupPrompts.mock.calls.at(-1)?.[0] as { onOpenIncome?: () => void }
+    props.onOpenIncome?.()
+    await screen.findByRole("dialog", { name: "Monthly income" })
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }))
+    expect(screen.queryByRole("dialog", { name: "Monthly income" })).toBeNull()
+    expect(mocks.navigate).not.toHaveBeenCalled()
   })
 
   it("Remaining's vs-last-month chip is suppressed when a month is overspent; the others stay", () => {

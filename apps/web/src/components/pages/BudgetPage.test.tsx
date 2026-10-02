@@ -143,7 +143,8 @@ describe("BudgetPage", () => {
 
   // MOB-R36 #13 — the Plan card's income buttons ("Set income" / "Edit income") open Profile, where
   // the typed income is set; they used to open the income activity list.
-  it("the income card's action opens Profile", () => {
+  it("the income card's action opens the income dialog", () => {
+    // MOB-R47 Part A: the buttons now open the income dialog on Plan (the comment above predates it).
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     render(
       <MemoryRouter initialEntries={["/plan"]}>
@@ -157,6 +158,20 @@ describe("BudgetPage", () => {
     )
     const props = mocks.incomePlanningCard.mock.calls.at(-1)?.[0] as { onOpenIncome?: () => void }
     act(() => props.onOpenIncome?.())
-    expect(screen.getByText("profile page")).toBeInTheDocument()
+    expect(screen.getByRole("dialog", { name: "Monthly income" })).toBeInTheDocument()
+    expect(screen.queryByText("profile page")).toBeNull()
+  })
+
+  // MOB-R47 Part A — "Edit income" prefills the dialog with the current typed income.
+  it("Edit income prefills the income dialog with the current value", () => {
+    const base = mocks.budgetHooks.useBudgetPageQueries() as Record<string, unknown>
+    mocks.budgetHooks.useBudgetPageQueries.mockReturnValue({
+      ...base,
+      profileContext: { monthly_income_kd: "1500.000" },
+    })
+    renderPage()
+    const props = mocks.incomePlanningCard.mock.calls.at(-1)?.[0] as { onOpenIncome?: () => void }
+    act(() => props.onOpenIncome?.())
+    expect((screen.getByLabelText("Monthly income (KD)") as HTMLInputElement).value).toBe("1500.000")
   })
 })
