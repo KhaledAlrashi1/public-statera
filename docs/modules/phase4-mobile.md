@@ -8006,3 +8006,83 @@ Step 2 — Probes (read-only)
 Step 3 — Stop
 - No push. This persistence commit rides with the next cycle's push.
 - Close in the standing read-back form: unpushed 1, origin/main at c6f92d3.
+
+MOB-R45 — REAL-USER DATA IS NOW PROTECTED BY A STANDING GATE (RM-21). A READ-ONLY RECON FOR THE
+OPERATOR'S FEEDBACK PACKAGE. NO CODE, NO PUSH. TIER 2 RECON; TIER 1 WHERE THE GATE SAYS SO.
+
+Operator words, after the meeting (quoted verbatim):
+- "It would have been better if she got to see the demo before the app asking her to sign up. I
+  want the app to display the demo first and then prompt the user to sign up later."
+- "be aware that now we have a new user and I don't want to lose them by delete their account or
+  the database. Please be careful."
+- "I want to make sure that the user now they can add their own categories and merchants."
+- "how about they get a pop window to where they can quickly set their income."
+- "I think the app is mobile-friendly but we can make it much more mobile friendly."
+- Channel's summary, not a quote: he also asked for about 20 generic categories, 50 popular
+  Kuwait merchants and three budget suggestions. The channel drafts those in the review
+  channel; nothing is built from them under this block.
+
+0. Precondition
+- MOB-R44 is persisted at 7968–8008 and origin/main is c6f92d3. If either is not so: STOP.
+
+1. RM-21 — the real-user data gate (operator ruling, quoted above; standing from now on)
+- Statera has a real user. Her account and her rows must survive every change.
+- STOP and report, before writing any code, if a change would:
+  (a) add or edit a migration, or change a schema file;
+  (b) add or change any code path that deletes, nulls or overwrites user rows, including
+      account deletion, demo load/clear/replace, import replace, bulk delete/update, purges
+      and maintenance jobs;
+  (c) seed, insert or backfill rows for EXISTING users.
+- A change under (a)–(c) is Tier 1 and needs its own ruling. Migrations are additive only: no
+  DROP, no destructive ALTER, no data rewrite.
+- Before any deploy that carries a migration, the operator runs an on-demand backup and
+  confirms the new object exists. The push block for that deploy names this as a step.
+- CC never connects to the production database or the production server. Tests run only
+  against local services.
+
+2. Recon (read-only). Answer with file:line and verbatim snippets. Every "none" or "0" needs a
+   positive control showing the search could have found something.
+R1 Categories and merchants
+- Every UI path by which a user can create a category or a merchant today (dialogs, settings,
+  inline creation while logging), whether each is reachable on a 375px screen, and the api
+  method and route each calls.
+- What a brand-new account's category and merchant lists contain, and where those rows come
+  from (sign-up, demo, import, logging).
+R2 Suggestions
+- Where QuickAdd's category and merchant suggestions come from, and where a fixed, global list
+  of suggested names (not per-user rows) could plug in without a migration.
+R3 Demo and sign-up
+- The current path from the landing page through sign-up to the demo choice, file:line.
+- Whether any page or route works without a session today.
+- The demo seed: what it writes, the one-month budget shelf life (demo-data-lib.ts:439), and
+  every clear/replace path, including the condition under which a real income of 1800.000
+  is cleared. Quote the code.
+R4 Income
+- The Profile income field: its component, save call (api method, route, payload,
+  validation) and the queries it invalidates.
+- Every "Set income" entry point in the app, and where each one navigates now.
+R5 Budgets
+- How a budget is created (UI, api method, POST /api/budgets payload), and which endpoints
+  already return per-category spend by month and the profile income, with their money types.
+R6 Mobile census (counts with file:line, each with a positive control)
+- amount inputs without inputmode="decimal"; dialogs that are not full-width on small
+  screens; fixed widths over 375px; tables or wide rows without an overflow-x wrapper.
+R7 Data safety
+- Every code path that deletes, nulls or overwrites user rows (file:line), grouped by trigger.
+- Every migration file, and whether any exists at HEAD that is not in c6f92d3.
+- How the operator runs an on-demand backup and confirms it: the runbook's commands, quoted
+  with file:line.
+
+Step 1 — Persist this block alone, in the standing read-back form.
+- Append at 8010, after a blank line at 8009. Report the appended line count; the channel
+  checks it against its own count.
+- Predict: strict 45, contiguous; loose 47 (body lines 1513 and 6934 only); unpushed 2 by
+  both routes. Paste git show --stat and git status --porcelain in full.
+
+Step 2 — Recon R1–R7, read-only. No edits and no commits after Step 1.
+
+Step 3 — Close
+- Report R1–R7 in order. Then propose, without implementing, the income pop-up: the files it
+  would touch, whether it can reuse the Profile save call unchanged, and its predicted test
+  count with signs.
+- Final state predicted: strict 45, loose 47, unpushed 2, porcelain empty, nothing pushed.
