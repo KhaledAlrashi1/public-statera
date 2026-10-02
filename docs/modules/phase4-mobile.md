@@ -7906,3 +7906,61 @@ Step 4 — Facts the operator asked for (read-only)
 Step 5 — Close
 - Final state predicted: strict 42, loose 44, unpushed 9 by both routes, origin/main 7186a8b,
   nothing pushed. Close in the standing read-back form.
+
+MOB-R43 — OPERATOR OVERRIDE: PUSH TODAY. THE DATES IN MOB-R42 ARE CORRECTED HERE. PUSH 10
+COMMITS, WAIT FOR THE RUN, THEN STOP FOR THE OPERATOR'S LIVE WALK-THROUGH. TIER 2.
+
+Operator words, 2026-10-02 (quoted verbatim):
+- In chat: "Could you kindly do the four fixes?"
+- To the channel's question "By "do the four fixes" you mean…" → "Override: push today, I'll
+  check it live tonight". The channel recommended the other option ("Keep my rule: push after
+  the meeting (recommended)"). The options are the channel's; the selection is the operator's.
+- To "What's today's date where you are?" → "Fri Oct 2 (meeting Sat Oct 3)".
+
+1. Date correction (channel ruling; the error is the channel's)
+- Section 2 of MOB-R42 says today is Thu 2026-10-01 and the meeting is Fri 2026-10-02. Both
+  are one day early. Today is Fri 2026-10-02; the meeting is Sat 2026-10-03.
+- Cause: the channel's own option label "Tomorrow (Fri)" carried the wrong weekday. The
+  operator chose "tomorrow"; the channel supplied the date.
+- That block is a record and stays as written. This entry is its correction.
+
+2. The override (operator ruling, quoted above)
+- The standing rule (no deploy on the day before the meeting) is set aside for this push only.
+- Until the meeting is over, the only other deploy allowed is a rollback to 7186a8b, if the
+  operator calls for one after his walk-through. It runs as workflow_dispatch with
+  sha=7186a8b and is started by the operator, not by CC.
+- Nothing else is pushed or deployed before the meeting. No fix-forward today: a defect found
+  tonight is answered by the rollback, not by a new commit.
+
+Step 1 — Persist this block alone, in the standing read-back form.
+- Append at 7910, after a blank line at 7909. Report the appended line count; the channel
+  checks it against its own count.
+- Predict: strict 43, contiguous; loose 45 (body lines 1513 and 6934 only); unpushed 10 by
+  both routes. Paste git show --stat and git status --porcelain in full.
+
+Step 2 — Pre-push checks (read-only). Any STOP here means no push.
+- git fetch origin, then show origin/main. Predicted: 7186a8b. Anything else: STOP.
+- Paste git diff --name-status origin/main..HEAD verbatim. Predicted: exactly the 11 entries
+  listed in the MOB-R42 report's Step 3. Any added, missing or re-lettered entry: STOP.
+- git status --porcelain must be empty. Otherwise STOP.
+- Paste, in the report text itself and not only in tool output, the three comment-only hunks
+  named in Step 3 of MOB-R42. This closes the gap left by that block's report.
+
+Step 3 — Push
+- git push origin main, fast-forward only. Predicted: 10 commits, ending at this block's
+  persistence commit. A rejected or non-fast-forward push: STOP. No retry, no force.
+
+Step 4 — Wait for the deploy, then verify
+- Wait until the Actions run started by the push has completed. Paste its run id, its
+  conclusion, and each job's conclusion.
+- Any job not success: STOP. Do not re-run and do not fix. Report what /healthz shows.
+- On success: curl the live /healthz and /readyz and paste both shas. Predicted: the full sha
+  of this block's persistence commit, on both probes.
+- Unpushed: 0 by both routes (rev-list and [ahead]).
+
+Step 5 — Close, then stop
+- Report Steps 1–4 in the standing read-back form.
+- This report does not accept the push. The channel accepts it after the operator's live
+  walk-through tonight, or the operator rolls it back as in section 2.
+- Final state predicted: strict 43, loose 45, unpushed 0, origin/main and both probes at this
+  block's persistence commit.
