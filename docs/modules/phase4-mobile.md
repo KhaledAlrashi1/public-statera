@@ -8217,3 +8217,52 @@ Queued, not acted on
 - Dead code with no renderer: ConnectedAccountsPanel (sections.tsx:899, empty state "Connect your first bank"), RecurringBillsCard; SafeToSpendHero under the two-stage removal.
 - Legacy /expenses and /income still route, because the redirect flag defaults to false.
 - E5, the add-to-home-screen app (manifest, icon, viewport-fit=cover, insets): its own cycle.
+
+MOB-R48 — PUSH OF THE QUICK-WINS CYCLE (9 COMMITS) AFTER THE OPERATOR'S ON-DEMAND BACKUP; RUNBOOK'S SUDO FORM CONFIRMED ON THE SERVER
+Source: channel ruling on CC's MOB-R47 report (8a4844d, b074c18, cf0e60d, 4d37555) and the operator's server output. Tier 2 push: frontend and docs only. No new gate; the next gate stays RM-22.
+
+Review (channel)
+- MOB-R47 accepted: 55 lines at 8165–8219, stat 56, both regions cmp-equal; G4 re-run with a control; only granted test lines edited; 294 / 53, exit 0, tsc 0 bytes; censuses 29 → 0, 26 → 0, 2 → 0 with controls; physical properties 32 / 9 / 0; apps/api diff empty with a control; strict 47, loose 49, unpushed 8.
+- Disclosed departure accepted for now: the checkbox labels carry a plain inline-flex, not a touch-only prefix. CC's claim that desktop is unchanged is unmeasured; the operator checks it on desktop after deploy.
+
+Operator selections (channel options; operator's selection verbatim)
+- "Which phone will you use for the phone check after deploy?" → "iPhone"
+- "After this cycle, what comes first?" → "Budget presets, as planned (recommended)"
+
+On-demand backup (operator, before this block)
+- Command, verbatim, as deploy@statera-prod: sudo systemctl start statera-backup.service
+- Journal, verbatim (operator's pager cut each line at the right edge, shown as ">"):
+  Oct 03 10:56:53 statera-prod statera-backup[911498]: [backup] rclone size: OK —>
+  Oct 03 10:56:53 statera-prod statera-backup[911498]: [backup] Healthcheck pinge>
+  Oct 03 10:56:53 statera-prod statera-backup[911498]: [backup] Complete.
+- The same journal shows the daily timer's run completing at Oct 03 02:34:13 with the same sequence.
+- The form without sudo was not tried. Off-box confirmation (Healthchecks.io) is not yet captured. Neither gates this push, because it carries no migration (RM-21).
+
+Channel rulings
+- The canonical on-demand backup command is "sudo systemctl start statera-backup.service" as the deploy user, now proven on the server. backups.md already reads this (CC, MOB-R46 Part C), so no runbook edit is needed. MOB-R47's hold on it is lifted.
+- The 10e record's form without sudo (phase4-10e.md:6021, :6069) stays as written. This block is the correction next to it: whether that form works for the deploy user is unmeasured.
+- Queued from MOB-R47: the Split dialog keeps vh and has no sticky footer; text-link buttons and the ImportDialogs pill stay small on touch; BudgetTable shows its "add limits" copy while loading or on error; the stale comment at BudgetPage.test.tsx:144–145.
+
+Step 1 — Persist this block alone, before any work. Standing read-back. Predicted: 48 lines at 8221–8268 after a blank at 8220, stat 49; strict 48, loose 50, unpushed 9.
+
+Step 2 — Preconditions (each with its command and exit code)
+- Porcelain empty; HEAD is 9 commits ahead of origin/main c6f92d3 by both routes; the push is a fast-forward (merge-base equals c6f92d3).
+- No migration: git diff --name-status c6f92d3..HEAD -- apps/api/src/db/ is empty, while the control 88a157f~1..88a157f lists 0004–0006. Migrations stay 8 files.
+- Frontend suite at HEAD: 294 / 53, exit 0, tsc 0 bytes, Errors-instrument 0. Contract fixture 66, ALLOWLIST empty.
+- Any precondition that fails: STOP before pushing.
+
+Step 3 — Push and deploy
+- git push origin main, no force. The push output must show c6f92d3..<HEAD> with no "+".
+- Wait for the Actions run on the HEAD sha. Record its run id, every job's conclusion and headSha.
+- Both probes (/healthz and /readyz on staterafinance.app) report the HEAD sha.
+- Unpushed 0 by both routes.
+- Any failed job or a probe on another sha: STOP. No re-run and no fix-forward without a block.
+
+After deploy (operator, with a screenshot for each)
+- iPhone, Safari: log a coffee and reach Save without closing the keyboard (time it, target under 10 seconds); no zoom in the import and Settings fields; close X, Activity checkbox and a dropdown each work on the first tap; "Set income" on Home opens the pop-up in place; the new empty-screen lines read sensibly.
+- Desktop: the Activity row checkboxes look as before.
+- Healthchecks.io: statera-db-backup green, with its event log showing the manual ping.
+
+Final state predicted
+- origin/main equals HEAD; both probes on that sha; unpushed 0; porcelain empty; strict 48, loose 50.
+- Report: every count with its command and exit code; the push output verbatim; the run id with job conclusions; both probe outputs verbatim.
