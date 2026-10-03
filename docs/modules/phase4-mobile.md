@@ -8266,3 +8266,110 @@ After deploy (operator, with a screenshot for each)
 Final state predicted
 - origin/main equals HEAD; both probes on that sha; unpushed 0; porcelain empty; strict 48, loose 50.
 - Report: every count with its command and exit code; the push output verbatim; the run id with job conclusions; both probe outputs verbatim.
+
+MOB-R49 — THREE RECORDS ARE ADDED BESIDE MOB-R48, WHICH IS NOT EDITED. PART B PINS THE CI RUNNER
+TO ubuntu-24.04 AND PUSHES IT UNDER THIS BLOCK. PART C IS A READ-ONLY RECON AND PROPOSAL FOR
+BUDGET PRESETS. RM-22 IS ISSUED. NO APP CODE CHANGES UNDER THIS BLOCK.
+
+CADENCE. Part B is a CI-only change with its own push. Part C edits nothing. One report: Part B
+first, then Part C. A STOP in Part B holds Part C.
+
+═══ RECORDS — CORRECTIONS NEXT TO THE RECORD, NOT EDITS TO IT ═══
+
+R-1. OFF-BOX BACKUP CONFIRMATION. MOB-R48 recorded the Healthchecks.io confirmation as "not yet
+  captured". It is now captured, as relayed by the operator: check statera-db-backup, event #101,
+  Oct 3 13:56 Asia/Kuwait, OK. That is the journal's 10:56:53 UTC "Complete." (Kuwait is UTC+3).
+  Nightly pings show OK on every day in view. The on-demand backup route proven in MOB-R48 is
+  therefore confirmed by both instruments, on-box and off-box.
+R-2. CHANNEL RELAY MISS. The first send of MOB-R48 dropped its last 4 lines. CC's line-count check
+  caught it, CC stopped at Step 1 and reverted, and appended the full 48 lines after the resend
+  (lines 1–44 cmp-equal to the first send). The channel now writes each block to a file, counts it
+  with bash, and pastes that file's printed output. It does not retype blocks.
+R-3. THE OPERATOR'S PHONE AND DESKTOP CHECK IS PENDING. It is recorded in the next block, with
+  screenshots. The channel's earlier plan put it in this block; it moved so Parts B and C need not
+  wait. Nothing in this block depends on its result.
+
+═══ OPERATOR SELECTIONS ═══
+
+Provenance: the questions and options are the CHANNEL'S; the selections are the OPERATOR'S, given
+in the exchange before this block was issued. Verbatim:
+  "If Save is still under the iOS keyboard, when should the fix happen?" → "Ride with budget
+  presets". (The channel had marked "Fix first, before presets" as recommended. The operator chose
+  otherwise; the selection stands.)
+  "Where does the CI runner pin go?" → "Inside MOB-R49, its own part (recommended)"
+
+═══ PART B — PIN THE CI RUNNER ═══
+
+FACT, CHECKED BY THE CHANNEL against the GitHub changelog of 2026-09-17: ubuntu-latest moves from
+Ubuntu 24.04 to 26.04 gradually, between October 19 and November 19, 2026. Pinning ubuntu-24.04
+keeps the current image. This block does not move to 26.04; that is a later cycle of its own.
+B0. GATE, BEFORE ANY EDIT. Show in full: grep -rn 'runs-on' .github/ and grep -rn 'ubuntu-'
+  .github/, plus ls .github/workflows/. CHANNEL PREDICTION: 4 runs-on lines, all ubuntu-latest,
+  one per job of run 37118967168 (resolve-sha, test, build-push, deploy). Any other count, a
+  matrix, a reusable workflow, or a second workflow file is a QUESTION: STOP and report it.
+B1. THE EDIT. Each runs-on value ubuntu-latest becomes ubuntu-24.04, and nothing else changes.
+  Show the full diff. Predicted git diff --stat: 1 file, +4 −4.
+B2. DISCRIMINATION. After the edit, grep -c ubuntu-latest on the workflow file gives 0. Positive
+  control: the same grep on git show HEAD:<file> gives 4.
+B3. RM-21 IS NOT FIRED. Assert it from the diff: no migration, schema or app file is touched. No
+  backup step is required for this push.
+B4. PUSH, UNDER THIS BLOCK. The commit message is piped from a file. Predicted unpushed: 1 after
+  persistence, 2 after B1. Fast-forward only. Wait for the Actions run. Predicted: all four jobs
+  succeed. Quote each job's "Requested labels" line verbatim from the new run, next to the same
+  line from run 37118967168 as the control (predicted: ubuntu-24.04 now, ubuntu-latest before).
+  Both probes show the new sha. 0 unpushed by both routes. Porcelain empty.
+STOP CONDITIONS: a B0 miss; any diff beyond the runs-on values; any failed job. On a failure after
+the push, do not push again and do not revert; report the run id and the failing step.
+
+═══ PART C — BUDGET PRESETS: READ-ONLY RECON AND PROPOSAL ═══
+
+Three presets, shown as cards with KD amounts pre-filled, applied in one tap, editable afterwards:
+50/30/20 of income; match your spending (3-month average per category); trim your top 3 (90% of
+last month on the three biggest categories). Every claim is FROM SOURCE with its file:line.
+C1. THE SAVE PATH. Confirm from source that POST /api/budgets deletes the whole month and then
+  re-inserts it (budgets.ts:269, :278–284). Is it one transaction? What does the client send
+  today: the whole month, or only the edited rows? What happens to a category in the stored month
+  that is missing from the payload?
+C2. INPUTS AND THEIR TYPES. For each preset, name the route and field it would read, and whether
+  that field is a string or a number. Recorded: R1, R5 and R7 send numbers; R3 and the income
+  fields send strings. Which months count toward the 3-month average: calendar months? Is the
+  current partial month excluded? What counts as "last month"?
+C3. MONEY ARITHMETIC. Does the frontend already have a Decimal library or a fils (integer)
+  helper? Propose one method, and state the rounding rule and how remainders are handled, so a
+  preset's amounts sum exactly to its target. No floats.
+C4. CATEGORIES. How budgets key a category (id or name); how income categories are excluded;
+  where uncategorised spending goes; categories with spending but no limit. For 50/30/20, list
+  the 22 suggested names, each with a PROPOSED need or want, marked as a proposal. Give the
+  options for user-created categories (fixed default, user choice, ask once) with the cost of
+  each.
+C5. OVERWRITE SAFETY. RM-21(b) FIRES: applying a preset replaces the month. Give options with
+  their tests: fill only categories without a limit; a replace that first shows what will change;
+  undo. Recommend one.
+C6. ELIGIBILITY. The rule and the copy for each blocked case: income not set; fewer than 3 months
+  of history (define it); no spending last month; fewer than 3 categories; demo data active. Do
+  demo rows enter the averages?
+C7. KEYBOARD (from the selection above). Recon the sticky Save in Add/Edit: where it is set, and
+  whether VisualViewport is used anywhere today. Propose a fix and the operator check that would
+  prove it. It is implemented with the presets only if the next block records that Save was hidden.
+C8. THE PROPOSAL. Files to touch. Every existing test the change would break, by file:line. New
+  tests, each with a red-first plan. Every new string, for the operator to select (RM-16). Commits,
+  each green on its own. Predicted counts with sign: frontend from 294 / 53; API from 873 / 34 / 62
+  and 897 / 10 / 62 if any backend file is touched. Tier 1.
+RM-22. NO PRESET APPLY CODE UNTIL A RULING RECORDS THE OPERATOR'S SELECTION OF THE OVERWRITE
+  BEHAVIOUR (C5) AND THE NEED/WANT METHOD (C4).
+MANDATE: no edit to any tracked file in Part C. Scratch files only in an untracked, ignored
+location. Show git status --porcelain before and after Part C; they are identical.
+
+═══ CONSTRAINTS, UNCHANGED ═══
+
+The named regression files stay untouched and green: AppShell.test.tsx,
+legal/PrivacyPolicyPage.test.tsx, legal/TermsPage.test.tsx. CC never touches the production
+database or server. Queued items stay queued.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, before any other work, at a position derived from the file. THE WRAP
+CHECK RUNS AS ITS OWN STEP before the append. Predicted after the append: the strict count is 49,
+contiguous; the loose count is 51, the known body lines being 1513 and 6934. Any third match stops.
+Read-back: the appended line count, the header and last line verbatim, cmp of the region against
+the payload, git show --stat and porcelain in full. The commit message is piped from a file.
