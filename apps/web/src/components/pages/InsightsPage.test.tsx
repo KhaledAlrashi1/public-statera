@@ -420,3 +420,46 @@ describe("MOB-1 Group 1 — story-of-the-month pace note", () => {
   })
 })
 
+
+/**
+ * MOB-R50 F4 — the story never states a percent change against last month's 0. Rent is new this
+ * month (base 0) and is the largest shift, so it leads; its "100% higher" sentence is DROPPED,
+ * not reworded (removal only — no new copy). With no commitments there is no pace note either,
+ * so the story has nothing true to say and does not render. Clock pinned to 2026-03-15.
+ */
+describe("MOB-R50 F4 — story of the month from a zero base", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] })
+    vi.setSystemTime(new Date("2026-03-15"))
+    vi.clearAllMocks()
+    window.localStorage.clear()
+    mocks.analyticsApi.recurringPatterns.mockResolvedValue({ patterns: [] })
+    mocks.analyticsApi.weeklyDigest.mockResolvedValue(null)
+    mocks.analyticsApi.safeToSpend.mockResolvedValue({
+      committed_kd: "0.000",
+      remaining_budget_kd: "0.000",
+      actual_spend_kd: "460.000",
+    })
+    mocks.analyticsApi.dashboardMetrics.mockResolvedValue({
+      months: ["2026-03", "2026-02"],
+      monthly: [],
+      expense_by_category: {
+        "2026-03": { Rent: "300.000", Groceries: "160.000" },
+        "2026-02": { Groceries: "100.000" },
+      },
+    })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it("does not claim a percent change for a lead category that had no spending last month", async () => {
+    renderPage()
+    // The page rendered the month-delta rows — otherwise the absence below proves nothing.
+    expect(await screen.findByText("Rent")).toBeInTheDocument()
+    // WITHOUT the change the story reads "Rent is 100% higher than last month, a shift of …".
+    expect(screen.queryByText(/higher than last month/)).not.toBeInTheDocument()
+    expect(screen.queryByText("Story of the month")).not.toBeInTheDocument()
+  })
+})

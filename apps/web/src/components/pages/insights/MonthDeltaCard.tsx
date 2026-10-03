@@ -111,9 +111,12 @@ export function MonthDeltaCard({
                         {formatKD(row.delta_kd)}
                       </span>
                     </div>
-                    <div className="text-xs opacity-75">
-                      ({row.delta_kd >= 0 ? "+" : ""}{row.delta_pct.toFixed(0)}%)
-                    </div>
+                    {/* MOB-R50 F4 — no percentage against last month's 0: it is not a change rate. */}
+                    {row.last_month_kd > 0 ? (
+                      <div className="text-xs opacity-75">
+                        ({row.delta_kd >= 0 ? "+" : ""}{row.delta_pct.toFixed(0)}%)
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>

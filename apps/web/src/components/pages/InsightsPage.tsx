@@ -277,9 +277,14 @@ export default function InsightsPage() {
         committedThisMonth <= 0 || remainingBudget > 0 || incomeNotSet
           ? ""
           : "Committed spending is now overtaking the rest of this month's budget."
-      const lead1 = sameAsLastMonth
-        ? `${lead.category} is tracking about the same as last month.`
-        : `${lead.category} is ${Math.abs(lead.delta_pct).toFixed(0)}% ${direction} than last month, a shift of ${formatKD(Math.abs(lead.delta_kd))}.`
+      // MOB-R50 F4 — a lead with no spending last month has no percent change to state (the row's
+      // delta_pct is a fabricated 100). Its sentence is DROPPED, not reworded: removal only, no new
+      // copy. The join below then leaves the pace note alone, or nothing, and an empty story hides.
+      const lead1 = lead.last_month_kd <= 0
+        ? ""
+        : sameAsLastMonth
+          ? `${lead.category} is tracking about the same as last month.`
+          : `${lead.category} is ${Math.abs(lead.delta_pct).toFixed(0)}% ${direction} than last month, a shift of ${formatKD(Math.abs(lead.delta_kd))}.`
       // Joined rather than interpolated so an empty paceNote leaves no trailing space.
       return [lead1, paceNote].filter(Boolean).join(" ")
     }

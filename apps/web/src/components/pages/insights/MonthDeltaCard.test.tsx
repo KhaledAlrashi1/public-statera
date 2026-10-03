@@ -42,4 +42,22 @@ describe("MonthDeltaCard", () => {
     expect(screen.getByText("(+50%)")).toBeInTheDocument()
     expect(screen.getByText("(-40%)")).toBeInTheDocument()
   })
+
+  // MOB-R50 F4 — a percent change against last month's 0 is not a percentage: the row keeps its
+  // KD shift and shows no percentage. The base-80 row is the control that percentages still show.
+  it("shows no percentage for a category with no spending last month", () => {
+    render(
+      <MonthDeltaCard
+        rows={[
+          makeRow({ category: "Rent", this_month_kd: 300, last_month_kd: 0, delta_kd: 300, delta_pct: 100 }),
+          makeRow({ category: "Dining", delta_kd: 40, delta_pct: 50 }),
+        ]}
+        loading={false}
+        error={null}
+      />
+    )
+    // WITHOUT the change the Rent row reads "(+100%)".
+    expect(screen.queryByText("(+100%)")).not.toBeInTheDocument()
+    expect(screen.getByText("(+50%)")).toBeInTheDocument()
+  })
 })
