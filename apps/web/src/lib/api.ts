@@ -681,7 +681,9 @@ export const budgetsApi = {
   },
 
   getMonths: async (): Promise<string[]> => {
-    const data = await apiFetch<{ ok: boolean; months: string[] }>("/api/budgets/months")
+    // MOB-R50 F2 — the server nests the list under `data` (budgets.ts:169).
+    const payload = await apiFetch<unknown>("/api/budgets/months")
+    const data = readApiData<{ months?: string[] }>(payload)
     return Array.isArray(data.months) ? data.months : []
   },
 }

@@ -422,3 +422,23 @@ describe("authApi magic-link", () => {
     })
   })
 })
+
+// MOB-R50 F2 — GET /api/budgets/months nests the list under `data` (budgets.ts:169); the client
+// read it at the root, so the Plan month picker never saw a month with budgets.
+describe("budgetsApi.getMonths", () => {
+  beforeEach(() => {
+    fetchMock.mockReset()
+    __resetApiClientStateForTests()
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it("reads the months from the response envelope's data", async () => {
+    mockJsonResponse({ ok: true, data: { months: ["2026-09", "2026-08"] }, error: null, meta: {} })
+    // WITHOUT the change this is [], whatever months the server returns.
+    await expect(budgetsApi.getMonths()).resolves.toEqual(["2026-09", "2026-08"])
+  })
+})
