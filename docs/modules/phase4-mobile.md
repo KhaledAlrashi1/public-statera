@@ -8607,3 +8607,199 @@ append. Predicted after the append: strict 51, contiguous; loose (^MOB-R[0-9]) 5
 lines being 1513 and 6934. Read-back: the appended line count, the header and last line verbatim,
 cmp of the region against the payload, git show --stat and porcelain in full. The commit message
 is piped from a file.
+
+MOB-R52 — THE MOB-R51 REPORT IS ACCEPTED WITH FOUR FINDINGS. F5B STAYS OPEN ON THE OPERATOR'S
+SCREENSHOT. THE CAPTURE DIRECTION AND THE LOGGING CHARTER ARE RECORDED; RM-25 HOLDS CAPTURE CODE.
+THIS BLOCK AUTHORISES C0 (MISSING ARTIFACTS), R1–R2 (READ-ONLY RECON), F6 (TIER 2), THEN A PUSH.
+
+CADENCE. F6 is Tier 2: API NOT MEASURED. C0, R1 and R2 edit nothing. One report for all of it.
+
+═══ THE REPORT ON THE PREVIOUS BLOCK — ACCEPTED ═══
+
+Accepted on its artifacts: persistence at 8511–8609 (8509 + 1 + 99), strict 51 and loose 53 as
+predicted; F5a as ruled, one class; 303 / 54, exit 0, tsc 0 bytes, predicted +0; the fast-forward
+8d19479..f3dc5d3, 7 commits, 13 files; run 37124064637, labels ["ubuntu-24.04"] on all four jobs;
+both probes on f3dc5d3; 0 unpushed by both routes; porcelain empty. Production is now f3dc5d3.
+
+FINDING 1 — THE "TWO" WAS AN ASSERTION, AND THE CHANNEL REPEATED IT. Five existing test files
+gained cases under MOB-R50, not two (git diff dddd192 893e519): InsightsPage.test.tsx,
+budget/sections.test.tsx, cache-invalidation.test.tsx, insights/MonthDeltaCard.test.tsx,
+lib/api.test.ts. BudgetPage.save-month.test.tsx is new. The previous block is not edited; this is
+the correction beside it. The miss is the CHANNEL'S: it predicted from a report's word, not a diff.
+
+FINDING 2 — THE REMOVED-LINES DIFF WAS NOT EMPTY, AND THE PUSH WENT AHEAD. Four import lines were
+replaced by wider ones. The content is accepted: no assertion line was removed or changed. The
+order is not. An expectation stated in a block that does not hold is a miss, and a miss is a
+QUESTION before the push, even when the answer looks obvious. CC asked whether the channel would
+have held. Answer: the content would not have held it; the procedure should have. Recorded as a
+deviation, accepted after the fact. From this block on, any stated expectation that fails stops
+the push.
+
+FINDING 3 — THE READ-BACK WAS SUMMARISED. "Byte-equal" and "unchanged" are assertions. C0 asks
+for the artifacts.
+
+FINDING 4 — F5A'S DEFECT WAS WIDER THAN RULED. The clip also happened at 375, and at 390 "Add" ran
+about 19 px into the panel's padding. "360 and below" was the CHANNEL'S prediction and it missed.
+The edit stayed exactly the ruled edit, so this is not a scope widening. Visible consequence at
+the operator's width: at 390 "Add" sits alone on a second line. It joins the operator's check.
+
+═══ F5B — OPEN. THE OPERATOR'S FRESH SCREENSHOT DECIDES ═══
+
+The census did not reproduce the cut-off text ("compares with plan.", "First month with
+spending") or the missing card border at 390 or 375. Its 360 positive control fired, and text
+scaled to 115% and 130% was confirmed (root font 16 → 20.8 px). The original screenshot predates
+F1–F4, which changed the text on that screen. NO FURTHER CENSUS NOW. If the fresh screenshot still
+shows it, the next census adds, ruled then: (a) an element wholly outside its clipping ancestor,
+counted apart from "off-screen"; (b) vertical clipping, not only side edges; (c) Chrome on iOS's
+own text-size setting, which root-font scaling may not model; (d) the operator's real strings.
+
+═══ OPERATOR WORDS SINCE THE PREVIOUS BLOCK WAS ISSUED ═══
+
+Provenance OPERATOR, DIRECT. Verbatim:
+  On capture: "I'd be interested how we can effectively accomplish the addition of apple pay and
+  Bank SMS. Please note that NBK and probably other banks have tendency to use other means other
+  than SMS because SMS is more expensive. So, I want you to factor in the other methods of sending
+  the bank transactions (I remember hearing ABC and one more I forgot). I think we can continue
+  improving the transaction logging workflow. The user experience, user interface, as well as the
+  design thinking."
+The questions below are the CHANNEL'S; the answers are the OPERATOR'S, verbatim:
+  "Place first or category first?" → "I think place first. Though, we created the auto-suggestion
+  feature to pick up what the transaction was because it's more unique. I choose for instance, the
+  merchant first like PICK, it could suggest the American, the sandwich, or the ice cream based on
+  the most logged on. This could be less of a problem when logging what it was first."
+  "How do you and she mostly pay?" → "her and in Kuwait in general, people use apple pay, card,
+  and then cash in that order. People rarely nowadays use cash. it's almost non-existence."
+  "Exactly right, or quick and fix later?" → "Tough question. I want the user to have a good
+  experience when logging the expenses. I want it to be frictionless experience. Anyone who tried
+  logging on Excel knows the pain and how time consuming it is. As for someone who never logged
+  their transactions/spending I want the app to make it easier for them. I want the epxerience to
+  be beginner-friendly and intuitive. This is a core goal of the app. How can we accomplish this
+  and commit to serve the user."
+
+═══ FACTS AND POSITION — THE CHANNEL'S, NOT RULED ═══
+
+Checked on the web by the CHANNEL, Saturday, October 3, 2026: NBK lets app users take alerts as
+push notifications instead of SMS, and iPhone users can choose Apple Messages (Apple Messages for
+Business, formerly Apple Business Chat, likely the operator's "ABC") as their alert channel. iOS
+17+ Shortcuts has a Transaction (Wallet) trigger passing merchant, amount and card for Apple Pay
+payments; other apps use it to log automatically (by email, or by an API call). Known failure
+modes: the automation reverting to "Ask Before Running", Low Power Mode, Wallet without mobile
+data, terminals that don't send the event.
+CHANNEL POSITION: Apple Pay capture first (largest share of spending); bank alerts and statements
+second; manual entry (canvas v5) for the rest; everything captured lands in a "To review" inbox.
+iOS gives no app access to other apps' push notifications or to Apple Messages chats; whether the
+Shortcuts Message trigger fires for bank SMS or Apple Messages for Business is tested on the
+operator's phone. Capture needs a new table (a migration: RM-21(a), Tier 1), a per-user
+write-only capture token, deduplication against manual and imported rows, and merchant-name
+cleaning ("TSC SALMIYA" → Sultan Center).
+Canvas v5 (https://claude.ai/artifact/DfkP7H8kEqeJ2CEcv2rH6w): "Place, then item" and "To review".
+
+═══ CHANNEL OPTIONS — OPERATOR SELECTIONS ═══
+
+The options are the CHANNEL'S; the selections are the OPERATOR'S. Ratified by this block:
+  "Which automatic capture should we pursue first?" → "Both in parallel"
+  "Run the one-week Apple Pay test on your phone before any code?" → "Yes, I'll run it this week
+  (recommended)"
+  "Adopt the logging charter (5 promises + measures)?" → "Adopt as proposed (recommended)"
+Recorded: the operator chose both captures in parallel over the channel's Apple Pay first.
+
+═══ THE LOGGING CHARTER — ADOPTED FOR MODULE 11 ═══
+
+The wording is the CHANNEL'S, selected by the OPERATOR:
+  (1) remember, don't ask; (2) capture before typing; (3) only amount and category are required;
+  (4) forgive mistakes: undo, nothing lost, fix later; (5) work on day one.
+  Measures at every Friday test: time per entry (repeat under 5 s, new under 15 s), taps per
+  entry, share captured automatically, first entry without help, entries abandoned.
+  "Exactly right or quick": quick, with a safety net.
+The operator's spikes, in the week to Friday, October 9, 2026, NO CODE: an Apple Pay Shortcut
+appending each payment to a note (miss rate, raw merchant names, amount format); a Message-trigger
+test on NBK alerts (SMS and Apple Messages); sample alerts and a statement export, with card
+numbers and balances removed.
+
+═══ RM-25 — CAPTURE CODE IS HELD ═══
+
+No capture code: no endpoint, table, migration, token, alert or statement parser, Shortcut recipe
+or "To review" UI, until a ruling after the operator's spike results. That ruling is Tier 1: the
+table is RM-21(a), and confirming a captured item writes user rows. RM-23 and RM-24 still hold.
+
+═══ C0 — THE MISSING ARTIFACTS. FIRST IN THE REPORT, PASTED, NOT SUMMARISED ═══
+
+  C0.1 sed -n '8510p;8511p;8609p' docs/modules/phase4-mobile.md, verbatim.
+  C0.2 git show --stat 0b4c99d in full, and git show 0b4c99d | grep -c '^-[^-]' (predicted 0).
+  C0.3 The cmp used for the read-back with its output and exit code. If the payload file is gone,
+       say so; C0.2's count then stands for "the file above is unchanged".
+  C0.4 git diff -U0 dddd192 893e519 on the five test files: every removed line and the line that
+       replaced it, verbatim (predicted 4 pairs, all import lines).
+  C0.5 The previous block's grant for existing-test edits, quoted with its track line. For each of
+       the five files: granted or not. An ungranted file is reported; nothing is edited for it.
+
+═══ R1 — CAPTURE RECON. READ-ONLY. FACTS, NO PROPOSAL ═══
+
+For the Tier 1 ruling after the spikes. Every answer FROM SOURCE with file:line; schema from the
+migration files 0000–0007.
+  R1.1 The transactions table: every column, type, null, default and index. Any column for where
+       a row came from (manual, import, demo) or for a status?
+  R1.2 The insert paths of QuickAdd and the importer, and the fields each sets. Any duplicate
+       detection today, within a file or against existing rows.
+  R1.3 How merchant or description is stored, and whether anything normalises it.
+  R1.4 The auto-suggestion the operator described (what was logged most at a place): where it
+       lives, what it reads, whether it is per user.
+  R1.5 Authentication: how a request is tied to a user; any token besides the session; CSRF
+       handling; rate and body-size limits on POST routes.
+  R1.6 Anything already named capture, inbox, pending or review.
+
+═══ R2 — THE FAB OVER CONTENT. READ-ONLY ═══
+
+CC's fixture showed Log covering Plan's empty-state button. Report how the FAB is placed
+(file:line), what bottom space each page reserves for it, and, in the scratch WebKit at 390 and
+375, which last controls it covers on Plan, Home, Activity and Insights, with and without data.
+No fix here: the FAB is a protected element, and its fix is ruled after the screenshot.
+
+═══ F6 — NO PERCENTAGE FROM A ZERO BASE ON HOME. TIER 2 ═══
+
+The rule ruled for Insights in F4, applied to the queued sites: when the comparison base is 0, no
+percentage is shown. A chip that shows only the percentage is hidden; a sentence carrying it
+drops. NO NEW STRING: any new or changed sentence STOPS.
+Sites as queued: DashboardPage.tsx:286 and :455, dashboard/sections.tsx:1373. Stored line numbers
+rot: re-locate each at HEAD.
+GATE, in the report before the first edit: per site, the current file:line, what it shows today
+from a zero base, and every existing test asserting it. If any existing test needs an edit, STOP.
+Report only, no edit: DashboardPage.tsx:510 and ExpensesPage.tsx:790 (does either compute a
+percentage from a zero base?). aggregation.ts:983 stays queued (backend, panel hidden).
+TESTS: at least one new case per site, each shown red at HEAD for the reason under test, then
+green. Existing tests and the named regression files untouched.
+PREDICTIONS, before the first edit, with sign: frontend 303 / 54 → 303 + k / 54 + f, with k and f
+named per test; tsc 0 bytes; physical properties delta 0 and strings delta 0, re-derived after the
+last edit; no backend, migration, schema, QuickAdd or FAB file touched.
+
+═══ PUSH — AUTHORISED ON CONDITIONS ═══
+
+After F6, only if every stated prediction and expectation held and nothing stopped: fast-forward
+only; the Actions run with all four jobs succeeding and jobs API labels ubuntu-24.04; both probes
+on the new sha; 0 unpushed by both routes. Unpushed predicted: 1 after this block's persistence,
+then 1 + the F6 commit count stated before the first edit. ANY MISS OR STOP: no push; report it.
+No backup step: nothing under this block touches a migration.
+
+═══ THE OPERATOR'S CHECK AFTER DEPLOY (CHROME; SAFARI IF HE CAN) ═══
+
+  1. A fresh Plan screenshot with no budget (decides F5b).
+  2. Plan header at his width: "Add" alone on a second line, acceptable or not.
+  3. Remaining shows "—". 4. Insights shows no percentage from zero.
+  5. Add budget shows only the page's month. 6. Home, a past month's "Set budget" opens on it.
+  7. The month picker lists months that have budgets. 8. Home shows no percentage from zero (F6).
+  Still unchecked from MOB-R48: first tap (#3), Home "Set income" pop-up (#4), desktop Activity
+  checkboxes (#6).
+
+═══ CONSTRAINTS, UNCHANGED ═══
+
+RM-21 stands. Logical properties only. CSP enforcing; no new origin. QuickAdd internals and the
+FAB untouched. Named regression files untouched. No renames. Legal copy not edited. Stage 2
+unauthorised. The importer is not edited. Queued items stay queued. CC never touches the
+production database or server. Next gate is RM-26.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, before any work, position derived from the file. The wrap check runs as
+its own step before the append. After: strict 52, contiguous; loose 54, non-header lines 1513 and
+6934 only. Any third match stops. Read-back: appended line count, header and last line verbatim,
+cmp of the region against the payload, git show --stat and porcelain, all in full.
