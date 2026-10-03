@@ -8507,3 +8507,103 @@ append. Predicted after the append: strict 50, contiguous; loose (^MOB-R[0-9]) 5
 lines being 1513 and 6934. Read-back: the appended line count, the header and last line verbatim,
 cmp of the region against the payload, git show --stat and porcelain in full. The commit message
 is piped from a file.
+
+MOB-R51 — F1–F4 ARE ACCEPTED, WITH ONE SCOPE DEVIATION RECORDED. THE F5 STOP IS CORRECT. F5 IS
+REPLACED BY F5a, A WRAP FIX AT 360 PX AND BELOW, AND F5b, A READ-ONLY CLIPPING CENSUS. THE PUSH
+IS AUTHORISED UNDER THE CONDITIONS BELOW. OPERATOR SELECTIONS ARE RECORDED. RM-24 IS ISSUED.
+
+CADENCE. Persist this block. Then F5b (no edit), then F5a (one commit), then the push. One report.
+
+═══ MOB-R50 — ACCEPTED ═══
+
+Persistence: met (dddd192, lines 8377–8509, 133 lines; strict 50; loose 52, body lines 1513 and
+6934 only).
+F1: ACCEPTED, WITH A RECORDED DEVIATION. The fix went beyond the ruled scope: Home's "Set budget"
+(DashboardPage.tsx:676/683) and the dialog's month-snapping in edit mode. It applies the ruled
+rule to the same dialog and closes the same data-loss path, so it is accepted. It should have
+been a STOP and a question; this is recorded as a deviation, not a precedent. CONSEQUENCE,
+recorded: when Home shows a past month, "Set budget" now writes to that past month.
+F1's red-first test first failed for the wrong reason; CC found it, moved Home's fixture to May,
+and re-proved red on the old code and green on the new. ACCEPTED: the discrimination rule working.
+F2, F3: ACCEPTED.
+F4: ACCEPTED. Dropping the story sentence, and hiding the section when nothing else applies, is
+removal. QUEUED, not fixed: percent change from a zero base at DashboardPage.tsx:286 and :455,
+dashboard/sections.tsx:1373, aggregation.ts:983 (panel hidden); review DashboardPage.tsx:510 and
+ExpensesPage.tsx:790, which show 0.
+Counts: 303 / 54, exit 0, tsc 0 bytes. Predicted, met. REQUIRED IN THE NEXT REPORT: name the two
+existing test files that gained cases, with git diff --stat for each, and confirm no assertion
+line was changed (a diff of removed lines in those files is empty).
+F5: THE STOP IS CORRECT.
+
+═══ F5 — WHAT WAS SEEN, AND THE TWO PARTS ═══
+
+The channel's claim came from one iPhone screenshot in Chrome: text cut off at the right edge
+("compares with plan.", "First month with spending") and the Income Context card's right border
+missing. CC measured page width only, which is 390 everywhere. Clipping inside a container would
+not show in page width. The channel's claim of page-level overflow is therefore UNPROVEN.
+F5b. READ-ONLY CENSUS. In WebKit at 390 px with the no-budget fixture (and at 375), list every
+  element whose content is clipped (scrollWidth > clientWidth under overflow hidden or clip) or
+  whose right edge passes its nearest clipping ancestor or the viewport. For each: file:line and
+  the measured widths. No edit. Positive control: the census must find the ≤360 px "Add" clip
+  below when run at 360 px. The operator compares the result with a fresh screenshot after deploy.
+F5a. RULED: the Plan table header's buttons ("Copy last month · Export · Add",
+  budget/sections.tsx:448) wrap instead of clipping at 360 px and below. No new string. Logical
+  properties only; physical-property delta 0. Instrument: the scratch WebKit measurement at 320,
+  360, 375 and 390 px, before and after; before shows "Add" clipped at 360 and below, after shows
+  every button inside the panel. Class census before and after. List any existing test the change
+  would break; a break STOPS F5a.
+
+═══ PUSH ═══
+
+Predicted unpushed: 6 after this block's persistence, 7 after F5a. If F5a stops, push the 6.
+Fast-forward only. Wait for the Actions run: all four jobs succeed; the jobs API labels show
+ubuntu-24.04. Both probes show the new sha. 0 unpushed by both routes. Porcelain empty.
+RM-21(b) fired for F1; this block's acceptance of F1 is the ruling that lets it deploy. No
+migration, so no backup step; assert it from the diff. Any miss: no push; report.
+OPERATOR CHECK AFTER DEPLOY, in Chrome and, if he can, Safari; recorded in the next block: a fresh
+screenshot of Plan with no budget (for F5b); Remaining shows "—"; Insights shows no percentage
+from zero; Add budget shows only the page's month; on Home, a past month's "Set budget" opens on
+that month; the month picker lists months that have budgets.
+
+═══ OPERATOR WORDS AND SELECTIONS ═══
+
+Provenance: options and prose questions are the CHANNEL'S; answers are the OPERATOR'S, verbatim.
+  "Which Log design should we carry forward?" → "B: built-in keypad (recommended)"
+  On batches and testing: "I think most users log in a batch at the end of the day or the week.
+  No, testers will try B. Also, I only shared it with a friend I trust. I can test again with her
+  next Friday. While it would be better to test with more people, one for me is good enough
+  until it becomes good enough for both myself and her, then I will share it with more people."
+  Channel question "Is batch logging something you've seen, or a guess?" → "It's something she
+  was going to do and I do it myself."
+  Channel question "What's the bar before sharing B wider?" → "When I say it's good and then get
+  her opinion on it."
+  Channel question "Should Done show a batch summary, or just close?" → "Whatever you recommend. I
+  can tell you when I experience it." CHANNEL RECOMMENDATION, recorded as the channel's: Done
+  closes with a confirmation naming the count and total, and a link to them in Activity; no
+  extra screen. The operator judges it in use.
+  On logging: "The new logging-in design is much better. While showing the most used
+  categories, I want to make sure the user can easily pick a different one quickly. Also, I want
+  to improve the workflow for choosing a merchant and what the transaction was about. It's ok if
+  we spend so much time on improving the user experience for logging a transaction. This is a
+  core feature on the app. How can we improve things further? We can do much better than this."
+RECORDED: the channel published Log mockups on the design canvas: v2 (A: system keyboard fitted;
+B: built-in keypad), v3 (B with batch logging) and v4 (where first: recent places fill the
+category and last amount; a searchable category picker; notes suggested from that place). The
+next test is with one trusted tester on Friday, October 9, 2026.
+RM-24. NO LOG-REDESIGN CODE UNTIL A RULING, AFTER THAT TEST, RULES ITS DESIGN, DATA SOURCES (MOST
+  USED, RECENT PLACES, LAST AMOUNT, PAST NOTES), STRINGS (RM-16) AND THE DESKTOP BEHAVIOUR.
+
+═══ CONSTRAINTS AND QUEUE ═══
+
+Unchanged: the named regression files stay untouched and green (AppShell.test.tsx,
+legal/PrivacyPolicyPage.test.tsx, legal/TermsPage.test.tsx); QuickAdd internals and the FAB are
+untouched; legal copy is not edited; CC never touches the production database or server.
+Queued items stay queued, with the zero-base sites above added.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, before any other work. THE WRAP CHECK RUNS AS ITS OWN STEP before the
+append. Predicted after the append: strict 51, contiguous; loose (^MOB-R[0-9]) 53, the known body
+lines being 1513 and 6934. Read-back: the appended line count, the header and last line verbatim,
+cmp of the region against the payload, git show --stat and porcelain in full. The commit message
+is piped from a file.
