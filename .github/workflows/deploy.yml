@@ -21,7 +21,7 @@ jobs:
   # any job checks out code or builds an image. All downstream jobs consume this
   # output so the same SHA is used throughout the pipeline.
   resolve-sha:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     outputs:
@@ -59,7 +59,7 @@ jobs:
   # ── test ────────────────────────────────────────────────────────────────────
   test:
     needs: resolve-sha
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd  # v5.0.1
         with:
@@ -94,7 +94,7 @@ jobs:
   # ── build-push ──────────────────────────────────────────────────────────────
   build-push:
     needs: [test, resolve-sha]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write  # required for GHCR push via GITHUB_TOKEN
@@ -150,7 +150,7 @@ jobs:
   # ── deploy ──────────────────────────────────────────────────────────────────
   deploy:
     needs: [build-push, resolve-sha]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # environment: enables GitHub deployment audit log and protection rules
     environment: production
 
