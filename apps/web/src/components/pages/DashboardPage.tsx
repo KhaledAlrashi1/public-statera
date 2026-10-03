@@ -282,8 +282,9 @@ export default function DashboardPage() {
     // MOB-R36 re-key: this must read the LOGGED income, not the typed figure — the typed income
     // is never 0 once set, so keying on it would silently disable the guard.
     if (loggedMonthIncome === 0 && monthExpenses === 0) return null
-    const delta = (curr: number, prev: number) => {
-      if (prev === 0) return curr > 0 ? 100 : 0
+    // MOB-R52 F6 — against a base of 0 there is no percent change; the chip is hidden (null).
+    const delta = (curr: number, prev: number): number | null => {
+      if (prev === 0) return null
       return ((curr - prev) / prev) * 100
     }
     // The Income chip is removed (MOB-R36 operator selection). Remaining's chip is suppressed when
@@ -446,13 +447,14 @@ export default function DashboardPage() {
   )
 
   const risingCategory = useMemo(() => {
-    let best: { name: string; deltaAmount: number; deltaPct: number } | null = null
+    let best: { name: string; deltaAmount: number; deltaPct: number | null } | null = null
     for (const [name, amountRaw] of Object.entries(selectedMonthExpenseMap)) {
       const amount = Number(amountRaw || 0)
       const prev = Number(prevMonthExpenseMap[name] || 0)
       const deltaAmount = amount - prev
       if (deltaAmount <= 0) continue
-      const deltaPct = prev > 0 ? (deltaAmount / prev) * 100 : 100
+      // MOB-R52 F6 — a category new this month has no percent change (was a fabricated 100).
+      const deltaPct = prev > 0 ? (deltaAmount / prev) * 100 : null
       if (!best || deltaAmount > best.deltaAmount) {
         best = { name, deltaAmount, deltaPct }
       }

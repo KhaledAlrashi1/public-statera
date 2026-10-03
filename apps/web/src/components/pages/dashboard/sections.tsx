@@ -770,7 +770,7 @@ export function DashboardHero({
   dailyPace: { avgDaily: number; projected: number; daysElapsed: number; daysInMonth: number } | null
   // The Income chip is removed (MOB-R36: under RM-17 flat it always read 0.0%). remainingDelta is
   // null when either month is overspent (a channel ruling by analogy, MOB-R36).
-  deltas: { expensesDelta: number; remainingDelta: number | null; savingsRateDelta: number } | null
+  deltas: { expensesDelta: number | null; remainingDelta: number | null; savingsRateDelta: number } | null
   analyticsUpdatedAt?: string | null
 }) {
   const freshness = useMemo(() => {
@@ -863,7 +863,7 @@ export function DashboardHero({
             <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Expenses</div>
               <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl"><AnimatedKD value={monthExpenses} /></div>
-              {deltas && <HeroDelta value={deltas.expensesDelta} inverted />}
+              {deltas && deltas.expensesDelta !== null && <HeroDelta value={deltas.expensesDelta} inverted />}
             </div>
             <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Remaining</div>
@@ -988,7 +988,7 @@ export function HomeAttentionCenter({
   monthLabel: string
   overBudgetCount: number
   overBudgetAmount: number
-  risingCategory: { name: string; deltaAmount: number; deltaPct: number } | null
+  risingCategory: { name: string; deltaAmount: number; deltaPct: number | null } | null
   budgetAlerts: BudgetAlertNotification[]
   alertsLoading: boolean
   dismissingAlertId: string | null
@@ -1068,7 +1068,10 @@ export function HomeAttentionCenter({
                 <span className="text-sm font-semibold opacity-70">+KD</span>
                 <span className="text-2xl font-semibold leading-tight tabular-nums">{fmt3(risingCategory.deltaAmount)}</span>
               </span>
-              <span className="text-lg font-semibold tabular-nums">({Math.abs(risingCategory.deltaPct).toFixed(1)}%)</span>
+              {/* MOB-R52 F6 — no percentage for a category with no spending last month. */}
+              {risingCategory.deltaPct !== null ? (
+                <span className="text-lg font-semibold tabular-nums">({Math.abs(risingCategory.deltaPct).toFixed(1)}%)</span>
+              ) : null}
             </div>
             <p className="text-xs text-muted-foreground">Worth a quick review before it grows.</p>
           </div>
