@@ -8373,3 +8373,137 @@ CHECK RUNS AS ITS OWN STEP before the append. Predicted after the append: the st
 contiguous; the loose count is 51, the known body lines being 1513 and 6934. Any third match stops.
 Read-back: the appended line count, the header and last line verbatim, cmp of the region against
 the payload, git show --stat and porcelain in full. The commit message is piped from a file.
+
+MOB-R50 — MOB-R49 IS ACCEPTED, WITH ONE CHANNEL ERROR RECORDED. THE OPERATOR'S PHONE CHECK AND
+SELECTIONS ARE RECORDED. THIS BLOCK RULES FIVE BUG FIXES, F1–F5 (TIER 1; RM-21(b) FIRES FOR F1),
+AND PRE-AUTHORISES THEIR PUSH. BUDGET PRESETS WAIT FOR THEIR OWN RULING AFTER THE USER TESTS.
+RM-23 IS ISSUED.
+
+CADENCE. Gates G1–G5 first, from source, in the report before any edit; each gates only its own
+fix. Then F1–F5 in order, one commit each. Then the push, only under the conditions below.
+
+═══ MOB-R49 — ACCEPTED ═══
+
+Persistence: met. INSTRUMENT RECORD: "loose" means ^MOB-R[0-9] (no em-dash), the FF-R census
+form at phase4-mobile.md:14–19, as CC found. The channel's handoff used the count without the
+pattern; this record stands next to that use and does not edit it.
+Part B: ACCEPTED. CHANNEL ERROR: B4 predicted a "Requested labels" log line the channel had never
+seen; it appears in none of the 8 job logs. That was a prediction from a name, not an artifact.
+CC's replacement, the jobs API labels field, discriminates (new run ubuntu-24.04 in all four
+jobs; control run 37118967168 ubuntu-latest) and is accepted. origin/main = 8d19479, deployed by
+run 37120061040; both probes 8d19479.
+Part C: ACCEPTED as recon. The C8 proposal is superseded by the operator's redirect below and is
+not ruled. RM-22's two conditions are now both recorded: the overwrite behaviour is fill-only
+(C5), and the need/want method is moot because 50/30/20 will not be built (C4).
+RM-23. NO PRESET OR STARTER-BUDGET CODE UNTIL A RULING, AFTER THE OPERATOR'S USER TESTS, RULES
+  ITS DESIGN, CATEGORIES, PERCENTAGES, MONEY METHOD (C3) AND STRINGS (RM-16).
+
+═══ OPERATOR CHECK — FROM HIS SCREENSHOTS, OCT 3 ═══
+
+Browser: Chrome on iOS ("Chrome"), not Safari as planned. Same engine (WebKit); different
+toolbars. Safari remains UNCHECKED.
+#1 Save above the keyboard: PASS. With Amount focused, Add Expense shows above the number pad.
+  Time not given. Operator, verbatim: "Save or add a transaction is easy to press; though, it
+  doesn't feel nice or comfortable to log a transaction on the IPhone. It's not a good
+  experience."
+#2 No zoom on focus: PASS for the Amount field. The import screenshot shows the file picker, not
+  a text field, so it is not evidence. Settings: not shown.
+#3 first tap, #4 "Set income" on Home, #6 desktop Activity checkboxes: NOT EVIDENCED; unchecked.
+CHANNEL OBSERVATIONS (input to the redesign; only F3–F5 are ruled here): the sticky footer takes
+about half the visible sheet; Category is the last field and starts hidden; four fields; an
+autofill bar above the number pad; Plan is wider than the screen; Remaining shows −KD 373 and
+"↓ 125.7% vs last month" with no budget set; two empty-state messages on Plan; income shown as
+"KD 1.6K"; the Log button overlaps "Add your first budget"; Insights says "100% higher than last
+month" when last month was 0.
+
+═══ OPERATOR WORDS AND SELECTIONS ═══
+
+Provenance: options and prose questions are the CHANNEL'S; answers are the OPERATOR'S, verbatim.
+  On overwrites: "the preset SHOULD only fill categories she hasn't set yet."
+  On his real user: "No, she didn't. But I saw her confusion. She didn't know how she could set a
+  budget. Worse, no category was suggested because there was no categories in her account. This
+  could be in a different phase but I want to make it easier for the user to see and get and
+  create new categories and merchants."
+  "When did she see the empty budget page?" → "Before suggested names went live"
+  On presets: "Because the user will start from the beginning and assuming most users will start
+  from zero how about we come up with a different way to make easier for them to set a budget.
+  For eaxmple, suggest two or three common categories with their amount and have the user approve
+  them or edit them. Or anything that is user-friendly."
+  "What should come first?" → "Both in one cycle"
+  "Where do the suggested amounts come from?" → "% of her income (recommended)"
+  "If her income isn't set, what happens?" → "Ask for income first, using the pop-up
+  (recommended)"
+  "The history presets (match spending, trim top 3)?" → "Build them in this cycle too"
+  On design: "It seems we should improve the UX/UI experience a lot. ... Desktop version is much
+  better. It's easy from to use the app because I designed it. However, it wouldn't be the same
+  for new users. I want to apply design thinking/theory here to improve the app."
+  "What should CC do next?" → "Fix today's bugs; you run user tests; then redesign
+  (recommended)". "You" is the operator: he runs the user tests.
+  "When should I mock up the new Log screen?" → "Now, before the tests". The channel published
+  a Log-sheet mockup, v1. No code follows from it under this block.
+CONSEQUENCE: the starter budget (two or three categories at a % of income, approve or edit, the
+income pop-up first) and the two history presets form one later cycle under RM-23, fill-only.
+
+═══ THE FIXES ═══
+
+F1. ADD BUDGET WRITES ONE MONTH'S LIST INTO ANOTHER MONTH (BudgetPage.tsx:223 builds the list
+  from the page's month; :235 saves to the dialog's month). RM-21(b) FIRES: this path overwrites
+  user rows, and this block is its ruling. RULED: in create mode, the dialog saves only to the
+  page's month, and the dialog offers no other month. G1: show handleSave, the dialog's month
+  state, edit mode's handling of month, and every caller of budgetsApi.save. Red-first test: on
+  month A with rows, Add posts month A with A's list plus the new row, and no other month can be
+  chosen.
+F2. budgetsApi.getMonths ALWAYS RETURNS [] (api.ts:684–685 reads months at the root;
+  budgets.ts:169 nests it under data). RULED: read it where the server puts it. F2 lands AFTER
+  F1, because a working picker widens F1's exposure. G2: the route's response from source, every
+  consumer, whether the contract fixture covers this route, and what the picker will show
+  afterwards. Red-first test on the client's parsing.
+F3. REMAINING WITH NO BUDGET. When the month has no budget, Remaining shows "—" and no "vs last
+  month" chip; the chip is also suppressed when the previous month had no budget. No new sentence
+  ("—" follows the MOB-R36 #8 precedent). G3: the tile's source and its chip. Red-first test.
+F4. A PERCENT CHANGE FROM ZERO. On Insights, "Spend vs Last Month" and "Story of the month" show
+  no percentage when last month was 0. Removal only. If the story needs a sentence with no
+  percentage and no existing template fits, STOP and propose copy (RM-16). G4: frontend or
+  backend; list every site that computes a percent change against a base that can be zero; fix
+  only these two and list the rest as queued. A backend change runs both API modes, before and
+  after. Red-first test.
+F5. PLAN IS WIDER THAN THE PHONE SCREEN. G5: name the overflowing element(s) from source, with
+  file:line (fixed widths, nowrap, min-width, grid tracks without minmax(0, …)). Instrument: if
+  the repo's existing e2e tooling can drive a real browser, measure scrollWidth against
+  clientWidth on /plan at 390 px, before and after, in an untracked scratch script (the e2e
+  suite stays untouched); otherwise a class census before and after, and the operator's
+  screenshot. Logical properties only; physical-property delta 0.
+EVERY GATE also lists every existing test its fix would break. Any break STOPS that fix before
+editing; the others may proceed.
+
+═══ PREDICTIONS, COMMITS, PUSH ═══
+
+Before the first edit, state per fix the named new tests and the count delta, with sign, from
+frontend 294 / 53. API 873 / 34 / 62 and 897 / 10 / 62, run only if a backend file changes.
+Contract fixture 66, ALLOWLIST empty, unchanged. tsc 0 bytes. New tests are red-first.
+Order F1 → F5, one commit each, each green on its own (frontend suite and tsc per commit).
+Predicted unpushed: 1 after persistence, 6 after F5.
+PUSH IS PRE-AUTHORISED only with zero misses and no STOP: fast-forward only; wait for the
+Actions run (all four jobs succeed; the jobs API labels show ubuntu-24.04); both probes show the
+new sha; 0 unpushed by both routes; porcelain empty. No migration, so no backup step; assert it
+from the diff. Any miss: no push; report.
+OPERATOR CHECK AFTER DEPLOY (recorded in the next block): Plan on the phone does not scroll
+sideways; Remaining shows "—" with no budget; Insights shows no percentage from zero; Add budget
+offers only the page's month; the month picker shows months that have budgets.
+
+═══ CONSTRAINTS AND QUEUE ═══
+
+Unchanged: the named regression files stay untouched and green (AppShell.test.tsx,
+legal/PrivacyPolicyPage.test.tsx, legal/TermsPage.test.tsx); QuickAdd internals and the FAB are
+untouched; legal copy is not edited; CC never touches the production database or server.
+QUEUED, not acted on: demo budgets survive demo-clear (manifest ids, demo-data-lib.ts:296–302);
+"KD 1.6K" on Plan; two empty-state messages on Plan; the FAB overlapping the Plan button; the
+autofill bar on Amount; the client and server income filters; the Log-sheet redesign.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, before any other work. THE WRAP CHECK RUNS AS ITS OWN STEP before the
+append. Predicted after the append: strict 50, contiguous; loose (^MOB-R[0-9]) 52, the known body
+lines being 1513 and 6934. Read-back: the appended line count, the header and last line verbatim,
+cmp of the region against the payload, git show --stat and porcelain in full. The commit message
+is piped from a file.
