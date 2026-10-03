@@ -664,8 +664,8 @@ export default function DashboardPage() {
     }
   }, [invalidateFinancialQueries, toast])
 
+  // MOB-R50 F1 — budgetResp belongs to Home's selectedMonth, so the save goes to that month only.
   const saveStarterBudget = useCallback(async ({
-    month,
     category,
     amount_kd,
   }: {
@@ -673,6 +673,7 @@ export default function DashboardPage() {
     category: string
     amount_kd: string
   }) => {
+    const month = selectedMonth
     const existingItems = budgetResp?.items || []
     const nextItems = [...existingItems, { category, amount_kd }]
     const duplicateCategory = findDuplicateCategory(nextItems)
@@ -688,10 +689,9 @@ export default function DashboardPage() {
       queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] }),
       queryClient.invalidateQueries({ queryKey: ["insights"] }),
     ])
-    setSelectedMonth(month)
     setBudgetDialogOpen(false)
     toast.success("Budget added.")
-  }, [budgetResp?.items, queryClient, toast])
+  }, [budgetResp?.items, queryClient, selectedMonth, toast])
 
   return (
     <div className={`space-y-8 ${isMounted ? "animations-complete" : ""}`}>

@@ -16,7 +16,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import DashboardPage from "./DashboardPage"
 import BudgetPage from "./BudgetPage"
@@ -305,5 +305,41 @@ describe("MOB-F1 Item B — budget writes reach the setup-progress query", () =>
       expect(invalidated(qc, ["budgets", "setup-progress", "2026-01"])).toBe(true)
     })
     expect(invalidated(qc, ["merchants"])).toBe(false)
+  })
+})
+
+// MOB-R50 F1 — Home's "Set budget" saves only into the month Home is showing. Placed here
+// because this file already carries a DashboardPage harness whose BudgetDialog stub reaches
+// onSave; the stub posts "2026-03", a month OTHER than Home's. Clock pinned to 2026-05-15.
+describe("MOB-R50 F1 — Home saves a budget only to its own month", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] })
+    vi.setSystemTime(new Date("2026-05-15T09:00:00"))
+    vi.clearAllMocks()
+    window.localStorage.clear()
+    mocks.saveBudgets.mockResolvedValue({ items: [] })
+    mocks.useDashboardPageQueries.mockReturnValue(
+      // Home follows dashboardMetrics.months (DashboardPage.tsx:142-149), so it must offer 2026-05
+      // for Home to be SHOWING 2026-05; with the base fixture's ["2026-03"] Home shows 2026-03 and
+      // the stub's month would coincide with Home's, making this case pass for the wrong reason.
+      baseResult({
+        dashboardMetrics: { months: ["2026-05"], monthly: [], expense_by_category: {} },
+        budgetResp: { month: "2026-05", items: [{ category: "Groceries", amount_kd: "200.000" }] },
+      })
+    )
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it("posts Home's month with that month's list plus the new row", async () => {
+    renderWithClient()
+    fireEvent.click(screen.getAllByText("save budget")[0])
+    await waitFor(() => expect(mocks.saveBudgets).toHaveBeenCalledTimes(1))
+    // WITHOUT the change the first argument is "2026-03": Home's 2026-05 list written into 2026-03.
+    expect(mocks.saveBudgets).toHaveBeenCalledWith("2026-05", [
+      { category: "Groceries", amount_kd: "200.000" },
+      { category: "Food", amount_kd: "10.000" },
+    ])
   })
 })

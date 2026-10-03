@@ -219,7 +219,11 @@ export default function BudgetPage() {
     [categories]
   )
 
-  const handleSave = async ({ month, category, amount_kd }: { month: string; category: string; amount_kd: string }) => {
+  // MOB-R50 F1 — `next` is built from the page's month, so it is saved to the page's month and
+  // nowhere else. The dialog's `month` is deliberately not read here (it equals selectedMonth
+  // since F1; this keeps a future dialog change from reopening the overwrite).
+  const handleSave = async ({ category, amount_kd }: { month: string; category: string; amount_kd: string }) => {
+    const month = selectedMonth
     const next = [...budgets]
     if (editIndex !== null && editIndex >= 0 && editIndex < next.length) {
       next[editIndex] = { category, amount_kd }
@@ -239,7 +243,6 @@ export default function BudgetPage() {
     queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
     queryClient.invalidateQueries({ queryKey: ["insights"] })
     setEditIndex(null)
-    setSelectedMonth(month)
     toast.success(editIndex !== null ? "Budget updated." : "Budget added.")
   }
 

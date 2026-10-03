@@ -753,12 +753,12 @@ export function BudgetDialog({
   initialValues?: { category: string; amount_kd: string }
   onSave: (data: { month: string; category: string; amount_kd: string }) => Promise<void>
 }) {
-  const monthOptions = getBudgetMonthOptions()
-  // Clamp initialMonth to one of the two allowed values
-  const defaultMonth = monthOptions.some((o) => o.value === initialMonth)
-    ? initialMonth
-    : monthOptions[0].value
-  const [month, setMonth] = useState(defaultMonth)
+  // MOB-R50 F1 — the dialog saves ONLY to the page's month, in both modes. Callers build the
+  // list they save from the month they are showing, so a different month here wrote one month's
+  // list over another's. The former clamp (to this/next month) did that silently for any other
+  // page month; the former create-mode picker did it on request. The month is shown, not chosen.
+  const month = initialMonth
+  const monthLabel = getBudgetMonthOptions().find((o) => o.value === month)?.label ?? month
   const [category, setCategory] = useState(initialValues?.category || "")
   const [amount, setAmount] = useState(initialValues?.amount_kd || "")
   const [error, setError] = useState<string | null>(null)
@@ -767,16 +767,13 @@ export function BudgetDialog({
 
   useEffect(() => {
     if (open) {
-      const opts = getBudgetMonthOptions()
-      const clamped = opts.some((o) => o.value === initialMonth) ? initialMonth : opts[0].value
-      setMonth(clamped)
       setCategory(initialValues?.category || "")
       setAmount(initialValues?.amount_kd || "")
       setError(null)
       setSaving(false)
       setTouched({ amount: false })
     }
-  }, [open, initialMonth, initialValues])
+  }, [open, initialValues])
 
   const handleSubmit = async () => {
     setError(null)
@@ -832,16 +829,12 @@ export function BudgetDialog({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="budget-month">Month</Label>
-              <Select value={month} onValueChange={setMonth} disabled={mode === "edit"}>
+              <Select value={month} disabled>
                 <SelectTrigger id="budget-month">
                   <SelectValue placeholder="Select month" />
                 </SelectTrigger>
                 <SelectContent>
-                  {monthOptions.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value={month}>{monthLabel}</SelectItem>
                 </SelectContent>
               </Select>
               {mode === "edit" && (

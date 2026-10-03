@@ -1,7 +1,7 @@
-import { fireEvent, render, screen } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { BudgetChart, BudgetHero, BudgetTable, IncomePlanningCard, type BudgetProfileContext } from "./sections"
+import { BudgetChart, BudgetDialog, BudgetHero, BudgetTable, IncomePlanningCard, type BudgetProfileContext } from "./sections"
 
 describe("BudgetTable", () => {
   it("shows an empty-state CTA when no budgets exist yet", () => {
@@ -157,5 +157,45 @@ describe("MOB-1 Group 1 — BudgetChart widest-gap caption", () => {
     )
     expect(screen.getByText(/Groceries is .* over plan/)).toBeInTheDocument()
     expect(screen.queryByText(/Housing is .* over plan/)).not.toBeInTheDocument()
+  })
+})
+
+/**
+ * MOB-R50 F1 — the Add/Edit budget dialog saves only to the month the page is showing.
+ * Clock pinned to 2026-05-15, so "this month" is 2026-05 and "next month" 2026-06.
+ */
+describe("MOB-R50 F1 — BudgetDialog saves only to the page's month", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] })
+    vi.setSystemTime(new Date("2026-05-15T09:00:00"))
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  async function fillAndSave() {
+    fireEvent.change(screen.getByLabelText("Category"), { target: { value: "Coffee" } })
+    fireEvent.change(screen.getByLabelText("Amount (KD)"), { target: { value: "25" } })
+    fireEvent.click(screen.getByRole("button", { name: "Save Budget" }))
+  }
+
+  it("offers no other month in create mode, and posts the page's month", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined)
+    render(<BudgetDialog open onOpenChange={() => {}} initialMonth="2026-05" mode="create" onSave={onSave} />)
+    // WITHOUT the change the Month select is enabled in create mode and offers next month too.
+    expect(screen.getByLabelText("Month")).toBeDisabled()
+    await fillAndSave()
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1))
+    expect(onSave.mock.calls[0][0].month).toBe("2026-05")
+  })
+
+  it("does not move a page month outside this/next month onto the current month", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined)
+    render(<BudgetDialog open onOpenChange={() => {}} initialMonth="2025-11" mode="create" onSave={onSave} />)
+    await fillAndSave()
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1))
+    // WITHOUT the change the dialog clamps 2025-11 to "this month" and this reads "2026-05",
+    // so the page's 2025-11 list would be written into 2026-05.
+    expect(onSave.mock.calls[0][0].month).toBe("2025-11")
   })
 })
