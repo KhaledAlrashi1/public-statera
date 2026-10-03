@@ -91,6 +91,7 @@ export function BudgetHero({
   percentUsed,
   isOver,
   hasBudget,
+  hasPreviousBudget,
 }: {
   monthLabel: string
   totalBudget: number
@@ -102,6 +103,7 @@ export function BudgetHero({
   percentUsed: number
   isOver: boolean
   hasBudget: boolean
+  hasPreviousBudget: boolean
 }) {
   const status = !hasBudget
     ? null
@@ -168,10 +170,15 @@ export function BudgetHero({
         </div>
         <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Remaining</div>
+          {/* MOB-R50 F3 — with no budget, "remaining" is just −(spend): it reads "—" instead (the
+              MOB-R36 #8 precedent). The vs-last-month chip needs a budget in BOTH months; without
+              one last month its base is −(last month's spend) and the percentage measures nothing. */}
           <div className="mt-1 font-mono text-xl font-semibold tabular-nums">
-            {isOver ? `−${formatCompactKD(Math.abs(remaining))}` : formatCompactKD(remaining)}
+            {!hasBudget ? "—" : isOver ? `−${formatCompactKD(Math.abs(remaining))}` : formatCompactKD(remaining)}
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">{remainingTrendLabel}</div>
+          {hasBudget && hasPreviousBudget ? (
+            <div className="mt-1 text-xs text-muted-foreground">{remainingTrendLabel}</div>
+          ) : null}
         </div>
         <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">% Used</div>

@@ -154,12 +154,12 @@ export default function BudgetPage() {
         missingBaselineLabel: "First month with spending",
       })
     : "No spending logged yet"
-  const remainingTrendLabel = budgets.length > 0 || previousTotalBudget > 0
-    ? formatDeltaLabel(remaining, previousRemaining, {
-        timeframeLabel: "last month",
-        missingBaselineLabel: "First reserve comparison",
-      })
-    : "No budget reserve yet"
+  // MOB-R50 F3 — BudgetHero shows this only when BOTH months have a budget (hasBudget +
+  // hasPreviousBudget), so the former no-budget fallback line could no longer render.
+  const remainingTrendLabel = formatDeltaLabel(remaining, previousRemaining, {
+    timeframeLabel: "last month",
+    missingBaselineLabel: "First reserve comparison",
+  })
 
   const rows = useMemo(() => {
     const map = range === "month" ? spentMap : rangeSpentMap
@@ -460,6 +460,7 @@ export default function BudgetPage() {
             percentUsed={percentUsed}
             isOver={remaining < 0}
             hasBudget={budgets.length > 0}
+            hasPreviousBudget={previousBudgetItems.length > 0}
           />
 
           <IncomePlanningCard

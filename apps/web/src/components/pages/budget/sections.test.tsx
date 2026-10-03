@@ -199,3 +199,46 @@ describe("MOB-R50 F1 — BudgetDialog saves only to the page's month", () => {
     expect(onSave.mock.calls[0][0].month).toBe("2025-11")
   })
 })
+
+/**
+ * MOB-R50 F3 — Remaining with no budget. The value reads "—" (MOB-R36 #8 precedent) and the
+ * "vs last month" chip is not shown; the chip is also not shown when last month had no budget,
+ * because its base is then −(last month's spend) and the percentage measures nothing.
+ */
+describe("MOB-R50 F3 — BudgetHero Remaining tile", () => {
+  const chip = "↓ 125.7% vs last month"
+  const base = {
+    monthLabel: "October 2026",
+    totalBudgetTrendLabel: "",
+    totalSpentTrendLabel: "",
+    remainingTrendLabel: chip,
+  }
+
+  it("shows — and no chip when the month has no budget", () => {
+    render(
+      <BudgetHero
+        {...base}
+        totalBudget={0}
+        totalSpent={373}
+        remaining={-373}
+        percentUsed={0}
+        isOver
+        hasBudget={false}
+        hasPreviousBudget
+      />
+    )
+    // WITHOUT the change this reads "−KD 373" with the chip beneath it.
+    expect(screen.getByText("—")).toBeInTheDocument()
+    expect(screen.queryByText(/−KD/)).not.toBeInTheDocument()
+    expect(screen.queryByText(chip)).not.toBeInTheDocument()
+  })
+
+  it("hides the chip when last month had no budget, and shows it when it had one", () => {
+    const props = { ...base, totalBudget: 500, totalSpent: 200, remaining: 300, percentUsed: 40, isOver: false, hasBudget: true }
+    const { rerender } = render(<BudgetHero {...props} hasPreviousBudget={false} />)
+    // WITHOUT the change the chip renders against a month that had no budget.
+    expect(screen.queryByText(chip)).not.toBeInTheDocument()
+    rerender(<BudgetHero {...props} hasPreviousBudget />)
+    expect(screen.getByText(chip)).toBeInTheDocument()
+  })
+})
