@@ -16,7 +16,7 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Delete, Search } from "lucide-react"
 import { ApiError, categoriesApi, transactionsApi } from "@/lib/api"
-import { cn, formatKD } from "@/lib/utils"
+import { cn, formatDisplayDate, formatKD } from "@/lib/utils"
 import { normalizeAmount, pressDecimal, pressDelete, pressDigit, sumKd } from "@/lib/log-amount"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -212,7 +212,8 @@ function LogPanel() {
       void queryClient.invalidateQueries()
     } catch {
       setLastCreatedId(id)
-      setError("Couldn't save. Check your connection and try again.")
+      // MOB-R56 D4 (S16) — not S14: after a failed undo the entry is still saved.
+      setError("Couldn't undo. The entry is still saved.")
     }
   }
 
@@ -277,7 +278,8 @@ function LogPanel() {
             aria-pressed={date !== todayIso && date !== yesterdayIso}
             onClick={() => setPickingDate(true)}
           >
-            {date !== todayIso && date !== yesterdayIso ? date : "Pick a date"}
+            {/* MOB-R56 D3 — the app's existing date formatter (utils.ts formatDisplayDate). */}
+            {date !== todayIso && date !== yesterdayIso ? formatDisplayDate(date) : "Pick a date"}
           </button>
         )}
         <Button type="button" variant="outline" className="ms-auto min-h-11 min-w-11" aria-label="Search places and items" onClick={() => setSearchOpen(true)}>
