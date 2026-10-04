@@ -100,7 +100,8 @@ export default function CommandPalette({
         label: "Add Expense",
         description: "Capture a new expense quickly",
         icon: TrendingDown,
-        action: () => quickAdd("expense"),
+        // MOB-R61 D2 — /log is the main expense entry; income keeps QuickAdd.
+        action: () => go("/log"),
         keywords: ["new expense", "spending", "capture", "quick add"],
       },
       {

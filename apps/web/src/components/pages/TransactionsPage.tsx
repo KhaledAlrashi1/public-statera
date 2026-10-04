@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import {
   Plus,
   Upload,
@@ -58,6 +58,7 @@ export default function TransactionsPage() {
   const toast = useToast()
   const queryClient = useQueryClient()
   const { openQuickAdd } = useQuickAdd()
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
   // Reference data
@@ -271,7 +272,8 @@ export default function TransactionsPage() {
             <Button
               variant="default"
               size="pill"
-              onClick={() => openQuickAdd(activityType === "income" ? "income" : "expense")}
+              // MOB-R61 D2 — an expense opens /log, the main expense entry; income keeps QuickAdd.
+              onClick={() => (activityType === "income" ? openQuickAdd("income") : navigate("/log"))}
               className="rounded-full px-5"
             >
               <Plus className="mr-2 h-4 w-4" />

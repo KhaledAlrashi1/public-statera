@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { ClipboardList, Plus, BarChart3, LineChart as LineChartIcon } from "lucide-react"
 import {
   Cell,
@@ -31,7 +31,6 @@ import { SplitTransactionDialog } from "./expenses/dialogs"
 import {
   usePagedTransactionRows,
 } from "./expenses/hooks"
-import { useQuickAdd } from "@/contexts/QuickAddContext"
 
 const RECENT_ROWS_LIMIT = 50
 const CATEGORY_DETAIL_PAGE_SIZE = 100
@@ -539,7 +538,8 @@ export default function ExpensesPage() {
   const [selectedMonth, setSelectedMonth] = useState("")
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
-  const { openQuickAdd } = useQuickAdd()
+  // MOB-R61 D2 — /log is the main expense entry (it replaced QuickAdd on this page's add buttons).
+  const navigate = useNavigate()
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [categoryOffset, setCategoryOffset] = useState(0)
   const [splitOpen, setSplitOpen] = useState(false)
@@ -905,7 +905,7 @@ export default function ExpensesPage() {
             <Button
               type="button"
               variant="default"
-              onClick={() => openQuickAdd("expense")}
+              onClick={() => navigate("/log")}
               className="h-10 px-4 text-sm"
               aria-label="Add new expense transaction"
             >
@@ -990,7 +990,7 @@ export default function ExpensesPage() {
               <Button
                 type="button"
                 variant="default"
-                onClick={() => openQuickAdd("expense")}
+                onClick={() => navigate("/log")}
               >
                 Add Expense
               </Button>
@@ -1040,7 +1040,7 @@ export default function ExpensesPage() {
           filterRange={filterRange}
           setFilterRange={setFilterRange}
           categories={categories}
-          onAdd={() => openQuickAdd("expense")}
+          onAdd={() => navigate("/log")}
           onSplit={openSplit}
         />
       )}

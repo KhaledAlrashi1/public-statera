@@ -71,13 +71,15 @@ function AppShellLayout() {
   const showQuickAddFab = true
   const navItems = useMemo(() => baseNavItems, [])
 
-  // Route-derived default type, shared by the FAB and the "L" shortcut.
+  // Route-derived default type, shared by the FAB and the "L" shortcut. MOB-R61 D2 — an expense
+  // opens /log, the main expense entry; income keeps QuickAdd.
   const handleQuickAdd = useCallback(() => {
     const requestedType = new URLSearchParams(location.search).get("type")
     const defaultType =
       location.pathname === "/income" || requestedType === "income" ? "income" : "expense"
-    openQuickAdd(defaultType)
-  }, [location.search, location.pathname, openQuickAdd])
+    if (defaultType === "expense") navigate("/log")
+    else openQuickAdd(defaultType)
+  }, [location.search, location.pathname, navigate, openQuickAdd])
 
   // Global "L" shortcut → same QuickAdd path as the FAB (item 2). Fires only when
   // the authenticated shell is mounted (this component), no modifier is held, focus

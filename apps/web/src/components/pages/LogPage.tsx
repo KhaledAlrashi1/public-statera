@@ -1,7 +1,8 @@
-// MOB-R53 Part B — v5 manual logging, "Place, then item", on the HIDDEN route /log (RM-26: linked
-// from nowhere, does not replace QuickAdd or the FAB, strings provisional until a ruling after the
-// Friday test). Mounted inside ProtectedRoute but OUTSIDE AppShell, so neither the FAB nor the
-// bottom tabs cover the keypad — without touching either.
+// MOB-R53 Part B — v5 manual logging, "Place, then item", on the route /log. MOB-R61 D2 made it the
+// main expense entry (the FAB and "L" for an expense, the palette's "Add Expense", Activity's add on
+// a non-income view); income keeps QuickAdd. Strings stay provisional until a ruling after the
+// Friday test (RM-26, D5). Mounted inside ProtectedRoute but OUTSIDE AppShell, so neither the FAB
+// nor the bottom tabs cover the keypad — without touching either.
 //
 // Money is a STRING end to end (B3): the keypad builds a string (lib/log-amount), the API gets the
 // normalised 3-decimal string, and the batch total is summed in integer fils. Display goes through
@@ -12,9 +13,9 @@
 // After a save or an undo every query is invalidated (MOB-R55 G3: no key list, so it cannot drift).
 // Test stats are local only: sessionStorage, shown at /log?stats=1, never sent anywhere.
 import { useMemo, useRef, useState } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { Delete, Search } from "lucide-react"
+import { ArrowLeft, Delete, Search } from "lucide-react"
 import { ApiError, categoriesApi, transactionsApi } from "@/lib/api"
 import { cn, formatDisplayDate, formatKD } from "@/lib/utils"
 import { normalizeAmount, pressDecimal, pressDelete, pressDigit, sumKd } from "@/lib/log-amount"
@@ -72,6 +73,7 @@ export default function LogPage() {
 
 function LogPanel() {
   const navigate = useNavigate()
+  const location = useLocation()
   const toast = useToast()
   const queryClient = useQueryClient()
 
@@ -217,6 +219,13 @@ function LogPanel() {
     }
   }
 
+  // MOB-R61 D3 — the way back to where the user came from; a /log opened directly (no in-app
+  // history entry) goes Home instead of leaving the app.
+  const goBack = () => {
+    if (location.key !== "default") navigate(-1)
+    else navigate("/")
+  }
+
   const done = () => {
     if (saved.length > 0) {
       toast.success(`${saved.length} saved · ${formatKD(sumKd(saved.map((s) => s.amount)))}`)
@@ -256,6 +265,9 @@ function LogPanel() {
     <div className="mx-auto flex min-h-screen w-full max-w-[28rem] flex-col gap-4 bg-background px-4 py-4">
       {/* Date */}
       <div className="flex flex-wrap items-center gap-2">
+        <Button type="button" variant="ghost" className="min-h-11 min-w-11 px-2" aria-label="Back" onClick={goBack}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
         <button type="button" className={chip} aria-pressed={date === todayIso} onClick={() => { tap(); changed(); setDate(todayIso); setPickingDate(false) }}>
           Today
         </button>
