@@ -8803,3 +8803,217 @@ This block persists ALONE, before any work, position derived from the file. The 
 its own step before the append. After: strict 52, contiguous; loose 54, non-header lines 1513 and
 6934 only. Any third match stops. Read-back: appended line count, header and last line verbatim,
 cmp of the region against the payload, git show --stat and porcelain, all in full.
+
+MOB-R53 — THE MOB-R52 REPORT IS ACCEPTED; THE HELD PUSH IS AUTHORISED. RM-24 IS LIFTED FOR A HIDDEN
+ROUTE ONLY (RM-26). REPORT A: PUSH, F7, R3, R4 AND THE V-GATE. PART B, ON THE OPERATOR'S WORD
+"continue": V5 MANUAL LOGGING ON /log, TIER 1 (NEW READ-ONLY ENDPOINT), NO MIGRATION, THEN A PUSH.
+
+CADENCE. F7 and Part B are Tier 1: both API suites are measured. R3 and R4 edit nothing. Report A
+ends after A5. Part B proceeds on the operator's word "continue", which carries no new ruling and
+need not be persisted. If the channel issues a block instead, that block governs.
+
+═══ THE REPORT ON THE PREVIOUS BLOCK — ACCEPTED ═══
+
+Accepted on its artifacts: C0.1–C0.5 pasted, each cmp exit 0, the grep zero with its positive
+control (25 on d6e9aa2); persistence at 8611–8805 (8609 + 1 + 195), strict 52 and loose 54 as
+predicted; F6 as 94029c6, 303 / 54 → 306 / 56 as predicted, exit 0, tsc 0 bytes, physical
+properties +0, strings +0; unpushed 2 as predicted.
+
+FINDING 1 — FIVE EXISTING TEST FILES WERE EDITED WITH NO GRANT. C0.5: the block at 8377–8509 holds
+no grant; the last is at 8225, scoped to its own cycle. Deviation of that cycle, accepted after the
+fact on C0.4: four import lines widened, additions only, no assertion changed. The channel shares
+the miss: that block never said where new cases go, and the next one accepted "two" unchecked.
+STANDING FROM THIS BLOCK: adding a case to an existing test file is an existing-test edit. New
+cases go in new files unless a block grants the file by name. F6 already did this.
+
+FINDING 2 — THE F6 HOLD WAS RIGHT. "One red case per site" was the channel's expectation, written
+from a queued line number. The gate found site 3 already correct (the existing "New" badge,
+dashboard/sections.tsx:1410-1421). A test that cannot be red at HEAD is not required. Accepted.
+
+FINDING 3 — R2. The Plan overlap was a full-page-capture artefact. Real, at the first scroll
+position: on Home with no data the Log button covers "Start guided setup" at 390 and 375 (a new
+user's first screen); on Activity at 390 it covers the first row's checkbox. The FAB is protected:
+both go to the design pass below, not patched here.
+
+F5B, NEW POSSIBILITY: the operator's screenshot may also have been a full-page capture, the same
+artefact. Added to his check.
+
+R1, QUEUED FOR LATER RULINGS, NOT ACTED ON: the dead retry block (transactions.ts:265-293);
+learnTransaction logs errors to the console only, with no Sentry, and keeps a name's first
+category forever (R1.4); no rate limiter on the write routes R1.5 lists; no global body-size
+limit; CSRF rests on SameSite=Lax; the API accepts the session JWT as Bearer.
+FOR THE CAPTURE RULING, THE CHANNEL'S POSITION, NOT RULED: a Shortcut never holds the session JWT;
+capture gets a scoped, write-only token; deduplication cannot rely on name_key, because bank names
+differ from typed ones, so a match on user, amount and date within a day is flagged as a possible
+duplicate, never blocked; captured rows carry their own source value.
+
+═══ OPERATOR WORDS SINCE THE PREVIOUS BLOCK WAS ISSUED ═══
+
+Provenance OPERATOR, DIRECT. The questions are the CHANNEL'S; the answers are verbatim.
+  "Which result from this week would change the order: a poor capture spike, or a poor Friday
+  test?" → "Poor capture spike."
+  "Is your goal "she logs everything," or "she logs enough to trust her totals"?" → "She logs
+  enough to trust her totals."
+  "After Friday, would you rather ship v5 manual logging quickly and improve it, or wait and ship
+  it together with capture?" → "I think it's long time before Friday. We can move much faster and
+  get things done before Friday."
+  On the channel's spike steps 1 (Apple Pay to a note) and 3 (Message trigger on NBK alerts):
+  "For one and three, this was already implemented but the appending might be slightly different.
+  You will see it when I have the data/screenshots."
+  "Since we have like a week, I wonder if there are other things we can do on the app while we
+  wait for the spike and the testing on Friday. I think we can and should continue the web app.
+  Improve the look of the web app. I want to make things much better because we can."
+Channel options, operator selections, ratified by this block:
+  "Which Log mockup should the Friday Oct 9 test use?" → "v5 Place, then item (recommended)"
+  "Build v5 manual logging in the real app before Friday?" → "Yes, hidden route, QuickAdd kept
+  (recommended)"
+  "Apple Pay spike length?" → "3 days, start today (recommended)"
+  "Capture (Tier 1, migration) timing?" → "Build this week, deploy after Friday (recommended)"
+RECORDED CONSEQUENCES: the goal of Module 11 is that she logs enough to trust her totals. The
+spike runs Saturday, October 3 to Monday, October 5, 2026, superseding "the week to Friday" in
+the previous block. Results Tuesday, October 6; the capture ruling Wednesday, October 7; capture
+deploys after Friday, October 9. Friday's test runs on /log in the real app, not the mockup.
+
+═══ RM-24 LIFTED FOR /log ONLY. RM-26 — V5 STAYS HIDDEN ═══
+
+RM-24 is lifted for v5 manual logging on a hidden route. RM-26: /log is not linked from any
+navigation, does not replace QuickAdd or the FAB, and its strings are provisional, until a ruling
+after Friday's test. RM-25 is unchanged. RM-23 still holds.
+
+═══ REPORT A ═══
+
+A1 THE PUSH, FIRST. After this block's persistence, unpushed predicted 3 (92ae3b1, 94029c6, this
+   block). Fast-forward only; the Actions run with all four jobs succeeding and jobs API labels
+   ubuntu-24.04; both probes on the new sha; 0 unpushed by both routes. Any miss: no push.
+A2 F7 — THE OLD NAME IN THE BUDGET-ALERT EMAIL. Census first: grep -rniI dinartrack over the
+   repo, excluding node_modules and .git, every hit with file:line, each classed as user-facing or
+   not. Edit only email-templates.ts:31 and :39, to "Open Statera to review and adjust your plan."
+   Any other user-facing hit is reported, not edited. One new test file, shown red at HEAD: the
+   rendered alert contains "Statera" and not "DinarTrack". Predictions with sign before the edit,
+   hermetic and integration both measured. F7 is pushed with Part B, not alone.
+A3 R3 — CAPTURE STAGING. READ-ONLY. FACTS, NO PROPOSAL. bank_sync_runs and
+   raw_bank_transactions: every column, type, null, default, foreign key and index, from the
+   migration file:line. Which NOT NULL columns a captured Apple Pay item (merchant, amount, card
+   name, time) could not fill. Any code that reads or writes them, with a control. Any existing
+   table or column that could hold a per-user token hash.
+A4 R4 — VISUAL INVENTORY. READ-ONLY. For the channel's design pass.
+   (a) Tokens: the Tailwind config, CSS custom properties (colours, radii, shadows, spacing), font
+       families and how they load, whether dark mode exists and how it is set, the component
+       primitives (folder and list), and a census of distinct colour classes and literals in use.
+   (b) Screenshots, LOCAL ONLY, with fixture or demo data; never production, never real-user
+       data. WebKit at 390×844 and Chromium at 1440×900. Home, Activity, Plan, Insights, Profile,
+       sign-in, and the QuickAdd sheet open; each with no data and with demo data. Viewport
+       captures, named page-width-state; a full-page capture only where labelled full-page. One
+       folder outside the repo, zipped; state the file count and size. The operator uploads it.
+A5 THE V-GATE, FROM SOURCE, BEFORE ANY PART B EDIT, with file:line for each:
+   - the path /log is free in the router;
+   - how QuickAdd posts: payload, amount-string handling, where its categories come from, and the
+     cache invalidation after a save;
+   - DELETE /api/transactions/:id: is it scoped to the requesting user?
+   - the backend income rule (payday-lib.ts:17) and how B1 would exclude income rows;
+   - EXPLAIN for B1's queries on the integration database, on existing indexes;
+   - every existing test Part B could break (predicted none);
+   - predictions with sign for frontend, hermetic, integration and the contract fixture.
+
+═══ PART B — V5 MANUAL LOGGING ON /log. TIER 1. NO MIGRATION ═══
+
+B1 ENDPOINT. GET /api/log-suggestions: read-only, authenticated like the other GET routes, scoped
+   to the requesting user. From that user's own transactions, excluding source 'demo' and income
+   rows by the backend rule:
+   - places: merchants used, ordered by entry count in the last 90 days, then by most recent
+     date; at most 200. Each: merchant name, the category of its most recent entry, the count.
+   - items per place: at most 5, grouped by name_key, ordered by count, then most recent. Each:
+     the display name and category of its most recent entry, and that entry's amount as the API's
+     money string.
+   Money stays a string end to end. The endpoint writes nothing.
+B2 PAGE. /log inside ProtectedRoute, linked from nowhere (RM-26). Layout as canvas v5 "Place, then
+   item": date chips; places; the chosen place's items; built-in keypad; Save; the batch line with
+   Undo last; Search; Done. On a wide screen the same panel, centred, max inline size 28rem.
+   QuickAdd and the FAB are untouched.
+B3 BEHAVIOUR.
+   - Picking a place sets its category. Picking an item fills its last amount, muted; the first
+     key press replaces it.
+   - Only amount and category are required. The entry's name is the item, else the place, else
+     the category. The merchant is the place when one is chosen.
+   - The keypad builds a string: at most 6 integer digits and 3 decimals, sent normalised to 3
+     decimals ("1.25" → "1.250"). No parseFloat and no Number on money.
+   - The date stays set across saves.
+   - Save posts through the existing POST /api/transactions as QuickAdd does, with the same cache
+     invalidation. On a 409 duplicate, show S13; the next Save on that entry sends force.
+   - Undo last calls the existing DELETE only with the id returned by this page's own most recent
+     create in this page session. RM-21(b) considered: no path is added or changed, and the only
+     caller removes a row it created moments before. A test proves no other id is ever sent.
+   - Search filters B1's places and items in the browser. With no exact place match it offers
+     "+ Add “{query}” as a new place", then the category picker.
+   - The category picker follows canvas v4; categories come from QuickAdd's source; "+ New
+     category “{query}”" creates through the existing path.
+   - No places yet: "Popular in Kuwait" with PICK (Coffee), Starbucks (Coffee), Sultan Center
+     (Groceries), Talabat (Food Delivery), Oula (Fuel), Careem (Transport). Picking one fills the
+     place and its category only.
+   - Done: if anything was saved, go to Activity and show S15; otherwise go back.
+   - NOT IN THIS BUILD: Income (QuickAdd keeps it) and Note (create accepts no memo, R1.2).
+   - Test stats, local only: per entry, the time from first tap to Save, the tap count, and
+     whether a suggestion was used; kept in sessionStorage; shown at /log?stats=1; never sent.
+   - Keypad keys are labelled ("Delete", "Decimal point"); chips carry aria-pressed; touch
+     targets at least 44 px.
+B4 STRINGS, PROVISIONAL UNDER RM-26. From canvas v5 unless marked; ADDED ones are the channel's.
+   S1  "Today", "Yesterday"; the date button's label "Pick a date"
+   S2  "Your usual places" / "Popular in Kuwait"
+   S3  under a place: "{category} · {n} usual" / "{category}"
+   S4  "Category" while none is set
+   S5  "Pick a place to see what you usually buy there." / "What was it? Optional. Your usuals
+       appear here."
+   S6  "+ Other", opening a field with the placeholder "What was it?" (ADDED behaviour)
+   S7  "Tap a place, then type the amount." / "Date stays set while you log several." / "Usual
+       price for {item}. Type to change it." / "{n} saved · KD {total} · last: {what}", where
+       {what} is "{item} at {place}" when both are set
+   S8  "Undo last"
+   S9  "Enter an amount" / "Pick a place or category" / "Save KD {amount} · {what}"
+   S10 "Done"
+   S11 "Place or item"; "Search places and items"; placeholder "Try “americano” or “pick”"; a
+       result's second line "{place} · {category}"; "+ Add “{query}” as a new place" (canvas v4)
+   S12 "Find a category"; placeholder "Type to find, or tap below"; "+ New category “{query}”"
+       (canvas v4)
+   S13 ADDED "Already saved for this date. Tap Save again to keep both."
+   S14 ADDED "Couldn't save. Check your connection and try again."
+   S15 ADDED toast "{n} saved · KD {total}"
+   KD amounts use the app's existing money formatter.
+B5 TESTS AND PREDICTIONS. New files only, each case shown red for the reason under test. Backend,
+   hermetic and integration: another user's rows never appear; demo and income rows excluded;
+   ordering and both caps; money as strings. Frontend: the two required fields; amount
+   normalisation including "0.", "1.25" and the digit caps; 409 then force on the next Save; Undo
+   sends only the last created id; the beginner list with no places; stats never call fetch.
+   Predictions with sign before the first edit; tsc 0 bytes in both packages; physical
+   properties delta 0; strings delta exactly B4 plus F7.
+B6 STOPS. A migration or a new index; any change to an existing route, QuickAdd, the FAB or a named
+   regression file; any existing-test edit; any string outside B4; anything the build needs that
+   B3 does not cover. Report it; do not decide it.
+B7 PUSH, after Part B, with F7, on A1's conditions. Unpushed predicted: 1 + the commit count of F7
+   and Part B, stated before the first edit. No backup step: no migration. Then the operator
+   opens /log on his phone.
+
+═══ DESIGN PASS — THE LOOK OF THE APP. THE CHANNEL'S, NO CODE UNDER THIS BLOCK ═══
+
+From R4, the channel mocks up a visual direction on the design canvas. The operator selects. A
+later block rules the implementation, page by page, Tier 2. In scope: Home's empty state under the
+Log button and Activity's first row (Finding 3).
+
+═══ THE OPERATOR'S CHECKS ═══
+
+Carried from the previous block, items 1–8. ADDED: (9) was the original Plan screenshot a
+full-page (scrolling) capture? After Part B deploys: (10) on /log, log three entries, undo one,
+confirm Activity shows two, open /log?stats=1.
+
+═══ CONSTRAINTS, UNCHANGED ═══
+
+RM-21 stands. Logical properties only. CSP enforcing; no new origin. QuickAdd internals and the
+FAB untouched. Named regression files untouched. No renames. Legal copy not edited. Stage 2
+unauthorised. The importer is not edited. Queued items stay queued. CC never touches the
+production database or server. Next gate is RM-27.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, before any work, position derived from the file. The wrap check runs as
+its own step before the append. After: strict 53, contiguous; loose 55, non-header lines 1513 and
+6934 only. Any third match stops. Read-back: appended line count, header and last line verbatim,
+cmp of the region against the payload, git show --stat and porcelain, all in full.
