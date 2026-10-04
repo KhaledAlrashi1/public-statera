@@ -9312,3 +9312,63 @@ month start is large and Tier 1: budgets are saved per calendar month, and every
 read-only recon of what paydayDay already drives, then a ruling. Open design questions: days
 29-31 in short months; budgets already saved per calendar month; a lighter option (calendar
 months plus "until payday" figures on Home).
+
+MOB-R57 — Generic "Savings & investing" category; K1 rule amended; read-only recon first
+
+Date: Sunday, October 4, 2026. Tier 1 (category rows; money totals).
+Persist after MOB-R56, alone. Nothing in MOB-R56 changes: G5, the strings and the push stand.
+
+A. Operator, Sunday, October 4, 2026, verbatim
+  "She doesn't have a Savings or Investing category. I want it to be a generic category in the
+  app."
+This answers operator check #11: the tester has no Savings, Investing or other savings category.
+So K1 as ruled changes nothing she sees until this category exists.
+
+B. Channel's questions and options; operator's selections
+- How should the category exist? "Always in everyone's list, saved on first use (recommended)"
+  / "Added to every account now (Tier 1, backup)".
+  Selected: "Always in everyone's list, saved on first use (recommended)".
+- Name: One: "Savings & investing" (recommended) / Two: "Savings" and "Investing".
+  Selected: One: "Savings & investing" (recommended).
+- When: "MOB-R57 now: CC checks first, before K1 build (recommended)" / "After Friday's test".
+  Selected: "MOB-R57 now: CC checks first, before K1 build (recommended)".
+All three selections matched the channel's recommendation.
+RM-23 (presets) is lifted for this one category only, by the operator's choice above. The
+channel flagged RM-23 before he chose. All other presets and the starter budget stay held.
+
+C. K1 rule amended (P1, savings test only)
+A non-income category is savings if its trimmed lower-case name is exactly "savings",
+"investing" or "savings & investing". Income detection is unchanged (P4, KS8). Everything else
+in K1 (P2-P7, KS1-KS8, E1-E3 of MOB-R56) is unchanged.
+The new name needs its own test case, in a new file, shown able to fail.
+
+D. Order
+  D1. After the push in MOB-R56 (F3, F4): the read-only recon in section E. No edits.
+  D2. Then K1's E1 (K-gate table, breaking tests, predictions) with the amended rule, in the
+      same report as the recon.
+  D3. K1 builds under E2 and E3 of MOB-R56, held unpushed.
+  D4. The generic category is not built until a ruling on the recon.
+
+E. Recon (read-only; file:line for every claim)
+  E1. Storage: the table or tables that hold categories; columns; unique constraints; whether a
+      transaction refers to a category row or holds a name string.
+  E2. Every surface that lists categories, and how its list is assembled: GET /api/categories,
+      QuickAdd, /log, Plan's Add budget, Activity edit, the importer's mapping, Insights
+      filters, and any other found.
+  E3. What happens today when a transaction is created with a category name the user has never
+      used, through QuickAdd, /log and the importer: is a row created, by which code, and when.
+  E4. Whether an entry can appear in a list without a stored row, and what each surface does
+      when the user picks it.
+  E5. A user who already has "Savings" or "Investing": what the list would show next to the
+      generic entry. CC proposes how to avoid two savings entries side by side.
+  E6. learnTransaction: what happens when a name first learned under one category is later
+      logged under "Savings & investing".
+  E7. RM-21: whether the build needs a migration or schema edit, any delete, null or overwrite
+      path, or any seed, insert or backfill for existing users. Any of these is a STOP.
+  E8. Every existing test the build would break, and the predicted counts with sign.
+  E9. CC's proposal for /log: whether the generic entry appears there. /log strings and
+      behaviour stay provisional under RM-26 until a ruling after Friday.
+
+F. Positions
+Expected: the previous block at 9197-9314 after blank 9196; this block after one blank line.
+After both persist: strict 57, loose 59 (body lines 1513 and 6934).
