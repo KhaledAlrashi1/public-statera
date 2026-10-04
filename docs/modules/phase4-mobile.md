@@ -9540,3 +9540,84 @@ them. His instruction was to finish both.
 I. Positions
 Expected: this block after blank 9447. After it persists: strict 59, loose 61 (body lines 1513
 and 6934).
+
+MOB-R60 — KS14: snapshot rows versioned; D2 route; income copy; build K1 whole; work order
+
+Date: Sunday, October 4, 2026. Tier 1 (money totals; derived rows; contract files).
+Operator, verbatim: "regarding the meta questions, let's go with your recommendations. Also,
+feel free to make bigger jumps as CC can handle them well."
+
+A. Accepted from CC's report under MOB-R59
+- Persistence: 9448-9542 after blank 9447; sha256 f2f32c29...e1df285; both cmps exit 0;
+  strict 59, loose 61; stat 96 insertions (95 + 1 blank); porcelain empty.
+- Deviation (CC's): the wrap check ran in the same command as the append. Accepted this once;
+  the wrap check runs as its own step, before the append, from now on.
+- KS14 recon, the D1 measurement (one failure, the granted line; reverted byte-identical) and
+  E5 accepted.
+- E5: every "Set income" entry opens IncomeQuickDialog (DashboardPage.tsx:218-219, :962;
+  dashboard/sections.tsx:255 via :930; budget/sections.tsx:250, mounted BudgetPage.tsx:472).
+  Operator check #4 is answered: the income pop-up exists.
+
+B. Channel correction (records unchanged)
+KS14 in MOB-R59 assumed R4 is Redis-cached. It is not. The cached analytics are R3
+(dashboard_metrics:, 900 s, analytics-cache.ts:273-278, :452) and R9 (safe_to_spend:, 300 s,
+aggregation.ts:741-752).
+
+C. KS14 ruled: snapshot rows are derived data, versioned
+  C1. dashboard_snapshots rows are derived from transactions and already overwritten every 15
+      minutes by the existing job. Changing what R3 computes adds no new overwrite path.
+  C2. The stored snapshot JSON gains a version marker. The reader (analytics-cache.ts:420)
+      treats a row without the current version as a miss and recomputes through the existing
+      cache-miss path (:441). An old-rule row is never shown.
+  C3. The Redis keys for R3 and R9 are versioned, so old entries are never read. No deletes.
+  C4. No migration and no schema change. If the version marker needs either: STOP.
+  C5. Before K1 deploys, the operator runs the RM-21 backup step anyway (backup service,
+      journalctl, Healthchecks event).
+  C6. Tests in new files: an old-version row is not served; a current-version row is; each
+      shown able to fail.
+
+D. D2 ruled: decide once, pass down as data
+  D1. categoryOptions (category-combobox.tsx:32) gains one input: whether the user owns a
+      category of the savings kind, taken from GET /api/categories' kind (K1). The generic
+      entry is hidden when true.
+  D2. Granted: every call site of categoryOptions, including QuickAddContext.tsx:28, for
+      that argument only. No other change to QuickAdd: save path, amount handling and UI stay
+      as they are. Every existing QuickAdd and dialog test passes unchanged; if one fails, STOP.
+  D3. No frontend copy of the savings rule. No fetch inside the combobox.
+
+E. Income pop-up copy (Tier 2; provisional for the design pass)
+  E1. DashboardPage.tsx:216 becomes: "Add your monthly income. You can change it later in
+      Profile."
+  E2. IncomeQuickDialog shows one line: "You can change this later in Profile." This is F3 of
+      MOB-R59 section F, brought forward; F1 is already true and F2 stays scheduled.
+  E3. If an existing test asserts the old line at :216, that one string literal is granted;
+      CC lists it verbatim. Any other existing-test change: STOP.
+
+F. Build K1 whole, with the generic category and E
+  F1. Before the first edit, CC writes exact predictions with sign to a scratch file: every
+      suite, money paths, generated assertions, leaves, contract fixture, files, commits,
+      unpushed count. CC reports its sha256 and quotes it verbatim. No round trip to the
+      channel.
+  F2. Then CC builds everything ruled in MOB-R56 to this block. A miss, an edit outside a
+      grant, or a migration or schema file: STOP.
+  F3. Held unpushed for the channel's review. A later block rules the push and the deploy.
+
+G. Work order (channel's recommendation; the operator accepted it in advance)
+When the channel asked, it marked no recommendation. It states one here for the first time:
+  1. K1 and the generic category (this block).
+  2. Capture (RM-25): spike results Tue Oct 6, ruling Wed Oct 7, build Wed-Thu, deploy after
+     Fri Oct 9. The /log test on Fri Oct 9.
+  3. Demo-first: the public sample dashboard with no account (Tier 1).
+  4. Month start (F2 of MOB-R59 section F), with its read-only recon first (Tier 1).
+  5. Budget presets (Tier 1; RM-21 (b) fires because saving a month replaces it).
+Reason for 3 before 4: the demo touches no user rows and is the smaller build, so it ships
+first, on calendar months. The month-start cycle then includes the demo's sample data in its
+scope.
+
+H. Operator preference recorded
+Bigger jumps per cycle: blocks may rule whole features at once when CC's predictions are
+written before the edits. STOP conditions are unchanged.
+
+I. Positions
+Expected: this block after blank 9543. After it persists: strict 60, loose 62 (body lines 1513
+and 6934).
