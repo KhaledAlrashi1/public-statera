@@ -9017,3 +9017,80 @@ This block persists ALONE, before any work, position derived from the file. The 
 its own step before the append. After: strict 53, contiguous; loose 55, non-header lines 1513 and
 6934 only. Any third match stops. Read-back: appended line count, header and last line verbatim,
 cmp of the region against the payload, git show --stat and porcelain, all in full.
+
+MOB-R54 — THE OPERATOR'S LOOK AND KPI DECISIONS ARE RECORDED. R5, A READ-ONLY SAVINGS RECON, JOINS
+REPORT A. THIS BLOCK PERSISTS RIGHT AFTER MOB-R53 AND BEFORE A1, SO A1'S UNPUSHED PREDICTION
+BECOMES 4. NO BUILD OF THE KPI CHANGE UNDER THIS BLOCK.
+
+ORDER. The block before this one persists first, then this one, each alone. Then Report A runs as
+ruled there, with R5 added after A5. Part B still proceeds on the operator's word "continue".
+A1 AMENDED, BESIDE ITS RECORD: unpushed predicted 4 before the push (92ae3b1, 94029c6, the two
+persistence commits). A1's conditions are otherwise unchanged.
+
+═══ OPERATOR WORDS SINCE THE PREVIOUS BLOCK WAS ISSUED ═══
+
+Provenance OPERATOR, DIRECT. Questions and options are the CHANNEL'S; answers are verbatim.
+  "How should Statera feel?" → "Same feel, more polished"
+  "When should the new look go live?" → "Before Friday, page by page" (the channel recommended
+  "After Friday's test")
+  "Which screen bothers you most today?" → "I guess how the KPIs are without boundaries. I feel
+  they need to be bounded in some way. Other than that, what I want is making things a bit more
+  elegant and professional as well as has an amazing feeling and dynamic effects."
+  "When you say "amazing feeling," which app gives you that feeling today?" → "Coded web app.
+  "https://coded.kw""
+  "Should Home's KPIs answer one question at a glance, like "Am I OK this month?" If so, which
+  number answers it?" → "I want the KPIs to actually be: Income, expenses, investing/savings, and
+  remaining. Remove the save rate. I want investing/saving categories to be outside the expenses
+  categories"
+  "How should the app know a category is savings?" → "Fixed names: Savings, Investing (before
+  Fri)" (the channel recommended "She marks categories (migration, after Fri)")
+  "What should Remaining mean?" → "Income − expenses − savings (recommended)"
+  "How does savings get into the app?" → "She logs each transfer"
+
+RECORDED CONSEQUENCES, FOR THE BUILD BLOCK THAT FOLLOWS R5:
+  - Home's KPIs become Income, Expenses, Savings & investing, Remaining. The savings rate is
+    removed from Home. The tile label "Savings & investing" is the CHANNEL'S, provisional.
+  - A category counts as savings when its name, trimmed and case-insensitive, is exactly
+    "Savings" or "Investing". No migration.
+  - Expenses exclude savings categories. Remaining = income − expenses − savings.
+  - Savings arrive as logged transactions in those categories.
+  - The new look ships before Friday, page by page, Tier 2, from the design pass. KPI tiles get a
+    visible boundary. CHANNEL'S RECOMMENDATION, NOT RULED: no look changes deploy after Thursday
+    evening, October 8, 2026, so Friday's test runs on a stable app.
+  - CHANNEL'S NOTE: the name rule repeats the pattern behind the queued income-rule mismatch
+    (utils.ts:148 against payday-lib.ts:17). The build block will require one rule in one place.
+
+═══ R5 — SAVINGS RECON. READ-ONLY. FACTS, FILE:LINE, AFTER A5 ═══
+
+  R5.1 Every site, backend and frontend, that totals expenses or computes Remaining, the savings
+       rate, budget totals, category shares or trends, and what each includes today.
+  R5.2 The savings rate: where it is computed, where it is shown, which contract fixture fields
+       carry it, and which tests assert it.
+  R5.3 Both income rules quoted exactly (utils.ts:148, payday-lib.ts:17). Would "Savings" or
+       "Investing" match either today?
+  R5.4 How category names are stored (case, trimming, uniqueness), and whether "Savings" or
+       "Investing" appear in seeds, demo data, the 22 suggested names or test fixtures.
+  R5.5 Budgets: can a category named Savings carry a budget today, and how Plan totals budgets
+       against income.
+  R5.6 Every existing test that asserts expense totals, Remaining or the savings rate: the list a
+       build would need granted, file by file.
+  R5.7 Where one shared rule could live so that frontend and backend cannot disagree. CC's
+       proposal, labelled as CC's, at most ten lines.
+MANDATE: no edit to any tracked file for R5.
+
+═══ THE OPERATOR'S CHECKS — ADDED ═══
+
+(11) In the app, does she already have a category named Savings or Investing, or one she uses for
+transfers under another name? Expense totals for past months will move when the rule ships.
+(12) Screenshots of the parts of coded.kw that give the feeling he wants.
+
+═══ CONSTRAINTS ═══
+
+Unchanged from the block before this one. RM-21 stands. No new gate is opened; next is RM-27.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, after the block before it, before any other work. The wrap check runs
+as its own step before the append. After: strict 54, contiguous; loose 56, non-header lines 1513
+and 6934 only. Any third match stops. Read-back: appended line count, header and last line
+verbatim, cmp of the region against the payload, git show --stat and porcelain, all in full.
