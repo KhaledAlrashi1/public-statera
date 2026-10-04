@@ -14,6 +14,7 @@ import { uploadRouter } from "./routes/upload"
 import { memorizedRouter } from "./routes/memorized"
 import { budgetsRouter } from "./routes/budgets"
 import { suggestionsRouter } from "./routes/suggestions"
+import { logSuggestionsRouter } from "./routes/log-suggestions"
 import { aggregationRouter } from "./routes/aggregation"
 import { intelligenceRouter } from "./routes/intelligence"
 import { notificationsRouter } from "./routes/notifications"
@@ -56,6 +57,7 @@ export function createApp() {
   app.route("/api/memorized-transactions", memorizedRouter)
   app.route("/api/budgets", budgetsRouter)
   app.route("/api/transaction-suggestions", suggestionsRouter)
+  app.route("/api/log-suggestions", logSuggestionsRouter)
   app.route("/api/analytics", aggregationRouter)
   app.route("/api/analytics", intelligenceRouter)
   app.route("/api/notifications", notificationsRouter)
