@@ -9691,3 +9691,99 @@ E. Order, review and push
 F. Positions
 Expected: this block after the blank line that follows MOB-R60's last line. After it persists:
 strict 61, loose 63 (body lines 1513 and 6934).
+
+MOB-R62 — Push R61 now; amount text fix (RM-27) before K1; K1 grants; R61 read-back owed.
+Issued Sunday, October 4, 2026, by the review channel, on CC's two reports: (1) R60 persistence
+and K1 STEP 1 STOP; (2) the R61 build. Work order: A, B, C, D, E, F, G. STOP rules unchanged.
+
+A. Read-backs first.
+A1. R60 persistence accepted: ae1e30f, 80 lines at 9544-9623, strict 60, loose 62. Owed: the
+    longest line's length in characters, and both cmp commands with their verbatim tails.
+A2. R61 persistence was not read back in either report. Owed in full: line count (expected 69),
+    position 9625-9693 after blank 9624, header and last line verbatim, sha256 (expected
+    adbe3dc7...51af3fc3), cmp of the region against the payload, git show --stat, porcelain.
+    Strict 61, loose 63.
+A3. Persist this block: wrap check as its own step, then append after a blank at 9694. Expected
+    9695-9789 (95 lines). After it: strict 62, loose 64. Standard read-back.
+
+B. /log's Amount path (read-only, before the push; nothing committed).
+B1. Name the file:line where /log reads and parses Amount; say whether it shares
+    money-input.tsx's filter, log-amount.ts toFils, or neither.
+B2. Scratch run: what QuickAdd and /log each save for "1.5", "1,5", "1,500", the Arabic-Indic
+    text U+0661 U+066B U+0665, and U+0661 U+0665. Table: input, QuickAdd, /log ("refused" if
+    nothing saves).
+B3. Push condition: for every input, /log saves what QuickAdd saves, or refuses. If /log saves
+    a value QuickAdd would not: STOP, no push.
+
+C. Push and deploy R61 now. The channel ruled this without asking the operator. It follows his
+   words "Fix QuickAdd now and implement /log main today/now"; K1 gets its own push.
+C1. Push the 7 unpushed commits plus this block's persistence commit. Fast-forward; all four
+    Actions jobs succeed with jobs API labels ubuntu-24.04; both probes on the new sha; 0
+    unpushed by both routes. No migration: RM-21's backup is not needed for this push. It stays
+    required before K1's deploy (R60 C5).
+C2. Acceptance: the operator's iPhone screenshot with the keyboard up, after deploy.
+
+D. R61 rulings.
+D1. C3 STOP accepted; Amount unchanged in R61. The bug it found is ruled in E.
+D2. C5 accepted: the ">" tab is not ours (only AppShell.tsx:536 is fixed to the left edge).
+    Operator check: does it show on another site in Safari?
+D3. The two-row phone footer ("Keep open", then Cancel and Add) accepted under the layout grant.
+D4. suggestion-combobox.tsx (optional autoComplete, pass-through) and LogPage's header comment
+    accepted after the fact, recorded as a deviation: a file absent from the predictions file is
+    a STOP. Owed: git show of both hunks.
+D5. AppShell.test.tsx granted: the two "opens quick add" titles say /log instead; the :119
+    assertion is deleted (it passes only because navigation is mocked). Run the file before and
+    after, tails quoted. Then mutate the FAB's destination in AppShell.tsx: exit 1, restored
+    byte-identical. Commit held with E and F.
+D6. The X button over scrolled fields stays unmeasured; it joins the operator's screenshot check.
+
+E. Amount text fix. Tier 1. Before K1: small, and logging is the core path.
+   Facts (CC, R61 C3): Amount opens a decimal pad (money-input.tsx:55-56); its filter strips ","
+   (:14-15); "1,5" saves 15.000; Arabic-Indic digits are stripped, so nothing saves. In
+   production now. The channel ruled this fix without asking the operator; it is put to him as a
+   priority beside this block.
+E1. One normalizer in one new file, used by every box where a user types an amount (QuickAdd and
+    /log at least). List every caller first, by grep, quoted.
+E2. Rules, in this order. U+0660-U+0669 and U+06F0-U+06F9 become 0-9. U+066B becomes ".".
+    U+066C and spaces are removed. No "." and exactly one ",": the "," is the decimal point
+    (pads in comma regions have no "."). A "." present: every "," is removed. Two or more ","
+    and no ".": refused. Everything else as today.
+E3. Under Amount, a readout shows the parsed value as the user types (e.g. "KD 1.500"), so a
+    misread shows before saving. Known trade-off: "1,500" reads as KD 1.500, not 1500. A refused
+    value shows one short line and saves nothing. New strings provisional, as RM-26.
+E4. Tests in new files only: the input table above plus "1,250.5", "1,2,3" and "", for each
+    path. Each rule mutated: exit 1, restored byte-identical.
+E5. Predictions file first (R60 rule): files, test counts with sign, strings; API, contract
+    fixture 67 and money-wire counts unchanged.
+E6. RM-27 (standing): user-typed amount text goes through the one normalizer; no character of an
+    amount is dropped silently; a value saves only as the readout showed it. The importer
+    ("12,5" -> 125.000, Arabic-digit dates) stays queued, to reuse the normalizer later.
+
+F. K1 (R55-R60), built whole.
+F1. STEP 1 STOP accepted; the three predicted files failed. Not predicted: the tsc error at
+    dashboard-snapshot-lib.test.ts:193 and the emit-site guard. Explanation accepted. Owed:
+    file:line of the new formatKd call in dashboard-snapshot-lib.ts.
+F2. C2 stands: a stored row without v:2 is a miss. Serving an old row would show expenses that
+    still include savings. The redesign is declined.
+F3. Granted as CC listed them; fixtures and baselines only, no other expected value changes.
+    dashboard-snapshot-lib.test.ts: stored rows as {v:2, monthly}; monthly gains savings_kd.
+    dashboard-snapshot-tier.test.ts: T2's stored row the same.
+    money-wire-shape.test.ts: the R3-tier2 fixture the same; emit-site baseline for
+    dashboard-snapshot-lib.ts 3 -> 4, totals 43 -> 44 and 47 -> 48; C7 gains R3's
+    monthly[].savings_kd. JSON and assert.ts by the generators only.
+F4. New file: a version-less stored row reads as a miss; a v:2 row is served. Mutation: remove
+    the version check: exit 1, restored byte-identical.
+F5. K1 only, amending R53 (the channel ruled without asking the operator). An existing test file
+    may be edited without a STOP only if its diff touches fixture or mock data alone (adds
+    savings_kd, total_savings_mtd or kind; wraps a stored row as v:2; adds the version to a cache
+    key string) and no +/- line holds "expect(" or a test title. Instrument: git diff -U0 on
+    test files, grepped for both; 0 outside F3 and D5, with a planted line shown found first.
+    Each such file listed with its diff. Anything else: STOP, revert byte-identical.
+F6. New scratch file, sha256 and quoted, before the first edit: every count with sign (API
+    hermetic and integration, frontend, contract fixture, money paths, generated assertions,
+    leaves, emit-site totals, strings, migrations 8 unchanged).
+F7. Build K1 whole with the generic category and the income copy, as ruled in R55-R60.
+
+G. Hold D5, E and F unpushed; one report with every owed artifact. The next block rules their
+   push and deploy, the RM-21 backup step first. Next block 63; next gate RM-28.
+   After this block: strict 62, loose 64 (body lines 1513 and 6934).
