@@ -9193,3 +9193,122 @@ This block persists ALONE, before any work, position derived from the file. The 
 its own step before the append. After: strict 55, contiguous; loose 57, non-header lines 1513 and
 6934 only. Any third match stops. Read-back: appended line count, header and last line verbatim,
 cmp of the region against the payload, git show --stat and porcelain, all in full.
+
+MOB-R56 — Report under MOB-R55 accepted; G5 re-granted (four files); strings; K1 sites; push
+
+Date: Sunday, October 4, 2026. Tier 1 (backend endpoint; money totals).
+
+A. Accepted from CC's report under MOB-R55
+- Persistence: 98 lines at 9098-9195 after blank 9097; sha256 matched; strict 55, loose 57;
+  unpushed 2 at that point. All as predicted.
+- Part B: 8691ac8 (backend), f5d3555 (frontend). Every count met its prediction: frontend
+  319/58; API hermetic 880/38/65; API integration 908/10/65; contract fixture 67.
+  Cross-check: passed + skipped = 918 in both API suites; 22 new cases = backend 9 (4 of them
+  integration-only) + frontend 13.
+- The G5 STOP was correct under MOB-R52. Continuing the rest of Part B on the F5 precedent:
+  accepted.
+- Choices made without a ruling, now accepted: places capped at 200; tie-break by most recent
+  date after the 90-day count.
+- Missing from the report text, required in the next report before the push: read-back header
+  and last line verbatim; git show --stat and porcelain in full; tail and exit code of every
+  suite run; the red tail of each of the 22 mutations.
+
+B. Channel corrections (earlier records unchanged; corrections recorded here)
+- G5 in the previous block granted one file and one entry. The channel predicted that from the
+  name "money-wire capture" without seeing the files: the same error as in MOB-R51. Four files
+  are needed.
+- P1 in the previous block said every split uses the new rule. That contradicts P4. P4 governs;
+  see KS8.
+
+C. G5 re-granted for four files, by name
+  money-wire-shape.test.ts (router mount, route entry, fixtures)
+  money-wire-shape.json (artifact)
+  money-wire-shape.assert.test.ts
+  money-wire-shape.assert.ts (generated)
+Before any edit, CC reports:
+  C1. The full path of each file.
+  C2. Which files are generated, and the exact command that generates each one.
+  C3. Every existing test the change would break (MOB-R53), or "none" with the reason.
+  C4. Predicted counts with sign for every suite and the contract fixture.
+After the edit:
+  C5. Run the generator twice; the second run is byte-identical to the first (cmp exit 0).
+  C6. Discrimination: change the endpoint's money field from string to number; show the
+      capture or assert test red; restore byte-identical.
+Hand-editing a generated file is not granted.
+
+D. Strings (provisional under RM-26)
+  D1. KD prefix on the amount while typing: accepted.
+  D2. /log?stats=1 printing the stored JSON: accepted (operator-only diagnostic).
+  D3. Picked date: use the app's existing date formatter; CC names it with file:line. If none
+      exists, STOP and ask.
+  D4. Failed Undo gets its own string (next free S-number): "Couldn't undo. The entry is still
+      saved." Reason: S14 after a failed undo tells her the entry is gone when it is saved.
+      Failed new-category keeps S14. One new test, in a new file, shown able to fail.
+
+E. K1 rulings (sites KS1-KS8 from the K-gate; month: income 100, expenses 40, savings 30)
+P7 (new): a share's denominator contains its numerator; "left over" is one number everywhere.
+  KS1. Shares over expenses only: R4 top_categories (aggregation.ts:840-846),
+       DashboardPage.tsx:510, sections.tsx:1255, ExpensesPage.tsx:787. Savings rows keep
+       their amount and show no percentage. Expense shares sum to 100%.
+  KS2. R2 spend-by-month (aggregation.ts:141-158): expenses only; 170 becomes 40. Before the
+       edit CC lists every place R2 is displayed.
+  KS3. R5 merchant and transaction breakdowns and their total (:233-240), R6 merchant trend
+       (:338): savings rows excluded.
+  KS4. R12 recurring patterns (intelligence-lib.ts:201): savings rows excluded.
+  KS5. R13 net position (:562-583): income - expenses - savings = 30, equal to Remaining.
+       CC names where it is shown.
+  KS6. Activity table totals (TransactionsTable.tsx:119-122): unchanged. CC quotes the label
+       verbatim; if it says spent or expenses, STOP and ask.
+  KS7. Plan Remaining (BudgetPage.tsx:131): expense budgets - expense spending. Savings budgets
+       show their own "X of Y" progress; the string is CC's proposal, flagged in the report.
+  KS8. routes/transactions.ts :725, :736, :764, :876-877: income detection unchanged (flag
+       only). The new rule splits only non-income rows into savings and expense, and only at
+       sites that compute an expense total. CC states each site's output before the edit.
+Order for K1:
+  E1. CC restates the K-gate table with KS1-KS8 (today vs after), lists every existing test the
+      build would break, and predicts every count with its sign.
+  E2. If any test outside dashboard-hero.test.tsx and DashboardPage.test.tsx breaks: STOP for
+      a grant. Otherwise build.
+  E3. The build is held unpushed for the channel's review, as before.
+
+F. Order and push
+  F1. Persist this block alone; standing read-back.
+  F2. G5 (section C), then D3 and D4.
+  F3. CC predicts the unpushed count, then pushes: F7, the MOB-R55 record, Part B (two
+      commits), this record, G5 and the strings. Only if every prediction in C and D is met.
+  F4. Fast-forward; all four Actions jobs succeed, jobs API labels ubuntu-24.04; both probes on
+      the new sha; 0 unpushed by both routes. Any stated expectation that fails stops the push
+      (MOB-R52).
+  F5. K1 after the push (section E).
+No migration in this push: the RM-21 backup step does not apply.
+
+G. Provenance (channel's questions and options; operator's selections)
+- Push: "Re-grant G5 (4 files), then one push (recommended)" / "Push now, G5 as a follow-up".
+  Selected: "Re-grant G5 (4 files), then one push (recommended)".
+- K1's 8 sites: "Accept channel rulings, build now (recommended)" / "Go through them one by
+  one" / "Hold K1 until check #11 is answered".
+  Selected: "Accept channel rulings, build now (recommended)".
+- The 4 strings: "Accept channel rulings (recommended)" / "I'll rule them myself".
+  Selected: "Accept channel rulings (recommended)".
+All three selections matched the channel's recommendation.
+
+H. Recorded, scheduled for later (not this week)
+Operator, Sunday, October 4, 2026, verbatim (wrapped):
+  "The same user told me today that she preferred to set when the month starts. So, currently
+  the month starts at 1st. She preferred it to start at 25th of the month. That's when she gets
+  paid. While one can arguably say it's the same in the long term, I think it's a good
+  feedback. I want to add a small feature to prompt the user to enter if they would like the
+  month to start at a specific date while the default value is the first of the month. I want
+  to it to be quick and easy. For instance, do we really need to have the user to go the
+  profile page to set their income. Why don't we have them do it on the spot? Like a small pop
+  up window where they set their income and and optionally set when they would like the month
+  to start (suggestion could be pay day). The default is the first day of the month. I am not
+  saying let's do it now but let's schedule it for later after we do the more important
+  features."
+Channel's notes: two parts of different size. The pop-up is small: a Home "Set income" pop-up
+already exists (operator check #4, unverified) and paydayDay exists with no UI setter. A custom
+month start is large and Tier 1: budgets are saved per calendar month, and every monthly total
+(Home, Plan, Insights, digest, alerts) uses calendar months. First step when scheduled: a
+read-only recon of what paydayDay already drives, then a ruling. Open design questions: days
+29-31 in short months; budgets already saved per calendar month; a lighter option (calendar
+months plus "until payday" figures on Home).
