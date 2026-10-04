@@ -9094,3 +9094,102 @@ This block persists ALONE, after the block before it, before any other work. The
 as its own step before the append. After: strict 54, contiguous; loose 56, non-header lines 1513
 and 6934 only. Any third match stops. Read-back: appended line count, header and last line
 verbatim, cmp of the region against the payload, git show --stat and porcelain, all in full.
+
+MOB-R55 — REPORT A IS ACCEPTED. THE FIVE GATE ITEMS ARE RULED AND PART B PROCEEDS, THEN A PUSH WITH
+F7. K1, THE SAVINGS SPLIT, IS RULED ON PRINCIPLES: GATE, THEN BUILD UNLESS A STOP, HELD UNPUSHED
+FOR THE CHANNEL'S REVIEW. TIER 1 THROUGHOUT. NO MIGRATION.
+
+ORDER. Persist this block alone. Then Part B, then its push (B7), then K1's gate, then K1's build.
+One report. This block replaces the word "continue"; no further word is needed for Part B.
+
+═══ REPORT A — ACCEPTED ═══
+
+Accepted on its artifacts: both blocks persisted with cmp exit 0 (8807–9019 and 9021–9096), strict
+54 and loose 56 as predicted; the push f3dc5d3..c1f7cb8, run 37210707024, labels ubuntu-24.04 on
+all four jobs, both probes on c1f7cb8. Production is c1f7cb8. F7 as 04195c3: 2 of 37 hits
+user-facing and edited, hermetic 875/34/63 and integration 899/10/63, both measured, predicted
+exactly. The EXPLAIN re-run on rolled-back seeded rows is the right instrument after a
+non-discriminating first attempt. The QuickAdd capture's "dialog did not open" log against images
+showing it open is an instrument false negative, recorded as such.
+R3 RECORDED: raw_bank_transactions cannot hold a captured item (connection, sync run and provider
+id required; no time or card column; CHECK > 0 rejects refunds). account_action_tokens could hold
+a capture token hash with a purpose and a far expiry; whether "used" cleanup would touch it is a
+question for the capture ruling (RM-25).
+QUEUED: ProfilePage.tsx:513 still promises "savings milestones"; routes/transactions.ts uses
+is_income alone (:725, :736, :764, :876-877), a third income rule.
+
+═══ THE GATE ITEMS — RULED ═══
+
+G1 GRANTED BY NAME: src/contract/capture.ts, one added line for the new method, and the
+   regenerated frontend-calls.json. Diffs pasted; any other changed line STOPS.
+G2 B1's window. Places: every merchant with any entry, all time, ordered by entry count in the
+   last 90 days, then by most recent date; at most 200. Items: counts all time, top 5 per place,
+   ordered by count, then most recent. Older places stay findable by search.
+G3 Cache: after a save or an undo, /log invalidates every query (no key list). Drift-proof and
+   QuickAdd stays untouched. Revisited if /log ever replaces QuickAdd.
+G4 B1 uses readRateLimit.
+G5 Close the gap: add B1 to the money-wire capture. Name the file before the edit; one added
+   entry, nothing else, granted by this item. More than one file or entry STOPS. Re-predict the
+   counts with it.
+
+═══ PART B — PROCEEDS AS RULED, WITH G1–G5 ═══
+
+Predictions to restate before the first edit, with G5 included: hermetic 875/34/63 → 880/38/65 and
+integration 899/10/63 → 908/10/65 as reported, adjusted for G5; frontend 306/56 → 319/58; contract
+fixture 66 → 67. Unpushed: 2 after this block's persistence (04195c3 and it), 4 after Part B's 2
+commits. B7's push then carries F7, this block and Part B, on A1's conditions.
+
+═══ K1 — THE SAVINGS SPLIT. TIER 1. NO MIGRATION, NO ROW CHANGE ═══
+
+From the operator's selections recorded in the previous block. CC's R5.7 proposal is accepted in
+part, as P1 and P4 say.
+P1 ONE RULE, ONE PLACE: lib/category-kind.ts. Kind is income when the existing backend income
+   rule holds (payday-lib.ts:17, unchanged); else savings when the trimmed, lower-cased name is
+   exactly "savings" or "investing"; else expense. Every server filter that splits income from
+   the rest uses it. A parity test pins the SQL fragment against the TypeScript function over a
+   table of names, including "  savings ", "SAVINGS", "Investing", "Savings account" (expense)
+   and "Income: Salary".
+P2 Every server EXPENSE TOTAL excludes savings. A category's own figures (its spend against its
+   budget, its row in a breakdown) keep savings categories under their own name.
+P3 Home's KPIs: Income, Expenses, Savings & investing, Remaining. Remaining = income − expenses −
+   savings, keeping today's clamp at 0 (DashboardPage.tsx:175). The savings figure comes from the
+   server for the same month. Removed: the savings rate, its points chip and the "in reserve"
+   sentence it drives (dashboard/sections.tsx:134-147, :809, :882, :884). The only new string is
+   the tile label "Savings & investing", provisional.
+P4 GET /api/categories gains kind; the frontend uses it for savings only. INCOME IS NOT CHANGED:
+   utils.ts:148 stays, and the income rules' unification stays queued. No behaviour changes for
+   any category that is not named Savings or Investing.
+P5 Plan: a savings category may keep a budget (a target) and shows its own spend. Plan totals
+   labelled as spending exclude savings. budget_to_income_pct counts savings budgets as
+   committed, unchanged.
+P6 Insights, the weekly digest and budget alerts follow P2 through the shared filter.
+K-GATE, in the report before K1's first edit: every site from R5.1, R5.5 and P2–P6 in one table
+   with file:line, what it shows today, and what it shows after for a month holding KD 100
+   income, KD 40 expenses and KD 30 savings (Remaining 30). Any site the principles do not
+   decide STOPS.
+GRANTED for the savings-rate removal only: dashboard-hero.test.tsx and DashboardPage.test.tsx.
+   Each removed or changed line pasted. Any other existing test that fails STOPS; new cases go in
+   new files.
+PREDICTIONS with sign before the first edit: hermetic, integration, frontend, contract fixture,
+   money-wire; tsc 0 bytes in both packages; physical properties delta 0; strings +1 and the
+   removed ones listed.
+K1 IS NOT PUSHED under this block. Unpushed after K1 = its commit count, stated before the first
+   edit. The channel reviews K1's report and rules the push: it changes totals the real user sees.
+
+═══ THE OPERATOR ═══
+
+Before K1 deploys: check (11) from the previous block, whether she already has a category named
+Savings or Investing. Upload CC's statera-visual-inventory.zip (31 entries, 5,157,532 bytes) to
+the channel, with the coded.kw screenshots, for the design pass.
+
+═══ CONSTRAINTS ═══
+
+Unchanged. RM-21 stands; RM-23, RM-25 and RM-26 hold. QuickAdd internals and the FAB untouched.
+Named regression files untouched. Next gate is RM-27.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, before any work, position derived from the file. The wrap check runs as
+its own step before the append. After: strict 55, contiguous; loose 57, non-header lines 1513 and
+6934 only. Any third match stops. Read-back: appended line count, header and last line verbatim,
+cmp of the region against the payload, git show --stat and porcelain, all in full.
