@@ -57,6 +57,8 @@ function lazyWithRetry<T extends React.ComponentType<unknown>>(retryKey: string,
 
 const AppShell = lazyWithRetry("app-shell", () => import("@/components/layout/AppShell"))
 const DashboardPage = lazyWithRetry("dashboard", () => import("@/components/pages/DashboardPage"))
+// MOB-R53 Part B — hidden v5 logging page (RM-26: linked from nowhere).
+const LogPage = lazyWithRetry("log", () => import("@/components/pages/LogPage"))
 const ExpensesPage = lazyWithRetry("expenses", () => import("@/components/pages/ExpensesPage"))
 const TransactionsPage = lazyWithRetry("transactions", () => import("@/components/pages/TransactionsPage"))
 const IncomePage = lazyWithRetry("income", () => import("@/components/pages/IncomePage"))
@@ -176,6 +178,8 @@ function AppRoutes() {
       <Route path="/terms" element={<TermsPage />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/welcome" element={<WorkspaceChoicePage />} />
+        {/* MOB-R53 B2 — inside ProtectedRoute, OUTSIDE AppShell: no FAB or tabs over the keypad. */}
+        <Route path="/log" element={<LogPage />} />
         <Route element={<AppShell />}>
           <Route index element={<DashboardPage />} />
           <Route path="home" element={<Navigate to="/" replace />} />

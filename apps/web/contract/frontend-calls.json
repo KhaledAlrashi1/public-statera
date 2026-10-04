@@ -105,6 +105,10 @@
   },
   {
     "method": "GET",
+    "path": "/api/log-suggestions"
+  },
+  {
+    "method": "GET",
     "path": "/api/memorized-transactions"
   },
   {

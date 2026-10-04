@@ -27,6 +27,7 @@ import type {
   BudgetResponse,
   MemorizedTransaction,
   TransactionSuggestion,
+  LogSuggestionPlace,
   DemoDataClearResult,
   DemoDataLoadResult,
   MagicLinkVerifyResult,
@@ -517,6 +518,13 @@ export const transactionsApi = {
     apiFetch<{ items: TransactionSuggestion[] }>(
       `/api/transaction-suggestions?q=${encodeURIComponent(q)}&limit=${limit}`
     ),
+
+  // MOB-R53 B1 — usual places and items for the hidden /log page (RM-26).
+  logSuggestions: async (): Promise<LogSuggestionPlace[]> => {
+    const payload = await apiFetch<unknown>("/api/log-suggestions")
+    const data = readApiData<{ places?: LogSuggestionPlace[] }>(payload)
+    return Array.isArray(data.places) ? data.places : []
+  },
 
   summary: (month?: string) => {
     const p = new URLSearchParams()

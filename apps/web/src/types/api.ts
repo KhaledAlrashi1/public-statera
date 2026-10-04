@@ -279,6 +279,20 @@ export interface MemorizedTransaction {
   pinned_at: string | null
 }
 
+// MOB-R53 B1 — GET /api/log-suggestions (hidden /log page, RM-26). amount_kd is a 3-decimal string.
+export interface LogSuggestionItem {
+  name: string
+  category: string | null
+  amount_kd: string
+}
+
+export interface LogSuggestionPlace {
+  name: string
+  category: string | null
+  count: number
+  items: LogSuggestionItem[]
+}
+
 export interface TransactionSuggestion {
   name: string
   category: MemorizedCategoryRef | null

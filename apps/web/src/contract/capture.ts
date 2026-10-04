@@ -95,6 +95,7 @@ export const INVOCATIONS: Invocation[] = [
   { source: "transactionsApi.byCategory", run: () => transactionsApi.byCategory({ category: "Food" }) },
   { source: "transactionsApi.byCategoryAll", run: () => transactionsApi.byCategoryAll({ category: "Food" }) },
   { source: "transactionsApi.suggestions", run: () => transactionsApi.suggestions("coffee") },
+  { source: "transactionsApi.logSuggestions", run: () => transactionsApi.logSuggestions() },
   { source: "transactionsApi.summary", run: () => transactionsApi.summary() },
   { source: "transactionsApi.topPatterns", run: () => transactionsApi.topPatterns("30") },
 
