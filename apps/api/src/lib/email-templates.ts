@@ -28,7 +28,7 @@ const TEMPLATES: Record<string, TemplatePair> = {
       <strong>{{ category }}</strong> budget for {{ month_label }}.
     </p>
     <p style="margin: 0 0 8px;">Spent: KD {{ spent_kd }} of KD {{ budget_kd }}</p>
-    <p style="margin: 0; color: #6b7280;">Open DinarTrack to review and adjust your plan.</p>
+    <p style="margin: 0; color: #6b7280;">Open Statera to review and adjust your plan.</p>
   </body>
 </html>`,
     text: `Budget Alert
@@ -36,7 +36,7 @@ const TEMPLATES: Record<string, TemplatePair> = {
 You have used {{ ratio_pct }}% of your {{ category }} budget for {{ month_label }}.
 Spent: KD {{ spent_kd }} of KD {{ budget_kd }}.
 
-Open DinarTrack to review and adjust your plan.`,
+Open Statera to review and adjust your plan.`,
   },
   // Module 10e. ONE template for BOTH the sign-in and sign-up branches (10e-R65):
   // the copy below is true in either case, and a second variant is a place a future
