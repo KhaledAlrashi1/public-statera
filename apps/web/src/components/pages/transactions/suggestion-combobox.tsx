@@ -31,6 +31,8 @@ interface SuggestionComboboxProps {
    */
   extraOptions?: readonly ExtraOption[]
   onSelectExtra?: (option: ExtraOption) => void
+  /** MOB-R61 C4 — passed through to the input; QuickAdd sets "off" to discourage Safari's bar. */
+  autoComplete?: string
 }
 
 export type ExtraOption = { name: string; detail?: string }
@@ -62,6 +64,7 @@ export const SuggestionCombobox = forwardRef<HTMLInputElement, SuggestionCombobo
       feedback,
       extraOptions = NO_EXTRAS,
       onSelectExtra,
+      autoComplete,
     },
     ref,
   ) {
@@ -140,6 +143,7 @@ export const SuggestionCombobox = forwardRef<HTMLInputElement, SuggestionCombobo
             aria-controls={listboxId}
             aria-autocomplete="list"
             aria-activedescendant={open && total ? optionId(highlighted) : undefined}
+            autoComplete={autoComplete}
             placeholder={placeholder}
             value={value}
             onChange={(e) => {

@@ -46,6 +46,7 @@ import {
 import { SuggestionCombobox, type ExtraOption } from "./suggestion-combobox"
 import { CategoryCombobox } from "./category-combobox"
 import { SUGGESTED_MERCHANTS, suggestedMerchantsFor } from "@/lib/suggested-names"
+import { useVisualViewportVars } from "@/lib/useVisualViewport"
 
 export function DuplicateWarningDialog({
   open,
@@ -143,6 +144,17 @@ export function AddTransactionDialog({
   const [keepOpen, setKeepOpen] = useState(false)
   const amountRef = useRef<HTMLInputElement>(null)
   const saveButtonRef = useRef<HTMLButtonElement>(null)
+  // MOB-R61 C1 — keep the field being typed in visible above the keyboard: the dialog is sized
+  // to the visual viewport, and the focused field is scrolled into view inside the fields region
+  // on focus and whenever the keyboard resizes the viewport.
+  const fieldsRef = useRef<HTMLDivElement>(null)
+  const revealFocusedField = () => {
+    const active = document.activeElement
+    if (!(active instanceof HTMLElement) || !fieldsRef.current?.contains(active)) return
+    // jsdom has no scrollIntoView; the guard keeps the existing dialog tests untouched (C7).
+    if (typeof active.scrollIntoView === "function") active.scrollIntoView({ block: "nearest" })
+  }
+  const viewportVars = useVisualViewportVars(open && !dupMeta, revealFocusedField)
   // Track open suggestion panels so Escape closes the panel (not the dialog) — Radix's
   // Escape fires in the capture phase, so we gate it via onEscapeKeyDown below.
   const openDropdownCount = useRef(0)
@@ -341,7 +353,11 @@ export function AddTransactionDialog({
     <>
       <Dialog open={open && !dupMeta} onOpenChange={onOpenChange}>
         <DialogContent
-          className="max-h-[92dvh] w-[calc(100vw-1rem)] max-w-2xl space-y-5 overflow-y-auto sm:w-full"
+          // MOB-R61 C1/C2 — below sm: top-anchored inside the visual viewport and capped to its
+          // height, a flex column whose fields scroll in their own region, so the footer sits
+          // outside that region and never overlaps a field. sm+ is unchanged.
+          className="max-h-[92dvh] w-[calc(100vw-1rem)] max-w-2xl space-y-5 overflow-y-auto sm:w-full max-sm:top-[calc(var(--vv-top,0px)+0.5rem)] max-sm:translate-y-0 max-sm:max-h-[calc(var(--vv-height,100dvh)-1rem)] max-sm:flex max-sm:flex-col max-sm:overflow-y-hidden"
+          style={viewportVars}
           onOpenAutoFocus={(e) => {
             e.preventDefault()
             requestAnimationFrame(() => amountRef.current?.focus())
@@ -350,220 +366,238 @@ export function AddTransactionDialog({
             if (openDropdownCount.current > 0) e.preventDefault()
           }}
         >
-          <DialogHeader>
-            <DialogTitle>
-              {type === "income" ? "Add Income" : "Add Expense"}
-            </DialogTitle>
-          </DialogHeader>
-
-          {/* Type toggle */}
-          <div className="grid grid-cols-2 rounded-lg border border-border/70 p-0.5 text-sm">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                setType("expense")
-                setSubmitAttempted(false)
-                setError(null)
-              }}
-              className={cn(
-                "flex-1 rounded-md py-1.5 font-medium transition",
-                type === "expense"
-                  ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground"
-                  : "text-muted-foreground hover:bg-transparent hover:text-foreground"
-              )}
+          <form onSubmit={onSubmit} className="max-sm:flex max-sm:min-h-0 max-sm:flex-1 max-sm:flex-col">
+            {/* MOB-R61 C1/C2 — below sm this is the dialog's scroll region (title, type toggle and
+                fields), so only the footer stays fixed and the keyboard leaves room for the field;
+                -mx-1/px-1 keep focus rings from being clipped by it. */}
+            <div
+              ref={fieldsRef}
+              data-quickadd-fields=""
+              onFocus={() => requestAnimationFrame(revealFocusedField)}
+              className="space-y-5 max-sm:-mx-1 max-sm:min-h-0 max-sm:flex-1 max-sm:overflow-y-auto max-sm:px-1 max-sm:py-1"
             >
-              Expense
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                setType("income")
-                setSubmitAttempted(false)
-                setError(null)
-              }}
-              className={cn(
-                "flex-1 rounded-md py-1.5 font-medium transition",
-                type === "income"
-                  ? "bg-success text-success-foreground shadow-sm hover:bg-success hover:text-success-foreground"
-                  : "text-muted-foreground hover:bg-transparent hover:text-foreground"
-              )}
-            >
-              Income
-            </Button>
-          </div>
+              <DialogHeader>
+                <DialogTitle>
+                  {type === "income" ? "Add Income" : "Add Expense"}
+                </DialogTitle>
+              </DialogHeader>
 
-          <form onSubmit={onSubmit}>
-            {/* Reserved height (sm+) so toggling expense↔income doesn't jump the
-                dialog: income has one fewer field row than expense; 240px floors
-                the shorter mode to the taller expense layout. Mobile stacks/scrolls,
-                so the floor is sm-only. */}
-            <div className="space-y-5 sm:min-h-[240px]">
-              {type === "income" ? (
-                <div className="space-y-5">
-                  {/* Amount hero */}
-                  <div className="space-y-2">
-                    <Label htmlFor="income-amount">Amount (KD)</Label>
-                    <MoneyInput
-                      ref={amountRef}
-                      id="income-amount"
-                      value={incomeAmount}
-                      onValueChange={setIncomeAmount}
-                      onBlur={() => setTouched((prev) => ({ ...prev, incomeAmount: true }))}
-                      aria-invalid={incomeAmountValidation?.tone === "error"}
-                      currencyClassName="text-base"
-                      className={cn("h-14 text-xl", validationInputClass(incomeAmountValidation?.tone))}
-                    />
-                    <FieldFeedback tone={incomeAmountValidation?.tone} message={incomeAmountValidation?.message} />
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="income-name">Name</Label>
-                      <Input
-                        id="income-name"
-                        placeholder="e.g., Salary"
-                        value={incomeName}
-                        onChange={(e) => setIncomeName(e.target.value)}
-                        onBlur={() => setTouched((prev) => ({ ...prev, incomeName: true }))}
-                        aria-invalid={incomeNameValidation?.tone === "error"}
-                        className={validationInputClass(incomeNameValidation?.tone)}
-                      />
-                      <FieldFeedback tone={incomeNameValidation?.tone} message={incomeNameValidation?.message} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="income-date">Date</Label>
-                      <Input
-                        id="income-date"
-                        type="date"
-                        value={date}
-                        max={today()}
-                        onChange={(e) => setDate(e.target.value)}
-                        onBlur={() => setTouched((prev) => ({ ...prev, date: true }))}
-                        aria-invalid={dateValidation?.tone === "error"}
-                        className={validationInputClass(dateValidation?.tone)}
-                      />
-                      <FieldFeedback tone={dateValidation?.tone} message={dateValidation?.message} />
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {categoriesLoading ? (
-                    <Alert variant="warning">
-                      <AlertTitle>Loading categories</AlertTitle>
-                      <AlertDescription>
-                        Categories are still loading for quick add. Wait a moment before saving this expense.
-                      </AlertDescription>
-                    </Alert>
-                  ) : null}
-                  {categoriesError ? (
-                    <Alert variant="warning">
-                      <AlertTitle>Categories unavailable</AlertTitle>
-                      <AlertDescription className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <p>{categoriesError}</p>
-                        {onRetryCategories ? (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={onRetryCategories}
-                          >
-                            Retry categories
-                          </Button>
-                        ) : null}
-                      </AlertDescription>
-                    </Alert>
-                  ) : null}
-                  {/* Amount hero */}
-                  <div className="space-y-2">
-                    <Label htmlFor="expense-amount">Amount (KD)</Label>
-                    <MoneyInput
-                      ref={amountRef}
-                      id="expense-amount"
-                      value={expenseAmount}
-                      onValueChange={setExpenseAmount}
-                      aria-invalid={expenseAmountValidation?.tone === "error"}
-                      currencyClassName="text-base"
-                      className={cn("h-14 text-xl", validationInputClass(expenseAmountValidation?.tone))}
-                    />
-                    <FieldFeedback tone={expenseAmountValidation?.tone} message={expenseAmountValidation?.message} />
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {/*
-                      The suggestions backend matches q against the transaction NAME
-                      (memorized norm/canonical), NOT merchant text — see
-                      apps/api/src/lib/suggestions-lib.ts. Merchant-field suggestions are
-                      therefore name-derived: typing "netf" surfaces the row named
-                      "Netflix subscription". Do not assume merchant-text matching here.
-                    */}
-                    <SuggestionCombobox
-                      id="add-merchant"
-                      label="Merchant"
-                      placeholder="e.g., Starbucks"
-                      value={merchant}
-                      onValueChange={setMerchant}
-                      suggestions={suggestions}
-                      onFetch={fetchSuggestions}
-                      onSelect={applyToForm}
-                      onAfterSelect={() => saveButtonRef.current?.focus()}
-                      onOpenChange={trackDropdown}
-                      extraOptions={suggestedMerchantOptions}
-                      onSelectExtra={applySuggestedMerchant}
-                    />
-                    <SuggestionCombobox
-                      id="expense-name"
-                      label="What was this for?"
-                      placeholder="What did you buy?"
-                      value={expenseName}
-                      onValueChange={setExpenseName}
-                      suggestions={suggestions}
-                      onFetch={fetchSuggestions}
-                      onSelect={applyToForm}
-                      onAfterSelect={() => saveButtonRef.current?.focus()}
-                      onOpenChange={trackDropdown}
-                      invalid={expenseNameValidation?.tone === "error"}
-                      className={validationInputClass(expenseNameValidation?.tone)}
-                      feedback={<FieldFeedback tone={expenseNameValidation?.tone} message={expenseNameValidation?.message} />}
-                    />
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <CategoryCombobox
-                      id="add-category"
-                      value={category}
-                      onValueChange={setCategory}
-                      categories={categories}
-                      onOpenChange={trackDropdown}
-                    />
-                    <div className="space-y-2">
-                      <Label htmlFor="add-date">Date</Label>
-                      <Input
-                        id="add-date"
-                        type="date"
-                        value={date}
-                        max={today()}
-                        onChange={(e) => setDate(e.target.value)}
-                        onBlur={() => setTouched((prev) => ({ ...prev, date: true }))}
-                        aria-invalid={dateValidation?.tone === "error"}
-                        className={validationInputClass(dateValidation?.tone)}
-                      />
-                      <FieldFeedback tone={dateValidation?.tone} message={dateValidation?.message} />
-                    </div>
-                  </div>
-                </>
-              )}
+              {/* Type toggle */}
+              <div className="grid grid-cols-2 rounded-lg border border-border/70 p-0.5 text-sm">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    setType("expense")
+                    setSubmitAttempted(false)
+                    setError(null)
+                  }}
+                  className={cn(
+                    "flex-1 rounded-md py-1.5 font-medium transition",
+                    type === "expense"
+                      ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground"
+                      : "text-muted-foreground hover:bg-transparent hover:text-foreground"
+                  )}
+                >
+                  Expense
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    setType("income")
+                    setSubmitAttempted(false)
+                    setError(null)
+                  }}
+                  className={cn(
+                    "flex-1 rounded-md py-1.5 font-medium transition",
+                    type === "income"
+                      ? "bg-success text-success-foreground shadow-sm hover:bg-success hover:text-success-foreground"
+                      : "text-muted-foreground hover:bg-transparent hover:text-foreground"
+                  )}
+                >
+                  Income
+                </Button>
+              </div>
 
-              {error && (
-                <div className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  {error}
-                </div>
-              )}
+              {/* Reserved height (sm+) so toggling expense↔income doesn't jump the
+                  dialog: income has one fewer field row than expense; 240px floors
+                  the shorter mode to the taller expense layout. Mobile stacks/scrolls,
+                  so the floor is sm-only. */}
+              <div className="space-y-5 sm:min-h-[240px]">
+                {type === "income" ? (
+                  <div className="space-y-5">
+                    {/* Amount hero */}
+                    <div className="space-y-2">
+                      <Label htmlFor="income-amount">Amount (KD)</Label>
+                      <MoneyInput
+                        ref={amountRef}
+                        id="income-amount"
+                        value={incomeAmount}
+                        onValueChange={setIncomeAmount}
+                        onBlur={() => setTouched((prev) => ({ ...prev, incomeAmount: true }))}
+                        aria-invalid={incomeAmountValidation?.tone === "error"}
+                        currencyClassName="text-base"
+                        className={cn("h-14 text-xl", validationInputClass(incomeAmountValidation?.tone))}
+                      />
+                      <FieldFeedback tone={incomeAmountValidation?.tone} message={incomeAmountValidation?.message} />
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="income-name">Name</Label>
+                        <Input
+                          id="income-name"
+                          type="text"
+                          autoComplete="off"
+                          placeholder="e.g., Salary"
+                          value={incomeName}
+                          onChange={(e) => setIncomeName(e.target.value)}
+                          onBlur={() => setTouched((prev) => ({ ...prev, incomeName: true }))}
+                          aria-invalid={incomeNameValidation?.tone === "error"}
+                          className={validationInputClass(incomeNameValidation?.tone)}
+                        />
+                        <FieldFeedback tone={incomeNameValidation?.tone} message={incomeNameValidation?.message} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="income-date">Date</Label>
+                        <Input
+                          id="income-date"
+                          type="date"
+                          autoComplete="off"
+                          value={date}
+                          max={today()}
+                          onChange={(e) => setDate(e.target.value)}
+                          onBlur={() => setTouched((prev) => ({ ...prev, date: true }))}
+                          aria-invalid={dateValidation?.tone === "error"}
+                          className={validationInputClass(dateValidation?.tone)}
+                        />
+                        <FieldFeedback tone={dateValidation?.tone} message={dateValidation?.message} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {categoriesLoading ? (
+                      <Alert variant="warning">
+                        <AlertTitle>Loading categories</AlertTitle>
+                        <AlertDescription>
+                          Categories are still loading for quick add. Wait a moment before saving this expense.
+                        </AlertDescription>
+                      </Alert>
+                    ) : null}
+                    {categoriesError ? (
+                      <Alert variant="warning">
+                        <AlertTitle>Categories unavailable</AlertTitle>
+                        <AlertDescription className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <p>{categoriesError}</p>
+                          {onRetryCategories ? (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={onRetryCategories}
+                            >
+                              Retry categories
+                            </Button>
+                          ) : null}
+                        </AlertDescription>
+                      </Alert>
+                    ) : null}
+                    {/* Amount hero */}
+                    <div className="space-y-2">
+                      <Label htmlFor="expense-amount">Amount (KD)</Label>
+                      <MoneyInput
+                        ref={amountRef}
+                        id="expense-amount"
+                        value={expenseAmount}
+                        onValueChange={setExpenseAmount}
+                        aria-invalid={expenseAmountValidation?.tone === "error"}
+                        currencyClassName="text-base"
+                        className={cn("h-14 text-xl", validationInputClass(expenseAmountValidation?.tone))}
+                      />
+                      <FieldFeedback tone={expenseAmountValidation?.tone} message={expenseAmountValidation?.message} />
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {/*
+                        The suggestions backend matches q against the transaction NAME
+                        (memorized norm/canonical), NOT merchant text — see
+                        apps/api/src/lib/suggestions-lib.ts. Merchant-field suggestions are
+                        therefore name-derived: typing "netf" surfaces the row named
+                        "Netflix subscription". Do not assume merchant-text matching here.
+                      */}
+                      <SuggestionCombobox
+                        id="add-merchant"
+                        label="Merchant"
+                        placeholder="e.g., Starbucks"
+                        value={merchant}
+                        onValueChange={setMerchant}
+                        suggestions={suggestions}
+                        onFetch={fetchSuggestions}
+                        onSelect={applyToForm}
+                        onAfterSelect={() => saveButtonRef.current?.focus()}
+                        onOpenChange={trackDropdown}
+                        extraOptions={suggestedMerchantOptions}
+                        onSelectExtra={applySuggestedMerchant}
+                        autoComplete="off"
+                      />
+                      <SuggestionCombobox
+                        id="expense-name"
+                        label="What was this for?"
+                        placeholder="What did you buy?"
+                        value={expenseName}
+                        onValueChange={setExpenseName}
+                        suggestions={suggestions}
+                        onFetch={fetchSuggestions}
+                        onSelect={applyToForm}
+                        onAfterSelect={() => saveButtonRef.current?.focus()}
+                        onOpenChange={trackDropdown}
+                        invalid={expenseNameValidation?.tone === "error"}
+                        className={validationInputClass(expenseNameValidation?.tone)}
+                        feedback={<FieldFeedback tone={expenseNameValidation?.tone} message={expenseNameValidation?.message} />}
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <CategoryCombobox
+                        id="add-category"
+                        value={category}
+                        onValueChange={setCategory}
+                        categories={categories}
+                        onOpenChange={trackDropdown}
+                      />
+                      <div className="space-y-2">
+                        <Label htmlFor="add-date">Date</Label>
+                        <Input
+                          id="add-date"
+                          type="date"
+                          autoComplete="off"
+                          value={date}
+                          max={today()}
+                          onChange={(e) => setDate(e.target.value)}
+                          onBlur={() => setTouched((prev) => ({ ...prev, date: true }))}
+                          aria-invalid={dateValidation?.tone === "error"}
+                          className={validationInputClass(dateValidation?.tone)}
+                        />
+                        <FieldFeedback tone={dateValidation?.tone} message={dateValidation?.message} />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {error && (
+                  <div className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                    {error}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* MOB-R47 E1 — below sm the footer sticks to the dialog's bottom edge so Save stays in view
-                while the fields scroll; -mx-5/-mb-5 with px-5/pb-5 cancel and restore the dialog's p-5. */}
-            <DialogFooter className="mt-5 flex-col-reverse gap-2 pt-3 sm:flex-row sm:items-center max-sm:sticky max-sm:bottom-0 max-sm:z-10 max-sm:-mx-5 max-sm:-mb-5 max-sm:border-t max-sm:border-border/70 max-sm:bg-card max-sm:px-5 max-sm:pb-5">
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground pointer-coarse:min-h-11 sm:mr-auto">
+            {/* MOB-R47 E1, MOB-R61 C2 — below sm the footer sits outside the scroll region, at the
+                dialog's bottom edge, so it never overlaps a field: two rows (keep open; then Cancel
+                and Add side by side) to leave the keyboard-shrunk dialog room for the field.
+                -mx-5/-mb-5 with px-5/pb-5 cancel and restore the dialog's p-5. */}
+            <DialogFooter className="mt-5 flex-col-reverse gap-2 pt-3 sm:flex-row sm:items-center max-sm:-mx-5 max-sm:-mb-5 max-sm:mt-2 max-sm:grid max-sm:shrink-0 max-sm:grid-cols-2 max-sm:border-t max-sm:border-border/70 max-sm:bg-card max-sm:px-5 max-sm:pb-5">
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground pointer-coarse:min-h-11 sm:mr-auto max-sm:col-span-2">
                 <input
                   type="checkbox"
                   checked={keepOpen}
