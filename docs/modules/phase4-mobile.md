@@ -9621,3 +9621,73 @@ written before the edits. STOP conditions are unchanged.
 I. Positions
 Expected: this block after blank 9543. After it persists: strict 60, loose 62 (body lines 1513
 and 6934).
+
+MOB-R61 — QuickAdd phone layout fixed; /log becomes the main expense entry; one review, one push
+
+Date: Sunday, October 4, 2026. Tier 2 (frontend) inside a Tier 1 push (K1 rides with it).
+Persist after MOB-R60, alone, with the wrap check as its own step and the standing read-back.
+
+A. Operator, verbatim
+- With a screenshot of QuickAdd on his iPhone, keyboard up: "I tried logging in a transaction.
+  It was really annoying. When I click on a field to fill, I get this. See the screenshot. This
+  is not good enough. Is that what we agreed on?"
+- Channel's answer: no. QuickAdd was kept untouched while /log was built; its keyboard defects
+  were known (Save under the iOS keyboard; Safari's bar above Amount) and left in the queue
+  without being put to the operator as a priority. The miss is the channel's.
+- Seen in the screenshot (iPhone, Safari, 390 class): Add Expense, Cancel and "Keep open for
+  another" sit over the form; the Amount field is cut in half; the letter keyboard is up but
+  the focused field is not visible; Safari's key/card/location bar shows; a grey tab with ">"
+  sits at the left edge, source unknown.
+
+B. Channel's questions and options; operator's selections
+- "How should we fix logging on the phone?" Options: "Both: fix QuickAdd now, /log main after
+  Friday (recommended)" / "Only fix QuickAdd now" / "Only make /log the main entry after
+  Friday". Operator wrote instead: "Fix QuickAdd now and implement /log main today/now. We can
+  do that." He chose against the channel's timing: /log becomes main before Friday, not after.
+- "Did you try /log on your phone?" Operator: "Not sure how is /log is different from what I
+  did." He has not used /log yet.
+
+C. QuickAdd on phones (layout only)
+QuickAdd's protection is lifted for layout and input attributes only. Its save path, amount
+parsing, 409 handling and posted fields stay as they are.
+  C1. The field being typed in is fully visible above the keyboard (VisualViewport; iOS does
+      not shrink dvh for the keyboard).
+  C2. Add, Cancel and "Keep open for another" never overlap a field, with or without the
+      keyboard.
+  C3. Amount opens a number pad. Before changing inputmode, CC quotes how QuickAdd parses the
+      amount (parseFloat) and states what a "," decimal or Arabic-Indic digits from that pad
+      would produce. If either would save a wrong amount: STOP; nothing about parsing is
+      granted.
+  C4. Each field carries autocomplete and type attributes that discourage Safari's bar.
+      Safari may still show it; that is accepted.
+  C5. CC finds the grey ">" left-edge tab: our element (file:line) or not ours.
+  C6. Instruments: CC's scratch Playwright WebKit at 390 and 375 with the visual viewport
+      shrunk to keyboard height; a class census of the dialog; after deploy, the operator's
+      iPhone screenshot with the keyboard up is the acceptance check.
+  C7. Tests in new files (attributes, focus scroll), each shown able to fail. Existing
+      QuickAdd and dialog tests pass unchanged.
+
+D. /log becomes the main expense entry (RM-26 lifted in part)
+  D1. Before editing, CC lists every place that opens QuickAdd (the FAB, Home's Log button,
+      empty states, any other), with file:line and whether it opens for an expense or income.
+  D2. Expense entry points open /log. Income entry points keep QuickAdd. Activity's edit
+      dialogs are unchanged.
+  D3. /log has a clear way back to where the user came from. CC shows it; if missing, it is
+      granted.
+  D4. The FAB's protection is lifted for its destination only: its position, size and look are
+      unchanged. AppShell.test.tsx (a named regression file) and any other existing test that
+      asserts the old destination are granted for that assertion only, listed verbatim after a
+      measured run. Any other existing-test change: STOP.
+  D5. RM-26 still holds for /log's strings and behaviour (provisional until a ruling after
+      Friday). Friday's test runs as planned.
+
+E. Order, review and push
+  E1. Finish the K1 build under MOB-R60. Then this block. Predictions written to a scratch file
+      before the first edit (MOB-R60 F1).
+  E2. K1 is held unpushed for review, so this work is held with it. One report covers both.
+  E3. The channel reviews and rules one push and one deploy, with the RM-21 backup step first
+      (MOB-R60 C5).
+
+F. Positions
+Expected: this block after the blank line that follows MOB-R60's last line. After it persists:
+strict 61, loose 63 (body lines 1513 and 6934).
