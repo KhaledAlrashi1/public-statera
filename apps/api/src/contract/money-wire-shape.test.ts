@@ -118,6 +118,7 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { resolve } from "node:path"
 import { aggregationRouter } from "../routes/aggregation"
 import { intelligenceRouter } from "../routes/intelligence"
+import { logSuggestionsRouter } from "../routes/log-suggestions"
 import { createSessionToken } from "../middleware/auth"
 
 vi.mock("../db/connection", () => ({ getDb: vi.fn() }))
@@ -226,6 +227,11 @@ const FIXTURES: Record<string, unknown[]> = {
   id: [{ id: 1 }],
   computedAt: [{ computedAt: new Date("2026-05-31T12:00:00.000Z") }],
   "income,expense": [{ income: "2000.000", expense: "175.250" }],
+  // MOB-R56 G5 — LS (log suggestions): one place, one entry at it.
+  "merchantId,merchantName,recentCount": [{ merchantId: 3, merchantName: "PICK", recentCount: 4 }],
+  "merchantId,nameKey,name,amountKd,categoryName": [
+    { merchantId: 3, nameKey: "americano", name: "Americano", amountKd: "1.375", categoryName: "Coffee" },
+  ],
   // R11 (N3): >=2 distinct months on a regular day-25 cadence -> detected:true,
   // which is the only arm where suggested_monthly_income_kd is non-null.
   "txDate,incomeName,amountKd": [
@@ -668,6 +674,7 @@ function walk(
 const app = new Hono()
   .route("/api/analytics", aggregationRouter)
   .route("/api/analytics", intelligenceRouter)
+  .route("/api/log-suggestions", logSuggestionsRouter)
 
 const ROUTES: Array<{ id: string; path: string; expectCacheStatus?: string }> = [
   { id: "R1", path: "/api/analytics/spend-by-category" },
@@ -688,6 +695,8 @@ const ROUTES: Array<{ id: string; path: string; expectCacheStatus?: string }> = 
   { id: "R11", path: "/api/analytics/income-pattern" },
   { id: "R12", path: "/api/analytics/recurring-patterns?days=90" },
   { id: "R13", path: "/api/analytics/snapshot" },
+  // MOB-R56 G5 — GET /api/log-suggestions (hidden /log page, MOB-R53 B1).
+  { id: "LS", path: "/api/log-suggestions" },
 ]
 
 type CapturedEntry = { path: string; type: string; money: boolean }

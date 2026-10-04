@@ -44,6 +44,7 @@ import type {
   ExpenseBreakdownResponse,
   ExpenseMerchantTrendResponse,
   IncomePatternResponse,
+  LogSuggestionPlace,
   RecurringPatternsResponse,
   SafeToSpendResponse,
   SnapshotResponse,
@@ -178,3 +179,5 @@ const _a59: AssertEqual<Exclude<NonNullable<NonNullable<SnapshotResponse>["net_p
 const _a60: AssertEqual<Exclude<NonNullable<NonNullable<SnapshotResponse>["net_position"]>["income_total_kd"], null | undefined>, string> = true
 // R13
 const _a61: AssertEqual<Exclude<NonNullable<NonNullable<SnapshotResponse>["net_position"]>["net_kd"], null | undefined>, string> = true
+// LS
+const _a62: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<LogSuggestionPlace>["items"]>[number]>["amount_kd"], null | undefined>, string> = true

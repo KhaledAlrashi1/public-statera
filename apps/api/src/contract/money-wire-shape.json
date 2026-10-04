@@ -811,5 +811,37 @@
       "type": "string",
       "money": true
     }
+  ],
+  "LS": [
+    {
+      "path": "data.places[].category",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.places[].count",
+      "type": "number",
+      "money": false
+    },
+    {
+      "path": "data.places[].items[].amount_kd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.places[].items[].category",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.places[].items[].name",
+      "type": "string",
+      "money": false
+    },
+    {
+      "path": "data.places[].name",
+      "type": "string",
+      "money": false
+    }
   ]
 }

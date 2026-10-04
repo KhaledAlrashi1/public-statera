@@ -61,6 +61,8 @@ const ROUTE_MAP: Record<string, { prefix: string; type: string }> = {
   R11: { prefix: "data", type: "IncomePatternResponse" },
   R12: { prefix: "data", type: "RecurringPatternsResponse" },
   R13: { prefix: "data", type: "SnapshotResponse" },
+  // MOB-R56 G5 — log suggestions: the client unwraps data.places, typed LogSuggestionPlace[].
+  LS: { prefix: "data.places[]", type: "LogSuggestionPlace" },
 }
 
 // B4-2-R5: a missing or moved capture must fail LOUDLY. An unreadable file that
