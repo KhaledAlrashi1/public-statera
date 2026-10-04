@@ -9444,3 +9444,99 @@ channel's; the operator has not chosen among options for them.
 H. Positions
 Expected: the generic-category block at 9316-9374 after blank 9315; this block after blank 9375.
 After both persist: strict 58, loose 60 (body lines 1513 and 6934).
+
+MOB-R59 — K1 sites ruled; KS3 withdrawn; generic category built; month-start feature recorded
+
+Date: Sunday, October 4, 2026. Tier 1 (money totals; contract files; category rows).
+Operator, verbatim: "Let's finish both /log and K1."
+
+A. Accepted from CC's report under MOB-R58
+- Persistence: MOB-R57 at 2a28b30, 9316-9374 after blank 9315, sha256 34a4a6c5...7e0a;
+  MOB-R58 at 968eea4, 9376-9446 after blank 9375, sha256 53d60045...7ca2. Both cmps exit 0
+  each time. Strict 58, loose 60. Unpushed 2 (the two persistence commits).
+- B1: the six new leaves, verbatim. Accepted.
+- B2: "Popular in Kuwait" is ruled by MOB-R53 B3 (phase4-mobile.md:8950, heading S2 at :8961).
+  Accepted.
+- B3: Home Remaining uses Number() on both money strings (DashboardPage.tsx:159-175).
+- Recon E1-E9 of MOB-R57: accepted as reported.
+
+B. Channel correction (records unchanged)
+The B2 question in MOB-R58 raised RM-23 against a list that MOB-R53 B3 had already ruled. The
+channel had not checked its own record before asking.
+
+C. K1 rulings (sites from CC's report; P7 governs)
+  KS3. Withdrawn. R5 and R6 have 0 callers (control: recurringPatterns 1). R5 and R6 join R2
+       and R13 in the dead-code queue.
+  KS9. Remaining's vs-last-month chip (DashboardPage.tsx:258-299) compares like with like.
+       If its previous-month figure comes from R3, use R3's new savings_kd for both months.
+       Otherwise hide the chip when either month holds savings. CC states which before the
+       edit.
+  KS10. "Over by" (:177) = expenses + savings - income, shown when above 0. A Remaining
+       clamped to 0 is then always explained. Label unchanged.
+  KS11. Plan "% Used" (BudgetPage.tsx:132): expense spending / expense budgets, the same basis
+       as KS7. Savings budgets show only their "X of Y".
+  KS12. Home category chart (dashboard/sections.tsx:1244-1256): savings rows excluded from the
+       slices; the sentence names the largest expense category, its share over expenses.
+       Title unchanged.
+  KS13. Remaining, "Over by" and the KS9 chip are computed in exact fils with the helper /log
+       already uses (CC names it with file:line). No new Number() or parseFloat on money.
+  KS14. Caches built under the old rule:
+       - Redis R4 and R9: version the cache key so old entries are never read. No deletes.
+       - R3 snapshots: CC reports where they live, and how and when they refresh, with
+         file:line. If they are database rows, any rebuild is an overwrite path: RM-21 STOP
+         before code. K1 does not deploy until this is ruled.
+
+D. Generic category "Savings & investing" (operator's name, selected under MOB-R57)
+  D1. Added to SUGGESTED_CATEGORIES (22 to 23 names). It appears where the suggestions appear
+      today (QuickAdd, Activity edit) and in /log's category picker (CC's E9 proposal,
+      accepted; provisional under RM-26).
+  D2. Hidden whenever the user owns a category of the savings kind (CC's E5 proposal,
+      accepted).
+  D3. Saved on first use through getOrCreateCategory. No seed, no backfill, no migration (E7).
+  D4. Granted: suggested-names.test.ts:10-11, the length 22 to 23 only. Before editing it, CC
+      makes the change, runs the frontend suite and lists every failing case verbatim. Any
+      failure outside that line: STOP.
+  D5. Unchanged and queued: Plan's Add budget list; learnTransaction keeping a name's first
+      category (E6).
+
+E. Order
+  E1. Persist this block alone, with the standing read-back.
+  E2. Restate exact predictions with sign, not "about": every suite, money paths, generated
+      assertions, leaves, contract fixture, files, commits, unpushed count.
+  E3. Build K1 and the generic category. Any miss, any edit outside a grant, or any migration
+      or schema file: STOP.
+  E4. Held unpushed. The channel reviews; a later block rules the push.
+  E5. Read-only, one line each: does Home's "Set income" open a pop-up today (operator check
+      #4)? List every "Set income" entry point and what each opens, with file:line.
+
+F. Recorded for later (scheduled; not this cycle)
+Operator, Sunday, October 4, 2026, verbatim (wrapped), adding to section H of MOB-R56:
+  "Also, I want the feature I asked for is documented and we will implement it later. The
+  option where the user sets when the month starts. They can choose at the same step they set
+  their income. Also, instead of taking the user to the profile page to set their income. They
+  should be able to set it from a small pop up window and asked if they like to set when the
+  month starts. Suggestion could be the pay day and the default value is the first day of the
+  month. Also, they should know that they can readjust their income in the profile page."
+Spec as stated by the operator:
+  F1. Income is set in a small pop-up, not by sending the user to Profile.
+  F2. The same pop-up asks, optionally, when the month should start. Suggestion: payday.
+      Default: the 1st.
+  F3. The pop-up tells the user they can change their income later in Profile.
+Channel's notes: an income pop-up opened from "Set income" entry points was ruled in the
+quick wins after the operator's feedback recorded in MOB-R45; whether it exists is check #4,
+answered by E5 above. The month start is the large, Tier 1 part: open questions as in section
+H of MOB-R56. When scheduled: a read-only recon first, then a ruling.
+
+G. Operator's question, answered by the channel
+Operator asked what happened to the demo before sign-in. Channel's answer: chosen earlier as
+"Sample dashboard, no account (recommended)", with the order quick wins, then budget presets,
+then demo-first. Module 11 (/log) took priority. Not started; still queued, Tier 1. No public
+route exists (/ sits inside ProtectedRoute).
+
+H. Provenance
+The rulings in C, D and E are the channel's; the operator did not choose among options for
+them. His instruction was to finish both.
+
+I. Positions
+Expected: this block after blank 9447. After it persists: strict 59, loose 61 (body lines 1513
+and 6934).
