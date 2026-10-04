@@ -9372,3 +9372,75 @@ E. Recon (read-only; file:line for every claim)
 F. Positions
 Expected: the previous block at 9197-9314 after blank 9196; this block after one blank line.
 After both persist: strict 57, loose 59 (body lines 1513 and 6934).
+
+MOB-R58 — Push accepted; K1 grant: server savings field; KS2 and KS5 withdrawn; KS7 string
+
+Date: Sunday, October 4, 2026. Tier 1 (money totals; contract files).
+Persistence order: the block on the generic "Savings & investing" category (MOB-R57) first, if
+it is not yet persisted; then this one. Each alone, each with the standing read-back.
+
+A. Accepted from CC's report under MOB-R56
+- Persistence of MOB-R56: 78b975b at 9197-9314 after blank 9196; sha256 722d2eee...f3cc46c4
+  matched; strict 56, loose 58. Delivered as a paste, not a file: accepted, the sha matched.
+- Items asked for in section A: MOB-R55 read-back header and last line; git show --stat 0f0d380
+  with 99 insertions (98 lines + 1 blank); porcelain empty; all five runs exit 0 at 13ce283.
+- Discrimination: 25 mutations over the 22 cases; every case went red under its own mutation;
+  three cases were mutated twice (M3/M4, MI2/MI3, MI4/MI4b). Every file restored byte-identical.
+- G5 (29138c0): C1-C6 met. No suite count moved; routes 14 to 15, money paths 65 to 66,
+  generated assertions 62 to 63; both generators cmp-equal on a second run; C6 red as required.
+- D3, D4 (13ce283): formatDisplayDate (apps/web/src/lib/utils.ts:61); S16 for a failed Undo.
+- Push: unpushed 7 predicted and measured; fast-forward c1f7cb8..13ce283; run 37215701540, four
+  jobs succeeded with labels ["ubuntu-24.04"]; both probes on 13ce283; 0 unpushed by both
+  routes; porcelain empty.
+Production is 13ce283. /log is live and unlinked.
+New baselines: frontend 320/59; API hermetic 880/38/65; API integration 908/10/65; contract
+fixture 67; capture routes 15, money paths 66, generated assertions 63, leaves 163.
+- K1: E1 delivered and E2 stopped correctly.
+
+B. Questions (answer in the next report; not a STOP)
+  B1. Leaves 157 to 163 was not predicted. List the six new leaf paths verbatim.
+  B2. P5 "Popular in Kuwait...": quote what it shows and the block and line that ruled it.
+      RM-23 holds presets. If no ruling covers it, say so; the channel rules it.
+  B3. Home Remaining (DashboardPage.tsx:152-161): quote how it is computed today, and say
+      whether the added subtraction would be float or exact fils. No change beyond the ruled
+      formula is granted.
+
+C. KS2 and KS5 withdrawn (new facts from E1)
+spendByMonth has no caller. FinancialSnapshotHero is mounted 0 times and analyticsApi.snapshot
+has 0 callers. Changing figures nobody sees costs test and contract edits for nothing.
+R2 (aggregation.ts:141-158) and R13 (:562-583) stay untouched. Both join the dead-code queue,
+with R2's defect recorded: it counts income as spend (170 for the ruled month).
+This withdraws KS2 and KS5 as ruled in MOB-R56; that record stays as it is.
+
+D. P3: the savings figure comes from the server
+  D1. R4 gains total_savings_mtd: a money string in the same format as total_spend_mtd. Home
+      reads it. No client-side sum from R3's breakdown.
+  D2. Granted by name, for the new field only: money-wire-shape.test.ts,
+      money-wire-shape.json, money-wire-shape.assert.test.ts, money-wire-shape.assert.ts.
+      Same procedure as G5: the JSON and assert.ts come only from the two generator commands
+      CC named; breaks listed before the edit; predictions with sign for routes, money paths,
+      generated assertions and leaves; each generator cmp-equal on a second run; with
+      total_savings_mtd changed to a number, the guards go red; restored byte-identical.
+  D3. aggregation.test.ts: granted only for mock setup shifted by R4's added query. Before
+      editing it, CC makes the change, runs the file, and lists the failing cases verbatim:
+      measured, not predicted from source. No assertion value may change; if one must, STOP.
+
+E. KS7 string accepted (CC's proposal)
+Under a savings budget: "{spent} of {budget}" using formatKD, e.g. "KD 30.000 of KD 50.000".
+Provisional: the design pass may restyle it.
+
+F. Order
+  F1. Persist, as above.
+  F2. The read-only recon in section E of MOB-R57, reported with file:line.
+  F3. K1 with the amended savings rule ("savings", "investing", "savings & investing") and
+      sections C-E applied: restate predictions with sign (counts, files, commits), then
+      build if every edit falls inside a grant; otherwise STOP. Held unpushed for review.
+  F4. The generic category is not built until a ruling on the recon.
+
+G. Provenance
+The operator relayed CC's report with the words "cc report:". The rulings above are the
+channel's; the operator has not chosen among options for them.
+
+H. Positions
+Expected: the generic-category block at 9316-9374 after blank 9315; this block after blank 9375.
+After both persist: strict 58, loose 60 (body lines 1513 and 6934).
