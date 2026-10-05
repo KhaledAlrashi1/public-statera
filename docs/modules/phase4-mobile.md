@@ -10083,3 +10083,123 @@ the append, and its output is pasted. Expected: blank 9973, then 112 lines at 99
 Read-back: appended line count, header and last line verbatim, cmp of the region against the
 payload, git show --stat and porcelain, all pasted in full.
 After this block: strict 67, loose 69 (body lines 1513 and 6934).
+
+MOB-R68 — Home polish, look A (ink and brass): tokens, primitives, Home, count-ups, dark mode.
+
+Issued Monday, October 5, 2026, by the review channel. TIER 2: frontend only.
+ORDER: MOB-R67 persists, then this block, each alone. Then MOB-R67's work, then this build.
+E2 of MOB-R67 feeds this build: a finding there that contradicts this block STOPS that item.
+
+═══ A. OPERATOR SELECTIONS ═══
+
+Provenance: questions and options are the CHANNEL'S; answers are the OPERATOR'S, verbatim.
+A1. "Should money count up from zero?" Options: "Once on open and month change (Recommended)",
+    "Every time a number changes", "No count-ups". Selected: "Once on open and month change
+    (Recommended)".
+A2. "What goes under each KPI?" Options: "% of income (Recommended)", "Keep "vs last month"",
+    "Nothing". Selected: "% of income (Recommended)".
+A3. "Which look should Home use?" First answer: "Can you create examples in the chat. See it
+    better than just imaging." The channel showed A, B and a mix in the chat. Options: "A · Ink
+    and brass", "B · Navy and saffron", "Mix (Recommended)". Selected: "A · Ink and brass",
+    against the channel's recommendation.
+A4. "Dark mode in this build?" Options: "Same look, dark version (Recommended)", "Leave dark
+    mode as it is". Selected: "Same look, dark version (Recommended)".
+A5. CHANNEL'S RULINGS, stated to the operator in chat with no objection, not asked as options:
+    the floating 3D objects are left out; the "On pace to spend" line leaves Home if present.
+
+═══ B. TOKENS (index.css @theme; light and .dark) ═══
+
+B1. Existing tokens KEEP their values in this block. The report pastes, side by side, each
+    existing ground, surface, border, text and muted value against the mock's (light: #F5F2EC,
+    #FFFFFF, #E6E0D6, #2A211C, #6B5F57). A later block rules any change.
+B2. New tokens, converted exactly from hex to the file's HSL form, names CC's:
+      role                  light      dark
+      highlight             #E3B64C    #E3B64C
+      highlight-ink         #2A211C    #2A211C
+      panel (Remaining)     #2A211C    #2E2520 plus a 1px highlight border
+      panel-text            #FFFFFF    #F2EBE3
+      panel-muted           #C4B8AB    #C4B8AB
+      panel-segment         #EFE6DA    #EFE6DA
+      panel-track           #4A3F37    #4A3F37
+      bar-track             #F1ECE4    #2C241F
+      category 1-4          #2A211C #C9962B #3E7C59 #B5506A (dark: CC proposes, contrast shown)
+B3. No hex literal in any .tsx file. Contrast pasted for every text/background pair in both
+    modes: at least 4.5:1, or 3:1 at 24px and above.
+
+═══ C. PRIMITIVES (components/ui/, new files) ═══
+
+C1. Eyebrow: small uppercase label, letter-spacing about 0.12-0.16em, muted.
+C2. Highlight: a span on the highlight token, highlight-ink text, small radius and padding.
+C3. KpiTile: label with a 7px highlight square; value in IBM Plex Mono with a small "KD" before
+    it, tabular digits; one footer line; a "panel" variant for Remaining. Bordered, 1rem-ish
+    radius, soft shadow, logical properties only.
+C4. useCountUp (lib/): counts from 0 to the target over about 900 ms, ease-out, staggered about
+    60 ms per tile. Runs on Home's first mount and when the selected month changes. Never on a
+    refetch or a background refresh of the same month. Under prefers-reduced-motion: the final
+    value at once. Frames use Number for display only; the last frame's text is exactly the
+    existing formatter's output for the exact string value. Screen readers get only the final
+    text (the moving digits are aria-hidden).
+C5. Rise-in: tiles and cards fade up once on mount (about 520 ms, staggered). None under
+    reduced motion. Not replayed on month change.
+
+═══ D. HOME ═══
+
+D1. The narration sentence, its badge and the "HOME · THIS MONTH" pill are replaced by: Eyebrow
+    ("October 2026 · day 5 of 31"; a past month: "September 2026 · closed"); a two-line uppercase
+    heading with the second line in Highlight; one sub line.
+D2. Heading states (strings CHANNEL-DRAFTED, provisional, listed verbatim in the report):
+      current month, Remaining > 0: "October is" / "on track"
+      current month, Remaining = 0: "October is" / "over income"
+      past month, Remaining > 0:    "September" / "ended ahead"
+      past month, Remaining = 0:    "September" / "ended over"
+      income not set: no heading; today's income prompt stays as it is.
+    Sub line: "KD <Remaining> left after spending and saving." When Remaining is 0: "Spending and
+    saving have reached your income." No new money arithmetic: Remaining is K1's figure.
+D3. Four KpiTiles in K1's order: Income, Expenses, Savings & investing, Remaining (panel). Two
+    columns below 1024px, four in one row from 1024px. Footers: Income "Monthly, set by you";
+    Expenses and Savings "<n>% of income"; Remaining a segmented bar (expenses, savings, then
+    track) and "<n>% of income left". Percentages from integer fils, rounded half up, bar total
+    capped at 100%. Income not set: no footer percentages and no bar.
+D4. Removed from the KPI area: every "vs last month" chip and the "On pace to spend" line.
+D5. Top spending: heading "Top" + Highlight "spending" and a "See all" link to the existing
+    destination. Rows: category square, name, KD amount, a bar relative to the largest row. The
+    sparklines, % chips and 3-month average lines leave Home's top-spending card only.
+D6. The month control shows "October 2026" instead of "2026-10". Its behaviour is unchanged.
+D7. Bottom nav: a short highlight bar above the active item. The Log button keeps its position,
+    size, label and hit area; only its colours move to the new tokens.
+
+═══ E. INSTRUMENTS, TESTS, PREDICTIONS ═══
+
+E1. Before the first edit: exact predictions in a scratch file (sha256 reported, key lines
+    quoted): files touched, new test files and cases, frontend counts from 373/77 with sign,
+    tsc 0 bytes both. API, contract fixture (67) and money-wire counts predicted UNCHANGED.
+E2. New tests, NEW FILES ONLY, each shown able to fail: useCountUp (reduced motion shows the
+    final value at once; a same-month refetch does not animate; a month change does; the final
+    text equals the formatter's output); the four heading states and income-not-set; footer
+    percentages including rounding and the 100% cap.
+E3. Existing tests: none may be edited (MOB-R53). If any breaks, the build STOPS before its
+    commit and the report lists each break, measured by running it, file:line.
+E4. Class census: no physical properties added; no hex in .tsx; counts before and after pasted.
+E5. CC's scratch Playwright, WebKit and Chromium: Home at 390, 375 and 1280, light and dark,
+    demo and empty states, and one capture with reduced motion. Saved to
+    ~/Downloads/statera-home-polish/ with the file list pasted.
+E6. Commits, each green alone: (1) tokens, primitives, useCountUp and their tests; (2) Home.
+
+═══ F. CONSTRAINTS, PUSH, REPORT ═══
+
+F1. Any backend, migration or schema file touched: STOP. RM-21, RM-23, RM-25, RM-26, RM-27 stand.
+F2. Push under this block when every prediction holds: fast-forward; all four Actions jobs
+    succeed, labelled ubuntu-24.04; both probes on the new sha; 0 unpushed by both routes;
+    porcelain pasted. No migration, so no backup step. If the build STOPs, nothing is pushed;
+    MOB-R67's recon still runs and reports (MOB-R63 B).
+F3. After deploy, the operator's phone check: Home in light and dark; numbers count up on open
+    and on month change only; four bounded tiles; the heading. CC does not wait on it.
+F4. ONE report at the end, after MOB-R67's.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, after MOB-R67 (expected 9974-10085), before any other work. The wrap
+check runs as its own step and its output is pasted. Expected: blank 10086, then 119 lines at
+10087-10205. Read-back: appended line count, header and last line verbatim, cmp of the region
+against the payload, git show --stat and porcelain, all pasted in full.
+After this block: strict 68, loose 70 (body lines 1513 and 6934).
