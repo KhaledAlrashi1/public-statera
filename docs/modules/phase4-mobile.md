@@ -10203,3 +10203,195 @@ check runs as its own step and its output is pasted. Expected: blank 10086, then
 10087-10205. Read-back: appended line count, header and last line verbatim, cmp of the region
 against the payload, git show --stat and porcelain, all pasted in full.
 After this block: strict 68, loose 70 (body lines 1513 and 6934).
+
+MOB-R69 — Home grants and push; Log entry, old sheet and /log fixes; install; Log v2 recon.
+
+Issued Monday, October 5, 2026, by the review channel. One CC run; one report at the end.
+TIER 2: C, D, E1-E3, F1-F5. TIER 1 rigour: E3 (d), E4 (amount path, RM-27), F6, G.
+
+═══ A. MOB-R67 AND MOB-R68 REPORT — ACCEPTED, WITH GRANTS ═══
+
+A1. Persistence: MOB-R67 at 9974-10085, MOB-R68 at 10087-10205, both cmp exit 0; strict 68,
+    loose 70; porcelain empty. A3 length check pasted: max 96, none over 100. Accepted.
+A2. MOB-R67 D and E2 accepted as recon. Recorded for later blocks, not ruled here:
+    (a) THREE CLOCKS decide "this month": Kuwait (analytics-helpers.ts:26), UTC
+        (dashboard-snapshot-lib.ts:363) and the browser (DashboardPage.tsx:47). They disagree
+        from 21:00 UTC on a month's last day. Queued as the first item of the month-start cycle.
+    (b) Month start: CC's proposal (b), calendar months plus a payday note. Not yet put to him.
+    (c) Budget suggestions: CC's proposal of a new insert-if-absent endpoint, so a preset never
+        deletes or rewrites her rows. Ruled with the budget cycle, under RM-23.
+A3. MOB-R68 commit 1 (188a502): predictions held (379/78, +6, +1). Accepted.
+A4. MOB-R68 commit 2 STOPPED under E3 as drafted; the 7 breaks were predicted and measured.
+    MOB-R67 F1 predicted 1 unpushed; 3 is explained by MOB-R68's persistence and commit 1.
+A5. CC's choices in the held Home work, RATIFIED: text-lg below 1024px for KPI values; "See
+    all" to /activity?type=expense; Log button on the panel tokens with a highlight ring in dark;
+    no Income footer when income is not set; matchMedia missing treated as reduced motion.
+A6. CC's API baseline miss (873/34/62 carried from CLAUDE.md; measured 899/41/74): accepted as
+    reported. Lesson kept: derive, never carry.
+
+═══ B. OPERATOR WORDS SINCE MOB-R68 ═══
+
+Provenance: questions and options are the CHANNEL'S; answers are the OPERATOR'S, verbatim.
+B1. "I think for her, myself, and any user, the logging has to be easy and convenient, and
+    satisfying. Also, I had experienced bad experience when using the mobile version on a
+    browser. It was annoying. I hope we solve it. I want to solve it. The keyboard covers half
+    the screen. The top and bottom of the browser takes some space as well."
+B2. Other pages adopting the look: "All in one block once Home feels right."
+B3. "After Home ships, what comes next?" Selected: "App-feel cycle: install + keyboard
+    (Recommended)".
+B4. "How should she get the app on her phone?" Options: "Add to Home Screen, guided once
+    (Recommended)", "Keep using the browser", "Wait for an App Store app". Answer: "I want to
+    do both 1 and 2. I like your suggestions to mitigate the issue. Let's postpone the idea of
+    an App store app for later when we have say +100 users. Which browser does she use on her
+    iPhone? I am not sure and I am not building the app for one user. So, how about we consider
+    both browsers? When logging felt annoying, it was the keyboard covering things. Also, it
+    felt too much in general. Logging was not enjoyable."
+B5. "Which screen felt like too much?" Selected: "Old Add expense sheet". "What would make
+    logging satisfying?" Selected: "Fewer things on screen", "A pleasant save moment", "Faster
+    repeat entries".
+B6. On the channel's first Log mock: "The look is cleaner but might be boring. Can we make a
+    little bit interesting? Also, it looks like the keyboard might be taking too much space,
+    no?" Logged via /log on the phone: "Not yet".
+B7. "How does v2 feel?" Selected: "Yes, build toward v2 (Recommended)". "When should the brass
+    burst play?" Selected: "First save of the day (Recommended)".
+B8. First phone test (four screenshots, Chrome on iPhone, 390 wide): "Awesome work. I just tried
+    logging an expense. Here's how it looked like. I click on log, a pop-up shows, when I scroll
+    down, it moves not just vertically, but horizontally which is a bit annoying. When I pressed
+    amount to enter the value, the keyboard covered up the almost the screen. The same view
+    occurred again when I click on merchant." The screenshots show the old "Add Expense" sheet;
+    with the keyboard up the focused field is hidden behind the sheet's footer.
+B9. Second test (four phone screenshots of /log, one laptop screenshot): "I actually the test
+    was done before MOB R67 and R68. I did the test again after that deploy. I found some
+    issues. See the screenshots for reference. See when the user tries to get a different
+    category. Things are all over the place. Also, when the user tries to get a different date,
+    they would have to click twice. Finally, the user interface doesn't good. We might need
+    small padding. In addition, I assume we have also changed things on the desktop version for
+    simplicity. I am not sure if it was a correct decision. Because we made now more difficult
+    and inconvenient to log things on the desktop version. See the fifth screenshot where the
+    user on the laptop has to click on the numbers instead of typing. How can we balance between
+    the mobile and desktop version and fix the issues I have found. I haven't fed MOB R69 to
+    CC." CHANNEL'S NOTE BESIDE IT: MOB-R67 and MOB-R68 were not pushed; both tests ran on
+    production 9c12aca.
+B10. "How should logging work on a computer?" Selected: "Type on computers, keypad on phones
+    (Recommended)". "Category picker:" Selected: "Usual few first, search for the rest
+    (Recommended)". "How did you open /log this time?" Selected: "Log button on Home".
+B11. CHANNEL'S RULING, without asking him: the defects in B8 and B9 are core-path defects and
+    are fixed in this block, ahead of Log v2. Each fix is kept by v2.
+
+═══ C. HOME: FINISH AND SHIP ═══
+
+C1. GRANT (MOB-R53), by file, for the 7 measured breaks only:
+      DashboardPage.test.tsx :574, :637, :690       DashboardPage.savings.test.tsx :157
+      DashboardPage.zero-base.test.tsx :134         dashboard-hero.test.tsx :65, :161
+    Each case is rewritten to pin the new behaviour where one exists (no "vs last month" chip on
+    any tile; the count-up rule), or deleted where none exists. No other line in these files.
+C2. DashboardPage.test.tsx :579-600 passes for the wrong reason (undefined is not null). It is
+    rewritten to assert that no tile renders a "vs last month" chip, shown able to fail.
+C3. Before the first edit: the scratch predictions file gains, per case, "rewrite" or "delete"
+    and the exact frontend counts with sign. Each edited file's diff is pasted in the report.
+C4. Re-apply stash@{0}, then commit 2 (Home) with the test edits. Green alone.
+C5. CLAUDE.md: two notes BESIDE the existing lines, never replacing them: (1) the brass ration
+    line: "MOB-R68 A3: look A governs Home and any page that adopts it"; (2) the API baseline
+    line: the measured 899/41/74 with the date. Own commit.
+
+═══ D. ENTRY POINTS AND THE OLD SHEET ═══
+
+D1. Every control that starts an expense entry (FAB, nav, Home, Activity, Plan, quick actions),
+    with file:line and what it opens at HEAD. B10: Home's Log button opened /log; in B8 a Log
+    control opened the old sheet. Every expense entry opens /log. If MOB-R61 ruled a control to
+    the old sheet, D1 STOPS and quotes that ruling; D2-D4 continue.
+D2. No sideways scroll: the old sheet's scroll container never scrolls horizontally at 375 and
+    390. CC finds the cause (the date field is the suspect), and pastes scrollWidth and
+    clientWidth before and after in WebKit and Chromium.
+D3. Focused field visible: while the phone keyboard is up, the sheet's height follows
+    window.visualViewport, and the focused field scrolls into view above the sticky footer. The
+    primary button stays reachable. The same hook serves every sheet and text field on /log.
+D4. New tests in new files, each shown able to fail: the visualViewport hook (a resize event
+    changes the height; no visualViewport leaves it unchanged) and the D1 entry points.
+
+═══ E. /LOG FIXES (KEPT BY v2) ═══
+
+E1. Padding: below 640px, /log content sits at least 16px from both edges, plus safe-area
+    insets; the amount is never clipped. CC pastes, at 375 and 390 in WebKit and Chromium, the
+    smallest left and right gap of any visible element, before and after.
+E2. Date: one tap on "Pick a date" opens the date picker, in Chrome and Safari on iPhone and on
+    a computer. Technique CC's.
+E3. Category picker:
+    (a) On touch devices (pointer: coarse) the search field is not focused on open, so no
+        keyboard appears until she taps it. On computers it may take focus.
+    (b) The title and the search field never overlap; the picker follows the D3 hook.
+    (c) Up to six of HER categories first, ranked by her own use, from data that already exists
+        (CC names the source). Typing searches the full list. With no history: CC's fallback,
+        labelled CC's. If ranking needs a backend change, (c) STOPS; (a), (b), (d) continue.
+    (d) Income-kind categories ("Income", "Income: Salary" and the like) leave /log's expense
+        picker. Read-only first: trace what /log saves today when one is picked (flag, totals,
+        file:line), and say whether such a row counts as income anywhere. No row is changed.
+    (e) Report whether the generic "Savings & investing" category appears in the picker (K1).
+E4. Typing (B10): on /log, digits, ".", "," and Backspace from a physical keyboard work on every
+    device; Enter saves only when Save is enabled. On computers (pointer: fine and hover: hover)
+    the amount is a text field with a caret and the keypad is hidden; phones keep the keypad.
+    Typed text goes through the RM-27 normalizer; the readout shows what will save; refused
+    text saves nothing. Keys are ignored while any other text field has focus.
+E5. New tests in new files, each shown able to fail: E4 key handling (append, Backspace, Enter
+    only when valid, ignored in another field); "1,500" typed shows KD 1,500.000; "1,5" typed
+    is refused and nothing saves; E3 (a) and (d).
+E6. CC's Playwright, WebKit and Chromium: /log at 375, 390 and 1280; the picker open; the date
+    flow. Saved beside the Home captures, file list pasted.
+
+═══ F. INSTALL TO THE HOME SCREEN ═══
+
+F1. Web app manifest: name and short_name "Statera"; start_url "/"; display "standalone";
+    background and theme colours from the existing tokens; icons 192, 512 and maskable 512, and
+    a 180 apple-touch-icon, all from the existing logo mark. Theme-color meta for light and dark.
+F2. No service worker and no offline caching in this block.
+F3. viewport-fit=cover, with safe-area insets on the header, bottom nav, Log button and sheets,
+    so nothing sits under the notch or the home bar when opened from the Home Screen.
+F4. A one-time guide on iPhone when Statera is not opened from the Home Screen. Remembered per
+    device in localStorage. Two variants. Strings CHANNEL-DRAFTED, provisional:
+      Title:   "Add Statera to your Home Screen"
+      Safari:  "Tap Share, then Add to Home Screen."
+      Chrome:  "Tap Share in the address bar, then Add to Home Screen."
+      Button:  "Got it"
+F5. If the manifest or icons need a server, Caddy or CSP change, F STOPS and reports the exact
+    change. CC edits no server configuration.
+F6. SIGN-IN GATE, read-only first: on iPhone a Home Screen app keeps its own cookies. For each
+    sign-in method, can she sign in inside the installed app, and does a magic link open in the
+    browser instead? If no method works inside the installed app, F STOPS before its commit.
+
+═══ G. LOG v2 — READ-ONLY RECON ═══
+
+G0. v2, as shown in chat and chosen (B7): a dark amount card; up to four "Your usual" place
+    tiles (a repeat is tile, then Save); "Somewhere new" for a new place; a keypad hidden until
+    the card is tapped (on computers, typing as in E4); one Save button; a save moment with
+    Undo; the brass burst on the first save of the day only.
+G1. /log at HEAD: files, steps, and what it remembers per place (category, last amount, count,
+    last used). Can "usual places" with an amount come from existing data, with no schema change?
+G2. Save path, RM-27 normalizer use, and the keypad component.
+G3. Undo: what exists. A new undo that deletes her row is RM-21 (b): say so, and give a way that
+    avoids it if one exists.
+G4. "First save of the day": what data or device state can tell it, and whose clock (A2 (a)).
+G5. What the old sheet still does (income, edit) and what moving it to the v2 pattern touches.
+G6. CC's proposal, labelled CC's, at most fifteen lines: files, commits, tests that would break.
+
+═══ H. CONSTRAINTS, PUSH, OPERATOR CHECKS ═══
+
+H1. RM-21, RM-23, RM-25 (postponed), RM-26, RM-27 stand. No new gate; next is RM-28.
+H2. Order: persist; C; D; E; F; G. A STOP in one item stops only that item (MOB-R63 B). Stopped
+    work is stashed, never committed, so the tree stays clean.
+H3. Push once, after the last item: fast-forward; every committed item's predictions held; all
+    four Actions jobs succeed, labelled ubuntu-24.04; both probes on the new sha; 0 unpushed by
+    both routes; porcelain pasted. A STOPPED item's expectations do not block the push.
+H4. Operator's phone checks after deploy, in Chrome and in Safari: Home in light and dark, the
+    count-ups; every Log control opens /log; /log has margins, one-tap date, a calm category
+    picker without an automatic keyboard; on the laptop, typing an amount and Enter saves; the
+    Income sheet has no sideways scroll and the field stays visible with the keyboard up; the
+    install guide; Statera opened from the Home Screen fills the screen and he can sign in
+    there; "1,500" saves as KD 1,500.000 and "1,5" is refused. CC does not wait on them.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, before any other work. The wrap check runs as its own step and its
+output is pasted. Expected: blank 10206, then 191 lines at 10207-10397. Read-back: appended
+line count, header and last line verbatim, cmp of the region against the payload, git show
+--stat and porcelain, all pasted in full.
+After this block: strict 69, loose 71 (body lines 1513 and 6934).
