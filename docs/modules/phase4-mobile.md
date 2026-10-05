@@ -9883,3 +9883,52 @@ B5. Operator check after D's push, on the phone: Profile income "1,500" shows KD
 
 Next block 65; next gate RM-28.
 After this block: strict 64, loose 66 (body lines 1513 and 6934).
+
+MOB-R65 — K1 pushes after the backup; C4 stands; Profile income withdrawn; amount fix next.
+Issued Monday, October 5, 2026, by the review channel, on CC's report under blocks 63 and 64.
+Work order: A, B, C, D, E, F. A STOP on one item does not stop independent items.
+
+A. Accepted from the report.
+A1. Persistence of 63 (8aedcf9) and 64 (dd1c500), both read-backs in full.
+A2. K1 as three commits: 35baa5a, c1bccf6, e547260. Every count matched the addendum
+    (b5fffdc4...): API hermetic 899/41/74, integration 930/10/74, frontend 342/74, tsc 0 bytes,
+    money-wire 15/167/70/66, fixture 67, migrations 8.
+A3. C1 (:884); C2 (prefix deletes reach the versioned keys; transactions.cache-bust.test.ts, both
+    mutations exit 1); C5 (:348, :1069); C6 (a file K1 creates, so no deviation).
+A4. Owed in the next report: the addendum predictions file's key lines, quoted (R60 rule).
+A5. Persist this block: wrap check as its own step, then append after a blank at 9886. Expected
+    9887-9934 (48 lines). After it: strict 65, loose 67. Standard read-back.
+
+B. C4.
+B1. The STOP stands: filsToKd returns a string (log-amount.ts:50); AnimatedKD takes a number
+    (sections.tsx:93). Number(fils) / 1000 stays: the sums are exact fils (KS13), and this is
+    the display step only.
+B2. Correction beside C10 of block 63: "no STOP in C" was not meant to count C4, whose STOP was
+    that item's alone. The channel's drafting miss; CC read it as written.
+B3. Queued for the design pass: AnimatedKD taking a string.
+
+C. The repo's .claude/settings.json is modified, not by CC.
+C1. CC never stages, edits or reverts it. Before the push, CC shows it is in no commit:
+    git diff --name-only origin/main..HEAD, grepped for it, empty, with a planted line found first.
+C2. The operator decides on it (keep or restore); that does not hold the push.
+
+D. Push K1 now, as C10 of block 63 rules.
+D1. CC asks the operator for the RM-21 backup: the one operator step block 63 B2 allows here.
+    CC checks a success after its request (server UTC; Healthchecks UTC+3).
+D2. Then push the 7 unpushed commits (a442047, 8aedcf9, dd1c500, the three K1 commits, and this
+    block's persistence). Fast-forward; four jobs succeed with jobs API labels ubuntu-24.04; both
+    probes on the new sha; 0 unpushed by both routes.
+
+E. Block 64's B is withdrawn.
+E1. Its premise was wrong. Profile checks the text first (monthly-income.ts:9) and refuses
+    "1,500", "1,5" and Arabic-Indic digits; it never saves a wrong value. The channel took
+    "sent to the server as typed" from CC's block-62 report without checking it. The channel's
+    miss.
+E2. The operator's words were conditional ("If you think we should fix it"); the channel
+    withdraws B on the new facts, without asking him.
+E3. ProfilePage.tsx:418 joins RM-27's known exceptions as safe: it refuses, drops nothing.
+E4. Block 64 B5's phone check moves to the income pop-up after the amount fix ships.
+
+F. The amount fix (block 63 D, without Profile), built after K1's push. Held unpushed; one report
+   at the end. Next block 66; next gate RM-28.
+   After this block: strict 65, loose 67 (body lines 1513 and 6934).
