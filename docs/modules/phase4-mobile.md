@@ -9932,3 +9932,41 @@ E4. Block 64 B5's phone check moves to the income pop-up after the amount fix sh
 F. The amount fix (block 63 D, without Profile), built after K1's push. Held unpushed; one report
    at the end. Next block 66; next gate RM-28.
    After this block: strict 65, loose 67 (body lines 1513 and 6934).
+
+MOB-R66 — Amount fix accepted; push and deploy; operator's phone check; no timing pressure.
+Issued Monday, October 5, 2026, by the review channel, on CC's report under block 65.
+
+A. Accepted from the report.
+A1. Persistence of 65 (4d0926a), read-back in full; the addendum's key lines quoted (A4).
+A2. C1: the repo's .claude/settings.json was clean by the push and in none of the 50 files.
+A3. Backup: requested 09:47:59 UTC; the journal shows rclone copy OK, rclone size OK, ping sent,
+    Complete, at 09:50:47-48. The operator reported Healthchecks green without a time; the
+    journal's ping line is accepted as the time evidence.
+A4. Push 38da9ff..4d0926a, run 37292884664, four jobs ubuntu-24.04, both probes 4d0926a,
+    0 unpushed. K1 is live.
+A5. Persist this block: wrap check as its own step, then append after a blank at 9935. Expected
+    9936-9972 (37 lines). After it: strict 66, loose 68. Standard read-back.
+
+B. The amount fix, c36c81a, accepted.
+B1. Predictions e459da23... met: frontend 373/77, tsc 0 bytes, no API change.
+B2. The ruled table matches block 63 D2 on a "." device; "1,5" saves 1.500 on a "," device.
+B3. D3: the three money-input tests rewritten to RM-27, diffs as granted; no other test edit.
+B4. D5: 18 mutations, each exit 1, restored. The two checks that never fired were removed inside
+    the new file; the shape check enforces both rules; recorded, inside the ruled build.
+B5. The source holds \u escapes, by a byte count with a planted control.
+
+C. Push and deploy c36c81a with this block's persistence. Fast-forward; four jobs succeed with
+   jobs API labels ubuntu-24.04; both probes on the new sha; 0 unpushed by both routes. No
+   migration: no backup step and no operator step.
+
+D. Operator check after deploy. Operator, verbatim: "I want to try the amount fix on my phone
+   before Friday." In the income pop-up: "1,500" shows KD 1,500.000 and saves; "1,5" shows the
+   refusal and saves nothing.
+
+E. Standing for the channel. Operator, verbatim: "I want you to forget about the deadline. Let's
+   just focus on implementing the the plan we had." The channel drops timing framing from its
+   advice. The work order of block 60 G stands: capture next, then demo-first, month start,
+   budget presets.
+
+F. One report after the deploy. Next block 67; next gate RM-28.
+   After this block: strict 66, loose 68 (body lines 1513 and 6934).
