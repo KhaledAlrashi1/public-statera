@@ -30,6 +30,7 @@ import { transactions } from "../db/schema/transactions"
 import { formatKd } from "./transaction-lib"
 import { ymExpr, buildMonthWindow } from "./analytics-helpers"
 import { incomeCategoryFilter } from "./payday-lib"
+import { isSavingsCategoryName } from "./category-kind"
 
 // Re-export buildMonthWindow for existing callers (including tests importing from this file).
 export { buildMonthWindow }
@@ -39,7 +40,9 @@ export { buildMonthWindow }
 export type DashboardMonthlyEntry = {
   month: string
   income_kd: string
+  // MOB-R55 P2 — expense_kd excludes savings-kind categories; their total is savings_kd.
   expense_kd: string
+  savings_kd: string
 }
 
 export type DashboardMetricsPayload = {
@@ -144,6 +147,7 @@ function validateSnapshotPayload(raw: unknown): DashboardMetricsPayload | null {
     // Reject float monetary values — any non-string type is treated as invalid.
     if (typeof e.income_kd !== "string") return null
     if (typeof e.expense_kd !== "string") return null
+    if (typeof e.savings_kd !== "string") return null
   }
 
   // expense_by_category is a two-level map with DYNAMIC keys at both levels
@@ -218,11 +222,13 @@ export async function computeDashboardMetricsPayload(
 
   const incomeByMonth: Record<string, Decimal> = {}
   const expenseByMonth: Record<string, Decimal> = {}
+  const savingsByMonth: Record<string, Decimal> = {}
   const expenseByCategory: Record<string, Record<string, Decimal>> = {}
 
   for (const key of monthKeys) {
     incomeByMonth[key] = new Decimal(0)
     expenseByMonth[key] = new Decimal(0)
+    savingsByMonth[key] = new Decimal(0)
     expenseByCategory[key] = {}
   }
 
@@ -234,7 +240,10 @@ export async function computeDashboardMetricsPayload(
     if (isIncome) {
       incomeByMonth[monthKey] = incomeByMonth[monthKey].plus(amount)
     } else {
-      expenseByMonth[monthKey] = expenseByMonth[monthKey].plus(amount)
+      // MOB-R55 P2 — a savings-kind category leaves the expense total but keeps its own row in
+      // the per-category breakdown, under its own name.
+      if (isSavingsCategoryName(catName)) savingsByMonth[monthKey] = savingsByMonth[monthKey].plus(amount)
+      else expenseByMonth[monthKey] = expenseByMonth[monthKey].plus(amount)
       expenseByCategory[monthKey][category] = (
         expenseByCategory[monthKey][category] ?? new Decimal(0)
       ).plus(amount)
@@ -245,6 +254,7 @@ export async function computeDashboardMetricsPayload(
     month: key,
     income_kd: formatKd(incomeByMonth[key] ?? new Decimal(0)),
     expense_kd: formatKd(expenseByMonth[key] ?? new Decimal(0)),
+    savings_kd: formatKd(savingsByMonth[key] ?? new Decimal(0)),
   }))
 
   const expenseByCategoryStr: Record<string, Record<string, string>> = {}
@@ -267,6 +277,12 @@ export async function computeDashboardMetricsPayload(
 
 // ── Persist ───────────────────────────────────────────────────────────────────
 
+// MOB-R60 C2 — stored monthlyJson is versioned: {v: SNAPSHOT_FORMAT_VERSION, monthly}. A row
+// without the current version (every row written before K1, whose expense_kd still includes
+// savings) reads as a miss and is recomputed through the existing Tier 3 path, which rewrites it.
+// An old-rule row is never shown. No migration and no schema change: the column is unchanged.
+export const SNAPSHOT_FORMAT_VERSION = 2
+
 // Upserts a snapshot row. The unique constraint on (user_id, months_count,
 // window_end_month) guarantees at most one canonical snapshot per window.
 // onDuplicateKeyUpdate is atomic — no SELECT-then-INSERT race.
@@ -279,7 +295,7 @@ export async function persistDashboardSnapshot(
 ): Promise<void> {
   const now = new Date()
   const monthsJson = JSON.stringify(payload.months)
-  const monthlyJson = JSON.stringify(payload.monthly)
+  const monthlyJson = JSON.stringify({ v: SNAPSHOT_FORMAT_VERSION, monthly: payload.monthly })
   const expenseByCategoryJson = JSON.stringify(payload.expense_by_category)
   await db
     .insert(dashboardSnapshots)
@@ -318,7 +334,15 @@ export async function loadDashboardSnapshot(
   let expense_by_category: unknown
   try {
     months = JSON.parse(row.monthsJson ?? "[]")
-    monthly = JSON.parse(row.monthlyJson ?? "[]")
+    const stored: unknown = JSON.parse(row.monthlyJson ?? "null")
+    if (
+      !stored ||
+      typeof stored !== "object" ||
+      Array.isArray(stored) ||
+      (stored as { v?: unknown }).v !== SNAPSHOT_FORMAT_VERSION
+    )
+      return null
+    monthly = (stored as { monthly?: unknown }).monthly
     expense_by_category = JSON.parse(row.expenseByCategoryJson ?? "{}")
   } catch {
     return null

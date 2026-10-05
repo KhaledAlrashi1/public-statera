@@ -26,6 +26,7 @@ import { eq, sql } from "drizzle-orm"
 import type { getDb } from "../db/connection"
 import { dashboardSnapshots } from "../db/schema/dashboard-snapshots"
 import { env } from "./env"
+import { versionedCacheKey } from "./analytics-cache-version"
 import { Sentry } from "./sentry"
 import {
   computeDashboardMetricsPayload,
@@ -390,7 +391,7 @@ export async function getDashboardMetricsWithCache(
     hardFail = false,
   } = opts
 
-  const cacheKey = dashboardMetricsCacheKey(userId, months, until)
+  const cacheKey = versionedCacheKey(dashboardMetricsCacheKey(userId, months, until))
 
   // Tier 1 — Redis
   const cached = await cacheGet(cacheKey, { hardFail })

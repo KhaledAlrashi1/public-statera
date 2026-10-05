@@ -60,8 +60,8 @@ const TX_ROWS = [
 // monthly[] money is entirely STRING-typed in both stored rows, so the PRE-EXISTING
 // monthly check cannot fire. Only the expense_by_category guard is under test.
 const STORED_MONTHLY = [
-  { month: "2026-04", income_kd: "0.000", expense_kd: "7.000" },
-  { month: "2026-05", income_kd: "2000.000", expense_kd: "200.625" },
+  { month: "2026-04", income_kd: "0.000", expense_kd: "7.000", savings_kd: "0.000" },
+  { month: "2026-05", income_kd: "2000.000", expense_kd: "200.625", savings_kd: "0.000" },
 ]
 
 function storedRow(expenseByCategory: unknown, userId: number): unknown {
@@ -71,7 +71,7 @@ function storedRow(expenseByCategory: unknown, userId: number): unknown {
     monthsCount: 2,
     windowEndMonth: "2026-05",
     monthsJson: JSON.stringify(["2026-04", "2026-05"]),
-    monthlyJson: JSON.stringify(STORED_MONTHLY),
+    monthlyJson: JSON.stringify({ v: 2, monthly: STORED_MONTHLY }),
     expenseByCategoryJson: JSON.stringify(expenseByCategory),
     computedAt: new Date("2026-05-15T00:00:00.000Z"),
   }

@@ -41,6 +41,7 @@ import { transactions } from "../db/schema/transactions"
 import { formatKd } from "./transaction-lib"
 import { currentLocalDate } from "./analytics-helpers"
 import { incomeCategoryFilter, expenseCategoryFilter } from "./payday-lib"
+import { expenseOnlyCategoryFilter } from "./category-kind"
 import { resolveIncomeForPeriod, type IncomeSource } from "./income-lib"
 
 type Db = ReturnType<typeof getDb>
@@ -198,7 +199,8 @@ export async function buildRecurringPatternsPayload(
     .where(and(
       eq(transactions.userId, userId),
       sql`${transactions.date} >= ${cutoff}`,
-      expenseCategoryFilter(),
+      // MOB-R56 KS4 — a transfer to savings is not a recurring expense: savings-kind rows excluded.
+      expenseOnlyCategoryFilter(),
     ))
     .orderBy(asc(transactions.date), asc(transactions.id))
 

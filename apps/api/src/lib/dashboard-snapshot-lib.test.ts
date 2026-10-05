@@ -97,8 +97,8 @@ describe("loadDashboardSnapshot — no matching row", () => {
 // ── loadDashboardSnapshot — valid row ─────────────────────────────────────────
 
 const VALID_MONTHLY = [
-  { month: "2025-12", income_kd: "500.000", expense_kd: "200.000" },
-  { month: "2026-01", income_kd: "600.000", expense_kd: "300.000" },
+  { month: "2025-12", income_kd: "500.000", expense_kd: "200.000", savings_kd: "0.000" },
+  { month: "2026-01", income_kd: "600.000", expense_kd: "300.000", savings_kd: "0.000" },
 ]
 const VALID_EBC = {
   "2025-12": { Food: "200.000" },
@@ -112,7 +112,7 @@ function makeSnapshotRow(overrides: Partial<Record<string, unknown>> = {}): unkn
     monthsCount: 24,
     windowEndMonth: "2026-01",
     monthsJson: JSON.stringify(["2025-12", "2026-01"]),
-    monthlyJson: JSON.stringify(VALID_MONTHLY),
+    monthlyJson: JSON.stringify({ v: 2, monthly: VALID_MONTHLY }),
     expenseByCategoryJson: JSON.stringify(VALID_EBC),
     computedAt: new Date("2026-01-15T12:00:00Z"),
     ...overrides,
@@ -136,15 +136,15 @@ describe("loadDashboardSnapshot — valid row", () => {
 
 describe("loadDashboardSnapshot — float monetary values are rejected", () => {
   it("returns null when income_kd is a number (float snapshot)", async () => {
-    const floatMonthly = [{ month: "2026-01", income_kd: 1234.567, expense_kd: "300.000" }]
-    const row = makeSnapshotRow({ monthlyJson: JSON.stringify(floatMonthly) })
+    const floatMonthly = [{ month: "2026-01", income_kd: 1234.567, expense_kd: "300.000", savings_kd: "0.000" }]
+    const row = makeSnapshotRow({ monthlyJson: JSON.stringify({ v: 2, monthly: floatMonthly }) })
     const result = await loadDashboardSnapshot(10, makeDbReturning([row]), 24, "2026-01")
     expect(result).toBeNull()
   })
 
   it("returns null when expense_kd is a number (float snapshot)", async () => {
-    const floatMonthly = [{ month: "2026-01", income_kd: "500.000", expense_kd: 456.789 }]
-    const row = makeSnapshotRow({ monthlyJson: JSON.stringify(floatMonthly) })
+    const floatMonthly = [{ month: "2026-01", income_kd: "500.000", expense_kd: 456.789, savings_kd: "0.000" }]
+    const row = makeSnapshotRow({ monthlyJson: JSON.stringify({ v: 2, monthly: floatMonthly }) })
     const result = await loadDashboardSnapshot(10, makeDbReturning([row]), 24, "2026-01")
     expect(result).toBeNull()
   })
@@ -160,7 +160,7 @@ describe("loadDashboardSnapshot — corrupt JSON shapes are rejected", () => {
   })
 
   it("returns null when monthlyJson is not a JSON array", async () => {
-    const row = makeSnapshotRow({ monthlyJson: '{"key": "value"}' })
+    const row = makeSnapshotRow({ monthlyJson: '{"v": 2, "monthly": {"key": "value"}}' })
     const result = await loadDashboardSnapshot(10, makeDbReturning([row]), 24, "2026-01")
     expect(result).toBeNull()
   })
@@ -184,7 +184,7 @@ describe("persistDashboardSnapshot", () => {
   it("resolves without throwing", async () => {
     const payload = {
       months: ["2026-01"],
-      monthly: [{ month: "2026-01", income_kd: "500.000", expense_kd: "200.000" }],
+      monthly: [{ month: "2026-01", income_kd: "500.000", expense_kd: "200.000", savings_kd: "0.000" }],
       expense_by_category: { "2026-01": { Food: "200.000" } },
       cycle_enabled: false,
       cycle_start: null,

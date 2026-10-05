@@ -8,6 +8,8 @@ export interface Category {
   is_income?: boolean
   is_system?: boolean
   transaction_count?: number
+  // MOB-R55 P4 — the server's category kind (one rule, lib/category-kind.ts). Used for savings only.
+  kind?: "income" | "savings" | "expense"
 }
 
 export interface CategoryRemapResult {
@@ -85,7 +87,9 @@ export interface DashboardMetricsResponse {
     // R3 KWD amounts are 3-decimal strings via formatKd ("500.000"), not number.
     // See the money-string consumer sweep (phase4-money-string-consumer-sweep.md).
     income_kd: string
+    // MOB-R55 P2 — expense_kd excludes savings-kind categories; their total is savings_kd.
     expense_kd: string
+    savings_kd: string
   }>
   // R3 expense_by_category leaf values are 3-decimal strings via formatKd, not number.
   expense_by_category: Record<string, Record<string, string>>
@@ -108,6 +112,8 @@ export interface AccountOverviewConnectedAccount {
 export interface AccountOverviewResponse {
   month: string
   total_spend_mtd: string
+  // MOB-R58 D1 — the month's savings total (savings-kind categories), excluded from total_spend_mtd.
+  total_savings_mtd: string
   total_income_mtd: string
   connected_accounts: AccountOverviewConnectedAccount[]
   manual_entry_summary: {
@@ -117,7 +123,8 @@ export interface AccountOverviewResponse {
   top_categories: Array<{
     category: string
     amount_kd: string
-    pct: number
+    // MOB-R56 KS1 — null for a savings-kind category: shares are over expenses only.
+    pct: number | null
   }>
   month_trend: Array<{
     month: string

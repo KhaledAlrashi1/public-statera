@@ -25,6 +25,7 @@ import { budgets } from "../db/schema/budgets"
 import { memorizedTransactions } from "../db/schema/memorized-transactions"
 import { requireAuth } from "../middleware/auth"
 import { readRateLimit, writeRateLimit, heavyWriteRateLimit } from "../lib/rate-limit"
+import { categoryKind, type CategoryKind } from "../lib/category-kind"
 
 export const categoriesRouter = new Hono()
 
@@ -51,6 +52,9 @@ type CategoryItem = {
   is_income: boolean
   is_system: boolean
   transaction_count: number
+  // MOB-R55 P4 — the category's kind under the one rule (lib/category-kind.ts). The frontend uses
+  // it for savings only; income handling there is unchanged.
+  kind: CategoryKind
 }
 
 type RemapCounts = {
@@ -69,6 +73,7 @@ function serializeCategory(
     is_income: row.isIncome ?? false,
     is_system: row.isSystem,
     transaction_count: transactionCount,
+    kind: categoryKind(row.name, row.isIncome),
   }
 }
 

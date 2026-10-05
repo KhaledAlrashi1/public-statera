@@ -65,6 +65,7 @@ import {
   roundedKd,
 } from "../lib/analytics-helpers"
 import { expenseCategoryFilter, incomeCategoryFilter, currentPayPeriod } from "../lib/payday-lib"
+import { expenseOnlyCategoryFilter, isSavingsCategoryName, savingsCategoryFilter } from "../lib/category-kind"
 import { formatKd } from "../lib/transaction-lib"
 import {
   CacheBackendUnavailableError,
@@ -75,6 +76,7 @@ import {
   cacheGet,
   cacheSet,
 } from "../lib/analytics-cache"
+import { versionedCacheKey } from "../lib/analytics-cache-version"
 import { resolveIncomeForPeriod } from "../lib/income-lib"
 import { dashboardSnapshots } from "../db/schema/dashboard-snapshots"
 import { buildBudgetPayload } from "./budgets"
@@ -614,7 +616,8 @@ async function _sumExpenseBetween(
       eq(transactions.userId, userId),
       sql`${transactions.date} >= ${start}`,
       sql`${transactions.date} <= ${end}`,
-      expenseCategoryFilter(),
+      // MOB-R55 P2 / P6 — an expense total: savings-kind categories are excluded.
+      expenseOnlyCategoryFilter(),
     ))
   return new Decimal(row?.total ?? "0")
 }
@@ -737,7 +740,7 @@ async function _getSafeToSpendPayloadCached(
   today: Date,
   db: ReturnType<typeof getDb>,
 ): Promise<Record<string, unknown>> {
-  const cacheKey = safeToSpendCacheKey(userId, month)
+  const cacheKey = versionedCacheKey(safeToSpendCacheKey(userId, month))
   const cached = await cacheGet(cacheKey, { hardFail: true })
   if (cached) {
     try {
@@ -771,8 +774,13 @@ async function _buildAccountOverviewPayload(
   const { start: monthStart, end: monthEnd } = calendarMonthBounds(year, monthNumber)
   const monthKeys = buildMonthWindow(year, monthNumber, 6)
 
+  // MOB-R55 P2 / MOB-R58 D1 — the month's expense total excludes savings-kind categories, whose
+  // total is total_savings_mtd. One query with two CASE columns, so R4's query count is unchanged.
   const [spendRow] = await db
-    .select({ total: sql<string>`COALESCE(SUM(${transactions.amountKd}), '0')` })
+    .select({
+      total: sql<string>`COALESCE(SUM(CASE WHEN ${savingsCategoryFilter()} THEN 0 ELSE ${transactions.amountKd} END), '0')`,
+      savings: sql<string>`COALESCE(SUM(CASE WHEN ${savingsCategoryFilter()} THEN ${transactions.amountKd} ELSE 0 END), '0')`,
+    })
     .from(transactions)
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
     .where(and(
@@ -782,6 +790,7 @@ async function _buildAccountOverviewPayload(
       sql`${transactions.date} <= ${monthEnd}`,
     ))
   const totalSpendMtd = new Decimal(spendRow?.total ?? "0")
+  const totalSavingsMtd = new Decimal(spendRow?.savings ?? "0")
 
   const [incomeRow] = await db
     .select({ total: sql<string>`COALESCE(SUM(${transactions.amountKd}), '0')` })
@@ -813,7 +822,7 @@ async function _buildAccountOverviewPayload(
     .where(and(
       eq(transactions.userId, userId),
       eq(transactions.source, "manual"),
-      expenseCategoryFilter(),
+      expenseOnlyCategoryFilter(),
       sql`${transactions.date} >= ${monthStart}`,
       sql`${transactions.date} <= ${monthEnd}`,
     ))
@@ -837,12 +846,16 @@ async function _buildAccountOverviewPayload(
     .orderBy(desc(sql`SUM(${transactions.amountKd})`), asc(topCatExpr))
     .limit(5)
 
+  // MOB-R56 KS1 / P7 — shares are over the expense total only. A savings-kind category keeps its
+  // row and amount but has no share (pct null), so the expense shares sum to 100%.
   const totalSpendForPct = totalSpendMtd.gt(0) ? totalSpendMtd : new Decimal(0)
   const topCategories = topRows.map((r) => {
     const amount = new Decimal(r.total || "0")
-    const pct = totalSpendForPct.gt(0)
-      ? Number(amount.div(totalSpendForPct).mul(100).toDecimalPlaces(1))
-      : 0
+    const pct = isSavingsCategoryName(r.category)
+      ? null
+      : totalSpendForPct.gt(0)
+        ? Number(amount.div(totalSpendForPct).mul(100).toDecimalPlaces(1))
+        : 0
     return { category: r.category, amount_kd: formatKd(amount), pct }
   })
 
@@ -851,7 +864,7 @@ async function _buildAccountOverviewPayload(
     .select({
       ym: ymExpr,
       incomeTotal: sql<string>`COALESCE(SUM(CASE WHEN ${incomeCategoryFilter()} THEN ${transactions.amountKd} ELSE 0 END), '0')`,
-      spendTotal: sql<string>`COALESCE(SUM(CASE WHEN ${expenseCategoryFilter()} THEN ${transactions.amountKd} ELSE 0 END), '0')`,
+      spendTotal: sql<string>`COALESCE(SUM(CASE WHEN ${expenseOnlyCategoryFilter()} THEN ${transactions.amountKd} ELSE 0 END), '0')`,
     })
     .from(transactions)
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
@@ -874,6 +887,7 @@ async function _buildAccountOverviewPayload(
   return {
     month,
     total_spend_mtd: formatKd(totalSpendMtd),
+    total_savings_mtd: formatKd(totalSavingsMtd),
     total_income_mtd: formatKd(totalIncomeMtd),
     connected_accounts: [],
     manual_entry_summary: {

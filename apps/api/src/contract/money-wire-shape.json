@@ -60,6 +60,11 @@
       "money": false
     },
     {
+      "path": "data.monthly[].savings_kd",
+      "type": "string",
+      "money": true
+    },
+    {
       "path": "data.months[]",
       "type": "string",
       "money": false
@@ -110,6 +115,11 @@
       "path": "data.monthly[].month",
       "type": "string",
       "money": false
+    },
+    {
+      "path": "data.monthly[].savings_kd",
+      "type": "string",
+      "money": true
     },
     {
       "path": "data.months[]",
@@ -165,6 +175,11 @@
     },
     {
       "path": "data.total_income_mtd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.total_savings_mtd",
       "type": "string",
       "money": true
     },
@@ -328,6 +343,11 @@
     },
     {
       "path": "data.account_overview.total_income_mtd",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.account_overview.total_savings_mtd",
       "type": "string",
       "money": true
     },

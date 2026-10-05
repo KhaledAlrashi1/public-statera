@@ -65,119 +65,125 @@ const _a2: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<DashboardMetr
 const _a3: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<DashboardMetricsResponse>["monthly"]>[number]>["expense_kd"], null | undefined>, string> = true
 // R3, R3-tier2
 const _a4: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<DashboardMetricsResponse>["monthly"]>[number]>["income_kd"], null | undefined>, string> = true
+// R3, R3-tier2
+const _a5: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<DashboardMetricsResponse>["monthly"]>[number]>["savings_kd"], null | undefined>, string> = true
 // R4
-const _a5: AssertEqual<Exclude<NonNullable<NonNullable<AccountOverviewResponse>["manual_entry_summary"]>["spend_mtd"], null | undefined>, string> = true
+const _a6: AssertEqual<Exclude<NonNullable<NonNullable<AccountOverviewResponse>["manual_entry_summary"]>["spend_mtd"], null | undefined>, string> = true
 // R4
-const _a6: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<AccountOverviewResponse>["month_trend"]>[number]>["income"], null | undefined>, string> = true
+const _a7: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<AccountOverviewResponse>["month_trend"]>[number]>["income"], null | undefined>, string> = true
 // R4
-const _a7: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<AccountOverviewResponse>["month_trend"]>[number]>["spend"], null | undefined>, string> = true
+const _a8: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<AccountOverviewResponse>["month_trend"]>[number]>["spend"], null | undefined>, string> = true
 // R4
-const _a8: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<AccountOverviewResponse>["top_categories"]>[number]>["amount_kd"], null | undefined>, string> = true
+const _a9: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<AccountOverviewResponse>["top_categories"]>[number]>["amount_kd"], null | undefined>, string> = true
 // R4
-const _a9: AssertEqual<Exclude<NonNullable<AccountOverviewResponse>["total_income_mtd"], null | undefined>, string> = true
+const _a10: AssertEqual<Exclude<NonNullable<AccountOverviewResponse>["total_income_mtd"], null | undefined>, string> = true
 // R4
-const _a10: AssertEqual<Exclude<NonNullable<AccountOverviewResponse>["total_spend_mtd"], null | undefined>, string> = true
+const _a11: AssertEqual<Exclude<NonNullable<AccountOverviewResponse>["total_savings_mtd"], null | undefined>, string> = true
+// R4
+const _a12: AssertEqual<Exclude<NonNullable<AccountOverviewResponse>["total_spend_mtd"], null | undefined>, string> = true
 // R5
-const _a11: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<ExpenseBreakdownResponse>["items"]>[number]>["amount_kd"], null | undefined>, number> = true
+const _a13: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<ExpenseBreakdownResponse>["items"]>[number]>["amount_kd"], null | undefined>, number> = true
 // R5
-const _a12: AssertEqual<Exclude<NonNullable<ExpenseBreakdownResponse>["total_kd"], null | undefined>, number> = true
+const _a14: AssertEqual<Exclude<NonNullable<ExpenseBreakdownResponse>["total_kd"], null | undefined>, number> = true
 // R6
-const _a13: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<ExpenseMerchantTrendResponse>["series"]>[number]>["total_kd"], null | undefined>, number> = true
+const _a15: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<ExpenseMerchantTrendResponse>["series"]>[number]>["total_kd"], null | undefined>, number> = true
 // R7
-const _a14: AssertEqual<Exclude<NonNullable<NonNullable<BudgetMetricsResponse>["avg12_by_category"]>[string], null | undefined>, number> = true
+const _a16: AssertEqual<Exclude<NonNullable<NonNullable<BudgetMetricsResponse>["avg12_by_category"]>[string], null | undefined>, number> = true
 // R7
-const _a15: AssertEqual<Exclude<NonNullable<NonNullable<BudgetMetricsResponse>["range_spent_by_category"]>[string], null | undefined>, number> = true
+const _a17: AssertEqual<Exclude<NonNullable<NonNullable<BudgetMetricsResponse>["range_spent_by_category"]>[string], null | undefined>, number> = true
 // R7
-const _a16: AssertEqual<Exclude<NonNullable<NonNullable<BudgetMetricsResponse>["spent_by_category"]>[string], null | undefined>, number> = true
+const _a18: AssertEqual<Exclude<NonNullable<NonNullable<BudgetMetricsResponse>["spent_by_category"]>[string], null | undefined>, number> = true
 // R8
-const _a17: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["account_overview"]>["manual_entry_summary"]>["spend_mtd"], null | undefined>, string> = true
+const _a19: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["account_overview"]>["manual_entry_summary"]>["spend_mtd"], null | undefined>, string> = true
 // R8
-const _a18: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["account_overview"]>["month_trend"]>[number]>["income"], null | undefined>, string> = true
+const _a20: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["account_overview"]>["month_trend"]>[number]>["income"], null | undefined>, string> = true
 // R8
-const _a19: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["account_overview"]>["month_trend"]>[number]>["spend"], null | undefined>, string> = true
+const _a21: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["account_overview"]>["month_trend"]>[number]>["spend"], null | undefined>, string> = true
 // R8
-const _a20: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["account_overview"]>["top_categories"]>[number]>["amount_kd"], null | undefined>, string> = true
+const _a22: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["account_overview"]>["top_categories"]>[number]>["amount_kd"], null | undefined>, string> = true
 // R8
-const _a21: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["account_overview"]>["total_income_mtd"], null | undefined>, string> = true
+const _a23: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["account_overview"]>["total_income_mtd"], null | undefined>, string> = true
 // R8
-const _a22: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["account_overview"]>["total_spend_mtd"], null | undefined>, string> = true
+const _a24: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["account_overview"]>["total_savings_mtd"], null | undefined>, string> = true
 // R8
-const _a23: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["budget"]>["items"]>[number]>["amount_kd"], null | undefined>, string> = true
+const _a25: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["account_overview"]>["total_spend_mtd"], null | undefined>, string> = true
 // R8
-const _a24: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["budget"]>["profile_context"]>["budget_to_income_pct"], null | undefined>, string> = true
+const _a26: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["budget"]>["items"]>[number]>["amount_kd"], null | undefined>, string> = true
 // R8
-const _a25: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["budget"]>["profile_context"]>["budget_total_kd"], null | undefined>, string> = true
+const _a27: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["budget"]>["profile_context"]>["budget_to_income_pct"], null | undefined>, string> = true
 // R8
-const _a26: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["budget"]>["profile_context"]>["monthly_income_kd"], null | undefined>, string> = true
+const _a28: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["budget"]>["profile_context"]>["budget_total_kd"], null | undefined>, string> = true
 // R8
-const _a27: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["budget_alerts"]>["items"]>[number]>["budget_kd"], null | undefined>, string> = true
+const _a29: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["budget"]>["profile_context"]>["monthly_income_kd"], null | undefined>, string> = true
 // R8
-const _a28: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["budget_alerts"]>["items"]>[number]>["spent_kd"], null | undefined>, string> = true
+const _a30: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["budget_alerts"]>["items"]>[number]>["budget_kd"], null | undefined>, string> = true
 // R8
-const _a29: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["safe_to_spend"]>["actual_spend_kd"], null | undefined>, string> = true
+const _a31: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["budget_alerts"]>["items"]>[number]>["spent_kd"], null | undefined>, string> = true
 // R8
-const _a30: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["safe_to_spend"]>["committed_breakdown_kd"]>["budget_allocations"], null | undefined>, string> = true
+const _a32: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["safe_to_spend"]>["actual_spend_kd"], null | undefined>, string> = true
 // R8
-const _a31: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["safe_to_spend"]>["committed_kd"], null | undefined>, string> = true
+const _a33: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<DashboardBundleResponse>["safe_to_spend"]>["committed_breakdown_kd"]>["budget_allocations"], null | undefined>, string> = true
 // R8
-const _a32: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["safe_to_spend"]>["daily_rate_kd"], null | undefined>, string> = true
+const _a34: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["safe_to_spend"]>["committed_kd"], null | undefined>, string> = true
 // R8
-const _a33: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["safe_to_spend"]>["monthly_income_kd"], null | undefined>, string> = true
+const _a35: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["safe_to_spend"]>["daily_rate_kd"], null | undefined>, string> = true
 // R8
-const _a34: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["safe_to_spend"]>["remaining_budget_kd"], null | undefined>, string> = true
+const _a36: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["safe_to_spend"]>["monthly_income_kd"], null | undefined>, string> = true
 // R8
-const _a35: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["safe_to_spend"]>["total_budget_kd"], null | undefined>, string> = true
+const _a37: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["safe_to_spend"]>["remaining_budget_kd"], null | undefined>, string> = true
+// R8
+const _a38: AssertEqual<Exclude<NonNullable<NonNullable<DashboardBundleResponse>["safe_to_spend"]>["total_budget_kd"], null | undefined>, string> = true
 // R9
-const _a36: AssertEqual<Exclude<NonNullable<SafeToSpendResponse>["actual_spend_kd"], null | undefined>, string> = true
+const _a39: AssertEqual<Exclude<NonNullable<SafeToSpendResponse>["actual_spend_kd"], null | undefined>, string> = true
 // R9
-const _a37: AssertEqual<Exclude<NonNullable<NonNullable<SafeToSpendResponse>["committed_breakdown_kd"]>["budget_allocations"], null | undefined>, string> = true
+const _a40: AssertEqual<Exclude<NonNullable<NonNullable<SafeToSpendResponse>["committed_breakdown_kd"]>["budget_allocations"], null | undefined>, string> = true
 // R9
-const _a38: AssertEqual<Exclude<NonNullable<SafeToSpendResponse>["committed_kd"], null | undefined>, string> = true
+const _a41: AssertEqual<Exclude<NonNullable<SafeToSpendResponse>["committed_kd"], null | undefined>, string> = true
 // R9
-const _a39: AssertEqual<Exclude<NonNullable<SafeToSpendResponse>["daily_rate_kd"], null | undefined>, string> = true
+const _a42: AssertEqual<Exclude<NonNullable<SafeToSpendResponse>["daily_rate_kd"], null | undefined>, string> = true
 // R9
-const _a40: AssertEqual<Exclude<NonNullable<SafeToSpendResponse>["monthly_income_kd"], null | undefined>, string> = true
+const _a43: AssertEqual<Exclude<NonNullable<SafeToSpendResponse>["monthly_income_kd"], null | undefined>, string> = true
 // R9
-const _a41: AssertEqual<Exclude<NonNullable<SafeToSpendResponse>["remaining_budget_kd"], null | undefined>, string> = true
+const _a44: AssertEqual<Exclude<NonNullable<SafeToSpendResponse>["remaining_budget_kd"], null | undefined>, string> = true
 // R9
-const _a42: AssertEqual<Exclude<NonNullable<SafeToSpendResponse>["total_budget_kd"], null | undefined>, string> = true
+const _a45: AssertEqual<Exclude<NonNullable<SafeToSpendResponse>["total_budget_kd"], null | undefined>, string> = true
 // R10
-const _a43: AssertEqual<Exclude<NonNullable<WeeklyDigestResponse>["last_week_expense_kd"], null | undefined>, string> = true
+const _a46: AssertEqual<Exclude<NonNullable<WeeklyDigestResponse>["last_week_expense_kd"], null | undefined>, string> = true
 // R10
-const _a44: AssertEqual<Exclude<NonNullable<WeeklyDigestResponse>["safe_to_spend_today_kd"], null | undefined>, string> = true
+const _a47: AssertEqual<Exclude<NonNullable<WeeklyDigestResponse>["safe_to_spend_today_kd"], null | undefined>, string> = true
 // R10
-const _a45: AssertEqual<Exclude<NonNullable<WeeklyDigestResponse>["this_week_expense_kd"], null | undefined>, string> = true
+const _a48: AssertEqual<Exclude<NonNullable<WeeklyDigestResponse>["this_week_expense_kd"], null | undefined>, string> = true
 // R10
-const _a46: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<WeeklyDigestResponse>["top_categories"]>[number]>["amount_kd"], null | undefined>, string> = true
+const _a49: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<WeeklyDigestResponse>["top_categories"]>[number]>["amount_kd"], null | undefined>, string> = true
 // R11
-const _a47: AssertEqual<Exclude<NonNullable<IncomePatternResponse>["monthly_income_kd"], null | undefined>, string> = true
+const _a50: AssertEqual<Exclude<NonNullable<IncomePatternResponse>["monthly_income_kd"], null | undefined>, string> = true
 // R11
-const _a48: AssertEqual<Exclude<NonNullable<IncomePatternResponse>["suggested_monthly_income_kd"], null | undefined>, string> = true
+const _a51: AssertEqual<Exclude<NonNullable<IncomePatternResponse>["suggested_monthly_income_kd"], null | undefined>, string> = true
 // R12
-const _a49: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<RecurringPatternsResponse>["patterns"]>[number]>["avg_amount_kd"], null | undefined>, string> = true
+const _a52: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<RecurringPatternsResponse>["patterns"]>[number]>["avg_amount_kd"], null | undefined>, string> = true
 // R13
-const _a50: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["30d"]>["expense_kd"], null | undefined>, string> = true
+const _a53: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["30d"]>["expense_kd"], null | undefined>, string> = true
 // R13
-const _a51: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["30d"]>["income_kd"], null | undefined>, string> = true
+const _a54: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["30d"]>["income_kd"], null | undefined>, string> = true
 // R13
-const _a52: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["30d"]>["net_kd"], null | undefined>, string> = true
+const _a55: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["30d"]>["net_kd"], null | undefined>, string> = true
 // R13
-const _a53: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["60d"]>["expense_kd"], null | undefined>, string> = true
+const _a56: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["60d"]>["expense_kd"], null | undefined>, string> = true
 // R13
-const _a54: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["60d"]>["income_kd"], null | undefined>, string> = true
+const _a57: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["60d"]>["income_kd"], null | undefined>, string> = true
 // R13
-const _a55: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["60d"]>["net_kd"], null | undefined>, string> = true
+const _a58: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["60d"]>["net_kd"], null | undefined>, string> = true
 // R13
-const _a56: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["90d"]>["expense_kd"], null | undefined>, string> = true
+const _a59: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["90d"]>["expense_kd"], null | undefined>, string> = true
 // R13
-const _a57: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["90d"]>["income_kd"], null | undefined>, string> = true
+const _a60: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["90d"]>["income_kd"], null | undefined>, string> = true
 // R13
-const _a58: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["90d"]>["net_kd"], null | undefined>, string> = true
+const _a61: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<SnapshotResponse>["cash_flow"]>["90d"]>["net_kd"], null | undefined>, string> = true
 // R13
-const _a59: AssertEqual<Exclude<NonNullable<NonNullable<SnapshotResponse>["net_position"]>["expense_total_kd"], null | undefined>, string> = true
+const _a62: AssertEqual<Exclude<NonNullable<NonNullable<SnapshotResponse>["net_position"]>["expense_total_kd"], null | undefined>, string> = true
 // R13
-const _a60: AssertEqual<Exclude<NonNullable<NonNullable<SnapshotResponse>["net_position"]>["income_total_kd"], null | undefined>, string> = true
+const _a63: AssertEqual<Exclude<NonNullable<NonNullable<SnapshotResponse>["net_position"]>["income_total_kd"], null | undefined>, string> = true
 // R13
-const _a61: AssertEqual<Exclude<NonNullable<NonNullable<SnapshotResponse>["net_position"]>["net_kd"], null | undefined>, string> = true
+const _a64: AssertEqual<Exclude<NonNullable<NonNullable<SnapshotResponse>["net_position"]>["net_kd"], null | undefined>, string> = true
 // LS
-const _a62: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<LogSuggestionPlace>["items"]>[number]>["amount_kd"], null | undefined>, string> = true
+const _a65: AssertEqual<Exclude<NonNullable<NonNullable<NonNullable<LogSuggestionPlace>["items"]>[number]>["amount_kd"], null | undefined>, string> = true

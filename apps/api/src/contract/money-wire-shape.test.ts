@@ -201,6 +201,8 @@ const FIXTURES: Record<string, unknown[]> = {
   "category,total": [{ category: "Groceries", total: "120.500" }],
   "month,total": [{ month: "2026-05", total: "310.250" }],
   total: [{ total: "1500.750" }],
+  // MOB-R58 D1 — R4's month total query: expense total and savings total in one row.
+  "total,savings": [{ total: "1500.750", savings: "30.000" }],
   count: [{ count: 7 }],
   "name,total": [{ name: "Lulu", total: "88.125" }],
   "ym,total": [{ ym: "2026-05", total: "44.500" }],
@@ -260,10 +262,13 @@ const FIXTURES: Record<string, unknown[]> = {
       monthsCount: 24,
       windowEndMonth: "2026-05",
       monthsJson: JSON.stringify(["2026-04", "2026-05"]),
-      monthlyJson: JSON.stringify([
-        { month: "2026-04", income_kd: "1950.000", expense_kd: "200.625" },
-        { month: "2026-05", income_kd: "2000.000", expense_kd: "175.250" },
-      ]),
+      monthlyJson: JSON.stringify({
+        v: 2,
+        monthly: [
+          { month: "2026-04", income_kd: "1950.000", expense_kd: "200.625", savings_kd: "0.000" },
+          { month: "2026-05", income_kd: "2000.000", expense_kd: "175.250", savings_kd: "0.000" },
+        ],
+      }),
       expenseByCategoryJson: JSON.stringify({
         "2026-04": { Groceries: "160.125", Transport: "40.500" },
         "2026-05": { Groceries: "175.250" },
@@ -355,6 +360,7 @@ const MONEY_KEYS = new Set([
   "income",
   "total_spend_mtd",
   "total_income_mtd",
+  "total_savings_mtd",
   "spend_mtd",
   // B4-1-R2 (ruling 2026-08-06): a .toFixed(1) decimal string with a null branch,
   // and the field behind the 2026-07-10 budgets crash. In scope.
@@ -428,7 +434,7 @@ type MultiPath = {
 const MULTI_PATH: MultiPath[] = [
   {
     id: "MP-1",
-    wirePath: "R3 data.expense_by_category.*.* (and data.monthly[].income_kd / .expense_kd)",
+    wirePath: "R3 data.expense_by_category.*.* (and data.monthly[].income_kd / .expense_kd / .savings_kd)",
     arms: [
       "Tier 3 recompute: lib/dashboard-snapshot-lib.ts:222/223/230 (formatKd)",
       "Tier 2 replay: lib/analytics-cache.ts loadDashboardSnapshot -> lib/dashboard-snapshot-lib.ts:277 (JSON.parse of a stored row)",
@@ -773,9 +779,9 @@ async function captureAll(): Promise<{
 const REPO_SRC = resolve(__dirname, "..")
 
 const PRIMITIVE_BASELINES: Array<{ file: string; sites: number; feeds: string }> = [
-  { file: "routes/aggregation.ts", sites: 28, feeds: "R1 R2 R4 R5 R6 R7 R9 R10" },
+  { file: "routes/aggregation.ts", sites: 29, feeds: "R1 R2 R4 R5 R6 R7 R9 R10" },
   { file: "lib/intelligence-lib.ts", sites: 9, feeds: "R11 R12 R13" },
-  { file: "lib/dashboard-snapshot-lib.ts", sites: 3, feeds: "R3" },
+  { file: "lib/dashboard-snapshot-lib.ts", sites: 4, feeds: "R3" },
   { file: "routes/budgets.ts", sites: 2, feeds: "R8 (:64 wire; :306 write-path, see NON_WIRE_PRIMITIVE)" },
   { file: "lib/budget-alerts-lib.ts", sites: 1, feeds: "R8" },
 ]
@@ -798,8 +804,8 @@ const NON_WIRE_PRIMITIVE: Array<{ site: string; why: string }> = [
 // The three budgets.ts sites were correct at HEAD (:147/:151/:152) and C1 moved them. Only the
 // COUNT of this list is asserted (the 47 total), so these strings rot by construction — queued.
 const NON_PRIMITIVE_SITES: Array<{ site: string; field: string }> = [
-  { site: "routes/aggregation.ts:346", field: "R6 series[].total_kd — zero-fill literal `byMonth[mk] ?? 0`" },
-  { site: "routes/aggregation.ts:1055", field: "R10 safe_to_spend_today_kd — `String(...)` pass-through of R9 daily_rate_kd" },
+  { site: "routes/aggregation.ts:348", field: "R6 series[].total_kd — zero-fill literal `byMonth[mk] ?? 0`" },
+  { site: "routes/aggregation.ts:1069", field: "R10 safe_to_spend_today_kd — `String(...)` pass-through of R9 daily_rate_kd" },
   { site: "routes/budgets.ts:123", field: "R8 budget.profile_context.budget_to_income_pct — `.toFixed(1)`" },
   { site: "routes/budgets.ts:127", field: "R8 budget.profile_context.budget_total_kd — `.toFixed(3)`" },
   { site: "routes/budgets.ts:128", field: "R8 budget.profile_context.monthly_income_kd — `.toFixed(3)`" },
@@ -877,6 +883,7 @@ describe("B4-1 money wire-shape capture", () => {
       "data.expense_by_category.*.*",
       "data.monthly[].expense_kd",
       "data.monthly[].income_kd",
+      "data.monthly[].savings_kd",
     ])
     expect(r3Months.size, "R3 needs >=2 expense_by_category month keys").toBeGreaterThanOrEqual(2)
     expect(r3Cats.size, "R3 needs >=1 expense_by_category category leaf").toBeGreaterThanOrEqual(1)
@@ -1025,8 +1032,8 @@ describe("B4-1 money wire-shape capture", () => {
     console.log(`    ${total - NON_WIRE_PRIMITIVE.length}  wire-emitting primitive sites`)
     console.log(`    ${NON_PRIMITIVE_SITES.length}  non-primitive wire sites (pinned file:line, not greppable)`)
     console.log(`    ${total - NON_WIRE_PRIMITIVE.length + NON_PRIMITIVE_SITES.length}  wire-emitting sites feeding R1-R13`)
-    expect(total).toBe(43)
-    expect(total - NON_WIRE_PRIMITIVE.length + NON_PRIMITIVE_SITES.length).toBe(47)
+    expect(total).toBe(45)
+    expect(total - NON_WIRE_PRIMITIVE.length + NON_PRIMITIVE_SITES.length).toBe(49)
   })
 
   it("C7: MULTI_PATH inventory — every CAPTURED-BOTH claim holds at runtime", async () => {
