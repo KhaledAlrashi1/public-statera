@@ -1,6 +1,7 @@
 // MOB-R53 B3 — the /log keypad's amount, kept as a STRING end to end. No parseFloat, no Number:
 // the keypad builds a string, normalizeAmount() pads it to 3 decimals for the API, and totals are
 // summed exactly as integer fils (BigInt), never as floats.
+import { parseAmountText } from "./amount-text"
 
 export const MAX_INTEGER_DIGITS = 6
 export const MAX_DECIMALS = 3
@@ -33,11 +34,10 @@ export function pressDelete(amount: string): string {
  * there is no positive amount ("", "0.", "0.000").
  */
 export function normalizeAmount(amount: string): string | null {
-  if (!/^[0-9]+(\.[0-9]{0,3})?$|^\.[0-9]{1,3}$/.test(amount)) return null
-  const [intRaw, decRaw = ""] = amount.split(".")
-  const intPart = intRaw.replace(/^0+(?=[0-9])/, "") || "0"
-  const normalized = `${intPart}.${decRaw.padEnd(MAX_DECIMALS, "0")}`
-  return /[1-9]/.test(normalized) ? normalized : null
+  // MOB-R62 E / RM-27 — read through the one normalizer shared with every typed amount box.
+  const parsed = parseAmountText(amount)
+  if (parsed.kind !== "ok") return null
+  return /[1-9]/.test(parsed.kd) ? parsed.kd : null
 }
 
 /** "1.250" -> 1250n. Input must already be a normalized 3-decimal string. */
