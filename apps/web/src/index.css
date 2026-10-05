@@ -34,6 +34,21 @@
   --info-foreground: 0 0% 100%;
   --ring: 26 16% 18%; /* = ink primary (design-5.4c-1) */
   --shadow: 28 25% 12%;
+  /* MOB-R68 B2 — Home look A (ink and brass). Converted from the ruled hex; each value
+     round-trips to its hex exactly. Existing tokens above keep their values (B1). */
+  --highlight: 42.1 72.9% 59.4%; /* #E3B64C */
+  --highlight-ink: 21.4 20% 13.7%; /* #2A211C */
+  --panel: 21.4 20% 13.7%; /* #2A211C */
+  --panel-border: 21.4 20% 13.7%; /* = panel in light; highlight in dark (B2) */
+  --panel-text: 0 0% 100%; /* #FFFFFF */
+  --panel-muted: 31 17% 72%; /* #C4B8AB */
+  --panel-segment: 34.3 39.6% 89.6%; /* #EFE6DA */
+  --panel-track: 25.3 14.7% 25.3%; /* #4A3F37 */
+  --bar-track: 37 32% 92%; /* #F1ECE4 */
+  --category-1: 21.4 20% 13.7%; /* #2A211C */
+  --category-2: 40.6 64.8% 47.8%; /* #C9962B */
+  --category-3: 146.1 33.3% 36.5%; /* #3E7C59 */
+  --category-4: 344.6 40.6% 51.2%; /* #B5506A */
 
   /* Tailwind/shadcn-compatible aliases */
   --color-background: hsl(var(--bg));
@@ -88,6 +103,20 @@
   --color-warning-foreground: hsl(var(--warning-foreground));
   --color-info: hsl(var(--info));
   --color-info-foreground: hsl(var(--info-foreground));
+
+  --color-highlight: hsl(var(--highlight));
+  --color-highlight-ink: hsl(var(--highlight-ink));
+  --color-panel: hsl(var(--panel));
+  --color-panel-border: hsl(var(--panel-border));
+  --color-panel-text: hsl(var(--panel-text));
+  --color-panel-muted: hsl(var(--panel-muted));
+  --color-panel-segment: hsl(var(--panel-segment));
+  --color-panel-track: hsl(var(--panel-track));
+  --color-bar-track: hsl(var(--bar-track));
+  --color-category-1: hsl(var(--category-1));
+  --color-category-2: hsl(var(--category-2));
+  --color-category-3: hsl(var(--category-3));
+  --color-category-4: hsl(var(--category-4));
 
   /* Type scale — Warm Precision Fintech
      text-xs: 0.8125rem / captions, labels, table headers
@@ -164,6 +193,16 @@
   --info: 212 82% 66%;
   --info-foreground: 0 0% 100%;
   --ring: 38 22% 88%; /* = light-ink primary (design-5.4c-1) */
+  /* MOB-R68 B2 — dark values. The panel carries a 1px highlight border in dark (KpiTile).
+     Category 1-4 dark values are CC's proposal (B2); contrast in the MOB-R68 report. */
+  --panel: 21.4 17.9% 15.3%; /* #2E2520 */
+  --panel-border: 42.1 72.9% 59.4%; /* #E3B64C — the 1px highlight border (B2) */
+  --panel-text: 32 37% 92%; /* #F2EBE3 */
+  --bar-track: 23.1 17.3% 14.7%; /* #2C241F */
+  --category-1: 34.3 39.6% 89.6%; /* #EFE6DA */
+  --category-2: 42.1 72.9% 59.4%; /* #E3B64C */
+  --category-3: 144.9 32.1% 57.3%; /* #6FB58C */
+  --category-4: 344.5 60% 69.6%; /* #E0839B */
   --color-success: hsl(var(--success));
   --color-warning: hsl(var(--warning));
 }
@@ -432,6 +471,24 @@
     }
   }
 
+  /* MOB-R68 C5 — Home's tiles and cards fade up once on mount (about 520 ms). The stagger is an
+     inline animation-delay. Unlike .float-in, .animations-complete does not cancel it; it is
+     applied only on first reveal, so it does not replay on a refetch or a month change. */
+  .rise-in {
+    animation: riseIn 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes riseIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   .gradient-flow {
     background-size: 100% 100%;
     animation: none;
@@ -474,6 +531,7 @@
   @media (prefers-reduced-motion: reduce) {
     .page-transition,
     .float-in,
+    .rise-in,
     .gradient-flow,
     .goal-complete-celebration {
       animation: none;
