@@ -9970,3 +9970,116 @@ E. Standing for the channel. Operator, verbatim: "I want you to forget about the
 
 F. One report after the deploy. Next block 67; next gate RM-28.
    After this block: strict 66, loose 68 (body lines 1513 and 6934).
+
+MOB-R67 — R66 accepted; capture postponed; Home polish next; month start and budget recon now.
+
+Issued Monday, October 5, 2026, by the review channel. Tier 1 for D (read-only); Tier 2 for E.
+
+═══ A. MOB-R66 REPORT — ACCEPTED ═══
+
+A1. Persistence matches the prediction: 37 lines at 9936-9972 after blank 9935; sha256
+    0f43a116005e92ef07ee3ec5fd84b0645b41065351d3293511e27eaf937749a8; header and last line
+    verbatim; strict 66, loose 68; git show --stat 38 insertions (37 lines + 1 blank).
+A2. Push and deploy match: fast-forward 4d0926a..9c12aca (c36c81a, 9c12aca); run 37293997564,
+    four jobs succeeded, each labelled ubuntu-24.04; /healthz and /readyz on
+    9c12aca1cf23bd8329075fcc41318c9ec1b3cb5f; 0 unpushed by both routes. Production is 9c12aca.
+A3. Two omissions, not misses: the wrap check's line-length result was not stated, and
+    porcelain was described ("clean"), not pasted. In the report under this block, CC runs the
+    length check on lines 9936-9972 of the track file and pastes its output and exit code.
+    From this block on, both are pasted, never described.
+A4. CC's "Next (E)" quoted MOB-R60 G as restated in MOB-R66 E. Section C replaces that order.
+
+═══ B. OPERATOR WORDS SINCE MOB-R66 ═══
+
+Provenance: questions and options are the CHANNEL'S; answers are the OPERATOR'S, verbatim.
+B1. Capture (RM-25) is POSTPONED. Operator, after his spike: "Yes. I have been getting the
+    transactions in the notes. I might want to postpone this feature for later. There are other
+    things I want to focus on." His notes hold the spike data. RM-25 stands; no capture code.
+B2. "What should we focus on next?" Options: "Polish Home (Recommended)", "Month start",
+    "Budget presets", "Something else". Operator: "I will go with your recommedations but I
+    believe we can make bigger jumps as CC has gotten much smarter and can handle several
+    things at the same time." Recorded: Polish Home, by delegation to the channel's
+    recommendation; several independent items per block.
+B3. On coded.kw, with eight screenshots: "I want you to see how impressive the look is. I want
+    to add that the moving effects like objects and numbers (from zero to the actual) is not
+    captured in the screenshots. It's really amazing the simplicity and the emphasis and the
+    colors."
+B4. CHANNEL'S NOTE: during the MOB-R54 design talk the channel advised that money values not
+    count up on every refresh. That was the channel's advice, never ruled. B3 favours count-ups.
+    The question is put to the operator; MOB-R68 records his answer.
+
+═══ C. WORK ORDER (REPLACES MOB-R60 G AS RESTATED IN MOB-R66 E) ═══
+
+C1. Home polish: the channel's canvas, the operator's pick, then MOB-R68 rules the build.
+C2. Month start and budget suggestions: read-only recon now (D); each is built later as a whole
+    Tier 1 feature under its own block.
+C3. Demo-first. C4. Capture, postponed (B1).
+C5. CORRECTION BESIDE THE CHANNEL'S PLANNING NOTES. The channel's notes for this step still
+    described budget presets as 50/30/20, match and trim, with needs/wants classing. That is
+    stale. The operator's selections of October 3 (recorded for MOB-R50): a starter budget (two
+    or three common categories at a % of income; the income pop-up first when income is not
+    set) and the history presets "match your spending" and "trim your top 3", in one cycle;
+    presets fill only categories she has not set; 50/30/20 is not built. RM-23 HOLDS: no preset
+    or starter-budget code until a ruling. CC cites and quotes the track-file lines that record
+    these selections. If the record differs, BS0 STOPS and the rest of D continues.
+
+═══ D. READ-ONLY RECON. FILE:LINE FOR EVERY CLAIM. NO EDIT TO ANY TRACKED FILE ═══
+
+Base: HEAD after this block's persistence commit. Scratch only in an untracked, ignored place.
+Month start (MS)
+MS1. paydayDay: schema file:line, type, default, nullable; every read and write site, backend
+     and frontend; every figure it changes today; confirm no UI sets it.
+MS2. Every site that computes a month's start or end: budgets, R3, R4, Home KPIs, Plan,
+     Insights, Activity filters, cache keys, snapshot rows, demo data. Calendar or payday, each.
+MS3. Days 29, 30, 31: what each MS2 site does in February and in 30-day months. From source;
+     a scratch run where a pure function exists.
+MS4. Budgets: how the month is stored (column, format). What a payday month would mean for
+     her budgets stored as calendar months. RM-21 exposure: migration, backfill or rewrite.
+MS5. Cache keys and {v:2} snapshot rows that carry a month; what a boundary change invalidates.
+MS6. Where an optional "month starts on" field would sit in the income pop-up (file:line), and
+     what saving it would write (endpoint, column).
+MS7. Two options, each with files, tests that would break (by file:line) and RM-21 exposure:
+     (a) months run payday to payday everywhere; (b) calendar months stay and only a payday
+     note is shown. CHANNEL'S NOTE: a Days-until-payday counter was ruled out with This Week
+     on September 25; (b) must say whether it brings one back. CC's proposal, labelled CC's,
+     at most ten lines.
+Budget suggestions (BS)
+BS0. The C5 citation and quotes.
+BS1. MOB-R49 Part C findings (C1-C6) re-checked at HEAD: each old finding's location, then
+     "unchanged" or the new file:line. Name what K1 changed (savings categories, generic one).
+BS2. "Fill only unset": can the existing POST /api/budgets do it by sending the merged month,
+     or is a new path needed? Two tabs open at once. RM-21 (b) exposure of each way.
+BS3. Starter budget inputs: income field and type; the suggested names and the generic savings
+     category; how a suggested name becomes a category row when a budget saves.
+BS4. History presets inputs: which months make the 3-month average; partial month excluded or
+     not; savings categories in or out after K1; string or number routes; "last month" for trim.
+BS5. Money: an existing fils or Decimal helper? A rounding rule so amounts sum exactly.
+BS6. Eligibility and copy needed: no income; no history; fewer than three categories; demo
+     active; every category already set.
+BS7. CC's proposal, labelled CC's, at most fifteen lines: files, commits, tests that would break
+     (by file:line; measured at build), predicted counts with sign.
+
+═══ E. HOME POLISH — DESIGN PENDING ═══
+
+E1. No look or motion code until MOB-R68. The channel mocks on the canvas; the operator picks.
+E2. Read-only, in the same report, so MOB-R68 can rule exactly:
+    (a) AnimatedKD and useAnimatedNumber: file:line, every use, how they animate, whether they
+        honour reduced motion, and what they do when a query refetches;
+    (b) Home's KPI section after K1: file:line of each tile, label and value source;
+    (c) the @theme tokens in index.css with their light and .dark values, pasted, not retyped.
+
+═══ F. CONSTRAINTS AND REPORT ═══
+
+F1. RM-21 stands. RM-23 holds. RM-25 stands (postponed). RM-26 and RM-27 stand. No new gate;
+    next is RM-28. No push under this block: after persistence, unpushed is predicted 1.
+F2. Independent items: a STOP in one of A3, D or E2 does not stop the others (MOB-R63 B).
+F3. No operator step is needed. His MOB-R66 D phone check is his own; CC does not wait on it.
+F4. ONE report at the end: A3 output, persistence read-back, D, E2.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, before any other work. The wrap check runs as its own step before
+the append, and its output is pasted. Expected: blank 9973, then 112 lines at 9974-10085.
+Read-back: appended line count, header and last line verbatim, cmp of the region against the
+payload, git show --stat and porcelain, all pasted in full.
+After this block: strict 67, loose 69 (body lines 1513 and 6934).
