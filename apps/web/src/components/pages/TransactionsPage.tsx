@@ -97,6 +97,8 @@ export default function TransactionsPage() {
     () => categoriesRaw.map((c) => c.name),
     [categoriesRaw]
   )
+  // MOB-R60 D2 — from the server's category kind; hides the generic savings entry in the edit dialog.
+  const ownsSavingsCategory = useMemo(() => categoriesRaw.some((c) => c.kind === "savings"), [categoriesRaw])
   const merchantNames = useMemo(
     () => merchantsRaw.map((m) => m.name),
     [merchantsRaw]
@@ -411,6 +413,7 @@ export default function TransactionsPage() {
         onOpenChange={setEditOpen}
         categories={categoryNames}
         onSuccess={refreshAll}
+        ownsSavingsCategory={ownsSavingsCategory}
       />
 
       <BulkEditDialog

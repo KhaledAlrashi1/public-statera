@@ -97,6 +97,8 @@ export function IncomeQuickDialog({
               tone={invalid ? "error" : undefined}
               message={invalid ? MONTHLY_INCOME_INVALID_MESSAGE : undefined}
             />
+            {/* MOB-R60 E2 (provisional for the design pass). */}
+            <p className="text-xs text-muted-foreground">You can change this later in Profile.</p>
           </div>
           <DialogFooter className="gap-2">
             <Button

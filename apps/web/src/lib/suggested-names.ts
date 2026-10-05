@@ -29,7 +29,13 @@ export const SUGGESTED_CATEGORIES: readonly string[] = [
   "Charity",
   "Domestic Help",
   "Family Support",
+  // MOB-R59 D1 — the generic savings category (operator's name, MOB-R57). Saved on first use like
+  // any suggestion; hidden when the user already owns a savings-kind category (D2).
+  "Savings & investing",
 ]
+
+/** The generic savings category in SUGGESTED_CATEGORIES (MOB-R59 D1). */
+export const GENERIC_SAVINGS_CATEGORY = "Savings & investing"
 
 export type SuggestedMerchant = { name: string; category: string }
 
@@ -76,10 +82,20 @@ export const SUGGESTED_MERCHANTS: readonly SuggestedMerchant[] = [
 
 const norm = (s: string) => s.trim().toLowerCase()
 
-/** The user's own categories first, then the suggestions they do not already own (case-insensitive). */
-export function categoryOptions(own: readonly string[]): string[] {
+/**
+ * The user's own categories first, then the suggestions they do not already own (case-insensitive).
+ * MOB-R60 D1 — ownsSavingsCategory comes from the server's category kind (GET /api/categories); when
+ * true the generic "Savings & investing" entry is hidden, so two savings entries never sit side by
+ * side. There is no frontend copy of the savings rule (D3).
+ */
+export function categoryOptions(own: readonly string[], ownsSavingsCategory = false): string[] {
   const owned = new Set(own.map(norm))
-  return [...own, ...SUGGESTED_CATEGORIES.filter((name) => !owned.has(norm(name)))]
+  return [
+    ...own,
+    ...SUGGESTED_CATEGORIES.filter(
+      (name) => !owned.has(norm(name)) && !(ownsSavingsCategory && name === GENERIC_SAVINGS_CATEGORY),
+    ),
+  ]
 }
 
 /**

@@ -245,7 +245,7 @@ export default function DashboardPage() {
       {
         key: "income",
         title: "Set your income",
-        description: "Add your monthly income in Profile so planning starts with a real baseline.",
+        description: "Add your monthly income. You can change it later in Profile.",
         done: hasIncome,
         actionLabel: "Set income",
         onAction: () => setIncomeDialogOpen(true),

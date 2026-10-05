@@ -33,6 +33,11 @@ export function QuickAddProvider({ children }: { children: ReactNode }) {
     () => categories.map((category) => category.name),
     [categories]
   )
+  // MOB-R60 D2 — from the server's category kind; the only change to QuickAdd for the generic entry.
+  const ownsSavingsCategory = useMemo(
+    () => categories.some((category) => category.kind === "savings"),
+    [categories]
+  )
 
   const openQuickAdd = useCallback((type: QuickAddType = "expense") => {
     setInitialType(type)
@@ -74,6 +79,7 @@ export function QuickAddProvider({ children }: { children: ReactNode }) {
         onOpenChange={setOpen}
         initialType={initialType}
         categories={categoryNames}
+        ownsSavingsCategory={ownsSavingsCategory}
         categoriesError={
           categoriesError instanceof Error
             ? categoriesError.message

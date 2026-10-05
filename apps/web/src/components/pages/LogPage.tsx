@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/toaster"
 import type { LogSuggestionItem, LogSuggestionPlace } from "@/types/api"
+import { GENERIC_SAVINGS_CATEGORY } from "@/lib/suggested-names"
 
 export const LOG_STATS_KEY = "statera.log.stats"
 
@@ -243,7 +244,15 @@ function LogPanel() {
   const exactPlace = listedPlaces.some((p) => p.name.toLowerCase() === q)
 
   const cq = categoryQuery.trim().toLowerCase()
-  const categoryNames = categoryList.map((c) => c.name)
+  // MOB-R59 D1/E9 (provisional, RM-26) — the generic savings entry follows the user's own
+  // categories unless they own a savings-kind one (server kind) or already have the name. Picking it
+  // only sets the name; the row is created on save by the server (getOrCreateCategory).
+  const ownedNames = categoryList.map((c) => c.name)
+  const ownsSavingsCategory = categoryList.some((c) => c.kind === "savings")
+  const categoryNames =
+    ownsSavingsCategory || ownedNames.some((n) => n.toLowerCase() === GENERIC_SAVINGS_CATEGORY.toLowerCase())
+      ? ownedNames
+      : [...ownedNames, GENERIC_SAVINGS_CATEGORY]
   const categoryResults = cq ? categoryNames.filter((n) => n.toLowerCase().includes(cq)) : categoryNames
   const exactCategory = categoryNames.some((n) => n.toLowerCase() === cq)
 

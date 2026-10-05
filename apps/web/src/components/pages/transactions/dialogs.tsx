@@ -108,6 +108,7 @@ export function AddTransactionDialog({
   onRetryCategories,
   onSuccess,
   initialType = "expense",
+  ownsSavingsCategory = false,
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
@@ -117,6 +118,8 @@ export function AddTransactionDialog({
   onRetryCategories?: () => void
   onSuccess: () => void
   initialType?: "expense" | "income"
+  // MOB-R60 D2 — passed to the category field only (categoryOptions' one input).
+  ownsSavingsCategory?: boolean
 }) {
   const toast = useToast()
   const [type, setType] = useState<"expense" | "income">(initialType)
@@ -564,6 +567,7 @@ export function AddTransactionDialog({
                         onValueChange={setCategory}
                         categories={categories}
                         onOpenChange={trackDropdown}
+                        ownsSavingsCategory={ownsSavingsCategory}
                       />
                       <div className="space-y-2">
                         <Label htmlFor="add-date">Date</Label>
@@ -880,12 +884,15 @@ export function EditTransactionDialog({
   onOpenChange,
   categories,
   onSuccess,
+  ownsSavingsCategory = false,
 }: {
   txnId: number | null
   open: boolean
   onOpenChange: (v: boolean) => void
   categories: string[]
   onSuccess: () => void
+  // MOB-R60 D2 — passed to the category field only (categoryOptions' one input).
+  ownsSavingsCategory?: boolean
 }) {
   const toast = useToast()
   const [date, setDate] = useState("")
@@ -1118,6 +1125,7 @@ export function EditTransactionDialog({
                     onValueChange={setCategory}
                     categories={categories}
                     onOpenChange={trackDropdown}
+                    ownsSavingsCategory={ownsSavingsCategory}
                   />
                   <div className="space-y-2">
                     <Label htmlFor="edit-date">Date</Label>

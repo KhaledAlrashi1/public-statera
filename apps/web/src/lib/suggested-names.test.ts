@@ -7,8 +7,8 @@ import { SUGGESTED_CATEGORIES, SUGGESTED_MERCHANTS } from "./suggested-names"
 const lower = (s: string) => s.toLowerCase()
 
 describe("suggested names (MOB-R46)", () => {
-  it("has the 22 categories", () => {
-    expect(SUGGESTED_CATEGORIES).toHaveLength(22)
+  it("has the 23 categories", () => {
+    expect(SUGGESTED_CATEGORIES).toHaveLength(23)
   })
 
   it("has the 50 merchants", () => {

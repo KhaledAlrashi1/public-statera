@@ -13,6 +13,8 @@ interface CategoryComboboxProps {
   categories: string[]
   /** Reports panel open/close so the parent dialog can gate its Escape handler. */
   onOpenChange?: (open: boolean) => void
+  /** MOB-R60 D1 — the user owns a savings-kind category (server kind); hides the generic entry. */
+  ownsSavingsCategory?: boolean
 }
 
 /**
@@ -21,7 +23,7 @@ interface CategoryComboboxProps {
  * row is created on save by the server's getOrCreateCategory, never here. Nothing is highlighted
  * until the user types or arrows, so Enter on an untouched field submits rather than picking.
  */
-export function CategoryCombobox({ id, value, onValueChange, categories, onOpenChange }: CategoryComboboxProps) {
+export function CategoryCombobox({ id, value, onValueChange, categories, onOpenChange, ownsSavingsCategory = false }: CategoryComboboxProps) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [highlighted, setHighlighted] = useState(-1)
@@ -29,7 +31,7 @@ export function CategoryCombobox({ id, value, onValueChange, categories, onOpenC
   const optionId = (i: number) => `${listboxId}-opt-${i}`
 
   const q = query.trim().toLowerCase()
-  const options = categoryOptions(categories).filter((name) => !q || name.toLowerCase().includes(q))
+  const options = categoryOptions(categories, ownsSavingsCategory).filter((name) => !q || name.toLowerCase().includes(q))
   const isNewName = Boolean(q) && !options.some((name) => name.toLowerCase() === q)
 
   const onOpenChangeRef = useRef(onOpenChange)
