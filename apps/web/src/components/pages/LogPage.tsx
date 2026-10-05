@@ -12,7 +12,7 @@
 // DELETE only with the id this page's own most recent create returned in this page session.
 // After a save or an undo every query is invalidated (MOB-R55 G3: no key list, so it cannot drift).
 // Test stats are local only: sessionStorage, shown at /log?stats=1, never sent anywhere.
-import { useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { ArrowLeft, Delete, Search } from "lucide-react"
@@ -25,6 +25,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/components/ui/toaster"
 import type { LogSuggestionItem, LogSuggestionPlace } from "@/types/api"
 import { GENERIC_SAVINGS_CATEGORY } from "@/lib/suggested-names"
+import { AMOUNT_REFUSED_MESSAGE, formatAmountReadout, parseAmountText } from "@/lib/amount-text"
+import { searchableCategoryNames, usualCategoryNames } from "@/lib/log-categories"
+import { useFinePointer } from "@/lib/use-pointer"
+import { useVisualViewportVars, VISUAL_VIEWPORT_SHEET_CLASS } from "@/lib/useVisualViewport"
 
 export const LOG_STATS_KEY = "statera.log.stats"
 
@@ -89,7 +93,8 @@ function LogPanel() {
   const { data: categoryList = [] } = useQuery({ queryKey: ["categories"], queryFn: categoriesApi.list })
 
   const [date, setDate] = useState(todayIso)
-  const [pickingDate, setPickingDate] = useState(false)
+  // MOB-R69 E4 — computers type the amount; touch devices keep the keypad.
+  const fine = useFinePointer()
   const [place, setPlace] = useState<string | null>(null)
   const [placeItems, setPlaceItems] = useState<LogSuggestionItem[]>([])
   const [item, setItem] = useState<string | null>(null)
@@ -127,6 +132,17 @@ function LogPanel() {
   const itemName = other?.trim() || item
   const what = itemName && place ? `${itemName} at ${place}` : itemName || place || category || ""
   const normalized = prefilled ? amount : normalizeAmount(amount)
+  // MOB-R69 E4 — the readout shows what will save, through the RM-27 normalizer; refused text is
+  // shown as typed, with the refusal line, and cannot be saved (normalized is null).
+  const parsed = prefilled ? null : parseAmountText(amount)
+  const amountRefused = parsed?.kind === "refused"
+  const readout = prefilled
+    ? formatAmountReadout(amount)
+    : parsed?.kind === "ok"
+      ? formatAmountReadout(parsed.kd)
+      : parsed?.kind === "refused"
+        ? `KD ${amount}`
+        : "KD 0"
 
   const pickPlace = (p: { name: string; category: string | null; items: LogSuggestionItem[] }, fromSuggestion: boolean) => {
     tap(fromSuggestion)
@@ -154,6 +170,17 @@ function LogPanel() {
     const base = prefilled ? "" : amount
     setPrefilled(false)
     if (k === "del") setAmount(prefilled ? "" : pressDelete(base))
+    else if (k === ".") setAmount(pressDecimal(base))
+    else setAmount(pressDigit(base, k))
+  }
+
+  // MOB-R69 E4 — a key from a physical keyboard. "," is kept as typed; the normalizer reads it.
+  const typeChar = (k: string) => {
+    tap()
+    changed()
+    const base = prefilled ? "" : amount
+    setPrefilled(false)
+    if (k === ",") setAmount(`${base},`)
     else if (k === ".") setAmount(pressDecimal(base))
     else setAmount(pressDigit(base, k))
   }
@@ -236,6 +263,53 @@ function LogPanel() {
     }
   }
 
+  const canSave = Boolean(normalized && category && !saving)
+
+  // MOB-R69 E4 — digits, ".", "," and Backspace from a physical keyboard, on every device. Enter
+  // saves only when Save is enabled. Ignored while any text field has focus (that field owns its
+  // keys; on computers the amount field types natively) and while a picker is open.
+  const keyHandler = useRef<(e: KeyboardEvent) => void>(() => {})
+  keyHandler.current = (e: KeyboardEvent) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return
+    const isField = (node: EventTarget | Element | null) => {
+      const n = node as HTMLElement | null
+      return Boolean(n && (n.tagName === "INPUT" || n.tagName === "TEXTAREA" || n.tagName === "SELECT" || n.isContentEditable))
+    }
+    // Both the focused element and the event's own target: a key typed in a field (including the
+    // computer's amount field, which handles its own Enter) never reaches this handler twice.
+    if (isField(document.activeElement) || isField(e.target)) return
+    if (searchOpen || categoryOpen) return
+    if (/^[0-9]$/.test(e.key) || e.key === "." || e.key === ",") {
+      e.preventDefault()
+      typeChar(e.key)
+    } else if (e.key === "Backspace") {
+      e.preventDefault()
+      key("del")
+    } else if (e.key === "Enter" && canSave) {
+      e.preventDefault()
+      void save()
+    }
+  }
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => keyHandler.current(e)
+    document.addEventListener("keydown", onKey)
+    return () => document.removeEventListener("keydown", onKey)
+  }, [])
+
+  // MOB-R69 D3/E3 (b) — /log's two pickers follow the visual viewport like the old sheet, and the
+  // focused field is revealed after the keyboard resizes them.
+  const revealFocused = () => {
+    const active = document.activeElement
+    if (active instanceof HTMLElement && typeof active.scrollIntoView === "function") active.scrollIntoView({ block: "nearest" })
+  }
+  const searchVv = useVisualViewportVars(searchOpen, revealFocused)
+  const categoryVv = useVisualViewportVars(categoryOpen, revealFocused)
+  // E3 (a) — on touch devices no field takes focus when a picker opens, so no keyboard appears
+  // until she taps the search field. Computers keep the focus.
+  const keepKeyboardDown = (e: Event) => {
+    if (!fine) e.preventDefault()
+  }
+
   const q = query.trim().toLowerCase()
   const placeResults = q ? listedPlaces.filter((p) => p.name.toLowerCase().includes(q)) : []
   const itemResults = q
@@ -247,14 +321,18 @@ function LogPanel() {
   // MOB-R59 D1/E9 (provisional, RM-26) — the generic savings entry follows the user's own
   // categories unless they own a savings-kind one (server kind) or already have the name. Picking it
   // only sets the name; the row is created on save by the server (getOrCreateCategory).
+  // MOB-R69 E3 (c)/(d) — before typing: up to six of her categories by her own use (lib/
+  // log-categories); typing searches the full list. Income-kind categories are never offered here.
   const ownedNames = categoryList.map((c) => c.name)
   const ownsSavingsCategory = categoryList.some((c) => c.kind === "savings")
-  const categoryNames =
-    ownsSavingsCategory || ownedNames.some((n) => n.toLowerCase() === GENERIC_SAVINGS_CATEGORY.toLowerCase())
-      ? ownedNames
-      : [...ownedNames, GENERIC_SAVINGS_CATEGORY]
-  const categoryResults = cq ? categoryNames.filter((n) => n.toLowerCase().includes(cq)) : categoryNames
-  const exactCategory = categoryNames.some((n) => n.toLowerCase() === cq)
+  const offerGenericSavings =
+    !ownsSavingsCategory && !ownedNames.some((n) => n.toLowerCase() === GENERIC_SAVINGS_CATEGORY.toLowerCase())
+  const withGeneric = (names: string[]) => (offerGenericSavings ? [...names, GENERIC_SAVINGS_CATEGORY] : names)
+  const categoryNames = withGeneric(searchableCategoryNames(categoryList))
+  const categoryResults = cq
+    ? categoryNames.filter((n) => n.toLowerCase().includes(cq))
+    : withGeneric(usualCategoryNames(categoryList))
+  const exactCategory = categoryNames.some((n) => n.toLowerCase() === cq) || ownedNames.some((n) => n.toLowerCase() === cq)
 
   const hint = prefilled && item
     ? `Usual price for ${item}. Type to change it.`
@@ -271,38 +349,47 @@ function LogPanel() {
   const last = saved[saved.length - 1]
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[28rem] flex-col gap-4 bg-background px-4 py-4">
+    // MOB-R69 E1 — at least 16px from both edges, plus the safe-area insets (notch, home bar).
+    <div className="mx-auto flex min-h-screen w-full max-w-[28rem] flex-col gap-4 bg-background ps-[calc(1rem+env(safe-area-inset-left))] pe-[calc(1rem+env(safe-area-inset-right))] pt-[calc(1rem+env(safe-area-inset-top))] pb-[calc(1rem+env(safe-area-inset-bottom))]">
       {/* Date */}
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" variant="ghost" className="min-h-11 min-w-11 px-2" aria-label="Back" onClick={goBack}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <button type="button" className={chip} aria-pressed={date === todayIso} onClick={() => { tap(); changed(); setDate(todayIso); setPickingDate(false) }}>
+        <button type="button" className={chip} aria-pressed={date === todayIso} onClick={() => { tap(); changed(); setDate(todayIso) }}>
           Today
         </button>
-        <button type="button" className={chip} aria-pressed={date === yesterdayIso} onClick={() => { tap(); changed(); setDate(yesterdayIso); setPickingDate(false) }}>
+        <button type="button" className={chip} aria-pressed={date === yesterdayIso} onClick={() => { tap(); changed(); setDate(yesterdayIso) }}>
           Yesterday
         </button>
-        {pickingDate ? (
+        {/* MOB-R69 E2 — one tap opens the date picker. The real date field lies over the chip,
+            transparent, so the tap lands on it (iPhone opens its picker on that tap); on computers
+            showPicker() opens the calendar from anywhere on the chip. */}
+        <span
+          className={cn(
+            chip,
+            "relative",
+            date !== todayIso && date !== yesterdayIso && "border-primary bg-primary text-primary-foreground"
+          )}
+        >
+          {/* MOB-R56 D3 — the app's existing date formatter (utils.ts formatDisplayDate). */}
+          <span aria-hidden="true">{date !== todayIso && date !== yesterdayIso ? formatDisplayDate(date) : "Pick a date"}</span>
           <input
             type="date"
             aria-label="Pick a date"
-            className={cn(chip, "bg-card")}
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
             value={date}
             max={todayIso}
+            onClick={(e) => {
+              try {
+                e.currentTarget.showPicker?.()
+              } catch {
+                /* not allowed here: the field's own tap behaviour applies */
+              }
+            }}
             onChange={(e) => { tap(); changed(); if (e.target.value) setDate(e.target.value) }}
           />
-        ) : (
-          <button
-            type="button"
-            className={chip}
-            aria-pressed={date !== todayIso && date !== yesterdayIso}
-            onClick={() => setPickingDate(true)}
-          >
-            {/* MOB-R56 D3 — the app's existing date formatter (utils.ts formatDisplayDate). */}
-            {date !== todayIso && date !== yesterdayIso ? formatDisplayDate(date) : "Pick a date"}
-          </button>
-        )}
+        </span>
         <Button type="button" variant="outline" className="ms-auto min-h-11 min-w-11" aria-label="Search places and items" onClick={() => setSearchOpen(true)}>
           <Search className="h-4 w-4" />
         </Button>
@@ -374,28 +461,60 @@ function LogPanel() {
 
       {/* Amount + keypad */}
       <div className="space-y-2">
-        <div className={cn("text-end font-mono text-3xl font-semibold tabular-nums", prefilled && "text-muted-foreground")} data-testid="log-amount">
-          KD {amount || "0"}
+        {fine ? (
+          <input
+            type="text"
+            inputMode="decimal"
+            autoComplete="off"
+            aria-label="Amount (KD)"
+            placeholder="0.000"
+            value={amount}
+            onFocus={(e) => { if (prefilled) e.currentTarget.select() }}
+            onChange={(e) => { tap(); changed(); setPrefilled(false); setAmount(e.target.value) }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && canSave) {
+                e.preventDefault()
+                void save()
+              }
+            }}
+            className={cn(
+              "w-full rounded-[var(--radius-input)] border border-input bg-card px-3 py-2 text-end font-mono text-3xl font-semibold tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              prefilled && "text-muted-foreground"
+            )}
+          />
+        ) : null}
+        <div
+          className={cn(
+            "text-end font-mono font-semibold tabular-nums",
+            fine ? "text-sm text-muted-foreground" : "text-3xl",
+            !fine && prefilled && "text-muted-foreground"
+          )}
+          data-testid="log-amount"
+        >
+          {readout}
         </div>
+        {amountRefused ? <p className="text-end text-sm text-destructive">{AMOUNT_REFUSED_MESSAGE}</p> : null}
         <p className="text-sm text-muted-foreground">{hint}</p>
-        <div className="grid grid-cols-3 gap-2">
-          {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "del"].map((k) => (
-            <button
-              key={k}
-              type="button"
-              className="min-h-14 rounded-[var(--radius-card)] border border-border bg-card text-xl font-semibold"
-              aria-label={k === "del" ? "Delete" : k === "." ? "Decimal point" : undefined}
-              onClick={() => key(k)}
-            >
-              {k === "del" ? <Delete className="mx-auto h-5 w-5" /> : k}
-            </button>
-          ))}
-        </div>
+        {fine ? null : (
+          <div className="grid grid-cols-3 gap-2">
+            {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "del"].map((k) => (
+              <button
+                key={k}
+                type="button"
+                className="min-h-14 rounded-[var(--radius-card)] border border-border bg-card text-xl font-semibold"
+                aria-label={k === "del" ? "Delete" : k === "." ? "Decimal point" : undefined}
+                onClick={() => key(k)}
+              >
+                {k === "del" ? <Delete className="mx-auto h-5 w-5" /> : k}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
 
-      <Button type="button" className="min-h-12" disabled={!normalized || !category || saving} onClick={() => void save()}>
+      <Button type="button" className="min-h-12" disabled={!canSave} onClick={() => void save()}>
         {saveLabel}
       </Button>
 
@@ -415,18 +534,17 @@ function LogPanel() {
       </Button>
 
       <Dialog open={searchOpen} onOpenChange={(open) => { setSearchOpen(open); if (!open) setQuery("") }}>
-        <DialogContent>
-          <DialogHeader>
+        <DialogContent className={cn("space-y-4", VISUAL_VIEWPORT_SHEET_CLASS)} style={searchVv} onOpenAutoFocus={keepKeyboardDown}>
+          <DialogHeader className="pe-10">
             <DialogTitle>Place or item</DialogTitle>
           </DialogHeader>
           <Input
-            autoFocus
             aria-label="Search places and items"
             placeholder="Try “americano” or “pick”"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <div className="space-y-1">
+          <div className="space-y-1 max-sm:min-h-0 max-sm:flex-1 max-sm:overflow-y-auto">
             {placeResults.map((p) => (
               <button key={`p-${p.name}`} type="button" className="block min-h-11 w-full rounded-lg px-3 py-2 text-start hover:bg-muted" onClick={() => { pickPlace(p, true); setSearchOpen(false); setQuery("") }}>
                 <span className="block font-medium">{p.name}</span>
@@ -459,18 +577,17 @@ function LogPanel() {
       </Dialog>
 
       <Dialog open={categoryOpen} onOpenChange={(open) => { setCategoryOpen(open); if (!open) setCategoryQuery("") }}>
-        <DialogContent>
-          <DialogHeader>
+        <DialogContent className={cn("space-y-4", VISUAL_VIEWPORT_SHEET_CLASS)} style={categoryVv} onOpenAutoFocus={keepKeyboardDown}>
+          <DialogHeader className="pe-10">
             <DialogTitle>Find a category</DialogTitle>
           </DialogHeader>
           <Input
-            autoFocus
             aria-label="Find a category"
             placeholder="Type to find, or tap below"
             value={categoryQuery}
             onChange={(e) => setCategoryQuery(e.target.value)}
           />
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap content-start gap-2 max-sm:min-h-0 max-sm:flex-1 max-sm:overflow-y-auto">
             {categoryResults.map((n) => (
               <button key={n} type="button" className={chip} aria-pressed={category === n} onClick={() => { tap(); changed(); setCategory(n); setCategoryOpen(false); setCategoryQuery("") }}>
                 {n}
