@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils"
 import { useDarkMode } from "@/lib/useDarkMode"
 import { useAuth, getUserFirstName } from "@/contexts/AuthContext"
 import { QuickAddProvider, useQuickAdd } from "@/contexts/QuickAddContext"
+import { InstallGuide } from "./InstallGuide"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useToast } from "@/components/ui/toaster"
@@ -214,8 +215,9 @@ function AppShellLayout() {
   // lg:pb-24 (96px) clears it at lg:bottom-6 + h-14 = 80px on desktop, where the bottom-tabs are
   // absent. Previously pb-16 cleared only the 64px tab bar, so content could pass beneath the
   // FAB. Clearance change only — the FAB topology is unchanged.
+  // MOB-R69 F3 — plus the home-bar inset when opened from the Home Screen (0 in a browser).
   return (
-    <div className="relative min-h-screen bg-background pb-36 lg:pb-24">
+    <div className="relative min-h-screen bg-background pb-[calc(9rem+env(safe-area-inset-bottom))] lg:pb-24">
       {/* Skip to content — a11y */}
       <a
         href="#main-content"
@@ -230,7 +232,8 @@ function AppShellLayout() {
       {/* ==================== Header ==================== */}
       <header
         className={cn(
-          "sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur transition-transform duration-300",
+          // MOB-R69 F3 — clear the notch / status bar and the side insets when installed.
+          "sticky top-0 z-40 border-b border-border/70 bg-background/80 pt-[env(safe-area-inset-top)] ps-[env(safe-area-inset-left)] pe-[env(safe-area-inset-right)] backdrop-blur transition-transform duration-300",
           headerHidden && "-translate-y-full"
         )}
       >
@@ -529,6 +532,8 @@ function AppShellLayout() {
 
       {/* ==================== Main content ==================== */}
       <main id="main-content" className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-5 py-4 sm:px-6 lg:px-8 lg:py-6">
+        {/* MOB-R69 F4 — once, on iPhone, outside the installed app. */}
+        <InstallGuide />
         <div key={location.pathname} className="page-transition">
           <Outlet />
         </div>
@@ -589,7 +594,7 @@ function AppShellLayout() {
               variant="default"
               size="icon"
               onClick={handleQuickAdd}
-              className="fixed bottom-20 end-4 z-40 h-14 w-auto ps-4 pe-5 rounded-[var(--radius-card)] bg-panel text-panel-text ring-1 ring-panel-border shadow-elevation-3 transition-all duration-200 hover:-translate-y-0.5 hover:bg-panel/90 active:translate-y-0 lg:bottom-6 lg:end-8"
+              className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] end-4 z-40 h-14 w-auto ps-4 pe-5 rounded-[var(--radius-card)] bg-panel text-panel-text ring-1 ring-panel-border shadow-elevation-3 transition-all duration-200 hover:-translate-y-0.5 hover:bg-panel/90 active:translate-y-0 lg:bottom-6 lg:end-8"
               aria-label="Log transaction"
             >
               <Plus className="icon-hero" />

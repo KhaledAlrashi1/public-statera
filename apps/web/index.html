@@ -3,7 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- MOB-R69 F1/F3 — install to the Home Screen. viewport-fit=cover lets the app use the full
+         screen; the header, bottom tabs, Log button and sheets add the safe-area insets. Colours are
+         the existing --bg tokens (light 40 24% 95% = #F5F3EF, dark 28 14% 8% = #171412). No service
+         worker (F2). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180.png" />
+    <meta name="apple-mobile-web-app-title" content="Statera" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F5F3EF" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#171412" />
     <!-- Fonts are self-hosted via @fontsource (see src/main.tsx); the former
          Google Fonts <link>/preconnects were removed in design-5.4e so the CSP
          style-src/font-src narrow to 'self'. -->

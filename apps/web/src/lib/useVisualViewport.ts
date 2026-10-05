@@ -24,7 +24,7 @@ function readViewport(): ViewportBox | null {
  * the visible height, a flex column so a scroll region can sit above a fixed footer. sm+ unchanged.
  */
 export const VISUAL_VIEWPORT_SHEET_CLASS =
-  "max-sm:top-[calc(var(--vv-top,0px)+0.5rem)] max-sm:translate-y-0 max-sm:max-h-[calc(var(--vv-height,100dvh)-1rem)] max-sm:flex max-sm:flex-col max-sm:overflow-y-hidden"
+  "max-sm:top-[calc(var(--vv-top,0px)+0.5rem)] max-sm:translate-y-0 max-sm:max-h-[calc(var(--vv-height,100dvh)-1rem-env(safe-area-inset-bottom))] max-sm:flex max-sm:flex-col max-sm:overflow-y-hidden"
 
 export function useVisualViewportVars(
   active: boolean,
