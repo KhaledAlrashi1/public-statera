@@ -485,6 +485,7 @@ The UX-redesign thread (`design-*` commits) carries a set of constraints that us
 
 - **Scope boundary.** No debt/goals restyle or deletion — removal has its own pending module. Token-swap effects that flow through shared tokens are fine; targeted edits to debt/goals surfaces are not.
 - **Protected journey.** QuickAdd internals are untouchable (token flow-through only). The FAB topology settled in 5.3 is fixed: the FAB (Plus icon plus a visible "Log" label since MOB-R40 F3; 56px high, width auto with logical padding `ps-4 pe-5`, `bg-primary`, `z-40`, `aria-label="Log transaction"` unchanged, tooltip `"Log transaction — L"`) is the sole visible QuickAdd trigger; global "L" shortcut with focus/overlay guards; no header trigger.
+  - MOB-R70 A10: the MOB-R69 D1 prop hand-off, D2 (16px inputs, vertical scroll) and D3 (reveal after re-render) are ratified exceptions.
 - **No renames** of files, exports, or components.
 - **Pinned strings.** FAB `aria-label` `"Log transaction"` + tooltip `"Log transaction — L"`; the two legal `data-testid`s `commitment-backup-retention` and `commitment-statement-files`.
 - **Logical properties only** — no physical `ml-`/`mr-`/`pl-`/`pr-` additions (Phase 6 RTL sweep depends on this).
