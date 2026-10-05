@@ -123,16 +123,8 @@ describe("MOB-R52 F6 — DashboardPage, percent change from a zero base", () => 
     mocks.useDashboardPageQueries.mockReturnValue(queries())
   })
 
-  it("gives the hero no Expenses percentage when last month had no expenses", () => {
-    renderPage()
-    const { deltas } = mocks.dashboardHero.mock.calls.at(-1)?.[0] as {
-      deltas: { expensesDelta: number | null; remainingDelta: number | null } | null
-    }
-    // The comparison exists (February has income rows) — otherwise null below proves nothing.
-    expect(deltas).not.toBeNull()
-    // WITHOUT the change this is 100: a "+100%" chip against February's 0 expenses.
-    expect(deltas?.expensesDelta).toBeNull()
-  })
+  // MOB-R69 C1 — the hero's Expenses-percentage case is deleted: MOB-R68 D4 removed every
+  // comparison with last month, so no percentage against a zero base can exist.
 
   it("gives the rising category no percentage when it had no spending last month", () => {
     renderPage()

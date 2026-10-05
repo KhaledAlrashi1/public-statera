@@ -9,12 +9,15 @@ afterEach(() => {
 })
 
 describe("DashboardHero", () => {
-  it("animates from the current displayed value when months switch quickly", () => {
+  // MOB-R69 C1 — rewritten to the MOB-R68 C4 count-up rule: figures count up from 0 when the
+  // month (monthKey) changes; a new value for the SAME month shows at once, with no animation.
+  it("counts up from zero on a month change; a same-month value change shows at once", () => {
     let now = 0
     let frameId = 0
     const pending = new Map<number, FrameRequestCallback>()
 
     vi.spyOn(performance, "now").mockImplementation(() => now)
+    vi.stubGlobal("matchMedia", (query: string) => ({ matches: false, media: query }))
     vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
       frameId += 1
       pending.set(frameId, cb)
@@ -30,57 +33,35 @@ describe("DashboardHero", () => {
       pending.clear()
       for (const [, cb] of frames) cb(now)
     }
+    // The moving digits of the Income tile (hidden from screen readers).
+    const shownIncome = () =>
+      screen.getByText("Income").parentElement?.querySelector(".font-mono > [aria-hidden='true']")?.textContent
 
-    const { rerender } = render(
+    const hero = (monthKey: string, income: number) => (
       <DashboardHero
         isLoading={false}
-        monthLabel="March 2026"
-        monthIncome={100}
+        monthLabel={monthKey}
+        monthKey={monthKey}
+        monthIncome={income}
         monthExpenses={20}
-        monthRemaining={80}
-        savingsRate={22}
-        dailyPace={{ avgDaily: 2, projected: 62, daysElapsed: 12, daysInMonth: 31 }}
-        deltas={null}
+        monthSavings={0}
+        monthRemaining={income - 20}
       />
     )
 
-    expect(screen.getByText("KD 100.000")).toBeInTheDocument()
+    const { rerender } = render(hero("2026-03", 1000))
+    expect(shownIncome()).toBe("KD0.000")
+    act(() => flushFrame(1200))
+    expect(shownIncome()).toBe("KD1,000.000")
 
-    rerender(
-      <DashboardHero
-        isLoading={false}
-        monthLabel="April 2026"
-        monthIncome={200}
-        monthExpenses={20}
-        monthRemaining={180}
-        savingsRate={22}
-        dailyPace={{ avgDaily: 2, projected: 62, daysElapsed: 12, daysInMonth: 30 }}
-        deltas={null}
-      />
-    )
+    rerender(hero("2026-03", 1200))
+    expect(shownIncome()).toBe("KD1,200.000")
+    expect(screen.getByText("KD 1,200.000")).toBeInTheDocument()
 
-    act(() => {
-      flushFrame(300)
-    })
-    expect(screen.getByText("KD 187.500")).toBeInTheDocument()
-
-    rerender(
-      <DashboardHero
-        isLoading={false}
-        monthLabel="May 2026"
-        monthIncome={300}
-        monthExpenses={20}
-        monthRemaining={280}
-        savingsRate={22}
-        dailyPace={{ avgDaily: 2, projected: 62, daysElapsed: 12, daysInMonth: 31 }}
-        deltas={null}
-      />
-    )
-
-    act(() => {
-      flushFrame(100)
-    })
-    expect(screen.getByText("KD 234.896")).toBeInTheDocument()
+    rerender(hero("2026-04", 900))
+    expect(shownIncome()).toBe("KD0.000")
+    act(() => flushFrame(1200))
+    expect(shownIncome()).toBe("KD900.000")
   })
 
   it("shows a stale analytics warning when dashboard data is older than 30 minutes", () => {
@@ -144,21 +125,22 @@ describe("DashboardHero — typed income (MOB-R36)", () => {
     expect(screen.getByText("Over by KD 200.000")).toBeInTheDocument()
   })
 
-  it("the Income tile has no vs-last-month chip; the Expenses tile still does", () => {
+  // MOB-R69 C1 — rewritten: MOB-R68 D4 removed every "vs last month" chip; the footers are shares
+  // of income instead.
+  it("no tile renders a vs-last-month chip; the footers show shares of income", () => {
     render(
       <DashboardHero
         isLoading={false}
         monthLabel="March 2026"
         monthIncome={1000}
         monthExpenses={600}
-        monthRemaining={400}
-        savingsRate={40}
-        dailyPace={null}
-        // incomeDelta is what the OLD hero rendered as the Income chip; 0 is what RM-17 flat gives.
-        deltas={{ incomeDelta: 0, expensesDelta: 10, remainingDelta: 5, savingsRateDelta: 2 }}
+        monthSavings={100}
+        monthRemaining={300}
+        footers={{ expensesPct: 60, savingsPct: 10, bar: { expensesPct: 60, savingsPct: 10, trackPct: 30, leftPct: 30 } }}
       />
     )
-    expect(screen.getByText("10.0% vs last month")).toBeInTheDocument()
-    expect(screen.queryByText("0.0% vs last month")).not.toBeInTheDocument()
+    expect(screen.getByText("60% of income")).toBeInTheDocument()
+    expect(screen.getByText("30% of income left")).toBeInTheDocument()
+    expect(screen.queryByText(/vs last month/i)).toBeNull()
   })
 })

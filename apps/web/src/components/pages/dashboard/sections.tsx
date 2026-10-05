@@ -35,9 +35,14 @@ import {
   Bar,
 } from "@/lib/recharts"
 
+import { Link } from "react-router-dom"
+
 import { chartTooltipStyle, cn, fmt3, formatCompactKD, formatKD, getBudgetUtilizationTone } from "@/lib/utils"
+import { COUNT_UP_STAGGER_MS, useCountUp } from "@/lib/use-count-up"
 import { CHART_STROKES, getChartColors } from "@/lib/chart-tokens"
 import { Button } from "@/components/ui/button"
+import { Highlight } from "@/components/ui/highlight"
+import { KpiTile } from "@/components/ui/kpi-tile"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
@@ -90,40 +95,9 @@ function useAnimatedNumber(target: number, duration = 600): number {
   return display
 }
 
-function AnimatedKD({ value }: { value: number }) {
-  const animated = useAnimatedNumber(value)
-  return <>{formatKD(animated)}</>
-}
-
 function AnimatedKDNumber({ value }: { value: number }) {
   const animated = useAnimatedNumber(value)
   return <>{fmt3(animated)}</>
-}
-
-function HeroDelta({
-  value,
-  inverted = false,
-  unit = "percent",
-}: {
-  value: number
-  inverted?: boolean
-  unit?: "percent" | "points"
-}) {
-  const positive = inverted ? value <= 0 : value >= 0
-  const DeltaIcon = value >= 0 ? TrendingUp : TrendingDown
-  const deltaText = `${Math.abs(value).toFixed(1)}${unit === "points" ? " pts" : "%"} vs last month`
-  return (
-    <div
-      className={`mt-2 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
-        positive
-          ? "border-success/25 bg-success/10 text-success"
-          : "border-warning/25 bg-warning/10 text-warning"
-      }`}
-    >
-      <DeltaIcon className="h-4 w-4" />
-      <span>{deltaText}</span>
-    </div>
-  )
 }
 
 const SAFE_TO_SPEND_WARNING_COPY: Record<string, string> = {
@@ -725,20 +699,29 @@ export function SetupGuideDialog({
   )
 }
 
+// MOB-R68 D3 — one KPI footer bundle, computed by the page from integer fils (lib/home-summary).
+// null when income is not set: then no tile shows a percentage and Remaining shows no bar.
+export type HeroFooters = {
+  expensesPct: number
+  savingsPct: number
+  bar: { expensesPct: number; savingsPct: number; trackPct: number; leftPct: number }
+} | null
+
 export function DashboardHero({
   isLoading,
-  monthLabel,
+  monthKey,
   monthIncome,
   monthExpenses,
   monthSavings,
   monthRemaining,
   overBy = null,
-  dailyPace,
-  deltas,
+  footers = null,
   analyticsUpdatedAt,
 }: {
   isLoading: boolean
   monthLabel: string
+  // MOB-R68 C4 — the selected month; a new key counts the figures up from zero once.
+  monthKey?: string
   // MOB-R36 — the TYPED monthly income; null when not set. Not set wins over overspent.
   monthIncome: number | null
   monthExpenses: number
@@ -748,10 +731,7 @@ export function DashboardHero({
   monthRemaining: number
   // Expenses + savings - income when that is above 0 (MOB-R59 KS10); null otherwise.
   overBy?: number | null
-  dailyPace: { avgDaily: number; projected: number; daysElapsed: number; daysInMonth: number } | null
-  // The Income chip is removed (MOB-R36: under RM-17 flat it always read 0.0%). remainingDelta is
-  // null when either month is overspent (a channel ruling by analogy, MOB-R36).
-  deltas: { expensesDelta: number | null; remainingDelta: number | null } | null
+  footers?: HeroFooters
   analyticsUpdatedAt?: string | null
 }) {
   const freshness = useMemo(() => {
@@ -787,86 +767,133 @@ export function DashboardHero({
     }
   }, [analyticsUpdatedAt])
   const incomeSet = monthIncome !== null
+  const over = overBy !== null && overBy > 0
+
+  // MOB-R68 C4 — the four count-ups live HERE, above the skeleton, so a refetch (which shows the
+  // skeleton) never restarts them. Stagger 60 ms per tile, in tile order.
+  const ready = !isLoading
+  const key = monthKey ?? ""
+  const income = useCountUp({ value: monthIncome ?? 0, animateKey: key, ready, delayMs: 0 })
+  const expenses = useCountUp({ value: monthExpenses, animateKey: key, ready, delayMs: COUNT_UP_STAGGER_MS })
+  const savings = useCountUp({ value: monthSavings, animateKey: key, ready, delayMs: COUNT_UP_STAGGER_MS * 2 })
+  const remaining = useCountUp({ value: monthRemaining, animateKey: key, ready, delayMs: COUNT_UP_STAGGER_MS * 3 })
+
+  // MOB-R68 C5 — the tiles rise in on their FIRST reveal only; a remount after a refetch's
+  // skeleton does not replay it.
+  const revealedRef = useRef(false)
+  useEffect(() => {
+    if (!isLoading) revealedRef.current = true
+  }, [isLoading])
 
   return (
-    <section className="float-in stagger-1 space-y-4" aria-label="Monthly overview">
+    <section className="space-y-3" aria-label="Monthly overview">
+      {freshness ? (
+        <div className="flex justify-end text-xs">
+          {freshness.stale ? (
+            <div className="inline-flex items-start gap-2 rounded-full border border-warning/25 bg-warning/10 px-3 py-1 text-warning">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+              <div>
+                <div className="font-semibold">Data may be out of date</div>
+                <div className="text-[11px] text-warning/80">{freshness.label}</div>
+              </div>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">{freshness.label}</span>
+          )}
+        </div>
+      ) : null}
+
       {isLoading ? (
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="skeleton h-6 w-80 max-w-full rounded" />
-            <div className="skeleton h-4 w-40 rounded" />
-          </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <div className="skeleton h-16 rounded" />
-            <div className="skeleton h-16 rounded" />
-            <div className="skeleton h-16 rounded" />
-            <div className="skeleton h-16 rounded" />
-          </div>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="skeleton h-28 rounded-[1rem]" />
+          <div className="skeleton h-28 rounded-[1rem]" />
+          <div className="skeleton h-28 rounded-[1rem]" />
+          <div className="skeleton h-28 rounded-[1rem]" />
         </div>
       ) : (
-        <>
-          {/* Narration voice + status chip; freshness pinned top-right */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="text-lg leading-snug text-foreground">
-                Income, expenses, and remaining balance for the selected month.
-              </p>
-            </div>
-            {freshness ? (
-              <div className="shrink-0 text-xs sm:text-right">
-                {freshness.stale ? (
-                  <div className="inline-flex items-start gap-2 rounded-full border border-warning/25 bg-warning/10 px-3 py-1 text-warning">
-                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
-                    <div>
-                      <div className="font-semibold">Data may be out of date</div>
-                      <div className="text-[11px] text-warning/80">{freshness.label}</div>
-                    </div>
-                  </div>
-                ) : (
-                  <span className="text-muted-foreground">{freshness.label}</span>
-                )}
-              </div>
-            ) : null}
-          </div>
-
-          {/* KPI row — plain stat blocks, logical border-s hairlines on sm+, 2×2 on mobile */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <div className="min-w-0">
-              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Income</div>
-              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl">
-                {monthIncome === null ? "Not set" : <AnimatedKD value={monthIncome} />}
-              </div>
-            </div>
-            <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
-              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Expenses</div>
-              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl"><AnimatedKD value={monthExpenses} /></div>
-              {deltas && deltas.expensesDelta !== null && <HeroDelta value={deltas.expensesDelta} inverted />}
-            </div>
-            <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
-              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Remaining</div>
-              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl">
-                {!incomeSet
-                  ? "—"
-                  : overBy !== null && overBy > 0
-                    ? `Over by ${formatKD(overBy)}`
-                    : <AnimatedKD value={monthRemaining} />}
-              </div>
-              {deltas && deltas.remainingDelta !== null && <HeroDelta value={deltas.remainingDelta} />}
-            </div>
-            <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
-              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Savings &amp; investing</div>
-              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl"><AnimatedKD value={monthSavings} /></div>
-            </div>
-          </div>
-
-          {dailyPace && monthExpenses > 0 ? (
-            <p className="text-xs text-muted-foreground">
-              On pace to spend {formatCompactKD(dailyPace.projected)} this month at {formatKD(dailyPace.avgDaily)}/day ({dailyPace.daysElapsed}/{dailyPace.daysInMonth} days)
-            </p>
-          ) : null}
-        </>
+        <HeroTiles
+          riseOnMount={!revealedRef.current}
+          income={incomeSet ? income : null}
+          expenses={expenses}
+          savings={savings}
+          remaining={remaining}
+          incomeSet={incomeSet}
+          over={over}
+          overBy={overBy}
+          footers={incomeSet ? footers : null}
+        />
       )}
     </section>
+  )
+}
+
+type CountUpText = { text: string; finalText: string }
+
+// Two columns below 1024px, four in one row from 1024px (D3). K1's order: Income, Expenses,
+// Savings & investing, Remaining.
+function HeroTiles({
+  riseOnMount,
+  income,
+  expenses,
+  savings,
+  remaining,
+  incomeSet,
+  over,
+  overBy,
+  footers,
+}: {
+  riseOnMount: boolean
+  income: CountUpText | null
+  expenses: CountUpText
+  savings: CountUpText
+  remaining: CountUpText
+  incomeSet: boolean
+  over: boolean
+  overBy: number | null
+  footers: HeroFooters
+}) {
+  const [rise] = useState(riseOnMount)
+  const riseProps = (index: number) =>
+    rise ? { className: "rise-in", style: { animationDelay: `${index * COUNT_UP_STAGGER_MS}ms` } } : {}
+
+  return (
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <KpiTile
+        {...riseProps(0)}
+        label="Income"
+        money={income ?? undefined}
+        value={income ? undefined : "Not set"}
+        footer={incomeSet ? "Monthly, set by you" : null}
+      />
+      <KpiTile
+        {...riseProps(1)}
+        label="Expenses"
+        money={expenses}
+        footer={footers ? `${footers.expensesPct}% of income` : null}
+      />
+      <KpiTile
+        {...riseProps(2)}
+        label="Savings & investing"
+        money={savings}
+        footer={footers ? `${footers.savingsPct}% of income` : null}
+      />
+      <KpiTile
+        {...riseProps(3)}
+        variant="panel"
+        label="Remaining"
+        money={incomeSet && !over ? remaining : undefined}
+        value={!incomeSet ? "—" : over && overBy !== null ? `Over by ${formatKD(overBy)}` : undefined}
+        footer={footers ? (
+          <div className="space-y-2">
+            <div aria-hidden="true" className="flex h-1.5 w-full overflow-hidden rounded-full bg-panel-track">
+              <div className="h-full bg-panel-segment" style={{ width: `${footers.bar.expensesPct}%` }} />
+              <div className="h-full bg-highlight" style={{ width: `${footers.bar.savingsPct}%` }} />
+            </div>
+            <div>{`${footers.bar.leftPct}% of income left`}</div>
+          </div>
+        ) : null}
+      />
+    </div>
   )
 }
 
@@ -1307,107 +1334,64 @@ export function CategoryBreakdownChart({
   )
 }
 
+// MOB-R68 D5 — category squares and bars on the category tokens (light and dark), by row.
+const CATEGORY_SWATCHES = ["bg-category-1", "bg-category-2", "bg-category-3", "bg-category-4"] as const
+
 export function TopExpensesPanel({
   isLoading,
   topExpenses,
-  selectedMonth,
-  categoryDeltas,
+  seeAllHref,
 }: {
   isLoading: boolean
-  topExpenses: Array<{ name: string; value: number; sparklineData: Array<{ month: string; value: number }> }>
-  selectedMonth: string
-  categoryDeltas: Map<string, number>
+  // value: for the bar's length only (display); valueKd: the exact R3 string the amount shows.
+  topExpenses: Array<{ name: string; value: number; valueKd: string }>
+  seeAllHref: string
 }) {
-  const chartColors = getChartColors()
+  const largest = topExpenses.reduce((max, row) => Math.max(max, row.value), 0)
 
   return (
-    <section className="section-panel float-in stagger-5" aria-label="Top expense categories">
+    <section className="section-panel" aria-label="Top expense categories">
       <div className="section-header">
-        <div className="flex items-center gap-2 text-lg font-semibold">
-          <BarChart3 className="h-4 w-4 text-primary" />
-          Top Spending
-        </div>
-        <div className="text-xs text-muted-foreground">
-          Top four categories for {selectedMonth || "-"}
-        </div>
+        <h2 className="text-lg font-semibold uppercase tracking-tight">
+          Top <Highlight>spending</Highlight>
+        </h2>
+        <Link to={seeAllHref} className="text-sm font-semibold text-foreground underline-offset-4 hover:underline">
+          See all
+        </Link>
       </div>
       <div className="section-body">
         {isLoading ? (
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="skeleton h-24" />
-            <div className="skeleton h-24" />
-            <div className="skeleton h-24" />
-            <div className="skeleton h-24" />
+          <div className="space-y-4">
+            <div className="skeleton h-9" />
+            <div className="skeleton h-9" />
+            <div className="skeleton h-9" />
+            <div className="skeleton h-9" />
           </div>
         ) : topExpenses.length === 0 ? (
           <div className="flex h-[180px] items-center justify-center rounded-xl border border-border bg-muted/40 text-sm text-muted-foreground">
             Add expenses to see which categories are taking the biggest share.
           </div>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {topExpenses.map(({ name, value, sparklineData }, idx) => {
-              const baseline = categoryDeltas.get(name) ?? 0
-              const deltaPct = baseline > 0 ? ((value - baseline) / baseline) * 100 : (value > 0 ? 100 : 0)
-              const showDelta = baseline > 0 || value > 0
-              const trendUp = value >= baseline
-              const DeltaIcon = trendUp ? TrendingUp : TrendingDown
+          <ul className="space-y-4">
+            {topExpenses.map(({ name, value, valueKd }, idx) => {
+              const swatch = CATEGORY_SWATCHES[idx % CATEGORY_SWATCHES.length]
+              const width = largest > 0 ? Math.max(2, (value / largest) * 100) : 0
               return (
-                <div key={name} className="inner-card space-y-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex min-w-0 flex-1 items-center gap-2">
-                      <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-full"
-                        style={{ background: chartColors[idx % chartColors.length] }}
-                      />
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-semibold" title={name}>
-                          {name}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="h-10 w-20 shrink-0">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={sparklineData}>
-                          <Line
-                            type="monotone"
-                            dataKey="value"
-                            stroke={chartColors[idx % chartColors.length]}
-                            strokeWidth={1.5}
-                            dot={false}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
+                <li key={name} className="space-y-1.5">
+                  <div className="flex items-center gap-3">
+                    <span aria-hidden="true" className={cn("size-2.5 shrink-0 rounded-[2px]", swatch)} />
+                    <span className="min-w-0 flex-1 truncate text-sm font-semibold" title={name}>
+                      {name}
+                    </span>
+                    <span className="shrink-0 font-mono text-sm font-semibold tabular-nums">{formatKD(valueKd)}</span>
                   </div>
-                  <div className="flex items-end justify-between gap-3">
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-sm font-semibold text-muted-foreground">KD</span>
-                      <span className="text-2xl font-semibold leading-tight tabular-nums">{fmt3(value)}</span>
-                    </div>
-                    {showDelta && (
-                      baseline > 0 ? (
-                        <div
-                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                            trendUp ? "bg-warning/10 text-warning" : "bg-success/10 text-success"
-                          }`}
-                        >
-                          <DeltaIcon className="h-3 w-3" />
-                          <span>{Math.abs(deltaPct).toFixed(0)}%</span>
-                        </div>
-                      ) : (
-                        <Badge variant="neutral">New</Badge>
-                      )
-                    )}
+                  <div aria-hidden="true" className="h-1.5 w-full overflow-hidden rounded-full bg-bar-track">
+                    <div className={cn("h-full rounded-full", swatch)} style={{ width: `${width}%` }} />
                   </div>
-                  {baseline > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      3-mo avg: {formatKD(baseline)}
-                    </p>
-                  )}
-                </div>
+                </li>
               )
             })}
-          </div>
+          </ul>
         )}
       </div>
     </section>

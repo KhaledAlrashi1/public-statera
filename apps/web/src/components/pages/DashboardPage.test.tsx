@@ -545,38 +545,10 @@ describe("DashboardPage", () => {
     expect(mocks.navigate).toHaveBeenCalledWith("/activity?import=1")
   })
 
-  // heroDeltas already suppresses the chips when the PREVIOUS period is empty
-  // (prevMonthKpis returns null). The same treatment applied to the CURRENT
-  // period keeps a -100% delta caused by absent rows from rendering as a green
-  // "100.0% vs last month" success pill on the inverted Expenses tile.
-  it("suppresses the hero deltas when the selected month has no rows", () => {
-    // Reuse the beforeEach fixture rather than restating ~35 unrelated fields.
-    const base = mocks.useDashboardPageQueries() as Record<string, unknown>
-    mocks.useDashboardPageQueries.mockReturnValue({
-      ...base,
-      dashboardMetrics: {
-        months: ["2026-03", "2026-02"],
-        monthly: [
-          { month: "2026-02", income_kd: "1800.000", expense_kd: "500.000" },
-          { month: "2026-03", income_kd: "0.000", expense_kd: "0.000" },
-        ],
-        expense_by_category: {},
-      },
-      accountOverview: { total_income_mtd: "0.000", total_spend_mtd: "0.000" },
-      // MOB-R37 (iii) — a typed income, so the null below is caused by the EMPTY-ROW guard, not by
-      // "income not set" (which also yields null deltas and would pass this for the wrong reason).
-      profile: { monthly_income_kd: "1800.000" },
-    })
-
-    renderPage()
-
-    const props = mocks.dashboardHero.mock.calls.at(-1)?.[0] as { deltas: unknown }
-    expect(props.deltas).toBeNull()
-  })
-
-  // Control for the case above: with rows in the selected month the chips must
-  // still render, so the guard cannot pass by suppressing everything.
-  it("still passes hero deltas when the selected month has rows", () => {
+  // MOB-R69 C2 — rewritten: it passed for the wrong reason (undefined is not null). MOB-R68 D4
+  // removed every "vs last month" chip, so this renders the REAL hero with the props Home passed and
+  // asserts no tile shows one, while the footers prove the hero rendered its tiles.
+  it("no KPI tile renders a vs-last-month chip", async () => {
     const base = mocks.useDashboardPageQueries() as Record<string, unknown>
     mocks.useDashboardPageQueries.mockReturnValue({
       ...base,
@@ -589,14 +561,16 @@ describe("DashboardPage", () => {
         expense_by_category: {},
       },
       accountOverview: { total_income_mtd: "1800.000", total_spend_mtd: "250.000" },
-      // MOB-R37 (ii) — a typed income; without it the hero is "not set" and deltas are null.
       profile: { monthly_income_kd: "1800.000" },
     })
 
     renderPage()
 
-    const props = mocks.dashboardHero.mock.calls.at(-1)?.[0] as { deltas: unknown }
-    expect(props.deltas).not.toBeNull()
+    const props = mocks.dashboardHero.mock.calls.at(-1)?.[0] as Record<string, unknown>
+    const { DashboardHero } = await vi.importActual<typeof import("./dashboard/sections")>("./dashboard/sections")
+    const hero = render(<DashboardHero {...(props as Parameters<typeof DashboardHero>[0])} />)
+    expect(hero.getByText("14% of income")).toBeInTheDocument()
+    expect(hero.queryByText(/vs last month/i)).toBeNull()
   })
 
   // ── MOB-R36 C4 — the hero reads the TYPED income (profile), mirroring the resolver's declared arm.
@@ -625,7 +599,8 @@ describe("DashboardPage", () => {
     expect(lastHero().monthIncome).toBe(1500)
   })
 
-  it("income not set: the hero gets null income and null deltas", () => {
+  // MOB-R69 C1 — rewritten: the hero has no deltas (MOB-R68 D4); income not set means no footers.
+  it("income not set: the hero gets null income and no footers", () => {
     mocks.useDashboardPageQueries.mockReturnValue({
       ...baseResult,
       dashboardMetrics: TWO_MONTHS,
@@ -634,7 +609,7 @@ describe("DashboardPage", () => {
     })
     renderPage()
     expect(lastHero().monthIncome).toBeNull()
-    expect(lastHero().deltas).toBeNull()
+    expect((lastHero() as unknown as { footers: unknown }).footers).toBeNull()
   })
 
   it("the Set income prompt opens the income dialog", async () => {
@@ -670,7 +645,9 @@ describe("DashboardPage", () => {
     expect(mocks.navigate).not.toHaveBeenCalled()
   })
 
-  it("Remaining's vs-last-month chip is suppressed when a month is overspent; the others stay", () => {
+  // MOB-R69 C1 — rewritten: no chips exist (MOB-R68 D4). Overspent, the footers show Expenses over
+  // 100% of income while the Remaining bar is capped at 100 and nothing is left (D3).
+  it("overspent: Expenses shows 120% of income, the Remaining bar is capped and 0% is left", () => {
     mocks.useDashboardPageQueries.mockReturnValue({
       ...baseResult,
       dashboardMetrics: {
@@ -685,10 +662,13 @@ describe("DashboardPage", () => {
       profile: { monthly_income_kd: "1000.000" }, // March spending 1200 exceeds the typed 1000
     })
     renderPage()
-    const deltas = lastHero().deltas
-    expect(deltas).not.toBeNull()
-    expect(deltas?.remainingDelta).toBeNull()
-    expect(typeof deltas?.expensesDelta).toBe("number")
+    const hero = lastHero() as unknown as { overBy: number | null; footers: unknown }
+    expect(hero.overBy).toBe(200)
+    expect(hero.footers).toEqual({
+      expensesPct: 120,
+      savingsPct: 0,
+      bar: { expensesPct: 100, savingsPct: 0, trackPct: 0, leftPct: 0 },
+    })
   })
 
   it("canLoadDemoData: once a typed income exists the demo is not offered; with nothing set it is", () => {

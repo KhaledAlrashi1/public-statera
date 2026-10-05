@@ -46,7 +46,8 @@ const baseNavItems: NavItem[] = [
 
 const navActiveClass = "bg-primary/12 text-primary ring-1 ring-primary/20 shadow-none after:absolute after:bottom-0.5 after:left-4 after:right-4 after:h-0.5 after:rounded-full after:bg-primary"
 const navActiveDrawerClass = "bg-primary/12 text-primary ring-1 ring-primary/15 shadow-sm"
-const navActiveMobileClass = "border-primary bg-primary/10 text-primary"
+// MOB-R68 D7 — the active tab is marked by a short highlight bar above it (rendered in the tab).
+const navActiveMobileClass = "bg-primary/10 text-primary"
 const loadingColor = "var(--color-app-accent)"
 
 // ============================================================
@@ -547,17 +548,24 @@ function AppShellLayout() {
                 end={item.to === "/"}
                 className={({ isActive }) =>
                   cn(
-                    "group relative flex flex-1 flex-col items-center gap-0.5 border-t-2 px-1 pb-2 pt-2 text-[10px] font-semibold transition-colors duration-200",
+                    "group relative flex flex-1 flex-col items-center gap-0.5 px-1 pb-2 pt-2 text-[10px] font-semibold transition-colors duration-200",
                     isNavItemActive(item.to, isActive)
                       ? navActiveMobileClass
-                      : "border-transparent text-muted-foreground"
+                      : "text-muted-foreground"
                   )
                 }
               >
-                <span className="relative">
-                  <item.icon className="icon-hero" />
-                </span>
-                <span>{item.label}</span>
+                {({ isActive }) => (
+                  <>
+                    {isNavItemActive(item.to, isActive) ? (
+                      <span aria-hidden="true" className="absolute inset-x-0 top-0 mx-auto h-[3px] w-7 rounded-b-full bg-highlight" />
+                    ) : null}
+                    <span className="relative">
+                      <item.icon className="icon-hero" />
+                    </span>
+                    <span>{item.label}</span>
+                  </>
+                )}
               </NavLink>
             )
           })}
@@ -565,6 +573,9 @@ function AppShellLayout() {
       </nav>
 
       {/* ==================== Quick Action FAB ==================== */}
+      {/* MOB-R68 D7 — position, size, label and hit area unchanged; only the colours move to the
+          new tokens (panel ink, with the panel's 1px highlight edge in dark as a ring, which takes
+          no space). */}
       {/* Single visible QuickAdd trigger at every breakpoint (operator ruling
           2026-07-12, supersedes the design-3 dual-trigger layout). z-40 keeps it
           below Radix dialog/drawer portals (z-50), so it never occludes a dialog
@@ -578,7 +589,7 @@ function AppShellLayout() {
               variant="default"
               size="icon"
               onClick={handleQuickAdd}
-              className="fixed bottom-20 end-4 z-40 h-14 w-auto ps-4 pe-5 rounded-[var(--radius-card)] bg-primary shadow-elevation-3 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 lg:bottom-6 lg:end-8"
+              className="fixed bottom-20 end-4 z-40 h-14 w-auto ps-4 pe-5 rounded-[var(--radius-card)] bg-panel text-panel-text ring-1 ring-panel-border shadow-elevation-3 transition-all duration-200 hover:-translate-y-0.5 hover:bg-panel/90 active:translate-y-0 lg:bottom-6 lg:end-8"
               aria-label="Log transaction"
             >
               <Plus className="icon-hero" />

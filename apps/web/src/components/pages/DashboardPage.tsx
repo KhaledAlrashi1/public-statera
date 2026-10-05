@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button"
 import { CategoryDetailModal } from "@/components/ui/category-detail-modal"
 import { DemoWorkspaceBanner } from "@/components/ui/demo-workspace-banner"
 import { EmptyState } from "@/components/ui/empty-state"
-import PageHeader from "@/components/layout/PageHeader"
+import { Eyebrow } from "@/components/ui/eyebrow"
+import { Highlight } from "@/components/ui/highlight"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/toaster"
 import type { Transaction } from "@/types/api"
@@ -27,7 +28,15 @@ import { useDashboardPageQueries } from "./dashboard/hooks"
 import { BudgetDialog } from "./budget/sections"
 import { IncomeQuickDialog } from "./profile/IncomeQuickDialog"
 import { findDuplicateCategory, saveBudgets } from "./budget/hooks"
-import { toFils } from "@/lib/log-amount"
+import { filsToKd, toFils } from "@/lib/log-amount"
+import {
+  formatMonthYear,
+  homeEyebrow,
+  homeHeading,
+  homeSubLine,
+  percentOfIncome,
+  remainingBar,
+} from "@/lib/home-summary"
 
 const DASHBOARD_CATEGORY_PAGE_SIZE = 100
 
@@ -277,62 +286,22 @@ export default function DashboardPage() {
 
   const prevMonthVal = useMemo(() => prevMonthUtil(selectedMonth), [selectedMonth])
 
-  const dailyPace = useMemo(() => {
-    if (!selectedMonth) return null
-    const [year, month] = selectedMonth.split("-").map(Number)
-    const daysInMonth = new Date(year, month, 0).getDate()
-    const isCurrentMo = selectedMonth === currentMonth
-    const daysElapsed = isCurrentMo ? now.getDate() : daysInMonth
-    const avgDaily = daysElapsed > 0 ? monthExpenses / daysElapsed : 0
-    const projected = avgDaily * daysInMonth
-    return { avgDaily, projected, daysElapsed, daysInMonth }
-  }, [selectedMonth, currentMonth, monthExpenses])
+  // MOB-R68 D4 — the "On pace to spend" line and every "vs last month" chip left the KPI area, so
+  // their inputs (dailyPace, prevMonthKpis, heroDeltas) are gone with them.
 
-  const prevMonthKpis = useMemo(() => {
-    if (!prevMonthVal) return null
-    const prev = monthlyKpiMap.get(prevMonthVal)
-    const prevKd = monthlyKdMap.get(prevMonthVal)
-    // The empty-period guard stays on the LOGGED sums: 0/0/0 means the month has no rows. Savings
-    // is the third sum since MOB-R55 P2 split it from expenses.
-    const loggedIncome = prev?.income || 0
-    const expenses = prev?.expenses || 0
-    const prevExpensesFils = filsOf(prevKd?.expense_kd)
-    const prevSavingsFils = filsOf(prevKd?.savings_kd)
-    if (loggedIncome === 0 && expenses === 0 && prevSavingsFils === 0n) return null
-    if (incomeFils === null) return null
-    // RM-17 flat: the previous month is measured against the same typed income. MOB-R59 KS9: like
-    // with like — both months' Remaining subtract savings (the previous month's from R3).
-    const prevOutflow = prevExpensesFils + prevSavingsFils
-    const remaining = filsToDisplayKd(prevOutflow >= incomeFils ? 0n : incomeFils - prevOutflow)
-    return { expenses, remaining, overspent: prevOutflow > incomeFils }
-  }, [monthlyKpiMap, monthlyKdMap, prevMonthVal, incomeFils])
-
-  const heroDeltas = useMemo(() => {
-    // Income not set: Remaining has no value, so nothing is compared.
-    if (typedIncome === null) return null
-    if (!prevMonthKpis) return null
-    // Symmetric with prevMonthKpis' own empty-period guard above: a month with no
-    // rows produces logged income = expenses = 0, which yields a -100% delta that the
-    // inverted Expenses tile renders as a green success pill. Both category
-    // filters are exhaustive and every amount is > 0 (DB CHECK
-    // chk_transactions_amount_positive), so 0/0 means no rows, never a real zero.
-    // MOB-R36 re-key: this must read the LOGGED income, not the typed figure — the typed income
-    // is never 0 once set, so keying on it would silently disable the guard.
-    if (loggedMonthIncome === 0 && monthExpenses === 0 && monthSavingsFils === 0n) return null
-    // MOB-R52 F6 — against a base of 0 there is no percent change; the chip is hidden (null).
-    const delta = (curr: number, prev: number): number | null => {
-      if (prev === 0) return null
-      return ((curr - prev) / prev) * 100
-    }
-    // The Income chip is removed (MOB-R36 operator selection). Remaining's chip is suppressed when
-    // either month is overspent: a clamped Remaining is not a comparable quantity (a channel ruling
-    // by analogy, MOB-R36 — not an operator ruling).
-    const eitherOverspent = monthOverBy !== null || prevMonthKpis.overspent
-    return {
-      expensesDelta: delta(monthExpenses, prevMonthKpis.expenses),
-      remainingDelta: eitherOverspent ? null : delta(monthRemaining, prevMonthKpis.remaining),
-    }
-  }, [typedIncome, loggedMonthIncome, monthExpenses, monthSavingsFils, monthRemaining, monthOverBy, prevMonthKpis])
+  // MOB-R68 D1-D3 — Home's eyebrow, heading, sub line and KPI footers. Remaining is K1's figure in
+  // exact fils; the percentages come from the same integer fils, rounded half up.
+  const incomeSet = incomeFils !== null
+  const eyebrowText = homeEyebrow(selectedMonth, currentMonth, now)
+  const heading = homeHeading(selectedMonth, currentMonth, incomeSet, remainingFils)
+  const subLine = homeSubLine(incomeSet, remainingFils, filsToKd(remainingFils))
+  const heroFooters = incomeFils === null
+    ? null
+    : {
+        expensesPct: percentOfIncome(monthExpensesFils, incomeFils),
+        savingsPct: percentOfIncome(monthSavingsFils, incomeFils),
+        bar: remainingBar(monthExpensesFils, monthSavingsFils, remainingFils, incomeFils),
+      }
 
   const trendData = useMemo(() => {
     return monthlyMetrics.slice(Math.max(0, monthlyMetrics.length - 12)).map((row) => ({
@@ -401,55 +370,14 @@ export default function DashboardPage() {
   )
 
   const topExpenses = useMemo(() => {
-    // Coerce formatKd string values for display/sort (SWEEP-R3 display-only boundary).
+    // MOB-R68 D5 — the amount shows R3's exact string; the number is for sort order and the bar's
+    // length only (SWEEP-R3 display-only boundary). Sparklines, % chips and 3-month averages left
+    // Home's top-spending card.
     return Object.entries(selectedMonthExpenseMap)
-      .map(([name, value]) => [name, Number(value || 0)] as [string, number])
-      .sort((a, b) => b[1] - a[1])
+      .map(([name, valueKd]) => ({ name, value: Number(valueKd || 0), valueKd: String(valueKd || "0.000") }))
+      .sort((a, b) => b.value - a.value)
       .slice(0, 4)
   }, [selectedMonthExpenseMap])
-
-  const topExpensesWithSparklines = useMemo(() => {
-    if (!selectedMonth || topExpenses.length === 0) return []
-
-    const months: string[] = []
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(selectedMonth + "-01")
-      d.setMonth(d.getMonth() - i)
-      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`)
-    }
-
-    return topExpenses.map(([name, value]) => {
-      const sparklineData = months.map((month) => {
-        const total = Number(expenseByCategoryByMonth[month]?.[name] || 0)
-        return { month, value: total }
-      })
-      return { name, value, sparklineData }
-    })
-  }, [topExpenses, expenseByCategoryByMonth, selectedMonth])
-
-  const categoryTrendDeltas = useMemo(() => {
-    if (!selectedMonth || topExpenses.length === 0) return new Map<string, number>()
-    // Build 3-month rolling average from the 3 months BEFORE the selected month
-    const rollingMonths: string[] = []
-    for (let i = 1; i <= 3; i++) {
-      const d = new Date(selectedMonth + "-01")
-      d.setMonth(d.getMonth() - i)
-      rollingMonths.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`)
-    }
-    const map = new Map<string, number>()
-    for (const [name] of topExpenses) {
-      const monthsWithData = rollingMonths.filter(
-        (m) => expenseByCategoryByMonth[m]?.[name] != null
-      )
-      const avg =
-        monthsWithData.length > 0
-          ? monthsWithData.reduce((s, m) => s + Number(expenseByCategoryByMonth[m]?.[name] || 0), 0) /
-            monthsWithData.length
-          : 0
-      map.set(name, avg)
-    }
-    return map
-  }, [topExpenses, selectedMonth, expenseByCategoryByMonth])
 
   const budgetTop = useMemo(() => {
     const items = budgetResp?.items || []
@@ -565,6 +493,12 @@ export default function DashboardPage() {
 
   const isLoading = analyticsLoading
   const heroLoading = analyticsLoading || accountOverviewLoading || !selectedMonth
+  // MOB-R68 D1 — the heading and sub line wait for the first load (no figure is guessed on first
+  // paint), then stay up through refetches, which briefly set the loading flags again.
+  const [summaryShown, setSummaryShown] = useState(false)
+  useEffect(() => {
+    if (!heroLoading) setSummaryShown(true)
+  }, [heroLoading])
   const effectiveSetupGuideSeen = Boolean(profile?.setup_guide_seen) || setupGuideSeenLocal
   const effectiveOnboardingDismissed = Boolean(profile?.setup_guide_dismissed) || onboardingDismissed
   const setupCompleteCount = setupSteps.filter((step) => step.done).length
@@ -741,32 +675,43 @@ export default function DashboardPage() {
   return (
     <div className={`space-y-8 ${isMounted ? "animations-complete" : ""}`}>
       <h1 className="sr-only">Home</h1>
-      <PageHeader
-        badge="Home"
-        badgeDotClassName="bg-primary"
-        badgeSuffix={monthLabel}
-        actions={(
-          <Select
-            value={selectedMonth}
-            onValueChange={setSelectedMonth}
-            disabled={isLoading || monthOptions.length === 0}
+      {/* MOB-R68 D1 — the "HOME · THIS MONTH" pill and the hero's narration sentence are replaced by
+          an eyebrow, a two-line uppercase heading (second line in Highlight) and one sub line.
+          Strings are CHANNEL-DRAFTED and provisional (D2). Income not set: no heading and no sub
+          line; the income prompt below stays as it is. */}
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0 space-y-2">
+          <Eyebrow>{eyebrowText}</Eyebrow>
+          {summaryShown && heading ? (
+            <h2 className="text-[2rem] font-bold uppercase leading-[1.08] tracking-tight sm:text-[2.5rem]">
+              <span className="block">{heading.line1}</span>
+              <span className="block">
+                <Highlight>{heading.line2}</Highlight>
+              </span>
+            </h2>
+          ) : null}
+          {summaryShown && subLine ? <p className="text-sm text-muted-foreground">{subLine}</p> : null}
+        </div>
+        <Select
+          value={selectedMonth}
+          onValueChange={setSelectedMonth}
+          disabled={isLoading || monthOptions.length === 0}
+        >
+          <SelectTrigger
+            className="h-10 w-[180px] shrink-0 rounded-full px-4 text-sm shadow-sm"
+            aria-label="Select month to view"
           >
-            <SelectTrigger
-              className="h-10 w-[160px] rounded-full px-4 text-sm shadow-sm sm:w-[180px]"
-              aria-label="Select month to view"
-            >
-              <SelectValue placeholder="No months" />
-            </SelectTrigger>
-            <SelectContent>
-              {monthOptions.map((m) => (
-                <SelectItem key={m} value={m}>
-                  {m}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      />
+            <SelectValue placeholder="No months" />
+          </SelectTrigger>
+          <SelectContent>
+            {monthOptions.map((m) => (
+              <SelectItem key={m} value={m}>
+                {formatMonthYear(m)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </header>
 
       {activeDemoWorkspace ? (
         <DemoWorkspaceBanner
@@ -855,13 +800,13 @@ export default function DashboardPage() {
       <DashboardHero
         isLoading={heroLoading}
         monthLabel={monthLabel}
+        monthKey={selectedMonth}
         monthIncome={monthIncome}
         monthExpenses={monthExpenses}
         monthSavings={monthSavings}
         monthRemaining={monthRemaining}
         overBy={monthOverBy}
-        dailyPace={dailyPace}
-        deltas={heroDeltas}
+        footers={heroFooters}
         analyticsUpdatedAt={analyticsUpdatedAt}
       />
 
@@ -896,14 +841,18 @@ export default function DashboardPage() {
               the component and its tests remain in dashboard/sections.tsx; its three non
               safe-to-spend affordances now render from PlanSetupPrompts, mounted unconditionally
               below. This is the last safe-to-spend render path on Home. */}
-          <TopExpensesPanel
-            isLoading={isLoading}
-            topExpenses={topExpensesWithSparklines}
-            selectedMonth={selectedMonth}
-            categoryDeltas={categoryTrendDeltas}
-          />
+          {/* MOB-R68 C5 — Home's cards rise in once on mount, staggered. The wrappers stay mounted
+              across refetches and month changes, so the animation does not replay. D5: "See all"
+              goes to the spending view the legacy /expenses route already redirects to. */}
+          <div className="rise-in" style={{ animationDelay: "240ms" }}>
+            <TopExpensesPanel
+              isLoading={isLoading}
+              topExpenses={topExpenses}
+              seeAllHref="/activity?type=expense"
+            />
+          </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="rise-in grid gap-6 lg:grid-cols-2" style={{ animationDelay: "300ms" }}>
             <IncomeExpensesChart isLoading={isLoading} trendData={trendData} typedIncome={typedIncome} />
             <CategoryBreakdownChart
               isLoading={isLoading}
@@ -917,21 +866,24 @@ export default function DashboardPage() {
               the element is byte-identical to the one that stood above TopExpensesPanel, only
               its position in the list changed. No restyle, no wrapper, no gate change — the
               two spending cards keep their own relative order inside their grid, and the outer
-              stack carries no order- or reverse utilities, so this order holds at every width. */}
-          <HomeAttentionCenter
-            isLoading={isLoading}
-            monthLabel={monthLabel}
-            overBudgetCount={overBudgetCount}
-            overBudgetAmount={overBudgetAmount}
-            risingCategory={risingCategory}
-            budgetAlerts={budgetAlerts}
-            alertsLoading={budgetAlertsLoading}
-            dismissingAlertId={dismissingAlertId}
-            budgetPressureItems={budgetTop}
-            onDismissBudgetAlert={dismissBudgetAlert}
-            onOpenPlan={() => navigate("/plan")}
-            onOpenActivity={() => navigate("/activity?type=all")}
-          />
+              stack carries no order- or reverse utilities, so this order holds at every width.
+              MOB-R68 C5 — it now sits inside a rise-in wrapper; its position is unchanged. */}
+          <div className="rise-in" style={{ animationDelay: "360ms" }}>
+            <HomeAttentionCenter
+              isLoading={isLoading}
+              monthLabel={monthLabel}
+              overBudgetCount={overBudgetCount}
+              overBudgetAmount={overBudgetAmount}
+              risingCategory={risingCategory}
+              budgetAlerts={budgetAlerts}
+              alertsLoading={budgetAlertsLoading}
+              dismissingAlertId={dismissingAlertId}
+              budgetPressureItems={budgetTop}
+              onDismissBudgetAlert={dismissBudgetAlert}
+              onOpenPlan={() => navigate("/plan")}
+              onOpenActivity={() => navigate("/activity?type=all")}
+            />
+          </div>
 
           <CategoryDetailModal
             open={Boolean(activeCategory)}

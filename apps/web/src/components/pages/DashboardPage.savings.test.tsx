@@ -150,11 +150,17 @@ describe("Home — savings & investing (MOB-R55 K1)", () => {
     expect(lastHero().monthRemaining).toBe(0)
   })
 
-  it("the Remaining chip compares with last month's Remaining after its savings too", () => {
+  // MOB-R69 C1 — rewritten: the Remaining chip is gone (MOB-R68 D4). The footers are the month's
+  // shares of income in exact fils, and savings is its own segment of the Remaining bar.
+  it("the footers count savings as its own share of income", () => {
     mocks.useDashboardPageQueries.mockReturnValue(queries())
     renderPage()
-    // February: 100 - 20 - 10 = 70. March: 30. (30 - 70) / 70 = -57.14%.
-    expect(lastHero().deltas?.remainingDelta).toBeCloseTo(-57.142857, 5)
+    // March: income 100, expenses 40, savings 30, Remaining 30.
+    expect((lastHero() as unknown as { footers: unknown }).footers).toEqual({
+      expensesPct: 40,
+      savingsPct: 30,
+      bar: { expensesPct: 40, savingsPct: 30, trackPct: 30, leftPct: 30 },
+    })
   })
 
   it("the expenses chart has no savings slice, and a savings category shows no share", () => {

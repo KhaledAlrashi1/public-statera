@@ -48,7 +48,7 @@ export function KpiTile({
         <span aria-hidden="true" className="size-[7px] shrink-0 bg-highlight" />
         {label}
       </div>
-      <div className="mt-2 font-mono text-xl font-semibold tabular-nums leading-tight sm:text-2xl">
+      <div className="mt-2 font-mono text-lg font-semibold tabular-nums leading-tight lg:text-2xl">
         {money ? (
           <>
             <span aria-hidden="true">
