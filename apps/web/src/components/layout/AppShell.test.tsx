@@ -108,7 +108,7 @@ describe("AppShell", () => {
     window.scrollTo = vi.fn()
   })
 
-  it("opens quick add without navigating away from the current page", () => {
+  it("opens /log for an expense from the current page", () => {
     renderShell("/")
 
     expect(screen.getByText("home screen")).toBeInTheDocument()
@@ -116,7 +116,6 @@ describe("AppShell", () => {
 
     expect(mocks.navigate).toHaveBeenCalledWith("/log")
     expect(mocks.openQuickAdd).not.toHaveBeenCalled()
-    expect(screen.getByText("home screen")).toBeInTheDocument()
   })
 
   it("uses the current income context for quick add without surfacing hidden bank navigation", () => {
@@ -144,7 +143,7 @@ describe("AppShell", () => {
     })
   })
 
-  it("opens quick add when the L shortcut fires with no modal and no text focus", () => {
+  it("opens /log when the L shortcut fires with no modal and no text focus", () => {
     renderShell("/")
 
     fireEvent.keyDown(document.body, { key: "l" })
