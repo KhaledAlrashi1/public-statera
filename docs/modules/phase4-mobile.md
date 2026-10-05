@@ -10395,3 +10395,218 @@ output is pasted. Expected: blank 10206, then 191 lines at 10207-10397. Read-bac
 line count, header and last line verbatim, cmp of the region against the payload, git show
 --stat and porcelain, all pasted in full.
 After this block: strict 69, loose 71 (body lines 1513 and 6934).
+
+MOB-R70 — MOB-R69 report accepted; B12 recorded; the Log screen is rebuilt as option A, Receipt.
+
+Issued Monday, October 5, 2026, by the review channel.
+TIER 1 for D (backend, contract fixture). TIER 2 for E and F. One CC run; one report at the end.
+
+═══ A. MOB-R69 REPORT — ACCEPTED ═══
+
+A1. Persistence 10207-10397, cmp exit 0; strict 69, loose 71. Pushed 9c12aca..dee16a2, run
+    37351973589, all four jobs ubuntu-24.04, both probes on dee16a2, 0 unpushed. Accepted.
+A2. C: grants used as granted. CORRECTION BESIDE CC's prose, which reads "Five were rewritten,
+    including C2": the pasted diffs show 2 deleted (:574, zero-base :134) and 6 rewritten (the 5
+    granted plus C2 at :579). Counts 379/78 -> 391/79 are consistent. Accepted.
+A3. D1: no STOP was due. Every expense control already opened /log at 9c12aca (59e37d0, under
+    the MOB-R61 ruling). The CHANNEL'S D1 premise was wrong; the sheet in his B8 screenshots
+    was most likely reached through the old sheet's own Expense toggle, which now opens /log.
+    Lesson kept: verify the premise of the channel's own lines against the record first.
+A4. D2: cause from source: 15px inputs make iOS zoom on focus, and the zoomed page pans
+    sideways. Fix: 16px inputs on touch in the Input primitive (app-wide), the fields region
+    scrolls vertically only, the date field min-w-0. RATIFIED as within D2 although app-wide.
+A5. D3: the visualViewport hook existed; the reveal now runs after the re-render; the focused
+    field was visible in all four modelled runs. Accepted.
+A6. D build miss: the first run broke dialogs.savings-category.test.tsx (no router). CC changed
+    code (a prop hand-off), not the test, and reported it. Accepted under H2 below.
+A7. E1: margins were already 16px in emulation before the change. CHANNEL'S READING: the narrow
+    margins and the clipped "KD 0" in his B9 screenshots were most likely the iOS zoom fixed by
+    D2. His phone check confirms or refutes it.
+A8. E3 (d) trace: rows carry no income flag; an income-kind category means income in R3 and R4.
+    FOUND: Activity's income-only filter (transactions.ts:876) checks is_income = 1 only. Added
+    to the income-rules-unify queue item. Not acted on here.
+A9. F6: Google sign-in was expected to work inside the installed app (same-tab redirect, Lax
+    cookies); a magic link opens and signs in the browser, not the installed app. The operator's
+    check (B3) confirms Google works inside the installed app. The install guide STAYS.
+    Magic-link sign-in inside the installed app is queued.
+A10. CLAUDE.md "QuickAdd internals are untouchable": the D1 hand-off, D2 and D3 are RATIFIED as
+    exceptions. A note goes BESIDE that line, never replacing it: "MOB-R70 A10: the MOB-R69 D1
+    prop hand-off, D2 (16px inputs, vertical scroll) and D3 (reveal after re-render) are
+    ratified exceptions." Own commit.
+A11. Queue additions: favicon.svg is invalid XML (--accent inside a comment); possible expense
+    rows saved earlier under income-kind categories via /log (the operator can look in
+    Activity); magic-link sign-in inside the installed app.
+
+═══ B. OPERATOR FEEDBACK AND CHECKS, VERBATIM ═══
+
+B1. B12, with a phone screenshot of /log (Chrome on iPhone, opened from the Home Screen):
+    "Great improvement. I have found some areas for improvement. One is the search
+    icon/bar/feature is a bit confusing. I tried entering a new place. When adding it, it was
+    clear to me that it was added and the app was waiting for me to enter the category, the
+    amount, and what was the transaction about. How can we make things more obvious? Also, I
+    added the app to the home screen successfully. Nevertheless, the note was not clear why the
+    user should add it to the home screen. In addition, how can I make the workflow of the
+    transaction logging smoother. For instance, when the user selects the date, they don't need
+    to hit the check icon to confirm. It's unnecessary step. Also, when the user wants to closes
+    the keyboard on the search bar, the search bar should go away. Why do I need to close it as
+    well? I would like us to factor in design thinking as well making the transaction logging
+    clear. The user needs to know what they need to do. This involves knowing the components of
+    each transaction. The optional and mandatory fields. Also, if you see the screenshot, things
+    aren't as tidy, smooth, and clean. How can we improve the issues I see and the ones I don't.
+    The current design isn't user-friendly. The user wouldn't easily know how to log a
+    transaction. It's better to start a new conversation. Let me know if the handoff is still
+    valid."
+B2. The channel asked whether he meant it was NOT clear. His answer, verbatim: "To answer the
+    question, "it was not clear to me that it was added and the app was waiting…""
+B3. His sign-in check, verbatim: "By the way, I can sign in on the installed app."
+B4. Phone checks on dee16a2 done: Statera added to the Home Screen (B1); Google sign-in inside
+    the installed app (B3). Still open, listed in H5. The CHANNEL RULED, without asking him,
+    that the open checks do not hold this build: /log is rebuilt here and the rest is unchanged.
+B5. CHANNEL'S observations from his screenshot, shown to him, not his words: the screen never
+    says what it is; two instruction lines compete ("Pick a place to see what you usually buy
+    there." and "Tap a place, then type the amount."); "Coffee · 1 usual" reads oddly; the
+    search button sits alone on its own row; the date chips take a full row; the Category chip
+    gives no sign it is required; the amount sits far right; the disabled "Enter an amount" bar
+    is grey and heavy; a second button (Done) sits half off-screen below it. The heading "Where
+    did you spend?" leads with the place, which is optional.
+B6. The CHANNEL'S design pass: the anatomy (required: amount and category; optional: place,
+    what it was for, date, which is today unless changed); one visible next step; repeats in
+    two taps. Three working mocks rendered in chat, CHANNEL'S: A Receipt, B Amount first, C
+    Step by step. The channel's questions and options; the operator's selections:
+      "Which Log screen should CC build?" Options: "A · Receipt (recommended)", "B · Amount
+      first", "C · Step by step". Selected: "A · Receipt (recommended)".
+      "Undo after saving: how should it work?" Options: "Keep today's Undo: deletes the row
+      just saved (recommended)", "Hold the save a few seconds, then write". Selected: "Keep
+      today's Undo: deletes the row just saved (recommended)".
+      "Amount shown on a usual tile:" Options: "Place's last amount, small backend addition
+      (recommended)", "Top item's amount, no backend change". Selected: "Place's last amount,
+      small backend addition (recommended)".
+B7. Consequence: option A SUPERSEDES the v2 heading "Where did you spend?" and the dark amount
+    card. Kept from v2: usual tiles, one Save button, the save moment, Undo, the first-save
+    burst, keypad on phones and typing on computers.
+
+═══ C. THE ENTRY, AS THE SCREEN MUST SHOW IT ═══
+
+C1. Required: amount, category. Optional: place, what for (the item or a note), date. Date is
+    today unless changed. The screen shows exactly this: no other field is required, and no
+    required field is hidden.
+C2. Every string in E is CHANNEL-DRAFTED and provisional under RM-26.
+
+═══ D. BACKEND: PLACE LAST AMOUNT AND LAST USED (TIER 1, NO SCHEMA) ═══
+
+D1. GET /api/log-suggestions gains, per place: last_amount, the amount of her most recent
+    non-demo expense at that place, in the money format the route already uses for item
+    amounts; and last_used, that row's date. Ties on date: the most recently created row wins.
+    Same exclusions as today (demo rows, income). Existing fields unchanged; order unchanged.
+D2. Read-only. If it needs a migration, a schema change or a write, D STOPS (RM-21).
+D3. Money-wire: if the route is in the inventory, the JSON and assert.ts come only from the
+    generators, never hand-edited. Report routes, money paths, generated assertions and leaves
+    before and after, with sign. Contract fixture 67 -> CC's prediction; ALLOWLIST stays empty.
+D4. New API tests in new files, each shown able to fail: last amount and last used for a place
+    with several rows; the tie rule; demo and income rows excluded. Hermetic and integration
+    both run; integration last measured 930/10/74 at c36c81a, re-measured before the edit.
+D5. Own commit, green alone, before E.
+
+═══ E. /log BECOMES OPTION A, RECEIPT (TIER 2) ═══
+
+E1. Header: close control, title "New expense", line "Amount and category are all you need."
+E2. "Repeat in two taps": up to four place tiles in a 2-column grid, in today's order: colour
+    square with the initial, name, "KD {last_amount}". A tap fills place, its category and
+    last_amount; Save then saves. Selected tile has an ink border. No places: section hidden.
+    A place with no last_amount fills place and category only.
+E3. "Or fill in a new one": one card, five lines in this order: Amount, Category, Place, What
+    for, Date. Each line shows its label and its value, or a quiet hint when empty ("How much",
+    "What kind of spending", "Shop or app", "Item or note"). Date shows "Today" by default.
+E4. Line tags while empty: Amount and Category show "Required"; the FIRST missing one shows
+    "Next" in brass instead. First missing: Category if a place is chosen and Category is empty;
+    else Amount; else Category. Place and What for show "Optional". Filled lines show no tag.
+E5. Tapping a line opens its picker inline beneath it; one picker open at a time; tapping the
+    open line closes it.
+    Amount: keypad on touch (existing log-amount.ts); typed field on computers (MOB-R69 E4).
+      When the amount is valid and Category is empty, a button "Next: category" under it.
+    Category: her top six by transaction_count plus search for the rest; no keyboard until
+      search is tapped; no income-kind categories (all as at dee16a2). When a place is chosen
+      and Category is empty, the line "What kind of spending is {place}?" sits above the
+      chips. Choosing closes the picker and opens Amount if Amount is missing.
+    Place: a search field. Results are her places; when the text matches none, the last result
+      is "Add “{text}” as a new place". A result applies on pointer down, so the keyboard
+      closing cannot swallow the tap. Closing the keyboard without choosing closes the search
+      and drops the text (CHANNEL'S choice, per B1). After choosing: Category opens if empty,
+      else Amount if missing, else the picker closes.
+    What for: a text field; Enter or closing the keyboard keeps the text and closes. The place's
+      remembered items show above it as chips, "{item} · KD {amount}", no counts; a chip fills
+      What for, and Amount only if Amount is empty (CHANNEL'S choice: keeps item memory).
+    Date: Statera's own chips: "Today", "Yesterday", then the 12 days before, as "Sat 3 Oct".
+      A tap applies at once and closes. No confirm step. A last chip "Earlier date" opens the
+      existing one-tap overlay for older days (CHANNEL'S choice). No future dates.
+E6. Save: one button, never disabled. While something required is missing, it is outlined and
+    names it: "Add an amount and a category", "Add an amount" or "Add a category". A tap opens
+    the first missing line and shows "Add {missing} to save" above the button. When ready: ink
+    pill, brass circle with a check, "Save KD {amount}" in the existing formatter. On computers
+    Enter saves when ready.
+E7. Save moment: brass circle, the check draws, "Logged", "KD {amount} · {place, else
+    category}", "Undo" and "Log another"; resets after about 2.6 s. Brass squares burst only on
+    the first save of the day (per-device localStorage date, browser clock). Reduced motion: a
+    static check, no draw, no burst. Screen readers hear "Logged, KD {amount}".
+E8. Undo: today's path, unchanged (MOB-R53), as the operator selected. It resets the form. The
+    existing undo-failure behaviour is kept.
+E9. Removed from /log: both instruction lines, the lone search row, the top date-chip row, the
+    "usual" counts, the second button below Save, the grey disabled bar.
+E10. Kept: RM-27 normalizer for every amount; 16px inputs; the visualViewport reveal; typing
+    on computers; demo and income exclusions; /log?stats=1 timings; light and dark mode from
+    tokens; one Log screen on every width.
+E11. Tokens: existing tokens only. Any new token pair (light and dark) is listed in the report.
+    The existing-vs-mock token values stay unruled.
+E12. The old sheet (income) is unchanged. Moving income to this screen is a later block.
+E13. Install guide: one new line under the title, above the existing steps: "It opens full
+    screen like an app, one tap away. No App Store needed." Title, steps and "Got it" unchanged.
+
+═══ F. TESTS, PREDICTIONS, INSTRUMENTS ═══
+
+F1. MOB-R60: before the first edit, CC writes exact predictions with sign to a scratch file,
+    reports its sha256 and quotes its key lines: frontend 414/85 ->; API hermetic 899/41/74 ->;
+    integration (re-measured) ->; tsc 0 bytes both; fixture 67 ->; money-wire four numbers.
+F2. CC MEASURES every break first: with E applied and no test edited, run the suite and list
+    each failing case with file:line and its reason. GRANT (MOB-R53), by file, for measured
+    breaks caused by E only: LogPage.test.tsx, LogPage.undo-failure.test.tsx,
+    LogPage.typing.test.tsx and the category-picker test file. Each case is rewritten to pin
+    the new behaviour or deleted where the behaviour is removed; every diff pasted. A break in
+    any other file STOPS E (MOB-R63 B); D and A10 continue.
+F3. New frontend tests in new files, each shown able to fail: the tags (Required, Next,
+    Optional) and the first-missing rule; the Save label names what is missing; a tile fills
+    three lines; a date chip applies with no confirm; search closes on blur and a pointer-down
+    pick still applies; a new place opens Category with its question; the first-save burst
+    date key; reduced motion; the install guide line.
+F4. Layout: CC's scratch Playwright, WebKit and Chromium, at 375 and 390: /log scrollWidth equals
+    clientWidth with each picker open; Save visible with the keypad open; with visualViewport
+    shrunk, the Place and What for fields stay visible. Numbers pasted.
+
+═══ G. ORDER ═══
+
+G1. Persist; A10; D; E. Each commit green alone. A STOP stops only its item; stopped work is
+    stashed, never committed.
+
+═══ H. CONSTRAINTS, PUSH, OPERATOR CHECKS ═══
+
+H1. RM-21, RM-23, RM-25 (postponed), RM-26, RM-27 stand. No new gate; next is RM-28.
+H2. STANDING, clarifying the MOB-R52 rule: it applies to the committed state. A miss during the
+    build, fixed before commit without editing a test, is reported (as in MOB-R69 D) and does
+    not by itself stop the push.
+H3. Push once, after the last item: fast-forward; every committed item's predictions held; all
+    four Actions jobs succeed, labelled ubuntu-24.04; both probes on the new sha; 0 unpushed by
+    both routes; porcelain pasted. A STOPPED item's expectations do not block the push.
+H4. If D stops, E still ships with tiles showing the top item's amount where one exists, else
+    no amount, and the report says so.
+H5. Operator's phone checks after deploy, in Chrome and Safari; CC does not wait on them: a new
+    entry with no help (new place, category, amount, save); a repeat from a tile; the date chips;
+    search closing with the keyboard; the save moment and Undo; the install guide line. Still
+    open from dee16a2: Home light and dark and the count-ups; laptop typing and Enter; the
+    Income sheet; "1,500" saves as KD 1,500.000 and "1,5" is refused.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, before any other work. The wrap check runs as its own step and its
+output is pasted. Expected: blank 10398, then 214 lines at 10399-10612. Read-back: appended
+line count, header and last line verbatim, cmp of the region against the payload, git show
+--stat and porcelain, all pasted in full.
+After this block: strict 70, loose 72 (body lines 1513 and 6934).
