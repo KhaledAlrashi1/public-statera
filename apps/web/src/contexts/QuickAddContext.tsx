@@ -13,7 +13,14 @@ type QuickAddContextValue = {
 
 const QuickAddContext = createContext<QuickAddContextValue | null>(null)
 
-export function QuickAddProvider({ children }: { children: ReactNode }) {
+export function QuickAddProvider({
+  children,
+  onChooseExpense,
+}: {
+  children: ReactNode
+  // MOB-R69 D1 — every expense entry opens /log; the host (AppShell) says how to get there.
+  onChooseExpense?: () => void
+}) {
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [initialType, setInitialType] = useState<QuickAddType>("expense")
@@ -92,6 +99,14 @@ export function QuickAddProvider({ children }: { children: ReactNode }) {
           void refetchCategories()
         }}
         onSuccess={handleSuccess}
+        onChooseExpense={
+          onChooseExpense
+            ? () => {
+                setOpen(false)
+                onChooseExpense()
+              }
+            : undefined
+        }
       />
     </QuickAddContext.Provider>
   )

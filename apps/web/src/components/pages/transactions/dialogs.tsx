@@ -46,7 +46,7 @@ import {
 import { SuggestionCombobox, type ExtraOption } from "./suggestion-combobox"
 import { CategoryCombobox } from "./category-combobox"
 import { SUGGESTED_MERCHANTS, suggestedMerchantsFor } from "@/lib/suggested-names"
-import { useVisualViewportVars } from "@/lib/useVisualViewport"
+import { useVisualViewportVars, VISUAL_VIEWPORT_SHEET_CLASS } from "@/lib/useVisualViewport"
 
 export function DuplicateWarningDialog({
   open,
@@ -109,6 +109,7 @@ export function AddTransactionDialog({
   onSuccess,
   initialType = "expense",
   ownsSavingsCategory = false,
+  onChooseExpense,
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
@@ -120,6 +121,9 @@ export function AddTransactionDialog({
   initialType?: "expense" | "income"
   // MOB-R60 D2 — passed to the category field only (categoryOptions' one input).
   ownsSavingsCategory?: boolean
+  // MOB-R69 D1 — every expense entry opens /log. When given, choosing "Expense" hands over to it
+  // instead of switching this sheet to an expense form. Absent, the toggle works as before.
+  onChooseExpense?: () => void
 }) {
   const toast = useToast()
   const [type, setType] = useState<"expense" | "income">(initialType)
@@ -359,7 +363,7 @@ export function AddTransactionDialog({
           // MOB-R61 C1/C2 — below sm: top-anchored inside the visual viewport and capped to its
           // height, a flex column whose fields scroll in their own region, so the footer sits
           // outside that region and never overlaps a field. sm+ is unchanged.
-          className="max-h-[92dvh] w-[calc(100vw-1rem)] max-w-2xl space-y-5 overflow-y-auto sm:w-full max-sm:top-[calc(var(--vv-top,0px)+0.5rem)] max-sm:translate-y-0 max-sm:max-h-[calc(var(--vv-height,100dvh)-1rem)] max-sm:flex max-sm:flex-col max-sm:overflow-y-hidden"
+          className={cn("max-h-[92dvh] w-[calc(100vw-1rem)] max-w-2xl space-y-5 overflow-y-auto sm:w-full", VISUAL_VIEWPORT_SHEET_CLASS)}
           style={viewportVars}
           onOpenAutoFocus={(e) => {
             e.preventDefault()
@@ -377,7 +381,8 @@ export function AddTransactionDialog({
               ref={fieldsRef}
               data-quickadd-fields=""
               onFocus={() => requestAnimationFrame(revealFocusedField)}
-              className="space-y-5 max-sm:-mx-1 max-sm:min-h-0 max-sm:flex-1 max-sm:overflow-y-auto max-sm:px-1 max-sm:py-1"
+              // MOB-R69 D2 — overflow-x-hidden: this region scrolls vertically only.
+              className="space-y-5 max-sm:-mx-1 max-sm:min-h-0 max-sm:flex-1 max-sm:overflow-y-auto max-sm:overflow-x-hidden max-sm:px-1 max-sm:py-1"
             >
               <DialogHeader>
                 <DialogTitle>
@@ -391,6 +396,10 @@ export function AddTransactionDialog({
                   type="button"
                   variant="ghost"
                   onClick={() => {
+                    if (onChooseExpense) {
+                      onChooseExpense()
+                      return
+                    }
                     setType("expense")
                     setSubmitAttempted(false)
                     setError(null)
@@ -472,7 +481,7 @@ export function AddTransactionDialog({
                           onChange={(e) => setDate(e.target.value)}
                           onBlur={() => setTouched((prev) => ({ ...prev, date: true }))}
                           aria-invalid={dateValidation?.tone === "error"}
-                          className={validationInputClass(dateValidation?.tone)}
+                          className={cn("min-w-0 max-w-full", validationInputClass(dateValidation?.tone))}
                         />
                         <FieldFeedback tone={dateValidation?.tone} message={dateValidation?.message} />
                       </div>
@@ -580,7 +589,7 @@ export function AddTransactionDialog({
                           onChange={(e) => setDate(e.target.value)}
                           onBlur={() => setTouched((prev) => ({ ...prev, date: true }))}
                           aria-invalid={dateValidation?.tone === "error"}
-                          className={validationInputClass(dateValidation?.tone)}
+                          className={cn("min-w-0 max-w-full", validationInputClass(dateValidation?.tone))}
                         />
                         <FieldFeedback tone={dateValidation?.tone} message={dateValidation?.message} />
                       </div>

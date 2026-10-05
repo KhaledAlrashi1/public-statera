@@ -608,8 +608,10 @@ function AppShellLayout() {
 }
 
 export default function AppShell() {
+  const navigate = useNavigate()
   return (
-    <QuickAddProvider>
+    // MOB-R69 D1 — choosing "Expense" in the old sheet opens /log, the main expense entry.
+    <QuickAddProvider onChooseExpense={() => navigate("/log")}>
       <AppShellLayout />
     </QuickAddProvider>
   )
