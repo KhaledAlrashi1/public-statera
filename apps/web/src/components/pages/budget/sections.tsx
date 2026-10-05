@@ -18,6 +18,7 @@ import {
   cn,
   fmt3,
   formatCompactKD,
+  formatKD,
   getBudgetUtilizationFill,
   getBudgetUtilizationTone,
   today,
@@ -78,6 +79,9 @@ export type BudgetRow = {
   avg: number
   remaining: number
   pct: number
+  // MOB-R56 KS7 — a savings-kind category: its budget is a target, shown as "{spent} of {budget}",
+  // with no "% used", no "remaining" and no over-budget styling.
+  isSavings?: boolean
 }
 
 export function BudgetHero({
@@ -546,7 +550,7 @@ export function BudgetTable({
           />
         ) : (
           rows.map((r) => {
-            const isOver = r.remaining < 0
+            const isOver = !r.isSavings && r.remaining < 0
             const progressWidth = Math.max(0, Math.min(100, r.pct))
             const tone = getBudgetUtilizationTone(r.pct)
 
@@ -557,9 +561,15 @@ export function BudgetTable({
                     <h3 className="truncate text-sm font-semibold" title={r.cat}>
                       {r.cat}
                     </h3>
-                    <p className={cn("mt-1 text-xs", tone.textClassName)}>
-                      {Math.round(r.pct)}% used · {tone.label}
-                    </p>
+                    {r.isSavings ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {formatKD(r.spent)} of {formatKD(r.allocated)}
+                      </p>
+                    ) : (
+                      <p className={cn("mt-1 text-xs", tone.textClassName)}>
+                        {Math.round(r.pct)}% used · {tone.label}
+                      </p>
+                    )}
                   </div>
                   <div className="text-right">
                     <div className="text-base font-semibold tabular-nums">KD {fmt3(r.spent)}</div>
@@ -574,16 +584,18 @@ export function BudgetTable({
                     <div
                       className={cn(
                         "h-2.5 rounded-full transition-all",
-                        tone.barClassName
+                        r.isSavings ? "bg-primary" : tone.barClassName
                       )}
                       style={{ width: `${progressWidth}%` }}
                     />
                   </div>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span className="tabular-nums">12-mo avg: KD {fmt3(r.avg)}</span>
-                    <span className={cn("tabular-nums", isOver && "font-semibold text-destructive")}>
-                      {isOver ? "-" : ""}KD {fmt3(Math.abs(r.remaining))} remaining
-                    </span>
+                    {r.isSavings ? null : (
+                      <span className={cn("tabular-nums", isOver && "font-semibold text-destructive")}>
+                        {isOver ? "-" : ""}KD {fmt3(Math.abs(r.remaining))} remaining
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -657,7 +669,7 @@ export function BudgetTable({
               </tr>
             ) : (
               rows.map((r) => {
-                const isOver = r.remaining < 0
+                const isOver = !r.isSavings && r.remaining < 0
                 const tone = getBudgetUtilizationTone(r.pct)
                 return (
                   <tr key={`${r.cat}-${r.idx}`} className="border-b border-border/60 table-row-hover">
@@ -666,9 +678,13 @@ export function BudgetTable({
                     <td className="px-4 py-3 text-right tabular-nums">KD {fmt3(r.spent)}</td>
                     <td className="px-4 py-3 text-right tabular-nums">KD {fmt3(r.avg)}</td>
                     <td className="px-4 py-3 text-right">
-                      <span className={cn("tabular-nums", isOver && "text-destructive font-semibold")}>
-                        {isOver ? "-" : ""}KD {fmt3(Math.abs(r.remaining))}
-                      </span>
+                      {r.isSavings ? (
+                        <span className="text-muted-foreground">—</span>
+                      ) : (
+                        <span className={cn("tabular-nums", isOver && "text-destructive font-semibold")}>
+                          {isOver ? "-" : ""}KD {fmt3(Math.abs(r.remaining))}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -676,14 +692,20 @@ export function BudgetTable({
                           <div
                             className={cn(
                               "h-2 rounded-full",
-                              tone.barClassName
+                              r.isSavings ? "bg-primary" : tone.barClassName
                             )}
                             style={{ width: `${Math.min(100, r.pct)}%` }}
                           />
                         </div>
-                        <span className={cn("text-xs font-semibold", tone.textClassName)}>
-                          {Math.round(r.pct)}% · {tone.label}
-                        </span>
+                        {r.isSavings ? (
+                          <span className="text-xs text-muted-foreground">
+                            {formatKD(r.spent)} of {formatKD(r.allocated)}
+                          </span>
+                        ) : (
+                          <span className={cn("text-xs font-semibold", tone.textClassName)}>
+                            {Math.round(r.pct)}% · {tone.label}
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right">

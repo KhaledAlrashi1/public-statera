@@ -9,24 +9,6 @@ afterEach(() => {
 })
 
 describe("DashboardHero", () => {
-  it("shows a motivational state when the month is under budget", () => {
-    render(
-      <DashboardHero
-        isLoading={false}
-        monthLabel="March 2026"
-        monthIncome={1200}
-        monthExpenses={780}
-        monthRemaining={420}
-        savingsRate={22}
-        dailyPace={{ avgDaily: 26, projected: 806, daysElapsed: 12, daysInMonth: 31 }}
-        deltas={null}
-      />
-    )
-
-    expect(screen.getByText("You're doing well this month")).toBeInTheDocument()
-    expect(screen.getByText(/You've kept KD 420 in reserve so far/i)).toBeInTheDocument()
-  })
-
   it("animates from the current displayed value when months switch quickly", () => {
     let now = 0
     let frameId = 0
@@ -126,7 +108,7 @@ describe("DashboardHero", () => {
 // MOB-R36 — the typed income. Not set wins over overspent; the Income tile's "vs last month" chip is
 // removed (under RM-17 flat it would always read 0.0%).
 describe("DashboardHero — typed income (MOB-R36)", () => {
-  it("income not set: Income reads Not set, Remaining and Savings rate read —", () => {
+  it("income not set: Income reads Not set, Remaining reads —", () => {
     render(
       <DashboardHero
         isLoading={false}
@@ -134,13 +116,13 @@ describe("DashboardHero — typed income (MOB-R36)", () => {
         monthIncome={null}
         monthExpenses={250}
         monthRemaining={0}
-        savingsRate={null}
+        monthSavings={30}
         dailyPace={null}
         deltas={null}
       />
     )
     expect(screen.getByText("Not set")).toBeInTheDocument()
-    expect(screen.getAllByText("—")).toHaveLength(2)
+    expect(screen.getAllByText("—")).toHaveLength(1)
     expect(screen.queryByText("KD 0.000")).not.toBeInTheDocument()
     expect(screen.queryByText("0.0%")).not.toBeInTheDocument()
   })
@@ -178,27 +160,5 @@ describe("DashboardHero — typed income (MOB-R36)", () => {
     )
     expect(screen.getByText("10.0% vs last month")).toBeInTheDocument()
     expect(screen.queryByText("0.0% vs last month")).not.toBeInTheDocument()
-  })
-})
-
-describe("DashboardHero — S10 label (MOB-R40 F2)", () => {
-  // The branch below 15% compares typed income with logged expenses; no budget is involved, so
-  // the label names what is compared. Its gate and its detail line are unchanged.
-  it("a savings rate above 0 and below 15 reads as spending less than you earn", () => {
-    render(
-      <DashboardHero
-        isLoading={false}
-        monthLabel="March 2026"
-        monthIncome={1000}
-        monthExpenses={900}
-        monthRemaining={100}
-        savingsRate={10}
-        dailyPace={null}
-        deltas={null}
-      />
-    )
-    expect(screen.getByText("You're spending less than you earn")).toBeInTheDocument()
-    expect(screen.queryByText("You're under budget this month")).not.toBeInTheDocument()
-    expect(screen.getByText(/You still have KD 100 protected/)).toBeInTheDocument()
   })
 })

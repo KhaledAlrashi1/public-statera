@@ -47,7 +47,8 @@ export function CategoryDetailModal({
   onLoadMore: () => void
   onRetryCategoryLoad?: () => void
   categoryTotal: number
-  categoryShare: number
+  // MOB-R56 KS1 — null for a savings-kind category: shares are over expenses only, so it has none.
+  categoryShare: number | null
   categoryDelta: number
   categoryDeltaPct: number
   categoryPrevTotal: number
@@ -79,14 +80,16 @@ export function CategoryDetailModal({
                 {formatKD(categoryTotal)}
               </div>
             </div>
-            <div className="inner-card">
-              <div className="text-xs font-semibold tracking-wide text-muted-foreground">
-                Share of Month
+            {categoryShare === null ? null : (
+              <div className="inner-card">
+                <div className="text-xs font-semibold tracking-wide text-muted-foreground">
+                  Share of Month
+                </div>
+                <div className="mt-2 text-lg font-semibold tabular-nums">
+                  {categoryShare.toFixed(1)}%
+                </div>
               </div>
-              <div className="mt-2 text-lg font-semibold tabular-nums">
-                {categoryShare.toFixed(1)}%
-              </div>
-            </div>
+            )}
             <div className="inner-card">
               <div className="text-xs font-semibold tracking-wide text-muted-foreground">
                 vs {prevMonth || "Prev"}

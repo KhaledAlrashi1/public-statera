@@ -100,11 +100,6 @@ function AnimatedKDNumber({ value }: { value: number }) {
   return <>{fmt3(animated)}</>
 }
 
-function AnimatedPercent({ value }: { value: number }) {
-  const animated = useAnimatedNumber(value)
-  return <>{animated.toFixed(1)}%</>
-}
-
 function HeroDelta({
   value,
   inverted = false,
@@ -129,22 +124,6 @@ function HeroDelta({
       <span>{deltaText}</span>
     </div>
   )
-}
-
-function dashboardMomentumState(monthRemaining: number, savingsRate: number) {
-  if (monthRemaining <= 0 || savingsRate <= 0) return null
-
-  if (savingsRate >= 15) {
-    return {
-      label: "You're doing well this month",
-      detail: `You've kept ${formatCompactKD(monthRemaining)} in reserve so far. Keep this pace and you'll finish with room to spare.`,
-    }
-  }
-
-  return {
-    label: "You're spending less than you earn",
-    detail: `You still have ${formatCompactKD(monthRemaining)} protected. A steady pace keeps the month comfortably on track.`,
-  }
 }
 
 const SAFE_TO_SPEND_WARNING_COPY: Record<string, string> = {
@@ -751,9 +730,9 @@ export function DashboardHero({
   monthLabel,
   monthIncome,
   monthExpenses,
+  monthSavings,
   monthRemaining,
   overBy = null,
-  savingsRate,
   dailyPace,
   deltas,
   analyticsUpdatedAt,
@@ -763,14 +742,16 @@ export function DashboardHero({
   // MOB-R36 — the TYPED monthly income; null when not set. Not set wins over overspent.
   monthIncome: number | null
   monthExpenses: number
+  // MOB-R55 P3 — the month's savings & investing total (savings-kind categories), from the server.
+  monthSavings: number
+  // Income - expenses - savings, clamped at 0 (P3).
   monthRemaining: number
-  // Expenses minus income when spending exceeds the typed income (#23); null otherwise.
+  // Expenses + savings - income when that is above 0 (MOB-R59 KS10); null otherwise.
   overBy?: number | null
-  savingsRate: number | null
   dailyPace: { avgDaily: number; projected: number; daysElapsed: number; daysInMonth: number } | null
   // The Income chip is removed (MOB-R36: under RM-17 flat it always read 0.0%). remainingDelta is
   // null when either month is overspent (a channel ruling by analogy, MOB-R36).
-  deltas: { expensesDelta: number | null; remainingDelta: number | null; savingsRateDelta: number } | null
+  deltas: { expensesDelta: number | null; remainingDelta: number | null } | null
   analyticsUpdatedAt?: string | null
 }) {
   const freshness = useMemo(() => {
@@ -806,7 +787,6 @@ export function DashboardHero({
     }
   }, [analyticsUpdatedAt])
   const incomeSet = monthIncome !== null
-  const momentum = incomeSet ? dashboardMomentumState(monthRemaining, savingsRate ?? 0) : null
 
   return (
     <section className="float-in stagger-1 space-y-4" aria-label="Monthly overview">
@@ -829,11 +809,8 @@ export function DashboardHero({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-lg leading-snug text-foreground">
-                {momentum
-                  ? momentum.detail
-                  : "Income, expenses, and remaining balance for the selected month."}
+                Income, expenses, and remaining balance for the selected month.
               </p>
-              {momentum ? <Badge variant="success">{momentum.label}</Badge> : null}
             </div>
             {freshness ? (
               <div className="shrink-0 text-xs sm:text-right">
@@ -877,11 +854,8 @@ export function DashboardHero({
               {deltas && deltas.remainingDelta !== null && <HeroDelta value={deltas.remainingDelta} />}
             </div>
             <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
-              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Savings rate</div>
-              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl">
-                {savingsRate === null ? "—" : <AnimatedPercent value={savingsRate} />}
-              </div>
-              {deltas && <HeroDelta value={deltas.savingsRateDelta} unit="points" />}
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Savings &amp; investing</div>
+              <div className="mt-1 font-mono text-lg font-semibold tabular-nums sm:text-xl"><AnimatedKD value={monthSavings} /></div>
             </div>
           </div>
 

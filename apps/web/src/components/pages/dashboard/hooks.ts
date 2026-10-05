@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { analyticsApi, authApi, budgetsApi, transactionsApi } from "@/lib/api"
+import { analyticsApi, authApi, budgetsApi, categoriesApi, transactionsApi } from "@/lib/api"
 
 const DASHBOARD_CATEGORY_PAGE_SIZE = 100
 
@@ -83,8 +83,16 @@ export function useDashboardPageQueries(
     staleTime: 5 * 60 * 1000,
   })
 
+  // MOB-R55 P4 — the user's categories with their server kind; Home uses it for savings only.
+  const { data: categoryList } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => categoriesApi.list(),
+    staleTime: 5 * 60 * 1000,
+  })
+
   return {
     dashboardMetrics,
+    categoryList,
     analyticsLoading: analyticsPending || analyticsFetching,
     analyticsFetching,
     analyticsError,

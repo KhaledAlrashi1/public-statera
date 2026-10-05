@@ -120,27 +120,39 @@ export default function BudgetPage() {
     enabled: Boolean(comparisonMonth),
   })
 
+  // MOB-R55 P5 / MOB-R56 KS7 / MOB-R59 KS11 — Plan's spending figures are over EXPENSE budgets and
+  // expense spending; a savings-kind category (the server's kind, P4) keeps its budget as a target
+  // and shows its own "X of Y". "Planned total" still sums every budget.
+  const savingsCategoryNames = useMemo(
+    () => new Set(categories.filter((c) => c.kind === "savings").map((c) => c.name)),
+    [categories]
+  )
+  const isSavingsCategory = (name: string | null | undefined) => savingsCategoryNames.has(name || "Uncategorized")
   const totalBudget = budgets.reduce(
     (sum, b) => sum + (parseFloat(b.amount_kd) || 0),
     0
   )
-  const totalSpent = Object.values(spentMap).reduce(
-    (sum, v) => sum + (v || 0),
-    0
-  )
-  const remaining = totalBudget - totalSpent
-  const percentUsed = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0
+  const expenseBudgetTotal = budgets
+    .filter((b) => !isSavingsCategory(b.category))
+    .reduce((sum, b) => sum + (parseFloat(b.amount_kd) || 0), 0)
+  const totalSpent = Object.entries(spentMap)
+    .filter(([cat]) => !isSavingsCategory(cat))
+    .reduce((sum, [, v]) => sum + (v || 0), 0)
+  const remaining = expenseBudgetTotal - totalSpent
+  const percentUsed = expenseBudgetTotal > 0 ? (totalSpent / expenseBudgetTotal) * 100 : 0
   const previousBudgetItems = comparisonBudgetData?.items || []
   const previousSpentMap = comparisonBudgetMetrics?.spent_by_category || {}
   const previousTotalBudget = previousBudgetItems.reduce(
     (sum, b) => sum + (parseFloat(b.amount_kd) || 0),
     0
   )
-  const previousTotalSpent = Object.values(previousSpentMap).reduce(
-    (sum, value) => sum + (value || 0),
-    0
-  )
-  const previousRemaining = previousTotalBudget - previousTotalSpent
+  const previousExpenseBudgetTotal = previousBudgetItems
+    .filter((b) => !isSavingsCategory(b.category))
+    .reduce((sum, b) => sum + (parseFloat(b.amount_kd) || 0), 0)
+  const previousTotalSpent = Object.entries(previousSpentMap)
+    .filter(([cat]) => !isSavingsCategory(cat))
+    .reduce((sum, [, value]) => sum + (value || 0), 0)
+  const previousRemaining = previousExpenseBudgetTotal - previousTotalSpent
 
   const totalBudgetTrendLabel = budgets.length > 0
     ? formatDeltaLabel(totalBudget, previousTotalBudget, {
@@ -179,6 +191,7 @@ export default function BudgetPage() {
           avg,
           remaining: remainingVal,
           pct,
+          isSavings: savingsCategoryNames.has(cat),
         }
       })
       .filter((b) => !searchQuery.trim() || b.cat.toLowerCase().includes(searchQuery.trim().toLowerCase()))
@@ -190,7 +203,7 @@ export default function BudgetPage() {
       if (b.pct !== a.pct) return b.pct - a.pct
       return a.cat.localeCompare(b.cat)
     })
-  }, [budgets, spentMap, rangeSpentMap, avg12, range, searchQuery])
+  }, [budgets, spentMap, rangeSpentMap, avg12, range, searchQuery, savingsCategoryNames])
 
   const chartData = useMemo(() => {
     const categoriesSet = new Set<string>()

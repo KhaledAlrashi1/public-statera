@@ -784,7 +784,12 @@ export default function ExpensesPage() {
     return Number(prevMonthExpenseMap[activeCategory] || 0)
   }, [prevMonthExpenseMap, activeCategory, prevMonth])
 
-  const categoryShare = monthTotal > 0 ? (categoryTotal / monthTotal) * 100 : 0
+  // MOB-R56 KS1 — monthTotal is R3's expense_kd, which excludes savings (MOB-R55 P2); a
+  // savings-kind category shows no share (the server's kind, MOB-R55 P4).
+  const categoryShare =
+    activeCategory && allCategories.some((c) => c.name === activeCategory && c.kind === "savings")
+      ? null
+      : monthTotal > 0 ? (categoryTotal / monthTotal) * 100 : 0
   const categoryDelta = categoryTotal - categoryPrevTotal
   const categoryDeltaPct =
     categoryPrevTotal > 0 ? (categoryDelta / categoryPrevTotal) * 100 : 0

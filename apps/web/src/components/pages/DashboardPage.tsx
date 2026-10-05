@@ -27,8 +27,15 @@ import { useDashboardPageQueries } from "./dashboard/hooks"
 import { BudgetDialog } from "./budget/sections"
 import { IncomeQuickDialog } from "./profile/IncomeQuickDialog"
 import { findDuplicateCategory, saveBudgets } from "./budget/hooks"
+import { toFils } from "@/lib/log-amount"
 
 const DASHBOARD_CATEGORY_PAGE_SIZE = 100
+
+// MOB-R59 KS13 — Remaining, Over by and the Remaining chip are computed in exact fils
+// (lib/log-amount toFils). This is the one conversion back to a number, for display only (the
+// hero animates numbers): SWEEP-R3's display-only boundary, never fed back into arithmetic.
+const filsToDisplayKd = (fils: bigint): number => Number(fils) / 1000
+const filsOf = (kd: string | null | undefined): bigint => toFils(kd && kd.trim() ? kd.trim() : "0")
 const SETUP_GUIDE_AUTO_LAUNCH_KEY = "setup-guide-autolaunch-v1"
 const ONBOARDING_DISMISSED_KEY = "onboarding-dismissed"
 
@@ -64,6 +71,7 @@ export default function DashboardPage() {
 
   const {
     dashboardMetrics,
+    categoryList,
     analyticsLoading,
     analyticsFetching,
     analyticsError,
@@ -119,10 +127,23 @@ export default function DashboardPage() {
       monthlyMetrics.some((row) => {
         const income = Number(row.income_kd || 0)
         const expense = Number(row.expense_kd || 0)
-        return income > 0 || expense > 0
+        // MOB-R55 P2 — savings left expense_kd, so a month holding only savings still has rows.
+        return income > 0 || expense > 0 || filsOf(row.savings_kd) > 0n
       }),
     [monthlyMetrics]
   )
+
+  // MOB-R55 P4 — savings-kind category names, from the server's kind (no frontend copy of the rule).
+  const savingsCategoryNames = useMemo(
+    () => new Set((categoryList ?? []).filter((c) => c.kind === "savings").map((c) => c.name)),
+    [categoryList]
+  )
+  // R3's per-month strings, for the exact-fils figures below.
+  const monthlyKdMap = useMemo(() => {
+    const map = new Map<string, { expense_kd: string; savings_kd: string }>()
+    monthlyMetrics.forEach((row) => map.set(row.month, { expense_kd: row.expense_kd, savings_kd: row.savings_kd }))
+    return map
+  }, [monthlyMetrics])
   const hasRecordedExpenses = useMemo(
     () => monthlyMetrics.some((row) => Number(row.expense_kd || 0) > 0),
     [monthlyMetrics]
@@ -172,11 +193,22 @@ export default function DashboardPage() {
   }, [profile?.monthly_income_kd])
 
   const monthIncome = typedIncome
-  const monthRemaining = typedIncome === null ? 0 : Math.max(0, typedIncome - monthExpenses)
-  // #23 — "Over by KD {amount}", amount = expenses minus income. Not set wins over overspent.
-  const monthOverBy = typedIncome !== null && monthExpenses > typedIncome ? monthExpenses - typedIncome : null
-
-  const savingsRate = typedIncome === null ? null : ((typedIncome - monthExpenses) / typedIncome) * 100
+  // MOB-R55 P3 / MOB-R58 D1 — the month's savings total comes from the server: R4 when present,
+  // else R3 for the same month. Exact fils throughout (KS13).
+  const incomeFils = typedIncome === null ? null : filsOf(String(profile?.monthly_income_kd ?? ""))
+  const monthExpensesFils = accountOverview
+    ? filsOf(accountOverview.total_spend_mtd)
+    : filsOf(selectedMonth ? monthlyKdMap.get(selectedMonth)?.expense_kd : null)
+  const monthSavingsFils = accountOverview
+    ? filsOf(accountOverview.total_savings_mtd)
+    : filsOf(selectedMonth ? monthlyKdMap.get(selectedMonth)?.savings_kd : null)
+  const monthSavings = filsToDisplayKd(monthSavingsFils)
+  // Remaining = income - expenses - savings, clamped at 0 (P3). "Over by" = expenses + savings -
+  // income when above 0 (KS10), so a Remaining clamped to 0 is always explained. Not set wins.
+  const outflowFils = monthExpensesFils + monthSavingsFils
+  const remainingFils = incomeFils === null || outflowFils >= incomeFils ? 0n : incomeFils - outflowFils
+  const monthRemaining = filsToDisplayKd(remainingFils)
+  const monthOverBy = incomeFils !== null && outflowFils > incomeFils ? filsToDisplayKd(outflowFils - incomeFils) : null
 
   const monthLabel = labelForYM(selectedMonth)
   const monthBundleErrorMessage = monthBundleError instanceof Error
@@ -259,20 +291,25 @@ export default function DashboardPage() {
   const prevMonthKpis = useMemo(() => {
     if (!prevMonthVal) return null
     const prev = monthlyKpiMap.get(prevMonthVal)
-    // The empty-period guard stays on the LOGGED sums: 0/0 means the month has no rows.
+    const prevKd = monthlyKdMap.get(prevMonthVal)
+    // The empty-period guard stays on the LOGGED sums: 0/0/0 means the month has no rows. Savings
+    // is the third sum since MOB-R55 P2 split it from expenses.
     const loggedIncome = prev?.income || 0
     const expenses = prev?.expenses || 0
-    if (loggedIncome === 0 && expenses === 0) return null
-    if (typedIncome === null) return null
-    // RM-17 flat: the previous month is measured against the same typed income.
-    const remaining = Math.max(0, typedIncome - expenses)
-    const sr = ((typedIncome - expenses) / typedIncome) * 100
-    return { expenses, remaining, savingsRate: sr, overspent: expenses > typedIncome }
-  }, [monthlyKpiMap, prevMonthVal, typedIncome])
+    const prevExpensesFils = filsOf(prevKd?.expense_kd)
+    const prevSavingsFils = filsOf(prevKd?.savings_kd)
+    if (loggedIncome === 0 && expenses === 0 && prevSavingsFils === 0n) return null
+    if (incomeFils === null) return null
+    // RM-17 flat: the previous month is measured against the same typed income. MOB-R59 KS9: like
+    // with like — both months' Remaining subtract savings (the previous month's from R3).
+    const prevOutflow = prevExpensesFils + prevSavingsFils
+    const remaining = filsToDisplayKd(prevOutflow >= incomeFils ? 0n : incomeFils - prevOutflow)
+    return { expenses, remaining, overspent: prevOutflow > incomeFils }
+  }, [monthlyKpiMap, monthlyKdMap, prevMonthVal, incomeFils])
 
   const heroDeltas = useMemo(() => {
-    // Income not set: Remaining and Savings rate have no value, so nothing is compared.
-    if (typedIncome === null || savingsRate === null) return null
+    // Income not set: Remaining has no value, so nothing is compared.
+    if (typedIncome === null) return null
     if (!prevMonthKpis) return null
     // Symmetric with prevMonthKpis' own empty-period guard above: a month with no
     // rows produces logged income = expenses = 0, which yields a -100% delta that the
@@ -281,7 +318,7 @@ export default function DashboardPage() {
     // chk_transactions_amount_positive), so 0/0 means no rows, never a real zero.
     // MOB-R36 re-key: this must read the LOGGED income, not the typed figure — the typed income
     // is never 0 once set, so keying on it would silently disable the guard.
-    if (loggedMonthIncome === 0 && monthExpenses === 0) return null
+    if (loggedMonthIncome === 0 && monthExpenses === 0 && monthSavingsFils === 0n) return null
     // MOB-R52 F6 — against a base of 0 there is no percent change; the chip is hidden (null).
     const delta = (curr: number, prev: number): number | null => {
       if (prev === 0) return null
@@ -294,9 +331,8 @@ export default function DashboardPage() {
     return {
       expensesDelta: delta(monthExpenses, prevMonthKpis.expenses),
       remainingDelta: eitherOverspent ? null : delta(monthRemaining, prevMonthKpis.remaining),
-      savingsRateDelta: savingsRate - prevMonthKpis.savingsRate,
     }
-  }, [typedIncome, loggedMonthIncome, monthExpenses, monthRemaining, monthOverBy, savingsRate, prevMonthKpis])
+  }, [typedIncome, loggedMonthIncome, monthExpenses, monthSavingsFils, monthRemaining, monthOverBy, prevMonthKpis])
 
   const trendData = useMemo(() => {
     return monthlyMetrics.slice(Math.max(0, monthlyMetrics.length - 12)).map((row) => ({
@@ -318,11 +354,14 @@ export default function DashboardPage() {
   const categoryData = useMemo(() => {
     // R3 expense_by_category values are formatKd strings — coerce for display/sort
     // (SWEEP-R3 display-only boundary; not ledger arithmetic).
+    // MOB-R59 KS12 — an expenses chart: savings-kind categories are not slices, so its sentence
+    // names the largest EXPENSE category and its share over expenses.
     return Object.entries(selectedMonthExpenseMap)
+      .filter(([name]) => !savingsCategoryNames.has(name))
       .map(([name, value]) => ({ name, value: Number(value || 0) }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 10)
-  }, [selectedMonthExpenseMap])
+  }, [selectedMonthExpenseMap, savingsCategoryNames])
 
   useEffect(() => {
     setCategoryOffset(0)
@@ -507,7 +546,11 @@ export default function DashboardPage() {
     return Number(prevMonthExpenseMap[activeCategory] || 0)
   }, [prevMonthExpenseMap, activeCategory, prevMonthVal])
 
-  const categoryShare = monthExpenses > 0 ? (categoryTotal / monthExpenses) * 100 : 0
+  // MOB-R56 KS1 — shares are over expenses only; a savings-kind category shows no share.
+  const categoryShare =
+    activeCategory && savingsCategoryNames.has(activeCategory)
+      ? null
+      : monthExpenses > 0 ? (categoryTotal / monthExpenses) * 100 : 0
   const categoryDelta = categoryTotal - categoryPrevTotal
   const categoryDeltaPct = categoryPrevTotal > 0 ? (categoryDelta / categoryPrevTotal) * 100 : 0
 
@@ -814,9 +857,9 @@ export default function DashboardPage() {
         monthLabel={monthLabel}
         monthIncome={monthIncome}
         monthExpenses={monthExpenses}
+        monthSavings={monthSavings}
         monthRemaining={monthRemaining}
         overBy={monthOverBy}
-        savingsRate={savingsRate}
         dailyPace={dailyPace}
         deltas={heroDeltas}
         analyticsUpdatedAt={analyticsUpdatedAt}
