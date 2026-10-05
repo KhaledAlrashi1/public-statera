@@ -9787,3 +9787,74 @@ F7. Build K1 whole with the generic category and the income copy, as ruled in R5
 G. Hold D5, E and F unpushed; one report with every owed artifact. The next block rules their
    push and deploy, the RM-21 backup step first. Next block 63; next gate RM-28.
    After this block: strict 62, loose 64 (body lines 1513 and 6934).
+
+MOB-R63 — K1: one line granted, cache-key check, then push; amount rule by device locale; no asks.
+Issued Monday, October 5, 2026, by the review channel, on CC's report under block 62.
+Correction to block 62, beside it: it says "Issued Sunday, October 4, 2026". It was issued
+Monday, October 5, 2026. The channel's miss; it did not check the weekday.
+Work order: A, B, C, D, E. A STOP on one item does not stop independent items.
+
+A. Accepted from the report.
+A1. Read-backs A1-A3 of block 62, including CC's own prefix-run error, found and corrected.
+A2. B and C: /log has no "," key (LogPage.tsx:373), so expense logging cannot hit the comma
+    bug. Push 13ce283..38da9ff, run 37283986949, four jobs ubuntu-24.04, both probes 38da9ff.
+A3. D4 hunks; D5 committed as a442047 (2 failed under mutation, restored).
+A4. Persist this block: wrap check as its own step, then append after a blank at 9790. Expected
+    9791-9860 (70 lines). After it: strict 63, loose 65. Standard read-back.
+
+B. Standing: no approvals from the operator. Operator, verbatim: "I wish Claude code would ask
+   me to confirm things less if possible never to ask me to approve anything." and "So, can we
+   have it skip my approval and have it keep going until the end."
+B1. CC never asks the operator to approve or confirm. It acts within the blocks, or STOPs that
+    item, carries on with independent items, and reports once, at the end, to the channel.
+B2. The only operator steps are those a block names: the RM-21 backup, screenshots, phone checks.
+B3. Permission prompts are Claude Code settings. The operator changes them himself; CC does not
+    edit any settings file.
+
+C. K1: finish, commit, push.
+C1. Granted: money-wire-shape.test.ts:882, the C2 list gains "data.monthly[].savings_kd".
+    Correction beside F3 of block 62: it says C7, after CC's STEP 1 report; the list is C2.
+C2. Cache keys: the suffix at use sites is accepted only if every read, write and delete of the
+    R3 and R9 keys carries it, including invalidation after a transaction is added, edited or
+    deleted. List every site by grep, quoted, with a planted line found first. New file: a
+    transaction write removes the versioned R3 key; mutation (no suffix at the delete site)
+    exit 1. A site without the suffix is fixed within K1 and reported; if that needs an
+    existing-test edit outside F5's class: STOP.
+C3. Accepted: emit-site totals 45 and 49 (R4's field, under the R60 money-wire grant); empty-
+    month guards counting savings; Plan savings rows (accent bar, "—"), look provisional.
+C4. The hero's Number(fils) / 1000 becomes filsToKd (log-amount.ts:50). If its type does not
+    fit: STOP that item.
+C5. Granted: the title "has the 22 categories" says 23; the money-wire labels for
+    aggregation.ts:346 and :1055 move to the measured lines. Other stale labels: queued.
+C6. Owed: the file that gained the {v:1} case. If it is an existing file, a recorded deviation.
+C7. F5's list should have named the R55, R59 and R60 grants: the channel's drafting miss. CC's
+    attribution accepted.
+C8. Queued: Plan's "Planned total" basis (no savings budget can be added from Plan yet); the
+    legacy Expenses caption; ExpensesPage.test.tsx's recharts mock that never applies.
+C9. Before the C1-C5 edits, an addendum predictions file (sha256, quoted). Then commit K1 as three
+    commits. Every count must match 076e18... plus the addendum.
+C10. Push condition: every prediction met, no STOP in C. Then CC tells the operator to run
+    `sudo systemctl start statera-backup.service` and send `journalctl -u statera-backup.service
+    -n 20` and the Healthchecks statera-db-backup event. CC checks a success after its request
+    (server UTC; Healthchecks UTC+3), then pushes: fast-forward; four jobs succeed, ubuntu-24.04;
+    both probes on the new sha; 0 unpushed by both routes.
+
+D. Amount fix, rebuilt from r62e-amount-text.patch after K1's push. Held unpushed.
+D1. New facts: the tester's iPhone is English, region Kuwait (operator); its decimal pad types
+    ".". So "," mostly arrives by paste or a computer keyboard, where "1,500" means 1500.
+D2. Block 62's E2 comma rule is withdrawn: it read "1,500" as 1.500. The channel's error. New:
+    Arabic digits, U+066B and U+066C as before. If the browser's locale writes decimals with ","
+    (Intl.NumberFormat formatToParts of 1.5): one "," or one "." is the decimal point; more than
+    one separator: refused. Otherwise "," is a thousands separator, accepted only in groups of
+    three ("1,500", "12,500.250"); any other "," ("1,5"): refused. Letters, a second ".", more
+    than 3 decimals: refused (CC's interpretation accepted under RM-27). The readout stays.
+D3. Granted: the 3 money-input.test.tsx tests, rewritten to RM-27; diffs verbatim. No other
+    existing-test edit.
+D4. The 5 plain amount boxes stay out: ProfilePage.tsx:418, dialogs.tsx:789 and
+    expenses/dialogs.tsx:290 queued next; ImportDialogs.tsx:1784 and :1933 with the importer.
+    These are RM-27's known exceptions.
+D5. Predictions file first. One mutation per rule, both locale branches (locale stubbed). State
+    whether the source holds \u escapes or literal Arabic characters, by a byte check.
+
+E. One report at the end, with every owed artifact. Next block 64; next gate RM-28.
+   After this block: strict 63, loose 65 (body lines 1513 and 6934).
