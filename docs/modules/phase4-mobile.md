@@ -9858,3 +9858,28 @@ D5. Predictions file first. One mutation per rule, both locale branches (locale 
 
 E. One report at the end, with every owed artifact. Next block 64; next gate RM-28.
    After this block: strict 63, loose 65 (body lines 1513 and 6934).
+
+MOB-R64 — Profile income joins the amount fix (D of block 63); operator check on the phone.
+Issued Monday, October 5, 2026, by the review channel. Persist after block 63, alone.
+Channel's question: "Do you want a phone-only test of entering "1,500" in Profile income after
+the next push?" Operator, verbatim: "If you think we should fix it, let's do it". The channel
+recommends the fix: the box sends its text to the server as typed (ProfilePage.tsx:418).
+
+A. Persist: wrap check as its own step, then append after a blank at 9861. Expected 9862-9885
+   (24 lines). After it: strict 64, loose 66. Standard read-back.
+
+B. Profile income.
+B1. ProfilePage.tsx:418 leaves block 63's D4 exceptions and joins D: its text goes through the
+    one normalizer, with the readout, and the server receives the normalized text. CC names in
+    D's predictions file whether it uses MoneyInput or calls the normalizer directly.
+B2. First, read-only: the file:line where the server parses this field, and what it saves today
+    for "1,500", "1,5" and Arabic-Indic digits (scratch run, not committed).
+B3. Client only. Any server change: STOP this item (RM-21). No existing-test edit is granted; a
+    break is a STOP of this item, and the rest of D carries on (block 63, B1).
+B4. Still queued: dialogs.tsx:789 and expenses/dialogs.tsx:290 (splits); the import boxes go
+    with the importer.
+B5. Operator check after D's push, on the phone: Profile income "1,500" shows KD 1,500.000 and
+    saves as 1500.000 (Home's Income shows it); "1,5" shows the refusal and saves nothing.
+
+Next block 65; next gate RM-28.
+After this block: strict 64, loose 66 (body lines 1513 and 6934).
