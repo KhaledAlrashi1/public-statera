@@ -914,7 +914,16 @@ function Frame({
         </div>
         {/* E1 — the close control. Its accessible name stays "Back": it returns to where she came
             from (MOB-R61 D3), which is what it does, and what the existing test names it. */}
-        <Button type="button" variant="ghost" className="min-h-11 min-w-11 shrink-0 px-2" aria-label="Back" onClick={onBack}>
+        {/* MOB-R73 E4 — a 40px circle (surface fill, border, ink icon), like Home's header buttons. The
+            button primitive's 44px touch minimum is overridden to the ruled 40px. The ring shows only
+            on keyboard focus (the primitive's focus-visible ring; E8). */}
+        <Button
+          type="button"
+          variant="outline"
+          className="h-10 w-10 min-h-10 min-w-10 shrink-0 rounded-full border-border bg-card p-0 text-foreground pointer-coarse:min-h-10 pointer-coarse:min-w-10"
+          aria-label="Back"
+          onClick={onBack}
+        >
           <X className="h-5 w-5" />
         </Button>
       </header>
