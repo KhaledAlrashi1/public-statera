@@ -96,11 +96,33 @@ const chip =
 // E2 — the colour square behind a tile's initial: one of the existing chart tokens, picked by the
 // place's name so a place keeps its colour. Brass (chart-2) and ink (chart-1) are left out: brass
 // is rationed, and ink is the selected-tile border. The initial is decorative (the name is beside it).
-const TILE_COLOURS = ["bg-chart-3", "bg-chart-4", "bg-chart-5", "bg-chart-6", "bg-chart-7"]
-function tileColour(name: string): string {
+export const TILE_COLOURS = ["bg-chart-3", "bg-chart-4", "bg-chart-5", "bg-chart-6", "bg-chart-7"]
+/** MOB-R74 H (E7b) — Popular in Kuwait tiles are not her places, so they get a neutral square from the
+ * existing muted tokens; colour means her places (operator selection H1, option (b)). */
+export const POPULAR_TILE_SQUARE = "bg-muted text-muted-foreground"
+
+function preferredColourIndex(name: string): number {
   let h = 0
   for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0
-  return TILE_COLOURS[h % TILE_COLOURS.length]
+  return h % TILE_COLOURS.length
+}
+
+/**
+ * MOB-R74 H (E7b) — colours for her visible place tiles (at most four), never two the same. Each place
+ * prefers the colour its name hashes to; places are settled in NAME order, not display order, and a
+ * place whose preferred colour is taken takes the next free one. So the result depends only on which
+ * places are visible: a place keeps its colour when the tiles reorder.
+ */
+export function assignTileColours(names: readonly string[]): Map<string, string> {
+  const out = new Map<string, string>()
+  const used = new Set<number>()
+  for (const name of [...names].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
+    let i = preferredColourIndex(name)
+    for (let step = 0; step < TILE_COLOURS.length && used.has(i); step += 1) i = (i + 1) % TILE_COLOURS.length
+    used.add(i)
+    out.set(name, TILE_COLOURS[i])
+  }
+  return out
 }
 
 /**
@@ -563,6 +585,7 @@ function LogPanel() {
   const tiles: LogSuggestionPlace[] = popular
     ? POPULAR_IN_KUWAIT.map((p) => ({ ...p, count: 0, items: [], last_amount: null, last_used: null }))
     : places.slice(0, TILE_LIMIT)
+  const tileColours = assignTileColours(popular ? [] : tiles.map((t) => t.name))
   const dateLabel =
     dateChips.find((c) => c.iso === date)?.label ?? formatDisplayDate(date)
 
@@ -593,7 +616,14 @@ function LogPanel() {
                   onClick={() => pickTile(p)}
                   className="flex min-h-16 min-w-0 items-center gap-3 rounded-[var(--radius-card)] border-2 border-border bg-card p-3 text-start transition-colors aria-pressed:border-primary"
                 >
-                  <span aria-hidden="true" className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-sm font-bold text-white", tileColour(p.name))}>
+                  <span
+                    aria-hidden="true"
+                    data-testid="log-tile-square"
+                    className={cn(
+                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-sm font-bold",
+                      popular ? POPULAR_TILE_SQUARE : cn("text-white", tileColours.get(p.name))
+                    )}
+                  >
                     {p.name.trim().charAt(0).toUpperCase()}
                   </span>
                   <span className="min-w-0">
