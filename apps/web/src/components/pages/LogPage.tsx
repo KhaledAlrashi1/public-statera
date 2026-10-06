@@ -229,6 +229,14 @@ function LogPanel() {
   const [category, setCategory] = useState<string | null>(null)
   const [amount, setAmount] = useState("")
   const [prefilled, setPrefilled] = useState(false)
+  // MOB-R73 E2 — "never overwrite what she chose" (operator selection D1: everywhere). Each field
+  // remembers whether SHE set it (typed or picked by her) or a suggestion did (a tile, a Popular tile,
+  // place memory, an item chip). A suggestion fills a field only while it is empty or still holds a
+  // suggestion. Amount carries this as `prefilled` (true = a suggestion's amount); the other three
+  // carry it here. Clearing a field returns it to empty. The date is never set by a suggestion.
+  const [categoryHers, setCategoryHers] = useState(false)
+  const [placeHers, setPlaceHers] = useState(false)
+  const [whatHers, setWhatHers] = useState(false)
   const [open, setOpen] = useState<Line | null>(null)
   const [placeQuery, setPlaceQuery] = useState("")
   const [categoryQuery, setCategoryQuery] = useState("")
@@ -292,27 +300,35 @@ function LogPanel() {
     else setOpen(null)
   }
 
+  // A place she picks from search (or adds) is hers; its remembered category is a suggestion.
   const applyPlace = (p: { name: string; category: string | null; items: LogSuggestionItem[] }, fromSuggestion: boolean) => {
     tap(fromSuggestion)
     changed()
     setPlace(p.name)
+    setPlaceHers(true)
     setPlaceItems(p.items)
     setPlaceQuery("")
-    const nextCategory = p.category ?? category
-    if (p.category) setCategory(p.category)
-    advance({ categoryChosen: nextCategory !== null, amountChosen: amountOk })
+    const takesCategory = Boolean(p.category) && !categoryHers
+    if (takesCategory) setCategory(p.category)
+    advance({ categoryChosen: takesCategory || category !== null, amountChosen: amountOk })
   }
 
   // E2 — a tile fills place, its category and its amount (C7); Save then saves. A Popular in Kuwait
   // tile (C2) has no items, so it fills place and category only and Amount becomes Next.
+  // MOB-R73 E2 — a tile is a suggestion: each of its fields lands only where she has not chosen.
   const pickTile = (p: LogSuggestionPlace) => {
     tap(true)
     changed()
-    setPlace(p.name)
-    setPlaceItems(p.items)
-    if (p.category) setCategory(p.category)
+    if (!placeHers) {
+      setPlace(p.name)
+      setPlaceItems(p.items)
+    }
+    if (p.category && !categoryHers) setCategory(p.category)
+    const amountIsHers = amount !== "" && !prefilled
     const tileKd = tileAmount(p)
-    if (tileKd !== null) {
+    if (amountIsHers) {
+      // Her amount stays.
+    } else if (tileKd !== null) {
       setAmount(tileKd)
       setPrefilled(true)
     } else if (prefilled) {
@@ -328,15 +344,17 @@ function LogPanel() {
     tap()
     changed()
     setCategory(name)
+    setCategoryHers(true)
     setCategoryQuery("")
     setOpen(amountOk ? null : "amount")
   }
 
+  // An item chip is a suggestion (MOB-R73 E2): it fills What for and Amount only where she has not.
   const pickItem = (it: LogSuggestionItem) => {
     tap(true)
     changed()
-    setWhatFor(it.name)
-    if (!amountOk && amount === "") {
+    if (!whatHers) setWhatFor(it.name)
+    if (amount === "" || prefilled) {
       setAmount(it.amount_kd)
       setPrefilled(true)
     }
@@ -365,6 +383,9 @@ function LogPanel() {
   }
 
   const resetEntry = () => {
+    setCategoryHers(false)
+    setPlaceHers(false)
+    setWhatHers(false)
     setPlace(null)
     setPlaceItems([])
     setWhatFor("")
@@ -767,7 +788,7 @@ function LogPanel() {
               placeholder="Item or note"
               autoFocus={autoFocusField}
               value={whatFor}
-              onChange={(e) => { changed(); setWhatFor(e.target.value) }}
+              onChange={(e) => { changed(); setWhatFor(e.target.value); setWhatHers(e.target.value.trim() !== "") }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault()
