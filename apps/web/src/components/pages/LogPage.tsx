@@ -637,7 +637,8 @@ function LogPanel() {
         </section>
       ) : null}
 
-      <section className="space-y-2" aria-labelledby={tiles.length > 0 ? "log-new" : undefined}>
+      {/* MOB-R78 F4 — -mb-1: 16px between the form card and the Save bar (the frame's gap-5 less 4px). */}
+      <section className="-mb-1 space-y-2" aria-labelledby={tiles.length > 0 ? "log-new" : undefined}>
         {tiles.length > 0 ? (
           <h2 id="log-new" className="text-sm font-semibold text-muted-foreground">Or fill in a new one</h2>
         ) : null}
