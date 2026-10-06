@@ -32,7 +32,7 @@ const auth = async () =>
   `Bearer ${await createSessionToken({ userId: 7, externalId: "ext", authProvider: "test", sv: 1 })}`
 
 const place = (merchantId: number, merchantName: string, recentCount = 1): PlaceRow => ({ merchantId, merchantName, recentCount })
-const entry = (merchantId: number, nameKey: string, amountKd = "1.000", categoryName: string | null = "Coffee"): EntryRow => ({
+const entry = (merchantId: number, nameKey: string, amountKd = "1.000", categoryName: string | null = "Coffee"): EntryRow => ({ date: "2026-05-01", createdAt: null, id: 0,
   merchantId,
   nameKey,
   name: nameKey.toUpperCase(),
@@ -57,7 +57,7 @@ describe("GET /api/log-suggestions", () => {
     const body = (await res.json()) as { ok: boolean; data: { places: Array<Record<string, unknown>> }; meta: { count: number } }
     expect(body.ok).toBe(true)
     expect(body.meta.count).toBe(1)
-    expect(body.data.places[0]).toEqual({
+    expect(body.data.places[0]).toEqual({ last_amount: "1.500", last_used: "2026-05-01",
       name: "PICK",
       category: "Coffee",
       count: 3,

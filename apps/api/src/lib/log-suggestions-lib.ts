@@ -9,7 +9,10 @@
 //     findable by the page's search, which filters this list in the browser;
 //   - items per place: grouped by name_key, counted all time, ordered by count then most recent,
 //     at most ITEMS_PER_PLACE. Each carries the display name, category and amount of its MOST
-//     RECENT entry.
+//     RECENT entry;
+//   - per place (MOB-R70 D1): last_amount and last_used, the amount (formatKd) and date of its most
+//     recent entry. Most recent = latest date; ties on date go to the most recently CREATED row
+//     (created_at, then id). Computed here by comparison, so the entry order above is untouched.
 // Money stays a string end to end: amount_kd is formatKd of the stored decimal, never a number.
 //
 // Two ordinary queries rather than one window query: places first (grouped, limited), then every
@@ -35,6 +38,8 @@ export type LogSuggestionPlace = {
   category: string | null
   count: number
   items: LogSuggestionItem[]
+  last_amount: string | null
+  last_used: string | null
 }
 
 /** One row per place from the grouped query, already in display order. */
@@ -46,6 +51,23 @@ export type EntryRow = {
   name: string
   amountKd: string
   categoryName: string | null
+  date: Date | string
+  createdAt: Date | string | null
+  id: number
+}
+
+const dateOnly = (d: Date | string): string => (d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10))
+const createdMs = (d: Date | string | null): number => (d === null ? -Infinity : new Date(d).getTime())
+
+/** True when `a` is more recent than `b`: later date, then later created_at, then higher id. */
+function isMoreRecent(a: EntryRow, b: EntryRow): boolean {
+  const da = dateOnly(a.date)
+  const db = dateOnly(b.date)
+  if (da !== db) return da > db
+  const ca = createdMs(a.createdAt)
+  const cb = createdMs(b.createdAt)
+  if (ca !== cb) return ca > cb
+  return a.id > b.id
 }
 
 /**
@@ -55,13 +77,14 @@ export type EntryRow = {
  */
 export function shapeLogSuggestions(placeRows: PlaceRow[], entryRows: EntryRow[]): LogSuggestionPlace[] {
   type ItemAcc = { name: string; category: string | null; amountKd: string; count: number; firstIndex: number }
-  const byPlace = new Map<number, { category: string | null; seen: boolean; items: Map<string, ItemAcc> }>()
-  for (const p of placeRows) byPlace.set(p.merchantId, { category: null, seen: false, items: new Map() })
+  const byPlace = new Map<number, { category: string | null; seen: boolean; items: Map<string, ItemAcc>; last: EntryRow | null }>()
+  for (const p of placeRows) byPlace.set(p.merchantId, { category: null, seen: false, items: new Map(), last: null })
 
   entryRows.forEach((row, index) => {
     if (row.merchantId === null) return
     const place = byPlace.get(row.merchantId)
     if (!place) return
+    if (place.last === null || isMoreRecent(row, place.last)) place.last = row
     if (!place.seen) {
       place.category = row.categoryName ?? null
       place.seen = true
@@ -77,7 +100,14 @@ export function shapeLogSuggestions(placeRows: PlaceRow[], entryRows: EntryRow[]
       .sort((a, b) => b.count - a.count || a.firstIndex - b.firstIndex)
       .slice(0, ITEMS_PER_PLACE)
       .map((it) => ({ name: it.name, category: it.category, amount_kd: formatKd(it.amountKd) }))
-    return { name: p.merchantName, category: acc.category, count: Number(p.recentCount ?? 0), items }
+    return {
+      name: p.merchantName,
+      category: acc.category,
+      count: Number(p.recentCount ?? 0),
+      items,
+      last_amount: acc.last ? formatKd(acc.last.amountKd) : null,
+      last_used: acc.last ? dateOnly(acc.last.date) : null,
+    }
   })
 }
 
@@ -113,6 +143,9 @@ export async function buildLogSuggestions(
       name: transactions.name,
       amountKd: transactions.amountKd,
       categoryName: categories.name,
+      date: transactions.date,
+      createdAt: transactions.createdAt,
+      id: transactions.id,
     })
     .from(transactions)
     .leftJoin(categories, eq(transactions.categoryId, categories.id))

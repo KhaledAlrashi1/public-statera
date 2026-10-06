@@ -298,6 +298,10 @@ export interface LogSuggestionPlace {
   category: string | null
   count: number
   items: LogSuggestionItem[]
+  /** MOB-R70 D1 — amount (3-decimal string, formatKd) and date (YYYY-MM-DD) of her most recent
+   * expense at this place; null when the place has none. */
+  last_amount: string | null
+  last_used: string | null
 }
 
 export interface TransactionSuggestion {

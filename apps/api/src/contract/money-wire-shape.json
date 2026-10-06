@@ -859,6 +859,16 @@
       "money": false
     },
     {
+      "path": "data.places[].last_amount",
+      "type": "string",
+      "money": true
+    },
+    {
+      "path": "data.places[].last_used",
+      "type": "string",
+      "money": false
+    },
+    {
       "path": "data.places[].name",
       "type": "string",
       "money": false

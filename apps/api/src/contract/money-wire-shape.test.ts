@@ -231,7 +231,7 @@ const FIXTURES: Record<string, unknown[]> = {
   "income,expense": [{ income: "2000.000", expense: "175.250" }],
   // MOB-R56 G5 — LS (log suggestions): one place, one entry at it.
   "merchantId,merchantName,recentCount": [{ merchantId: 3, merchantName: "PICK", recentCount: 4 }],
-  "merchantId,nameKey,name,amountKd,categoryName": [
+  "merchantId,nameKey,name,amountKd,categoryName,date,createdAt,id": [
     { merchantId: 3, nameKey: "americano", name: "Americano", amountKd: "1.375", categoryName: "Coffee" },
   ],
   // R11 (N3): >=2 distinct months on a regular day-25 cadence -> detected:true,
@@ -365,6 +365,7 @@ const MONEY_KEYS = new Set([
   // B4-1-R2 (ruling 2026-08-06): a .toFixed(1) decimal string with a null branch,
   // and the field behind the 2026-07-10 budgets crash. In scope.
   "budget_to_income_pct",
+  "last_amount", // MOB-R72 B1 — LS per-place amount, formatKd (lib/log-suggestions-lib.ts:108)
 ])
 const MONEY_VALUE_MAPS = [
   /^data\.items$/, // R1 (map form; R2's data.items is an array)
