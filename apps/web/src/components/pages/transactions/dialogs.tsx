@@ -37,7 +37,6 @@ import { MoneyInput } from "@/components/ui/money-input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
-import { Separator } from "@/components/ui/separator"
 import {
   applyTransactionSuggestion,
   tempId,

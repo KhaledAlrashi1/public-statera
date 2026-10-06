@@ -61,7 +61,6 @@ const DashboardPage = lazyWithRetry("dashboard", () => import("@/components/page
 const LogPage = lazyWithRetry("log", () => import("@/components/pages/LogPage"))
 const ExpensesPage = lazyWithRetry("expenses", () => import("@/components/pages/ExpensesPage"))
 const TransactionsPage = lazyWithRetry("transactions", () => import("@/components/pages/TransactionsPage"))
-const IncomePage = lazyWithRetry("income", () => import("@/components/pages/IncomePage"))
 const BudgetPage = lazyWithRetry("budget", () => import("@/components/pages/BudgetPage"))
 const LoginPage = lazyWithRetry("login", () => import("@/components/pages/LoginPage"))
 const WorkspaceChoicePage = lazyWithRetry("workspace-choice", () => import("@/components/pages/WorkspaceChoicePage"))
