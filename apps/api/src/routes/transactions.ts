@@ -186,6 +186,7 @@ transactionsRouter.get("/:id{[0-9]+}", requireAuth, async (c) => {
       categoryId: transactions.categoryId,
       merchantId: transactions.merchantId,
       categoryName: categories.name,
+      categoryCountsAsIncome: incomeCategoryFilter(),
       merchantName: merchants.name,
     })
     .from(transactions)
@@ -315,6 +316,7 @@ transactionsRouter.post("/", requireAuth, importRateLimit, async (c) => {
       categoryId: transactions.categoryId,
       merchantId: transactions.merchantId,
       categoryName: categories.name,
+      categoryCountsAsIncome: incomeCategoryFilter(),
       merchantName: merchants.name,
     })
     .from(transactions)
@@ -431,6 +433,7 @@ transactionsRouter.patch("/:id{[0-9]+}", requireAuth, async (c) => {
       categoryId: transactions.categoryId,
       merchantId: transactions.merchantId,
       categoryName: categories.name,
+      categoryCountsAsIncome: incomeCategoryFilter(),
       merchantName: merchants.name,
     })
     .from(transactions)
@@ -624,6 +627,7 @@ transactionsRouter.post("/:id{[0-9]+}/split", requireAuth, async (c) => {
           categoryId: transactions.categoryId,
           merchantId: transactions.merchantId,
           categoryName: categories.name,
+          categoryCountsAsIncome: incomeCategoryFilter(),
           merchantName: merchants.name,
         })
         .from(transactions)
@@ -672,6 +676,7 @@ transactionsRouter.post("/:id{[0-9]+}/split", requireAuth, async (c) => {
             categoryId: transactions.categoryId,
             merchantId: transactions.merchantId,
             categoryName: categories.name,
+            categoryCountsAsIncome: incomeCategoryFilter(),
             merchantName: merchants.name,
           })
           .from(transactions)
@@ -892,6 +897,7 @@ transactionsRouter.get("/search", requireAuth, searchRateLimit, async (c) => {
     categoryId: transactions.categoryId,
     merchantId: transactions.merchantId,
     categoryName: categories.name,
+    categoryCountsAsIncome: incomeCategoryFilter(),
     merchantName: merchants.name,
   }
 
@@ -1013,6 +1019,7 @@ transactionsRouter.get("/by-category", requireAuth, async (c) => {
     categoryId: transactions.categoryId,
     merchantId: transactions.merchantId,
     categoryName: categories.name,
+    categoryCountsAsIncome: incomeCategoryFilter(),
     merchantName: merchants.name,
   }
 

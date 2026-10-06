@@ -16,7 +16,7 @@
 
 import { Hono } from "hono"
 import { z } from "zod"
-import { and, eq, inArray, sql } from "drizzle-orm"
+import { and, eq, getTableColumns, inArray, sql } from "drizzle-orm"
 import { getDb } from "../db/connection"
 import { zodErrorToEnvelope } from "./route-helpers"
 import { categories } from "../db/schema/categories"
@@ -26,6 +26,7 @@ import { memorizedTransactions } from "../db/schema/memorized-transactions"
 import { requireAuth } from "../middleware/auth"
 import { readRateLimit, writeRateLimit, heavyWriteRateLimit } from "../lib/rate-limit"
 import { categoryKind, type CategoryKind } from "../lib/category-kind"
+import { incomeCategoryFilter, readIncomeFlag } from "../lib/payday-lib"
 
 export const categoriesRouter = new Hono()
 
@@ -57,6 +58,10 @@ type CategoryItem = {
   kind: CategoryKind
 }
 
+// MOB-R77 C3 — GET /api/categories also emits whether the category counts as income, by payday-lib's
+// rule (incomeCategoryFilter, selected as a column). is_income is unchanged beside it.
+type CategoryListItem = CategoryItem & { counts_as_income: boolean }
+
 type RemapCounts = {
   remapped_count: number
   budget_count: number
@@ -84,12 +89,12 @@ categoriesRouter.get("/", requireAuth, readRateLimit, async (c) => {
   const db = getDb()
 
   const cats = await db
-    .select()
+    .select({ ...getTableColumns(categories), countsAsIncome: incomeCategoryFilter() })
     .from(categories)
     .where(eq(categories.userId, userId))
     .orderBy(sql`LOWER(${categories.name})`, categories.id)
 
-  let items: CategoryItem[]
+  let items: CategoryListItem[]
   if (cats.length === 0) {
     items = []
   } else {
@@ -110,7 +115,10 @@ categoriesRouter.get("/", requireAuth, readRateLimit, async (c) => {
       .groupBy(transactions.categoryId)
 
     const countMap = new Map(countRows.map((r) => [r.categoryId, Number(r.count)]))
-    items = cats.map((cat) => serializeCategory(cat, countMap.get(cat.id) ?? 0))
+    items = cats.map(({ countsAsIncome, ...cat }) => ({
+      ...serializeCategory(cat, countMap.get(cat.id) ?? 0),
+      counts_as_income: readIncomeFlag(countsAsIncome),
+    }))
   }
 
   return c.json({ ok: true, data: { items }, error: null, meta: {} })

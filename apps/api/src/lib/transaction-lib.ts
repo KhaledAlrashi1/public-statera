@@ -6,6 +6,7 @@ import { memorizedTransactions } from "../db/schema/memorized-transactions"
 import { transactions } from "../db/schema/transactions"
 import { buildNameKey } from "./name-key"
 import { formatKd, parseKd } from "./kd"
+import { readIncomeFlag } from "./payday-lib"
 
 export { buildNameKey } from "./name-key"
 export { formatKd, parseKd } from "./kd"
@@ -316,6 +317,8 @@ export type TransactionItem = {
   amount_kd: string
   category: string | null
   category_id: number | null
+  /** MOB-R77 C2 — the category counts as income, by payday-lib's rule (incomeCategoryFilter). */
+  category_counts_as_income: boolean
   merchant: string | null
   merchant_id: number | null
   source: string
@@ -346,6 +349,8 @@ export function serializeTransaction(row: {
   categoryId: number | null
   merchantId: number | null
   categoryName: string | null
+  /** incomeCategoryFilter() selected as a column (MOB-R77 C2). Required, so a select that omits it fails tsc. */
+  categoryCountsAsIncome: number | string | boolean | null
   merchantName: string | null
 }): TransactionItem {
   const src = normalizeSource(row.source)
@@ -357,6 +362,7 @@ export function serializeTransaction(row: {
     amount_kd: formatKd(row.amountKd),
     category: row.categoryName ?? null,
     category_id: row.categoryId ?? null,
+    category_counts_as_income: readIncomeFlag(row.categoryCountsAsIncome),
     merchant: row.merchantName ?? null,
     merchant_id: row.merchantId ?? null,
     source: src,

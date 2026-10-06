@@ -78,6 +78,7 @@
 import { and, asc, eq, ne } from "drizzle-orm"
 import type { getDb } from "../db/connection"
 import { formatKd } from "./kd"
+import { readIncomeFlag, transactionCategoryCountsAsIncome } from "./payday-lib"
 import {
   users,
   userProfiles,
@@ -212,6 +213,8 @@ export async function buildUserDataExport(
       memo: transactions.memo,
       amountKd: transactions.amountKd,
       categoryId: transactions.categoryId,
+      // MOB-R77 C2 — this route returns transaction rows without the serializer.
+      categoryCountsAsIncome: transactionCategoryCountsAsIncome(),
       merchantId: transactions.merchantId,
       importBatchId: transactions.importBatchId,
       createdAt: transactions.createdAt,
@@ -339,6 +342,7 @@ export async function buildUserDataExport(
       memo: r.memo ?? null,
       amount_kd: formatKd(r.amountKd),
       category_id: r.categoryId ?? null,
+      category_counts_as_income: readIncomeFlag(r.categoryCountsAsIncome),
       merchant_id: r.merchantId ?? null,
       import_batch_id: r.importBatchId ?? null,
       created_at: toIsoUtc(r.createdAt),

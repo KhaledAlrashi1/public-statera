@@ -8,6 +8,7 @@
 
 import { sql } from "drizzle-orm"
 import { categories } from "../db/schema/categories"
+import { transactions } from "../db/schema/transactions"
 import { calendarMonthBounds } from "./analytics-helpers"
 
 // Mirrors Flask's income_category_filter_expr:
@@ -15,6 +16,18 @@ import { calendarMonthBounds } from "./analytics-helpers"
 // The LIKE fallback handles legacy rows where is_income was not explicitly set.
 export function incomeCategoryFilter() {
   return sql<number>`(${categories.isIncome} IS TRUE OR LOWER(COALESCE(${categories.name}, '')) LIKE 'income%')`
+}
+
+// MOB-R77 C2 — the same rule for a transactions select that does not join categories (data-export):
+// EXISTS over the row's own category, so a row with no category is FALSE, as in a LEFT JOIN.
+export function transactionCategoryCountsAsIncome() {
+  return sql<number>`EXISTS (SELECT 1 FROM ${categories} WHERE ${categories.id} = ${transactions.categoryId} AND ${incomeCategoryFilter()})`
+}
+
+// MOB-R77 C2 — the rule column as the API emits it. MySQL returns 0/1; a driver may hand back a
+// string, and Boolean("0") would read true, so read the number.
+export function readIncomeFlag(value: unknown): boolean {
+  return Number(value ?? 0) !== 0
 }
 
 // NOT of incomeCategoryFilter — identifies expense-category transactions.
