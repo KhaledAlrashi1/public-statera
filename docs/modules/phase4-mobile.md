@@ -10959,3 +10959,147 @@ output is pasted. Expected: blank 10800, then 161 lines at 10801-10961. Read-bac
 line count, header and last line verbatim, cmp of the region against the payload, git show
 --stat and porcelain, all pasted in full.
 After this block: strict 73, loose 75 (body lines 1513 and 6934).
+
+MOB-R74 — MOB-R73 accepted; E3, E6 granted; tile and colour rulings; old sheet retired.
+Issued Tue 6 Oct 2026 by the review channel. Expected at lines 10963–11105, after a blank 10962.
+Tiers: sections C to H are TIER 2 (frontend only). Section I is TIER 1 recon (no commit).
+RM-21: nothing here adds a migration, touches user rows, or seeds rows. E6b deletes code, not rows.
+
+A. THE MOB-R73 REPORT IS ACCEPTED, WITH FINDINGS.
+A1. Read-back accepted: 162 lines appended, payload 10801–10961, cmp exit 0, strict 73, loose 75.
+A2. The committed-total miss (446/99 against 448/100) is accepted as reported, not absorbed. The
+  scratch file gave one total for one stop combination and assumed E7 would commit. From now on
+  the scratch file gives a delta per item, and the committed total is the base plus the deltas of
+  the items that commit. The report shows that sum.
+A3. Finding against the channel (E1). MOB-R73 C1 and E1 ruled a fix on a premise the channel had
+  not checked. C9 asked the operator which control he used, and the same block ruled before his
+  answer. At 4fee4ba no control opens the old sheet in Expense mode (CC's static check and 1280
+  sweep). Channel's question to the operator: "Was a laptop tab left open from before 4 Oct when
+  you saw the old Add Expense sheet?" His selection: "Yes, likely". C9's first question is
+  settled: a stale tab. Correction beside the record: the "C1 defect" is not reproduced; the
+  record stays as written. Lesson: a block that asks the operator a question settling a premise
+  does not, in the same block, rule a fix resting on that premise.
+A4. E2 accepted. CC's flagged choice (a tile tapped after she picked a place keeps her place and
+  fills from the other place) is replaced by G, on the operator's selection.
+A5. E4 accepted. Finding against the channel: MOB-R73 E4 ruled 40px, and meeting it overrode the
+  Button primitive's 44px coarse-pointer minimum. The block did not check what the primitive did
+  today (the MOB-R70 lesson). F below restores a 44px hit area; the drawn circle stays 40px.
+A6. E5 and E8 accepted. E5's 1280 finding ("KD 542.000" and "KD 71.100" under the FAB at rest)
+  goes to the queue; no fix is ruled.
+A7. E7 STOP accepted: the rule cannot hold with five colours and six Popular tiles. Ruled in H, on
+  the operator's selection.
+A8. E3's date reset (report only) is recorded: LogPage.tsx:400 returns the date to Today inside
+  resetEntry, after a save (:446) and after a successful Undo (:470). No change ruled.
+A9. F1, F2, F3 recorded. One premise is open (I1): the channel's queue lists R13 and
+  FinancialSnapshotHero as dead code, but F1 says R13 cash flow is shown at sections.tsx:1478.
+
+B. CLAUDE.MD (a live rule index, not a record). The channel ruled B without asking the operator.
+B1. CC quotes the repo's "Protected journey" line verbatim, with its line number (the channel's
+  copy has it at :487). It says QuickAdd internals are untouchable and the FAB is the sole visible
+  QuickAdd trigger. Neither holds after E5, E6 and E6b.
+B2. In the E6b commit, that line becomes one line made of the four lines below, joined with single
+  spaces, without the two leading spaces:
+  - **Protected journey.** Expenses are logged on /log. Below lg the bottom bar's centre "Log"
+  item opens it (MOB-R73 E5). At lg and up the FAB (aria-label "Log transaction", tooltip "Log
+  transaction — L") and the global "L" shortcut, with its focus and overlay guards, open it. The
+  old QuickAdd sheet and adding income were retired in MOB-R74 (D and E).
+B3. CC greps CLAUDE.md for QuickAdd, openQuickAdd, "sole visible" and "Add Income", pasting the
+  matches. Any match other than B1's line is reported, not edited.
+
+C. E3 IS GRANTED (date chips).
+C1. Identify the E3 stash by content, not index: its diff against r73-E3.patch, cmp exit 0,
+  pasted before it is applied.
+C2. Granted existing-test edits, in LogPage.receipt-date.test.tsx only: :55 (the expected chip
+  list becomes the list the E3 build shows), :48 (case title) and :1 (header comment), "12 days"
+  becoming "6 days". Nothing else in the file changes.
+C3. Expected: that case is green again, and no other existing test file changes.
+
+D. E6 IS GRANTED (no adding income).
+D1. Identify the E6 stash by content: its diff against r73-E6.patch, cmp exit 0, pasted.
+D2. Granted existing-test edit lines, as measured in the MOB-R73 report:
+  AppShell.log-entry.test.tsx :119, :124, :125
+  CommandPalette.log-entry.test.tsx :45, :55–:57
+  IncomePage.test.tsx :90
+  TransactionsPage.log-entry.test.tsx :57, :66–:68
+D3. AppShell.test.tsx :128, a NAMED REGRESSION OVERRIDE, granted on one condition. CC first quotes
+  the case around :128 verbatim and names what it guards. The edit is granted only if it guards
+  the income branch of the FAB or of "L", which the operator retired (MOB-R73 D). If it guards
+  anything else, STOP that edit.
+D4. Each granted edit changes what a case expects to the new behaviour. No case is deleted and no
+  case is added to an existing file.
+
+E. E6b IS GRANTED: delete the old sheet, in its own commit after E6.
+E1. Premise, pasted: after E6, grep for openQuickAdd and useQuickAdd finds 0 matches outside the
+  files E2 and E3 delete or edit.
+E2. Production deletions: QuickAddContext.tsx; AddTransactionDialog in dialogs.tsx (from :102,
+  its own range only); AppShell.tsx :23 (import) and :619 (mount). If dialogs.tsx also holds the
+  split dialog under the RM-27 exception (:789), that dialog stays; report its new line number.
+E3. Test files deleted whole, full paths given: dialogs.test.tsx (5), dialogs.suggested-names
+  (5), dialogs.phone-layout (3), dialogs.amount-text (1), dialogs.savings-category (1),
+  QuickAddContext.expense-to-log (2), 17 cases. Before deleting, CC shows that each file has no
+  case for code that stays. A file that has one: STOP that file.
+E4. Granted mock-factory edits (remove the QuickAdd mock, nothing else): AppShell.bar-log :55,
+  drawer :60, entry-points :60, fab-label :60, focus-ring :55, log-entry :61, AppShell.test.tsx
+  :57.
+E5. RM-27 coverage: the test file of amount-text.ts stays unchanged. The report names what the
+  deleted dialogs.amount-text case covered and where the same rule is still tested.
+E6. Prediction: −17 cases and −6 files against the total after E6. tsc 0 bytes, both packages.
+  Any other count change is a miss.
+
+F. E4b: A 44px HIT AREA FOR THE /log CLOSE CONTROL.
+F1. The drawn circle stays 40×40. The hit area grows to at least 44×44 (for example an invisible
+  ::before inset by −2px). The circle and its neighbours do not move.
+F2. Measured in WebKit and Chromium at 375 and 390: elementFromPoint at four points 1px outside
+  the drawn circle returns the control. Positive control: the same probe on 9937192 does not.
+F3. One new test file, shown to fail when the hit-area class is removed.
+
+G. E2b: A TILE TAP IS HER CHOICE OF PLACE.
+G1. Channel's question: "She picked a place, then taps a tile for another place. What should
+  happen?" Options were the channel's. His selection: "Tile replaces the place; her typed fields
+  stay (recommended)".
+G2. A tap on any tile (her places or Popular) sets the place to the tile's place and marks the
+  place as hers. Every other field she set herself (amount typed, category picked, what for)
+  stays. A field that is empty or holds a suggestion takes the tile's value. The date never
+  changes. Example: she picked Talabat, then taps Starbucks: the place becomes Starbucks.
+G3. Expected break: LogPage.receipt-keep.test.tsx, the case for CC's flagged choice (A4). No
+  grant: CC measures, and if any existing case breaks, STOPs the item with its edit lines.
+G4. New cases go in one new file, each reddened by its own mutation.
+
+H. E7b: COLOUR MEANS HER PLACES.
+H1. Channel's question: "E7: how should the six Popular tiles be coloured?" Options (a) to (d)
+  were CC's, rendered by the channel. His selection: "(b) Popular neutral, colour = her places
+  (recommended)".
+H2. Popular tiles get a neutral square from existing tokens (CC names them; no new token, no
+  value change). Her place tiles (at most 4) take colours from chart-3 to chart-7, and no two
+  visible tiles share a colour. CC reports how a colour is chosen and whether it stays with a
+  place when the tiles reorder.
+H3. If an existing case breaks, STOP the item with its edit lines. New cases in one new file.
+H4. Measured in WebKit at 375: a census of square fills for the Popular row and for a 4-place
+  row. Positive control: the same census on 9937192 shows a repeated fill in the Popular row.
+
+I. TIER 1 RECON FOR "NOT COUNTED" (F1 FOLLOW-THROUGH). No commit.
+I1. Is the component at sections.tsx:1478 mounted by any route at 9937192? Mount census with
+  file:line. If it is not, R13 is dead and leaves the F1 list.
+I2. For each live reader in F1, propose the change "not counted" needs: file:line of the EDIT;
+  what the operator would see at 375 and 1280 (hidden, 0, or replaced); and the money-wire
+  predicate entry behind any wire change. CC may build each proposal, run the suites and stash
+  it complete, to measure the existing tests it breaks (file and line). Nothing is committed.
+I3. The channel's proposed meaning, for the operator to confirm in MOB-R75: no saved income row
+  adds to any total, chart or summary; the rows stay listed in Activity, styled as income; Home's
+  Income stays the typed monthly figure.
+I4. Rule gap: transactions.ts:876 checks is_income = 1 only, while payday-lib.ts:17 also takes
+  names starting "income". On the dev DB only (scratch user, demo workspace, deleted after, as in
+  MOB-R73 G3), report how many demo rows the two rules classify differently.
+
+J. ORDER, PREDICTIONS, PUSH.
+J1. Order: persist this block; E3; E6; E6b with B2; E4b; E2b; E7b; then I. Each commit is
+  green alone.
+J2. Before the first edit, the predictions scratch file (MOB-R60), with a delta per item (A2);
+  report its sha256 and quote the key lines.
+J3. Dev Redis db 2: CC confirms it is the local dev instance, reports the key count, flushes db 2
+  and reports the count after. Production is not touched. The channel ruled this without asking.
+J4. Push under this block by the standing rules, if every committed expectation holds.
+J5. Phone checks due after the deploy (the operator, Chrome and Safari): the 8 date chips and
+  "Earlier date"; no way to add income on Transactions; the /log close control easy to hit; and,
+  for each of E2b and E7b that ships, a tile tap after picking a place, and the tile colours.
+After this block: strict 74, loose 76 (body lines 1513 and 6934).
