@@ -10733,3 +10733,67 @@ output is pasted. Expected: blank 10613, then 122 lines at 10614-10735. Read-bac
 line count, header and last line verbatim, cmp of the region against the payload, git show
 --stat and porcelain, all pasted in full.
 After this block: strict 71, loose 73 (body lines 1513 and 6934).
+
+MOB-R72 — MOB-R71 report accepted; both STOPs correct; the two missing sites granted; D and E ship.
+
+Issued Monday, October 5, 2026, by the review channel.
+TIER 1 for D. TIER 2 for E. One CC run; one report at the end.
+
+═══ A. MOB-R71 REPORT — ACCEPTED ═══
+
+A1. Persistence f4654f8: blank 10613, then 10614-10735, cmp exit 0; strict 71, loose 73;
+    porcelain empty. Push 7f2b1e5..f4654f8, run 37433849551, all four jobs ubuntu-24.04, both
+    probes on f4654f8, 0 unpushed by both routes. Accepted. /log is unchanged in production.
+A2. D STOPPED correctly. The provenance audit (money-wire-shape.test.ts:1088) reports a MISS for
+    LS data.places[].last_amount = "1.375": the money predicate is name-based (a _kd suffix or
+    MONEY_KEYS at :358-367) and last_amount matches neither. Regenerating would have recorded a
+    money field as non-money; CC did not. D3 answered: items at log-suggestions-lib.ts:102 and
+    last_amount at :108 both use formatKd (imported at :29). Accepted.
+A3. E STOPPED correctly. MOB-R71 E1 granted :49 and :54, where the failures surface; the edit
+    lives at :35 and :36. CC applied the two lines transiently to measure (438 passed / 96
+    files, exit 0), restored the file (cmp equal, git diff empty), and never committed or
+    stashed it. Accepted as a measurement, not an edit.
+A4. CHANNEL'S ERRORS, recorded: MOB-R71 D2 predicted money paths 70 -> 71 without granting the
+    line that makes it true; MOB-R71 E1 granted failure lines, not edit lines. Lessons: a grant
+    names the line that changes; a money-wire prediction names the predicate entry behind it.
+A5. F1: the arithmetic slip (437 -> 438) was corrected beside the original, before any edit.
+    Accepted.
+A6. C1-C7 as built: ACCEPTED, including C3 (category chips apply on a plain click; pointer-down
+    picks only on Place results), C1's existing failure string, and C2's constant restored
+    byte-identical (cmp exit 0). The "Next" hint cell at 375 cannot discriminate; the
+    "Required" cell does. Accepted.
+
+═══ B. GRANTS (MOB-R53), MEASURED SITES ONLY ═══
+
+B1. D: apply stash@{1}. GRANT: one entry, "last_amount", in MONEY_KEYS at
+    money-wire-shape.test.ts:358-367. With the three edits already granted in MOB-R71 D1, no
+    other line in any existing API test file. The JSON and assert.ts come only from the
+    generators. Predicted: routes 15 -> 15; money paths 70 -> 71; generated assertions 66 -> 67;
+    leaves 167 -> 169; fixture 67 -> 67; ALLOWLIST empty; the provenance audit reports 0 MISS.
+    API hermetic and integration: CC's exact predictions with sign.
+B2. E: apply stash@{0} on top of D. GRANT: LogPage.savings-category.test.tsx :35 (name
+    "Category" -> /^Category/) and :36 (dialog "Find a category" -> group "Category"). No other
+    line. With D landed: C7 gains last_amount precedence; MOB-R71 E3's mock grant applies if
+    measured. Predicted: 438/96 or CC's measured figure with sign.
+B3. Any other break STOPS that item (MOB-R63 B). Each commit green alone. Order: persist; D; E.
+B4. After the push succeeds, CC drops stash@{2} and stash@{3} (MOB-R70, superseded); the patch
+    files stay in the scratchpad. stash@{0} and stash@{1} are dropped once their commits push.
+
+═══ C. PREDICTIONS, PUSH, OPERATOR CHECKS ═══
+
+C1. MOB-R60: a new scratch predictions file before the first edit, sha256 reported, key lines
+    quoted. F4 is not re-run unless E's code changes beyond C7's precedence.
+C2. Push once, after the last item: fast-forward; every committed item's predictions held; all
+    four Actions jobs succeed, labelled ubuntu-24.04; both probes on the new sha; 0 unpushed by
+    both routes; porcelain pasted. A STOPPED item's expectations do not block the push.
+C3. MOB-R71 G1 and G3 stand: RM-21 (D read-only, no migration, Undo path unchanged), RM-23,
+    RM-25 (postponed), RM-26, RM-27; no new gate, next is RM-28. The operator's phone checks
+    follow the deploy; CC does not wait on them.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, before any other work. The wrap check runs as its own step and its
+output is pasted. Expected: blank 10736, then 63 lines at 10737-10799. Read-back: appended
+line count, header and last line verbatim, cmp of the region against the payload, git show
+--stat and porcelain, all pasted in full.
+After this block: strict 72, loose 74 (body lines 1513 and 6934).
