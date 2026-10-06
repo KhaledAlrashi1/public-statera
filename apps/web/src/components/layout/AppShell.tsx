@@ -15,7 +15,7 @@ import {
   Moon,
   Sun,
 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useIsFetching } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
 import { useDarkMode } from "@/lib/useDarkMode"
@@ -222,7 +222,9 @@ function AppShellLayout() {
   // FAB. Clearance change only — the FAB topology is unchanged.
   // MOB-R69 F3 — plus the home-bar inset when opened from the Home Screen (0 in a browser).
   return (
-    <div className="relative min-h-screen bg-background pb-[calc(9rem+env(safe-area-inset-bottom))] lg:pb-24">
+    // MOB-R73 E5 — below lg the FAB is gone; the padding now clears the tab bar and its raised Log
+    // circle only (pb-24 = 96px over a ~60px bar plus the ~20px the circle rises above it).
+    <div className="relative min-h-screen bg-background pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-24">
       {/* Skip to content — a11y */}
       <a
         href="#main-content"
@@ -550,8 +552,8 @@ function AppShellLayout() {
         aria-label="Tab navigation"
       >
         <div className="mx-auto flex max-w-lg items-stretch justify-around">
-          {navItems.map((item) => {
-            return (
+          {navItems.map((item, index) => {
+            const link = (
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -578,6 +580,27 @@ function AppShellLayout() {
                 )}
               </NavLink>
             )
+            // MOB-R73 E5 (operator selection D2) — Log sits in the centre of the bar, so it covers
+            // nothing: a raised ink circle with a brass plus. It opens /log, the main expense entry.
+            if (index !== Math.floor(navItems.length / 2)) return link
+            return (
+              <Fragment key={item.to}>
+                <button
+                  type="button"
+                  onClick={() => navigate("/log")}
+                  className="group relative flex flex-1 flex-col items-center gap-0.5 px-1 pb-2 pt-0 text-[10px] font-semibold text-foreground focus-visible:outline-none"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="-mt-5 flex h-12 w-12 items-center justify-center rounded-full bg-panel text-accent shadow-elevation-3 ring-1 ring-panel-border transition-transform group-active:scale-95 group-focus-visible:ring-2 group-focus-visible:ring-ring"
+                  >
+                    <Plus className="h-6 w-6" strokeWidth={2.5} />
+                  </span>
+                  <span>Log</span>
+                </button>
+                {link}
+              </Fragment>
+            )
           })}
         </div>
       </nav>
@@ -599,7 +622,8 @@ function AppShellLayout() {
               variant="default"
               size="icon"
               onClick={handleQuickAdd}
-              className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] end-4 z-40 h-14 w-auto ps-4 pe-5 rounded-[var(--radius-card)] bg-panel text-panel-text ring-1 ring-panel-border shadow-elevation-3 transition-all duration-200 hover:-translate-y-0.5 hover:bg-panel/90 active:translate-y-0 lg:bottom-6 lg:end-8"
+              // MOB-R73 E5 — max-lg:hidden: below lg the tab bar's centre Log item replaces it.
+              className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] end-4 z-40 h-14 w-auto ps-4 pe-5 rounded-[var(--radius-card)] bg-panel text-panel-text ring-1 ring-panel-border shadow-elevation-3 transition-all duration-200 hover:-translate-y-0.5 hover:bg-panel/90 active:translate-y-0 max-lg:hidden lg:bottom-6 lg:end-8"
               aria-label="Log transaction"
             >
               <Plus className="icon-hero" />
