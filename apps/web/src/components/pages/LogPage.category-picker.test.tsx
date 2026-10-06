@@ -1,5 +1,6 @@
 // MOB-R69 E3 / E5 — /log's category picker: no automatic keyboard on touch devices, her usual
-// categories first by her own use, and no income-kind category in the expense picker.
+// categories first by her own use, and no income-kind category in the expense picker. MOB-R70 E5:
+// rewritten under the F2 grant — the picker opens inline under the Category line (a group, not a dialog).
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
@@ -51,10 +52,10 @@ async function openPicker(categories: unknown[]) {
   mocks.categoriesList.mockResolvedValue(categories)
   renderAt()
   await screen.findByRole("button", { name: /^PICK/ })
-  fireEvent.click(screen.getByRole("button", { name: "Category" }))
-  return screen.findByRole("dialog", { name: "Find a category" })
+  fireEvent.click(screen.getByRole("button", { name: /^Category/ }))
+  return screen.findByRole("group", { name: "Category" })
 }
-const chips = (dialog: HTMLElement) => within(dialog).getAllByRole("button").map((b) => b.textContent).filter((t) => t !== "Close")
+const chips = (picker: HTMLElement) => within(picker).getAllByRole("button").map((b) => b.textContent)
 
 const RANKED = [
   { id: 1, name: "Coffee", kind: "expense", transaction_count: 3 },

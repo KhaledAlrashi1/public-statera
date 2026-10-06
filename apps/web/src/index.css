@@ -528,13 +528,51 @@
     }
   }
 
+  /* MOB-R70 E7 — /log's save moment: the check draws itself (pathLength 1), and on the first save
+     of the day eight brass squares burst outward. Reduced motion renders neither (LogPage.tsx);
+     the media rule below is the second guard. */
+  .log-check-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: logCheckDraw 420ms 120ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes logCheckDraw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .log-burst-square {
+    --angle: calc(var(--i) * 45deg);
+    opacity: 0;
+    animation: logBurst 700ms 80ms ease-out forwards;
+  }
+
+  @keyframes logBurst {
+    0% {
+      opacity: 1;
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) rotate(0deg);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-3.25rem) rotate(90deg);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .page-transition,
     .float-in,
     .rise-in,
     .gradient-flow,
-    .goal-complete-celebration {
+    .goal-complete-celebration,
+    .log-burst-square {
       animation: none;
+    }
+
+    .log-check-draw {
+      animation: none;
+      stroke-dashoffset: 0;
     }
   }
 

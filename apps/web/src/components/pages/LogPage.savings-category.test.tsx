@@ -32,8 +32,8 @@ async function pickerChips(categories: unknown[]) {
       </QueryClientProvider>
     </MemoryRouter>,
   )
-  fireEvent.click(screen.getByRole("button", { name: "Category" }))
-  const dialog = await screen.findByRole("dialog", { name: "Find a category" })
+  fireEvent.click(screen.getByRole("button", { name: /^Category/ }))
+  const dialog = await screen.findByRole("group", { name: "Category" })
   // The user's own row is listed once the categories have loaded.
   await within(dialog).findByRole("button", { name: "Groceries" })
   return within(dialog).getAllByRole("button").map((b) => b.textContent)

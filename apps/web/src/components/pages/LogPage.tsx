@@ -1,38 +1,57 @@
-// MOB-R53 Part B — v5 manual logging, "Place, then item", on the route /log. MOB-R61 D2 made it the
-// main expense entry (the FAB and "L" for an expense, the palette's "Add Expense", Activity's add on
-// a non-income view); income keeps QuickAdd. Strings stay provisional until a ruling after the
-// Friday test (RM-26, D5). Mounted inside ProtectedRoute but OUTSIDE AppShell, so neither the FAB
-// nor the bottom tabs cover the keypad — without touching either.
+// MOB-R53 Part B — manual logging on the route /log. MOB-R61 D2 made it the main expense entry (the
+// FAB and "L" for an expense, the palette's "Add Expense", Activity's add on a non-income view);
+// income keeps QuickAdd. Mounted inside ProtectedRoute but OUTSIDE AppShell, so neither the FAB nor
+// the bottom tabs cover the keypad — without touching either.
 //
-// Money is a STRING end to end (B3): the keypad builds a string (lib/log-amount), the API gets the
-// normalised 3-decimal string, and the batch total is summed in integer fils. Display goes through
-// the app's existing formatKD.
+// MOB-R70 E — rebuilt as option A, "Receipt" (operator's selection, MOB-R70 B6). The screen shows
+// the entry as it is (C1): Amount and Category are required, Place, What for and Date are optional,
+// and Date is today unless changed. Two ways in: "Repeat in two taps" (her usual places as tiles)
+// and "Or fill in a new one" (one card, five lines). Each line opens its picker inline beneath it,
+// one at a time; the first missing required line is tagged "Next". Save is never disabled: while
+// something required is missing it says what, and a tap opens that line. Strings are
+// CHANNEL-DRAFTED and provisional under RM-26 (MOB-R70 C2).
 //
-// Saves go through the existing POST /api/transactions, as QuickAdd's does. Undo calls the existing
-// DELETE only with the id this page's own most recent create returned in this page session.
-// After a save or an undo every query is invalidated (MOB-R55 G3: no key list, so it cannot drift).
+// MOB-R71 C7 — a tile shows its place's last_amount (MOB-R70 D), else its TOP item's amount, else no
+// amount. Popular in Kuwait tiles (C2) never show one.
+//
+// Money is a STRING end to end (B3): the keypad builds a string (lib/log-amount), typed text goes
+// through the RM-27 normalizer (lib/amount-text), and the API gets the normalised 3-decimal string.
+// Display goes through the app's existing formatKD.
+//
+// Saves go through the existing POST /api/transactions. Undo (MOB-R53, unchanged, the operator's
+// selection) calls the existing DELETE only with the id this page's own most recent create
+// returned. After a save or an undo every query is invalidated (MOB-R55 G3).
 // Test stats are local only: sessionStorage, shown at /log?stats=1, never sent anywhere.
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react"
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { ArrowLeft, Delete, Search } from "lucide-react"
+import { Check, Delete, X } from "lucide-react"
 import { ApiError, categoriesApi, transactionsApi } from "@/lib/api"
 import { cn, formatDisplayDate, formatKD } from "@/lib/utils"
-import { normalizeAmount, pressDecimal, pressDelete, pressDigit, sumKd } from "@/lib/log-amount"
+import { normalizeAmount, pressDecimal, pressDelete, pressDigit } from "@/lib/log-amount"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useToast } from "@/components/ui/toaster"
 import type { LogSuggestionItem, LogSuggestionPlace } from "@/types/api"
 import { GENERIC_SAVINGS_CATEGORY } from "@/lib/suggested-names"
 import { AMOUNT_REFUSED_MESSAGE, formatAmountReadout, parseAmountText } from "@/lib/amount-text"
 import { searchableCategoryNames, usualCategoryNames } from "@/lib/log-categories"
 import { useFinePointer } from "@/lib/use-pointer"
-import { useVisualViewportVars, VISUAL_VIEWPORT_SHEET_CLASS } from "@/lib/useVisualViewport"
+import { useVisualViewportVars } from "@/lib/useVisualViewport"
+import {
+  claimFirstSaveOfDay,
+  firstMissing,
+  localIso,
+  missingFields,
+  missingPhrase,
+  missingSaveLabel,
+  prefersReducedMotion,
+  recentDateChips,
+  type RequiredField,
+} from "@/lib/log-entry"
 
 export const LOG_STATS_KEY = "statera.log.stats"
 
-/** Beginner list, shown only while the user has no places of their own (B3). */
+/** Beginner list, shown only while the user has no places of their own (B3; MOB-R71 C2: as tiles). */
 export const POPULAR_IN_KUWAIT: ReadonlyArray<{ name: string; category: string }> = [
   { name: "PICK", category: "Coffee" },
   { name: "Starbucks", category: "Coffee" },
@@ -41,12 +60,14 @@ export const POPULAR_IN_KUWAIT: ReadonlyArray<{ name: string; category: string }
   { name: "Oula", category: "Fuel" },
   { name: "Careem", category: "Transport" },
 ]
+/** E2 — how many place tiles "Repeat in two taps" shows. */
+export const TILE_LIMIT = 4
+/** E7 — how long the save moment stays before the form is back. */
+export const SAVE_MOMENT_MS = 2600
 
-type Saved = { id: number; amount: string; what: string }
+type Line = "amount" | "category" | "place" | "what" | "date"
 type StatEntry = { ms: number; taps: number; suggestion: boolean }
-
-const localIso = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+type Moment = { amount: string; label: string; burst: boolean; still: boolean }
 
 function readStats(): StatEntry[] {
   try {
@@ -68,6 +89,63 @@ function writeStats(entries: StatEntry[]) {
 const chip =
   "inline-flex min-h-11 items-center rounded-full border border-border px-4 text-sm font-medium transition-colors aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground"
 
+// E2 — the colour square behind a tile's initial: one of the existing chart tokens, picked by the
+// place's name so a place keeps its colour. Brass (chart-2) and ink (chart-1) are left out: brass
+// is rationed, and ink is the selected-tile border. The initial is decorative (the name is beside it).
+const TILE_COLOURS = ["bg-chart-3", "bg-chart-4", "bg-chart-5", "bg-chart-6", "bg-chart-7"]
+function tileColour(name: string): string {
+  let h = 0
+  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0
+  return TILE_COLOURS[h % TILE_COLOURS.length]
+}
+
+/**
+ * E5, as amended by MOB-R71 C3 — a choice that applies on POINTER DOWN, so the keyboard closing (which
+ * moves the layout) cannot swallow the tap. Only the click from THAT SAME PRESS is then ignored,
+ * wherever it lands, so it cannot hit whatever the moved layout now puts under the finger. The next
+ * pointerdown (or a pointercancel) clears the flag: no timer, so a tap right after a pick always
+ * counts. Keyboard activation (Enter, Space) arrives as a plain click and applies there.
+ */
+function usePointerDownPick() {
+  const ignoreClick = useRef(false)
+  useEffect(() => {
+    // Capture phase on the document runs before any target's own handler: a new press clears the
+    // flag first, and a pick made by that press sets it again.
+    const clear = () => {
+      ignoreClick.current = false
+    }
+    const onClick = (ev: Event) => {
+      if (!ignoreClick.current) return
+      ignoreClick.current = false
+      ev.stopPropagation()
+      ev.preventDefault()
+    }
+    document.addEventListener("pointerdown", clear, true)
+    document.addEventListener("pointercancel", clear, true)
+    document.addEventListener("click", onClick, true)
+    return () => {
+      document.removeEventListener("pointerdown", clear, true)
+      document.removeEventListener("pointercancel", clear, true)
+      document.removeEventListener("click", onClick, true)
+    }
+  }, [])
+  return (apply: () => void) => ({
+    onPointerDown: (e: { button: number; preventDefault: () => void }) => {
+      if (e.button > 0) return // only the primary button (touch, pen and left click are 0)
+      e.preventDefault()
+      apply()
+      ignoreClick.current = true
+    },
+    onClick: apply,
+  })
+}
+
+/** MOB-R71 C7 — the amount a tile shows (and fills): the place's last_amount (MOB-R70 D); if absent
+ * or null, its top item's amount; else none. Popular tiles never pass through here and never show one. */
+function tileAmount(p: LogSuggestionPlace): string | null {
+  return p.last_amount ?? p.items[0]?.amount_kd ?? null
+}
+
 export default function LogPage() {
   const [params] = useSearchParams()
   if (params.get("stats") === "1") {
@@ -76,41 +154,93 @@ export default function LogPage() {
   return <LogPanel />
 }
 
+function Tag({ kind }: { kind: "required" | "next" | "optional" }) {
+  if (kind === "next") {
+    // "Next" in brass (E4): a brass pill with ink text. Brass AS text fails AA in light mode.
+    return <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-accent-foreground">Next</span>
+  }
+  return (
+    <span className="shrink-0 text-xs font-medium text-muted-foreground">{kind === "required" ? "Required" : "Optional"}</span>
+  )
+}
+
+function EntryLine({
+  id,
+  label,
+  value,
+  hint,
+  tag,
+  open,
+  onToggle,
+  children,
+}: {
+  id: Line
+  label: string
+  value: ReactNode | null
+  hint: string
+  tag: "required" | "next" | "optional" | null
+  open: boolean
+  onToggle: () => void
+  children: ReactNode
+}) {
+  return (
+    <div className="border-b border-border last:border-b-0" data-line={id}>
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={`log-${id}-picker`}
+        onClick={onToggle}
+        className="flex min-h-14 w-full items-center gap-3 px-4 py-3 text-start"
+      >
+        <span className="w-[4.75rem] shrink-0 text-sm font-medium">{label}</span>
+        <span className={cn("min-w-0 flex-1 truncate", value !== null ? "font-semibold" : "text-muted-foreground")}>
+          {value !== null ? value : hint}
+        </span>
+        {tag ? <Tag kind={tag} /> : null}
+      </button>
+      {open ? (
+        <div id={`log-${id}-picker`} role="group" aria-label={label} className="min-w-0 space-y-3 px-4 pb-4">
+          {children}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 function LogPanel() {
+  const pickProps = usePointerDownPick()
   const navigate = useNavigate()
   const location = useLocation()
-  const toast = useToast()
   const queryClient = useQueryClient()
 
-  const today = useMemo(() => new Date(), [])
+  const [today] = useState(() => new Date())
   const todayIso = localIso(today)
-  const yesterdayIso = localIso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1))
+  const dateChips = recentDateChips(today)
 
-  const { data: places = [], isSuccess: placesLoaded } = useQuery({
-    queryKey: ["log-suggestions"],
-    queryFn: transactionsApi.logSuggestions,
-  })
+  const { data: places = [], isSuccess: placesLoaded } = useQuery({ queryKey: ["log-suggestions"], queryFn: transactionsApi.logSuggestions })
   const { data: categoryList = [] } = useQuery({ queryKey: ["categories"], queryFn: categoriesApi.list })
 
-  const [date, setDate] = useState(todayIso)
   // MOB-R69 E4 — computers type the amount; touch devices keep the keypad.
   const fine = useFinePointer()
+  const [date, setDate] = useState(todayIso)
   const [place, setPlace] = useState<string | null>(null)
   const [placeItems, setPlaceItems] = useState<LogSuggestionItem[]>([])
-  const [item, setItem] = useState<string | null>(null)
-  const [other, setOther] = useState<string | null>(null)
+  const [whatFor, setWhatFor] = useState("")
   const [category, setCategory] = useState<string | null>(null)
   const [amount, setAmount] = useState("")
   const [prefilled, setPrefilled] = useState(false)
+  const [open, setOpen] = useState<Line | null>(null)
+  const [placeQuery, setPlaceQuery] = useState("")
+  const [categoryQuery, setCategoryQuery] = useState("")
+  const [nudge, setNudge] = useState<string | null>(null)
   const [forceNext, setForceNext] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState<Saved[]>([])
   const [lastCreatedId, setLastCreatedId] = useState<number | null>(null)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [query, setQuery] = useState("")
-  const [categoryOpen, setCategoryOpen] = useState(false)
-  const [categoryQuery, setCategoryQuery] = useState("")
+  const [moment, setMoment] = useState<Moment | null>(null)
+  const momentTimer = useRef<number | null>(null)
+  // A text picker closed by its field's blur must not be re-opened by the same tap on its line.
+  const blurClosed = useRef<{ line: Line; at: number } | null>(null)
 
   const stat = useRef<{ start: number | null; taps: number; suggestion: boolean }>({ start: null, taps: 0, suggestion: false })
   const tap = (fromSuggestion = false) => {
@@ -122,19 +252,17 @@ function LogPanel() {
   const changed = () => {
     setForceNext(false)
     setError(null)
+    setNudge(null)
   }
 
-  const beginner = placesLoaded && places.length === 0
-  const listedPlaces: Array<{ name: string; category: string | null; items: LogSuggestionItem[] }> = beginner
-    ? POPULAR_IN_KUWAIT.map((p) => ({ ...p, items: [] }))
-    : places
+  useEffect(() => () => {
+    if (momentTimer.current !== null) window.clearTimeout(momentTimer.current)
+  }, [])
 
-  const itemName = other?.trim() || item
-  const what = itemName && place ? `${itemName} at ${place}` : itemName || place || category || ""
-  const normalized = prefilled ? amount : normalizeAmount(amount)
   // MOB-R69 E4 — the readout shows what will save, through the RM-27 normalizer; refused text is
-  // shown as typed, with the refusal line, and cannot be saved (normalized is null).
+  // shown as typed, with the refusal line, and cannot be saved.
   const parsed = prefilled ? null : parseAmountText(amount)
+  const normalized = prefilled ? normalizeAmount(amount) : parsed?.kind === "ok" ? parsed.kd : null
   const amountRefused = parsed?.kind === "refused"
   const readout = prefilled
     ? formatAmountReadout(amount)
@@ -144,24 +272,75 @@ function LogPanel() {
         ? `KD ${amount}`
         : "KD 0"
 
-  const pickPlace = (p: { name: string; category: string | null; items: LogSuggestionItem[] }, fromSuggestion: boolean) => {
+  const amountOk = Boolean(normalized)
+  const missing = missingFields(amountOk, category !== null)
+  const next = firstMissing(place !== null, amountOk, category !== null)
+  const ready = missing.length === 0
+
+  const toggle = (line: Line) => {
+    const b = blurClosed.current
+    if (b && b.line === line && Date.now() - b.at < 400) return
+    tap()
+    setOpen((o) => (o === line ? null : line))
+    if (line !== "place") setPlaceQuery("")
+  }
+
+  /** E5 — after a choice, the next missing required line opens, else the picker closes. */
+  const advance = (opts: { categoryChosen: boolean; amountChosen: boolean }) => {
+    if (!opts.categoryChosen) setOpen("category")
+    else if (!opts.amountChosen) setOpen("amount")
+    else setOpen(null)
+  }
+
+  const applyPlace = (p: { name: string; category: string | null; items: LogSuggestionItem[] }, fromSuggestion: boolean) => {
     tap(fromSuggestion)
     changed()
     setPlace(p.name)
     setPlaceItems(p.items)
-    setItem(null)
-    setOther(null)
+    setPlaceQuery("")
+    const nextCategory = p.category ?? category
     if (p.category) setCategory(p.category)
+    advance({ categoryChosen: nextCategory !== null, amountChosen: amountOk })
+  }
+
+  // E2 — a tile fills place, its category and its amount (C7); Save then saves. A Popular in Kuwait
+  // tile (C2) has no items, so it fills place and category only and Amount becomes Next.
+  const pickTile = (p: LogSuggestionPlace) => {
+    tap(true)
+    changed()
+    setPlace(p.name)
+    setPlaceItems(p.items)
+    if (p.category) setCategory(p.category)
+    const tileKd = tileAmount(p)
+    if (tileKd !== null) {
+      setAmount(tileKd)
+      setPrefilled(true)
+    } else if (prefilled) {
+      // A tile without an amount fills place and category only; an amount another tile put there
+      // is not hers, so it goes. An amount she typed stays.
+      setAmount("")
+      setPrefilled(false)
+    }
+    setOpen(null)
+  }
+
+  const pickCategory = (name: string) => {
+    tap()
+    changed()
+    setCategory(name)
+    setCategoryQuery("")
+    setOpen(amountOk ? null : "amount")
   }
 
   const pickItem = (it: LogSuggestionItem) => {
     tap(true)
     changed()
-    setItem(it.name)
-    setOther(null)
-    if (it.category) setCategory(it.category)
-    setAmount(it.amount_kd)
-    setPrefilled(true)
+    setWhatFor(it.name)
+    if (!amountOk && amount === "") {
+      setAmount(it.amount_kd)
+      setPrefilled(true)
+    }
+    setOpen(null)
   }
 
   const key = (k: string) => {
@@ -188,17 +367,33 @@ function LogPanel() {
   const resetEntry = () => {
     setPlace(null)
     setPlaceItems([])
-    setItem(null)
-    setOther(null)
+    setWhatFor("")
     setCategory(null)
     setAmount("")
     setPrefilled(false)
     setForceNext(false)
+    setOpen(null)
+    setPlaceQuery("")
+    setCategoryQuery("")
+    setNudge(null)
+    setDate(todayIso)
     stat.current = { start: null, taps: 0, suggestion: false }
   }
 
+  const closeMoment = () => {
+    if (momentTimer.current !== null) window.clearTimeout(momentTimer.current)
+    momentTimer.current = null
+    setMoment(null)
+  }
+
   const save = async () => {
-    if (!normalized || !category) return
+    if (saving) return
+    if (!ready || !normalized || !category) {
+      // E6 — a tap while something is missing opens the first missing line and says what.
+      setNudge(`Add ${missingPhrase(missing)} to save`)
+      setOpen(next as RequiredField)
+      return
+    }
     tap()
     setSaving(true)
     setError(null)
@@ -207,18 +402,26 @@ function LogPanel() {
         date,
         merchant: place ?? undefined,
         category,
-        name: itemName || place || category,
+        name: whatFor.trim() || place || category,
         amount_kd: normalized,
         force: forceNext ? "1" : undefined,
       })
       const id = res.data?.item?.id
       if (typeof id === "number") setLastCreatedId(id)
-      setSaved((s) => [...s, { id: typeof id === "number" ? id : -1, amount: normalized, what }])
       writeStats([
         ...readStats(),
         { ms: Date.now() - (stat.current.start ?? Date.now()), taps: stat.current.taps, suggestion: stat.current.suggestion },
       ])
       void queryClient.invalidateQueries()
+      // E7 — the save moment. Reduced motion: a static check, no draw, no burst.
+      const still = prefersReducedMotion()
+      const burst = !still && claimFirstSaveOfDay(todayIso)
+      setMoment({ amount: normalized, label: place || category, burst, still })
+      if (momentTimer.current !== null) window.clearTimeout(momentTimer.current)
+      momentTimer.current = window.setTimeout(() => {
+        momentTimer.current = null
+        setMoment(null)
+      }, SAVE_MOMENT_MS)
       resetEntry()
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
@@ -232,17 +435,22 @@ function LogPanel() {
     }
   }
 
+  // E8 — Undo, today's path (MOB-R53): deletes only the id this page's last create returned, then
+  // resets the form. On failure the entry is still saved, said so, and Undo stays (MOB-R56 D4).
   const undo = async () => {
     const id = lastCreatedId
     if (id === null) return
+    if (momentTimer.current !== null) window.clearTimeout(momentTimer.current)
+    momentTimer.current = null
     setLastCreatedId(null)
     try {
       await transactionsApi.delete(id)
-      setSaved((s) => s.filter((e) => e.id !== id))
       void queryClient.invalidateQueries()
+      resetEntry()
+      setError(null)
+      setMoment(null)
     } catch {
       setLastCreatedId(id)
-      // MOB-R56 D4 (S16) — not S14: after a failed undo the entry is still saved.
       setError("Couldn't undo. The entry is still saved.")
     }
   }
@@ -254,20 +462,9 @@ function LogPanel() {
     else navigate("/")
   }
 
-  const done = () => {
-    if (saved.length > 0) {
-      toast.success(`${saved.length} saved · ${formatKD(sumKd(saved.map((s) => s.amount)))}`)
-      navigate("/activity")
-    } else {
-      navigate(-1)
-    }
-  }
-
-  const canSave = Boolean(normalized && category && !saving)
-
-  // MOB-R69 E4 — digits, ".", "," and Backspace from a physical keyboard, on every device. Enter
-  // saves only when Save is enabled. Ignored while any text field has focus (that field owns its
-  // keys; on computers the amount field types natively) and while a picker is open.
+  // MOB-R69 E4 — digits, ".", "," and Backspace from a physical keyboard, on every device; a digit
+  // opens the Amount line. Enter saves only when ready (E6). Ignored while a text field has focus
+  // (that field owns its keys) and while a picker with a text field is open.
   const keyHandler = useRef<(e: KeyboardEvent) => void>(() => {})
   keyHandler.current = (e: KeyboardEvent) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return
@@ -275,17 +472,16 @@ function LogPanel() {
       const n = node as HTMLElement | null
       return Boolean(n && (n.tagName === "INPUT" || n.tagName === "TEXTAREA" || n.tagName === "SELECT" || n.isContentEditable))
     }
-    // Both the focused element and the event's own target: a key typed in a field (including the
-    // computer's amount field, which handles its own Enter) never reaches this handler twice.
     if (isField(document.activeElement) || isField(e.target)) return
-    if (searchOpen || categoryOpen) return
+    if (open === "place" || open === "what" || open === "category" || moment) return
     if (/^[0-9]$/.test(e.key) || e.key === "." || e.key === ",") {
       e.preventDefault()
       typeChar(e.key)
+      setOpen("amount")
     } else if (e.key === "Backspace") {
       e.preventDefault()
       key("del")
-    } else if (e.key === "Enter" && canSave) {
+    } else if (e.key === "Enter" && ready) {
       e.preventDefault()
       void save()
     }
@@ -296,328 +492,479 @@ function LogPanel() {
     return () => document.removeEventListener("keydown", onKey)
   }, [])
 
-  // MOB-R69 D3/E3 (b) — /log's two pickers follow the visual viewport like the old sheet, and the
-  // focused field is revealed after the keyboard resizes them.
+  // MOB-R69 D3, kept (E10) — while a picker with a text field is open, the focused field is revealed
+  // inside the VISUAL viewport after the keyboard resizes it (runs after the re-render).
   const revealFocused = () => {
-    const active = document.activeElement
-    if (active instanceof HTMLElement && typeof active.scrollIntoView === "function") active.scrollIntoView({ block: "nearest" })
+    const el = document.activeElement
+    if (!(el instanceof HTMLElement) || el.tagName !== "INPUT") return
+    const vv = window.visualViewport
+    if (!vv) {
+      if (typeof el.scrollIntoView === "function") el.scrollIntoView({ block: "nearest" })
+      return
+    }
+    const r = el.getBoundingClientRect()
+    const margin = 12
+    const visibleTop = vv.offsetTop + margin
+    const visibleBottom = vv.offsetTop + vv.height - margin
+    if (r.bottom > visibleBottom) window.scrollBy(0, r.bottom - visibleBottom)
+    else if (r.top < visibleTop) window.scrollBy(0, r.top - visibleTop)
   }
-  const searchVv = useVisualViewportVars(searchOpen, revealFocused)
-  const categoryVv = useVisualViewportVars(categoryOpen, revealFocused)
-  // E3 (a) — on touch devices no field takes focus when a picker opens, so no keyboard appears
-  // until she taps the search field. Computers keep the focus.
-  const keepKeyboardDown = (e: Event) => {
-    if (!fine) e.preventDefault()
-  }
+  const vvStyle = useVisualViewportVars(open === "place" || open === "what" || open === "category", revealFocused)
 
-  const q = query.trim().toLowerCase()
-  const placeResults = q ? listedPlaces.filter((p) => p.name.toLowerCase().includes(q)) : []
-  const itemResults = q
-    ? listedPlaces.flatMap((p) => p.items.filter((i) => i.name.toLowerCase().includes(q)).map((i) => ({ place: p, item: i })))
-    : []
-  const exactPlace = listedPlaces.some((p) => p.name.toLowerCase() === q)
+  // E3 (a), kept — on touch devices no field takes focus when its picker opens, so no keyboard
+  // appears until she taps the field. Computers take the focus.
+  const autoFocusField = fine
 
+  // Place search — her places only (E5). With no text, all of them; with text, the matches; when
+  // the text matches none, the one result is "Add “{text}” as a new place".
+  const pq = placeQuery.trim().toLowerCase()
+  const placeResults = pq ? places.filter((p) => p.name.toLowerCase().includes(pq)) : places
+
+  // Category — MOB-R59 D1/E9 and MOB-R69 E3 (c)/(d), unchanged: up to six of hers by her own use,
+  // typing searches the rest, no income-kind category, the generic savings entry while she owns none.
   const cq = categoryQuery.trim().toLowerCase()
-  // MOB-R59 D1/E9 (provisional, RM-26) — the generic savings entry follows the user's own
-  // categories unless they own a savings-kind one (server kind) or already have the name. Picking it
-  // only sets the name; the row is created on save by the server (getOrCreateCategory).
-  // MOB-R69 E3 (c)/(d) — before typing: up to six of her categories by her own use (lib/
-  // log-categories); typing searches the full list. Income-kind categories are never offered here.
   const ownedNames = categoryList.map((c) => c.name)
   const ownsSavingsCategory = categoryList.some((c) => c.kind === "savings")
   const offerGenericSavings =
     !ownsSavingsCategory && !ownedNames.some((n) => n.toLowerCase() === GENERIC_SAVINGS_CATEGORY.toLowerCase())
   const withGeneric = (names: string[]) => (offerGenericSavings ? [...names, GENERIC_SAVINGS_CATEGORY] : names)
   const categoryNames = withGeneric(searchableCategoryNames(categoryList))
-  const categoryResults = cq
-    ? categoryNames.filter((n) => n.toLowerCase().includes(cq))
-    : withGeneric(usualCategoryNames(categoryList))
+  const categoryResults = cq ? categoryNames.filter((n) => n.toLowerCase().includes(cq)) : withGeneric(usualCategoryNames(categoryList))
   const exactCategory = categoryNames.some((n) => n.toLowerCase() === cq) || ownedNames.some((n) => n.toLowerCase() === cq)
 
-  const hint = prefilled && item
-    ? `Usual price for ${item}. Type to change it.`
-    : saved.length > 0
-      ? "Date stays set while you log several."
-      : "Tap a place, then type the amount."
+  // MOB-R71 C2 — with no places of her own, the existing Popular in Kuwait list, unchanged, as tiles.
+  const popular = placesLoaded && places.length === 0
+  const tiles: LogSuggestionPlace[] = popular
+    ? POPULAR_IN_KUWAIT.map((p) => ({ ...p, count: 0, items: [], last_amount: null, last_used: null }))
+    : places.slice(0, TILE_LIMIT)
+  const dateLabel =
+    dateChips.find((c) => c.iso === date)?.label ?? formatDisplayDate(date)
 
-  const saveLabel = !normalized
-    ? "Enter an amount"
-    : !category
-      ? "Pick a place or category"
-      : `Save ${formatKD(normalized)} · ${what}`
+  const tagFor = (field: RequiredField, filled: boolean): "required" | "next" | null =>
+    filled ? null : next === field ? "next" : "required"
 
-  const last = saved[saved.length - 1]
+  if (moment) {
+    return (
+      <Frame onBack={goBack}>
+        <SaveMoment moment={moment} canUndo={lastCreatedId !== null} error={error} onUndo={() => void undo()} onAnother={() => { closeMoment(); setError(null) }} />
+      </Frame>
+    )
+  }
 
   return (
-    // MOB-R69 E1 — at least 16px from both edges, plus the safe-area insets (notch, home bar).
-    <div className="mx-auto flex min-h-screen w-full max-w-[28rem] flex-col gap-4 bg-background ps-[calc(1rem+env(safe-area-inset-left))] pe-[calc(1rem+env(safe-area-inset-right))] pt-[calc(1rem+env(safe-area-inset-top))] pb-[calc(1rem+env(safe-area-inset-bottom))]">
-      {/* Date */}
-      <div className="flex flex-wrap items-center gap-2">
-        <Button type="button" variant="ghost" className="min-h-11 min-w-11 px-2" aria-label="Back" onClick={goBack}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <button type="button" className={chip} aria-pressed={date === todayIso} onClick={() => { tap(); changed(); setDate(todayIso) }}>
-          Today
-        </button>
-        <button type="button" className={chip} aria-pressed={date === yesterdayIso} onClick={() => { tap(); changed(); setDate(yesterdayIso) }}>
-          Yesterday
-        </button>
-        {/* MOB-R69 E2 — one tap opens the date picker. The real date field lies over the chip,
-            transparent, so the tap lands on it (iPhone opens its picker on that tap); on computers
-            showPicker() opens the calendar from anywhere on the chip. */}
-        <span
-          className={cn(
-            chip,
-            "relative",
-            date !== todayIso && date !== yesterdayIso && "border-primary bg-primary text-primary-foreground"
-          )}
-        >
-          {/* MOB-R56 D3 — the app's existing date formatter (utils.ts formatDisplayDate). */}
-          <span aria-hidden="true">{date !== todayIso && date !== yesterdayIso ? formatDisplayDate(date) : "Pick a date"}</span>
-          <input
-            type="date"
-            aria-label="Pick a date"
-            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-            value={date}
-            max={todayIso}
-            onClick={(e) => {
-              try {
-                e.currentTarget.showPicker?.()
-              } catch {
-                /* not allowed here: the field's own tap behaviour applies */
-              }
-            }}
-            onChange={(e) => { tap(); changed(); if (e.target.value) setDate(e.target.value) }}
-          />
-        </span>
-        <Button type="button" variant="outline" className="ms-auto min-h-11 min-w-11" aria-label="Search places and items" onClick={() => setSearchOpen(true)}>
-          <Search className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Places */}
-      <section className="space-y-2">
-        <h2 className="text-sm font-semibold text-muted-foreground">{beginner ? "Popular in Kuwait" : "Your usual places"}</h2>
-        <div className="flex flex-wrap gap-2">
-          {listedPlaces.map((p) => (
-            <button
-              key={p.name}
-              type="button"
-              className={cn(chip, "flex-col items-start justify-center py-1")}
-              aria-pressed={place === p.name}
-              onClick={() => pickPlace(p, true)}
-            >
-              <span>{p.name}</span>
-              {p.category ? (
-                <span className="text-xs opacity-75">
-                  {p.items.length > 0 ? `${p.category} · ${p.items.length} usual` : p.category}
-                </span>
-              ) : null}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Items */}
-      <section className="space-y-2">
-        {!place ? (
-          <p className="text-sm text-muted-foreground">Pick a place to see what you usually buy there.</p>
-        ) : (
-          <>
-            {placeItems.length === 0 ? (
-              <p className="text-sm text-muted-foreground">What was it? Optional. Your usuals appear here.</p>
-            ) : null}
-            <div className="flex flex-wrap gap-2">
-              {placeItems.map((it) => (
-                <button key={it.name} type="button" className={chip} aria-pressed={item === it.name && other === null} onClick={() => pickItem(it)}>
-                  {it.name}
+    <Frame onBack={goBack} style={vvStyle} keyboardInset={keyboardInset(vvStyle)}>
+      {tiles.length > 0 ? (
+        <section className="space-y-2" aria-labelledby="log-repeat">
+          <h2 id="log-repeat" className="text-sm font-semibold text-muted-foreground">{popular ? "Popular in Kuwait" : "Repeat in two taps"}</h2>
+          <div className="grid grid-cols-2 gap-2">
+            {tiles.map((p) => {
+              const tileKd = popular ? null : tileAmount(p)
+              return (
+                <button
+                  key={p.name}
+                  type="button"
+                  aria-pressed={place === p.name}
+                  onClick={() => pickTile(p)}
+                  className="flex min-h-16 min-w-0 items-center gap-3 rounded-[var(--radius-card)] border-2 border-border bg-card p-3 text-start transition-colors aria-pressed:border-primary"
+                >
+                  <span aria-hidden="true" className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-sm font-bold text-white", tileColour(p.name))}>
+                    {p.name.trim().charAt(0).toUpperCase()}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold">{p.name}</span>
+                    {tileKd !== null ? <span className="block font-mono text-xs tabular-nums text-muted-foreground">{formatKD(tileKd)}</span> : null}
+                  </span>
                 </button>
-              ))}
-              {other === null ? (
-                <button type="button" className={chip} aria-pressed={false} onClick={() => { tap(); changed(); setItem(null); setOther("") }}>
-                  + Other
-                </button>
-              ) : (
-                <Input
-                  autoFocus
-                  aria-label="What was it?"
-                  placeholder="What was it?"
-                  value={other}
-                  onChange={(e) => { changed(); setOther(e.target.value) }}
-                  className="min-h-11 w-48"
-                />
-              )}
-            </div>
-          </>
-        )}
-      </section>
-
-      {/* Category */}
-      <div>
-        <button type="button" className={chip} aria-pressed={category !== null} onClick={() => { tap(); setCategoryOpen(true) }}>
-          {category ?? "Category"}
-        </button>
-      </div>
-
-      {/* Amount + keypad */}
-      <div className="space-y-2">
-        {fine ? (
-          <input
-            type="text"
-            inputMode="decimal"
-            autoComplete="off"
-            aria-label="Amount (KD)"
-            placeholder="0.000"
-            value={amount}
-            onFocus={(e) => { if (prefilled) e.currentTarget.select() }}
-            onChange={(e) => { tap(); changed(); setPrefilled(false); setAmount(e.target.value) }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && canSave) {
-                e.preventDefault()
-                void save()
-              }
-            }}
-            className={cn(
-              "w-full rounded-[var(--radius-input)] border border-input bg-card px-3 py-2 text-end font-mono text-3xl font-semibold tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              prefilled && "text-muted-foreground"
-            )}
-          />
-        ) : null}
-        <div
-          className={cn(
-            "text-end font-mono font-semibold tabular-nums",
-            fine ? "text-sm text-muted-foreground" : "text-3xl",
-            !fine && prefilled && "text-muted-foreground"
-          )}
-          data-testid="log-amount"
-        >
-          {readout}
-        </div>
-        {amountRefused ? <p className="text-end text-sm text-destructive">{AMOUNT_REFUSED_MESSAGE}</p> : null}
-        <p className="text-sm text-muted-foreground">{hint}</p>
-        {fine ? null : (
-          <div className="grid grid-cols-3 gap-2">
-            {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "del"].map((k) => (
-              <button
-                key={k}
-                type="button"
-                className="min-h-14 rounded-[var(--radius-card)] border border-border bg-card text-xl font-semibold"
-                aria-label={k === "del" ? "Delete" : k === "." ? "Decimal point" : undefined}
-                onClick={() => key(k)}
-              >
-                {k === "del" ? <Delete className="mx-auto h-5 w-5" /> : k}
-              </button>
-            ))}
+              )
+            })}
           </div>
-        )}
-      </div>
-
-      {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
-
-      <Button type="button" className="min-h-12" disabled={!canSave} onClick={() => void save()}>
-        {saveLabel}
-      </Button>
-
-      {last ? (
-        <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
-          <span>{`${saved.length} saved · ${formatKD(sumKd(saved.map((s) => s.amount)))} · last: ${last.what}`}</span>
-          {lastCreatedId !== null ? (
-            <Button type="button" variant="outline" size="sm" className="min-h-11" onClick={() => void undo()}>
-              Undo last
-            </Button>
-          ) : null}
-        </div>
+        </section>
       ) : null}
 
-      <Button type="button" variant="outline" className="min-h-11" onClick={done}>
-        Done
-      </Button>
-
-      <Dialog open={searchOpen} onOpenChange={(open) => { setSearchOpen(open); if (!open) setQuery("") }}>
-        <DialogContent className={cn("space-y-4", VISUAL_VIEWPORT_SHEET_CLASS)} style={searchVv} onOpenAutoFocus={keepKeyboardDown}>
-          <DialogHeader className="pe-10">
-            <DialogTitle>Place or item</DialogTitle>
-          </DialogHeader>
-          <Input
-            aria-label="Search places and items"
-            placeholder="Try “americano” or “pick”"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <div className="space-y-1 max-sm:min-h-0 max-sm:flex-1 max-sm:overflow-y-auto">
-            {placeResults.map((p) => (
-              <button key={`p-${p.name}`} type="button" className="block min-h-11 w-full rounded-lg px-3 py-2 text-start hover:bg-muted" onClick={() => { pickPlace(p, true); setSearchOpen(false); setQuery("") }}>
-                <span className="block font-medium">{p.name}</span>
-                {p.category ? <span className="block text-xs text-muted-foreground">{p.category}</span> : null}
-              </button>
-            ))}
-            {itemResults.map(({ place: p, item: it }) => (
-              <button key={`i-${p.name}-${it.name}`} type="button" className="block min-h-11 w-full rounded-lg px-3 py-2 text-start hover:bg-muted" onClick={() => { pickPlace(p, true); pickItem(it); setSearchOpen(false); setQuery("") }}>
-                <span className="block font-medium">{it.name}</span>
-                <span className="block text-xs text-muted-foreground">{`${p.name} · ${it.category ?? p.category ?? ""}`}</span>
-              </button>
-            ))}
-            {q && !exactPlace ? (
-              <button
-                type="button"
-                className="block min-h-11 w-full rounded-lg px-3 py-2 text-start font-medium hover:bg-muted"
-                onClick={() => {
-                  pickPlace({ name: query.trim(), category: null, items: [] }, false)
-                  setCategory(null)
-                  setSearchOpen(false)
-                  setQuery("")
-                  setCategoryOpen(true)
+      <section className="space-y-2" aria-labelledby={tiles.length > 0 ? "log-new" : undefined}>
+        {tiles.length > 0 ? (
+          <h2 id="log-new" className="text-sm font-semibold text-muted-foreground">Or fill in a new one</h2>
+        ) : null}
+        <div className="overflow-hidden rounded-[var(--radius-card)] border border-border bg-card">
+          <EntryLine
+            id="amount"
+            label="Amount"
+            value={amount !== "" ? <span className="font-mono tabular-nums">{readout}</span> : null}
+            hint="How much"
+            tag={tagFor("amount", amountOk)}
+            open={open === "amount"}
+            onToggle={() => toggle("amount")}
+          >
+            {fine ? (
+              <input
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                autoFocus
+                aria-label="Amount (KD)"
+                placeholder="0.000"
+                value={amount}
+                onFocus={(e) => {
+                  const el = e.currentTarget
+                  if (prefilled) el.select()
+                  else el.setSelectionRange(el.value.length, el.value.length)
                 }}
-              >
-                {`+ Add “${query.trim()}” as a new place`}
-              </button>
-            ) : null}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={categoryOpen} onOpenChange={(open) => { setCategoryOpen(open); if (!open) setCategoryQuery("") }}>
-        <DialogContent className={cn("space-y-4", VISUAL_VIEWPORT_SHEET_CLASS)} style={categoryVv} onOpenAutoFocus={keepKeyboardDown}>
-          <DialogHeader className="pe-10">
-            <DialogTitle>Find a category</DialogTitle>
-          </DialogHeader>
-          <Input
-            aria-label="Find a category"
-            placeholder="Type to find, or tap below"
-            value={categoryQuery}
-            onChange={(e) => setCategoryQuery(e.target.value)}
-          />
-          <div className="flex flex-wrap content-start gap-2 max-sm:min-h-0 max-sm:flex-1 max-sm:overflow-y-auto">
-            {categoryResults.map((n) => (
-              <button key={n} type="button" className={chip} aria-pressed={category === n} onClick={() => { tap(); changed(); setCategory(n); setCategoryOpen(false); setCategoryQuery("") }}>
-                {n}
-              </button>
-            ))}
-            {cq && !exactCategory ? (
-              <button
-                type="button"
-                className={chip}
-                aria-pressed={false}
-                onClick={async () => {
-                  const name = categoryQuery.trim()
-                  try {
-                    await categoriesApi.create(name)
-                    void queryClient.invalidateQueries({ queryKey: ["categories"] })
-                    changed()
-                    setCategory(name)
-                    setCategoryOpen(false)
-                    setCategoryQuery("")
-                  } catch {
-                    setError("Couldn't save. Check your connection and try again.")
+                onChange={(e) => { tap(); changed(); setPrefilled(false); setAmount(e.target.value) }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && ready) {
+                    e.preventDefault()
+                    void save()
                   }
                 }}
-              >
-                {`+ New category “${categoryQuery.trim()}”`}
-              </button>
+                className={cn(
+                  "w-full min-w-0 rounded-[var(--radius-input)] border border-input bg-background px-3 py-2 text-end font-mono text-2xl font-semibold tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  prefilled && "text-muted-foreground"
+                )}
+              />
+            ) : (
+              <div className={cn("text-end font-mono text-3xl font-semibold tabular-nums", prefilled && "text-muted-foreground")} data-testid="log-amount">
+                {readout}
+              </div>
+            )}
+            {fine ? <div className="sr-only" data-testid="log-amount">{readout}</div> : null}
+            {amountRefused ? <p className="text-end text-sm text-destructive">{AMOUNT_REFUSED_MESSAGE}</p> : null}
+            {fine ? null : (
+              <div className="grid grid-cols-3 gap-2">
+                {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "del"].map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    className="min-h-12 rounded-[var(--radius-input)] border border-border bg-background text-xl font-semibold"
+                    aria-label={k === "del" ? "Delete" : k === "." ? "Decimal point" : undefined}
+                    onClick={() => key(k)}
+                  >
+                    {k === "del" ? <Delete className="mx-auto h-5 w-5" /> : k}
+                  </button>
+                ))}
+              </div>
+            )}
+            {amountOk && category === null ? (
+              <Button type="button" variant="outline" className="min-h-11 w-full" onClick={() => { tap(); setOpen("category") }}>
+                Next: category
+              </Button>
             ) : null}
+          </EntryLine>
+
+          <EntryLine
+            id="category"
+            label="Category"
+            value={category}
+            hint="Type of spending"
+            tag={tagFor("category", category !== null)}
+            open={open === "category"}
+            onToggle={() => toggle("category")}
+          >
+            {place !== null && category === null ? (
+              <p className="text-sm font-medium">{`What kind of spending is ${place}?`}</p>
+            ) : null}
+            <Input
+              aria-label="Find a category"
+              placeholder="Type to find, or tap below"
+              autoFocus={autoFocusField}
+              value={categoryQuery}
+              onChange={(e) => setCategoryQuery(e.target.value)}
+            />
+            <div className="flex flex-wrap gap-2">
+              {categoryResults.map((n) => (
+                <button key={n} type="button" className={chip} aria-pressed={category === n} onClick={() => pickCategory(n)}>
+                  {n}
+                </button>
+              ))}
+              {cq && !exactCategory ? (
+                <button
+                  type="button"
+                  className={chip}
+                  aria-pressed={false}
+                  onClick={async () => {
+                    const name = categoryQuery.trim()
+                    try {
+                      await categoriesApi.create(name)
+                      void queryClient.invalidateQueries({ queryKey: ["categories"] })
+                      pickCategory(name)
+                    } catch {
+                      setError("Couldn't save. Check your connection and try again.")
+                    }
+                  }}
+                >
+                  {`+ New category “${categoryQuery.trim()}”`}
+                </button>
+              ) : null}
+            </div>
+          </EntryLine>
+
+          <EntryLine
+            id="place"
+            label="Place"
+            value={place}
+            hint="Shop or app"
+            tag={place === null ? "optional" : null}
+            open={open === "place"}
+            onToggle={() => toggle("place")}
+          >
+            <Input
+              aria-label="Search places"
+              placeholder="Shop or app"
+              autoFocus={autoFocusField}
+              value={placeQuery}
+              onChange={(e) => setPlaceQuery(e.target.value)}
+              onBlur={() => {
+                // E5 — closing the keyboard without choosing closes the search and drops the text
+                // (the channel's choice, per B1). A pick on pointer down has already moved on.
+                blurClosed.current = { line: "place", at: Date.now() }
+                setPlaceQuery("")
+                setOpen((o) => (o === "place" ? null : o))
+              }}
+            />
+            <div className="max-h-64 space-y-1 overflow-y-auto">
+              {placeResults.map((p) => (
+                <button
+                  key={p.name}
+                  type="button"
+                  className="block min-h-11 w-full rounded-lg px-3 py-2 text-start hover:bg-muted"
+                  {...pickProps(() => applyPlace(p, true))}
+                >
+                  <span className="block truncate font-medium">{p.name}</span>
+                  {p.category ? <span className="block truncate text-xs text-muted-foreground">{p.category}</span> : null}
+                </button>
+              ))}
+              {pq && placeResults.length === 0 ? (
+                <button
+                  type="button"
+                  className="block min-h-11 w-full rounded-lg px-3 py-2 text-start font-medium hover:bg-muted"
+                  {...pickProps(() => applyPlace({ name: placeQuery.trim(), category: null, items: [] }, false))}
+                >
+                  {`Add “${placeQuery.trim()}” as a new place`}
+                </button>
+              ) : null}
+            </div>
+          </EntryLine>
+
+          <EntryLine
+            id="what"
+            label="What for"
+            value={whatFor.trim() ? whatFor.trim() : null}
+            hint="Item or note"
+            tag={whatFor.trim() ? null : "optional"}
+            open={open === "what"}
+            onToggle={() => toggle("what")}
+          >
+            {placeItems.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {placeItems.map((it) => (
+                  <button key={it.name} type="button" className={chip} aria-pressed={whatFor.trim() === it.name} {...pickProps(() => pickItem(it))}>
+                    {`${it.name} · ${formatKD(it.amount_kd)}`}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            <Input
+              aria-label="What for"
+              placeholder="Item or note"
+              autoFocus={autoFocusField}
+              value={whatFor}
+              onChange={(e) => { changed(); setWhatFor(e.target.value) }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  e.currentTarget.blur()
+                  setOpen(null)
+                }
+              }}
+              onBlur={() => {
+                // E5 — Enter or closing the keyboard keeps the text and closes.
+                blurClosed.current = { line: "what", at: Date.now() }
+                setOpen((o) => (o === "what" ? null : o))
+              }}
+            />
+          </EntryLine>
+
+          <EntryLine
+            id="date"
+            label="Date"
+            value={dateLabel}
+            hint="Today"
+            tag={null}
+            open={open === "date"}
+            onToggle={() => toggle("date")}
+          >
+            <div className="flex flex-wrap gap-2">
+              {dateChips.map((c) => (
+                <button
+                  key={c.iso}
+                  type="button"
+                  className={chip}
+                  aria-pressed={date === c.iso}
+                  onClick={() => { tap(); changed(); setDate(c.iso); setOpen(null) }}
+                >
+                  {c.label}
+                </button>
+              ))}
+              {/* MOB-R69 E2, kept for older days — the real date field lies over the chip,
+                  transparent, so the tap lands on it (iPhone opens its picker on that tap); on
+                  computers showPicker() opens the calendar from anywhere on the chip. */}
+              <span className={cn(chip, "relative")}>
+                <span aria-hidden="true">Earlier date</span>
+                <input
+                  type="date"
+                  aria-label="Earlier date"
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  value={date}
+                  max={todayIso}
+                  onClick={(e) => {
+                    try {
+                      e.currentTarget.showPicker?.()
+                    } catch {
+                      /* not allowed here: the field's own tap behaviour applies */
+                    }
+                  }}
+                  onChange={(e) => {
+                    const v = e.target.value
+                    if (!v || v > todayIso) return
+                    tap()
+                    changed()
+                    setDate(v)
+                    setOpen(null)
+                  }}
+                />
+              </span>
+            </div>
+          </EntryLine>
+        </div>
+      </section>
+
+      <div className="sticky bottom-0 -mx-4 mt-auto space-y-2 bg-background px-4 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2">
+        {/* MOB-R71 C1 — after the moment resets, a quiet "Undo last" stays until the next save or until
+            she leaves /log. It deletes only the row this page created last (MOB-R53), then goes. */}
+        {lastCreatedId !== null ? (
+          <div className="flex justify-end">
+            <Button type="button" variant="ghost" size="sm" className="min-h-11 text-muted-foreground" onClick={() => void undo()}>
+              Undo last
+            </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        ) : null}
+        {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
+        <p aria-live="polite" className="min-h-0 text-sm font-medium text-foreground empty:hidden">{nudge ?? ""}</p>
+        <Button
+          type="button"
+          variant={ready ? "default" : "outline"}
+          aria-busy={saving || undefined}
+          className={cn("min-h-12 w-full rounded-full text-base", ready && "justify-center gap-3")}
+          onClick={() => void save()}
+        >
+          {ready && normalized ? (
+            <>
+              <span aria-hidden="true" className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-accent-foreground">
+                <Check className="h-4 w-4" strokeWidth={3} />
+              </span>
+              {`Save ${formatKD(normalized)}`}
+            </>
+          ) : (
+            missingSaveLabel(missing)
+          )}
+        </Button>
+      </div>
+    </Frame>
+  )
+}
+
+function Frame({
+  onBack,
+  children,
+  style,
+  keyboardInset = 0,
+}: {
+  onBack: () => void
+  children: ReactNode
+  style?: CSSProperties
+  keyboardInset?: number
+}) {
+  return (
+    // MOB-R69 E1 — at least 16px from both edges, plus the safe-area insets (notch, home bar).
+    <div style={style} className="mx-auto flex min-h-screen w-full max-w-[28rem] flex-col gap-5 bg-background ps-[calc(1rem+env(safe-area-inset-left))] pe-[calc(1rem+env(safe-area-inset-right))] pt-[calc(1rem+env(safe-area-inset-top))]">
+      <header className="flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl font-semibold">New expense</h1>
+          <p className="text-sm text-muted-foreground">Amount and category are all you need.</p>
+        </div>
+        {/* E1 — the close control. Its accessible name stays "Back": it returns to where she came
+            from (MOB-R61 D3), which is what it does, and what the existing test names it. */}
+        <Button type="button" variant="ghost" className="min-h-11 min-w-11 shrink-0 px-2" aria-label="Back" onClick={onBack}>
+          <X className="h-5 w-5" />
+        </Button>
+      </header>
+      {children}
+      {/* MOB-R70 F4 / MOB-R71 C6 — only while the keyboard shrinks the visual viewport: room below the
+          page as tall as the keyboard, so a field near the end (What for) can still be scrolled above
+          it. With the keyboard down there is no spacer at all. */}
+      {keyboardInset > 0 ? <div aria-hidden="true" data-testid="log-keyboard-spacer" className="shrink-0" style={{ height: keyboardInset }} /> : null}
     </div>
+  )
+}
+
+/**
+ * MOB-R71 C6 — how far the keyboard shrinks the visual viewport below the layout viewport, from the
+ * --vv-height the hook reports. The layout viewport is documentElement.clientHeight, which the iOS
+ * keyboard does not shrink. 0 when the hook is inactive or nothing is hidden.
+ */
+function keyboardInset(vvStyle: CSSProperties | undefined): number {
+  if (!vvStyle || typeof document === "undefined") return 0
+  const vvHeight = parseFloat(String((vvStyle as Record<string, unknown>)["--vv-height"] ?? ""))
+  if (!Number.isFinite(vvHeight)) return 0
+  return Math.max(0, Math.round(document.documentElement.clientHeight - vvHeight))
+}
+
+function SaveMoment({
+  moment,
+  canUndo,
+  error,
+  onUndo,
+  onAnother,
+}: {
+  moment: Moment
+  canUndo: boolean
+  error: string | null
+  onUndo: () => void
+  onAnother: () => void
+}) {
+  const amountText = formatKD(moment.amount)
+  return (
+    <section className="flex flex-1 flex-col items-center justify-center gap-4 pb-16 text-center" data-testid="log-save-moment">
+      {/* Screen readers hear exactly this (E7). */}
+      <p role="status" className="sr-only">{`Logged, ${amountText}`}</p>
+      <div aria-hidden="true" className="relative">
+        {moment.burst ? (
+          <div data-testid="log-burst" className="pointer-events-none absolute inset-0">
+            {Array.from({ length: 8 }, (_, i) => (
+              <span key={i} className="log-burst-square absolute start-1/2 top-1/2 h-2 w-2 bg-accent" style={{ ["--i" as string]: i }} />
+            ))}
+          </div>
+        ) : null}
+        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-accent text-accent-foreground">
+          <svg viewBox="0 0 24 24" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12.5l4.5 4.5L19 7.5" pathLength={1} data-testid="log-check" className={moment.still ? undefined : "log-check-draw"} />
+          </svg>
+        </span>
+      </div>
+      <div aria-hidden="true" className="space-y-1">
+        <p className="text-xl font-semibold">Logged</p>
+        <p className="font-mono text-sm tabular-nums text-muted-foreground">{`${amountText} · ${moment.label}`}</p>
+      </div>
+      {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
+      <div className="flex w-full max-w-xs gap-2">
+        {canUndo ? (
+          <Button type="button" variant="outline" className="min-h-11 flex-1" onClick={onUndo}>
+            Undo
+          </Button>
+        ) : null}
+        <Button type="button" className="min-h-11 flex-1" onClick={onAnother}>
+          Log another
+        </Button>
+      </div>
+    </section>
   )
 }

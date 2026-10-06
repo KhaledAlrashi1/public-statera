@@ -28,6 +28,8 @@ function readVariant(): Variant | null {
   return null
 }
 
+export const WHY = "It opens full screen like an app, one tap away. No App Store needed."
+
 const COPY: Record<Variant, string> = {
   safari: "Tap Share, then Add to Home Screen.",
   chrome: "Tap Share in the address bar, then Add to Home Screen.",
@@ -53,6 +55,8 @@ export function InstallGuide() {
     >
       <div className="min-w-0 space-y-1">
         <p className="text-sm font-semibold">Add Statera to your Home Screen</p>
+        {/* MOB-R70 E13 — why, under the title and above the steps (CHANNEL-DRAFTED, RM-26). */}
+        <p className="text-sm">{WHY}</p>
         <p className="text-sm text-muted-foreground">{COPY[variant]}</p>
       </div>
       <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={dismiss}>

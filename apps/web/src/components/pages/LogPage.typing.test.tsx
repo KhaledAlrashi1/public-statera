@@ -1,6 +1,7 @@
 // MOB-R69 E4/E5 — /log typing from a physical keyboard, through the RM-27 normalizer. The jsdom
 // default is a touch device (no matchMedia): keypad shown, keys still typed. The computer case
-// stubs matchMedia so the amount becomes a text field.
+// stubs matchMedia so the amount becomes a text field. MOB-R70 E: four cases rewritten under the F2
+// grant for the Receipt layout (Save names what is missing; the amount sits in its own line).
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
@@ -52,7 +53,8 @@ const typeKeys = (keys: string, target: Element | Document = document) => {
   for (const k of keys) fireEvent.keyDown(target, { key: k })
 }
 const readout = () => screen.getByTestId("log-amount")
-const saveButton = () => screen.getByRole("button", { name: /^(Save KD|Enter an amount|Pick a place or category)/ })
+// MOB-R70 E6 — Save is never disabled; it names what is missing until it can save.
+const saveButton = () => screen.getByRole("button", { name: /^(Save KD|Add an amount|Add a category)/ })
 
 describe("/log — typing an amount (MOB-R69 E4)", () => {
   beforeEach(() => {
@@ -88,28 +90,29 @@ describe("/log — typing an amount (MOB-R69 E4)", () => {
     fireEvent.click(await screen.findByRole("button", { name: /^PICK/ }))
     typeKeys("1,5")
     expect(screen.getByText("Can't read this amount.")).toBeInTheDocument()
-    expect(saveButton()).toBeDisabled()
+    expect(saveButton()).toHaveTextContent(/^Add an amount$/)
     fireEvent.keyDown(document, { key: "Enter" })
     fireEvent.click(saveButton())
     expect(mocks.create).not.toHaveBeenCalled()
   })
 
-  it("Enter saves only when Save is enabled", async () => {
+  it("Enter saves only when the entry is ready", async () => {
     renderAt()
     await screen.findByRole("button", { name: /^PICK/ })
     typeKeys("7")
-    expect(saveButton()).toBeDisabled() // no place or category yet
+    expect(saveButton()).toHaveTextContent(/^Add a category$/) // no category yet
     fireEvent.keyDown(document, { key: "Enter" })
     expect(mocks.create).not.toHaveBeenCalled()
   })
 
   it("keys are ignored while another text field has focus", async () => {
     renderAt()
-    fireEvent.click(await screen.findByRole("button", { name: /^PICK/ }))
-    fireEvent.click(screen.getByRole("button", { name: "+ Other" }))
-    const other = screen.getByRole("textbox", { name: "What was it?" })
+    await screen.findByRole("button", { name: /^PICK/ })
+    fireEvent.click(screen.getByRole("button", { name: /^What for/ }))
+    const other = screen.getByRole("textbox", { name: "What for" })
     other.focus()
     typeKeys("5", other)
+    fireEvent.click(screen.getByRole("button", { name: /^Amount/ }))
     expect(readout()).toHaveTextContent("KD 0")
     expect(readout()).not.toHaveTextContent("KD 5")
   })
@@ -123,6 +126,7 @@ describe("/log — typing an amount (MOB-R69 E4)", () => {
     }))
     renderAt()
     fireEvent.click(await screen.findByRole("button", { name: /^PICK/ }))
+    fireEvent.click(screen.getByRole("button", { name: /^Amount/ }))
     expect(screen.queryByRole("button", { name: "Decimal point" })).toBeNull()
     const field = screen.getByRole("textbox", { name: "Amount (KD)" })
     fireEvent.change(field, { target: { value: "1,500" } })
