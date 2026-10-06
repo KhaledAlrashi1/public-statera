@@ -10610,3 +10610,126 @@ output is pasted. Expected: blank 10398, then 214 lines at 10399-10612. Read-bac
 line count, header and last line verbatim, cmp of the region against the payload, git show
 --stat and porcelain, all pasted in full.
 After this block: strict 70, loose 72 (body lines 1513 and 6934).
+
+MOB-R71 — MOB-R70 report accepted; both STOPs correct; D and E granted, amended, and shipped.
+
+Issued Monday, October 5, 2026, by the review channel.
+TIER 1 for D. TIER 2 for E. One CC run; one report at the end.
+
+═══ A. MOB-R70 REPORT — ACCEPTED ═══
+
+A1. Persistence 710ac66: blank 10398, then 10399-10612, cmp exit 0; strict 70, loose 72;
+    porcelain empty. Accepted.
+A2. A10 (7f2b1e5): the note is a sub-bullet under the protected-journey line, which is
+    byte-unchanged (cmp exit 0). ACCEPTED. Ordering disclosure (A10 committed before the
+    predictions file) accepted: one docs line, no count moved.
+A3. Push dee16a2..7f2b1e5, run 37360613287, all four jobs ubuntu-24.04, both probes on 7f2b1e5,
+    0 unpushed by both routes. Accepted. /log is unchanged in production.
+A4. D STOPPED correctly: 3 measured cases in 2 existing API files and 1 tsc error; no API test
+    file was granted. E STOPPED correctly: LogPage.savings-category.test.tsx :49 and :54 were
+    outside the grant. CHANNEL'S ERRORS, recorded: MOB-R70 granted no API file for D, and its
+    F2 list missed a fifth /log test file. CC predicted both STOPs in its scratch file.
+A5. E stash arithmetic consistent: 414 - 1 + 18 = 431 tests; 85 + 7 = 92 files. The granted
+    rewrites pin the new behaviour and are not weaker. Accepted.
+A6. CC's choices, RATIFIED: the close control is an icon whose accessible name stays "Back";
+    "Next" is a brass pill with ink text (brass as text fails AA in light mode); tile squares
+    use chart-3 to chart-7, no new tokens; two keyframes in index.css; the "Or fill in a new
+    one" heading is omitted when there are no tiles; a What-for chip does not set the category;
+    Place search lists all her places before she types.
+A7. CC's choices, NOT ratified, changed in C: the Undo window (C1); the 700 ms click swallow
+    (C3); the truncated Category hint (C4). Also C5 (test leakage) and C6 (spacer).
+A8. CHANNEL'S ERROR, recorded: MOB-R70 E2 ("No places: section hidden") removed the "Popular
+    in Kuwait" list for new users without knowing it existed. Lesson: before a block removes
+    or hides anything, the channel checks what it does today.
+
+═══ B. OPERATOR SELECTIONS, VERBATIM ═══
+
+B1. The questions and options are the CHANNEL'S; the selections are the OPERATOR'S:
+      "After saving, how long should Undo be available?" Options: "Quiet "Undo last" stays on
+      the form until the next save (Recommended)", "Only during the 2.6 s save moment".
+      Selected: "Quiet "Undo last" stays on the form until the next save (Recommended)".
+      "A new user with no places yet: what fills the tile area?" Options: ""Popular in Kuwait"
+      tiles: place + category, no amount (Recommended)", "Nothing; the form only". Selected:
+      ""Popular in Kuwait" tiles: place + category, no amount (Recommended)".
+
+═══ C. AMENDMENTS TO MOB-R70 E ═══
+
+C1. UNDO (amends E7 and E8). "Undo" stays in the save moment. After the moment resets, a quiet
+    "Undo last" stays on the form until the next save or until she leaves /log. It deletes only
+    the row this page created last (the MOB-R53 path, unchanged). After it is used, it goes away.
+C2. POPULAR IN KUWAIT (amends E2). When she has no places, the tile area shows the existing
+    "Popular in Kuwait" list, its entries, order and categories unchanged, as tiles in the same
+    grid, under the existing heading "Popular in Kuwait", with no amount. A tap fills place and
+    category only; Amount becomes the "Next" line. "Or fill in a new one" shows below them.
+C3. POINTER-DOWN PICK (amends E5). Only the click from the same press that made the pick is
+    ignored. The next pointerdown clears the flag. No timer. A category tapped right after a
+    place pick applies.
+C4. The Category hint becomes "Type of spending" (CHANNEL-DRAFTED, provisional under RM-26). It
+    must not truncate at 375 with a tag showing; F4 shows it.
+C5. M17's cross-test leakage is removed in its new file (isolate storage and timers); M17 then
+    reddens only its own case.
+C6. The What-for keyboard spacer exists only while visualViewport is shrunk; with the keyboard
+    down its height is 0. F4 shows both.
+C7. TILE AMOUNT (amends E2 with D landed): last_amount; if absent or null, the top item's
+    amount; else no amount. Popular tiles never show an amount.
+
+═══ D. BACKEND — GRANTED ═══
+
+D1. Apply stash@{1} (r70-D.patch). GRANT (MOB-R53), by site only: log-suggestions.test.ts:35
+    (the TS2739 fixture type) and :60 (the toEqual meets the two new keys);
+    money-wire-shape.test.ts:234 (the LS fixture key, which changed because the entry select
+    gained date, createdAt and id). No other line in these files. Diffs pasted.
+D2. The JSON and assert.ts come only from the generators. Predicted, from CC's report: routes
+    15 -> 15; money paths 70 -> 71; generated assertions 66 -> 67; leaves 167 -> 169; fixture
+    67 -> 67; ALLOWLIST empty. API hermetic and integration: CC's exact predictions with sign.
+D3. Paste the file:line where the route formats item amounts and where it formats last_amount.
+    If they are not the same formatter, D STOPS.
+D4. Own commit, green alone in both API modes, before E.
+
+═══ E. FRONTEND — GRANTED ═══
+
+E1. Re-apply stash@{0} (r70-E.patch) on top of D, with C1-C7. GRANT (MOB-R53):
+    LogPage.savings-category.test.tsx :49 and :54, for the two-line change CC described (open
+    the line by /^Category/; findByRole("group", { name: "Category" })). No other line.
+E2. The MOB-R70 F2 grant extends to C1 and C2 in LogPage.test.tsx and
+    LogPage.undo-failure.test.tsx: the Undo case pins "Undo last" after the reset and its
+    removal after use; the deleted Popular-in-Kuwait case returns, rewritten to pin C2.
+E3. If the frontend type change from D breaks mocked suggestions, CC MEASURES first; the
+    grant covers adding last_amount and last_used to mocked suggestion objects in the six
+    LogPage test files only. Any other break STOPS E.
+E4. New tests in new files, each shown able to fail: C1 (Undo last after the reset, gone after
+    use); C2 (popular tiles fill place and category, no amount, Amount is Next); C3 (a pick,
+    then an immediate category tap, applies; a timer-based swallow reddens it); C7 (the
+    fallback order).
+
+═══ F. PREDICTIONS, INSTRUMENTS, ORDER ═══
+
+F1. MOB-R60: before the first edit, a new scratch predictions file, sha256 reported, key lines
+    quoted: every count with sign for D and for E, including the restored case.
+F2. F4 of MOB-R70 is re-run after C, WebKit and Chromium, 375 and 390, numbers pasted: no
+    horizontal scroll with each picker open; Save visible with the keypad open; Place and What
+    for visible with visualViewport shrunk; spacer 0 with the keyboard down; the Category hint
+    whole with a tag showing.
+F3. Order: persist; D; E. Each commit green alone. A STOP stops only its item; stopped work is
+    stashed, never committed. If D stops, E ships under MOB-R70 H4 and C7's fallback.
+
+═══ G. CONSTRAINTS, PUSH, OPERATOR CHECKS ═══
+
+G1. RM-21 (D is read-only; no migration; the Undo delete path is unchanged), RM-23, RM-25
+    (postponed), RM-26, RM-27 stand. No new gate; next is RM-28.
+G2. Push once, after the last item: fast-forward; every committed item's predictions held; all
+    four Actions jobs succeed, labelled ubuntu-24.04; both probes on the new sha; 0 unpushed by
+    both routes; porcelain pasted. A STOPPED item's expectations do not block the push.
+G3. Operator's phone checks after deploy, in Chrome and Safari; CC does not wait on them: a new
+    entry with no help; a repeat from a tile; the date chips; search closing with the keyboard;
+    the save moment, Undo, and Undo last; the install guide line. Still open from dee16a2: Home
+    light and dark and the count-ups; laptop typing and Enter; the Income sheet; "1,500" saves
+    as KD 1,500.000 and "1,5" is refused.
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, before any other work. The wrap check runs as its own step and its
+output is pasted. Expected: blank 10613, then 122 lines at 10614-10735. Read-back: appended
+line count, header and last line verbatim, cmp of the region against the payload, git show
+--stat and porcelain, all pasted in full.
+After this block: strict 71, loose 73 (body lines 1513 and 6934).
