@@ -60,6 +60,10 @@ export const POPULAR_IN_KUWAIT: ReadonlyArray<{ name: string; category: string }
   { name: "Oula", category: "Fuel" },
   { name: "Careem", category: "Transport" },
 ]
+/** MOB-R74 F (E4b) — the close control's drawn circle stays 40px; an invisible ::before gives it a
+ * 44x44 hit area, so the circle and its neighbours do not move. The ::before is placed against the
+ * PADDING box, inside the 1px border (38px), so -3px makes 44px; -2px measured only 42px. */
+export const LOG_CLOSE_HIT_AREA = "relative before:absolute before:-inset-[3px] before:content-['']"
 /** E2 — how many place tiles "Repeat in two taps" shows. */
 export const TILE_LIMIT = 4
 /** E7 — how long the save moment stays before the form is back. */
@@ -920,12 +924,15 @@ function Frame({
         {/* E1 — the close control. Its accessible name stays "Back": it returns to where she came
             from (MOB-R61 D3), which is what it does, and what the existing test names it. */}
         {/* MOB-R73 E4 — a 40px circle (surface fill, border, ink icon), like Home's header buttons. The
-            button primitive's 44px touch minimum is overridden to the ruled 40px. The ring shows only
-            on keyboard focus (the primitive's focus-visible ring; E8). */}
+            button primitive's 44px touch minimum is overridden to the ruled 40px; MOB-R74 F restores a
+            44px hit area with LOG_CLOSE_HIT_AREA. The ring shows only on keyboard focus (E8). */}
         <Button
           type="button"
           variant="outline"
-          className="h-10 w-10 min-h-10 min-w-10 shrink-0 rounded-full border-border bg-card p-0 text-foreground pointer-coarse:min-h-10 pointer-coarse:min-w-10"
+          className={cn(
+            "h-10 w-10 min-h-10 min-w-10 shrink-0 rounded-full border-border bg-card p-0 text-foreground pointer-coarse:min-h-10 pointer-coarse:min-w-10",
+            LOG_CLOSE_HIT_AREA
+          )}
           aria-label="Back"
           onClick={onBack}
         >
