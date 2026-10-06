@@ -181,11 +181,6 @@ export default function DashboardPage() {
   const monthIncomeRaw = selectedMonth ? (monthlyKpiMap.get(selectedMonth)?.income || 0) : 0
   const monthExpensesRaw = selectedMonth ? (monthlyKpiMap.get(selectedMonth)?.expenses || 0) : 0
 
-  // The LOGGED income sum (R4 when present, else R3). MOB-R36: it no longer feeds any displayed
-  // figure; it is kept only for the empty-row guards, where 0/0 still means "no rows".
-  const loggedMonthIncome = accountOverview
-    ? Number(accountOverview.total_income_mtd || 0)
-    : monthIncomeRaw
   const monthExpenses = accountOverview
     ? Number(accountOverview.total_spend_mtd || 0)
     : monthExpensesRaw
