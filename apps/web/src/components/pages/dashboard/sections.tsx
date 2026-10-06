@@ -1125,7 +1125,7 @@ export function IncomeExpensesChart({
   // Without this filter an empty month satisfied `income >= expenses` (0 >= 0) and was counted as a
   // month that "finished with income ahead of expenses", and it dragged the expense average toward
   // zero as though it were a frugal month.
-  const monthsWithData = trendData.filter((row) => row.income !== 0 || row.expenses !== 0)
+  const monthsWithData = trendData.filter((row) => row.expenses !== 0) // MOB-R75 P1: saved income is not counted
   // MOB-R36 — RM-17 flat: every month is compared against the one typed income.
   const monthsAhead = typedIncome === null
     ? 0
