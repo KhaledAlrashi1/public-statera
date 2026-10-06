@@ -319,14 +319,15 @@ function LogPanel() {
 
   // E2 — a tile fills place, its category and its amount (C7); Save then saves. A Popular in Kuwait
   // tile (C2) has no items, so it fills place and category only and Amount becomes Next.
-  // MOB-R73 E2 — a tile is a suggestion: each of its fields lands only where she has not chosen.
+  // MOB-R73 E2, amended by MOB-R74 G (operator selection G1) — a tile tap IS her choice of place: it
+  // sets the place to the tile's place and marks it hers. Every other field she set herself stays; a
+  // field that is empty or holds a suggestion takes the tile's value. The date never changes.
   const pickTile = (p: LogSuggestionPlace) => {
     tap(true)
     changed()
-    if (!placeHers) {
-      setPlace(p.name)
-      setPlaceItems(p.items)
-    }
+    setPlace(p.name)
+    setPlaceHers(true)
+    setPlaceItems(p.items)
     if (p.category && !categoryHers) setCategory(p.category)
     const amountIsHers = amount !== "" && !prefilled
     const tileKd = tileAmount(p)
