@@ -24,6 +24,7 @@ import { categories } from "../db/schema/categories"
 import { merchants } from "../db/schema/merchants"
 import { requireAuth } from "../middleware/auth"
 import { importRateLimit, searchRateLimit } from "../lib/rate-limit"
+import { incomeCategoryFilter, expenseCategoryFilter } from "../lib/payday-lib"
 import {
   validateTransactionInput,
   createTransactionWithDupCheck,
@@ -873,8 +874,12 @@ transactionsRouter.get("/search", requireAuth, searchRateLimit, async (c) => {
   if (merIds) where = and(where, inArray(transactions.merchantId as Parameters<typeof inArray>[0], merIds))
   if (dateFromRaw) where = and(where, sql`${transactions.date} >= ${dateFromRaw}`)
   if (dateToRaw) where = and(where, sql`${transactions.date} <= ${dateToRaw}`)
-  if (incomeOnly) where = and(where, sql`${categories.isIncome} = 1`)
-  else if (excludeIncome) where = and(where, sql`(${categories.isIncome} IS NULL OR ${categories.isIncome} = 0)`)
+  // MOB-R75 C — one income rule for Activity: payday-lib's (is_income, or a category name starting
+  // "income"), so a row the rule calls income is listed under Income and never under Expense. Before,
+  // this checked is_income = 1 only, and income categories named "Income: …" (the demo's, with
+  // is_income = 0) appeared under Expense and never under Income. A row with no category is not income.
+  if (incomeOnly) where = and(where, incomeCategoryFilter())
+  else if (excludeIncome) where = and(where, expenseCategoryFilter())
 
   const selectFields = {
     id: transactions.id,
