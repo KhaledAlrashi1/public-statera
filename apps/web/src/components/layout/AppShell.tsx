@@ -20,7 +20,7 @@ import { useIsFetching } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
 import { useDarkMode } from "@/lib/useDarkMode"
 import { useAuth, getUserFirstName } from "@/contexts/AuthContext"
-import { QuickAddProvider, useQuickAdd } from "@/contexts/QuickAddContext"
+import { QuickAddProvider } from "@/contexts/QuickAddContext"
 import { InstallGuide } from "./InstallGuide"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -59,7 +59,6 @@ function AppShellLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout } = useAuth()
-  const { openQuickAdd } = useQuickAdd()
   const { isDark, toggleDarkMode } = useDarkMode()
   const toast = useToast()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -73,15 +72,11 @@ function AppShellLayout() {
   const showQuickAddFab = true
   const navItems = useMemo(() => baseNavItems, [])
 
-  // Route-derived default type, shared by the FAB and the "L" shortcut. MOB-R61 D2 — an expense
-  // opens /log, the main expense entry; income keeps QuickAdd.
+  // Shared by the FAB and the "L" shortcut: /log, the main expense entry (MOB-R61 D2).
+  // MOB-R73 E6 (operator selection D3) — adding income is removed, so income views open /log too.
   const handleQuickAdd = useCallback(() => {
-    const requestedType = new URLSearchParams(location.search).get("type")
-    const defaultType =
-      location.pathname === "/income" || requestedType === "income" ? "income" : "expense"
-    if (defaultType === "expense") navigate("/log")
-    else openQuickAdd(defaultType)
-  }, [location.search, location.pathname, navigate, openQuickAdd])
+    navigate("/log")
+  }, [navigate])
 
   // Global "L" shortcut → same QuickAdd path as the FAB (item 2). Fires only when
   // the authenticated shell is mounted (this component), no modifier is held, focus

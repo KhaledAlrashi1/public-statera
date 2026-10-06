@@ -54,7 +54,7 @@ beforeEach(() => {
 })
 
 describe("TransactionsPage — add button destination (MOB-R61 D2)", () => {
-  it("opens /log on the expense view and keeps QuickAdd on the income view", () => {
+  it("opens /log on the expense view and offers no add button on the income view (MOB-R73 D3)", () => {
     renderAt("/activity?type=expense")
     fireEvent.click(screen.getByRole("button", { name: "Add Expense" }))
     expect(mocks.navigate).toHaveBeenCalledWith("/log")
@@ -63,8 +63,8 @@ describe("TransactionsPage — add button destination (MOB-R61 D2)", () => {
     cleanup()
     vi.clearAllMocks()
     renderAt("/activity?type=income")
-    fireEvent.click(screen.getByRole("button", { name: "Add Income" }))
-    expect(mocks.openQuickAdd).toHaveBeenCalledWith("income")
+    expect(screen.queryByRole("button", { name: "Add Income" })).toBeNull()
+    expect(mocks.openQuickAdd).not.toHaveBeenCalled()
     expect(mocks.navigate).not.toHaveBeenCalledWith("/log")
   })
 })

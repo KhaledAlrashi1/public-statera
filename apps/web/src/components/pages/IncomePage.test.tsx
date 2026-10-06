@@ -87,6 +87,6 @@ describe("IncomePage", () => {
     renderPage()
 
     expect(await screen.findByText("Add your first income source")).toBeInTheDocument()
-    expect(screen.getAllByRole("button", { name: "Add Income" }).length).toBeGreaterThan(0)
+    expect(screen.queryAllByRole("button", { name: "Add Income" })).toHaveLength(0)
   })
 })

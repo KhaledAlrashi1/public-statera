@@ -16,7 +16,6 @@ import {
   transactionsApi,
 } from "@/lib/api"
 import { cn } from "@/lib/utils"
-import { useQuickAdd } from "@/contexts/QuickAddContext"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { SegmentedControl } from "@/components/ui/segmented-control"
@@ -57,7 +56,6 @@ function normalizeActivityType(value: string | null): ActivityType {
 export default function TransactionsPage() {
   const toast = useToast()
   const queryClient = useQueryClient()
-  const { openQuickAdd } = useQuickAdd()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -271,16 +269,19 @@ export default function TransactionsPage() {
               <Upload className="mr-2 h-4 w-4" />
               Import
             </Button>
-            <Button
-              variant="default"
-              size="pill"
-              // MOB-R61 D2 — an expense opens /log, the main expense entry; income keeps QuickAdd.
-              onClick={() => (activityType === "income" ? openQuickAdd("income") : navigate("/log"))}
-              className="rounded-full px-5"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              {addLabel}
-            </Button>
+            {/* MOB-R73 E6 (operator selection D3) — adding income is removed: the income view has no
+                add button; saved income rows stay listed. Elsewhere it opens /log (MOB-R61 D2). */}
+            {activityType !== "income" ? (
+              <Button
+                variant="default"
+                size="pill"
+                onClick={() => navigate("/log")}
+                className="rounded-full px-5"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                {addLabel}
+              </Button>
+            ) : null}
           </>
         )}
       />

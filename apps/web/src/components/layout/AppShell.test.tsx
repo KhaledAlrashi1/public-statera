@@ -125,7 +125,7 @@ describe("AppShell", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Log transaction" }))
 
-    expect(mocks.openQuickAdd).toHaveBeenCalledWith("income")
+    expect(mocks.navigate).toHaveBeenCalledWith("/log")
     expect(screen.queryByText("Bank")).not.toBeInTheDocument()
   })
 

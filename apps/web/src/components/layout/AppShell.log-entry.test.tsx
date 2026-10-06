@@ -116,12 +116,12 @@ describe("AppShell FAB destination (MOB-R61 D2)", () => {
     expect(mocks.openQuickAdd).not.toHaveBeenCalled()
   })
 
-  it("keeps QuickAdd for income", () => {
+  it("opens /log on an income route too (adding income was retired, MOB-R73 D3)", () => {
     renderShell("/income")
 
     fireEvent.click(screen.getByRole("button", { name: "Log transaction" }))
 
-    expect(mocks.openQuickAdd).toHaveBeenCalledWith("income")
-    expect(mocks.navigate).not.toHaveBeenCalledWith("/log")
+    expect(mocks.openQuickAdd).not.toHaveBeenCalled()
+    expect(mocks.navigate).toHaveBeenCalledWith("/log")
   })
 })

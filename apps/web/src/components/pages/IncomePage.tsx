@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
-  Plus,
   Trash2,
   LineChart as LineChartIcon,
   TrendingUp,
@@ -32,7 +31,6 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { FilterBar } from "@/components/ui/filter-bar"
 import { useToast } from "@/components/ui/toaster"
 import PageHeader from "@/components/layout/PageHeader"
-import { useQuickAdd } from "@/contexts/QuickAddContext"
 
 
 function IncomeHero({
@@ -136,7 +134,6 @@ function RecentIncome({
   range,
   setRange,
   onDelete,
-  onAdd,
 }: {
   rows: Array<{ id: number; date: string; name: string; amount_kd: string }>
   searchQuery: string
@@ -144,7 +141,6 @@ function RecentIncome({
   range: string
   setRange: (v: string) => void
   onDelete: (id: number) => void
-  onAdd: () => void
 }) {
   const isAllHistoryView = !searchQuery.trim() && range === "all"
   const isDefaultRecentView = !searchQuery.trim() && range === "30"
@@ -165,16 +161,6 @@ function RecentIncome({
         <h2 className="text-lg font-semibold">Recent Income</h2>
         <div className="flex items-center gap-2">
           <div className="text-xs text-muted-foreground">Last 50 entries</div>
-          <Button
-            type="button"
-            variant="default"
-            onClick={onAdd}
-            className="h-8 gap-1 px-3 text-xs"
-            aria-label="Add new income"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Add
-          </Button>
         </div>
       </div>
       <FilterBar
@@ -201,18 +187,6 @@ function RecentIncome({
             icon={<TrendingUp className="h-8 w-8" />}
             title={emptyTitle}
             description={emptyDescription}
-            action={(
-              <Button
-                type="button"
-                variant="default"
-                size="sm"
-                className="h-8 gap-1 px-3 text-xs"
-                onClick={onAdd}
-              >
-                <Plus className="h-3.5 w-3.5" />
-                Add Income
-              </Button>
-            )}
             compact
           />
         ) : (
@@ -275,18 +249,6 @@ function RecentIncome({
                     icon={<TrendingUp className="h-5 w-5" />}
                     title={emptyTitle}
                     description={emptyDescription}
-                    action={(
-                      <Button
-                        type="button"
-                        variant="default"
-                        size="sm"
-                        className="h-8 gap-1 px-3 text-xs"
-                        onClick={onAdd}
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                        Add Income
-                      </Button>
-                    )}
                   />
                 </td>
               </tr>
@@ -364,7 +326,6 @@ export default function IncomePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [range, setRange] = useState("30")
-  const { openQuickAdd } = useQuickAdd()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null)
   const [animDone, setAnimDone] = useState(false)
@@ -537,16 +498,7 @@ export default function IncomePage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button
-              type="button"
-              variant="default"
-              onClick={() => openQuickAdd("income")}
-              className="h-10 px-4 text-sm"
-              aria-label="Add new income"
-            >
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              Add Income
-            </Button>
+
           </>
         )}
       />
@@ -605,12 +557,7 @@ export default function IncomePage() {
                 Start tracking money coming in so you can see monthly trends and totals.
               </p>
             </div>
-            <Button
-              variant="default"
-              onClick={() => openQuickAdd("income")}
-            >
-              Add Income
-            </Button>
+
           </div>
         </section>
       )}
@@ -631,7 +578,6 @@ export default function IncomePage() {
         range={range}
         setRange={setRange}
         onDelete={handleDelete}
-        onAdd={() => openQuickAdd("income")}
       />
 
 

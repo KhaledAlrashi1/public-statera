@@ -42,7 +42,7 @@ describe("CommandPalette log entry (MOB-R61 D2)", () => {
     vi.clearAllMocks()
   })
 
-  it("opens /log for Add Expense and keeps QuickAdd for Add Income", () => {
+  it("opens /log for Add Expense and offers no Add Income (MOB-R73 D3)", () => {
     const onOpenChange = renderPalette()
     fireEvent.click(screen.getByRole("button", { name: /Add Expense/ }))
     expect(mocks.navigate).toHaveBeenCalledWith("/log")
@@ -52,8 +52,8 @@ describe("CommandPalette log entry (MOB-R61 D2)", () => {
     cleanup()
     vi.clearAllMocks()
     renderPalette()
-    fireEvent.click(screen.getByRole("button", { name: /Add Income/ }))
-    expect(mocks.openQuickAdd).toHaveBeenCalledWith("income")
+    expect(screen.queryByRole("button", { name: /Add Income/ })).toBeNull()
+    expect(mocks.openQuickAdd).not.toHaveBeenCalled()
     expect(mocks.navigate).not.toHaveBeenCalled()
   })
 })

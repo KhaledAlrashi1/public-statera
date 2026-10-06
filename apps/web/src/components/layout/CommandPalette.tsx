@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   ArrowLeftRight,
   TrendingDown,
-  TrendingUp,
   Wallet,
   User,
   Search,
@@ -13,7 +12,6 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { useQuickAdd } from "@/contexts/QuickAddContext"
 
 interface CommandItem {
   id: string
@@ -32,7 +30,6 @@ export default function CommandPalette({
   onOpenChange: (v: boolean) => void
 }) {
   const navigate = useNavigate()
-  const { openQuickAdd } = useQuickAdd()
   const [query, setQuery] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)
   const [selected, setSelected] = useState(0)
@@ -43,14 +40,6 @@ export default function CommandPalette({
       navigate(path)
     },
     [navigate, onOpenChange]
-  )
-
-  const quickAdd = useCallback(
-    (type: "expense" | "income") => {
-      onOpenChange(false)
-      openQuickAdd(type)
-    },
-    [onOpenChange, openQuickAdd]
   )
 
   const commands: CommandItem[] = useMemo(
@@ -104,16 +93,8 @@ export default function CommandPalette({
         action: () => go("/log"),
         keywords: ["new expense", "spending", "capture", "quick add"],
       },
-      {
-        id: "add-income",
-        label: "Add Income",
-        description: "Capture a new income entry",
-        icon: TrendingUp,
-        action: () => quickAdd("income"),
-        keywords: ["salary", "earnings", "income", "quick add"],
-      },
     ],
-    [go, quickAdd]
+    [go]
   )
 
   const filtered = useMemo(() => {
