@@ -222,7 +222,7 @@ export default function InsightsPage() {
 
   const activeMonthsInReadinessWindow = useMemo(() => {
     const monthly = readinessQuery.data?.monthly || []
-    return monthly.filter((row) => Number(row.expense_kd || 0) > 0 || Number(row.income_kd || 0) > 0).length
+    return monthly.filter((row) => Number(row.expense_kd || 0) > 0).length // MOB-R75 P3: saved income is not counted
   }, [readinessQuery.data?.monthly])
   const committedThisMonth = Number(safeToSpendQuery.data?.committed_kd ?? 0)
   const remainingBudget = Number(safeToSpendQuery.data?.remaining_budget_kd || 0)
