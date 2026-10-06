@@ -10,6 +10,8 @@ export interface Category {
   transaction_count?: number
   // MOB-R55 P4 — the server's category kind (one rule, lib/category-kind.ts). Used for savings only.
   kind?: "income" | "savings" | "expense"
+  // MOB-R77 C3 — the category counts as income, computed by the API (GET /api/categories only).
+  counts_as_income?: boolean
 }
 
 export interface CategoryRemapResult {
@@ -50,6 +52,9 @@ export interface Transaction {
   memo: string | null
   source?: "manual" | "bank_import" | "csv_import" | string
   source_label?: string
+  // MOB-R77 C2 — the row's category counts as income, computed by the API on every route that returns
+  // transaction rows. The frontend keeps no copy of the rule.
+  category_counts_as_income: boolean
 }
 
 export interface TransactionSearchResult {

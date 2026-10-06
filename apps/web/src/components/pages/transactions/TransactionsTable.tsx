@@ -6,7 +6,7 @@ import {
 } from "lucide-react"
 
 import { transactionsApi } from "@/lib/api"
-import { cn, formatAmount, formatDisplayDate, formatKD, isIncome } from "@/lib/utils"
+import { cn, formatAmount, formatDisplayDate, formatKD } from "@/lib/utils"
 import type { Transaction } from "@/types/api"
 import { CategoryBadge } from "@/components/ui/category-badge"
 import { FilterBar } from "@/components/ui/filter-bar"
@@ -116,10 +116,10 @@ function TransactionsTable({
         (sum, row) => {
           const amount = parseFloat(row.amount_kd) || 0
           if (transactionType === "income") {
-            return isIncome(row.category) ? sum + amount : sum
+            return row.category_counts_as_income ? sum + amount : sum
           }
           if (transactionType === "expense") {
-            return isIncome(row.category) ? sum : sum + amount
+            return row.category_counts_as_income ? sum : sum + amount
           }
           return sum + amount
         },
@@ -300,7 +300,7 @@ function TransactionsTable({
         ) : (
           rows.map((row) => {
             const txnId = getTxnId(row)
-            const rowIsIncome = isIncome(row.category)
+            const rowIsIncome = row.category_counts_as_income
             const amountMeta = formatAmount(row.amount_kd, rowIsIncome ? "income" : "expense")
             const isSelected = selectedIds?.has(txnId) ?? false
             const primaryLabel = row.merchant || row.name
@@ -351,7 +351,7 @@ function TransactionsTable({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <CategoryBadge category={row.category} />
+                  <CategoryBadge category={row.category} countsAsIncome={row.category_counts_as_income} />
                 </div>
 
                 <div className="flex items-center justify-end gap-2 border-t border-border/50 pt-3">
@@ -440,7 +440,7 @@ function TransactionsTable({
             ) : (
               rows.map((row) => {
                 const txnId = getTxnId(row)
-                const rowIsIncome = isIncome(row.category)
+                const rowIsIncome = row.category_counts_as_income
                 const amountMeta = formatAmount(row.amount_kd, rowIsIncome ? "income" : "expense")
 
                 const isSelected = selectedIds?.has(txnId) ?? false
@@ -475,7 +475,7 @@ function TransactionsTable({
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <CategoryBadge category={row.category} />
+                        <CategoryBadge category={row.category} countsAsIncome={row.category_counts_as_income} />
                       </td>
                       <td className="max-w-[240px] truncate px-4 py-3" title={row.name}>
                         {row.name}

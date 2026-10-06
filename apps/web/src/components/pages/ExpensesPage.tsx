@@ -311,7 +311,7 @@ function RecentExpenses({
   onAdd,
   onSplit,
 }: {
-  recentRows: Array<{ id: number; transaction_id?: number; date: string; merchant: string | null; category: string; name: string; amount_kd: string }>
+  recentRows: Array<{ id: number; transaction_id?: number; date: string; merchant: string | null; category: string; category_counts_as_income: boolean; name: string; amount_kd: string }>
   searchQuery: string
   setSearchQuery: (v: string) => void
   filterCategory: string
@@ -441,7 +441,7 @@ function RecentExpenses({
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <CategoryBadge category={t.category} />
+                  <CategoryBadge category={t.category} countsAsIncome={t.category_counts_as_income} />
                 </div>
                 <div className="flex items-center justify-end border-t border-border/50 pt-3">
                   <Button
@@ -500,7 +500,7 @@ function RecentExpenses({
                     <td className="px-4 py-3">{formatDisplayDate(t.date)}</td>
                     <td className="px-4 py-3">{t.merchant || "—"}</td>
                     <td className="px-4 py-3">
-                      <CategoryBadge category={t.category} />
+                      <CategoryBadge category={t.category} countsAsIncome={t.category_counts_as_income} />
                     </td>
                     <td className="px-4 py-3">{t.name || "—"}</td>
                     <td className={`px-4 py-3 text-right font-semibold ${t.amountMeta.className}`}>

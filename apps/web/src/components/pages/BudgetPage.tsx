@@ -2,7 +2,7 @@ import { Target } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { analyticsApi } from "@/lib/api"
-import { cn, fmt3, formatDeltaLabel, today, toYearMonth, isIncome, isEditableMonth, labelForYM, prevMonth as prevMonthUtil } from "@/lib/utils"
+import { cn, fmt3, formatDeltaLabel, today, toYearMonth, isEditableMonth, labelForYM, prevMonth as prevMonthUtil } from "@/lib/utils"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Select,
@@ -228,7 +228,7 @@ export default function BudgetPage() {
   }, [budgets, spentMap])
 
   const budgetCategories = useMemo(
-    () => categories.map((c) => c.name).filter((n) => !isIncome(n)),
+    () => categories.filter((c) => !c.counts_as_income).map((c) => c.name),
     [categories]
   )
 

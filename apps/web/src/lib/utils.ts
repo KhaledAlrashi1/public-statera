@@ -143,12 +143,6 @@ export function today(): string {
 }
 
 /**
- * Check if a category name represents income
- */
-export const isIncome = (cat: string) =>
-  /^income(?::|\s|$)/i.test(cat?.trim() || "")
-
-/**
  * Get the previous month as YYYY-MM from a YYYY-MM string
  */
 export function prevMonth(ym: string): string {

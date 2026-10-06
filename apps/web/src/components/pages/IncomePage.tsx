@@ -210,7 +210,7 @@ function RecentIncome({
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <CategoryBadge category="Income" />
+                  <CategoryBadge category="Income" countsAsIncome />
                 </div>
                 <div className="flex items-center justify-end border-t border-border/50 pt-3">
                   <Button
@@ -262,7 +262,7 @@ function RecentIncome({
                       {t.name}
                     </td>
                     <td className="px-4 py-3">
-                      <CategoryBadge category="Income" />
+                      <CategoryBadge category="Income" countsAsIncome />
                     </td>
                     <td className={`px-4 py-3 text-right font-semibold ${amountMeta.className}`}>
                       {amountMeta.text}

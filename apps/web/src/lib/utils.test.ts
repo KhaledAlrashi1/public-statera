@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { formatDisplayDate, formatKD, isIncome, labelForYM, prevMonth, toYearMonth, today } from "@/lib/utils"
+import { formatDisplayDate, formatKD, labelForYM, prevMonth, toYearMonth, today } from "@/lib/utils"
 
 describe("utils", () => {
   it("formats KD amounts with 3 decimals and thousands grouping", () => {
@@ -19,12 +19,6 @@ describe("utils", () => {
     expect(formatDisplayDate("not-a-date")).toBe("not-a-date")
   })
 
-  it("detects income categories robustly", () => {
-    expect(isIncome("income")).toBe(true)
-    expect(isIncome("Income: Salary")).toBe(true)
-    expect(isIncome("Income Salary")).toBe(true)
-    expect(isIncome(" groceries ")).toBe(false)
-  })
 
   it("handles previous month rollover", () => {
     expect(prevMonth("2026-02")).toBe("2026-01")
