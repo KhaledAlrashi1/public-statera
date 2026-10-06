@@ -178,7 +178,6 @@ export default function DashboardPage() {
     })
   }, [monthOptions, currentMonth])
 
-  const monthIncomeRaw = selectedMonth ? (monthlyKpiMap.get(selectedMonth)?.income || 0) : 0
   const monthExpensesRaw = selectedMonth ? (monthlyKpiMap.get(selectedMonth)?.expenses || 0) : 0
 
   const monthExpenses = accountOverview
