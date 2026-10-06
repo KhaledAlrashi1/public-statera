@@ -11202,3 +11202,84 @@ E4. Phone checks due after the deploy (the operator, Chrome and Safari): MOB-R74
   the neutral Popular square in dark mode; Activity's Income view lists income rows; the All
   view Total; /income opens the Income view.
 After this block: strict 75, loose 77 (body lines 1513 and 6934).
+
+MOB-R76 — MOB-R75 accepted; P2 dropped; one income check in the table; P4 with "Spent".
+Issued Tue 6 Oct 2026 by the review channel. Expected at lines 11206–11285, after a blank 11205.
+Tiers: all items are TIER 2 (frontend only). R is recon (no edit).
+RM-21: nothing here adds a migration, writes, deletes or seeds rows.
+
+A. THE MOB-R75 REPORT IS ACCEPTED, WITH FINDINGS.
+A1. Read-back accepted: 99 lines appended, payload 11107–11204, cmp exit 0, strict 75, loose 77.
+A2. Committed totals accepted as the A2 sum: FE 430/99; APIH 902/52/77; APII 944/10/77. The
+  P2 STOP was unpredicted and was reported as a miss, not absorbed.
+A3. Finding against the channel (P2). MOB-R75 ruled P2 from a one-line description of what the
+  operator would see. hasRecordedTransactions gates the setup checklist (DashboardPage.tsx:250),
+  the empty state (:517) and the demo offer (:525), and the backend refuses the demo when any
+  row exists (demo-data-lib.ts:306–320). This is the MOB-R70 lesson again. Rule from now on: a
+  proposal's "what the operator sees" line lists every reader of the value it changes, found by
+  grep and given with file:line; the channel rules only on that list.
+A4. Correction beside the record (MOB-R75 B8): after E6b's B4 import removals, the RM-27
+  exception for the split dialog's plain amount box is at dialogs.tsx:234–237.
+A5. C accepted. It also fixed a defect nobody had reported: the Expense view listed all 9 demo
+  income rows as expenses (81 → 72). Red-first and the five mutations are accepted.
+A6. P1, P3 and P5 accepted, including the export CC added for testing and reverted before
+  commit as outside the grant.
+A7. Probes: /readyz answered on try 4 of 4 (18:42:03Z), within MOB-R75 E3. Accepted.
+
+B. P2 IS DROPPED.
+B1. Channel's question: "P2: a month with only income rows. What should Home do?" Options were
+  the channel's. His selection: "Drop P2: Home stays as now, showing KD 0 spent (recommended)".
+B2. hasRecordedTransactions keeps counting any row. Save the P2 stash as r75-P2.patch in
+  scratch, report its sha256, then drop the stash.
+B3. Granted alone: remove the dead declaration loggedMonthIncome (DashboardPage.tsx:186), with
+  a grep showing 0 uses, pasted. Predicted count change: 0.
+
+C. DEAD IMPORTS.
+C1. Remove the unused Separator import in dialogs.tsx and the IncomePage lazy import at
+  App.tsx:64. For each, a grep showing 0 remaining uses, pasted. IncomePage.tsx and its test
+  stay. Predicted count change: 0.
+
+D. P4a: ONE INCOME CHECK IN THE ACTIVITY TABLE.
+D1. Premise first, no edit: do the rows TransactionsTable receives carry their category's
+  income flag? Give the row type (file:line) and the API select that fills it (file:line). If
+  they do not, STOP D and E: adding the field changes the API wire and needs its own block.
+D2. List every caller of isIncome (utils.ts:148) with file:line and what each shows today.
+D3. isIncome becomes the payday rule: the income flag, or a category name starting "income",
+  with the same case behaviour as the SQL filter. Only the function body changes. If its
+  signature must change, list the caller edit lines and STOP D and E.
+D4. Its new test reads the same table as the API side (src/test/income-rule-cases.ts in the API
+  package), with no copy. If the frontend test setup cannot import that file, STOP D and E and
+  report the options.
+D5. Every new case is shown able to fail (red-first on the old isIncome, then a mutation per
+  clause). Predicted visible change: rows in a flagged category such as "Salary", and rows in
+  "Incomes", are styled and totalled as income. Any other change is a miss.
+
+E. P4, WITH THE LABEL "SPENT", AFTER D COMMITS.
+E1. Channel's question: "After P4, Activity's All view total counts expenses only. Label it:"
+  Options were the channel's. His selection: ""Spent" (recommended)".
+E2. Identify the P4 stash by content: git stash show --stat for it, pasted, touching only
+  TransactionsTable.tsx and P4's new test file. Apply it. The All view's total label becomes
+  "Spent".
+E3. CC reports the Expense view's current total label. If it reads "Total", it becomes "Spent"
+  too, so one meaning has one word. The channel ruled this without asking the operator.
+E4. The Income view shows no total (as built). New cases in a new file, each red under its own
+  mutation. An existing test that pins the old label or total: STOP E with its edit lines.
+E5. After E commits, drop the P4 stash and the I2 recon stash; save each as a patch first and
+  report its sha256.
+
+R. RECON, NO EDIT.
+R1. The split route (transactions.ts:553–561) checks the flag only. On the dev DB (scratch user,
+  demo workspace, deleted after, as before): split one row in an unflagged "Income: …"
+  category and report how the two parts are stored and shown (Income view, Expense view).
+R2. Top patterns (transactions.ts:764): report which income rule it uses and where its output
+  shows in the UI, with file:line, or that nothing shows it.
+
+F. ORDER, PREDICTIONS, PUSH.
+F1. Order: persist this block; B; C; D; E; R. Each commit is green alone.
+F2. Before the first edit, the predictions scratch file (MOB-R60): a delta per item, each count
+  naming its runner command (MOB-R75 A3), and every reader list A3 requires. Report its sha256
+  and quote the key lines.
+F3. Push under this block by the standing rules, with probe retries as in MOB-R75 E3.
+F4. Phone checks due after the deploy (the operator, Chrome and Safari): MOB-R75 E4's list;
+  the All view total reads "Spent" and counts expenses only; income rows are styled as income.
+After this block: strict 76, loose 78 (body lines 1513 and 6934).
