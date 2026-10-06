@@ -20,7 +20,6 @@ import { useIsFetching } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
 import { useDarkMode } from "@/lib/useDarkMode"
 import { useAuth, getUserFirstName } from "@/contexts/AuthContext"
-import { QuickAddProvider } from "@/contexts/QuickAddContext"
 import { InstallGuide } from "./InstallGuide"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -636,12 +635,7 @@ function AppShellLayout() {
   )
 }
 
+// MOB-R74 E6b — the old QuickAdd sheet and its provider are retired; expenses are logged on /log.
 export default function AppShell() {
-  const navigate = useNavigate()
-  return (
-    // MOB-R69 D1 — choosing "Expense" in the old sheet opens /log, the main expense entry.
-    <QuickAddProvider onChooseExpense={() => navigate("/log")}>
-      <AppShellLayout />
-    </QuickAddProvider>
-  )
+  return <AppShellLayout />
 }

@@ -484,7 +484,7 @@ Fixes shipped after the original module commit, capturing real-world deployment 
 The UX-redesign thread (`design-*` commits) carries a set of constraints that used to live only in prompt lineage. Recorded here so future design modules do not depend on a specific prompt to know the rules. (Established across design-5.x; codified design-5.4a, 2026-07-13.)
 
 - **Scope boundary.** No debt/goals restyle or deletion — removal has its own pending module. Token-swap effects that flow through shared tokens are fine; targeted edits to debt/goals surfaces are not.
-- **Protected journey.** QuickAdd internals are untouchable (token flow-through only). The FAB topology settled in 5.3 is fixed: the FAB (Plus icon plus a visible "Log" label since MOB-R40 F3; 56px high, width auto with logical padding `ps-4 pe-5`, `bg-primary`, `z-40`, `aria-label="Log transaction"` unchanged, tooltip `"Log transaction — L"`) is the sole visible QuickAdd trigger; global "L" shortcut with focus/overlay guards; no header trigger.
+- **Protected journey.** Expenses are logged on /log. Below lg the bottom bar's centre "Log" item opens it (MOB-R73 E5). At lg and up the FAB (aria-label "Log transaction", tooltip "Log transaction — L") and the global "L" shortcut, with its focus and overlay guards, open it. The old QuickAdd sheet and adding income were retired in MOB-R74 (D and E).
   - MOB-R70 A10: the MOB-R69 D1 prop hand-off, D2 (16px inputs, vertical scroll) and D3 (reveal after re-render) are ratified exceptions.
 - **No renames** of files, exports, or components.
 - **Pinned strings.** FAB `aria-label` `"Log transaction"` + tooltip `"Log transaction — L"`; the two legal `data-testid`s `commitment-backup-retention` and `commitment-statement-files`.

@@ -22,9 +22,6 @@ vi.mock("react-router-dom", async () => {
 vi.mock("@/components/ui/toaster", () => ({
   useToast: () => ({ success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn() }),
 }))
-vi.mock("@/contexts/QuickAddContext", () => ({
-  useQuickAdd: () => ({ openQuickAdd: vi.fn(), closeQuickAdd: vi.fn() }),
-}))
 vi.mock("./dashboard/hooks", () => ({
   useDashboardPageQueries: (...args: unknown[]) => mocks.useDashboardPageQueries(...args),
 }))

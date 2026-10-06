@@ -26,7 +26,6 @@ vi.mock("@/components/ui/toaster", () => ({
 vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ flags: { enable_template_suggestions: false } }) }))
 vi.mock("@/contexts/PreferencesContext", () => ({ usePreferences: () => ({ autoFillSuggestions: false }) }))
 vi.mock("./expenses/dialogs", () => ({ SplitTransactionDialog: () => null }))
-vi.mock("@/contexts/QuickAddContext", () => ({ useQuickAdd: () => ({ openQuickAdd: vi.fn(), closeQuickAdd: vi.fn() }) }))
 vi.mock("@/components/ui/category-detail-modal", () => ({
   CategoryDetailModal: (props: unknown) => {
     mocks.detailModal(props)

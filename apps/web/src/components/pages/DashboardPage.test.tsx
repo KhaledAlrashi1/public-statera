@@ -37,13 +37,6 @@ vi.mock("@/components/ui/toaster", () => ({
   }),
 }))
 
-vi.mock("@/contexts/QuickAddContext", () => ({
-  useQuickAdd: () => ({
-    openQuickAdd: vi.fn(),
-    closeQuickAdd: vi.fn(),
-  }),
-}))
-
 vi.mock("./dashboard/hooks", () => ({
   useDashboardPageQueries: (...args: unknown[]) => mocks.useDashboardPageQueries(...args),
 }))

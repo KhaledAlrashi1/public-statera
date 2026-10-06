@@ -54,14 +54,6 @@ vi.mock("@/components/ui/toaster", () => ({
   }),
 }))
 
-vi.mock("@/contexts/QuickAddContext", () => ({
-  QuickAddProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
-  useQuickAdd: () => ({
-    openQuickAdd: mocks.openQuickAdd,
-    closeQuickAdd: vi.fn(),
-  }),
-}))
-
 vi.mock("@/lib/useDarkMode", () => ({
   useDarkMode: () => ({
     isDark: false,
@@ -118,7 +110,7 @@ describe("AppShell", () => {
     expect(mocks.openQuickAdd).not.toHaveBeenCalled()
   })
 
-  it("uses the current income context for quick add without surfacing hidden bank navigation", () => {
+  it("routes the quick-add control to /log without surfacing hidden bank navigation", () => {
     mocks.auth.flags.enable_open_banking = true
 
     renderShell("/activity?type=income")

@@ -50,13 +50,6 @@ vi.mock("@/contexts/AuthContext", () => ({
   getUserFirstName: (u: { first_name?: string } | null | undefined) => u?.first_name ?? "",
 }))
 
-// QuickAddProvider is enumerated here because AppShell imports BOTH exports; a factory that
-// lists only useQuickAdd makes the other resolve to undefined and every case in this file throws.
-vi.mock("@/contexts/QuickAddContext", () => ({
-  QuickAddProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
-  useQuickAdd: () => ({ openQuickAdd: mocks.openQuickAdd, closeQuickAdd: vi.fn() }),
-}))
-
 vi.mock("@/components/ui/toaster", () => ({
   useToast: () => ({ success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn() }),
 }))

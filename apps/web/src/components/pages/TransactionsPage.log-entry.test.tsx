@@ -24,9 +24,6 @@ vi.mock("@/lib/api", () => ({
   merchantsApi: { list: vi.fn().mockResolvedValue([]) },
   transactionsApi: { bulkDelete: vi.fn() },
 }))
-vi.mock("@/contexts/QuickAddContext", () => ({
-  useQuickAdd: () => ({ openQuickAdd: mocks.openQuickAdd, closeQuickAdd: vi.fn() }),
-}))
 vi.mock("@/components/ui/toaster", () => ({ useToast: () => mocks.toast }))
 vi.mock("@/components/ui/confirm-dialog", () => ({ ConfirmDialog: () => null }))
 vi.mock("@/components/ui/demo-workspace-banner", () => ({ DemoWorkspaceBanner: () => null }))

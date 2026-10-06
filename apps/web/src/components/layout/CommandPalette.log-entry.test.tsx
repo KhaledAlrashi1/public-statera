@@ -20,13 +20,6 @@ vi.mock("react-router-dom", async () => {
   }
 })
 
-vi.mock("@/contexts/QuickAddContext", () => ({
-  useQuickAdd: () => ({
-    openQuickAdd: mocks.openQuickAdd,
-    closeQuickAdd: vi.fn(),
-  }),
-}))
-
 function renderPalette() {
   const onOpenChange = vi.fn()
   render(
