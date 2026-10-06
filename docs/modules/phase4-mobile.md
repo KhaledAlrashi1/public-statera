@@ -11366,3 +11366,143 @@ G3. Push under this block by the standing rules, with probe retries as in MOB-R7
 G4. Phone checks added if E ships: the All view total reads "Spent" and counts expenses only;
   rows in a flagged category such as "Salary" are styled as income.
 After this block: strict 77, loose 79 (body lines 1513 and 6934).
+
+MOB-R78 — MOB-R77 accepted; C6 granted, then P4; pickers add on Return; status bar; Undo line.
+Issued Tue 6 Oct 2026 by the review channel. Expected at lines 11370–11508, after a blank 11369.
+Tiers: B, D, E and F are TIER 2 (frontend only). C keeps MOB-R76 E's tier. R is recon only.
+RM-21: nothing here adds a migration, writes, deletes or seeds rows. No API code changes.
+
+A. THE MOB-R77 REPORT IS ACCEPTED, WITH FINDINGS.
+A1. Read-back accepted as reported: 83 lines appended, blank 11286, payload 11287–11368, cmp
+  exit 0, strict 77, loose 79.
+A2. Finding against CC: the payload was typed, not piped (the "the all view" slip in G4). Its
+  cmp compared the file with CC's own typed copy, so it cannot show the record equals the issued
+  block. CC reports the sha256 of lines 11287–11368; the channel compares it with the issued
+  value. STANDING from this block: every read-back reports the sha256 of the appended payload; a
+  mismatch is a question for the channel, with no edit. When the operator names a file holding
+  a block, CC appends that file with cat, never a retyped copy.
+A3. Predictions accepted: every committed count met its prediction, from the runners. The C7
+  miss is the channel's: frontend test files are not type-checked, and a missing field reads as
+  false, so no fixture could break. What it shows is a gap: no existing test pins income styling
+  or totals. B4 and B5 below close it.
+A4. C2–C5 accepted. The data-export route was in scope (C2: "report it and include it"); the
+  user's export now carries category_counts_as_income. No contract artifact changed, because the
+  capture covers /api/analytics/* and /api/log-suggestions only; the new fields' coverage is
+  C5's 20 cases. CC's finding against its own PATCH case (M6) is accepted.
+A5. D accepted. Its 2-line comment sits at the granted guard: comment lines at a granted site
+  are part of that edit; comment lines anywhere else are beyond the grant (MOB-R77 A3). CC
+  quotes the two lines verbatim in the report. Splits mixing flagged and named income categories
+  now pass, which is correct under the one rule.
+A6. Push accepted: 9352a40, run 37522057411, four jobs on ubuntu-24.04; probes answered at
+  19:58:07Z (/healthz) and 19:58:37Z (/readyz) after one unanswered try.
+A7. Correction beside CC's "Still due: MOB-R76 F4's list": the operator ran MOB-R75 E4's list on
+  b858528 and wrote "I did all the checks and all are good." F4's two added checks remain; they
+  ship with B and C here.
+A8. Queued, no edit: the split guard does not check a category name that does not exist yet.
+  Recorded: CC's count guard stopped two mis-anchored scripted edits before any write.
+
+B. C6 IS GRANTED.
+B1. Identify the C6 stash by content: git stash show --stat for it, pasted. Expected: 9 files,
+  173 insertions, 25 deletions; the 7 production files of B2 and the 2 new test files. Any other
+  file: STOP B.
+B2. Granted production lines, as measured in the MOB-R77 report, beside MOB-R77 C6's six:
+  types/api.ts, the two fields with their comments (Category +13–14, Transaction +55–57);
+  utils.ts:145–150 (isIncome, its regex, its doc comment and the blank line after);
+  BudgetPage.tsx:5 and TransactionsTable.tsx:9 (the imports);
+  TransactionsTable.tsx:354 and :478 (the badge prop);
+  category-badge.tsx:1, :5–6, :8, :17 and :19 (the badge takes the flag, not a name);
+  ExpensesPage.tsx:314, :444, :503 and IncomePage.tsx:213, :265 (they keep compiling; both
+  stay queued as dead code).
+B3. Granted existing-test edit, lib/utils.test.ts only: :2 (isIncome leaves the import) and
+  :22–27 (the case "detects income categories robustly" is deleted; its function is gone). CC
+  quotes :22–27 verbatim first. The rule's cases live in the API (17) and in C6's 5 new cases.
+B4. Readers (MOB-R76 A3): for each line reading a new field, CC names the API route that feeds
+  its rows, with the file:line of the fetch, and shows that route in MOB-R77 C2's list or C3.
+  A reader fed by any other route (a plain GET /api/transactions list included): STOP B with the
+  list. Rows from such a route would show income as an expense, silently.
+B5. Positive control on the real path (scratch Playwright, dev API, 390, WebKit): rows in
+  "Income: Salary" and in a flagged "Salary" show income styling on Activity; a "Groceries" row
+  does not. The same probe on 9352a40 shows the flagged "Salary" row as an expense.
+B6. Predicted (FE = pnpm --filter statera-frontend run test:unit): 434 passed / 101 files
+  (430/99, minus 1 and plus 5 tests, plus 2 files); tsc 0 bytes both; APIH and APII unchanged.
+  After B commits: save the C6 stash as a patch, report its sha256, then drop it by content.
+
+C. P4 WITH "SPENT".
+C1. MOB-R77 E1 stands: MOB-R76 E1–E5, applied after B commits. If B stops, C stops.
+
+D. ADDING A NEW PLACE OR CATEGORY, BOTH PICKERS.
+D1. Provenance: the channel's question "Adding a new place or category: which fix?"; his
+  selection "Clear Add button + Return adds + keep text (recommended)". The ✓ he tapped is the
+  iOS keyboard bar's control: it only closes the keyboard, and no page can change it.
+D2. Measure first, both pickers, with file:line (MOB-R70): the components and the lines that
+  render the Add row; what Return does today with typed text (adds, picks, saves the expense, or
+  nothing); what closing the keyboard does to the text, the list and the Add row; where the Add
+  row sits; the condition that shows it. Nothing below changes that condition.
+D3. The Add row becomes a button at the top of the list: + icon, brass tint background, ink
+  text, at least 44px tall, naming the typed text (Add "Talabat"; RM-26 provisional).
+D4. Return (enterKeyHint "done"; the channel chose the label without asking): with typed text
+  and no existing entry listed, Return adds it. With entries listed, the highlight starts on the
+  first entry, not on Add, and Return picks it as today, so "Tal" never becomes a new place by
+  accident. Return never saves the expense. The same holds for Enter on computers.
+D5. Closing the keyboard keeps the picker open, with the typed text and the Add button visible.
+  Nothing is added on blur.
+D6. Grant: edits inside the picker components D2 names, and new test files. CC writes every edit
+  line in the scratch file before the first edit. Any other file: STOP D.
+D7. New cases in new files, both pickers: Return adds; Return with entries listed picks and adds
+  nothing; blur keeps the text and adds nothing; Return never saves. Each red on today's code or
+  under its own mutation; a case green on today's code is reported as such.
+
+E. STATUS BAR. The channel ruled this without asking the operator.
+E1. Seen in the installed app: the clock and battery cover "New expense", and scrolled content
+  slides under them.
+E2. Measure first, with file:line: the viewport meta (viewport-fit), the apple status-bar-style
+  meta, the manifest's display and theme_color, every env(safe-area-inset-*) use, and every
+  fixed or sticky element anchored at the top (bars, page headers, sheets, toasts), by route.
+  If viewport-fit=cover is absent: STOP E with the census (adding it moves all four edges).
+E3. One value, --safe-top: env(safe-area-inset-top, 0px), defined once. The app's top is padded
+  by it, and one fixed strip of that height in the page background (light and dark) sits above
+  everything at the top. Every element E2 finds anchored at top 0 moves down by it.
+E4. Readers of --safe-top listed with file:line in the scratch file (MOB-R76 A3).
+E5. Instrument (a browser has no inset): scratch WebKit and Chromium, 375 and 390, --safe-top
+  overridden to 59px: "New expense" starts below 59px; scrolled, the point (20, 20) hits the
+  strip. Positive control: the same probe on 9352a40 hits content. Without the override, every
+  page's top moves by 0px.
+E6. A new test file pins the strip and the top padding (class census), shown to fail when
+  either is removed.
+
+F. "UNDO LAST" SAYS WHAT IT UNDOES; LESS SPACE AT THE BOTTOM.
+F1. Provenance: the channel's question ""Undo last": which version?"; his selection "A: says
+  what it undoes, next to Save (recommended)". His words on the gap: "too much space at the
+  bottom".
+F2. Measure first: the "Undo last" lines (file:line), how many saves Undo reaches today, and
+  what shows after an Undo.
+F3. One line above Save: left "Last: KD 2.500 · Talabat" (the amount as Save showed it; the
+  place, else the category); right a text button "Undo", 44px hit area. It appears after a save,
+  updates on the next save and goes when she leaves /log. Undo depth stays as today; after an
+  Undo the line shows the next entry Undo reaches, or goes. Strings RM-26 provisional.
+F4. Gap: at 375 and 390, WebKit and Chromium, touch (keypad), scrolled to the bottom, measure the
+  space between the last element and the bar, and below Save. Target: 16px between the last
+  element and the bar's top, nothing covered by the bar. If the space comes from a wrapper other
+  pages share: STOP F4 with its file:line.
+F5. Grant: the /log page's own files and new test files; every edit line in the scratch file
+  first. The Undo line's cases go in a new file, each red first.
+
+R. RECON, NO EDIT.
+R1. lib/category-kind.ts:30 copies the income rule in JavaScript and disagrees with the SQL rule
+  on accented names (CC's dev-DB finding). List the readers of the categories kind field, API
+  and frontend, with file:line, and propose how kind follows the one rule.
+R2. data-export-lib.ts:205–222 and :334–345: quote the EXISTS clause. Does it call
+  incomeCategoryFilter() or restate the rule?
+
+G. ORDER, PREDICTIONS, PUSH.
+G1. Order: persist this block; B; C; D; E; F; R. Each commit is green alone. B or C stopping
+  does not stop D, E or F.
+G2. Before the first edit, the predictions scratch file (MOB-R60): a delta per item, each count
+  naming its runner command (MOB-R75 A3), and the reader lists of B4 and E4. Report its sha256
+  and quote the key lines.
+G3. Push under this block by the standing rules, with probe retries as in MOB-R75 E3.
+G4. Phone checks due after the deploy (the operator; Chrome and Safari; installed and in the
+  browser; app fully closed first): the All view "Spent"; a flagged "Salary" row styled as
+  income; the status bar clear of /log, Home and Activity, scrolled and not; a new place typed,
+  ✓ tapped, then Add; a new category added with Return; the "Last:" line and Undo; the gap.
+After this block: strict 78, loose 80 (body lines 1513 and 6934).
