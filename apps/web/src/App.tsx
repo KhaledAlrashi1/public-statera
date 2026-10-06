@@ -196,7 +196,7 @@ function AppRoutes() {
           />
           <Route
             path="income"
-            element={ENABLE_PHASE2_LEGACY_REDIRECTS ? <Navigate to="/activity?type=income" replace /> : <IncomePage />}
+            element={<Navigate to="/activity?type=income" replace />} // MOB-R75 P5: the row-derived Income page is retired
           />
           <Route
             path="budget"
