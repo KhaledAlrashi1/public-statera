@@ -24,7 +24,7 @@ import { categories } from "../db/schema/categories"
 import { merchants } from "../db/schema/merchants"
 import { requireAuth } from "../middleware/auth"
 import { importRateLimit, searchRateLimit } from "../lib/rate-limit"
-import { incomeCategoryFilter, expenseCategoryFilter } from "../lib/payday-lib"
+import { incomeCategoryFilter, expenseCategoryFilter, readIncomeFlag } from "../lib/payday-lib"
 import {
   validateTransactionInput,
   createTransactionWithDupCheck,
@@ -551,10 +551,12 @@ transactionsRouter.post("/:id{[0-9]+}/split", requireAuth, async (c) => {
   }
 
   // ── Validate direction consistency (income vs expense)
+  // MOB-R77 D — by the income rule (payday-lib's incomeCategoryFilter: the flag, or a name starting
+  // "income"), not the flag alone. Refuses before any write. A name with no category yet is not checked.
   const catNames = splitRows.map((r) => r.categoryName).filter(Boolean) as string[]
   if (catNames.length > 0) {
     const catRows = await db
-      .select({ name: categories.name, isIncome: categories.isIncome })
+      .select({ name: categories.name, countsAsIncome: incomeCategoryFilter() })
       .from(categories)
       .where(
         and(
@@ -562,7 +564,7 @@ transactionsRouter.post("/:id{[0-9]+}/split", requireAuth, async (c) => {
           inArray(categories.name, catNames),
         ),
       )
-    const incomeFlags = new Set(catRows.map((r) => !!r.isIncome))
+    const incomeFlags = new Set(catRows.map((r) => readIncomeFlag(r.countsAsIncome)))
     if (incomeFlags.size > 1) {
       return c.json(
         {
