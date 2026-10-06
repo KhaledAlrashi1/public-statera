@@ -946,7 +946,7 @@ function Frame({
 }) {
   return (
     // MOB-R69 E1 — at least 16px from both edges, plus the safe-area insets (notch, home bar).
-    <div style={style} className="mx-auto flex min-h-screen w-full max-w-[28rem] flex-col gap-5 bg-background ps-[calc(1rem+env(safe-area-inset-left))] pe-[calc(1rem+env(safe-area-inset-right))] pt-[calc(1rem+env(safe-area-inset-top))]">
+    <div style={style} className="mx-auto flex min-h-screen w-full max-w-[28rem] flex-col gap-5 bg-background ps-[calc(1rem+env(safe-area-inset-left))] pe-[calc(1rem+env(safe-area-inset-right))] pt-[calc(1rem+var(--safe-top))]">
       <header className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-semibold">New expense</h1>

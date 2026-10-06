@@ -171,6 +171,11 @@
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
+/* MOB-R78 E3 — the top safe area (status bar, notch), defined once. Every reader uses var(--safe-top). */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
 /* Dark mode — activated by .dark class on <html> */
 .dark {
   --bg: 28 14% 8%;

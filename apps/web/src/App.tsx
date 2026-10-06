@@ -7,6 +7,7 @@ import { ToastProvider } from "@/components/ui/toaster"
 import { AuthProvider } from "@/contexts/AuthContext"
 import { PreferencesProvider } from "@/contexts/PreferencesContext"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
+import { SafeTopStrip } from "@/components/layout/SafeTopStrip"
 import { reportError } from "@/lib/error-reporter"
 
 const queryClient = new QueryClient({
@@ -219,6 +220,7 @@ export default function App() {
           <ToastProvider>
             <TooltipProvider>
               <BrowserRouter>
+                <SafeTopStrip />
                 <ErrorBoundary>
                   <Suspense fallback={<RouteFallback />}>
                     <AppRoutes />

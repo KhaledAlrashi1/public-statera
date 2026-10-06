@@ -218,11 +218,11 @@ function AppShellLayout() {
   return (
     // MOB-R73 E5 — below lg the FAB is gone; the padding now clears the tab bar and its raised Log
     // circle only (pb-24 = 96px over a ~60px bar plus the ~20px the circle rises above it).
-    <div className="relative min-h-screen bg-background pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-24">
+    <div className="relative min-h-screen bg-background pt-[var(--safe-top)] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-24">
       {/* Skip to content — a11y */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-[calc(1rem+var(--safe-top))] focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground focus:shadow-lg"
       >
         Skip to content
       </a>
@@ -233,8 +233,9 @@ function AppShellLayout() {
       {/* ==================== Header ==================== */}
       <header
         className={cn(
-          // MOB-R69 F3 — clear the notch / status bar and the side insets when installed.
-          "sticky top-0 z-40 border-b border-border/70 bg-background/80 pt-[env(safe-area-inset-top)] ps-[env(safe-area-inset-left)] pe-[env(safe-area-inset-right)] backdrop-blur transition-transform duration-300",
+          // MOB-R69 F3 — clear the side insets when installed. MOB-R78 E3 — the status bar is cleared by the
+          // root's top padding; the header sticks just below the strip.
+          "sticky top-[var(--safe-top)] z-40 border-b border-border/70 bg-background/80 ps-[env(safe-area-inset-left)] pe-[env(safe-area-inset-right)] backdrop-blur transition-transform duration-300",
           headerHidden && "-translate-y-full"
         )}
       >
@@ -405,7 +406,7 @@ function AppShellLayout() {
         ref={drawerRef}
         id="nav-drawer"
         className={cn(
-          "fixed right-0 top-0 z-50 flex h-full w-[min(320px,85vw)] flex-col border-l border-border bg-background shadow-2xl transition-transform duration-300 ease-out lg:hidden",
+          "fixed right-0 top-[var(--safe-top)] bottom-0 z-50 flex w-[min(320px,85vw)] flex-col border-l border-border bg-background shadow-2xl transition-transform duration-300 ease-out lg:hidden",
           drawerOpen ? "translate-x-0" : "translate-x-full"
         )}
         role="dialog"
