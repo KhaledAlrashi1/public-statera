@@ -160,12 +160,17 @@ function AppShellLayout() {
     }
   }, [drawerOpen, closeDrawer])
 
-  // Focus trap: return focus when drawer closes
+  // Focus trap: return focus when drawer closes.
+  // MOB-R73 E8 — only on a real open -> closed change. Before, this also ran on mount (drawerOpen
+  // starts false), so every page load moved focus onto the menu button; WebKit shows a programmatic
+  // focus with no prior pointer as :focus-visible, which left the dark ring on Home (C7).
   const openBtnRef = useRef<HTMLButtonElement>(null)
+  const drawerWasOpen = useRef(false)
   useEffect(() => {
-    if (!drawerOpen && openBtnRef.current) {
+    if (drawerWasOpen.current && !drawerOpen && openBtnRef.current) {
       openBtnRef.current.focus()
     }
+    drawerWasOpen.current = drawerOpen
   }, [drawerOpen])
 
   useEffect(() => {
