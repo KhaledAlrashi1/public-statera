@@ -11103,3 +11103,102 @@ J5. Phone checks due after the deploy (the operator, Chrome and Safari): the 8 d
   "Earlier date"; no way to add income on Transactions; the /log close control easy to hit; and,
   for each of E2b and E7b that ships, a tile tap after picking a place, and the tile colours.
 After this block: strict 74, loose 76 (body lines 1513 and 6934).
+
+MOB-R75 — MOB-R74 accepted; E6b granted; one income rule for Activity; "not counted" (P1–P5).
+Issued Tue 6 Oct 2026 by the review channel. Expected at lines 11107–11204, after a blank 11106.
+Tiers: B and D are TIER 2 (frontend only). C is TIER 1 (an API query; no rows written).
+RM-21: nothing here adds a migration, writes, deletes or seeds rows. C changes a read query only.
+
+A. THE MOB-R74 REPORT IS ACCEPTED, WITH FINDINGS.
+A1. Read-back accepted: 144 lines appended, payload 10963–11105, cmp exit 0, strict 74, loose 76.
+A2. The committed total 452/102 equals the base plus the committed deltas, shown as A2 asked.
+A3. E6b count: finding against CC and against the channel. CC's MOB-R73 census counted it( lines
+  and missed an it.each table of 8; the channel adopted the "17" without seeing the file. Rule
+  from now on: every test count in a prediction or report comes from the runner's own output,
+  and the line names the command that produced it. Never from a grep of the file.
+A4. G3: the channel predicted a break from a file name without reading the case; CC read the
+  file and predicted 0, correctly. Recorded against the channel (predict from an artifact).
+A5. E4b: the channel's "−2px" example ignored the 1px border. CC's build miss was fixed before
+  commit with no test edited and was reported, so under MOB-R52 it did not stop the push.
+A6. D3's condition was met as quoted. The case title at AppShell.test.tsx:121 is now untrue;
+  it is granted in B6.
+A7. E2b and E7b accepted. Two items go to the queue: nothing reads the "place is hers" flag any
+  more; the dark-mode look of the neutral square (bg-muted) is a phone check (E4).
+A8. Production connectivity. Channel's questions and the operator's selections: "What does
+  UptimeRobot show for staterafinance.app since about 21:00 Kuwait time?" "Up, no alerts".
+  "Does the app open on your phone on mobile data, with wifi off?" "Opens normally".
+  Hetzner's status page (checked by the channel) listed no network incident for 6 Oct. Finding:
+  the server was up; the loss was on the route from CC's machine. CC's controls (github.com,
+  Cloudflare) answer from nearby edges, so they could not separate the route from the host.
+  Lesson: a network control must share the path under test. Not rolling back was right.
+A9. I1 accepted: FinancialSnapshotHero, analyticsApi.snapshot and /api/transactions/summary
+  have no UI caller. R13 leaves the F1 list. All three join the dead-code queue.
+A10. I4 accepted, and it orders this block: all 9 demo income rows are named "Income: …" with
+  is_income = 0, so Activity's income filter (transactions.ts:876) shows none of them. P5 would
+  send /income to that empty view, so C ships before D.
+
+B. E6b IS GRANTED: delete the old sheet.
+B1. Identify the E6b stash by content: its diff against r74-E6b.patch, cmp exit 0, pasted. It
+  was built on the E6 state; if it does not apply cleanly to HEAD, STOP the item.
+B2. Count, from the runner: −25 tests and −6 files, so 452/102 becomes 427/96. tsc 0 bytes,
+  both packages. Any other change is a miss.
+B3. The E1 premise is ruled satisfied by CC's measurement (the 12 files pass with the module
+  deleted), and the 12 stale mock factories are removed. Granted: the whole vi.mock statement
+  for "@/contexts/QuickAddContext" that starts at each line below, quoted before and after.
+  DashboardPage.income-copy :24, cache-invalidation :42, ExpensesPage :57,
+  TransactionsPage :24, DashboardPage :40, IncomePage :33, DashboardPage.zero-base :34,
+  ExpensesPage.savings-share :29, DashboardPage.savings :25, DashboardPage.category-chart :30,
+  CommandPalette.log-entry :23, TransactionsPage.log-entry :27.
+  If any of the 12 is a named regression file, STOP that file. Predicted count change: 0.
+B4. In dialogs.tsx, remove each import whose only users were in the deleted range; for each,
+  a grep showing 0 remaining uses, pasted.
+B5. In AppShell.bar-log, AppShell.drawer and AppShell.focus-ring, remove the comment lines that
+  say "QuickAddProvider is enumerated here…". Comment lines only, quoted with their line numbers
+  before the edit. Any code line in the way: STOP.
+B6. AppShell.test.tsx :121, a NAMED REGRESSION OVERRIDE for the title only. The title becomes:
+  "routes the quick-add control to /log without surfacing hidden bank navigation".
+B7. The B2 line of MOB-R74 at CLAUDE.md:487: cmp against the payload-derived bytes, pasted.
+B8. Correction beside the record: after E6b, the RM-27 exception for the split dialog's plain
+  amount box is at dialogs.tsx:236–239 (it was :802–:805 at 501645f; the record says :789).
+
+C. ONE INCOME RULE FOR ACTIVITY (TIER 1).
+C1. Channel's question: ""Not counted" for income: what should MOB-R75 ship?" Options were the
+  channel's. His selection: "Fix the Income filter first, then P1–P5 (recommended)".
+C2. The rule is the one at payday-lib.ts:17/:22: is_income, or a category name starting
+  "income". Before the edit, CC lists every Activity type-filter site (income and expense) with
+  file:line. Each site uses that rule, so a row the rule calls income appears under Income and
+  not under Expense. :725/:736 (summary, no UI caller) and :764 are reported, not edited.
+C3. One table of names drives the tests of both sides (payday-lib and the SQL filter), with at
+  least: flagged "Salary"; unflagged "Income: Salary", "income", "INCOME bonus"; the non-matches
+  "Salary" and "Bills income"; and "Incomes", where CC states what the rule says today.
+  Each new case is shown able to fail. New file(s) only.
+C4. Measured on the dev DB (scratch user, demo workspace, deleted after, as in MOB-R73 G3):
+  Income view and Expense view counts of the 9 demo income rows, on 501645f (the control) and
+  after C. Expected: Income 0 → 9; Expense loses those rows if it held them today.
+C5. Expected unchanged: contract fixture 67, ALLOWLIST empty; money-wire routes 15, paths 71,
+  generated assertions 67, leaves 169; provenance MISS 0. API hermetic and integration counts
+  predicted per file in the scratch file. An existing test that breaks: STOP the item.
+
+D. P1–P5 ARE GRANTED ("NOT COUNTED"), AFTER C COMMITS.
+D1. Identify the I2 stash by content: its diff against r74-I2.patch, cmp exit 0, pasted.
+D2. The edits, one commit each: P1 sections.tsx:1128; P2 DashboardPage.tsx:140, with the dead
+  loggedMonthIncome (:186) removed; P3 InsightsPage.tsx:225; P4 TransactionsTable.tsx:113–126
+  and :249 (All view Total = expenses only; the Income view shows no total); P5 App.tsx:198–199
+  (/income redirects to /activity?type=income).
+D3. P4 premise: the table's income test is utils.ts:148, a third rule. CC runs it over C3's
+  table of names. If it disagrees with the payday rule on any name, STOP P4 and report.
+D4. No existing test pins these readers (I2), so each P gets new cases in a new file, each red
+  under its own mutation. Predicted existing breaks: 0.
+D5. P5 measured: /income lands on the Income view, listing the 9 demo income rows.
+
+E. ORDER, PREDICTIONS, PUSH.
+E1. Order: persist this block; B (E6b); C; D, P1 to P5. Each commit is green alone. A stash is
+  dropped only after its commit.
+E2. Before the first edit, the predictions scratch file (MOB-R60), a delta per item (A2), each
+  count naming its runner command (A3); report its sha256 and quote the key lines.
+E3. Push under this block by the standing rules. Probes may be retried, each try timestamped.
+  A probe with no answer after 30 minutes is reported as unverified, not as passed.
+E4. Phone checks due after the deploy (the operator, Chrome and Safari): MOB-R74 J5's list;
+  the neutral Popular square in dark mode; Activity's Income view lists income rows; the All
+  view Total; /income opens the Income view.
+After this block: strict 75, loose 77 (body lines 1513 and 6934).
