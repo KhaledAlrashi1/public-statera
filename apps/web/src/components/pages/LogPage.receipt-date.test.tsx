@@ -1,4 +1,4 @@
-// MOB-R70 E5 / F3 — /log's Date line: Statera's own chips, "Today", "Yesterday", then the 12 days
+// MOB-R70 E5 / F3 — /log's Date line: Statera's own chips, "Today", "Yesterday", then the 6 days
 // before as "Sat 3 Oct". A tap applies at once and closes; there is no confirm step; no future day.
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
@@ -45,14 +45,14 @@ describe("/log date chips (MOB-R70 E5)", () => {
   })
   afterEach(() => vi.useRealTimers())
 
-  it("offers Today, Yesterday and the 12 days before, newest first, and nothing later than today", async () => {
+  it("offers Today, Yesterday and the 6 days before, newest first, and nothing later than today", async () => {
     renderLog()
     fireEvent.click(await screen.findByRole("button", { name: /^Date/ }))
     const picker = screen.getByRole("group", { name: "Date" })
     const labels = within(picker).getAllByRole("button").map((b) => b.textContent)
     expect(labels).toEqual([
       "Today", "Yesterday", "Sat 3 Oct", "Fri 2 Oct", "Thu 1 Oct", "Wed 30 Sep", "Tue 29 Sep",
-      "Mon 28 Sep", "Sun 27 Sep", "Sat 26 Sep", "Fri 25 Sep", "Thu 24 Sep", "Wed 23 Sep", "Tue 22 Sep",
+      "Mon 28 Sep",
     ])
     expect(within(picker).getByLabelText("Earlier date")).toHaveAttribute("max", "2026-10-05")
   })

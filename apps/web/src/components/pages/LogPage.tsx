@@ -25,7 +25,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react"
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { Check, Delete, X } from "lucide-react"
+import { CalendarDays, Check, Delete, X } from "lucide-react"
 import { ApiError, categoriesApi, transactionsApi } from "@/lib/api"
 import { cn, formatDisplayDate, formatKD } from "@/lib/utils"
 import { normalizeAmount, pressDecimal, pressDelete, pressDigit } from "@/lib/log-amount"
@@ -813,6 +813,7 @@ function LogPanel() {
             open={open === "date"}
             onToggle={() => toggle("date")}
           >
+            <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
               {dateChips.map((c) => (
                 <button
@@ -825,10 +826,14 @@ function LogPanel() {
                   {c.label}
                 </button>
               ))}
+            </div>
               {/* MOB-R69 E2, kept for older days — the real date field lies over the chip,
                   transparent, so the tap lands on it (iPhone opens its picker on that tap); on
-                  computers showPicker() opens the calendar from anywhere on the chip. */}
-              <span className={cn(chip, "relative")}>
+                  computers showPicker() opens the calendar from anywhere on the chip.
+                  MOB-R73 E3 — set apart on its own row: a calendar icon, brass-tint fill, brass
+                  border, so it stands out from the day chips. */}
+              <span className="relative inline-flex min-h-11 items-center gap-2 rounded-full border border-accent bg-accent/15 px-4 text-sm font-semibold text-foreground">
+                <CalendarDays aria-hidden="true" className="h-4 w-4" />
                 <span aria-hidden="true">Earlier date</span>
                 <input
                   type="date"

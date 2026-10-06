@@ -49,9 +49,10 @@ export function shortDayLabel(d: Date): string {
   return `${WEEKDAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`
 }
 
-export const RECENT_DAY_CHIPS = 12
+// MOB-R73 E3 (operator, B1 item 3) — today and the 7 days before: "Today", "Yesterday", then 6.
+export const RECENT_DAY_CHIPS = 6
 
-/** E5 Date — "Today", "Yesterday", then the 12 days before, newest first. Never a future day. */
+/** E5 Date — "Today", "Yesterday", then the 6 days before (8 chips), newest first. Never a future day. */
 export function recentDateChips(today: Date): Array<{ iso: string; label: string }> {
   const chips: Array<{ iso: string; label: string }> = []
   for (let i = 0; i < 2 + RECENT_DAY_CHIPS; i += 1) {
