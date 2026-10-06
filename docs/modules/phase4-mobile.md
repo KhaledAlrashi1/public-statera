@@ -10797,3 +10797,165 @@ output is pasted. Expected: blank 10736, then 63 lines at 10737-10799. Read-back
 line count, header and last line verbatim, cmp of the region against the payload, git show
 --stat and porcelain, all pasted in full.
 After this block: strict 72, loose 74 (body lines 1513 and 6934).
+
+MOB-R73 — MOB-R72 accepted; phone checks recorded; log fixes, Log in the bar, no adding income.
+
+Issued Tuesday, October 6, 2026, by the review channel.
+TIER 2 throughout (frontend, plus read-only recon). One CC run; one report at the end.
+
+═══ A. MOB-R72 REPORT — ACCEPTED ═══
+
+A1. Persistence 81230c6: blank 10736, then 10737-10799, cmp exit 0; strict 72, loose 74.
+A2. D (8740f9b): the 4 granted lines only; generators only; provenance MISS 0 (the 2 EXTRAs
+    are the pinned R6 total_kd and R8 budget_to_income_pct); money-wire 15/71/67/169; API
+    hermetic 902/43/76; integration 935/10/76; fixture 67, ALLOWLIST empty. Integration base
+    not re-run at f4654f8 (docs-only commits since 7f2b1e5): accepted.
+A3. E (4fee4ba): the 2 granted lines only; C7 precedence last_amount, then top item, then none,
+    pinned in one case shown able to fail; frontend 438/96; tsc 0 bytes. Accepted.
+A4. Push f4654f8..4fee4ba, run 37440345415, all four jobs ubuntu-24.04, both probes on 4fee4ba,
+    0 unpushed by both routes. Stashes dropped; patches kept. Accepted.
+A5. FOUND, queued: (a) frontend test files are not type-checked, so "tsc 0 bytes" does not
+    cover them; (b) the fixture row at money-wire-shape.test.ts:235 has no date, so the
+    captured last_used sample is the string "undefined" (type only is asserted).
+A6. Lesson kept: a grant names the line where the edit goes. CC reports edit lines, not only
+    the lines where a failure surfaces.
+
+═══ B. OPERATOR'S PHONE CHECKS ON 4fee4ba, VERBATIM ═══
+
+B1. With seven screenshots (/log installed at 12:16 and in Safari at 12:28; Home in Chrome at
+    12:25 with the install guide and at 12:28; Add Income in dark mode at 12:20; Transactions
+    at 12:26; desktop Add Expense at 12:18):
+    "1. Much better. Now, I noticed when i tried entering a place, if it existed before but for
+    a different category and clicked on it, the category would change if the user had entered
+    value. If the user enters a value in category, clicking on one place shouldn't change the
+    category value. Does that make sense?
+    2.  Yes! two taps
+    3. Yes. Great improvement. Now, I want the app to just show the last seven days (today +
+    the last seven days and then choose an earlier date). I want the earlier date to stand out
+    a bit.
+    4. Yes, I like it.
+    5. Yes, undo works.
+    6. Yes, it works.
+    7. The light and dark mode is fine on both the mobile and desktop verisons. I tried
+    entering 1.5 as an income. I was able to entering an income but it doesn't seem to have
+    change the income KPIs. I think it's cleaner to have the user enter their income once. But
+    it's confusing to give th euser the option to enter an income transaction and it doesn't
+    reflect on the income KPIs.
+    8. Also, the 'X' on the new expense, needs to stand out a little bit.
+    9. I see how I was able to add income. It's when I when to the transactions page, and
+    selected the income. I got the income window. While I want to be inclusive and consider the
+    users who might have more than one income, I think I am covering most of the users when
+    having them set their income one time. I guess we should remove the option to add income
+    transactions. See the screenshots and let me know if you find something that should be
+    improved such as UI interface or user experience or  defects in the app."
+B2. Map to MOB-R71 G3: new entry, repeat in two taps, date chips, search closing, Undo and
+    Undo last, install guide line: PASS. Home light and dark: PASS (his item 7). Still open:
+    the count-ups; laptop typing and Enter; "1,500" and "1,5".
+
+═══ C. CHANNEL'S FINDINGS FROM THE SCREENSHOTS (not his words) ═══
+
+C1. DEFECT, core path: desktop 12:18 shows the old "Add Expense" sheet in Expense mode
+    (Merchant, What was this for?, Category, Date 10/06/2026). Since MOB-R61 every expense
+    control should open /log, and the sheet's Expense toggle should open /log since dee16a2.
+C2. DEFECT: Add Income 12:20 shows "Income name looks good." and "Income name is required."
+    together; the Date field is cut off on the right.
+C3. The floating "+ Log" covers content: Remaining's "70% of income" (12:28) and the Expenses
+    amount (12:25); it also sits over a Transactions card (12:26).
+C4. Dates appear in four formats: "Thu 24 Sep", "6 Oct 2026", "Oct 6, 2026", "10/06/2026".
+    10/06 reads as 10 June in Kuwait.
+C5. A place named "Other" (note "Birthday gift", category Gifts): origin unknown.
+C6. Two neighbouring tiles share one colour (Pick, 221 Baker St); tiles reorder after a save.
+C7. The Home menu button keeps a dark ring after a tap (12:25).
+C8. Transactions: about 2.5 entries per screen; "Edit" alone on a row; checkboxes always shown;
+    cards inside a card; amounts without "KD". For the look-A block, not here.
+C9. Asked of him, not yet answered: which desktop control opened C1's sheet; whether "Thu 24
+    Sep" at 12:16 was picked just before or left from an earlier entry.
+
+═══ D. OPERATOR SELECTIONS (channel's questions and options; his selections) ═══
+
+D1. ""Never overwrite what she chose" applies to:" Options: "Everywhere: places, tiles and item
+    chips never overwrite her choices (Recommended)", "Places only; a tile still fills
+    everything". Selected: "Everywhere: places, tiles and item chips never overwrite her
+    choices (Recommended)".
+D2. "Where should the Log button live?" Options: "Centre of the bottom bar, covers nothing
+    (Recommended)", "Keep it floating, add space so it never covers numbers". Selected:
+    "Centre of the bottom bar, covers nothing (Recommended)".
+D3. "Income transactions:" Options: "Remove adding income; saved income rows stay visible, not
+    counted; CC maps all other income paths first (Recommended)", "Remove adding income and
+    hide saved income rows". Selected: "Remove adding income; saved income rows stay visible,
+    not counted; CC maps all other income paths first (Recommended)".
+
+═══ E. BUILD (each item its own commit, green alone) ═══
+
+E1. FIRST, C1: find the desktop control(s) that open the old sheet in Expense mode at 4fee4ba
+    (file:line, how found); each opens /log instead. A test in a new file shows each control
+    navigates to /log and is shown able to fail.
+E2. NEVER OVERWRITE (D1): each of amount, category, place and what for remembers its source:
+    hers (typed or picked by her) or suggested (a tile, a Popular tile, place memory, an item
+    chip). A suggestion fills a field only when it is empty or holds a suggestion; never a
+    field she set. Clearing a field returns it to empty. Date is never set by a suggestion.
+    Tests in a new file, each shown able to fail: her category survives a place pick and a
+    tile tap; her amount survives a tile tap and an item chip; a suggestion still replaces a
+    suggestion.
+E3. DATE (B1 item 3): chips "Today", "Yesterday", then the 6 days before (8 chips, today and the
+    7 days before), then "Earlier date" set apart: calendar icon, brass-tint fill, brass
+    border, as in the chat mock; it opens the existing overlay. Report, do not change, what the
+    reset after a save does to the date (file:line).
+E4. CLOSE (B1 item 8): the /log close control becomes a 40px circle (surface fill, border, ink
+    icon), matching Home's header buttons. Accessible name stays "Back".
+E5. LOG IN THE BAR (D2): the floating "+ Log" is removed on widths that show the bottom bar. A
+    centre item "Log" (raised ink circle, brass plus) opens /log. Labels stay as they are; if
+    five labels do not fit at 375 without clipping, E5 STOPS with measured widths (the
+    channel's "Activity" rename is not ruled). Report what widths without the bar show and
+    whether anything there covers content.
+E6. INCOME ADDING REMOVED (D3): remove every control that opens income entry (the Transactions
+    page income option; the old sheet's Income mode). Saved income rows stay in Activity,
+    unchanged. No API route, no row, no importer behaviour changes. With E1, report whether the
+    old sheet is now unreachable, and MEASURE what deleting it would break (files, cases,
+    edit lines). Deletion is a later block.
+E7. TILE COLOURS (C6): the visible tiles never share a colour; a place keeps its own colour
+    unless a visible tile already has it, then it takes the next free one.
+E8. FOCUS RING (C7): Home's header buttons and the /log close control show the ring only on
+    keyboard focus (focus-visible). Report an app-wide count of buttons using focus: rings;
+    change nothing else.
+
+═══ F. READ-ONLY RECON (report only; no code change) ═══
+
+F1. INCOME PATHS (D3): every writer of income rows (UI, importer, API routes, anything else) and
+    every reader (Home KPIs, R3/R4, payday-lib.ts:17, utils.ts:148, transactions.ts:876,
+    Insights, Plan, Activity), file:line each, and what "saved income rows are not counted"
+    would change at each reader today.
+F2. "OTHER" (C5): any code path that creates a place named "Other" (for example the old /log
+    "+ Other"), file:line, or none.
+F3. DATE FORMATS (C4): a census of displayed date formats, file:line per format, native date
+    inputs included. A single formatter is a later block.
+
+═══ G. TESTS, PREDICTIONS, PUSH, CHECKS ═══
+
+G1. MOB-R60: a scratch predictions file before the first edit, sha256 reported, key lines
+    quoted, every count with sign: frontend 438/96; tsc 0 bytes both; API untouched.
+G2. MOB-R53 stands: no existing test file is granted. CC MEASURES each item's breaks; an item
+    with an ungranted break STOPS, is stashed complete, and the report gives the edit lines.
+    Independent items carry on (MOB-R63 B).
+G3. Layout, scratch Playwright WebKit and Chromium at 375 and 390, numbers pasted: bottom bar
+    labels unclipped; the Log item inside the viewport; Home scrolled to the bottom, the last
+    content ends above the bar; "70% of income" not covered (elementFromPoint); date chips wrap
+    with no horizontal scroll; close control 40px.
+G4. RM-21, RM-23, RM-25 (postponed), RM-26 (strings provisional), RM-27 stand; no new gate,
+    next is RM-28.
+G5. Push once, after the last item: fast-forward; every committed item's predictions held; all
+    four Actions jobs succeed, labelled ubuntu-24.04; both probes on the new sha; 0 unpushed by
+    both routes; porcelain pasted. A STOPPED item's expectations do not block the push.
+G6. Operator's phone checks after deploy, Chrome and Safari; CC does not wait on them: a place
+    after picking a category (category kept); the date chips and "Earlier date"; the close
+    button; Log in the bar on Home and Transactions; no income option on Transactions; the
+    laptop's expense controls open /log. Still open: count-ups; laptop typing and Enter;
+    "1,500" and "1,5".
+
+═══ PERSISTENCE ═══
+
+This block persists ALONE, before any other work. The wrap check runs as its own step and its
+output is pasted. Expected: blank 10800, then 161 lines at 10801-10961. Read-back: appended
+line count, header and last line verbatim, cmp of the region against the payload, git show
+--stat and porcelain, all pasted in full.
+After this block: strict 73, loose 75 (body lines 1513 and 6934).
