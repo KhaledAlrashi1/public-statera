@@ -12328,3 +12328,145 @@ G1 Every route in the router: path, component, who links to it, and what the fla
 Dead code sweep (IncomePage, ComingSoonPage, FinancialSnapshotHero, DuplicateWarningDialog,
 EditTransactionDialog after D). Welcome's demo button and Plan's Add below the fold. Command
 palette role and aria-modal. ImportDialogs physical margins. Native date inputs' format.
+
+MOB-R88 — R87 accepted; E, F, search fix, edit look, G ship; layout readout grows (Wed 7 Oct 2026)
+
+Persist first, alone: blank line 12331, payload 12332–12472 (141 lines); read-back reports the
+payload sha256. After: strict 88, loose 90 (loose-only 1513, 6934). Docs-only commit.
+
+A. R87 report accepted. Findings:
+A1. C and D shipped as bf13a67 (run 37667213384; probes 18:33:52Z). D4 proof accepted: only
+  amount_kd, merchant_id, updated_at moved; memo "keep me" byte-equal; Undo at 7.5 s kept the row.
+A2. Channel miss: R87 E predicted breaks in receipt-place, pick-click and picker-return place
+  cases, from test names (R74 G3). Measured: none there; one in a category case (:152).
+A3. CC's correction stands beside R85: its "0 rows" rent lookup was the search bug, not a harness
+  miss.
+A4. Search defect (CC, outside scope, not fixed: correct) confirmed in PRODUCTION by his phone:
+  Activity search "A" shows "Activity unavailable" with MySQL's raw text, near '\' ... ESCAPE
+  '\'))'. Production keeps backslash escapes on. Raw database text reached a user screen.
+A5. EditTransactionDialog (transactions/dialogs.tsx) has no caller after D: queued as dead code.
+  The RM-27 exception "edit dialog parseFloat" is now in dead code, not gone.
+A6. His phone, on the edit screen (screenshots, dark): the title sits under the clock; the
+  screen opens scrolled to the bottom; one capture is zoomed and shifted sideways. Layout check
+  readout still not in, so the /log top fix is NOT ruled here (R74 A3). Next block.
+A7. His words, verbatim: "All worked but I don't like the interface, UI/UX. we need to fix that."
+  And: "When I opened the activity page, it felt like it was zoomed in where the scrolling was
+  going side ways. When editing the transaction, it takes you to the bottom of the edit page. I
+  still don't understand why my phone needs to scroll when the page can fit just fine."
+A8. Channel questions, his selections (options were the channel's):
+  - "Activity → search → type "a". What happens?" -> "Error or nothing".
+  - "The sideways scroll on Activity: when did it start?" -> "As soon as I opened it". So iOS
+    focus zoom (14px search) is NOT the cause; something is wider than his screen. R87 F2 ships.
+  - "What bothers you about Delete and Split?" -> "They float loose under Save".
+  - "Where should Split and Delete go on the edit screen?" -> "A: Actions card (Recommended)".
+  - "...keep it when editing?" (the subtitle) -> "Drop it when editing (Recommended)".
+
+B. Search fix. Tier 1. Ships.
+B1. Census in the report: every ESCAPE in apps/api (grep, file:line); for each, its endpoint and
+  every frontend caller (grep, file:line); the helper that escapes the typed pattern (file:line,
+  quoted) and all its readers. If any caller is on /log, say so at the top of the report.
+B2. SELECT @@GLOBAL.sql_mode, @@SESSION.sql_mode on dev, verbatim. Production is settled by A4.
+B3. Existing tests that read these SQL strings or endpoints: list them (R83 A3); measure breaks.
+  Any break: STOP this item (no grant here).
+B4. The fix: at each site the SQL text MySQL receives reads ESCAPE '\\' (one backslash as the
+  escape character). Show the received text once on dev, verbatim. Nothing else changes at the
+  sites, comments included.
+B5. New APII test on a scratch user: a plain word finds its row; "50%" and "a_b" each match only
+  the literal. Each case fails on main (500) and is reddened by restoring the old literal.
+B6. Dev proof, WebKit 390x844: Activity search "A" lists rows (GET 200, screenshot).
+B7. Activity (Tier 2): when search fails, the panel shows "Search isn't working right now." and
+  Retry, never the server's text, and no "No matches" beside it. Test with a mutation. Census
+  only (no edit): the API error handler that puts DB text in a 500 body (file:line), its tests,
+  and every screen that renders error.message (grep, file:line). Proposal in the report.
+
+C. R87 E (place picker) ships. Tier 2. Rows are created only by her save (RM-21 (c) not touched).
+C1. Name the stash's two files first. If any new case sits in an EXISTING test file, that is an
+  existing-test edit beyond the grant (MOB-R53): STOP this item and report.
+C2. Quote CC's E break predictions from the scratch file (49b4065b…5b28), hit or miss per line.
+  For each case the channel named (receipt-place, pick-click, picker-return place), say which
+  assertion still holds on the chips and why (positive control for the empty result).
+C3. Grant: LogPage.picker-return.test.tsx:152 becomes
+  expect(mocks.categoriesCreate).not.toHaveBeenCalled(). Nothing else in that file.
+C4. Dev DB proof, WebKit 390x844, scratch user, row counts before and after:
+  - new expense; Add category "Pets2" and place "Shop2"; save: one new category row, one new
+    merchant row, one new transaction;
+  - the same two Adds, then leave without saving: 0 new rows;
+  - edit mode on a row with memo "keep me"; Add a category; save: the category is created once;
+    only category_id and updated_at change; memo byte-equal.
+  Any other column change or a second category row: STOP this item.
+
+D. R87 F (polish batch) ships. Tier 2; F8 Tier 1.
+D1. Same check as C1 for F's 9 files and 4 new tests.
+D2. Grants, the edit at the line and nothing else in the file:
+  - InsightsPage.test.tsx:305: name "2026-02" -> "February 2026".
+  - income-expenses-chart.test.tsx:82: "2026-03" -> "March 2026".
+D3. labelForYM (utils.ts:214) is shared (R76 A3): list EVERY reader by grep, file:line, and state
+  that each only displays the label (no key, value, comparison or API use). Any other use:
+  STOP this item.
+D4. Home axis: before "2025-12 …", after it starts at January 2026. Report the chart's data
+  point count before and after (must be equal: tick thinning only); screenshots at 390 and 1280.
+D5. F6 titles, ruled by the channel without asking him: SettingsDialog.tsx:280 "Delete this
+  category?"; :689 "Delete this merchant?"; :1099 uses the noun of its own section heading
+  (quote the heading, file:line); "Delete this saved name?" if that heading says saved names.
+D6. F5 at Insights left unedited: accepted. F7 one-panel flex-row override: accepted (opt-in,
+  R76 A3); report a 1280 pixel diff of empty Home against main and name the changed region.
+D7. F8 dev proof, WebKit 390x844, scratch user: add a budget "1234.5", then edit it to "20": the
+  DB amount equals the readout each time; no other budget row changes. On ship, the RM-27 queue
+  drops budget/sections.tsx:834.
+
+E. Edit screen look (his A8 picks). Tier 2. Edit mode only; New expense pixel-identical.
+E1. Split and Delete leave the area under Save. A second card under the fields holds two rows:
+  "Split this expense" (or "...income") and "Delete expense" (or "Delete income") in today's
+  Delete colour. Each row is the whole row as a button, at least 44px tall. Behaviour unchanged:
+  Split opens today's dialog; Delete is the 6-second deferred delete with Undo, no confirm.
+  Rows only where D offers them today (if D has no Split on income, none here).
+E2. In edit mode the subtitle "Amount and category are all you need." is not shown.
+E3. Before the edit, quote every existing test query that finds Split, Delete or the subtitle
+  (file:line) and predict breaks. Any measured break: this item stays a stash; report it; the
+  next block grants.
+E4. New tests with mutations: rows present and in order; Delete row runs the deferred delete;
+  subtitle absent in edit, present in new.
+E5. WebKit 390x844 light and dark, edit mode, screenshots; New expense pixel diff vs main = 0
+  above the noise floor (positive control). Strings channel-drafted: provisional (RM-26).
+
+F. Opening at the top. Tier 2.
+F1. Census first: how the router handles scroll on navigation today (ScrollRestoration or any
+  scrollTo; grep, file:line).
+F2. Entering /log (new or edit) starts at scroll top and left 0. Scoped to /log; another route's
+  behaviour unchanged. Test that scrollTo runs on entry (mutation). WebKit: scroll Activity down,
+  tap a row, /log reports scrollY 0 (screenshot).
+
+G. Layout check grows to Activity (instrument). Tier 2.
+G1. Quote what LogLayoutReadout.tsx reports today (each value, file:line).
+G2. Profile "Layout check" turns on an in-memory flag (no storage) and opens /log as today. While
+  on, the readout shows on /log and on Activity, and adds: innerWidth, documentElement
+  scrollWidth, visualViewport width and scale, scrollX, and up to 5 elements whose right edge is
+  past innerWidth (tag, first two classes, left, right). ?layout=1 keeps working. Off by default.
+G3. Tests with mutations: hidden when off; shows on Activity when on; lists an over-wide element
+  (positive control with a forced 500px child). Readers of the flag: list by grep.
+
+H. R87 G (legacy routes) ships. Ruled by the channel without asking him: no visible change;
+  nothing links there.
+H1. Before any edit: grep the manifest (start_url, scope, shortcuts), index.html, server routes
+  and email templates for /transactions, /expenses, /income, /budget; 0 hits needs a positive
+  control. Any hit: STOP this item.
+H2. All four aliases redirect unconditionally: /transactions -> /activity?type=all, /expenses ->
+  /activity?type=expense, /budget -> /plan, /income as today. Delete the flag and every mention
+  of it (grep, file:line).
+H3. Delete ExpensesPage.tsx, expenses/dialogs.tsx, expenses/hooks.ts, their three test files,
+  the lazy import (App.tsx:63) and e2e/legacy-redirects.spec.ts. Grep each module's importers
+  first; any importer outside this list: STOP this item.
+H4. New route test: each of the four aliases lands on its target, each reddened by a mutation.
+  WebKit: /activity?type=expense shows the Expenses filter selected (positive control).
+H5. On ship, the RM-27 queue drops expenses/dialogs.tsx:290 (file gone).
+
+I. Counts, commits, push.
+I1. Predictions in the scratch file before the first edit (MOB-R60): base FE 515/123; APIH
+  908/80/82; APII 978/10/82. A delta per item; H's deleted tests are negative deltas.
+I2. One commit per item, in order C, D, B, E, F, G, H. An item that STOPs is left out (kept as a
+  stash, identified by content); the others go.
+I3. Push under this block: fast-forward; four jobs on ubuntu-24.04; both probes on the new sha,
+  timestamped; 0 unpushed by both routes. No migration in this push.
+I4. After C and D commit: save each stash patch, check the hash, drop the stash.
+I5. Queue adds: EditTransactionDialog dead; the "cannot be undone" delete confirm (R87 A) open;
+  the API 500-body text (B7 proposal).
