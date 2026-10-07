@@ -12232,3 +12232,99 @@ G4 Deliver the table in the report and one 390x844 screenshot per item. Nothing 
 
 ═══ QUEUE ═══
 Home desktop, income not set (C4). Phone keyboard checks for every dialog (G1 b) stay phone-only.
+
+MOB-R87 — MOB-R86 accepted; Log-screen edit and readout link ship; picker and polish stashed.
+
+CADENCE. Persist alone (blank 12235, payload 12236–12330). C (Tier 2) and D (Tier 1 rigour, frontend
+only) ship in one push; a D STOP does not block C. E and F are built as stashes, measured, nothing
+committed. G is a census. One report. After this block: strict 87, loose 89. Gates RM-1 … RM-28.
+
+═══ A — MOB-R86 ACCEPTED ═══
+A1 Persistence: payload sha256 9aac8396…7a72 equals the issued value; 12133–12234; strict 86.
+A2 C: f138ed6 is the stash less the 3 comment lines (70+/55−); FE 503/119; tsc 0.
+A3 D: aa9cc56; FE 505/120 as predicted; /log without the parameter 0 differing pixels in both
+   engines; the readout adds no height. Run 37659557974, four jobs on ubuntu-24.04; both probes on
+   aa9cc56 at 17:34:41–42Z (20:34 Kuwait, Wed 7 Oct 2026); 0 unpushed by both routes.
+A4 Miss, recorded: the first readout broke SafeTopStrip.test.tsx:35 against a prediction of 0.
+   CC fixed the code, not the test. The top inset is read through var(--safe-top), which is
+   env(safe-area-inset-top, 0px) at index.css:176, so it is the same value. Accepted.
+A5 Channel miss: D2 asked for a URL inside an app that has no address bar. C1 below fixes it.
+A6 E and F: reading "nothing stashed" as forbidding a scratch build was right. Breaks stay
+   predictions until measured (E2, F9 below).
+A7 Findings carried: the delete confirm says it "cannot be undone" while delete waits 6 seconds
+   behind Undo; budget add/edit saves through parseFloat (budget/sections.tsx:834), an RM-27
+   breach not on the exceptions list (F8); ExpensesPage still renders at /expenses (G).
+
+═══ B — OPERATOR SELECTIONS ═══
+Questions and options are the CHANNEL'S; answers are the OPERATOR'S, verbatim.
+B1 "Deleting a transaction from the edit screen: what happens?" -> "Delete, then 6-second Undo
+   (Recommended)".
+B2 "She adds a new place or category while logging. When is it saved?" -> "When she saves the
+   expense (Recommended)".
+B3 "Editing an income row on the Log screen: can its category change to an expense one?" -> "No,
+   it stays income (Recommended)".
+B4 Ruled by the channel without asking him: the Profile link (C1); place chips drop the category
+   line (E1); the contents of the polish batch (F).
+
+═══ C — READOUT LINK (TIER 2) ═══
+C1 One link at the bottom of Profile, muted small text, label "Layout check", navigating in-app to
+   /log?layout=1. No other Profile change. It is removed when the /log top fix ships. New test:
+   present, with that target. Predicted counts in the scratch file.
+
+═══ D — EDIT ON THE LOG SCREEN (TIER 1 RIGOUR; NO API CHANGE; RM-21 b GOVERNS THE REQUEST) ═══
+D1 The E5 proposal is accepted with B1–B3:
+   (a) A row tap navigates to /log?edit=<id>. Edit at TransactionsPage.tsx:412–432 and drop the
+       EditTransactionDialog import. The dialog file stays, with no caller (queued).
+   (b) Edit mode loads the row by transactionsApi.get; the tiles are hidden; title "Edit expense",
+       or "Edit income" for an income row (RM-26). Prefill and the What-for rule as proposed.
+   (c) Save sends PATCH with exactly amount_kd, category, name, merchant and date. Never memo.
+       The amount goes through amount-text.ts (RM-27). Merchant is sent as shown: the place, or
+       empty when she cleared it. Then back to Activity with a toast "Changes saved" (RM-26).
+   (d) Delete: a text button under Save, using today's 6-second deferred delete with Undo, and no
+       confirm (B1). Split: a text button opening today's split dialog, unchanged.
+   (e) An income row keeps an income category: its picker lists her income categories only (B3).
+D2 New tests, each shown red by a mutation: prefill; the What-for rule; the exact PATCH key set
+   for an expense row and for an income row (no memo in either); delete with Undo and no confirm;
+   Split opens; the income picker lists income only; the row tap navigates to /log?edit=<id>.
+D3 Breaks predicted 0. Any measured existing-test break STOPS D: stash it complete, report lines.
+D4 Proof in WebKit 390x844, scratch user with a memo on the row: open from Activity, change amount
+   and place, save. Read the row from the API before and after: every column except amount,
+   merchant and the updated time is byte-equal, memo included. Delete then Undo keeps the row;
+   delete without Undo removes it after 6 s. An income row saved unchanged stays income.
+D5 Push C and D under the standing rules.
+
+═══ E — PLACE PICKER LIKE CATEGORY: BUILD AS A STASH ═══
+E1 The F2 proposal with B2: Add in both pickers is state only and is created on save (category by
+   the existing getOrCreateCategory, place as the expense's merchant). With nothing typed, place
+   shows her six places by use as chips, without the category line; typing searches all of them.
+   No 256px scroll box. Both Add buttons use pickProps. Place keeps its query when another line
+   opens. The "What kind of spending is {place}?" prompt stays.
+E2 Measure every existing-test break, line by line, with the failing assertion. New tests shown
+   red. Predicted against measured counts. Screenshots of both pickers at 390x844. Confirm the API
+   is unchanged and no path deletes or overwrites rows (RM-21). Nothing committed.
+
+═══ F — POLISH BATCH (TIER 2; F8 TIER 1): BUILD AS A STASH ═══
+F1 The Categories & Merchants search ring (O15, O18, O19) is no longer clipped: 0px, measured.
+F2 Activity's search, Plan's filter and the command palette search render at 16px on phones.
+F3 Figures shown together share one size, the one the longest needs: Plan's four tiles are one
+   group; the category cards are another.
+F4 A month shown to her as "YYYY-MM" reads "October 2026": Plan's picker, budget add/edit, the
+   copy dialog, Home's "2025-12" (name each site). Values sent to the API do not change.
+F5 "This Month" reads "this month" (budget/sections.tsx:303 and the Insights site).
+F6 Dialog titles in sentence case (list each, from -> to). For the three "Confirm Action" titles
+   (SettingsDialog.tsx:280, :689, :1099), propose specific titles; the channel rules the words.
+F7 Empty Home: "Start guided setup" sits clear of the tab bar and the Log button.
+F8 Budget add/edit amounts go through amount-text.ts (RM-27), with tests for what the readout
+   shows and what saves.
+F9 Proof: 390x844 before and after per item, with the measure named; FE counts; breaks line by
+   line. Nothing committed.
+
+═══ G — LEGACY ROUTES: CENSUS AND PROPOSAL ═══
+G1 Every route in the router: path, component, who links to it, and what the flag
+   VITE_ENABLE_PHASE2_LEGACY_REDIRECTS changes (file:line). Proposal: where /expenses and the
+   other aliases should send her, and what that leaves dead. STOP there.
+
+═══ QUEUE ═══
+Dead code sweep (IncomePage, ComingSoonPage, FinancialSnapshotHero, DuplicateWarningDialog,
+EditTransactionDialog after D). Welcome's demo button and Plan's Add below the fold. Command
+palette role and aria-modal. ImportDialogs physical margins. Native date inputs' format.
