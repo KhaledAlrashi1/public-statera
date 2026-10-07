@@ -11926,3 +11926,69 @@ D4. Phone checks after the deploy (the operator; app fully closed first): Activi
   totals, Select mode, a row tap opens the edit; the Home Income tile opens the income edit; a
   scroll starting on a /log tile fills nothing; /log at rest and after a save does not scroll.
 After this block: strict 82, loose 84 (body lines 1513 and 6934).
+
+MOB-R83 — MOB-R82 accepted; both stops granted; pick on click ships; look A ships.
+Issued Wed 7 Oct 2026 by the review channel. Expected at lines 11930–11994, after a blank 11929.
+Tiers: all TIER 2 (frontend only). RM-21: nothing here adds a migration, writes, deletes or seeds.
+
+A. THE MOB-R82 REPORT IS ACCEPTED, WITH FINDINGS.
+A1. MOB-R82 persisted at 11839–11928 after a blank 11838: commit dd92657, 91 insertions, cmp
+  exit 0, porcelain 0, headers strict 82, loose 84. Payload sha256 a917a78a…0496 equals the
+  issued value. Written from the paste without asking, as MOB-R82 A4 rules.
+A2. Both stops are right, and each stopped only its own item (MOB-R63 B). CC predicted the two B
+  breaks in its scratch file before any edit.
+A3. Finding against the channel: MOB-R82 B2 changed pick timing without asking which existing
+  tests assert a pick on pointerdown, and B1 ruled on CC's word that place tiles used pickProps.
+  Finding against CC: that word was wrong; the tiles (LogPage.tsx:632–636) always picked on
+  click. The readers, measured: :135 (definition), :237, :819, :830, :851, and the chip.
+A4. Finding against CC, recorded: TransactionsTable.income-flag.test.tsx:44–46 and :54–56 were
+  missed in MOB-R81's break list, hidden behind earlier failures in the same tests.
+A5. B4–B5 accepted (4105be4): spare at 390x844 with both insets, before → after: fresh 71 → 79,
+  after a save 19 → 27, four long names 71 → 79, Popular in Kuwait 11 → 19. Gaps only
+  (LogPage.tsx:988, :658–659), +8px as predicted; 375x667 still scrolls with Save visible.
+  CC's instrument fault (a 409 duplicate, a read during the save moment), fixed and reported.
+A6. Push accepted: cb41b40..4105be4 fast-forward, run 37595560712, four jobs on ubuntu-24.04,
+  both probes on 4105be4 at 08:46:29–30Z, 0 unpushed by both routes. Baseline: FE 466/107.
+A7. C3–C8 accepted as built: line two and the year as ruled; lib/tile-colours.ts shared, with
+  /log re-exporting TILE_COLOURS for its test; Plan figures step down by length with a no-break
+  space after KD, the split check shown able to see a split; legend words muted; MonthDelta
+  signs local to MonthDeltaCard, its only reader; PageHeader's look A style opt-in, from
+  DashboardPage.tsx:671–685.
+
+B. PICK ON CLICK SHIPS (THE B STASH).
+B1. Restore the B stash, identified by content (patch sha256 256413ba…30acf).
+B2. Granted existing-test edits, each quoted before and after: LogPage.receipt-place.test.tsx:63
+  and LogPage.receipt-press.test.tsx:46 assert the pick on click, and that pointerdown alone
+  picks nothing.
+B3. Granted: delete the inert ignore-click lines LogPage.tsx:128–157, but only the symbols a grep
+  shows with no reader left, pasted. A symbol with a reader stays, and CC names it.
+B4. Predicted: FE +8 / +1 file from LogPage.pick-click.test.tsx; B2 and B3 change no count.
+
+C. LOOK A SHIPS (THE C STASH).
+C1. Restore the C stash, identified by content (patch sha256 2af95e94…aead).
+C2. Granted existing-test edits, each quoted before and after:
+  TransactionsPage.test.tsx:55 and :61 match the page title's whole text, across the span;
+  TransactionsTable.income-flag.test.tsx:44–46 take the new amount strings ("+KD x", "KD x");
+  TransactionsTable.income-flag.test.tsx:54–56 keep the badge on desktop only, and on the phone
+  row assert the category text and the income style.
+C3. C9 as an opt-in, like C8: ui/filter-bar.tsx gets a plain variant that Activity and Plan opt
+  into. ExpensesPage.tsx and IncomePage.tsx keep today's box, unchanged.
+C4. C10 granted: the category button's line CC names reads "Add “X” as a new category" with the
+  + icon and no literal "+". Granted existing-test edits, quoted before and after:
+  LogPage.picker-return.test.tsx:47, :161 and :162 take the new label.
+C5. New-file cases for C3 and C4, each red on today's code or under its own mutation.
+C6. Stash drops granted after the commits, each saved first as a patch with its sha256 reported:
+  the B stash, the C stash, and the MOB-R81 C stash (d9339682…466d, superseded by C).
+
+D. ORDER, PREDICTIONS, PUSH.
+D1. Order: persist this block; B1–B4; C1–C5; one push; C6. Each commit is green alone. A stop
+  does not stop the rest.
+D2. Before the first edit, the predictions scratch file: a delta per item, each count naming its
+  runner command, every edit line. Report its sha256 and paste the key lines (MOB-R60).
+D3. Push under this block by the standing rules, with probe retries as in MOB-R75 E3; paste the
+  fast-forward and 0 unpushed by both routes.
+D4. Phone checks after the deploy (the operator; app fully closed first): Activity rows, day
+  totals, Select mode, a row tap opens the edit; the Home Income tile opens the income edit;
+  Plan's big figures on one line; a swipe starting on a place result or an item chip picks
+  nothing; the category Add label.
+After this block: strict 83, loose 85 (body lines 1513 and 6934).
