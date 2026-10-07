@@ -1,6 +1,6 @@
-// MOB-R70 E5 / F3 — /log's Place search. Closing the keyboard without choosing closes the search and
-// drops the text; a result applies on POINTER DOWN, so the keyboard closing (blur) right after it
-// cannot swallow the pick; a new place opens Category with "What kind of spending is {place}?".
+// MOB-R70 E5 / F3 — /log's Place search. Closing the keyboard with nothing typed closes the search; with
+// text typed it keeps the search and the text (MOB-R80 B2). A result applies on POINTER DOWN, so the blur
+// right after it cannot swallow the pick; a new place opens Category with "What kind of spending is {place}?".
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, within } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
