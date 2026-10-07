@@ -40,19 +40,22 @@ describe("Activity table: income comes from the API (MOB-R77 C6)", () => {
 
   it("each row's amount is styled by the field, in both layouts", async () => {
     renderTable("all")
-    await screen.findAllByText("+100.000")
-    expect(screen.getAllByText("+100.000")).toHaveLength(2)
-    expect(screen.getAllByText("+5.000")).toHaveLength(2)
-    expect(screen.getAllByText("-7.000")).toHaveLength(2)
+    await screen.findAllByText("+KD 100.000")
+    expect(screen.getAllByText("+KD 100.000")).toHaveLength(2)
+    expect(screen.getAllByText("+KD 5.000")).toHaveLength(2)
+    expect(screen.getAllByText("KD 7.000").filter((el) => el.dataset.testid !== "activity-day-total")).toHaveLength(2) // the row amounts; the phone day header also totals that day
   })
 
   it("the category badge is coloured by the field, in both layouts", async () => {
     renderTable("all")
-    await screen.findAllByText("+100.000")
+    await screen.findAllByText("+KD 100.000")
     const badges = (name: string) =>
       screen.getAllByText(name).filter((el) => el.tagName === "SPAN" && el.className.includes("rounded-full"))
-    expect(badges("Salary").map((b) => b.className.includes("text-success"))).toEqual([true, true])
-    expect(badges("Incomes").map((b) => b.className.includes("text-success"))).toEqual([true, true])
-    expect(badges("Income: Gift").map((b) => b.className.includes("text-success"))).toEqual([false, false])
+    expect(badges("Salary").map((b) => b.className.includes("text-success"))).toEqual([true]) // the badge is desktop only (MOB-R83 C2)
+    { const r = screen.getByRole("button", { name: "Edit Salary, +KD 100.000" }); expect(r).toHaveTextContent("Salary"); expect(r.querySelector(".text-success")).toHaveTextContent("+KD 100.000") } // the phone row: category text, income style
+    expect(badges("Incomes").map((b) => b.className.includes("text-success"))).toEqual([true]) // the badge is desktop only (MOB-R83 C2)
+    { const r = screen.getByRole("button", { name: "Edit Incomes, +KD 5.000" }); expect(r).toHaveTextContent("Incomes"); expect(r.querySelector(".text-success")).toHaveTextContent("+KD 5.000") } // the phone row: category text, income style
+    expect(badges("Income: Gift").map((b) => b.className.includes("text-success"))).toEqual([false]) // the badge is desktop only (MOB-R83 C2)
+    { const r = screen.getByRole("button", { name: "Edit Income: Gift, KD 7.000" }); expect(r).toHaveTextContent("Income: Gift"); expect(r.querySelector(".text-success")).toBeNull() } // the phone row: category text, income style
   })
 })

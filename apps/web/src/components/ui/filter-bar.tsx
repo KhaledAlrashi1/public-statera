@@ -34,6 +34,9 @@ type FilterBarProps = {
     placeholder?: string
     width?: string
   }[]
+  /** "plain" draws no box around the controls (no border, background, shadow or padding), for a filter bar
+   * that already sits inside a card (MOB-R83 C3). "default" keeps the box. */
+  variant?: "default" | "plain"
 }
 
 export function FilterBar({
@@ -46,6 +49,7 @@ export function FilterBar({
   mobileCollapsible = false,
   mobileButtonLabel = "Filters",
   filters = [],
+  variant = "default",
 }: FilterBarProps) {
   const [showMobileFilters, setShowMobileFilters] = useState(false)
   const hasAdvancedControls = filters.length > 0 || Boolean(dateRange) || Boolean(onClear)
@@ -63,7 +67,12 @@ export function FilterBar({
 
   return (
     <div className="px-4 pt-4">
-      <div className="mb-3 flex flex-wrap items-center gap-3 rounded-[var(--radius-inner)] border border-border/60 bg-card p-3 shadow-[var(--shadow-level-1)]">
+      <div
+        className={cn(
+          "mb-3 flex flex-wrap items-center gap-3",
+          variant === "default" && "rounded-[var(--radius-inner)] border border-border/60 bg-card p-3 shadow-[var(--shadow-level-1)]"
+        )}
+      >
         <div className="flex min-w-[220px] flex-1 basis-[260px] items-center gap-2 rounded-[var(--radius-input)] border border-border/70 bg-background px-3 py-2.5 text-sm shadow-sm transition-colors focus-within:border-primary/35 focus-within:ring-2 focus-within:ring-primary/15">
           <Search className="icon-inline text-muted-foreground" />
           <input

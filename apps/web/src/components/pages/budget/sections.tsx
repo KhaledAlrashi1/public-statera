@@ -16,7 +16,6 @@ import { CHART_FILLS } from "@/lib/chart-tokens"
 import {
   chartTooltipStyle,
   cn,
-  fmt3,
   formatCompactKD,
   formatKD,
   getBudgetUtilizationFill,
@@ -84,6 +83,19 @@ export type BudgetRow = {
   isSavings?: boolean
 }
 
+// MOB-R82 C5 — a Plan figure stays on one line: it never wraps, and it steps down a size as its text grows.
+// Measured at 375x667 (a 160px cell): text-xl fits 9 characters, text-lg 14 (KD 999,999.000), text-base 16
+// (a sign and six integer digits). Display only.
+export function kpiAmountClass(text: string): string {
+  const size = text.length <= 9 ? "text-xl" : text.length <= 14 ? "text-lg" : "text-base"
+  return cn("mt-1 whitespace-nowrap font-mono font-semibold tabular-nums", size)
+}
+
+// MOB-R82 C5 — an amount inside a sentence or a row: a no-break space keeps "KD" with its figure.
+function kdNoBreak(amount: number | string): string {
+  return formatKD(amount).replace(" ", "\u00a0")
+}
+
 export function BudgetHero({
   monthLabel,
   totalBudget,
@@ -115,18 +127,18 @@ export function BudgetHero({
       ? {
           label: "Over budget",
           variant: "warning" as const,
-          detail: `You have spent ${formatCompactKD(Math.abs(remaining))} more than planned so far.`,
+          detail: `You have spent ${kdNoBreak(Math.abs(remaining))} more than planned so far.`,
         }
       : percentUsed >= 85
         ? {
             label: "Close to limit",
             variant: "warning" as const,
-            detail: `You still have ${formatCompactKD(remaining)} left this month.`,
+            detail: `You still have ${kdNoBreak(remaining)} left this month.`,
           }
         : {
             label: "On track",
             variant: "success" as const,
-            detail: `You are spending below plan with ${formatCompactKD(remaining)} left this month.`,
+            detail: `You are spending below plan with ${kdNoBreak(remaining)} left this month.`,
           }
 
   // MOB-1 Group 1 — zero-vs-no-data. With no budget rows `totalBudget` is 0, so `percentUsed`
@@ -143,6 +155,7 @@ export function BudgetHero({
         ? "Approaching limit"
         : "Spending within plan"
 
+  const remainingText = !hasBudget ? "—" : isOver ? `−${formatKD(Math.abs(remaining))}` : formatKD(remaining)
   return (
     <section className="float-in space-y-4" aria-label="Budget overview">
       {/* Narration voice + status chip; month context pinned top-right */}
@@ -164,12 +177,12 @@ export function BudgetHero({
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="min-w-0">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Planned total</div>
-          <div className="mt-1 font-mono text-xl font-semibold tabular-nums">{formatCompactKD(totalBudget)}</div>
+          <div className={kpiAmountClass(formatKD(totalBudget))}>{formatKD(totalBudget)}</div>
           <div className="mt-1 text-xs text-muted-foreground">{totalBudgetTrendLabel}</div>
         </div>
         <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Spent so far</div>
-          <div className="mt-1 font-mono text-xl font-semibold tabular-nums">{formatCompactKD(totalSpent)}</div>
+          <div className={kpiAmountClass(formatKD(totalSpent))}>{formatKD(totalSpent)}</div>
           <div className="mt-1 text-xs text-muted-foreground">{totalSpentTrendLabel}</div>
         </div>
         <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
@@ -177,9 +190,7 @@ export function BudgetHero({
           {/* MOB-R50 F3 — with no budget, "remaining" is just −(spend): it reads "—" instead (the
               MOB-R36 #8 precedent). The vs-last-month chip needs a budget in BOTH months; without
               one last month its base is −(last month's spend) and the percentage measures nothing. */}
-          <div className="mt-1 font-mono text-xl font-semibold tabular-nums">
-            {!hasBudget ? "—" : isOver ? `−${formatCompactKD(Math.abs(remaining))}` : formatCompactKD(remaining)}
-          </div>
+          <div className={kpiAmountClass(remainingText)}>{remainingText}</div>
           {hasBudget && hasPreviousBudget ? (
             <div className="mt-1 text-xs text-muted-foreground">{remainingTrendLabel}</div>
           ) : null}
@@ -305,15 +316,15 @@ export function IncomePlanningCard({
       </div>
       <div className="section-body">
         <div className="grid gap-3 sm:grid-cols-3">
-          <div className="inner-card">
+          <div className="border-t border-border/60 pt-2">
             <div className="text-xs text-muted-foreground">Planned Budget</div>
-            <div className="financial-number mt-1 text-sm font-semibold">{formatCompactKD(budgetTotal)}</div>
+            <div className="financial-number mt-1 text-sm font-semibold">{formatKD(budgetTotal)}</div>
           </div>
-          <div className="inner-card">
+          <div className="border-t border-border/60 pt-2">
             <div className="text-xs text-muted-foreground">Monthly Income</div>
-            <div className="financial-number mt-1 text-sm font-semibold">{formatCompactKD(monthlyIncome)}</div>
+            <div className="financial-number mt-1 text-sm font-semibold">{formatKD(monthlyIncome)}</div>
           </div>
-          <div className="inner-card">
+          <div className="border-t border-border/60 pt-2">
             <div className="text-xs text-muted-foreground">Budget / Income</div>
             <div className="mt-1 text-sm font-semibold">
               {/* MOB-1 Group 1 — "N/A" is the branch this site already had; only the condition
@@ -351,9 +362,9 @@ export function BudgetChart({
   }, null)
   const insightCaption = widestGap
     ? widestGap.delta > 0
-      ? `${widestGap.category} is ${formatCompactKD(widestGap.delta)} over plan, the largest gap in view.`
+      ? `${widestGap.category} is ${kdNoBreak(widestGap.delta)} over plan, the largest gap in view.`
       : widestGap.delta < 0
-        ? `${widestGap.category} is ${formatCompactKD(Math.abs(widestGap.delta))} under plan, leaving the most headroom.`
+        ? `${widestGap.category} is ${kdNoBreak(Math.abs(widestGap.delta))} under plan, leaving the most headroom.`
         : `${widestGap.category} is tracking right on plan in the current view.`
     : "Compare planned and actual spending across the categories taking the biggest share this month."
 
@@ -392,7 +403,8 @@ export function BudgetChart({
                   formatter={(value: number, name: string) => [`KD ${value.toFixed(3)}`, name]}
                   contentStyle={chartTooltipStyle}
                 />
-                <Legend verticalAlign="bottom" height={36} />
+                {/* MOB-R82 C6 — the legend's words in muted ink; its swatch keeps the series colour (brass stays in the marks). */}
+                <Legend verticalAlign="bottom" height={36} formatter={(value) => <span className="text-muted-foreground">{value}</span>} />
                 <Bar
                   dataKey="budget"
                   name="Budget"
@@ -504,6 +516,7 @@ export function BudgetTable({
         </div>
       </div>
       <FilterBar
+        variant="plain"
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}
         searchPlaceholder="Search budget…"
@@ -555,7 +568,7 @@ export function BudgetTable({
             const tone = getBudgetUtilizationTone(r.pct)
 
             return (
-              <article key={`${r.cat}-${r.idx}`} className="inner-card space-y-4">
+              <article key={`${r.cat}-${r.idx}`} className="space-y-4 py-4 border-b border-border/50 last:border-b-0">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <h3 className="truncate text-sm font-semibold" title={r.cat}>
@@ -563,7 +576,7 @@ export function BudgetTable({
                     </h3>
                     {r.isSavings ? (
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {formatKD(r.spent)} of {formatKD(r.allocated)}
+                        {kdNoBreak(r.spent)} of {kdNoBreak(r.allocated)}
                       </p>
                     ) : (
                       <p className={cn("mt-1 text-xs", tone.textClassName)}>
@@ -572,9 +585,9 @@ export function BudgetTable({
                     )}
                   </div>
                   <div className="text-right">
-                    <div className="text-base font-semibold tabular-nums">KD {fmt3(r.spent)}</div>
+                    <div className="text-base font-semibold tabular-nums">{kdNoBreak(r.spent)}</div>
                     <div className="text-xs text-muted-foreground">
-                      of KD {fmt3(r.allocated)}
+                      of {kdNoBreak(r.allocated)}
                     </div>
                   </div>
                 </div>
@@ -590,10 +603,10 @@ export function BudgetTable({
                     />
                   </div>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="tabular-nums">12-mo avg: KD {fmt3(r.avg)}</span>
+                    <span className="tabular-nums">12-mo avg: {kdNoBreak(r.avg)}</span>
                     {r.isSavings ? null : (
                       <span className={cn("tabular-nums", isOver && "font-semibold text-destructive")}>
-                        {isOver ? "-" : ""}KD {fmt3(Math.abs(r.remaining))} remaining
+                        {isOver ? "-" : ""}{kdNoBreak(Math.abs(r.remaining))} remaining
                       </span>
                     )}
                   </div>
@@ -674,15 +687,15 @@ export function BudgetTable({
                 return (
                   <tr key={`${r.cat}-${r.idx}`} className="border-b border-border/60 table-row-hover">
                     <td className="px-4 py-3">{r.cat}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">KD {fmt3(r.allocated)}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">KD {fmt3(r.spent)}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">KD {fmt3(r.avg)}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">{kdNoBreak(r.allocated)}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">{kdNoBreak(r.spent)}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">{kdNoBreak(r.avg)}</td>
                     <td className="px-4 py-3 text-right">
                       {r.isSavings ? (
                         <span className="text-muted-foreground">—</span>
                       ) : (
                         <span className={cn("tabular-nums", isOver && "text-destructive font-semibold")}>
-                          {isOver ? "-" : ""}KD {fmt3(Math.abs(r.remaining))}
+                          {isOver ? "-" : ""}{kdNoBreak(Math.abs(r.remaining))}
                         </span>
                       )}
                     </td>
@@ -699,7 +712,7 @@ export function BudgetTable({
                         </div>
                         {r.isSavings ? (
                           <span className="text-xs text-muted-foreground">
-                            {formatKD(r.spent)} of {formatKD(r.allocated)}
+                            {kdNoBreak(r.spent)} of {kdNoBreak(r.allocated)}
                           </span>
                         ) : (
                           <span className={cn("text-xs font-semibold", tone.textClassName)}>

@@ -54,7 +54,7 @@ export default function CommandPalette({
       },
       {
         id: "activity",
-        label: "Transactions",
+        label: "Activity",
         description: "View and manage all records",
         icon: ArrowLeftRight,
         action: () => go("/activity?type=all"),

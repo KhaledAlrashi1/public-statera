@@ -17,6 +17,13 @@ function deltaTone(row: MonthDeltaRow): string {
   return "text-muted-foreground"
 }
 
+// MOB-R82 C7 — a signed change: "+KD 2.500", "−KD 2.500" (U+2212) or "KD 0.000". Display only.
+export function formatSignedKD(delta: number): string {
+  if (delta > 0) return `+${formatKD(delta)}`
+  if (delta < 0) return `\u2212${formatKD(Math.abs(delta))}`
+  return formatKD(0)
+}
+
 function DeltaIcon({ row }: { row: MonthDeltaRow }) {
   if (row.delta_kd > 0) return <ArrowUpRight className="h-4 w-4" />
   if (row.delta_kd < 0) return <ArrowDownRight className="h-4 w-4" />
@@ -87,11 +94,11 @@ export function MonthDeltaCard({
             Not enough month-over-month data yet.
           </div>
         ) : (
-          <div className="scroll-panel-list space-y-1.5">
+          <div className="scroll-panel-list">
             {rows.map((row) => (
               <div
                 key={row.category}
-                className="surface-row-card flex items-center gap-3 px-3 py-3"
+                className="flex items-center gap-3 py-3 border-b border-border/50 last:border-b-0"
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{row.category}</p>
@@ -106,10 +113,7 @@ export function MonthDeltaCard({
                   <div className="text-right">
                     <div className={`flex items-center justify-end gap-1 text-sm font-semibold ${deltaTone(row)}`}>
                       <DeltaIcon row={row} />
-                      <span className="whitespace-nowrap">
-                        {row.delta_kd >= 0 ? "+" : ""}
-                        {formatKD(row.delta_kd)}
-                      </span>
+                      <span className="whitespace-nowrap">{formatSignedKD(row.delta_kd)}</span>
                     </div>
                     {/* MOB-R50 F4 — no percentage against last month's 0: it is not a change rate. */}
                     {row.last_month_kd > 0 ? (

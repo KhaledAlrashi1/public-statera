@@ -94,7 +94,7 @@ describe("AppShell bottom bar Log item (MOB-R73 E5)", () => {
     renderShell()
     const bar = screen.getByRole("navigation", { name: "Tab navigation" })
     const entries = Array.from(bar.querySelectorAll("a, button")).map((e) => e.textContent?.trim())
-    expect(entries).toEqual(["Home", "Transactions", "Log", "Plan", "Insights"])
+    expect(entries).toEqual(["Home", "Activity", "Log", "Plan", "Insights"])
   })
 
   it("opens /log, the expense entry, on any screen — an income view included", () => {

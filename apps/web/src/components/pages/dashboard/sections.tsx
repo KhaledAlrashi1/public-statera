@@ -717,6 +717,7 @@ export function DashboardHero({
   overBy = null,
   footers = null,
   analyticsUpdatedAt,
+  onOpenIncome,
 }: {
   isLoading: boolean
   monthLabel: string
@@ -733,6 +734,8 @@ export function DashboardHero({
   overBy?: number | null
   footers?: HeroFooters
   analyticsUpdatedAt?: string | null
+  // MOB-R81 C7 — a tap on the Income tile opens the edit for the typed monthly income (IncomeQuickDialog).
+  onOpenIncome?: () => void
 }) {
   const freshness = useMemo(() => {
     if (!analyticsUpdatedAt) return null
@@ -821,6 +824,7 @@ export function DashboardHero({
           over={over}
           overBy={overBy}
           footers={incomeSet ? footers : null}
+          onOpenIncome={onOpenIncome}
         />
       )}
     </section>
@@ -841,6 +845,7 @@ function HeroTiles({
   over,
   overBy,
   footers,
+  onOpenIncome,
 }: {
   riseOnMount: boolean
   income: CountUpText | null
@@ -851,6 +856,7 @@ function HeroTiles({
   over: boolean
   overBy: number | null
   footers: HeroFooters
+  onOpenIncome?: () => void
 }) {
   const [rise] = useState(riseOnMount)
   const riseProps = (index: number) =>
@@ -864,6 +870,20 @@ function HeroTiles({
         money={income ?? undefined}
         value={income ? undefined : "Not set"}
         footer={incomeSet ? "Monthly, set by you" : null}
+        {...(onOpenIncome
+          ? {
+              role: "button",
+              tabIndex: 0,
+              "aria-label": incomeSet ? "Edit monthly income" : "Set monthly income",
+              onClick: onOpenIncome,
+              onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
+                if (e.key !== "Enter" && e.key !== " ") return
+                e.preventDefault()
+                onOpenIncome()
+              },
+              className: cn(rise && "rise-in", "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"),
+            }
+          : {})}
       />
       <KpiTile
         {...riseProps(1)}

@@ -6,13 +6,38 @@ import {
 } from "lucide-react"
 
 import { transactionsApi } from "@/lib/api"
-import { cn, formatAmount, formatDisplayDate, formatKD } from "@/lib/utils"
+import { nameColour } from "@/lib/tile-colours"
+import { cn, formatDisplayDate, formatKD } from "@/lib/utils"
 import type { Transaction } from "@/types/api"
 import { CategoryBadge } from "@/components/ui/category-badge"
 import { FilterBar } from "@/components/ui/filter-bar"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useDebounce } from "./helpers"
+
+// MOB-R81 C6 — a row's amount: KD through formatKD, income as "+KD x" in the success colour. Display only.
+function rowAmount(row: Transaction): { text: string; className: string } {
+  return row.category_counts_as_income
+    ? { text: `+${formatKD(row.amount_kd)}`, className: "text-success" }
+    : { text: formatKD(row.amount_kd), className: "text-foreground" }
+}
+
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const
+function localToday(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+}
+// MOB-R81 C6 — "Today", else "Sun 4 Oct"; the year is added only when it is not this year.
+function dayLabel(iso: string, today: string): string {
+  if (iso === today) return "Today"
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso)
+  if (!m) return iso
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])]
+  const weekday = WEEKDAYS[new Date(Date.UTC(y, mo - 1, d)).getUTCDay()]
+  const year = m[1] === today.slice(0, 4) ? "" : ` ${y}`
+  return `${weekday} ${d} ${MONTHS[mo - 1]}${year}`
+}
 
 function TransactionsTable({
   categories,
@@ -24,6 +49,7 @@ function TransactionsTable({
   selectedIds,
   onToggleSelect,
   onSelectAll,
+  selecting = false,
 }: {
   categories: string[]
   merchants: string[]
@@ -34,6 +60,8 @@ function TransactionsTable({
   selectedIds?: Set<number>
   onToggleSelect?: (id: number) => void
   onSelectAll?: (ids: number[]) => void
+  /** MOB-R81 C6 — checkboxes show only in Select mode; outside it a row tap edits. */
+  selecting?: boolean
 }) {
   const [q, setQ] = useState("")
   const [category, setCategory] = useState("")
@@ -123,6 +151,27 @@ function TransactionsTable({
     [rows, transactionType]
   )
 
+  // MOB-R81 C6 — rows by day, newest first (the search is newest first). A day's total uses the rule the
+  // "Spent" chip above uses (income rows listed, never counted). Paging appends 20 rows at a time, so the
+  // LAST day loaded may continue on the next page: its total is not shown until that day is complete.
+  const dayGroups = useMemo(() => {
+    const groups: Array<{ date: string; rows: Transaction[]; spent: number; counted: number }> = []
+    for (const row of rows) {
+      let g = groups[groups.length - 1]
+      if (!g || g.date !== row.date) {
+        g = { date: row.date, rows: [], spent: 0, counted: 0 }
+        groups.push(g)
+      }
+      g.rows.push(row)
+      if (!row.category_counts_as_income) {
+        g.spent += parseFloat(row.amount_kd) || 0
+        g.counted += 1
+      }
+    }
+    return groups
+  }, [rows])
+  const today = localToday()
+
   const clearFilters = () => {
     setQ("")
     setCategory("")
@@ -184,6 +233,7 @@ function TransactionsTable({
       </div>
 
       <FilterBar
+        variant="plain"
         searchValue={q}
         onSearchChange={setQ}
         searchPlaceholder={searchPlaceholder}
@@ -269,7 +319,7 @@ function TransactionsTable({
         </div>
       ) : null}
 
-      <div className="space-y-3 p-4 md:hidden">
+      <div className="px-4 pb-2 md:hidden">
         {isLoading && allRows.length === 0 ? (
           Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="skeleton h-32 rounded-[var(--radius-inner)]" />
@@ -293,73 +343,78 @@ function TransactionsTable({
             compact
           />
         ) : (
-          rows.map((row) => {
-            const txnId = getTxnId(row)
-            const rowIsIncome = row.category_counts_as_income
-            const amountMeta = formatAmount(row.amount_kd, rowIsIncome ? "income" : "expense")
-            const isSelected = selectedIds?.has(txnId) ?? false
-            const primaryLabel = row.merchant || row.name
-            const secondaryLabel = row.merchant ? row.name : null
-
+          dayGroups.map((group, gi) => {
+            const complete = gi < dayGroups.length - 1 || !hasMore
+            const label = dayLabel(group.date, today)
             return (
-              <article
-                key={row.id}
-                className={cn("inner-card space-y-3", isSelected && "border-primary/25 bg-primary/5")}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold" title={primaryLabel}>
-                      {primaryLabel}
-                    </div>
-                    {secondaryLabel ? (
-                      <p className="mt-1 truncate text-xs text-muted-foreground" title={secondaryLabel}>
-                        {secondaryLabel}
-                      </p>
-                    ) : null}
-                    {/* MOB-1 Part 5 — the category used to render TWICE in this one card: as text
-                        here and as a CategoryBadge below. The separator bullet was emitted
-                        unconditionally, so an uncategorised row showed a bullet with nothing after
-                        it. Both removed: the badge is the richer rendering and is what the desktop
-                        table uses, and with the duplicate gone the bullet has nothing to separate. */}
-                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <span>{formatDisplayDate(row.date)}</span>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    {onToggleSelect ? (
-                      // MOB-R47 E2 — 44px hit area on touch (padding + matching negative margin), so
-                      // the checkbox's visible size and the row's layout stay as they were.
-                      <label className="inline-flex pointer-coarse:-m-3.5 pointer-coarse:p-3.5">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => onToggleSelect(txnId)}
-                          className="h-4 w-4 rounded border-border accent-primary"
-                          aria-label={`Select transaction ${row.name}`}
-                        />
-                      </label>
-                    ) : null}
-                    <div className={cn("text-base font-semibold", amountMeta.className)}>
-                      {amountMeta.text}
-                    </div>
-                  </div>
+              <section key={group.date} aria-label={label} data-testid="activity-day">
+                <div className="flex items-baseline justify-between gap-3 border-b border-border/60 pb-1.5 pt-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                  <h3>{label}</h3>
+                  {transactionType !== "income" && group.counted > 0 && complete ? (
+                    <span className="font-mono normal-case tracking-normal tabular-nums" data-testid="activity-day-total">
+                      {formatKD(group.spent)}
+                    </span>
+                  ) : null}
                 </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <CategoryBadge category={row.category} countsAsIncome={row.category_counts_as_income} />
-                </div>
-
-                <div className="flex items-center justify-end gap-2 border-t border-border/50 pt-3">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit(txnId)}
-                    className="h-8 rounded-full px-3 text-xs"
-                  >
-                    Edit
-                  </Button>
-                </div>
-              </article>
+                <ul className="divide-y divide-border/50">
+                  {group.rows.map((row) => {
+                    const txnId = getTxnId(row)
+                    const income = row.category_counts_as_income
+                    const isSelected = selectedIds?.has(txnId) ?? false
+                    // MOB-R82 C3 — the place over its category; with no place, the category over the entry's name
+                    // (else nothing); with neither, the name alone.
+                    const line1 = row.merchant || row.category || row.name
+                    const line2 = row.merchant ? row.category : row.category ? row.name || null : null
+                    const amount = rowAmount(row)
+                    const rowBody = (
+                      <>
+                        <span
+                          aria-hidden="true"
+                          data-testid="activity-row-square"
+                          className={cn(
+                            "flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sm font-bold",
+                            income ? "bg-muted text-muted-foreground" : cn("text-white", nameColour(line1)),
+                          )}
+                        >
+                          {line1.trim().charAt(0).toUpperCase()}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-semibold">{line1}</span>
+                          {line2 ? <span className="block truncate text-xs text-muted-foreground">{line2}</span> : null}
+                        </span>
+                        <span className={cn("shrink-0 font-mono text-sm font-semibold tabular-nums", amount.className)}>
+                          {amount.text}
+                        </span>
+                      </>
+                    )
+                    return (
+                      <li key={row.id}>
+                        {selecting && onToggleSelect ? (
+                          <label className={cn("flex min-h-12 cursor-pointer items-center gap-3 py-1.5", isSelected && "bg-primary/5")}>
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => onToggleSelect(txnId)}
+                              className="h-4 w-4 shrink-0 rounded border-border accent-primary"
+                              aria-label={`Select transaction ${row.name}`}
+                            />
+                            {rowBody}
+                          </label>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => onEdit(txnId)}
+                            aria-label={`Edit ${line1}, ${amount.text}`}
+                            className="flex min-h-12 w-full items-center gap-3 py-1.5 text-start"
+                          >
+                            {rowBody}
+                          </button>
+                        )}
+                      </li>
+                    )
+                  })}
+                </ul>
+              </section>
             )
           })
         )}
@@ -370,7 +425,7 @@ function TransactionsTable({
           <thead className="table-head">
             <tr>
               <th className="w-10 px-3 py-2.5 text-left">
-                {onSelectAll && (
+                {selecting && onSelectAll && (
                   <label className="inline-flex pointer-coarse:-m-3.5 pointer-coarse:p-3.5">
                     <input
                       type="checkbox"
@@ -435,8 +490,7 @@ function TransactionsTable({
             ) : (
               rows.map((row) => {
                 const txnId = getTxnId(row)
-                const rowIsIncome = row.category_counts_as_income
-                const amountMeta = formatAmount(row.amount_kd, rowIsIncome ? "income" : "expense")
+                const amountMeta = rowAmount(row)
 
                 const isSelected = selectedIds?.has(txnId) ?? false
 
@@ -449,7 +503,7 @@ function TransactionsTable({
                     )}
                   >
                       <td className="w-10 px-3 py-3">
-                        {onToggleSelect && (
+                        {selecting && onToggleSelect && (
                           <label className="inline-flex pointer-coarse:-m-3.5 pointer-coarse:p-3.5">
                             <input
                               type="checkbox"
@@ -475,7 +529,7 @@ function TransactionsTable({
                       <td className="max-w-[240px] truncate px-4 py-3" title={row.name}>
                         {row.name}
                       </td>
-                      <td className={cn("whitespace-nowrap px-4 py-3 text-right font-medium", amountMeta.className)}>
+                      <td className={cn("whitespace-nowrap px-4 py-3 text-right font-mono font-medium tabular-nums", amountMeta.className)}>
                         {amountMeta.text}
                       </td>
                       <td className="px-4 py-3 text-right">

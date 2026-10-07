@@ -302,6 +302,7 @@ export default function InsightsPage() {
   return (
     <div className="space-y-8">
       <PageHeader
+        variant="lookA"
         badge="Insights"
         badgeDotClassName="bg-primary"
         badgeSuffix={monthLabel}

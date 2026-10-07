@@ -34,6 +34,7 @@ import { Input } from "@/components/ui/input"
 import type { LogSuggestionItem, LogSuggestionPlace } from "@/types/api"
 import { GENERIC_SAVINGS_CATEGORY } from "@/lib/suggested-names"
 import { AMOUNT_REFUSED_MESSAGE, formatAmountReadout, parseAmountText } from "@/lib/amount-text"
+import { preferredColourIndex, TILE_COLOURS } from "@/lib/tile-colours"
 import { searchableCategoryNames, usualCategoryNames } from "@/lib/log-categories"
 import { useFinePointer } from "@/lib/use-pointer"
 import { useVisualViewportVars } from "@/lib/useVisualViewport"
@@ -96,16 +97,10 @@ const chip =
 // E2 — the colour square behind a tile's initial: one of the existing chart tokens, picked by the
 // place's name so a place keeps its colour. Brass (chart-2) and ink (chart-1) are left out: brass
 // is rationed, and ink is the selected-tile border. The initial is decorative (the name is beside it).
-export const TILE_COLOURS = ["bg-chart-3", "bg-chart-4", "bg-chart-5", "bg-chart-6", "bg-chart-7"]
+export { TILE_COLOURS }
 /** MOB-R74 H (E7b) — Popular in Kuwait tiles are not her places, so they get a neutral square from the
  * existing muted tokens; colour means her places (operator selection H1, option (b)). */
 export const POPULAR_TILE_SQUARE = "bg-muted text-muted-foreground"
-
-function preferredColourIndex(name: string): number {
-  let h = 0
-  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0
-  return h % TILE_COLOURS.length
-}
 
 /**
  * MOB-R74 H (E7b) — colours for her visible place tiles (at most four), never two the same. Each place
@@ -763,7 +758,8 @@ function LogPanel() {
             {/* MOB-R78 D3 — the Add button at the top: brass tint, ink text, at least 44px; today's label (MOB-R79 C1). */}
             {cq && !exactCategory ? (
               <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-accent bg-accent/15 px-3 py-2 text-start font-semibold text-foreground" onClick={() => void addCategory()}>
-                <span className="min-w-0 truncate">{`+ New category “${categoryQuery.trim()}”`}</span>
+                <Plus aria-hidden="true" className="h-4 w-4 shrink-0" />
+                <span className="min-w-0 truncate">{`Add “${categoryQuery.trim()}” as a new category`}</span>
               </button>
             ) : null}
             <div className="flex flex-wrap gap-2">

@@ -52,13 +52,13 @@ beforeEach(() => {
 describe("TransactionsPage — income view note (MOB-R36 #22)", () => {
   it("shows the note on the income view, and not on the expense view", () => {
     const { unmount } = renderAt("/activity?type=income")
-    expect(screen.getByText("Track, import, and manage income")).toBeInTheDocument()
+    expect(screen.getByRole("heading", { level: 1, name: "Track, import, and manage income" })).toBeInTheDocument()
     expect(screen.getByText(NOTE)).toBeInTheDocument()
     unmount()
 
     // NEGATIVE — the expense view renders its own header and no note.
     renderAt("/activity?type=expense")
-    expect(screen.getByText("Track, import, and manage expenses")).toBeInTheDocument()
+    expect(screen.getByRole("heading", { level: 1, name: "Track, import, and manage expenses" })).toBeInTheDocument()
     expect(screen.queryByText(NOTE)).not.toBeInTheDocument()
   })
 })

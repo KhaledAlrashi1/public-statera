@@ -802,6 +802,7 @@ export default function DashboardPage() {
         overBy={monthOverBy}
         footers={heroFooters}
         analyticsUpdatedAt={analyticsUpdatedAt}
+        onOpenIncome={() => setIncomeDialogOpen(true)}
       />
 
       {showDashboardEmptyState ? (

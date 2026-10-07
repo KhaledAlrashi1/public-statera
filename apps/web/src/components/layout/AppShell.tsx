@@ -39,7 +39,7 @@ type NavItem = {
 
 const baseNavItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Home" },
-  { to: "/activity", icon: ArrowLeftRight, label: "Transactions" },
+  { to: "/activity", icon: ArrowLeftRight, label: "Activity" },
   { to: "/plan", icon: Wallet, label: "Plan" },
   { to: "/insights", icon: Sparkles, label: "Insights" },
 ]

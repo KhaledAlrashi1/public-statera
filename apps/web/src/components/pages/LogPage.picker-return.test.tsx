@@ -44,7 +44,7 @@ function renderLog() {
 const line = (name: string) => screen.getByRole("button", { name: new RegExp(`^${name}`) })
 const enter = (el: HTMLElement) => fireEvent.keyDown(el, { key: "Enter", code: "Enter" })
 const placeAdd = (text: string) => screen.queryByRole("button", { name: `Add “${text}” as a new place` })
-const categoryAdd = (text: string) => screen.queryByRole("button", { name: `+ New category “${text}”` })
+const categoryAdd = (text: string) => screen.queryByRole("button", { name: `Add “${text}” as a new category` })
 
 const openPlace = async () => {
   fireEvent.click(await screen.findByRole("button", { name: /^Place/ }))
@@ -158,8 +158,8 @@ describe("/log category picker (MOB-R80 B)", () => {
     const field = await openCategory()
     fireEvent.change(field, { target: { value: "Co" } })
     const buttons = within(screen.getByRole("group", { name: "Category" })).getAllByRole("button").map((b) => b.textContent)
-    expect(buttons).toContain("+ New category “Co”")
-    expect(buttons.indexOf("+ New category “Co”")).toBeLessThan(buttons.indexOf("Coffee"))
+    expect(buttons).toContain("Add “Co” as a new category")
+    expect(buttons.indexOf("Add “Co” as a new category")).toBeLessThan(buttons.indexOf("Coffee"))
     enter(field)
     expect(line("Category")).toHaveTextContent("Coffee")
     expect(mocks.categoriesCreate).not.toHaveBeenCalled()

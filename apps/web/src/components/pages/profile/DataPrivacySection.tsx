@@ -59,7 +59,7 @@ export default function DataPrivacySection() {
       </p>
 
       {/* Download your data (standalone right-to-access) */}
-      <div className="mt-4 surface-row-card flex flex-col items-start gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-4 flex flex-col items-start gap-3 border-t border-border/50 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-medium">Download your data</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
@@ -80,7 +80,7 @@ export default function DataPrivacySection() {
       </div>
 
       {/* In-app legal links */}
-      <div className="mt-3 surface-row-card flex flex-col items-start gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col items-start gap-3 border-t border-border/50 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-medium">Policies</p>
           <p className="mt-0.5 text-xs text-muted-foreground">Our privacy and terms.</p>
@@ -98,7 +98,7 @@ export default function DataPrivacySection() {
       </div>
 
       {/* Danger zone */}
-      <div className="mt-5 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+      <div className="mt-2 border-t border-destructive/30 pt-4">
         <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-semibold text-destructive">Delete account</p>

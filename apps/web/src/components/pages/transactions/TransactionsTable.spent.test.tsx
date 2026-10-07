@@ -44,7 +44,7 @@ describe("Activity total: Spent, expenses only (MOB-R76 E)", () => {
 
   it("the Income view shows no total", async () => {
     renderTable("income")
-    await screen.findAllByText("+100.000")
+    await screen.findAllByText("+KD 100.000")
     expect(screen.queryByText(/Spent:|Total:/)).toBeNull()
   })
 
@@ -57,7 +57,7 @@ describe("Activity total: Spent, expenses only (MOB-R76 E)", () => {
     expect(totalBox()).not.toBeNull()
     unmount()
     renderTable("income")
-    await screen.findAllByText("+100.000")
+    await screen.findAllByText("+KD 100.000")
     expect(totalBox()).toBeNull()
   })
 })

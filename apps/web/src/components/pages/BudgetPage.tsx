@@ -2,7 +2,7 @@ import { Target } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { analyticsApi } from "@/lib/api"
-import { cn, fmt3, formatDeltaLabel, today, toYearMonth, isEditableMonth, labelForYM, prevMonth as prevMonthUtil } from "@/lib/utils"
+import { cn, fmt3, formatDeltaLabel, formatKD, today, toYearMonth, isEditableMonth, labelForYM, prevMonth as prevMonthUtil } from "@/lib/utils"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Select,
@@ -408,6 +408,7 @@ export default function BudgetPage() {
   return (
     <div className={cn("space-y-8", animDone && "animations-complete")}>
       <PageHeader
+        variant="lookA"
         badge="Plan"
         badgeDotClassName="bg-primary"
         badgeSuffix={labelForYM(selectedMonth)}
@@ -601,7 +602,7 @@ export default function BudgetPage() {
                         {copyPreview.items.map((item) => (
                           <tr key={item.category} className="border-b border-border/50 last:border-0">
                             <td className="px-4 py-3">{item.category}</td>
-                            <td className="px-4 py-3 text-right tabular-nums">KD {fmt3(item.amount_kd)}</td>
+                            <td className="px-4 py-3 text-right tabular-nums">{formatKD(item.amount_kd)}</td>
                           </tr>
                         ))}
                       </tbody>

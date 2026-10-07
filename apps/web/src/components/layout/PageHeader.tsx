@@ -1,5 +1,7 @@
 import type { ReactNode } from "react"
 
+import { Eyebrow } from "@/components/ui/eyebrow"
+import { Highlight } from "@/components/ui/highlight"
 import { cn } from "@/lib/utils"
 
 type PageHeaderProps = {
@@ -11,6 +13,22 @@ type PageHeaderProps = {
   actions?: ReactNode
   className?: string
   actionsClassName?: string
+  /** MOB-R82 C8 — Home's heading style (DashboardPage.tsx:671-685): an eyebrow over an uppercase heading
+   * whose last word sits on the highlight. Opt-in, so other readers keep today's header. */
+  variant?: "default" | "lookA"
+}
+
+// The title's last word on the highlight, as Home sets its second line; a non-string title is left as it is.
+function lookATitle(title: ReactNode): ReactNode {
+  if (typeof title !== "string") return title
+  const i = title.trimEnd().lastIndexOf(" ")
+  if (i < 0) return <Highlight>{title}</Highlight>
+  return (
+    <>
+      {title.slice(0, i + 1)}
+      <Highlight>{title.slice(i + 1)}</Highlight>
+    </>
+  )
 }
 
 export default function PageHeader({
@@ -21,7 +39,28 @@ export default function PageHeader({
   actions,
   className,
   actionsClassName,
+  variant = "default",
 }: PageHeaderProps) {
+  if (variant === "lookA") {
+    return (
+      <header className={cn("float-in flex flex-wrap items-start justify-between gap-4", className)}>
+        <div className="min-w-0 flex-1 space-y-2">
+          <Eyebrow>
+            {badge}
+            {badgeSuffix ? <> · {badgeSuffix}</> : null}
+          </Eyebrow>
+          {title ? (
+            <h1 className="text-[2rem] font-bold uppercase leading-[1.08] tracking-tight sm:text-[2.5rem]">{lookATitle(title)}</h1>
+          ) : null}
+        </div>
+        {actions ? (
+          <div className={cn("flex w-full flex-wrap items-center gap-3 sm:w-auto sm:shrink-0 sm:justify-end", actionsClassName)}>
+            {actions}
+          </div>
+        ) : null}
+      </header>
+    )
+  }
   return (
     <header className={cn("float-in flex flex-wrap items-start justify-between gap-4", className)}>
       <div className="min-w-0 flex-1">

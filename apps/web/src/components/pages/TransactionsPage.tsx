@@ -117,6 +117,8 @@ export default function TransactionsPage() {
   const [editTxnId, setEditTxnId] = useState<number | null>(null)
   const [editOpen, setEditOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  // MOB-R81 C6 — checkboxes and the bulk bar only in Select mode; leaving it clears the selection.
+  const [selecting, setSelecting] = useState(false)
   const [bulkEditOpen, setBulkEditOpen] = useState(false)
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [bulkDeleting, setBulkDeleting] = useState(false)
@@ -255,7 +257,8 @@ export default function TransactionsPage() {
     >
       {/* Page Header */}
       <PageHeader
-        badge="Transactions"
+        variant="lookA"
+        badge="Activity"
         badgeDotClassName="bg-primary"
         title={activityTitle}
         actions={(
@@ -341,6 +344,17 @@ export default function TransactionsPage() {
           <Settings2 className="h-4 w-4" />
           Categories & Merchants
         </Button>
+        <Button
+          variant="ghost"
+          aria-pressed={selecting}
+          onClick={() => {
+            if (selecting) setSelectedIds(new Set())
+            setSelecting((v) => !v)
+          }}
+          className="h-9 rounded-full px-3 text-sm font-semibold"
+        >
+          {selecting ? "Done" : "Select"}
+        </Button>
       </div>
 
       {demoWorkspaceActive ? (
@@ -355,7 +369,7 @@ export default function TransactionsPage() {
       ) : null}
 
       {/* Bulk action bar */}
-      {selectedIds.size > 0 && (
+      {selecting && selectedIds.size > 0 && (
         <div className="sticky top-[calc(var(--safe-top)+var(--header-h,64px))] z-20 flex flex-wrap items-center gap-2 rounded-xl border border-primary/30 bg-card px-4 py-2.5 shadow-md sm:gap-3">
           <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
             {selectedIds.size} selected
@@ -405,6 +419,7 @@ export default function TransactionsPage() {
         selectedIds={selectedIds}
         onToggleSelect={handleToggleSelect}
         onSelectAll={handleSelectAll}
+        selecting={selecting}
       />
 
       {/* Dialogs */}

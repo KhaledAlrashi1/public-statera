@@ -90,7 +90,7 @@ export function RecurringCommitmentsCard({
                     {GROUP_LABELS[groupName]}
                   </p>
                   {grouped[groupName].map((row) => (
-                    <div key={`${groupName}:${row.name}`} className="inner-card">
+                    <div key={`${groupName}:${row.name}`} className="py-3 border-b border-border/50 last:border-b-0">
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium">{row.name}</p>

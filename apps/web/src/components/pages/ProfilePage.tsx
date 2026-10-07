@@ -84,7 +84,7 @@ function Toggle({
     >
       <span
         className={[
-          "pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform duration-200",
+          "pointer-events-none block h-4 w-4 rounded-full bg-card shadow-lg ring-1 ring-border/60 transition-transform duration-200",
           checked ? "translate-x-4" : "translate-x-0",
         ].join(" ")}
       />
@@ -326,6 +326,7 @@ export default function ProfilePage() {
   return (
     <div className="space-y-8">
       <PageHeader
+        variant="lookA"
         badge="Profile"
         badgeDotClassName="bg-primary"
         title="Account, security, and preferences"
@@ -494,7 +495,7 @@ export default function ProfilePage() {
               </Button>
             </div>
           ) : null}
-          <div className="surface-row-card flex flex-col items-start gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col items-start gap-3 py-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/50 last:border-b-0">
             <Label htmlFor="pref-dark-mode" className="cursor-pointer select-none">
               Dark mode
             </Label>
@@ -504,7 +505,7 @@ export default function ProfilePage() {
               onChange={setDarkMode}
             />
           </div>
-          <div className="surface-row-card flex flex-col items-start gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col items-start gap-3 py-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/50 last:border-b-0">
             <div>
               <Label htmlFor="pref-email-notif" className="cursor-pointer select-none">
                 Email notifications
@@ -523,7 +524,7 @@ export default function ProfilePage() {
               }}
             />
           </div>
-          <div className="surface-row-card px-4 py-3">
+          <div className="py-3 border-b border-border/50 last:border-b-0">
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div className="max-w-xl">

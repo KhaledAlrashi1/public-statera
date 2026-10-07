@@ -142,7 +142,8 @@ describe("TransactionsTable", () => {
     renderTable()
 
     expect(await screen.findAllByText("Salary")).toHaveLength(2)
-    expect(screen.getAllByRole("button", { name: "Edit" })).toHaveLength(2)
+    for (const b of screen.getAllByRole("button", { name: /^Edit/ })) expect(b.tagName).toBe("BUTTON") // MOB-R82 C2: the row (phone) and the Edit button (desktop), each a button, so Enter opens the edit too
+    expect(screen.getAllByRole("button", { name: /^Edit/ })).toHaveLength(2)
     expect(screen.queryByRole("button", { name: /delete/i })).not.toBeInTheDocument()
   })
 
