@@ -12058,3 +12058,74 @@ D4. Phone checks (the operator; app fully closed first). Now, on 57695da: Activi
   Plan's big figures on one line; the category Add label; /log at rest and after a save does not
   scroll. After B: a swipe starting on a place result or an item chip picks nothing.
 After this block: strict 84, loose 86 (body lines 1513 and 6934).
+
+MOB-R85 — MOB-R84 accepted; one clock, Kuwait, ships after a boundary rerun; Home desktop header.
+
+CADENCE. Persist alone (blank 12061, payload 12062–12131). Then C (Tier 1, push) and D (Tier 2,
+stash only), independent. One report. After this block: strict 85, loose 87. Gates RM-1 … RM-28.
+
+═══ A — MOB-R84 ACCEPTED ═══
+A1 Persistence: payload sha256 26a90530…9794 equals the issued value; 11996–12060; strict 84.
+A2 B: FE 500/118 as predicted; 57695da..5e3cb67 fast-forward; run 37618313288, four jobs on
+   ubuntu-24.04; both probes on 5e3cb67 at 12:08:03–05Z; 0 unpushed by both routes. The comment
+   at :726 is the granted :758 moved by the merge. :780 left alone is right (R78 A5).
+A3 Channel record corrected beside it: the browser clock is DashboardPage.tsx:55–56, not :47.
+A4 Finding: C3's boundary table was run on main, not on the build. The build's proof is owed (C2).
+A5 Finding: currentMonthKeyUtc now returns Kuwait's month; the name is kept under "no renames".
+   A name that says UTC is a trap. Queued; C3 below adds one comment at its definition.
+
+═══ B — OPERATOR SELECTIONS ═══
+Questions and options are the CHANNEL'S; the answers are the OPERATOR'S, verbatim.
+B1 "Which clock decides "today" and "this month" in Statera?" Options: "Kuwait time everywhere
+   (Recommended)" / "Phone's time on screens". Answer: "I am certain most of the users are going
+   to be in Kuwait. But can we be more inclusive? The second suggestion seems to be better for
+   people outside Kuwait. How about we do the first option first for fast deployment but circle
+   to be more inclusive in a much later stage."
+   Ruled: Kuwait now. Users abroad come back as a later item, gated by RM-28.
+B2 "Home's header on desktop: which look?" -> "A: one line, picker on row (Recommended)".
+B3 "Have you run the phone checks on the live build (5e3cb67)?" -> "Not yet. List all the checks
+   for me. Make sure they're clear." The channel re-lists them to the operator; none reported.
+
+═══ RM-28 — ONE CLOCK ═══
+"Today" and "this month" are Kuwait's (UTC+3) on the server, in jobs and on screens. No code
+reads the device's timezone for a date or a month until a ruling. Users abroad: later, by ruling.
+
+═══ C — MONTH START SHIPS (TIER 1) ═══
+C1 The stash is identified by content: patch sha256 da52886c…9846, 12 files, 139+/21−. Any
+   mismatch STOPS C.
+C2 Before the commit, rerun C3's boundary table ON THE BUILD, every row, with the clock at 21:30Z
+   Sat 31 Oct 2026 (00:30 Sun 1 Nov Kuwait) and the control at 12:00Z Thu 15 Oct. Chromium in
+   Asia/Kuwait, then again in America/Los_Angeles (14:30 Sat 31 Oct there).
+   Precondition, on main first: LA Home shows "October 2026" at 21:30Z. Without it, no LA result.
+   Expected on the build, both timezones: every reader 2026-11 at 21:30Z, including
+   currentMonthKeyUtc, the /summary default and the demo month; Home "November 2026 · day 1
+   of 30"; /log and Activity "Today" = Sun 1 Nov. Control: every reader 2026-10.
+   Any other value STOPS C.
+C3 Grant: one comment line at the currentMonthKeyUtc definition (dashboard-snapshot-lib.ts:363)
+   saying it returns Kuwait's month, citing MOB-R85 RM-28. No other comment.
+C4 RM-21: quote the demo-data-lib.ts diff. Only the month computation may change. Any change to
+   an insert, update or delete STOPS C. No migration, so no backup run is needed.
+C5 Counts, predicted before the edit, from the runners: APIH 908/80/82 (+3, +1 file); APII
+   978/10/82; FE 503/119 (+3, +1 file); tsc 0 both.
+C6 Push under the standing rules. Then save the patch, check its sha256, drop the stash.
+   Not edited, stays queued: product-events-lib.ts:93, activation-reporting-lib.ts:104, the
+   unrouted Expenses and Income pages.
+
+═══ D — HOME HEADER ON DESKTOP (TIER 2): CENSUS AND STASH, NOTHING COMMITTED ═══
+Operator report (screenshot, 1280 wide, 57695da): the Home title sits on two lines, sized for a
+phone; the month picker floats beside it. The other pages do not show this.
+D1 Census at 5e3cb67, file:line with classes: the eyebrow, the title and its highlight, the
+   summary line, the month picker, "Updated …". What makes the title two lines. Every responsive
+   prefix used. Every reader of this markup by grep (R76 A3; PageHeader's look A came from
+   DashboardPage.tsx:671–685). Every test that pins it (R83 A3). Every title string it can show.
+D2 Build option A as a stash. At the desktop breakpoint the project already uses (name it, with
+   file:line): the title on one line, highlight kept on the second phrase; the month picker on
+   the title row, centred on it; "Updated …" right on the eyebrow row. Below it, nothing changes.
+D3 Proof: Playwright WebKit and Chromium at 375x667, 390x844, 430x932, 1024 and 1280, main
+   against build. Phone sizes: pixel diff 0. At 1024 and 1280: the longest title string on one
+   line, no overlap with the picker (boxes reported). Screenshots to the operator.
+D4 Report the stash (content hash, --stat), predicted and measured counts, and any existing-test
+   break line by line. Nothing is granted here.
+
+═══ QUEUE ═══
+Rename currentMonthKeyUtc (A5). Payday months (next ruling). Desktop 1280: FAB covers two amounts.
