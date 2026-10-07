@@ -60,12 +60,15 @@ describe("/log place search (MOB-R70 E5)", () => {
     const result = within(screen.getByRole("group", { name: "Place" })).getByRole("button", { name: /^Talabat/ })
     fireEvent.pointerDown(result, { button: 0 })
     fireEvent.blur(field)
+    expect(screen.getByRole("button", { name: /^Place/ })).not.toHaveTextContent("Talabat") // MOB-R83 B2: pointerdown alone picks nothing
+    fireEvent.click(result) // the pick arrives on click
     expect(screen.getByRole("button", { name: /^Place/ })).toHaveTextContent("Talabat")
     expect(screen.getByRole("button", { name: /^Category/ })).toHaveTextContent("Food Delivery")
-    // The pick moved the layout: Amount (missing) is open now. The click that ends the same tap lands
-    // on whatever is under the finger — here a keypad key — and must not count as a key press.
-    fireEvent.click(screen.getByRole("button", { name: "1" }))
+    // MOB-R84 B2 — the pick IS the click, so nothing follows it: Amount (missing) is open and still empty;
+    // then a deliberate tap on "1" types 1.
     expect(screen.getByRole("button", { name: /^Amount/ })).toHaveTextContent("How much")
+    fireEvent.click(screen.getByRole("button", { name: "1" }))
+    expect(screen.getByRole("button", { name: /^Amount/ })).toHaveTextContent("KD 1")
   })
 
   it("a new place opens Category with its question", async () => {

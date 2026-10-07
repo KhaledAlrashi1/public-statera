@@ -43,6 +43,8 @@ describe("/log pointer-down pick (MOB-R71 C3)", () => {
     fireEvent.change(screen.getByRole("textbox", { name: "Search places" }), { target: { value: "Bread Co" } })
     // Press 1: the pick, on pointer down. Its own click never arrives.
     fireEvent.pointerDown(screen.getByRole("button", { name: "Add “Bread Co” as a new place" }), { button: 0 })
+    expect(screen.getByRole("button", { name: /^Place/ })).not.toHaveTextContent("Bread Co") // MOB-R83 B2: pointerdown alone picks nothing
+    fireEvent.click(screen.getByRole("button", { name: "Add “Bread Co” as a new place" })) // the pick arrives on click
     expect(screen.getByRole("button", { name: /^Place/ })).toHaveTextContent("Bread Co")
     // Press 2, straight after: a category chip in the picker the pick opened.
     const chip = await within(screen.getByRole("group", { name: "Category" })).findByRole("button", { name: "Bakery" })

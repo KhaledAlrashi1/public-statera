@@ -120,43 +120,11 @@ export function assignTileColours(names: readonly string[]): Map<string, string>
   return out
 }
 
-/**
- * E5, as amended by MOB-R71 C3 — a choice that applies on POINTER DOWN, so the keyboard closing (which
- * moves the layout) cannot swallow the tap. Only the click from THAT SAME PRESS is then ignored,
- * wherever it lands, so it cannot hit whatever the moved layout now puts under the finger. The next
- * pointerdown (or a pointercancel) clears the flag: no timer, so a tap right after a pick always
- * counts. Keyboard activation (Enter, Space) arrives as a plain click and applies there.
- */
 function usePointerDownPick() {
-  const ignoreClick = useRef(false)
-  useEffect(() => {
-    // Capture phase on the document runs before any target's own handler: a new press clears the
-    // flag first, and a pick made by that press sets it again.
-    const clear = () => {
-      ignoreClick.current = false
-    }
-    const onClick = (ev: Event) => {
-      if (!ignoreClick.current) return
-      ignoreClick.current = false
-      ev.stopPropagation()
-      ev.preventDefault()
-    }
-    document.addEventListener("pointerdown", clear, true)
-    document.addEventListener("pointercancel", clear, true)
-    document.addEventListener("click", onClick, true)
-    return () => {
-      document.removeEventListener("pointerdown", clear, true)
-      document.removeEventListener("pointercancel", clear, true)
-      document.removeEventListener("click", onClick, true)
-    }
-  }, [])
   return (apply: () => void) => ({
-    onPointerDown: (e: { button: number; preventDefault: () => void }) => {
-      if (e.button > 0) return // only the primary button (touch, pen and left click are 0)
-      e.preventDefault()
-      apply()
-      ignoreClick.current = true
-    },
+    // MOB-R82 B2 — picks on click; pointerdown and mousedown only keep the focus (WebKit sends a mousedown).
+    onPointerDown: (e: { button: number; preventDefault: () => void }) => { if (e.button > 0) return; e.preventDefault() },
+    onMouseDown: (e: { button: number; preventDefault: () => void }) => { if (e.button > 0) return; e.preventDefault() },
     onClick: apply,
   })
 }
@@ -755,7 +723,7 @@ function LogPanel() {
                 setOpen((o) => (o === "category" ? null : o))
               }}
             />
-            {/* MOB-R78 D3 — the Add button at the top: brass tint, ink text, at least 44px; today's label (MOB-R79 C1). */}
+            {/* MOB-R78 D3 — the Add button at the top: brass tint, ink text, at least 44px; the label as ruled in MOB-R82 C10 and MOB-R83 C4. */}
             {cq && !exactCategory ? (
               <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-accent bg-accent/15 px-3 py-2 text-start font-semibold text-foreground" onClick={() => void addCategory()}>
                 <Plus aria-hidden="true" className="h-4 w-4 shrink-0" />
@@ -763,11 +731,10 @@ function LogPanel() {
               </button>
             ) : null}
             <div className="flex flex-wrap gap-2">
-              {/* MOB-R81 B4 — a chip picks on click; its pointerdown and mousedown only prevent the default, so
-                  the search input keeps focus (WebKit still sends a mousedown after a prevented pointerdown) and a
-                  press that turns into a scroll picks nothing. */}
+              {/* MOB-R81 B4 / MOB-R82 B2 — a chip picks on click through pickProps; pointerdown and mousedown keep
+                  the search input's focus, and a press that turns into a scroll picks nothing. */}
               {categoryResults.map((n, i) => (
-                <button key={n} type="button" className={cn(chip, cq && i === 0 && "ring-2 ring-primary/60")} data-highlighted={cq && i === 0 ? "true" : undefined} aria-pressed={category === n} onPointerDown={(e) => { if (e.button > 0) return; e.preventDefault() }} onMouseDown={(e) => { if (e.button > 0) return; e.preventDefault() }} onClick={() => pickCategory(n)}>
+                <button key={n} type="button" className={cn(chip, cq && i === 0 && "ring-2 ring-primary/60")} data-highlighted={cq && i === 0 ? "true" : undefined} aria-pressed={category === n} {...pickProps(() => pickCategory(n))}>
                   {n}
                 </button>
               ))}
