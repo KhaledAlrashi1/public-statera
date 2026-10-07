@@ -11720,3 +11720,118 @@ E4. Phone checks due after the deploy (the operator; Chrome and Safari; installe
   nothing typed closes the search; "Pizza" shows Add while "Pizza Hut" is listed; a new category
   added with Return; /log at rest does not scroll; /log scrolled shows nothing under the clock.
 After this block: strict 80, loose 82 (body lines 1513 and 6934).
+
+MOB-R81 — MOB-R80 accepted; chips, dark strip, bottom inset measured; look A built as a stash.
+Issued Wed 7 Oct 2026 by the review channel. Expected at lines 11724–11837, after a blank 11723.
+Tiers: all TIER 2 (frontend only). RM-21: nothing here adds a migration, writes, deletes or seeds.
+
+A. THE MOB-R80 REPORT IS ACCEPTED, WITH FINDINGS.
+A1. MOB-R79's read-back is closed: 105 lines (blank 11509, payload 11510–11613), cmp exit 0,
+  porcelain empty, payload sha256 equal to the issued a08b4963…ce31ba6.
+A2. Finding against CC: MOB-R80's own read-back is partial, the third short read-back in a row.
+  Given: range 11615–11722, cmp exit 0, commit ab5c564, payload sha256 equal to the issued
+  f886b11c…dbc7a7. Missing: header and last line verbatim, git show --stat, porcelain. CC pastes
+  them with this block's read-back. The hash match verifies the content; nothing is redone.
+A3. MOB-R80 E1: no file path was named, so CC wrote it from the pasted text. Its hash equals the
+  issued value, so it stands. For this block the operator names the downloaded file; CC cats it.
+A4. Accepted: B (d5c2a0d), C with no edit (MOB-R80 C5), D (c1cb565). The channel reads the counts
+  as FE 461/106 = 450/105 + B 11/1 (12 new cases, one deleted at receipt-place.test.tsx:54–66),
+  and APIH 905/80/81, APII 975/10/81 = base + D's 8 integration cases in one new file (MOB-R79
+  F2). CC confirms or corrects by pasting the scratch file's delta lines (MOB-R80 E2 asked for
+  key lines; none were quoted) and D1's git stash show --stat (described, not pasted).
+A5. Push accepted as far as stated: run 37580318648, four jobs on ubuntu-24.04, /healthz
+  06:17:16Z and /readyz 06:17:17Z on c1cb565. Not stated: fast-forward, 0 unpushed by both
+  routes. CC pastes them.
+A6. B accepted: 8 cases red on today's code; 4 green there, with six mutations each reddening one
+  case alone. The +6 shift (:709–801 now :715–807) is consistent with the edits named outside
+  the range, the Plus import (:28) and addCategory (:381–392); accepted as named.
+A7. Finding against CC: category chips now pick on pointer-down, a change beyond the ruled scope.
+  It should have been a STOP with its lines. It is shipped, so B1 measures it before any rule.
+A8. Labels, ruled by the channel without asking the operator: CC's reading is accepted. Place:
+  "Add “X” as a new place" with the + icon. Category: "+ New category “X”" unchanged, no icon.
+  The two wordings differ; C7 asks for one proposed wording. RM-26 keeps /log strings provisional.
+A9. C accepted as measured: the window is the only scroller; 390x844 and 430x932 fit with the
+  keypad closed at --safe-top 0 and 59; 375x667 and every keypad-open case scroll, with scrollTop
+  at the end equal to the overflow (the precondition proven, as MOB-R80 A8 asked). C7: no route
+  scrolls when its content fits; /insights ends 16px past the screen. CC's two instrument faults,
+  fixed and reported, are recorded.
+A10. Finding against the channel: MOB-R80 C2 measured neither dark mode (his screenshot was dark)
+  nor the bottom safe-area inset. elementFromPoint(20, 20) proves the strip is on top, not that
+  it paints over content. B2 and B3 close both.
+
+B. FOLLOW-UPS ON /LOG.
+B1. Chips, measure first (WebKit and Chromium, 390x844, touch on): quote the chip handler with
+  file:line. Report (a) whether pointerdown then pointercancel on a chip (what a scroll gesture
+  sends) picks; (b) whether Enter and Space on a focused chip pick exactly once; (c) whether a
+  plain tap picks exactly once; (d) whether the chip row scrolls sideways.
+B2. Strip, measure first, light and dark (prefers-color-scheme and data-theme both): the strip's
+  computed background-color with its alpha, and a Playwright screenshot pixel at (20, 20) with
+  /log scrolled to its end at --safe-top 59, compared with the strip's colour.
+B3. Bottom inset, measure first: every reader of env(safe-area-inset-bottom) or a variable fed by
+  it on /log's height chain (grep, file:line). Re-run MOB-R80 C2 at 390x844 and 430x932, keypad
+  closed, with that inset at 34px (overridden as for --safe-top): scrollHeight and clientHeight.
+  The channel's question "Which iPhone size do you check on?"; his selection "Standard 6.1"",
+  the 390x844 class, where MOB-R80 C2 found that /log fits; his screenshot says it scrolled.
+B4. Rules. B1 (a) picks, or (b) or (c) not exactly once: chips pick on click, and pointerdown
+  calls preventDefault so the input keeps focus and a tap with the keyboard up still picks. B2
+  alpha below 1, or a pixel not the strip's colour: the strip paints opaque in both themes. B3
+  overflow at a size that fits: /log fits at that inset (MOB-R80 C3 stands). Each fix comes with
+  new-file cases, red on today's code or under their own mutation. All pass: no edit for it.
+B5. Grant: the chip handler lines B1 quotes; the strip's lines in index.css and App.tsx; the /log
+  page's own files (MOB-R80 C6); every edit line in the scratch file first. A shared wrapper or
+  any other file: STOP B with its file:line.
+B6. Granted existing-test edit, comment only: receipt-place.test.tsx:1–3, to say closing the
+  keyboard drops the text only when nothing is typed. No count change.
+B7. Stash drops granted: MOB-R78 D and MOB-R79 F, each identified by content (git stash show
+  --stat, pasted), each saved first as a patch with its sha256 reported, then dropped.
+
+C. LOOK A ON THE OTHER PAGES, BUILT AS A STASH. NOTHING FROM C COMMITS UNDER THIS BLOCK.
+C1. Provenance: his words "All in one block once Home feels right" and "I think it'd be fine. No
+  need to render anything."; his selection "Inside the look A block, all pages (recommended)" for
+  Activity compact rows. The channel has not seen today's pages (MOB-R79 A4), so this block
+  builds and measures; MOB-R82 grants the commit from what CC reports.
+C2. Scope: every routed page in the shell except /log and Home, listed from the router with
+  file:line. Home is the reference: CC quotes where its look A tokens and font come from.
+C3. Census of today, before any edit, per page at 390x844: cards inside cards (file:line each);
+  every displayed amount, its formatter, and whether KD shows (file:line); colours or fonts not
+  from look A tokens (count per file); what Home does in dark mode.
+C4. Activity today, before any edit: what a row tap does; where checkboxes and the bulk bar show;
+  how income rows look; day grouping; rows per screen at 390x844; how paging splits a day; every
+  reader of the "Transactions" label (grep, file:line). The Home Income tile: what a tap does.
+C5. Spec: look A tokens and Space Grotesk as on Home; brass never as text in light mode; dark mode
+  as Home does it. Every amount shows KD through the formatter /log uses: display only, with no
+  money computation, wire shape or input change (RM-27 untouched). No card inside a card: the
+  inner one becomes a plain section.
+C6. Activity compact rows, one line per entry: colour square + initial, place (else category)
+  over category, amount with KD on the right. Day headers "Today", "Sun 4 Oct", with the day's
+  spent total by the rule the All view's "Spent" uses. Tap a row to edit, as today's edit does.
+  Checkboxes and the bulk bar only in a "Select" mode. Income rows "+KD x" in the success colour
+  with a neutral square. About 8 rows per screen at 390x844. A day split by the page boundary
+  never shows a partial total as the day's: CC proposes how and says which.
+C7. The channel's questions and his selections: "Rename the "Transactions" tab and page to
+  "Activity"?" -> "Activity (recommended)"; "What should tapping the Home Income tile do?" ->
+  "Edit monthly income (recommended)". Rename: every reader C4 finds that the operator sees
+  (tab bar, page title, links, aria labels) reads "Activity"; the route path stays. Income tile:
+  a tap opens the edit for the typed monthly figure Home shows, through the path that sets it
+  today. No such path, or a new write or route needed: STOP C with file:line (RM-21 (b)).
+C7a. Out of this block: the 1280 FAB overlap; one date formatter. CC proposes one wording for both
+  picker Add labels, no edit.
+C8. Build on a scratch branch. Measure every existing-test break (file:line, failing assertion).
+  New-file cases pin C5 and C6 (class census, KD in amounts, no card in a card, Select mode,
+  income row, the Activity label, the tile tap), each shown able to fail. Save before and
+  after screenshots per page at 390x844, light and dark, and give their folder.
+C9. Stash the result complete, identified by content (stat, patch sha256). Report per page: edit
+  lines, predicted and measured deltas, breaks to grant line by line, anything the spec missed.
+
+D. ORDER, PREDICTIONS, PUSH.
+D1. Order: persist this block (cat of the operator's file); the pastes A2, A4 and A5 ask for;
+  B7; B1–B3 measured; B fixes; B6; C. Each commit is green alone. A stop does not stop the rest.
+D2. Before the first edit, the predictions scratch file: a delta per item, each count naming its
+  runner command, B5's edit lines, C's predicted deltas. Report its sha256 and paste the key
+  lines (MOB-R60).
+D3. Push B under this block by the standing rules, with probe retries as in MOB-R75 E3. Paste
+  fast-forward and 0 unpushed by both routes. If B makes no edit, no push.
+D4. Phone checks (the operator; app fully closed first): MOB-R80 E4's list on c1cb565 now. After
+  a B push: a chip tap with the keyboard up picks; a sideways swipe on the chips picks nothing;
+  /log scrolled in dark mode shows nothing under the clock.
+After this block: strict 81, loose 83 (body lines 1513 and 6934).
