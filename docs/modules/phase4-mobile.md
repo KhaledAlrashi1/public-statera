@@ -12129,3 +12129,106 @@ D4 Report the stash (content hash, --stat), predicted and measured counts, and a
 
 ═══ QUEUE ═══
 Rename currentMonthKeyUtc (A5). Payday months (next ruling). Desktop 1280: FAB covers two amounts.
+
+MOB-R86 — MOB-R85 accepted; Home desktop header ships; /log readout ships; four censuses, no edit.
+
+CADENCE. Persist alone (blank 12132, payload 12133–12234). Then C and D ship together (Tier 2, one
+push). E, F and G are censuses: nothing edited, nothing stashed. One report. After this block:
+strict 86, loose 88. Gates RM-1 … RM-28.
+
+═══ A — MOB-R85 ACCEPTED ═══
+A1 Persistence: payload sha256 b9880d18…cf73 equals the issued value; 12062–12131; strict 85.
+A2 C: the boundary rerun on the build passed in both zones with the API at TZ=UTC, as production;
+   the LA precondition held on main; the control printed "2026-11" 0 times. Demo diff is the month
+   only. Counts as predicted: APIH 908/80/82, APII 978/10/82, FE 503/119, tsc 0. 74a452e: 12
+   files, 129+/20−, which is the stash less 10 comment lines and 1 deletion. Run 37625800982, four
+   jobs on ubuntu-24.04; both probes on 74a452e at 13:11:28–31Z (16:11 Kuwait, Wed 7 Oct 2026);
+   0 unpushed by both routes; patch saved, hash matched, stash dropped.
+A3 Finding, the channel's: R85 granted "one comment line" and "no other comment" without first
+   counting the comments the stash already carried (ten, "MOB-R84 C5 (scratch)" and a docstring
+   tweak). R78 A5 asks for that count before a grant. The ambiguity was the channel's.
+A4 Finding: CC asked the operator in-session, which MOB-R63 B forbids; it should have stopped the
+   item or followed the narrower reading. The operator answered; B5 ratifies. Second occurrence
+   (R82 A3 was the first).
+A5 The eslint-disable directive kept in the test is functional, not commentary. Accepted.
+A6 D: census and proof accepted. Noise floor 0; phone sizes 0 differing pixels in both engines;
+   the positive control fires; the longest title is one line at 1024 and 1280 with no overlap.
+
+═══ B — OPERATOR WORDS AND SELECTIONS ═══
+Questions and options are the CHANNEL'S unless marked CC'S; answers are the OPERATOR'S, verbatim.
+B1 Phone report on 5e3cb67, installed app (15:59 Kuwait): "Most of things look good!" … "I can
+   see that things show behind the time and battery at the top on both modes." … "The log screen
+   and the save one don't scroll. But the user can scroll and I don't think it's necessary." …
+   "I want though the app to factor different screen sizes of phones. If the phone is indeed small
+   then it's fine to scroll. Other than that, the user shouldn't scroll unnecessarily."
+B2 "why place is different category when adding a new categroy/place? I like the workflow of
+   category. Why don't we unify it?"
+B3 "I tap on one of the row to edit the transaction. I found that pop up window is outdated. The
+   user can scroll sides and up and down. And you will see that the boundaries of the transactions
+   name is touching the field. I see that a lot in the app." "Editing a transaction: which way?"
+   -> "A: open the Log screen (Recommended)". "Editing monthly income: which way?" -> "A: sheet
+   on the keyboard (Recommended)". On Plan: "Why the numbers have different sizes."
+B4 "I have found an outdate code/feature such as edit transaction. I wonder if you can find other
+   outdate stuff which we should fix."
+B5 CC'S question in-session on R85 C3; the operator chose "Granted line only (Recommended)".
+   Ratified.
+
+═══ C — HOME HEADER ON DESKTOP SHIPS (TIER 2) ═══
+C1 The stash is identified by content: 4551308f…87e5, 3 files, 73+/55−. A mismatch STOPS C.
+C2 Remove the two comments the build added (the block comment at the header, the header line of
+   home-freshness.tsx). No other edit.
+C3 Accepted: the space between the title spans (the heading reads "September is over income").
+C4 Accepted as is: with income not set, at 1024 and up the picker takes its own row (68px).
+C5 FE 503/119 (+0); tsc 0. Patch saved and its hash checked before the stash is dropped.
+
+═══ D — /log TOP: CENSUS AND A PHONE READOUT (TIER 2, CORE PATH) ═══
+The browsers cannot reproduce the installed app's insets, so the phone measures (instrument rule).
+D1 Census at 74a452e, file:line with classes: every height, min-height, max-height and overflow on
+   /log's tree up to html (vh, dvh, svh, %); every reader of env(safe-area-inset-*) and --safe-top
+   on /log; where the opaque strip renders and whether /log is inside it; the viewport meta, the
+   apple-mobile-web-app-status-bar-style meta and the manifest display value.
+D2 Build and ship a readout at /log?layout=1, the way /log?stats=1 works (name its file:line). It
+   shows: innerHeight, visualViewport.height, documentElement.clientHeight, scrollingElement
+   .scrollHeight, the four safe-area insets measured by a probe element, display-mode standalone
+   yes/no, and the strip's top, height, position and background (or "none"). Nothing else on /log
+   changes, and without the parameter it renders nothing. New tests: present with the parameter,
+   absent without. Predicted counts in the scratch file.
+D3 The fix is ruled from his readout screenshots. The rule to carry, his: a page scrolls only when
+   its content is taller than the screen; whenever content can pass under the clock, the strip is
+   opaque.
+
+═══ E — EDIT ON THE LOG SCREEN: CENSUS AND PROPOSAL (TIER 1, RM-21 b) ═══
+Editing overwrites her row, so this round edits nothing.
+E1 Every opener of the edit dialog, by grep, file:line (Activity row tap and every other).
+E2 The request the dialog sends: endpoint, method, every body field and its source. The Log
+   screen's save, the same. The update handler: what it writes when a field is absent, null or
+   empty (file:line).
+E3 A mapping table: each dialog field to a Log row (Amount, Category, Place, What for, Date, and
+   Notes if any). Any field with no row is named.
+E4 Split and Delete today: paths, guards (R77 D2), confirmations. Tests that pin the dialog.
+E5 Proposal: how the Log screen opens in edit mode; what Save, Split and Delete look like; the
+   rule that a field the screen does not show is never changed by the save; edit sites, measured
+   breaks, predicted counts. STOP there.
+
+═══ F — PLACE PICKER LIKE CATEGORY: CENSUS AND PROPOSAL (RM-26) ═══
+F1 Both pickers step by step, file:line each: the taps from opening to picked, the keyboard, where
+   Add sits, what Return and ✓ do, what is kept and when it saves. Tests that pin each step.
+F2 Proposal: every difference, with the edit that makes place behave like category; measured
+   breaks; predicted counts. STOP there.
+
+═══ G — OUTDATED SURFACES: CENSUS (THE OPERATOR'S B4) ═══
+G1 Every routed screen and every dialog, sheet, drawer or alert reachable from one (grep the
+   router and every use of those components), each with file:line and:
+   (a) look: look A (tokens, PageHeader, look A rows) or older;
+   (b) WebKit 390x844, opened as a user would: horizontal overflow (scrollWidth vs clientWidth);
+       primary button visible without scrolling; a focused field's ring clipped by an ancestor
+       (ring box against the clip box);
+   (c) amount entry through amount-text.ts or not (RM-27); the date format shown.
+G2 Place these already known items in the table: Plan figures sized one by one (R82 step-down);
+   Plan's picker "2026-10" where Home says "October 2026"; "Budget vs your income for This Month";
+   income dialog's Save under the keyboard bar (phone); edit dialog sideways scroll, clipped ring.
+G3 Unrouted and dead screens are listed apart, from the queue; not audited.
+G4 Deliver the table in the report and one 390x844 screenshot per item. Nothing edited.
+
+═══ QUEUE ═══
+Home desktop, income not set (C4). Phone keyboard checks for every dialog (G1 b) stay phone-only.
