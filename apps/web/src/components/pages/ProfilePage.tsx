@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { LogOut } from "lucide-react"
 import { authApi } from "@/lib/api"
 import {
@@ -590,6 +590,12 @@ export default function ProfilePage() {
       {/* ── 6. Data & privacy ───────────────────────────────────────────── */}
       <DataPrivacySection />
 
+      {/* MOB-R87 C1 — the /log layout readout, reachable from inside the installed app. Removed when the /log top fix ships. */}
+      <p className="text-center text-xs text-muted-foreground">
+        <Link to="/log?layout=1" className="underline-offset-4 hover:underline">
+          Layout check
+        </Link>
+      </p>
     </div>
   )
 }
