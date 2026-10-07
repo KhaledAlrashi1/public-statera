@@ -63,7 +63,7 @@ export default function DeleteAccountConfirmPage() {
   if (terminalError) {
     const isExpired = terminalError === "expired"
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-6">
+      <div className="flex min-h-screen items-center justify-center bg-background p-6 pt-[calc(1.5rem+var(--safe-top))]">
         <div className="w-full max-w-sm space-y-6 text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
             <AlertTriangle className="h-7 w-7 text-destructive" />
@@ -90,7 +90,7 @@ export default function DeleteAccountConfirmPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-6">
+    <div className="flex min-h-screen items-center justify-center bg-background p-6 pt-[calc(1.5rem+var(--safe-top))]">
       <div className="w-full max-w-sm space-y-6">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
           <AlertTriangle className="h-7 w-7 text-destructive" />

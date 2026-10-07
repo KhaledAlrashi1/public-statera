@@ -23,7 +23,7 @@ type LegalPageLayoutProps = {
 
 export default function LegalPageLayout({ title, lastUpdated, children }: LegalPageLayoutProps) {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background">
+    <div className="relative min-h-screen overflow-hidden bg-background pt-[var(--safe-top)]">
       <div className="pointer-events-none absolute inset-0 app-surface" />
 
       <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-10">

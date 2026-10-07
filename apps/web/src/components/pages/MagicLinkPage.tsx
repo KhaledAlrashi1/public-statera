@@ -110,7 +110,7 @@ export default function MagicLinkPage() {
   }, [])
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-6">
+    <div className="flex min-h-screen items-center justify-center bg-background p-6 pt-[calc(1.5rem+var(--safe-top))]">
       <div className="w-full max-w-sm space-y-6">
         <div className="flex items-center gap-3">
           <div className="icon-shell h-11 w-11 border-primary/20 bg-primary/10 text-primary">

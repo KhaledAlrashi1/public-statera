@@ -7,7 +7,7 @@ export default function LoginPage() {
   const accountDeleted = searchParams.get("deleted") === "1"
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background">
+    <div className="relative min-h-screen overflow-hidden bg-background pt-[var(--safe-top)]">
       <div className="pointer-events-none absolute inset-0 app-surface" />
 
       <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 lg:flex-row lg:items-stretch">

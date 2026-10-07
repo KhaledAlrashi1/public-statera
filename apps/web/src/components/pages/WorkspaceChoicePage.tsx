@@ -57,7 +57,7 @@ export default function WorkspaceChoicePage() {
     <div className="relative min-h-screen overflow-hidden bg-background">
       <div className="pointer-events-none absolute inset-0 app-surface" />
 
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl items-center px-4 py-10">
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl items-center px-4 py-10 pt-[calc(2.5rem+var(--safe-top))]">
         <div className="grid w-full gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <section className="section-panel float-in stagger-1 p-8">
             <div className="flex items-center gap-3">
