@@ -11,6 +11,7 @@ import { DemoWorkspaceBanner } from "@/components/ui/demo-workspace-banner"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Eyebrow } from "@/components/ui/eyebrow"
 import { Highlight } from "@/components/ui/highlight"
+import { HomeFreshness } from "./dashboard/home-freshness"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/toaster"
 import type { Transaction } from "@/types/api"
@@ -673,18 +674,22 @@ export default function DashboardPage() {
           an eyebrow, a two-line uppercase heading (second line in Highlight) and one sub line.
           Strings are CHANNEL-DRAFTED and provisional (D2). Income not set: no heading and no sub
           line; the income prompt below stays as it is. */}
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0 space-y-2">
-          <Eyebrow>{eyebrowText}</Eyebrow>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-x-6 lg:gap-y-2">
+        <div className="min-w-0 space-y-2 lg:contents lg:space-y-0">
+          <Eyebrow className="lg:col-start-1 lg:row-start-1">{eyebrowText}</Eyebrow>
+          <HomeFreshness
+            analyticsUpdatedAt={analyticsUpdatedAt}
+            className="hidden lg:col-start-2 lg:row-start-1 lg:flex lg:justify-self-end"
+          />
           {summaryShown && heading ? (
-            <h2 className="text-[2rem] font-bold uppercase leading-[1.08] tracking-tight sm:text-[2.5rem]">
-              <span className="block">{heading.line1}</span>
-              <span className="block">
+            <h2 className="text-[2rem] font-bold uppercase leading-[1.08] tracking-tight sm:text-[2.5rem] lg:col-start-1 lg:row-start-2">
+              <span className="block lg:inline">{heading.line1}</span>{" "}
+              <span className="block lg:inline">
                 <Highlight>{heading.line2}</Highlight>
               </span>
             </h2>
           ) : null}
-          {summaryShown && subLine ? <p className="text-sm text-muted-foreground">{subLine}</p> : null}
+          {summaryShown && subLine ? <p className="text-sm text-muted-foreground lg:col-start-1 lg:row-start-3">{subLine}</p> : null}
         </div>
         <Select
           value={selectedMonth}
@@ -692,7 +697,7 @@ export default function DashboardPage() {
           disabled={isLoading || monthOptions.length === 0}
         >
           <SelectTrigger
-            className="h-10 w-[180px] shrink-0 rounded-full px-4 text-sm shadow-sm"
+            className="h-10 w-[180px] shrink-0 rounded-full px-4 text-sm shadow-sm lg:col-start-2 lg:row-start-2 lg:justify-self-end"
             aria-label="Select month to view"
           >
             <SelectValue placeholder="No months" />

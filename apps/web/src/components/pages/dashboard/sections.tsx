@@ -42,6 +42,7 @@ import { COUNT_UP_STAGGER_MS, useCountUp } from "@/lib/use-count-up"
 import { CHART_STROKES, getChartColors } from "@/lib/chart-tokens"
 import { Button } from "@/components/ui/button"
 import { Highlight } from "@/components/ui/highlight"
+import { HomeFreshness } from "./home-freshness"
 import { KpiTile } from "@/components/ui/kpi-tile"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -737,38 +738,6 @@ export function DashboardHero({
   // MOB-R81 C7 — a tap on the Income tile opens the edit for the typed monthly income (IncomeQuickDialog).
   onOpenIncome?: () => void
 }) {
-  const freshness = useMemo(() => {
-    if (!analyticsUpdatedAt) return null
-    const updatedAt = new Date(analyticsUpdatedAt)
-    if (Number.isNaN(updatedAt.getTime())) return null
-
-    const diffMinutes = Math.max(0, Math.floor((Date.now() - updatedAt.getTime()) / 60_000))
-    const stale = diffMinutes > 30
-
-    if (diffMinutes < 1) {
-      return { label: "Updated just now", stale }
-    }
-    if (diffMinutes < 60) {
-      return {
-        label: `Updated ${diffMinutes} minute${diffMinutes === 1 ? "" : "s"} ago`,
-        stale,
-      }
-    }
-
-    const diffHours = Math.floor(diffMinutes / 60)
-    if (diffHours < 24) {
-      return {
-        label: `Updated ${diffHours} hour${diffHours === 1 ? "" : "s"} ago`,
-        stale,
-      }
-    }
-
-    const diffDays = Math.floor(diffHours / 24)
-    return {
-      label: `Updated ${diffDays} day${diffDays === 1 ? "" : "s"} ago`,
-      stale,
-    }
-  }, [analyticsUpdatedAt])
   const incomeSet = monthIncome !== null
   const over = overBy !== null && overBy > 0
 
@@ -790,21 +759,7 @@ export function DashboardHero({
 
   return (
     <section className="space-y-3" aria-label="Monthly overview">
-      {freshness ? (
-        <div className="flex justify-end text-xs">
-          {freshness.stale ? (
-            <div className="inline-flex items-start gap-2 rounded-full border border-warning/25 bg-warning/10 px-3 py-1 text-warning">
-              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
-              <div>
-                <div className="font-semibold">Data may be out of date</div>
-                <div className="text-[11px] text-warning/80">{freshness.label}</div>
-              </div>
-            </div>
-          ) : (
-            <span className="text-muted-foreground">{freshness.label}</span>
-          )}
-        </div>
-      ) : null}
+      <HomeFreshness analyticsUpdatedAt={analyticsUpdatedAt} className="lg:hidden" />
 
       {isLoading ? (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
