@@ -22,7 +22,7 @@
 // selection) calls the existing DELETE only with the id this page's own most recent create
 // returned. After a save or an undo every query is invalidated (MOB-R55 G3).
 // Test stats are local only: sessionStorage, shown at /log?stats=1, never sent anywhere.
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react"
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react"
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { CalendarDays, Check, Delete, Plus, X } from "lucide-react"
@@ -217,6 +217,11 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
   const queryClient = useQueryClient()
   const toast = useToast()
   const editing = editId !== null
+  // MOB-R88 F2 — /log sits outside AppShell, whose scroll reset (AppShell.tsx:133) never runs here: entering /log
+  // (new or edit) starts at the top and left edge, before the first paint.
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
 
   const [today] = useState(() => kuwaitNow())
   const todayIso = localIso(today)
