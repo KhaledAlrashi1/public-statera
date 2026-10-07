@@ -42,6 +42,7 @@ import { searchableCategoryNames, usualCategoryNames } from "@/lib/log-categorie
 import { useFinePointer } from "@/lib/use-pointer"
 import { useVisualViewportVars } from "@/lib/useVisualViewport"
 import { LogLayoutReadout } from "./LogLayoutReadout"
+import { useLayoutCheck } from "@/lib/layout-check"
 import {
   claimFirstSaveOfDay,
   firstMissing,
@@ -143,6 +144,7 @@ function tileAmount(p: LogSuggestionPlace): string | null {
 
 export default function LogPage() {
   const [params] = useSearchParams()
+  const layoutCheck = useLayoutCheck()
   if (params.get("stats") === "1") {
     return <pre className="mx-auto max-w-[28rem] whitespace-pre-wrap p-4 text-xs">{JSON.stringify(readStats(), null, 2)}</pre>
   }
@@ -152,7 +154,7 @@ export default function LogPage() {
   return (
     <>
       <LogPanel key={editId ?? "new"} editId={editId} />
-      {params.get("layout") === "1" ? <LogLayoutReadout /> : null}
+      {params.get("layout") === "1" || layoutCheck ? <LogLayoutReadout /> : null}
     </>
   )
 }
