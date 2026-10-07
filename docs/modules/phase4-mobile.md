@@ -11992,3 +11992,69 @@ D4. Phone checks after the deploy (the operator; app fully closed first): Activi
   Plan's big figures on one line; a swipe starting on a place result or an item chip picks
   nothing; the category Add label.
 After this block: strict 83, loose 85 (body lines 1513 and 6934).
+
+MOB-R84 — MOB-R83 accepted; look A live; B's last break granted; month start census, no edit.
+Issued Wed 7 Oct 2026 by the review channel. Expected at lines 11996–12060, after a blank 11995.
+Tiers: B is TIER 2 (frontend only). C is a TIER 1 census; nothing from it commits.
+RM-21: nothing here adds a migration, writes, deletes or seeds rows.
+
+A. THE MOB-R83 REPORT IS ACCEPTED, WITH FINDINGS.
+A1. MOB-R83 persisted at 11930–11994 after a blank 11929: commit 4fe9852, 66 insertions, cmp
+  exit 0, porcelain 0, headers strict 83, loose 85. Payload sha256 ba549b88…32b2 equals the
+  issued value.
+A2. C accepted (57695da): FE 492/117 = 466/107 + C 26/10, as predicted; tsc 0 bytes. C2 as
+  quoted: TransactionsPage.test.tsx:55 and :61 by the h1's whole name; income-flag :44–46 with
+  the new strings, :46 leaving out the day total; :54–56 without the ungranted import line. C3:
+  filter-bar variant (:37–39, :52, :70–75), opted into at TransactionsTable.tsx:236 and
+  budget/sections.tsx:519. C4: LogPage.tsx:761. C5's selector fault, caught and reported.
+A3. Push accepted: 4105be4..57695da fast-forward, run 37616139460, four jobs on ubuntu-24.04,
+  both probes on 57695da at 11:48:19–20Z, 0 unpushed by both routes. Baseline: FE 492/117.
+A4. B's stop is right. As reported: receipt-place.test.tsx:63 and receipt-press.test.tsx:46
+  rewritten; LogPage.tsx:128–134 and :136–157 deleted (ignoreClick read only inside its own
+  block); usePointerDownPick (:135) kept, read at :237. B build: 473 passed / 1 failed.
+A5. Finding against CC: MOB-R83 C6 granted drops after the commits, and the MOB-R82 B stash was
+  dropped although B did not commit. Its patch is saved (256413ba…) and its content is carried
+  in the MOB-R83 B stash (b86a97f2…f350), so nothing is lost. Recorded.
+A6. Finding against the channel: MOB-R83 B4 named no other break; the ignore-click machinery had
+  its own test (then receipt-place.test.tsx:68), and the channel never asked what pinned it.
+
+B. PICK ON CLICK SHIPS (THE MOB-R83 B STASH).
+B1. What the break guarded: with a pick on pointer-down, the list closed and the same tap's click
+  could land on the keypad and type into the amount; the ignore-click machinery swallowed it.
+  With the pick on click, the click is the pick and nothing follows it. The guard stays.
+B2. Granted existing-test edit, quoted before and after: receipt-place.test.tsx:65–68 (original
+  numbering). After a pick, the amount is still empty; then a deliberate tap on "1" types 1.
+B3. Restore the stash, identified by content (b86a97f2…f350), and merge it onto 57695da's
+  LogPage.tsx. A conflict whose sides are each a block's granted lines keeps both; any other
+  conflict: STOP B with its lines.
+B4. Granted comment edit: LogPage.tsx:758 cites the label as ruled in MOB-R82 C10 and MOB-R83
+  C4, in place of "today's label (MOB-R79 C1)".
+B5. Predicted: FE +8 / +1 file -> 500/118; B2 and B4 change no count. Any other break: STOP B.
+B6. Stash drop granted after B commits: the MOB-R83 B stash, its patch saved first with sha256.
+
+C. MONTH START: CENSUS AND A SCRATCH BUILD, NOTHING COMMITTED (WORK ORDER 3).
+C1. The three clocks known: Kuwait (analytics-helpers.ts:26), UTC (dashboard-snapshot-lib.ts:363),
+  the browser (DashboardPage.tsx:47). CC quotes each at today's sha first.
+C2. How a transaction's date is stored (column type, schema file:line), and every reader of a
+  month boundary, API and frontend, by grep (file:line): its clock, the screen or route showing
+  it, and whether payday or a stored setting changes it.
+C3. With the clock fixed at 21:30Z Sat 31 Oct 2026 (00:30 Kuwait, Sun 1 Nov), which month each
+  reader calls current, by its own output (route response or rendered text), naming the command.
+  A positive control: the same run at 12:00Z 15 Oct, where every reader agrees.
+C4. Payday: every reader of the payday setting (grep, file:line) and what a month means today
+  for a user with payday set and without.
+C5. Proposal: one clock, CC's recommendation with its reasons; the edit sites (file:line); every
+  reader affected; existing-test breaks, measured on a scratch branch; predicted counts per
+  runner. Keep the build as a stash identified by content. A migration or a write to user rows
+  in any part: say so; that part STOPs (RM-21).
+
+D. ORDER, PREDICTIONS, PUSH.
+D1. Order: persist this block; B1–B6; C. A stop does not stop the rest.
+D2. Before the first edit, the predictions scratch file (MOB-R60): its sha256 and key lines.
+D3. Push B under this block by the standing rules, with probe retries as in MOB-R75 E3; paste the
+  fast-forward and 0 unpushed by both routes.
+D4. Phone checks (the operator; app fully closed first). Now, on 57695da: Activity rows, day
+  totals, Select mode, a row tap opens the edit; the Home Income tile opens the income edit;
+  Plan's big figures on one line; the category Add label; /log at rest and after a save does not
+  scroll. After B: a swipe starting on a place result or an item chip picks nothing.
+After this block: strict 84, loose 86 (body lines 1513 and 6934).
