@@ -38,6 +38,7 @@ import { preferredColourIndex, TILE_COLOURS } from "@/lib/tile-colours"
 import { searchableCategoryNames, usualCategoryNames } from "@/lib/log-categories"
 import { useFinePointer } from "@/lib/use-pointer"
 import { useVisualViewportVars } from "@/lib/useVisualViewport"
+import { LogLayoutReadout } from "./LogLayoutReadout"
 import {
   claimFirstSaveOfDay,
   firstMissing,
@@ -140,7 +141,12 @@ export default function LogPage() {
   if (params.get("stats") === "1") {
     return <pre className="mx-auto max-w-[28rem] whitespace-pre-wrap p-4 text-xs">{JSON.stringify(readStats(), null, 2)}</pre>
   }
-  return <LogPanel />
+  return (
+    <>
+      <LogPanel />
+      {params.get("layout") === "1" ? <LogLayoutReadout /> : null}
+    </>
+  )
 }
 
 function Tag({ kind }: { kind: "required" | "next" | "optional" }) {
