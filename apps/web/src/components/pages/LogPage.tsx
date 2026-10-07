@@ -767,10 +767,11 @@ function LogPanel() {
               </button>
             ) : null}
             <div className="flex flex-wrap gap-2">
-              {/* MOB-R80 B2 — a chip picks on pointer down, so the keyboard closing (and the close above) cannot
-                  swallow the tap; keyboard activation still arrives as a click. */}
+              {/* MOB-R81 B4 — a chip picks on click; its pointerdown and mousedown only prevent the default, so
+                  the search input keeps focus (WebKit still sends a mousedown after a prevented pointerdown) and a
+                  press that turns into a scroll picks nothing. */}
               {categoryResults.map((n, i) => (
-                <button key={n} type="button" className={cn(chip, cq && i === 0 && "ring-2 ring-primary/60")} data-highlighted={cq && i === 0 ? "true" : undefined} aria-pressed={category === n} {...pickProps(() => pickCategory(n))}>
+                <button key={n} type="button" className={cn(chip, cq && i === 0 && "ring-2 ring-primary/60")} data-highlighted={cq && i === 0 ? "true" : undefined} aria-pressed={category === n} onPointerDown={(e) => { if (e.button > 0) return; e.preventDefault() }} onMouseDown={(e) => { if (e.button > 0) return; e.preventDefault() }} onClick={() => pickCategory(n)}>
                   {n}
                 </button>
               ))}
