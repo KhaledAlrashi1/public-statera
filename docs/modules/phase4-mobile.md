@@ -11835,3 +11835,94 @@ D4. Phone checks (the operator; app fully closed first): MOB-R80 E4's list on c1
   a B push: a chip tap with the keyboard up picks; a sideways swipe on the chips picks nothing;
   /log scrolled in dark mode shows nothing under the clock.
 After this block: strict 81, loose 83 (body lines 1513 and 6934).
+
+MOB-R82 — MOB-R81 accepted; his in-session choices ratified; pick on click everywhere; look A ships.
+Issued Wed 7 Oct 2026 by the review channel. Expected at lines 11839–11928, after a blank 11838.
+Tiers: all TIER 2 (frontend only). RM-21: nothing here adds a migration, writes, deletes or seeds.
+
+A. THE MOB-R81 REPORT IS ACCEPTED, WITH FINDINGS.
+A1. MOB-R81 persisted at 11724–11837 after a blank 11723: commit 485b614, 115 insertions, cmp
+  exit 0, porcelain 0. Its payload sha256 63115c29…c354 equals the value the channel issued to
+  the operator, so the bytes are checked; the hash travels beside the block, never inside it.
+A2. Closed: MOB-R80's header, last line and stat (ab5c564, 109 insertions); MOB-R81 A4's delta
+  lines and D1's stat (3 files, 94+/9−); A5's fast-forward and 0 unpushed; B7's two drops, each
+  saved as a patch first.
+A3. Finding against CC: it asked the operator two questions in-session (MOB-R63 B). Provenance:
+  his selections "Write it from the paste" and "Add mousedown, push"; his words to the channel
+  "CC asked two questions and I answered them myself. Jus letting you know." Both ratified.
+A4. STANDING (persistence): when no file path is named, CC writes the block from the pasted text
+  without asking; the payload sha256 against the issued value is the check (MOB-R78 A2).
+A5. The chip fix (5d57f59) is accepted as built: pick on click, preventDefault on pointerdown and
+  on mousedown. Under MOB-R81 B4's mechanism alone, WebKit's compatibility mousedown moved focus
+  and a tap with the keyboard up lost its pick. Edit lines :770–772 and :774, comment included.
+A6. Misses, recorded and accepted with their causes: the B fix, FE +5 against +4 (the case that
+  pins the mousedown, added under his choice); C, FE +14 / +5 files against +10 / +2 (three
+  extra harnesses).
+A7. B2 and B3 accepted, no edit. The strip is opaque in light and dark (the .dark class,
+  useDarkMode.ts:5–11); its pixel matched in all 24 runs, with a control showing content when
+  hidden. A 34px bottom inset does not overflow /log. Margin at 390x844, both insets: 11px.
+A8. Push accepted: c1cb565..cb41b40 fast-forward, run 37584444940, four jobs on ubuntu-24.04,
+  both probes on cb41b40 at 07:02:13Z, 0 unpushed by both routes. Baseline: FE 466/107.
+A9. C accepted as a build: stash 17 files, 603+/111−, patch sha256 d9339682…466d; 480 cases in
+  112 files with 6 measured breaks; 14 new cases, all red on today's code, four mutations.
+
+B. /LOG: THE SAME PICK DEFECT ELSEWHERE; THE 11PX MARGIN.
+B1. Measured by CC: pickProps (LogPage.tsx:158–164) picks on pointer-down, so a press that turns
+  into a scroll picks. Chips no longer use it; place tiles and item chips still do.
+B2. Rule: pickProps picks on click, with preventDefault on pointerdown and mousedown, as A5.
+  Grant: LogPage.tsx:158–164, and the chip site :770–774 if it can use pickProps again. CC lists
+  every reader of pickProps (grep, file:line) in the scratch file first. A reader outside
+  LogPage.tsx: STOP B with its file:line.
+B3. New-file cases per reader, red on today's code: a scroll-press picks nothing; a tap picks once
+  with the keyboard up and down; Enter and Space pick once. A tile still fills only empty or
+  suggested fields.
+B4. Measure, WebKit and Chromium, 390x844, keypad closed, --safe-top 59, bottom inset 34: /log
+  fresh; after a save (the "Last:" line showing); with four tiles of long place names; with the
+  "Popular in Kuwait" tiles. Report scrollHeight and clientHeight for each.
+B5. Rule: these four states fit at 390x844 with both insets, with at least 16px to spare. A state
+  that does not: tighten /log's vertical gaps only (no font size, no tap target under 44px, no
+  field removed), in /log's own files, edit lines in the scratch file first. Report before and
+  after for all four states; 375x667 still scrolls with Save reachable (MOB-R80 C3).
+
+C. LOOK A SHIPS: THE C STASH COMMITS WITH THESE RULINGS.
+C1. Restore the C stash, identified by content (patch sha256 d9339682…466d); keep its patch.
+C2. Granted existing-test edits, each quoted before and after: AppShell.bar-log.test.tsx:97,
+  "Transactions" becomes "Activity"; TransactionsTable.income-flag.test.tsx:43 and :51 and
+  TransactionsTable.spent.test.tsx:47 and :60, "+100.000" becomes "+KD 100.000";
+  TransactionsTable.test.tsx:145, two Edit buttons become two rows that open the edit by click
+  and by Enter, as buttons. Any other break: STOP C with its edit lines.
+C3. Rulings on what the spec missed (ruled by the channel, without asking the operator): with no
+  place, line one is the category and line two the entry's name, else empty; day headers carry
+  the year only outside the current year; expenses "KD 7.000" with no sign, income "+KD x"; a
+  split day as CC proposed (the last loaded day shows no total until it is complete).
+C4. Row colours: one shared module for the square's colour and name hash, imported by /log and
+  Activity, no copy; /log's import line is granted. Two names may share a colour (five colours).
+C5. Plan: no amount wraps. Large amounts stay on one line at 375x667 up to six integer digits,
+  stepping their size down to fit. CC reports how.
+C6. Brass text: the Plan chart legend's text is ink or muted with a brass swatch; brass stays in
+  the chart marks. That meets both the chart exemption and look A.
+C7. Signed amounts on MonthDelta: "+KD 2.500", "−KD 2.500" and "KD 0.000". CC lists every reader
+  of what it changes (grep, file:line); a reader beyond MonthDeltaCard: STOP C with the list.
+C8. Page headers on Activity, Plan, Insights and Profile take Home's heading style; CC quotes
+  Home's heading file:line first.
+C9. The filter box (ui/filter-bar.tsx:67) becomes a plain section if its only readers are
+  Activity and Plan (grep, file:line); any other reader: STOP C with the list.
+C10. Add labels, ruled by the channel: "Add “X” as a new place" and "Add “X” as a new category",
+  both with the + icon and no literal "+". Grant: the category button's line CC names. Any
+  existing-test break: STOP C with its edit lines.
+C11. New-file cases for C3–C10, each red on today's code or under its own mutation. Before and
+  after screenshots at 390x844, light and dark, plus Plan at 375x667.
+C12. Queued, no edit: the unrendered SpendForecastWidget, WeeklyDigestSection and
+  RecurringBillsCard (dead code); demo dates after today; category-detail-modal.tsx:62.
+
+D. ORDER, PREDICTIONS, PUSH.
+D1. Order: persist this block (A4); B2–B3; B4–B5; C1–C12. Each commit is green alone. A stop does
+  not stop the rest.
+D2. Before the first edit, the predictions scratch file: a delta per item, each count naming its
+  runner command, every edit line. Report its sha256 and paste the key lines (MOB-R60).
+D3. Push under this block by the standing rules, with probe retries as in MOB-R75 E3; paste the
+  fast-forward and 0 unpushed by both routes.
+D4. Phone checks after the deploy (the operator; app fully closed first): Activity rows, day
+  totals, Select mode, a row tap opens the edit; the Home Income tile opens the income edit; a
+  scroll starting on a /log tile fills nothing; /log at rest and after a save does not scroll.
+After this block: strict 82, loose 84 (body lines 1513 and 6934).
