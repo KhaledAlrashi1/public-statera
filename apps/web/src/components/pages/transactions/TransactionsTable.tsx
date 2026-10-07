@@ -115,13 +115,8 @@ function TransactionsTable({
       rows.reduce(
         (sum, row) => {
           const amount = parseFloat(row.amount_kd) || 0
-          if (transactionType === "income") {
-            return row.category_counts_as_income ? sum + amount : sum
-          }
-          if (transactionType === "expense") {
-            return row.category_counts_as_income ? sum : sum + amount
-          }
-          return sum + amount
+          // I2 P4: saved income is listed, never counted.
+          return row.category_counts_as_income ? sum : sum + amount
         },
         0
       ),
@@ -244,9 +239,9 @@ function TransactionsTable({
           )}
         </div>
 
-        {(hasDateFilter || rows.length > 0) && total > 0 && (
+        {transactionType !== "income" && (hasDateFilter || rows.length > 0) && total > 0 && (
           <div className="rounded-md bg-primary/10 px-3 py-1.5 text-xs font-medium tabular-nums text-primary">
-            {hasMore ? "Loaded total" : "Total"}: {formatKD(filteredTotal)}
+            {hasMore ? "Spent (loaded)" : "Spent"}: {formatKD(filteredTotal)}
           </div>
         )}
       </div>

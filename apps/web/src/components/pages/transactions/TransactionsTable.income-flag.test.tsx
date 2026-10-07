@@ -32,14 +32,10 @@ function renderTable(transactionType: "all" | "expense" | "income") {
 }
 
 describe("Activity table: income comes from the API (MOB-R77 C6)", () => {
-  it("the Income view totals the rows the API says count as income", async () => {
-    renderTable("income")
-    expect(await screen.findByText(/Total:/)).toHaveTextContent("105.000") // Salary + Incomes, not Income: Gift
-  })
 
   it("the Expense view total leaves those rows out", async () => {
     renderTable("expense")
-    expect(await screen.findByText(/Total:/)).toHaveTextContent("7.000") // Income: Gift only
+    expect(await screen.findByText(/Spent:/)).toHaveTextContent("7.000") // Income: Gift only
   })
 
   it("each row's amount is styled by the field, in both layouts", async () => {
