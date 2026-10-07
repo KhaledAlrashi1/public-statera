@@ -271,6 +271,8 @@ function LogPanel() {
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [lastCreatedId, setLastCreatedId] = useState<number | null>(null)
+  // MOB-R78 F3 — what the last save was, for the "Last:" line (the amount as Save showed it; place, else category).
+  const [lastSaved, setLastSaved] = useState<{ amount: string; label: string } | null>(null)
   const [moment, setMoment] = useState<Moment | null>(null)
   const momentTimer = useRef<number | null>(null)
   // A text picker closed by its field's blur must not be re-opened by the same tap on its line.
@@ -455,7 +457,10 @@ function LogPanel() {
         force: forceNext ? "1" : undefined,
       })
       const id = res.data?.item?.id
-      if (typeof id === "number") setLastCreatedId(id)
+      if (typeof id === "number") {
+        setLastCreatedId(id)
+        setLastSaved({ amount: normalized, label: place || category })
+      }
       writeStats([
         ...readStats(),
         { ms: Date.now() - (stat.current.start ?? Date.now()), taps: stat.current.taps, suggestion: stat.current.suggestion },
@@ -493,6 +498,7 @@ function LogPanel() {
     setLastCreatedId(null)
     try {
       await transactionsApi.delete(id)
+      setLastSaved(null)
       void queryClient.invalidateQueries()
       resetEntry()
       setError(null)
@@ -900,12 +906,15 @@ function LogPanel() {
       </section>
 
       <div className="sticky bottom-0 -mx-4 mt-auto space-y-2 bg-background px-4 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2">
-        {/* MOB-R71 C1 — after the moment resets, a quiet "Undo last" stays until the next save or until
-            she leaves /log. It deletes only the row this page created last (MOB-R53), then goes. */}
-        {lastCreatedId !== null ? (
-          <div className="flex justify-end">
-            <Button type="button" variant="ghost" size="sm" className="min-h-11 text-muted-foreground" onClick={() => void undo()}>
-              Undo last
+        {/* MOB-R71 C1, MOB-R78 F3 — after a save, one line above Save says what Undo would remove:
+            "Last: KD 2.500 · Talabat" and a text button "Undo" (44px). It updates on the next save, goes after
+            an Undo, and goes when she leaves /log. Undo deletes only the row this page created last (MOB-R53). */}
+        {lastCreatedId !== null && lastSaved ? (
+          <div className="flex items-center justify-between gap-3">
+            <p className="min-w-0 truncate text-sm text-muted-foreground">{`Last: ${formatKD(lastSaved.amount)} · ${lastSaved.label}`}</p>
+            {/* MOB-R79 D2 — visible "Undo"; the accessible name "Undo last" contains it. */}
+            <Button type="button" variant="ghost" size="sm" aria-label="Undo last" className="min-h-11 min-w-11 shrink-0 font-semibold" onClick={() => void undo()}>
+              Undo
             </Button>
           </div>
         ) : null}
