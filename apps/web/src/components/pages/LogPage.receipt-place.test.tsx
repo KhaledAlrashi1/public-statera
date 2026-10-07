@@ -51,19 +51,6 @@ describe("/log place search (MOB-R70 E5)", () => {
   })
   afterEach(() => vi.useRealTimers())
 
-  it("closing the keyboard without choosing closes the search and drops the text", async () => {
-    renderLog()
-    const field = await openPlace()
-    field.focus()
-    fireEvent.change(field, { target: { value: "zz" } })
-    fireEvent.blur(field)
-    expect(screen.queryByRole("textbox", { name: "Search places" })).toBeNull()
-    expect(screen.getByRole("button", { name: /^Place/ })).toHaveTextContent("Shop or app")
-    // A tap on the line inside 400 ms of the blur is the same tap that closed it; a later one opens.
-    vi.setSystemTime(Date.now() + 1000)
-    const reopened = await openPlace()
-    expect(reopened).toHaveValue("")
-  })
 
   it("a result picked on pointer down applies even though the field's blur and a stray click follow", async () => {
     renderLog()

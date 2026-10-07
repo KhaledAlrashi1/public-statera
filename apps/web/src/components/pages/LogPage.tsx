@@ -25,7 +25,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react"
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { CalendarDays, Check, Delete, X } from "lucide-react"
+import { CalendarDays, Check, Delete, Plus, X } from "lucide-react"
 import { ApiError, categoriesApi, transactionsApi } from "@/lib/api"
 import { cn, formatDisplayDate, formatKD } from "@/lib/utils"
 import { normalizeAmount, pressDecimal, pressDelete, pressDigit } from "@/lib/log-amount"
@@ -376,6 +376,18 @@ function LogPanel() {
     setCategoryHers(true)
     setCategoryQuery("")
     setOpen(amountOk ? null : "amount")
+  }
+
+  // MOB-R78 D — the Add button and Return both add the typed category (one path).
+  const addCategory = async () => {
+    const name = categoryQuery.trim()
+    try {
+      await categoriesApi.create(name)
+      void queryClient.invalidateQueries({ queryKey: ["categories"] })
+      pickCategory(name)
+    } catch {
+      setError("Couldn't save. Check your connection and try again.")
+    }
   }
 
   // An item chip is a suggestion (MOB-R73 E2): it fills What for and Amount only where she has not.
@@ -731,32 +743,37 @@ function LogPanel() {
               autoFocus={autoFocusField}
               value={categoryQuery}
               onChange={(e) => setCategoryQuery(e.target.value)}
+              enterKeyHint="done"
+              onKeyDown={(e) => {
+                // MOB-R78 D4 — Return picks the first entry listed, else adds the typed text. Never saves.
+                if (e.key !== "Enter") return
+                e.preventDefault()
+                if (!cq) return
+                if (categoryResults.length > 0) pickCategory(categoryResults[0])
+                else if (!exactCategory) void addCategory()
+              }}
+              onBlur={() => {
+                // MOB-R80 B2 — closing the keyboard with nothing typed closes the search (as MOB-R70 E5 for Place);
+                // with text typed it stays open with the text and its Add button (MOB-R78 D5). Nothing is added.
+                if (cq) return
+                blurClosed.current = { line: "category", at: Date.now() }
+                setOpen((o) => (o === "category" ? null : o))
+              }}
             />
+            {/* MOB-R78 D3 — the Add button at the top: brass tint, ink text, at least 44px; today's label (MOB-R79 C1). */}
+            {cq && !exactCategory ? (
+              <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-accent bg-accent/15 px-3 py-2 text-start font-semibold text-foreground" onClick={() => void addCategory()}>
+                <span className="min-w-0 truncate">{`+ New category “${categoryQuery.trim()}”`}</span>
+              </button>
+            ) : null}
             <div className="flex flex-wrap gap-2">
-              {categoryResults.map((n) => (
-                <button key={n} type="button" className={chip} aria-pressed={category === n} onClick={() => pickCategory(n)}>
+              {/* MOB-R80 B2 — a chip picks on pointer down, so the keyboard closing (and the close above) cannot
+                  swallow the tap; keyboard activation still arrives as a click. */}
+              {categoryResults.map((n, i) => (
+                <button key={n} type="button" className={cn(chip, cq && i === 0 && "ring-2 ring-primary/60")} data-highlighted={cq && i === 0 ? "true" : undefined} aria-pressed={category === n} {...pickProps(() => pickCategory(n))}>
                   {n}
                 </button>
               ))}
-              {cq && !exactCategory ? (
-                <button
-                  type="button"
-                  className={chip}
-                  aria-pressed={false}
-                  onClick={async () => {
-                    const name = categoryQuery.trim()
-                    try {
-                      await categoriesApi.create(name)
-                      void queryClient.invalidateQueries({ queryKey: ["categories"] })
-                      pickCategory(name)
-                    } catch {
-                      setError("Couldn't save. Check your connection and try again.")
-                    }
-                  }}
-                >
-                  {`+ New category “${categoryQuery.trim()}”`}
-                </button>
-              ) : null}
             </div>
           </EntryLine>
 
@@ -775,35 +792,46 @@ function LogPanel() {
               autoFocus={autoFocusField}
               value={placeQuery}
               onChange={(e) => setPlaceQuery(e.target.value)}
+              enterKeyHint="done"
+              onKeyDown={(e) => {
+                // MOB-R78 D4 — Return picks the first place listed, else adds the typed text. Never saves.
+                if (e.key !== "Enter") return
+                e.preventDefault()
+                if (!pq) return
+                if (placeResults.length > 0) applyPlace(placeResults[0], true)
+                else applyPlace({ name: placeQuery.trim(), category: null, items: [] }, false)
+              }}
               onBlur={() => {
-                // E5 — closing the keyboard without choosing closes the search and drops the text
-                // (the channel's choice, per B1). A pick on pointer down has already moved on.
+                // MOB-R70 E5 (from the operator's MOB-R70 B1) and MOB-R80 B2 (his MOB-R80 B1 choice): closing the
+                // keyboard with nothing typed closes the search; with text typed it stays open with the text and its
+                // Add button. A pick on pointer down has already moved on. Nothing is added on blur.
+                if (pq) return
                 blurClosed.current = { line: "place", at: Date.now() }
                 setPlaceQuery("")
                 setOpen((o) => (o === "place" ? null : o))
               }}
             />
             <div className="max-h-64 space-y-1 overflow-y-auto">
-              {placeResults.map((p) => (
+              {/* MOB-R80 B3 — Add shows whenever the typed text has no exact match (exactCategory's comparison); matches
+                  stay listed under it. MOB-R78 D3 look; today's label (MOB-R79 C1). */}
+              {pq && !places.some((p) => p.name.toLowerCase() === pq) ? (
+                <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-accent bg-accent/15 px-3 py-2 text-start font-semibold text-foreground" {...pickProps(() => applyPlace({ name: placeQuery.trim(), category: null, items: [] }, false))}>
+                  <Plus aria-hidden="true" className="h-4 w-4 shrink-0" />
+                  <span className="min-w-0 truncate">{`Add “${placeQuery.trim()}” as a new place`}</span>
+                </button>
+              ) : null}
+              {placeResults.map((p, i) => (
                 <button
                   key={p.name}
                   type="button"
-                  className="block min-h-11 w-full rounded-lg px-3 py-2 text-start hover:bg-muted"
+                  className={cn("block min-h-11 w-full rounded-lg px-3 py-2 text-start hover:bg-muted", pq && i === 0 && "ring-2 ring-primary/60")}
+                  data-highlighted={pq && i === 0 ? "true" : undefined}
                   {...pickProps(() => applyPlace(p, true))}
                 >
                   <span className="block truncate font-medium">{p.name}</span>
                   {p.category ? <span className="block truncate text-xs text-muted-foreground">{p.category}</span> : null}
                 </button>
               ))}
-              {pq && placeResults.length === 0 ? (
-                <button
-                  type="button"
-                  className="block min-h-11 w-full rounded-lg px-3 py-2 text-start font-medium hover:bg-muted"
-                  {...pickProps(() => applyPlace({ name: placeQuery.trim(), category: null, items: [] }, false))}
-                >
-                  {`Add “${placeQuery.trim()}” as a new place`}
-                </button>
-              ) : null}
             </div>
           </EntryLine>
 
