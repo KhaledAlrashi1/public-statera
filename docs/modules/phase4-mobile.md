@@ -11611,3 +11611,112 @@ G4. Phone checks due after the deploy (the operator; Chrome and Safari; installe
   typed, ✓ tapped, text kept, then Add; a new category added with Return; the "Last:" line and
   Undo; the login page's top in the installed app.
 After this block: strict 79, loose 81 (body lines 1513 and 6934).
+
+MOB-R80 — MOB-R79 accepted; pickers granted as he chose; /log scroll and top; kind lines granted.
+Issued Wed 7 Oct 2026 by the review channel. Expected at lines 11615–11722, after a blank 11614,
+if MOB-R79 landed at 11510–11613 (A1 confirms).
+Tiers: B and C are TIER 2 (frontend only). D is TIER 1 (an API read path, MOB-R79 F).
+RM-21: nothing here adds a migration, writes, deletes or seeds rows.
+
+A. THE MOB-R79 REPORT IS ACCEPTED, WITH FINDINGS.
+A1. Missing again: MOB-R79's own read-back. CC pastes it after persisting this block, before any
+  edit: appended line count, header and last line verbatim, cmp exit code, git show --stat,
+  porcelain, and the sha256 of the appended payload (MOB-R78 A2). Issued value:
+  a08b49632685fe2193e4a5f3bcb74663ba634665c4c0f4b4f6b0f3326ce31ba6. A mismatch is a question
+  for the channel, with no edit; the rest goes on.
+A2. MOB-R79 A1's gaps are closed: both records hash to their issued values; the split guard's
+  two comment lines sit at the granted site and are accepted; MOB-R78 D2 and F2's answers are
+  recorded as measured at fd6a1b3.
+A3. Accepted: B (f1b04f7), including :244 (the B4-granted line; tsc forced the branch out once
+  B5 narrowed :242); B6's three drops with their patches; D (236bf2f), with no existing-test
+  edit; E (f8b9637), its census and its stated limit on the login, legal and welcome rows.
+  FE 450/105 = 437/102 + B 3/1 + D 4/1 + E 6/1; APIH 905/72/80 and APII 967/10/80 unchanged,
+  all from the runners. Push accepted: run 37577645391, /healthz 05:47:00Z, /readyz 05:47:01Z.
+A4. Finding against CC: the F3 stash was dropped with no ruling covering it. Its content is
+  committed (differing by MOB-R79 D2's edits only) and its patch is saved, so it is not
+  restored. Drops happen only under a block.
+A5. Finding against CC: F predicted 2 breaks; 3 occurred. The search looked for direct calls,
+  not tests that reach kind through the route. CC's report caught it; recorded.
+A6. C's stop is right. Finding against the channel: MOB-R78 D5 ("keep text") contradicted MOB-R70
+  E5 ("closes the search and drops the text", from the operator's words in MOB-R70 B1), and the
+  channel did not check its records for an earlier ruling on the same control. B settles it.
+A7. R1 closed: expenseCategoryFilter (payday-lib.ts:35) counts rows with no category, or a NULL
+  flag, as expense, and drops "Income: Salary". Queued, no ruling: write it as NOT over
+  incomeCategoryFilter(), so the rule is written once.
+A8. Finding against the channel: MOB-R78 E5's scrolled probe never required proof that the page
+  scrolled. A page that fits the test viewport passes "scrolled" at scrollTop 0. Also recorded:
+  overriding --safe-top shows its readers move; it cannot show env() reaching --safe-top on a
+  phone. Only the phone shows that.
+
+B. THE PICKERS (MOB-R78 D, STASHED), AS THE OPERATOR CHOSE.
+B1. Provenance. The channel's question "Place picker: what should closing the keyboard (the ✓)
+  do?"; his selection "Keep it only if you typed (recommended)". The channel's question "Typing
+  "Pizza" while "Pizza Hut" exists: should Add "Pizza" show?"; his selection "Yes, unless the
+  exact name exists (recommended)". MOB-R70 E5 stands as a record; this rule sits beside it.
+B2. Closing the keyboard: with nothing typed, the search closes (as MOB-R70 E5); with text typed,
+  the search stays open with the text and its Add button (MOB-R78 D5). Both pickers. Nothing is
+  added on blur.
+B3. The place picker's Add button shows whenever typed text has no exact match, using the same
+  comparison as the category picker's exactCategory; CC quotes it first. Matches stay listed
+  under the Add button. MOB-R78 D3 (top of the list) and D4 (Return picks the first listed entry;
+  with none listed, Return adds) stand; MOB-R79 C1's label stands.
+B4. Granted existing-test edit: receipt-place.test.tsx:54–66, deleted after CC quotes it. The
+  comment at the blur handler that cites MOB-R70 E5 is part of the granted edit and cites both
+  rulings. Condition: new-file cases pin both halves of B2.
+B5. New cases in new files, each red on today's code or under its own mutation: nothing typed,
+  blur closes; typed, blur keeps the text and Add; "Pizza" with "Pizza Hut" listed shows Add
+  "Pizza" and Return picks "Pizza Hut"; an exact name in any letter case shows no Add.
+B6. Predicted green, unchanged: receipt-place.test.tsx:88, receipt-press.test.tsx:45,
+  receipt-tags.test.tsx:67. Any other existing-test break: STOP B with its edit lines.
+B7. Grant: the picker lines MOB-R79 measured (LogPage.tsx:709–801) and new test files; every
+  edit line in the scratch file first. Any other file: STOP B.
+
+C. /LOG SCROLLS ALTHOUGH IT FITS; SCROLLED CONTENT UNDER THE STATUS BAR.
+C1. Seen on his phone (installed app, dark mode, 08:20 Kuwait, after 0dc4e00 and before
+  f8b9637): /log scrolled a little although everything fit, and "New expense" sat under the
+  clock and battery with no strip. The channel's question "In your /log screenshot, had you
+  scrolled the page?"; his selection "Yes, I scrolled down a bit". His words: "I don't see the
+  necessity to scroll down on the mobile when everything seems to fit the current screen." and
+  "I don't want to fix this and ruin it on other screens of small sizes."
+C2. Measure first at f8b9637, WebKit and Chromium, at 375x667, 390x844 and 430x932, keypad
+  closed and open, --safe-top at 0 and 59px: which element scrolls (the window or a frame); its
+  scrollHeight and clientHeight; every height and padding on that chain (vh, dvh, svh, min-h,
+  pt) with file:line; the strip's z-index and the /log frame's. Then scroll to the end and
+  report scrollTop, which must be above 0 wherever there is overflow, and elementFromPoint(20,
+  20) with the strip hit-testable.
+C3. Rule: /log scrolls only when its content is taller than the screen. Where it fits,
+  scrollHeight equals clientHeight, at --safe-top 0 and 59px. Where it does not (375x667 with the
+  keypad open, at least), it scrolls, and at the end Save is fully visible above the bar.
+C4. Rule: on /log, scrolled content never shows in the status-bar area; the strip covers it as
+  on the other routes.
+C5. If C2 finds no overflow where content fits and the strip covers in every case: no edit.
+  CC reports it, and the operator re-checks on f8b9637 with the app fully closed first.
+C6. Grant: the /log page's own files and the strip's lines in index.css and App.tsx; every edit
+  line in the scratch file first. A shared wrapper: STOP C with its file:line. A new test file
+  pins the height chain (class census), shown to fail when the old classes return.
+C7. Census, no edit: C2's numbers for every other route at 390x844, --safe-top 59px, as a table.
+  A route that scrolls when its content fits is a finding for the look A block.
+
+D. KIND FOLLOWS THE ONE RULE (MOB-R79 F, STASHED).
+D1. Identify F's stash by content: git stash show --stat for it, pasted.
+D2. Granted existing-test edits, each quoted before and after:
+  category-kind.test.ts:12, the second value becomes true (the SQL rule says income);
+  category-kind.integration.test.ts:70, passes Number(r.income) === 1;
+  routes/categories.kind.test.ts:40, mocked rows gain countsAsIncome: isIncome ? 1 : 0.
+D3. Accepted: after D2, :70's parity pins the savings precedence only; income parity is pinned
+  by MOB-R79 F2's 8 cases on the three paths. Today's precedence (income, then savings) stays.
+D4. Predicted: FE unchanged; APIH and APII deltas in the scratch file, from the runners. Any
+  other break: STOP D with its edit lines.
+
+E. ORDER, PREDICTIONS, PUSH.
+E1. Order: persist this block (cat of the operator's file, MOB-R78 A2); A1; B; C; D. Each commit
+  is green alone. A stop does not stop the other items.
+E2. Before the first edit, the predictions scratch file (MOB-R60): a delta per item, each count
+  naming its runner command (MOB-R75 A3), and C6's edit lines. Report its sha256 and quote the
+  key lines.
+E3. Push under this block by the standing rules, with probe retries as in MOB-R75 E3.
+E4. Phone checks due after the deploy (the operator; Chrome and Safari; installed and in the
+  browser; app fully closed first): a new place typed, ✓ tapped, text kept, then Add; ✓ with
+  nothing typed closes the search; "Pizza" shows Add while "Pizza Hut" is listed; a new category
+  added with Return; /log at rest does not scroll; /log scrolled shows nothing under the clock.
+After this block: strict 80, loose 82 (body lines 1513 and 6934).
