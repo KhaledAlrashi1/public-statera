@@ -7,7 +7,7 @@ import {
 
 import { transactionsApi } from "@/lib/api"
 import { nameColour } from "@/lib/tile-colours"
-import { cn, formatDisplayDate, formatKD } from "@/lib/utils"
+import { cn, formatDisplayDate, formatKD, kuwaitNow } from "@/lib/utils"
 import type { Transaction } from "@/types/api"
 import { CategoryBadge } from "@/components/ui/category-badge"
 import { FilterBar } from "@/components/ui/filter-bar"
@@ -25,7 +25,7 @@ function rowAmount(row: Transaction): { text: string; className: string } {
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const
 function localToday(): string {
-  const d = new Date()
+  const d = kuwaitNow()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
 }
 // MOB-R81 C6 — "Today", else "Sun 4 Oct"; the year is added only when it is not this year.

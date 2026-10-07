@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { analyticsApi, authApi, budgetsApi, categoriesApi, transactionsApi } from "@/lib/api"
+import { kuwaitNow } from "@/lib/utils"
 
 const DASHBOARD_CATEGORY_PAGE_SIZE = 100
 
@@ -8,7 +9,7 @@ export function useDashboardPageQueries(
   activeCategory: string | null,
   categoryOffset: number
 ) {
-  const now = new Date()
+  const now = kuwaitNow()
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
   const setupMonth = selectedMonth || currentMonth
 

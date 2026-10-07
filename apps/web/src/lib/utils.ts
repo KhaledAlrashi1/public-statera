@@ -132,11 +132,20 @@ export function toYearMonth(dateStr: string): string {
   return dateStr?.slice(0, 7) || ""
 }
 
+const KUWAIT_PARTS = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Kuwait", year: "numeric", month: "2-digit", day: "2-digit",
+  hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23",
+})
+export function kuwaitNow(): Date {
+  const p = Object.fromEntries(KUWAIT_PARTS.formatToParts(new Date()).map((x) => [x.type, x.value]))
+  return new Date(Number(p.year), Number(p.month) - 1, Number(p.day), Number(p.hour), Number(p.minute), Number(p.second))
+}
+
 /**
  * Get today's date as YYYY-MM-DD
  */
 export function today(): string {
-  const d = new Date()
+  const d = kuwaitNow()
   const mm = String(d.getMonth() + 1).padStart(2, "0")
   const dd = String(d.getDate()).padStart(2, "0")
   return `${d.getFullYear()}-${mm}-${dd}`
@@ -192,7 +201,7 @@ export function formatDeltaLabel(
  * Budgets for past months are read-only.
  */
 export function isEditableMonth(month: string): boolean {
-  const now = new Date()
+  const now = kuwaitNow()
   const curr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
   const nd = new Date(now.getFullYear(), now.getMonth() + 1, 1)
   const next = `${nd.getFullYear()}-${String(nd.getMonth() + 1).padStart(2, "0")}`

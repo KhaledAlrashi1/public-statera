@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { analyticsApi, budgetsApi, categoriesApi } from "@/lib/api"
-import { prevMonth as prevMonthUtil, today, toYearMonth } from "@/lib/utils"
+import { kuwaitNow, prevMonth as prevMonthUtil, today, toYearMonth } from "@/lib/utils"
 import type { BudgetProfileContext, BudgetRange } from "./sections"
 
 export type BudgetItem = { category: string; amount_kd: string }
@@ -59,7 +59,7 @@ export function findDuplicateCategory(items: BudgetItem[]) {
 export function useBudgetMonthOptions(count = 24) {
   return useMemo(() => {
     const months: string[] = []
-    const d = new Date()
+    const d = kuwaitNow()
     for (let i = 0; i < count; i++) {
       months.push(monthKey(d))
       d.setMonth(d.getMonth() - 1)

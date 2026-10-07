@@ -27,7 +27,7 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { CalendarDays, Check, Delete, Plus, X } from "lucide-react"
 import { ApiError, categoriesApi, transactionsApi } from "@/lib/api"
-import { cn, formatDisplayDate, formatKD } from "@/lib/utils"
+import { cn, formatDisplayDate, formatKD, kuwaitNow } from "@/lib/utils"
 import { normalizeAmount, pressDecimal, pressDelete, pressDigit } from "@/lib/log-amount"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -202,7 +202,7 @@ function LogPanel() {
   const location = useLocation()
   const queryClient = useQueryClient()
 
-  const [today] = useState(() => new Date())
+  const [today] = useState(() => kuwaitNow())
   const todayIso = localIso(today)
   const dateChips = recentDateChips(today)
 

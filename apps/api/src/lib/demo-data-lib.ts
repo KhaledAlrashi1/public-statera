@@ -36,6 +36,7 @@ import {
   formatKd,
 } from "./transaction-lib"
 import { recordEvent, recordEventOnce } from "./product-events-lib"
+import { currentLocalDate } from "./analytics-helpers"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Tx = any
@@ -189,7 +190,7 @@ const DEMO_TRANSACTIONS = buildDemoTransactions()
 // ── Date helpers (Flask _month_start_for / _date_for, demo_data.py:225-244) ──
 
 function monthStartFor(offset: number): { year: number; month: number } {
-  const now = new Date()
+  const now = currentLocalDate()
   let year = now.getUTCFullYear()
   let month = now.getUTCMonth() + 1 + offset // 1-based month
   while (month < 1) {

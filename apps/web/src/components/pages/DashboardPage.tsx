@@ -2,7 +2,7 @@ import { LayoutDashboard } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
-import { prevMonth as prevMonthUtil, labelForYM } from "@/lib/utils"
+import { kuwaitNow, prevMonth as prevMonthUtil, labelForYM } from "@/lib/utils"
 import { authApi, notificationsApi } from "@/lib/api"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -52,7 +52,7 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const toast = useToast()
-  const now = new Date()
+  const now = kuwaitNow()
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
   const setupGuideSyncInFlight = useRef(false)
 

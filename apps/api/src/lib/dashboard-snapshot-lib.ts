@@ -28,7 +28,7 @@ import { categories } from "../db/schema/categories"
 import { dashboardSnapshots } from "../db/schema/dashboard-snapshots"
 import { transactions } from "../db/schema/transactions"
 import { formatKd } from "./transaction-lib"
-import { ymExpr, buildMonthWindow } from "./analytics-helpers"
+import { ymExpr, buildMonthWindow, currentMonthKey } from "./analytics-helpers"
 import { incomeCategoryFilter } from "./payday-lib"
 import { isSavingsCategoryName } from "./category-kind"
 
@@ -360,9 +360,9 @@ export async function loadDashboardSnapshot(
 
 // ── Rebuild ───────────────────────────────────────────────────────────────────
 
+// Returns Kuwait's current month, not UTC's, despite the name (MOB-R85 RM-28).
 export function currentMonthKeyUtc(): string {
-  const now = new Date()
-  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`
+  return currentMonthKey()
 }
 
 // Recomputes and persists a snapshot for a single user. Used by both the

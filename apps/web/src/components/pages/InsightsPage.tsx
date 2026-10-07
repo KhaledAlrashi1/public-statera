@@ -5,7 +5,7 @@ import { Info, Sparkles } from "lucide-react"
 
 import { analyticsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
-import { formatKD, labelForYM, prevMonth as prevMonthUtil, toYearMonth, today } from "@/lib/utils"
+import { formatKD, kuwaitNow, labelForYM, prevMonth as prevMonthUtil, toYearMonth, today } from "@/lib/utils"
 import PageHeader from "@/components/layout/PageHeader"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -112,9 +112,9 @@ export default function InsightsPage() {
   }, [monthOptions])
 
   const selectedMonthReferenceDate = useMemo(() => {
-    if (selectedMonth === currentMonth) return new Date()
+    if (selectedMonth === currentMonth) return kuwaitNow()
     const [year, month] = selectedMonth.split("-").map(Number)
-    if (!Number.isFinite(year) || !Number.isFinite(month)) return new Date()
+    if (!Number.isFinite(year) || !Number.isFinite(month)) return kuwaitNow()
     return new Date(year, month, 0)
   }, [currentMonth, selectedMonth])
 

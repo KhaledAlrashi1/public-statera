@@ -44,6 +44,7 @@ import {
 import { Sentry } from "../lib/sentry"
 import { cacheBustDashboardMetrics, cacheBustSafeToSpend } from "../lib/analytics-cache"
 import { zodErrorToEnvelope } from "./route-helpers"
+import { currentMonthKey } from "../lib/analytics-helpers"
 
 export const transactionsRouter = new Hono()
 
@@ -712,8 +713,7 @@ transactionsRouter.post("/:id{[0-9]+}/split", requireAuth, async (c) => {
 transactionsRouter.get("/summary", requireAuth, async (c) => {
   let month = (c.req.query("month") ?? "").trim()
   if (!month) {
-    const now = new Date()
-    month = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`
+    month = currentMonthKey()
   }
   const parsedMonth = SummaryMonthSchema.safeParse(month)
   if (!parsedMonth.success) return zodErrorToEnvelope(c, parsedMonth.error)
