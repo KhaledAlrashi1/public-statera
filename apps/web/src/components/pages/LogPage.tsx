@@ -655,8 +655,8 @@ function LogPanel() {
         </section>
       ) : null}
 
-      {/* MOB-R78 F4 — -mb-1: 16px between the form card and the Save bar (the frame's gap-5 less 4px). */}
-      <section className="-mb-1 space-y-2" aria-labelledby={tiles.length > 0 ? "log-new" : undefined}>
+      {/* MOB-R78 F4 — 16px between the form card and the Save bar: the frame's gap-4 (MOB-R82 B5). */}
+      <section className="space-y-2" aria-labelledby={tiles.length > 0 ? "log-new" : undefined}>
         {tiles.length > 0 ? (
           <h2 id="log-new" className="text-sm font-semibold text-muted-foreground">Or fill in a new one</h2>
         ) : null}
@@ -985,7 +985,7 @@ function Frame({
 }) {
   return (
     // MOB-R69 E1 — at least 16px from both edges, plus the safe-area insets (notch, home bar).
-    <div style={style} className="mx-auto flex min-h-screen w-full max-w-[28rem] flex-col gap-5 bg-background ps-[calc(1rem+env(safe-area-inset-left))] pe-[calc(1rem+env(safe-area-inset-right))] pt-[calc(1rem+var(--safe-top))]">
+    <div style={style} className="mx-auto flex min-h-screen w-full max-w-[28rem] flex-col gap-4 bg-background ps-[calc(1rem+env(safe-area-inset-left))] pe-[calc(1rem+env(safe-area-inset-right))] pt-[calc(1rem+var(--safe-top))]">
       <header className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-semibold">New expense</h1>
