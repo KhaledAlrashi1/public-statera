@@ -871,9 +871,9 @@ transactionsRouter.get("/search", requireAuth, searchRateLimit, async (c) => {
     where = and(
       where,
       or(
-        sql`${transactions.name} LIKE ${like} ESCAPE '\\'`,
-        sql`${categories.name} LIKE ${like} ESCAPE '\\'`,
-        sql`${merchants.name} LIKE ${like} ESCAPE '\\'`,
+        sql`${transactions.name} LIKE ${like} ESCAPE '\\\\'`,
+        sql`${categories.name} LIKE ${like} ESCAPE '\\\\'`,
+        sql`${merchants.name} LIKE ${like} ESCAPE '\\\\'`,
       ),
     )
   }
@@ -1007,7 +1007,7 @@ transactionsRouter.get("/by-category", requireAuth, async (c) => {
   if (month) where = and(where, sql`DATE_FORMAT(${transactions.date}, '%Y-%m') = ${month}`)
   if (q) {
     const like = likePattern(q)
-    where = and(where, sql`${transactions.name} LIKE ${like} ESCAPE '\\'`)
+    where = and(where, sql`${transactions.name} LIKE ${like} ESCAPE '\\\\'`)
   }
 
   const byCatFields = {

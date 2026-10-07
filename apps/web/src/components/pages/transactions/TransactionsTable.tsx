@@ -137,6 +137,8 @@ function TransactionsTable({
   const rows = allRows
   const hasDateFilter = !!dateFrom || !!dateTo
   const hasAnyFilter = !!debouncedQ || !!category || !!merchant || hasDateFilter
+  // MOB-R88 B7 — a failed search says so in plain words, never the server's text, and no count chip beside it.
+  const searchFailed = !!queryErrorMessage && !!debouncedQ
 
   const filteredTotal = useMemo(
     () =>
@@ -272,6 +274,7 @@ function TransactionsTable({
       />
 
       <div className="flex flex-wrap items-center gap-3 border-b border-border/40 px-4 py-2">
+        {searchFailed ? null : (
         <div className="rounded-md bg-muted px-3 py-1.5 text-xs text-muted-foreground tabular-nums">
           {total === 0 ? (
             hasAnyFilter ? "No matches" : "No transactions"
@@ -288,6 +291,7 @@ function TransactionsTable({
             </>
           )}
         </div>
+        )}
 
         {transactionType !== "income" && (hasDateFilter || rows.length > 0) && total > 0 && (
           <div className="rounded-md bg-primary/10 px-3 py-1.5 text-xs font-medium tabular-nums text-primary">
@@ -299,10 +303,14 @@ function TransactionsTable({
       {queryErrorMessage ? (
         <div className="mx-4 mt-4 rounded-xl border border-warning/35 bg-warning/10 px-4 py-3 text-sm">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-semibold text-warning">Activity unavailable</p>
-              <p className="mt-1 text-muted-foreground">{queryErrorMessage}</p>
-            </div>
+            {searchFailed ? (
+              <p className="font-semibold text-warning">Search isn&apos;t working right now.</p>
+            ) : (
+              <div>
+                <p className="font-semibold text-warning">Activity unavailable</p>
+                <p className="mt-1 text-muted-foreground">{queryErrorMessage}</p>
+              </div>
+            )}
             <Button
               type="button"
               variant="outline"
