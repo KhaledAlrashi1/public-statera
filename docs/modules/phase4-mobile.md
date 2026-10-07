@@ -11506,3 +11506,108 @@ G4. Phone checks due after the deploy (the operator; Chrome and Safari; installe
   income; the status bar clear of /log, Home and Activity, scrolled and not; a new place typed,
   ✓ tapped, then Add; a new category added with Return; the "Last:" line and Undo; the gap.
 After this block: strict 78, loose 80 (body lines 1513 and 6934).
+
+MOB-R79 — MOB-R78 accepted, report gaps; C, D, F3 granted; tops outside the shell; kind rule.
+Issued Wed 7 Oct 2026 by the review channel. Expected at lines 11510–11613, after a blank 11509,
+if MOB-R78 landed at 11370–11508 (A1 confirms).
+Tiers: B, C, D and E are TIER 2 (frontend only). F is TIER 1 (an API read path). R is recon only.
+RM-21: nothing here adds a migration, writes, deletes or seeds rows. F changes a computed field.
+
+A. THE MOB-R78 REPORT IS ACCEPTED, WITH GAPS.
+A1. Missing from the report. CC pastes these after persisting this block, before any edit:
+  (a) MOB-R78's read-back: appended line count, header and last line verbatim, cmp exit code,
+  git show --stat, porcelain, and the sha256 of the appended payload (MOB-R78 A2 STANDING).
+  Issued value: 700ff7811bffcaae2ff8522e6c321d16d39579ef52ea1918df9ae573cd7bc737.
+  (b) The sha256 of lines 11287–11368 (MOB-R78 A2). Issued value:
+  40138b2dd97e6f06111e8ea5be81681b8d8a8aa00a4333c8347e1f97fcaa59fa.
+  (c) MOB-R78's predictions scratch file: its sha256 and key lines (MOB-R78 G2).
+  (d) The two comment lines at the split guard, verbatim (MOB-R78 A5).
+  (e) MOB-R78 D2's answers and F2's answers, with file:line.
+  A mismatch in (a) or (b) is a question for the channel, with no edit; the rest goes on.
+A2. Accepted: B (fd6a1b3) with B4's readers and B5's control; E (7731d1d), including CC's probe
+  fix (the strip takes hit-testing for the measurement only; control and after both re-run);
+  F4 (0dc4e00). FE 437/102, APIH 905/72/80, APII 967/10/80, all from the runners. Push
+  accepted: run 37531275215, four jobs on ubuntu-24.04, /healthz 21:09:40Z, /readyz 21:09:41Z.
+A3. The STOPs of C, D and F3 are accepted, each right under MOB-R53. CC's reading of F5 is
+  right: existing-test lines are granted line by line, never by file.
+A4. Finding against the channel: MOB-R78 D3 set a new Add label without reading today's, which
+  already names the typed text ("Add “X” as a new place"). The MOB-R70 lesson again. C1 below
+  keeps today's label.
+A5. Finding against the channel: MOB-R78 E2's census named fixed and sticky elements only, so
+  pages whose top is plain content outside the shell (privacy, legal, login, welcome) were
+  missed. The handoff asked for every page's top. E below covers them.
+
+B. MOB-R78 C (P4 WITH "SPENT") IS GRANTED.
+B1. Identify C's stash by content: git stash show --stat for it, pasted.
+B2. Granted edits in TransactionsTable.income-flag.test.tsx (committed in fd6a1b3, so an
+  existing file): :35–38 is deleted (it pins an Income-view total, which MOB-R76 E4 removes);
+  at :40–43, /Total:/ becomes /Spent:/. CC quotes both verbatim first. Condition for the
+  deletion: one of P4's new cases pins that the Income view shows no total. If none does: STOP B.
+B3. The P4 line CC rewrote to read category_counts_as_income: accepted; CC quotes it with
+  file:line.
+B4. While more pages remain to load, the label reads "Spent (loaded)" instead of "Loaded
+  total". The channel ruled this without asking the operator; provisional.
+B5. The Income view draws nothing where the total was: no empty box. The edit goes at the line
+  that renders the box; a new case in P4's new test file, red first.
+B6. After B commits: MOB-R76 E5 (P4 and I2 recon stashes saved as patches, sha256 reported,
+  then dropped by content), and C's stash the same way.
+
+C. MOB-R78 D (BOTH PICKERS) IS GRANTED.
+C1. The Add button keeps today's label in each picker ("Add “X” as a new place" in the place
+  picker). Predicted: receipt-place.test.tsx:88, receipt-press.test.tsx:45 and
+  receipt-tags.test.tsx:67 stay green unchanged. D's new cases (uncommitted, so new) follow it.
+C2. receipt-place.test.tsx:54–66 pins the opposite of MOB-R78 D5 (closing the keyboard drops the
+  text and closes the picker). CC quotes it and the commit that added it (git log -L or blame,
+  with the message). If that commit cites a ruling that required the close: STOP C with the
+  quote. Otherwise :54–66 is deleted, and D's new place-picker blur case pins D5.
+C3. CC's choices confirmed (the channel, without asking): Return with nothing typed does
+  nothing; the highlight shows only while text is typed.
+
+D. MOB-R78 F3 (THE "LAST:" LINE) IS GRANTED.
+D1. Applied after C commits. CC merges F3's stash onto C's LogPage.tsx and shows the committed
+  F3 diff differs from F3's stash patch in context lines only. If C stops, F3 applies onto
+  LogPage.tsx as it stands.
+D2. The button's visible text is "Undo"; its accessible name stays "Undo last", which contains
+  the visible word. Predicted: LogPage.test.tsx:136, :141 and receipt-undo-last.test.tsx:51,
+  :55, :59, :68, :70 stay green unchanged.
+D3. If any of those seven lines still breaks, those lines only are granted, each changed to what
+  the F3 build shows, quoted before and after. Any other existing-test line: STOP D.
+
+E. TOPS OUTSIDE THE SHELL.
+E1. Census by route, from the router file with file:line: each route's top element, and whether
+  --safe-top pads it. Each route it does not pad gets the one class on its top element (privacy,
+  legal, login, welcome, and any other found). Grant: one class per page, at the line the
+  scratch file names.
+E2. Instrument as MOB-R78 E5, for each route added: with the 59px override the first content
+  starts below 59px; without it, 0 differences. New census cases in a new file, red first.
+
+F. KIND FOLLOWS THE ONE RULE (TIER 1). CC's R1 proposal; the channel ruled it without asking.
+F1. kind takes "income" from the SQL rule's column, selected on GET /api/categories and also on
+  POST / and the POST conflict path; the JavaScript income test (category-kind.ts:30) is
+  removed. The savings-name check and its precedence over income stay as today; CC quotes today's
+  precedence first. Edit lines in the scratch file before the first edit.
+F2. New cases in a new file, driven by INCOME_RULE_CASES: kind is "income" exactly when
+  counts_as_income is true, on GET and both POST paths. The accented "Íncome: Salary" case is
+  red on today's code.
+F3. Readers (MOB-R76 A3): log-categories.ts:19 hides income categories from /log; the other five
+  test "savings" only. What the operator sees: no change for names without accents.
+F4. Contract predicted unchanged. An existing test that breaks: STOP F with its edit lines.
+
+R. RECON, NO EDIT (TIER 1).
+R1. expenseCategoryFilter (payday-lib.ts:34–36) restates the rule as NOT (…). Quote it. In SQL,
+  NOT over a NULL gives NULL, which a WHERE drops. On the dev DB (scratch user, demo workspace,
+  deleted after): does a row with no category, and a category whose is_income is NULL, count as
+  an expense under it? List its readers with file:line.
+
+G. ORDER, PREDICTIONS, PUSH.
+G1. Order: persist this block; A1; B; C; D; E; F; R. Each commit is green alone. A stop does not
+  stop the other items.
+G2. Before the first edit, the predictions scratch file (MOB-R60): a delta per item, each count
+  naming its runner command (MOB-R75 A3), and the reader lists of E1 and F3. Report its sha256
+  and quote the key lines.
+G3. Push under this block by the standing rules, with probe retries as in MOB-R75 E3.
+G4. Phone checks due after the deploy (the operator; Chrome and Safari; installed and in the
+  browser; app fully closed first): the All view "Spent"; no box in the Income view; a new place
+  typed, ✓ tapped, text kept, then Add; a new category added with Return; the "Last:" line and
+  Undo; the login page's top in the installed app.
+After this block: strict 79, loose 81 (body lines 1513 and 6934).
