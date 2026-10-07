@@ -149,7 +149,7 @@ describe("/log category picker (MOB-R80 B)", () => {
     const field = await openCategory()
     fireEvent.change(field, { target: { value: "Pets" } })
     enter(field)
-    await waitFor(() => expect(mocks.categoriesCreate).toHaveBeenCalledWith("Pets"))
+    expect(mocks.categoriesCreate).not.toHaveBeenCalled()
     await waitFor(() => expect(line("Category")).toHaveTextContent("Pets"))
   })
 

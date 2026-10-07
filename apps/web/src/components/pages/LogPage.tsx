@@ -69,6 +69,8 @@ export const POPULAR_IN_KUWAIT: ReadonlyArray<{ name: string; category: string }
  * 44x44 hit area, so the circle and its neighbours do not move. The ::before is placed against the
  * PADDING box, inside the 1px border (38px), so -3px makes 44px; -2px measured only 42px. */
 export const LOG_CLOSE_HIT_AREA = "relative before:absolute before:-inset-[3px] before:content-['']"
+/** MOB-R87 E1 — how many of her places the Place picker shows before she types (as Category's six). */
+export const USUAL_PLACE_LIMIT = 6
 /** E2 — how many place tiles "Repeat in two taps" shows. */
 export const TILE_LIMIT = 4
 /** E7 — how long the save moment stays before the form is back. */
@@ -333,7 +335,6 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
     if (b && b.line === line && Date.now() - b.at < 400) return
     tap()
     setOpen((o) => (o === line ? null : line))
-    if (line !== "place") setPlaceQuery("")
   }
 
   /** E5 — after a choice, the next missing required line opens, else the picker closes. */
@@ -393,16 +394,12 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
     setOpen(amountOk ? null : "amount")
   }
 
-  // MOB-R78 D — the Add button and Return both add the typed category (one path).
-  const addCategory = async () => {
+  // MOB-R78 D — the Add button and Return both add the typed category (one path). MOB-R87 E1 (B2) — state only:
+  // the new category is created when she saves the expense (getOrCreateCategory on the server), as a place is.
+  const addCategory = () => {
     const name = categoryQuery.trim()
-    try {
-      await categoriesApi.create(name)
-      void queryClient.invalidateQueries({ queryKey: ["categories"] })
-      pickCategory(name)
-    } catch {
-      setError("Couldn't save. Check your connection and try again.")
-    }
+    if (!name) return
+    pickCategory(name)
   }
 
   // An item chip is a suggestion (MOB-R73 E2): it fills What for and Amount only where she has not.
@@ -657,7 +654,10 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
   // Place search — her places only (E5). With no text, all of them; with text, the matches; when
   // the text matches none, the one result is "Add “{text}” as a new place".
   const pq = placeQuery.trim().toLowerCase()
-  const placeResults = pq ? places.filter((p) => p.name.toLowerCase().includes(pq)) : places
+  // MOB-R87 E1 — like category: with no text, her six places by use; typing searches all of them.
+  const placeResults = pq
+    ? places.filter((p) => p.name.toLowerCase().includes(pq))
+    : [...places].sort((a, b) => b.count - a.count || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0)).slice(0, USUAL_PLACE_LIMIT)
 
   // Category — MOB-R59 D1/E9 and MOB-R69 E3 (c)/(d), unchanged: up to six of hers by her own use,
   // typing searches the rest, no income-kind category, the generic savings entry while she owns none.
@@ -831,7 +831,7 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
                 e.preventDefault()
                 if (!cq) return
                 if (categoryResults.length > 0) pickCategory(categoryResults[0])
-                else if (!exactCategory && !isIncome) void addCategory()
+                else if (!exactCategory && !isIncome) addCategory()
               }}
               onBlur={() => {
                 // MOB-R80 B2 — closing the keyboard with nothing typed closes the search (as MOB-R70 E5 for Place);
@@ -843,7 +843,7 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
             />
             {/* MOB-R78 D3 — the Add button at the top: brass tint, ink text, at least 44px; the label as ruled in MOB-R82 C10 and MOB-R83 C4. */}
             {cq && !exactCategory && !isIncome ? (
-              <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-accent bg-accent/15 px-3 py-2 text-start font-semibold text-foreground" onClick={() => void addCategory()}>
+              <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-accent bg-accent/15 px-3 py-2 text-start font-semibold text-foreground" {...pickProps(addCategory)}>
                 <Plus aria-hidden="true" className="h-4 w-4 shrink-0" />
                 <span className="min-w-0 truncate">{`Add “${categoryQuery.trim()}” as a new category`}</span>
               </button>
@@ -893,25 +893,19 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
                 setOpen((o) => (o === "place" ? null : o))
               }}
             />
-            <div className="max-h-64 space-y-1 overflow-y-auto">
-              {/* MOB-R80 B3 — Add shows whenever the typed text has no exact match (exactCategory's comparison); matches
-                  stay listed under it. MOB-R78 D3 look; today's label (MOB-R79 C1). */}
-              {pq && !places.some((p) => p.name.toLowerCase() === pq) ? (
-                <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-accent bg-accent/15 px-3 py-2 text-start font-semibold text-foreground" {...pickProps(() => applyPlace({ name: placeQuery.trim(), category: null, items: [] }, false))}>
-                  <Plus aria-hidden="true" className="h-4 w-4 shrink-0" />
-                  <span className="min-w-0 truncate">{`Add “${placeQuery.trim()}” as a new place`}</span>
-                </button>
-              ) : null}
+            {/* MOB-R80 B3 — Add shows whenever the typed text has no exact match (exactCategory's comparison); matches
+                stay listed under it. MOB-R78 D3 look; today's label (MOB-R79 C1). */}
+            {pq && !places.some((p) => p.name.toLowerCase() === pq) ? (
+              <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-accent bg-accent/15 px-3 py-2 text-start font-semibold text-foreground" {...pickProps(() => applyPlace({ name: placeQuery.trim(), category: null, items: [] }, false))}>
+                <Plus aria-hidden="true" className="h-4 w-4 shrink-0" />
+                <span className="min-w-0 truncate">{`Add “${placeQuery.trim()}” as a new place`}</span>
+              </button>
+            ) : null}
+            {/* MOB-R87 E1 — chips, as Category's: the name only, no category line, no scroll box. */}
+            <div className="flex flex-wrap gap-2">
               {placeResults.map((p, i) => (
-                <button
-                  key={p.name}
-                  type="button"
-                  className={cn("block min-h-11 w-full rounded-lg px-3 py-2 text-start hover:bg-muted", pq && i === 0 && "ring-2 ring-primary/60")}
-                  data-highlighted={pq && i === 0 ? "true" : undefined}
-                  {...pickProps(() => applyPlace(p, true))}
-                >
-                  <span className="block truncate font-medium">{p.name}</span>
-                  {p.category ? <span className="block truncate text-xs text-muted-foreground">{p.category}</span> : null}
+                <button key={p.name} type="button" className={cn(chip, pq && i === 0 && "ring-2 ring-primary/60")} data-highlighted={pq && i === 0 ? "true" : undefined} aria-pressed={place === p.name} {...pickProps(() => applyPlace(p, true))}>
+                  {p.name}
                 </button>
               ))}
             </div>
