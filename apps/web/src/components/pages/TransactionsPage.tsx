@@ -26,9 +26,6 @@ import { DemoWorkspaceBanner } from "@/components/ui/demo-workspace-banner"
 import {
   type PreviewRow,
 } from "./transactions/helpers"
-import {
-  EditTransactionDialog,
-} from "./transactions/dialogs"
 import TransactionsTable from "./transactions/TransactionsTable"
 import SettingsDialog from "./transactions/SettingsDialog"
 import {
@@ -96,7 +93,6 @@ export default function TransactionsPage() {
     [categoriesRaw]
   )
   // MOB-R60 D2 — from the server's category kind; hides the generic savings entry in the edit dialog.
-  const ownsSavingsCategory = useMemo(() => categoriesRaw.some((c) => c.kind === "savings"), [categoriesRaw])
   const merchantNames = useMemo(
     () => merchantsRaw.map((m) => m.name),
     [merchantsRaw]
@@ -114,8 +110,6 @@ export default function TransactionsPage() {
   }, [searchParams, setSearchParams])
 
   // Local state
-  const [editTxnId, setEditTxnId] = useState<number | null>(null)
-  const [editOpen, setEditOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
   // MOB-R81 C6 — checkboxes and the bulk bar only in Select mode; leaving it clears the selection.
   const [selecting, setSelecting] = useState(false)
@@ -409,10 +403,7 @@ export default function TransactionsPage() {
       <TransactionsTable
         categories={categoryNames}
         merchants={merchantNames}
-        onEdit={(id) => {
-          setEditTxnId(id)
-          setEditOpen(true)
-        }}
+        onEdit={(id) => navigate(`/log?edit=${id}`)}
         onImport={() => setImportOpen(true)}
         refreshSignal={refreshSignal}
         transactionType={activityType}
@@ -423,15 +414,6 @@ export default function TransactionsPage() {
       />
 
       {/* Dialogs */}
-      <EditTransactionDialog
-        txnId={editTxnId}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        categories={categoryNames}
-        onSuccess={refreshAll}
-        ownsSavingsCategory={ownsSavingsCategory}
-      />
-
       <BulkEditDialog
         open={bulkEditOpen}
         onOpenChange={setBulkEditOpen}

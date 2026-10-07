@@ -27,6 +27,9 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { CalendarDays, Check, Delete, Plus, X } from "lucide-react"
 import { ApiError, categoriesApi, transactionsApi } from "@/lib/api"
+import type { Transaction } from "@/types/api"
+import { useToast } from "@/components/ui/toaster"
+import { SplitTransactionDialog } from "./transactions/dialogs"
 import { cn, formatDisplayDate, formatKD, kuwaitNow } from "@/lib/utils"
 import { normalizeAmount, pressDecimal, pressDelete, pressDigit } from "@/lib/log-amount"
 import { Button } from "@/components/ui/button"
@@ -141,9 +144,12 @@ export default function LogPage() {
   if (params.get("stats") === "1") {
     return <pre className="mx-auto max-w-[28rem] whitespace-pre-wrap p-4 text-xs">{JSON.stringify(readStats(), null, 2)}</pre>
   }
+  // MOB-R87 D1 (a) — /log?edit=<id> opens the Log screen on a saved row (the row tap in Activity).
+  const editParam = params.get("edit")
+  const editId = editParam && /^[0-9]+$/.test(editParam) ? Number(editParam) : null
   return (
     <>
-      <LogPanel />
+      <LogPanel key={editId ?? "new"} editId={editId} />
       {params.get("layout") === "1" ? <LogLayoutReadout /> : null}
     </>
   )
@@ -202,11 +208,13 @@ function EntryLine({
   )
 }
 
-function LogPanel() {
+function LogPanel({ editId = null }: { editId?: number | null }) {
   const pickProps = usePointerDownPick()
   const navigate = useNavigate()
   const location = useLocation()
   const queryClient = useQueryClient()
+  const toast = useToast()
+  const editing = editId !== null
 
   const [today] = useState(() => kuwaitNow())
   const todayIso = localIso(today)
@@ -246,6 +254,9 @@ function LogPanel() {
   const momentTimer = useRef<number | null>(null)
   // A text picker closed by its field's blur must not be re-opened by the same tap on its line.
   const blurClosed = useRef<{ line: Line; at: number } | null>(null)
+  // MOB-R87 D1 — edit mode: the saved row, loaded once; Split's dialog.
+  const [editRow, setEditRow] = useState<Transaction | null>(null)
+  const [splitOpen, setSplitOpen] = useState(false)
 
   const stat = useRef<{ start: number | null; taps: number; suggestion: boolean }>({ start: null, taps: 0, suggestion: false })
   const tap = (fromSuggestion = false) => {
@@ -263,6 +274,41 @@ function LogPanel() {
   useEffect(() => () => {
     if (momentTimer.current !== null) window.clearTimeout(momentTimer.current)
   }, [])
+
+  // MOB-R87 D1 (b) — prefill from the saved row, every field hers. What for shows the name unless the name is
+  // the place or the category (what /log saves when What for is empty), so saving it back keeps the same name.
+  useEffect(() => {
+    if (editId === null) return
+    let live = true
+    transactionsApi
+      .get(editId)
+      .then((res) => {
+        const row = res.data?.item
+        if (!live || !row) return
+        const placeName = row.merchant?.trim() || null
+        const cat = row.category?.trim() || null
+        const name = (row.name ?? "").trim()
+        const isSame = (x: string | null) => x !== null && name.toLowerCase() === x.toLowerCase()
+        const what = isSame(placeName) || isSame(cat) ? "" : name
+        setEditRow(row)
+        setAmount(row.amount_kd)
+        setPrefilled(false)
+        setCategory(cat)
+        setCategoryHers(cat !== null)
+        setPlace(placeName)
+        setPlaceHers(placeName !== null)
+        setWhatFor(what)
+        setWhatHers(what !== "")
+        setDate(row.date)
+      })
+      .catch(() => {
+        if (live) setError("Couldn't load this entry. Check your connection and try again.")
+      })
+    return () => {
+      live = false
+    }
+  }, [editId])
+  const isIncome = editRow?.category_counts_as_income === true
 
   // MOB-R69 E4 — the readout shows what will save, through the RM-27 normalizer; refused text is
   // shown as typed, with the refusal line, and cannot be saved.
@@ -425,6 +471,33 @@ function LogPanel() {
       setOpen(next as RequiredField)
       return
     }
+    if (editing) {
+      if (!editRow) return
+      setSaving(true)
+      setError(null)
+      try {
+        // MOB-R87 D1 (c) — exactly the five fields the screen shows; memo is never sent, so the server keeps it.
+        await transactionsApi.update(editRow.id, {
+          amount_kd: normalized,
+          category,
+          name: whatFor.trim() || place || category,
+          merchant: place ?? "",
+          date,
+        })
+        void queryClient.invalidateQueries()
+        toast.success("Changes saved")
+        leaveToActivity()
+      } catch (err) {
+        setError(
+          err instanceof ApiError && err.code === "transaction_duplicate_conflict"
+            ? "This would duplicate an existing transaction."
+            : "Couldn't save. Check your connection and try again."
+        )
+      } finally {
+        setSaving(false)
+      }
+      return
+    }
     tap()
     setSaving(true)
     setError(null)
@@ -496,6 +569,37 @@ function LogPanel() {
     if (location.key !== "default") navigate(-1)
     else navigate("/")
   }
+  // MOB-R87 D1 (c) — after an edit, back to Activity (where the row tap came from).
+  const leaveToActivity = () => {
+    if (location.key !== "default") navigate(-1)
+    else navigate("/activity")
+  }
+
+  // MOB-R87 D1 (d), B1 — today's delete from the edit dialog (transactions/dialogs.tsx handleDelete): no
+  // confirm; the DELETE waits 6 seconds behind an Undo toast. The timer outlives this screen.
+  const deleteEntry = () => {
+    if (!editRow) return
+    const id = editRow.id
+    let undone = false
+    const timer = window.setTimeout(async () => {
+      if (undone) return
+      try {
+        await transactionsApi.delete(id)
+        void queryClient.invalidateQueries()
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "We couldn't delete this transaction right now.")
+        void queryClient.invalidateQueries()
+      }
+    }, 6000)
+    toast.success("Transaction deleted.", {
+      label: "Undo",
+      onClick: () => {
+        undone = true
+        window.clearTimeout(timer)
+      },
+    })
+    leaveToActivity()
+  }
 
   // MOB-R69 E4 — digits, ".", "," and Backspace from a physical keyboard, on every device; a digit
   // opens the Amount line. Enter saves only when ready (E6). Ignored while a text field has focus
@@ -563,13 +667,21 @@ function LogPanel() {
   const offerGenericSavings =
     !ownsSavingsCategory && !ownedNames.some((n) => n.toLowerCase() === GENERIC_SAVINGS_CATEGORY.toLowerCase())
   const withGeneric = (names: string[]) => (offerGenericSavings ? [...names, GENERIC_SAVINGS_CATEGORY] : names)
-  const categoryNames = withGeneric(searchableCategoryNames(categoryList))
-  const categoryResults = cq ? categoryNames.filter((n) => n.toLowerCase().includes(cq)) : withGeneric(usualCategoryNames(categoryList))
+  // MOB-R87 D1 (e), B3 — an income row keeps an income category: its picker lists her income categories only.
+  const incomeNames = categoryList.filter((c) => c.kind === "income").map((c) => c.name)
+  const categoryNames = isIncome ? incomeNames : withGeneric(searchableCategoryNames(categoryList))
+  const categoryResults = cq
+    ? categoryNames.filter((n) => n.toLowerCase().includes(cq))
+    : isIncome
+      ? incomeNames
+      : withGeneric(usualCategoryNames(categoryList))
   const exactCategory = categoryNames.some((n) => n.toLowerCase() === cq) || ownedNames.some((n) => n.toLowerCase() === cq)
 
   // MOB-R71 C2 — with no places of her own, the existing Popular in Kuwait list, unchanged, as tiles.
   const popular = placesLoaded && places.length === 0
-  const tiles: LogSuggestionPlace[] = popular
+  const tiles: LogSuggestionPlace[] = editing
+    ? []
+    : popular
     ? POPULAR_IN_KUWAIT.map((p) => ({ ...p, count: 0, items: [], last_amount: null, last_used: null }))
     : places.slice(0, TILE_LIMIT)
   const tileColours = assignTileColours(popular ? [] : tiles.map((t) => t.name))
@@ -588,7 +700,7 @@ function LogPanel() {
   }
 
   return (
-    <Frame onBack={goBack} style={vvStyle} keyboardInset={keyboardInset(vvStyle)}>
+    <Frame onBack={goBack} style={vvStyle} keyboardInset={keyboardInset(vvStyle)} title={editing ? (isIncome ? "Edit income" : "Edit expense") : undefined}>
       {tiles.length > 0 ? (
         <section className="space-y-2" aria-labelledby="log-repeat">
           <h2 id="log-repeat" className="text-sm font-semibold text-muted-foreground">{popular ? "Popular in Kuwait" : "Repeat in two taps"}</h2>
@@ -719,7 +831,7 @@ function LogPanel() {
                 e.preventDefault()
                 if (!cq) return
                 if (categoryResults.length > 0) pickCategory(categoryResults[0])
-                else if (!exactCategory) void addCategory()
+                else if (!exactCategory && !isIncome) void addCategory()
               }}
               onBlur={() => {
                 // MOB-R80 B2 — closing the keyboard with nothing typed closes the search (as MOB-R70 E5 for Place);
@@ -730,7 +842,7 @@ function LogPanel() {
               }}
             />
             {/* MOB-R78 D3 — the Add button at the top: brass tint, ink text, at least 44px; the label as ruled in MOB-R82 C10 and MOB-R83 C4. */}
-            {cq && !exactCategory ? (
+            {cq && !exactCategory && !isIncome ? (
               <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-accent bg-accent/15 px-3 py-2 text-start font-semibold text-foreground" onClick={() => void addCategory()}>
                 <Plus aria-hidden="true" className="h-4 w-4 shrink-0" />
                 <span className="min-w-0 truncate">{`Add “${categoryQuery.trim()}” as a new category`}</span>
@@ -936,7 +1048,33 @@ function LogPanel() {
             missingSaveLabel(missing)
           )}
         </Button>
+        {editing ? (
+          <div className="flex items-center justify-between gap-3">
+            <Button type="button" variant="ghost" size="sm" className="min-h-11 font-semibold" disabled={!editRow} onClick={() => setSplitOpen(true)}>
+              Split
+            </Button>
+            <Button type="button" variant="ghost" size="sm" className="min-h-11 font-semibold text-destructive" disabled={!editRow} onClick={deleteEntry}>
+              Delete
+            </Button>
+          </div>
+        ) : null}
       </div>
+      {editing && editRow ? (
+        <SplitTransactionDialog
+          open={splitOpen}
+          onOpenChange={setSplitOpen}
+          onSuccess={() => {
+            setSplitOpen(false)
+            void queryClient.invalidateQueries()
+            leaveToActivity()
+          }}
+          txnId={editRow.id}
+          txnName={editRow.name}
+          txnAmount={editRow.amount_kd}
+          txnDate={editRow.date}
+          categories={categoryList.map((c) => c.name)}
+        />
+      ) : null}
     </Frame>
   )
 }
@@ -946,18 +1084,20 @@ function Frame({
   children,
   style,
   keyboardInset = 0,
+  title = "New expense",
 }: {
   onBack: () => void
   children: ReactNode
   style?: CSSProperties
   keyboardInset?: number
+  title?: string
 }) {
   return (
     // MOB-R69 E1 — at least 16px from both edges, plus the safe-area insets (notch, home bar).
     <div style={style} className="mx-auto flex min-h-screen w-full max-w-[28rem] flex-col gap-4 bg-background ps-[calc(1rem+env(safe-area-inset-left))] pe-[calc(1rem+env(safe-area-inset-right))] pt-[calc(1rem+var(--safe-top))]">
       <header className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-semibold">New expense</h1>
+          <h1 className="text-xl font-semibold">{title}</h1>
           <p className="text-sm text-muted-foreground">Amount and category are all you need.</p>
         </div>
         {/* E1 — the close control. Its accessible name stays "Back": it returns to where she came
