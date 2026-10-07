@@ -26,8 +26,10 @@ export function isSavingsCategoryName(name: string | null | undefined): boolean 
   return SAVINGS_CATEGORY_NAMES.includes(key)
 }
 
-export function categoryKind(name: string | null | undefined, isIncome: boolean | null | undefined): CategoryKind {
-  if (isIncome === true || (name ?? "").toLowerCase().startsWith("income")) return "income"
+// MOB-R79 F — "income" comes from the one SQL rule: the caller selects incomeCategoryFilter() as a column and
+// passes its result. No JavaScript copy of the income rule (the old one disagreed on accented names).
+export function categoryKind(name: string | null | undefined, countsAsIncome: boolean): CategoryKind {
+  if (countsAsIncome) return "income"
   return isSavingsCategoryName(name) ? "savings" : "expense"
 }
 

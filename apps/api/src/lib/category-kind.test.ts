@@ -9,7 +9,7 @@ const CASES: ReadonlyArray<[name: string | null, isIncome: boolean, expected: st
   ["Investing", false, "savings"],
   ["Savings & investing", false, "savings"],
   ["Savings account", false, "expense"],
-  ["Income: Salary", false, "income"],
+  ["Income: Salary", true, "income"],
   ["Groceries", false, "expense"],
   [null, false, "expense"],
   ["Savings", true, "income"],

@@ -37,7 +37,7 @@ const app = new Hono().route("/api/categories", categoriesRouter)
 
 describe("GET /api/categories — kind (MOB-R55 P4)", () => {
   it("marks income, savings and expense categories", async () => {
-    const cat = (id: number, name: string, isIncome: boolean) => ({ id, userId: 1, name, isIncome, isSystem: false })
+    const cat = (id: number, name: string, isIncome: boolean) => ({ id, userId: 1, name, isIncome, isSystem: false, countsAsIncome: isIncome ? 1 : 0 })
     vi.mocked(getDb).mockReturnValue(
       makeSequentialDb([
         [cat(1, "Salary", true), cat(2, "Savings & investing", false), cat(3, "Groceries", false)],

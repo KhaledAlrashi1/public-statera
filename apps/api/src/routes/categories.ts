@@ -70,7 +70,8 @@ type RemapCounts = {
 
 function serializeCategory(
   row: typeof categories.$inferSelect,
-  transactionCount = 0,
+  transactionCount: number,
+  countsAsIncome: boolean,
 ): CategoryItem {
   return {
     id: row.id,
@@ -78,7 +79,7 @@ function serializeCategory(
     is_income: row.isIncome ?? false,
     is_system: row.isSystem,
     transaction_count: transactionCount,
-    kind: categoryKind(row.name, row.isIncome),
+    kind: categoryKind(row.name, countsAsIncome),
   }
 }
 
@@ -116,7 +117,7 @@ categoriesRouter.get("/", requireAuth, readRateLimit, async (c) => {
 
     const countMap = new Map(countRows.map((r) => [r.categoryId, Number(r.count)]))
     items = cats.map(({ countsAsIncome, ...cat }) => ({
-      ...serializeCategory(cat, countMap.get(cat.id) ?? 0),
+      ...serializeCategory(cat, countMap.get(cat.id) ?? 0, readIncomeFlag(countsAsIncome)),
       counts_as_income: readIncomeFlag(countsAsIncome),
     }))
   }
@@ -136,7 +137,7 @@ categoriesRouter.post("/", requireAuth, writeRateLimit, async (c) => {
 
   const db = getDb()
   const [existing] = await db
-    .select()
+    .select({ ...getTableColumns(categories), countsAsIncome: incomeCategoryFilter() })
     .from(categories)
     .where(and(eq(categories.userId, userId), sql`LOWER(${categories.name}) = LOWER(${name})`))
     .limit(1)
@@ -148,7 +149,7 @@ categoriesRouter.post("/", requireAuth, writeRateLimit, async (c) => {
         data: null,
         error: `A category named '${existing.name}' already exists.`,
         code: "category_name_exists",
-        existing_item: serializeCategory(existing),
+        existing_item: serializeCategory(existing, 0, readIncomeFlag(existing.countsAsIncome)),
       },
       409,
     )
@@ -160,13 +161,13 @@ categoriesRouter.post("/", requireAuth, writeRateLimit, async (c) => {
     .$returningId()
 
   const [created] = await db
-    .select()
+    .select({ ...getTableColumns(categories), countsAsIncome: incomeCategoryFilter() })
     .from(categories)
     .where(eq(categories.id, newId))
     .limit(1)
 
   return c.json(
-    { ok: true, data: { item: serializeCategory(created) }, error: null, meta: {} },
+    { ok: true, data: { item: serializeCategory(created, 0, readIncomeFlag(created.countsAsIncome)) }, error: null, meta: {} },
     201,
   )
 })

@@ -67,7 +67,7 @@ describe.runIf(RUN)("category kind — SQL vs TypeScript (MOB-R55 P1)", () => {
     const got = rows.map((r) => [r.name, sqlKind(r), Number(r.expense) === 1]).sort()
     const want = rows
       .map((r) => {
-        const k = categoryKind(r.name, r.isIncome)
+        const k = categoryKind(r.name, Number(r.income) === 1)
         return [r.name, k, k === "expense"]
       })
       .sort()
