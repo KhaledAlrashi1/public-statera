@@ -195,7 +195,7 @@ const MAPPING_FIELDS = [
   { key: "name", label: "Description / Name", required: true },
   { key: "amount_kd", label: "Amount (KD)", required: true },
   { key: "category", label: "Category", required: false },
-  { key: "merchant", label: "Merchant", required: false },
+  { key: "merchant", label: "Place", required: false },
 ] as const
 
 function parsePreviewAmount(value: string): number {
@@ -1737,7 +1737,7 @@ export function PreviewImportDialog({
         </div>
 
         <div className="grid gap-1.5">
-          <Label className="text-xs">Merchant</Label>
+          <Label className="text-xs">Place</Label>
           <Input
             value={row.merchant}
             onChange={(e) => {
@@ -2202,7 +2202,7 @@ export function PreviewImportDialog({
                       <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/68">Date</span>
                     </th>
                     <th className="th-standard" style={{ width: 170 }}>
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/68">Merchant</span>
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/68">Place</span>
                     </th>
                     <th className="th-standard" style={{ minWidth: 340 }}>
                       <div className="space-y-1.5">

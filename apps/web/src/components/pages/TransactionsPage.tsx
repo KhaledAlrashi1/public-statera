@@ -335,11 +335,11 @@ export default function TransactionsPage() {
         <Button
           variant="ghost"
           onClick={() => setSettingsOpen(true)}
-          title="Manage categories, merchants, and memorized transaction titles"
+          title="Manage categories, places, and memorized transaction titles"
           className="h-9 rounded-full px-3 text-sm text-muted-foreground hover:text-foreground"
         >
           <Settings2 className="h-4 w-4" />
-          Categories & Merchants
+          Categories & Places
         </Button>
         <Button
           variant="ghost"

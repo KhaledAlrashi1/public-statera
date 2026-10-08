@@ -256,10 +256,10 @@ function TransactionsTable({
             value: merchant || "__all__",
             onChange: (v) => setMerchant(v === "__all__" ? "" : v),
             options: [
-              { value: "__all__", label: "All merchants" },
+              { value: "__all__", label: "All places" },
               ...merchants.map((m) => ({ value: m, label: m })),
             ],
-            placeholder: "All merchants",
+            placeholder: "All places",
             width: "w-[160px]",
           },
         ]}
@@ -449,7 +449,7 @@ function TransactionsTable({
                 Date
               </th>
               <th className="th-standard">
-                Merchant
+                Place
               </th>
               <th className="th-standard">
                 Category

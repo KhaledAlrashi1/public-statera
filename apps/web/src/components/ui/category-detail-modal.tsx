@@ -164,7 +164,7 @@ export function CategoryDetailModal({
                   <thead className="table-head">
                     <tr>
                       <th className="th-standard">Date</th>
-                      <th className="th-standard">Merchant</th>
+                      <th className="th-standard">Place</th>
                       <th className="th-standard">Item</th>
                       <th className="th-standard-r">Amount (KD)</th>
                     </tr>

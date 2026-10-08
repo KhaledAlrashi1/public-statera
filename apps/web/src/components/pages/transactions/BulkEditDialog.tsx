@@ -186,7 +186,7 @@ export function BulkEditDialog({
           </p>
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="grid gap-1.5">
-              <Label className="text-xs">Merchant</Label>
+              <Label className="text-xs">Place</Label>
               <Input
                 placeholder="Leave blank to keep existing"
                 value={applyMerchant}
@@ -300,7 +300,7 @@ export function BulkEditDialog({
                         />
                       </div>
                       <div className="grid gap-1.5">
-                        <Label className="text-xs">Merchant</Label>
+                        <Label className="text-xs">Place</Label>
                         <Input
                           value={row.merchant}
                           onChange={(e) => updateRow(row.id, "merchant", e.target.value)}
@@ -335,7 +335,7 @@ export function BulkEditDialog({
                     <tr>
                       <th className="th-standard w-28">Date</th>
                       <th className="th-standard">Transaction</th>
-                      <th className="th-standard w-44">Merchant</th>
+                      <th className="th-standard w-44">Place</th>
                       <th className="th-standard w-44">Category</th>
                     </tr>
                   </thead>

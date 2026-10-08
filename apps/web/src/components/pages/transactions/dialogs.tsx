@@ -188,7 +188,7 @@ export function SplitTransactionDialog({
         <DialogHeader>
           <DialogTitle>Split transaction</DialogTitle>
           <DialogDescription>
-            Divide into two or more separate transactions. Each split keeps the same date and merchant.
+            Divide into two or more separate transactions. Each split keeps the same date and place.
           </DialogDescription>
         </DialogHeader>
 
