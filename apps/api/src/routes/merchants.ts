@@ -19,6 +19,8 @@ import { getDb } from "../db/connection"
 import { zodErrorToEnvelope } from "./route-helpers"
 import { merchants } from "../db/schema/merchants"
 import { transactions } from "../db/schema/transactions"
+import { categories } from "../db/schema/categories"
+import { expenseCategoryFilter } from "../lib/payday-lib"
 import { memorizedTransactions } from "../db/schema/memorized-transactions"
 import { requireAuth } from "../middleware/auth"
 import { readRateLimit, writeRateLimit, heavyWriteRateLimit } from "../lib/rate-limit"
@@ -59,7 +61,36 @@ merchantsRouter.get("/", requireAuth, readRateLimit, async (c) => {
     .where(eq(merchants.userId, userId))
     .orderBy(sql`LOWER(${merchants.name})`, merchants.id)
 
-  return c.json({ ok: true, data: { items: rows.map(serializeMerchant) }, error: null, meta: {} })
+  // MOB-R92 E2 — each place's expense count, read-only and only on this list: the same COUNT per id as the
+  // categories list (categories.ts), over her rows at that place whose category is not income (a row with no
+  // category is an expense, as everywhere else: expenseCategoryFilter).
+  const counts = new Map<number, number>()
+  if (rows.length > 0) {
+    const countRows = await db
+      .select({
+        merchantId: transactions.merchantId,
+        count: sql<number>`COUNT(${transactions.id})`,
+      })
+      .from(transactions)
+      .leftJoin(categories, eq(transactions.categoryId, categories.id))
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          // transactions.merchantId is nullable; inArray skips NULLs at runtime
+          inArray(transactions.merchantId as Parameters<typeof inArray>[0], rows.map((r) => r.id)),
+          expenseCategoryFilter(),
+        ),
+      )
+      .groupBy(transactions.merchantId)
+    for (const r of countRows) if (r.merchantId != null) counts.set(r.merchantId, Number(r.count))
+  }
+
+  return c.json({
+    ok: true,
+    data: { items: rows.map((r) => ({ ...serializeMerchant(r), expense_count: counts.get(r.id) ?? 0 })) },
+    error: null,
+    meta: {},
+  })
 })
 
 // ── POST /api/merchants ───────────────────────────────────────────────────────

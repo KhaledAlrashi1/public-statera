@@ -72,6 +72,29 @@ describe("GET /api/merchants", () => {
     expect(body.ok).toBe(true)
     expect((body.data as Record<string, unknown>).items).toEqual([])
   })
+
+  it("gives each place its expense count, and 0 for a place with none (MOB-R92 E2)", async () => {
+    // Two awaited queries, in order: the places, then the counts per place.
+    const answers: unknown[][] = [
+      [{ id: 1, userId: 1, name: "Lulu" }, { id: 2, userId: 1, name: "Talabat" }],
+      [{ merchantId: 1, count: 3 }],
+    ]
+    const chain = (): unknown =>
+      new Proxy({}, {
+        get(_t, prop: string) {
+          if (prop === "then") return (ok: (v: unknown) => unknown) => Promise.resolve(answers.shift() ?? []).then(ok)
+          return () => chain()
+        },
+      })
+    vi.mocked(getDb).mockReturnValue({ select: () => chain() } as unknown as ReturnType<typeof getDb>)
+    const res = await app.request("/api/merchants", { headers: { Authorization: await authHeader() } })
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as { data: { items: unknown[] } }
+    expect(body.data.items).toEqual([
+      { id: 1, name: "Lulu", expense_count: 3 },
+      { id: 2, name: "Talabat", expense_count: 0 },
+    ])
+  })
 })
 
 describe("POST /api/merchants", () => {

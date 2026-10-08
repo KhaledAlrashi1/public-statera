@@ -208,6 +208,12 @@ function expensesLabel(c: Category): string | null {
   return `${c.transaction_count} expense${c.transaction_count === 1 ? "" : "s"}`
 }
 
+/** "N expenses" for a place, from the places list's count; none when the list did not send one. */
+function placeExpensesLabel(m: Merchant): string | null {
+  if (typeof m.expense_count !== "number") return null
+  return `${m.expense_count} expense${m.expense_count === 1 ? "" : "s"}`
+}
+
 // Categories have no colour of their own; a neutral square, as /log gives tiles that are not her places.
 const CATEGORY_TILE = "bg-muted text-muted-foreground"
 
@@ -752,8 +758,8 @@ function ManageMerchants({
   return (
     <>
       {opened ? (
-        // D2 — the place's own screen. Rename in place. No "Used in": the places API returns no count (no API change
-        // in this block).
+        // D2 — the place's own screen. Rename in place. MOB-R92 E3: "Used in" is plain text — Activity has no URL
+        // that opens it filtered to one place (TransactionsPage.tsx reads only ?type= and ?import=).
         <div className="space-y-4" data-testid="manage-detail">
           <BackRow onBack={() => setOpenId(null)} />
           <div className="flex items-center gap-3">
@@ -777,6 +783,11 @@ function ManageMerchants({
               ) : null}
             </div>
           </div>
+          {placeExpensesLabel(opened) ? (
+            <ListBox>
+              <DetailRow label="Used in">{placeExpensesLabel(opened)}</DetailRow>
+            </ListBox>
+          ) : null}
           <ListBox>
             <ActionRow onClick={() => setRemapSourceId(opened.id)} disabled={allMerchants.length <= 1}>
               <ArrowRightLeft className="h-4 w-4 shrink-0" />
@@ -795,7 +806,7 @@ function ManageMerchants({
             <ListBox>
               {shown.map((m) => (
                 // D2 — the place's colour as on the Log screen and in Activity (lib/tile-colours.ts).
-                <ItemRow key={m.id} name={m.name} tileClass={cn("text-white", nameColour(m.name))} meta={null} onOpen={() => openPlace(m)} />
+                <ItemRow key={m.id} name={m.name} tileClass={cn("text-white", nameColour(m.name))} meta={placeExpensesLabel(m)} onOpen={() => openPlace(m)} />
               ))}
               {canAdd ? <AddRow text={search} onAdd={() => void handleAdd()} adding={adding} /> : null}
             </ListBox>

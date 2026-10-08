@@ -41,7 +41,7 @@ beforeEach(() => {
     { id: 3, name: "Salary", transaction_count: 4, counts_as_income: true, is_income: true },
   ])
   mocks.categoriesCreate.mockResolvedValue({ id: 9, name: "Gifts" })
-  mocks.merchantsList.mockResolvedValue([{ id: 11, name: "Talabat" }, { id: 12, name: "Lulu" }])
+  mocks.merchantsList.mockResolvedValue([{ id: 11, name: "Talabat", expense_count: 1 }, { id: 12, name: "Lulu", expense_count: 9 }])
   mocks.merchantsUpdate.mockResolvedValue({ item: { id: 11, name: "Talabat Mart" } })
   mocks.merchantsDelete.mockResolvedValue({ deleted: true })
   mocks.memorizedList.mockResolvedValue({ items: [{ id: 5, canonical: "Flat white", count: 2, is_pinned: false, merchant: { name: "Lulu" }, category: { name: "Coffee" } }], total: 1, has_more: false })
@@ -102,6 +102,20 @@ describe("categories and places manager (MOB-R91 D)", () => {
     expect(screen.getByRole("textbox", { name: "Find or add a category" })).toHaveValue("gro")
     expect(screen.queryByText("Coffee")).toBeNull()
     expect(screen.getByRole("button", { name: "Places" })).toBeInTheDocument()
+  })
+
+  it("a place row says how many expenses it holds, and its screen says it under Used in, as plain text (MOB-R92 E3)", async () => {
+    renderDialog()
+    fireEvent.click(tab("Places"))
+    const lulu = (await screen.findByText("Lulu")).closest("button")!
+    expect(lulu).toHaveTextContent("9 expenses")
+    expect(screen.getByText("Talabat").closest("button")).toHaveTextContent("1 expense")
+    fireEvent.click(lulu)
+    const detail = screen.getByTestId("manage-detail")
+    const usedIn = within(detail).getByText("Used in").parentElement!
+    expect(usedIn).toHaveTextContent("9 expenses")
+    expect(within(usedIn).queryByRole("link")).toBeNull()
+    expect(within(usedIn).queryByRole("button")).toBeNull()
   })
 
   it("a place keeps its Log-screen colour and renames in place; Save shows only once the name changes", async () => {

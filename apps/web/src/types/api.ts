@@ -39,6 +39,8 @@ export interface MerchantDependentCounts {
 export interface Merchant {
   id: number
   name: string
+  // MOB-R92 E2 — her expenses at this place (GET /api/merchants only).
+  expense_count?: number
 }
 
 export interface Transaction {
