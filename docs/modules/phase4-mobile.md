@@ -12848,3 +12848,77 @@ F2. Order: B, C, D (C1–C5), E. An item that stops stays a stash; D is all or n
 F3. Push under this block: fast-forward; four jobs on ubuntu-24.04; both probes on the new sha,
   timestamped; 0 unpushed by both routes. No migration.
 F4. Drop each shipped stash after saving its patch and checking the hash.
+
+MOB-R93 — R92 results; D and C grants; ship D then C; stash cleanup
+Issued Fri 9 Oct 2026 (Kuwait) by the review channel, on CC's MOB-R92 report.
+
+A. Review of R92 (recorded)
+A1. Persisted: R92 at 12763–12850, 88 lines, sha 4c86643c…599b = issued. Strict 92, loose 94.
+A2. B (a53d4ef) and E (b45a7c4) are live. Run 37841513954: four jobs green on ubuntu-24.04.
+    Probes on b45a7c4 at 20:47:41Z (Thu 8 Oct 2026, 23:47 Kuwait). 0 unpushed. No migration.
+A3. Counts at b45a7c4 as predicted: FE 543/129; APIH 911/84/85; APII 985/10/85. Accepted.
+A4. E accepted. Counting expense rows only is what "expense count" means (an income row at
+    Upwork must not read as an expense). "Used in" stays plain text: Activity has no place
+    filter in its URL (TransactionsPage.tsx:104, :137).
+A5. C and D stopped correctly at the measure step. CC's miss (first failing line only) and its
+    method (edit a copy, rerun past each failure, restore) are recorded; standing as B3.
+A6. The MoneyInput defect CC found in D is a Tier 1 catch: unreadable text read as "clear it"
+    and Save would have sent null over her saved income. The fix is accepted and stays in D.
+A7. The R92 report mixed R91 and R92 letters ("E strings", "D's code"). From R93 on, reports
+    use the current block's letters only.
+
+B. Standing from R93
+B1. Each count line names its fields once per report (for example: tests / files passed /
+    files).
+B2. Each held stash is reported with its content hash and its base commit sha.
+B3. A break list names every line that asserts a changed string or behaviour, found past the
+    first failure, never only the first failing line.
+
+C. D, payday months: grants (each line alone; nothing else in these files changes)
+C1. IncomeQuickDialog.test.tsx:35 label "Monthly income (KD)" -> "Monthly income".
+C2. IncomeQuickDialog.test.tsx:36 button "Save income" -> "Save".
+C3. IncomeQuickDialog.test.tsx:51 expected payload "1500" -> "1500.000". Condition, before the
+    edit: cite the server line that accepts a 3-decimal income string (file:line) and one
+    existing API test that sends one. If either is missing: STOP.
+C4. IncomeQuickDialog.test.tsx:57–62: the case "an empty amount shows the error" becomes "an
+    empty box with no income saved sends nothing and closes".
+C5. BudgetPage.test.tsx:175 label -> "Monthly income".
+C6. DashboardPage.test.tsx:636 clicks "Close" instead of "Cancel"; :637 dialog name -> "Income
+    and payday".
+C7. rebuild-dashboard-snapshots.test.ts:85–88: the expected options object gains payday: null.
+C8. Unreadable text in the income box (for example "12.3456"): check what she sees at Save.
+    If the sheet closes or shows a saved toast, change it: the sheet stays open, the box shows
+    its own error, nothing is sent. One new case pins it. A line in the six Profile cases
+    rewritten under R92 may change to match; list it with before and after. If the sheet
+    already stays open with an error, change nothing and cite file:line.
+C9. Channel-ruled without asking the operator: C3's condition and C8.
+
+D. C, Profile fixes: grants
+D1. LogPage.edit.test.tsx:129 "Transaction deleted." -> "Transaction deleted".
+D2. import-dialogs.test.tsx:340 "2 imported transactions removed." -> "2 imported transactions
+    removed".
+D3. Class grant (Tier 2 only; loosens R79 A3 for this class, channel-ruled): any further test
+    line whose ONLY change is the trailing period dropped from a toast title that C changes.
+    Before the edit, grep each changed title, with its period, across apps/web test files;
+    write the predicted hit count to the predictions file; list each hit as file:line with
+    before and after. A hit is a test line containing a changed title with its period. Any
+    other kind of break: STOP.
+
+E. Order and push
+E1. Persist R93 first: blank 12851, payload from 12852. After: strict 93, loose 95.
+E2. D's five commits onto b45a7c4. Then C rebased onto D's last commit; list each conflict
+    hunk and its resolution (D's income row and code, C's strings).
+E3. D is all-or-nothing. If D stops, nothing ships. If C stops after D is green, ship D alone.
+E4. Migrations stay 8 (0000–0007); any new migration or schema file is an RM-21 STOP.
+E5. Push under this block: fast-forward; four Actions jobs succeed on ubuntu-24.04; /healthz
+    and /readyz on the new sha, timestamped; 0 unpushed by both routes.
+E6. RM-29 closes when D is live.
+
+F. Stashes
+F1. Drop R91's C1–C5 and the original E by content hash, after listing each saved patch file
+    with its sha256. Expected after R93 ships: 0 stashes (D and C consumed).
+
+G. Report back
+G1. Persistence (lines, sha256, header counts); predictions file sha; per item, counts with
+    predicted signs and the actual; C3's citations; C8's outcome; D3's hits; base shas;
+    commits, run, probes; stash list.
