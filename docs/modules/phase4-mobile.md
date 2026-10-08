@@ -12631,3 +12631,131 @@ D. Counts and close.
 D1. Base at 85639e1: FE 530/127; APIH 910/83/84; APII 983/10/84. No source commit, no push.
 D2. Report: B1–B9 in order, each with file:line and command tails; the scratch stash by content
   hash; tree clean otherwise.
+
+MOB-R91 — R90 accepted; /log top, places manager, Profile fixes ship; payday built (Thu 8 Oct 2026)
+
+Persist first, alone: blank line 12634, payload 12635–12761 (127 lines); read-back reports the
+payload sha256. After: strict 91, loose 93 (loose-only 1513, 6934). Docs-only commit.
+
+A. R90 report accepted. Findings, readout, his words and selections:
+A1. Census complete. paydayDay (users.ts:47, int NULL) and monthlyIncomeKd (:46) exist since
+  0000: no migration. Payday has no UI; only the demo seed writes it (25, when null).
+A2. Channel miss: R90 B9 preferred "most days" for the internal key; CC's script shows it breaks
+  at payday 16 (two periods under 2026-03). CC's rule (c) is adopted in C.
+A3. B6 used in-page text swaps, narrower than the scratch stash the block allowed. Accepted.
+A4. His words, verbatim: "I did steps 1 to 7. I confirm all work. Amazing work! truly."
+A5. His Layout check readouts (dark, installed app, standalone yes): innerHeight 797,
+  visualViewport.height 797, clientHeight 797, scrollHeight 844, safe-area top 0 right 0
+  bottom 34 left 0, strip top 0 height 0; scrolled: strip top -23. innerWidth 390, scrollWidth
+  390, scale 1, wider none. Safari (light, standalone no): innerHeight 765, visualViewport 765,
+  clientHeight 666, scrollHeight 765, top 0, bottom 34; scrolled: strip top -29.
+A6. Channel reading: in the installed app the top inset reads 0 (the R86 hypothesis, now
+  measured) and /log is 47px taller than the visible height (844 vs 797), so it scrolls and
+  slides under the clock. His scrolled Profile screenshot (installed app) shows content cut
+  below the clock: pages inside AppShell do not pass under it.
+A7. His words, verbatim: "I noticed that the UI/UX for managing merchants and categories is kind
+  of old. Can you update it so it's aligned with the app's theme and improve it for the mobile
+  version. I felt for a second that the merchant edit page was n't intuitive. Let's fix that. I
+  took several screenshots. If you noticed something off, fix it."
+A8. Channel questions (options were the channel's), his selections:
+  - "How should she edit a category or place?" -> "A: tap row, own screen (Recommended)".
+  - "The Log screen says "Place"; this screen says "Merchants". Which word everywhere?" ->
+    "Places (Recommended)".
+  - "Profile's Timezone setting is unused and its text is wrong. What do we do?" -> "Remove it
+    (Recommended)".
+A9. Channel findings from his screenshots: Profile Timezone says insights "use UTC calendar
+  boundaries" (false since RM-28); Security says "a strong password" (no passwords exist);
+  Email notifications names "consent expiry reminders" and "savings milestones" (removed
+  features); toasts are see-through and text behind smears into them; "Transaction deleted."
+  ends with a period, "Changes saved" does not; Profile keeps the old uppercase brass title.
+A10. Open, not in this block: Activity "Spent (loaded)" and "Showing 20 of 21" (queued); his
+  Activity readout for the sideways scroll is still owed.
+
+B. /log top fix. Tier 2.
+B1. Census first: how AppShell sizes its frame and where it scrolls (file:line); every 100vh,
+  h-screen, min-h-screen, svh, dvh in apps/web and index.html (grep, file:line, readers).
+B2. /log (new and edit) takes AppShell's pattern: the frame is the visible height (dvh, with a
+  vh fallback), content scrolls inside the frame, the Save bar sits inside it at the bottom.
+  The document itself must not scroll. Change body's min-h-screen only if B1 shows it alone
+  makes the 844; report before and after. Do NOT add apple-mobile-web-app-status-bar-style
+  (black-translucent forces a white clock over the light strip).
+B3. The readout adds: the frame's scrollHeight, clientHeight, scrollTop; probe heights for
+  100vh, 100dvh, 100svh. Prediction for his phone: document scrollHeight equals innerHeight
+  (797) at rest.
+B4. Existing tests pinning /log frame classes or the readout (grep, file:line): predict; any
+  measured break: this item stays a stash. New tests with mutations.
+B5. WebKit 375x667, 390x844, 430x932, 1024: document scrollHeight equals innerHeight on /log
+  new and edit; at 375x667 with a picker open the frame scrolls and the document does not.
+  Screenshots light and dark at 390. 1280 pixel diff against main, changed region named.
+B6. Profile "Layout check" stays until his readout confirms B.
+
+C. Payday months (R90 B9, CC's 5 commits). Tier 1. BUILT AS A STASH SERIES; nothing commits.
+  RM-29 stays in force. The series ships in one later block, after the operator's B8 counts.
+C1. Income sheet (commit 1): one sheet replaces IncomeQuickDialog at the 5 entry points and
+  Profile's inline editor (Profile shows income and payday with Edit opening the sheet). Fields:
+  monthly income, optional, through amount-text.ts (RM-27); payday, optional, days 1–31, the
+  1st reading "1st · calendar month". Save sends only the fields she changed (absent keeps,
+  B2); clearing an income she had sends null. Save visible above the iOS keyboard. Strings
+  (channel-drafted, provisional, RM-26): title "Income and payday"; "Monthly income"; "If it
+  varies, use your average month."; "Payday"; "Your month starts on this day."; "You can
+  change these anytime in Profile."; button "Save".
+C2. Server key, rule (c): payday null or 1 -> calendar month (today's behaviour); payday 2–15
+  -> the month the period starts in; 16–31 -> the next month. Day 29–31 in a shorter month
+  starts on its last day; fixed day; Kuwait's clock (RM-28). Every B4 SQL cut and default month
+  uses it. Stored budgets keep their keys (each maps to the period with that key). Payday
+  change bumps the existing cache version (snapshots, both Redis keys).
+C3. Client current month and picker options follow the key.
+C4. Labels: payday set and not 1 -> dates only, "25 Sep – 24 Oct"; otherwise as today. Pickers
+  widen to fit, never clip (widest pair measured at 390). A period outside the current year
+  adds the year once at the end ("25 Dec – 24 Jan 2026"); measure it. Axis ticks: propose a
+  short form, measure collisions at 390 and 1280.
+C5. Budget-alert key and snapshot job follow the key.
+C6. Proofs on dev: a null-payday user gets byte-equal JSON from every month route before and
+  after (regression proof, the key one). Payday 25: an expense on 24 Oct is in 2026-10, on 25
+  Oct in 2026-11. Payday 3: 2 Oct in 2026-09, 3 Oct in 2026-10. Payday 16 and 31 in February:
+  gap-free. C1: profile row before and after, only changed columns and updated_at move.
+C7. Measure breaks per commit; list each by file:line with its failure line. Report the series
+  as stash content hashes in order. Grants come next block, line by line.
+C8. Demo seed writes payday 25: under C its users get payday months. Not changed here; say in
+  the report what a fresh demo load shows under C.
+
+D. Categories and places manager (his A8 picks). Tier 2; delete and merge behaviour unchanged.
+D1. Census first: SettingsDialog structure (tabs, file:line); every action per tab and its API
+  call; whether categories can be renamed today (API and UI); tests pinning (grep); every
+  user-facing "merchant" string in apps/web (grep, file:line), legal pages listed separately.
+D2. List: one row of tabs "Categories · Places · Memorized"; one box "Find or add a
+  category/place": typing filters, and with no exact match an "Add "<text>"" row appears; rows
+  show the initial tile (a place's colour as on the Log screen), the name, "N expenses". Tap a
+  row -> its own screen: Name (rename in place), Used in (count; plain text unless a filtered
+  Activity route exists), "Merge into another place/category", "Delete place/category" as the
+  red row. Delete keeps R89 titles and today's confirm; merge keeps today's flow. Back returns
+  to the list with the search kept. Memorized keeps its actions, as rows.
+D3. If categories cannot be renamed through today's API: no Rename for categories; say so. No
+  API change in this block.
+D4. "Places": every user-facing "Merchant(s)" in apps/web becomes "Place(s)", including "Delete
+  this merchant?" -> "Delete this place?". Legal pages, API, identifiers and data unchanged.
+D5. Phone: full height on phones (dvh), 16px inputs, rows at least 44px, no box scrolling
+  inside a box; desktop keeps a dialog. WebKit 390 light and dark, 1280: screenshots.
+D6. Measured breaks: 0 -> ships; any -> stays a stash, report each. Strings provisional.
+
+E. Profile fixes (A8, A9). Tier 2.
+E1. Remove the Timezone section from Profile. Census first: readers of the saved timezone
+  (grep, file:line). The stored value and the API stay; only the screen section goes.
+E2. Security: subtitle "Keep your account safe."; heading "Two-factor authentication"; text "Add
+  a code from an authenticator app when you sign in."
+E3. Email notifications: census the emails actually sent (job and template, file:line); the
+  line names only those, as "Emails about: <types>."
+E4. Profile header takes the page-header component the other look-A pages use (name it,
+  file:line): eyebrow "Profile", title "Account and settings".
+E5. Toasts: opaque surface in light and dark (tokens, file:line). Toast titles lose a trailing
+  period: list each changed string (grep, file:line).
+E6. Measured breaks: 0 -> ships; any -> stays a stash. Strings provisional (RM-26).
+
+F. Counts, commits, push.
+F1. Predictions in the scratch file before the first edit (MOB-R60): base FE 530/127, APIH
+  910/83/84, APII 983/10/84 at 85639e1; a delta per item. 13609e1 (R90 docs) goes in this push.
+F2. One commit per item, in order B, E, D. C is a stash series only.
+F3. Push under this block: fast-forward; four jobs on ubuntu-24.04; both probes on the new sha,
+  timestamped; 0 unpushed by both routes. No migration.
+F4. Queue adds: Activity "Spent (loaded)" total; demo seed payday under C; Layout check link
+  removal after his readout.
