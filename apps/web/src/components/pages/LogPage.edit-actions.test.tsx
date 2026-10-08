@@ -64,7 +64,7 @@ describe("/log edit actions card (MOB-R88 E)", () => {
     vi.useFakeTimers()
     fireEvent.click(del)
     expect(screen.queryByRole("dialog")).toBeNull()
-    expect(mocks.toast.success).toHaveBeenCalledWith("Transaction deleted.", expect.objectContaining({ label: "Undo" }))
+    expect(mocks.toast.success).toHaveBeenCalledWith("Transaction deleted", expect.objectContaining({ label: "Undo" }))
     await act(async () => {
       vi.advanceTimersByTime(6000)
     })

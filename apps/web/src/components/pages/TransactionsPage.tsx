@@ -186,9 +186,9 @@ export default function TransactionsPage() {
       setSelectedIds(new Set())
       setBulkDeleteOpen(false)
       refreshAll()
-      toast.success(`${count} transaction${count === 1 ? "" : "s"} deleted.`)
+      toast.success(`${count} transaction${count === 1 ? "" : "s"} deleted`)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "We couldn't delete those transactions right now."
+      const msg = err instanceof Error ? err.message : "We couldn't delete those transactions right now"
       toast.error(msg)
     } finally {
       setBulkDeleting(false)
@@ -222,10 +222,10 @@ export default function TransactionsPage() {
       setPreviewOpen(false)
       setImportOpen(false)
       toast.success(
-        `Cleared ${summary.transactions_cleared} demo transactions and ${summary.budgets_cleared} demo budgets.`
+        `Cleared ${summary.transactions_cleared} demo transactions and ${summary.budgets_cleared} demo budgets`
       )
     } catch (error) {
-      const message = error instanceof Error ? error.message : "We couldn't clear the demo workspace right now."
+      const message = error instanceof Error ? error.message : "We couldn't clear the demo workspace right now"
       toast.error(message)
     } finally {
       setClearingDemoData(false)

@@ -33,7 +33,7 @@ export default function WorkspaceChoicePage() {
       const summary = await authApi.loadDemoData()
       await queryClient.invalidateQueries()
       toast.success(
-        `Loaded ${summary.transactions_created} demo transactions across ${summary.months_seeded} months.`
+        `Loaded ${summary.transactions_created} demo transactions across ${summary.months_seeded} months`
       )
       navigate("/", { replace: true })
     } catch (error) {
@@ -47,7 +47,7 @@ export default function WorkspaceChoicePage() {
         navigate("/", { replace: true })
         return
       }
-      toast.error(error instanceof Error ? error.message : "We couldn't load the demo workspace right now.")
+      toast.error(error instanceof Error ? error.message : "We couldn't load the demo workspace right now")
     } finally {
       setLoadingDemo(false)
     }

@@ -264,7 +264,7 @@ export default function BudgetPage() {
     queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
     queryClient.invalidateQueries({ queryKey: ["insights"] })
     setEditIndex(null)
-    toast.success(editIndex !== null ? "Budget updated." : "Budget added.")
+    toast.success(editIndex !== null ? "Budget updated" : "Budget added")
   }
 
   const handleDelete = (idx: number) => {
@@ -287,7 +287,7 @@ export default function BudgetPage() {
       queryClient.invalidateQueries({ queryKey: ["insights"] })
       setDeleteOpen(false)
       setDeleteIndex(null)
-      toast.success(`Budget for "${catName}" deleted.`, {
+      toast.success(`Budget for "${catName}" deleted`, {
         label: "Undo",
         onClick: async () => {
           try {
@@ -297,14 +297,14 @@ export default function BudgetPage() {
             queryClient.invalidateQueries({ queryKey: ["budget-metrics"] })
             queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
             queryClient.invalidateQueries({ queryKey: ["insights"] })
-            toast.success(`Budget for "${catName}" restored.`)
+            toast.success(`Budget for "${catName}" restored`)
           } catch (error) {
-            toast.error(error instanceof Error ? error.message : "We couldn't restore that budget right now.")
+            toast.error(error instanceof Error ? error.message : "We couldn't restore that budget right now")
           }
         },
       })
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "We couldn't delete that budget right now.")
+      toast.error(error instanceof Error ? error.message : "We couldn't delete that budget right now")
     } finally {
       setDeleting(false)
     }
@@ -320,7 +320,7 @@ export default function BudgetPage() {
       }))
       const dup = findDuplicateCategory(cloned)
       if (dup) {
-        toast.error(`We couldn't copy those budgets because "${dup}" appears more than once.`)
+        toast.error(`We couldn't copy those budgets because "${dup}" appears more than once`)
         return
       }
 
@@ -333,10 +333,10 @@ export default function BudgetPage() {
       setCopyOpen(false)
       setCopyPreview(null)
       toast.success(
-        `Copied ${cloned.length} budget ${cloned.length === 1 ? "category" : "categories"} from ${formatMonthYear(copyPreview.month)}.`
+        `Copied ${cloned.length} budget ${cloned.length === 1 ? "category" : "categories"} from ${formatMonthYear(copyPreview.month)}`
       )
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "We couldn't copy the previous month's budgets right now.")
+      toast.error(error instanceof Error ? error.message : "We couldn't copy the previous month's budgets right now")
     } finally {
       setCopying(false)
     }
@@ -347,13 +347,13 @@ export default function BudgetPage() {
     try {
       const fallback = await findMostRecentBudgetsBefore(selectedMonth, 12)
       if (!fallback.items.length || !fallback.month) {
-        toast.error("We couldn't find any previous budgets to copy.")
+        toast.error("We couldn't find any previous budgets to copy")
         return
       }
       setCopyPreview({ month: fallback.month, items: fallback.items })
       setCopyOpen(true)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "We couldn't load the previous budget preview right now.")
+      toast.error(error instanceof Error ? error.message : "We couldn't load the previous budget preview right now")
     } finally {
       setCopyPreviewLoading(false)
     }

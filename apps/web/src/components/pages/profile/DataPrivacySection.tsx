@@ -39,7 +39,7 @@ export default function DataPrivacySection() {
     setExporting(true)
     try {
       await accountApi.dataExport()
-      toast.success("Your data export has started downloading.")
+      toast.success("Your data export has started downloading")
     } catch (err) {
       if (err instanceof ApiError && err.status === 429) {
         toast.error("You've reached the data-export limit. Please try again later.")

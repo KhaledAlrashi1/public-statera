@@ -109,7 +109,7 @@ export function IncomeQuickDialog({
       // refreshes the screens that use it.
       if ("payday_day" in body) await queryClient.invalidateQueries()
       else await invalidateIncomeQueries()
-      toast.success("payday_day" in body ? "Income and payday saved" : "Monthly income saved.")
+      toast.success("payday_day" in body ? "Income and payday saved" : "Monthly income saved")
       onOpenChange(false)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : String(err))

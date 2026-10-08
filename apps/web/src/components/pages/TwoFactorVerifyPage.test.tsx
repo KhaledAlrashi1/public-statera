@@ -69,7 +69,7 @@ describe("TwoFactorVerifyPage", () => {
     enterCodeAndSubmit()
     await waitFor(() =>
       expect(mockToastWarning).toHaveBeenCalledWith(
-        "Only 2 backup codes remaining — generate new ones from Profile.",
+        "Only 2 backup codes remaining — generate new ones from Profile",
       ),
     )
     await waitFor(() => expect(screen.getByText("Dashboard")).toBeInTheDocument())

@@ -106,7 +106,7 @@ describe("WorkspaceChoicePage", () => {
       expect(screen.getByText("Home page")).toBeInTheDocument()
     })
     expect(mocks.success).toHaveBeenCalledWith(
-      "Loaded 47 demo transactions across 6 months."
+      "Loaded 47 demo transactions across 6 months"
     )
   })
 })

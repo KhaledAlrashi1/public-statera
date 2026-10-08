@@ -156,9 +156,9 @@ export function BulkEditDialog({
       }
       if (updates.length > 0) {
         await Promise.all(updates)
-        toast.success(`Updated ${updates.length} transaction${updates.length === 1 ? "" : "s"}.`)
+        toast.success(`Updated ${updates.length} transaction${updates.length === 1 ? "" : "s"}`)
       } else {
-        toast.success("No changes to save.")
+        toast.success("No changes to save")
       }
       onOpenChange(false)
       onSuccess()

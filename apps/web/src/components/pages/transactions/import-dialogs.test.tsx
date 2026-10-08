@@ -316,7 +316,7 @@ describe("PreviewImportDialog", () => {
 
     await waitFor(() => {
       expect(mocks.toast.success).toHaveBeenCalledWith(
-        "2 transactions imported.",
+        "2 transactions imported",
         expect.objectContaining({
           label: "Undo",
           durationMs: 60000,
@@ -337,7 +337,7 @@ describe("PreviewImportDialog", () => {
 
     expect(onImportComplete).toHaveBeenCalledTimes(2)
     expect(onOpenChange).toHaveBeenCalledWith(false)
-    expect(mocks.toast.success).toHaveBeenLastCalledWith("2 imported transactions removed.")
+    expect(mocks.toast.success).toHaveBeenLastCalledWith("2 imported transactions removed")
   })
 
   it("renders fuzzy duplicate warnings with the softer label", () => {

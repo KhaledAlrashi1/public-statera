@@ -536,10 +536,10 @@ export default function DashboardPage() {
       const summary = await authApi.loadDemoData()
       await invalidateFinancialQueries()
       toast.success(
-        `Loaded ${summary.transactions_created} demo transactions across ${summary.months_seeded} months.`
+        `Loaded ${summary.transactions_created} demo transactions across ${summary.months_seeded} months`
       )
     } catch (error) {
-      const message = error instanceof Error ? error.message : "We couldn't load demo data right now."
+      const message = error instanceof Error ? error.message : "We couldn't load demo data right now"
       toast.error(message)
     } finally {
       setLoadingDemoData(false)
@@ -636,10 +636,10 @@ export default function DashboardPage() {
       const summary = await authApi.clearDemoData()
       await invalidateFinancialQueries()
       toast.success(
-        `Cleared ${summary.transactions_cleared} demo transactions and ${summary.budgets_cleared} demo budgets.`
+        `Cleared ${summary.transactions_cleared} demo transactions and ${summary.budgets_cleared} demo budgets`
       )
     } catch (error) {
-      const message = error instanceof Error ? error.message : "We couldn't clear the demo workspace right now."
+      const message = error instanceof Error ? error.message : "We couldn't clear the demo workspace right now"
       toast.error(message)
     } finally {
       setClearingDemoData(false)
@@ -672,7 +672,7 @@ export default function DashboardPage() {
       queryClient.invalidateQueries({ queryKey: ["insights"] }),
     ])
     setBudgetDialogOpen(false)
-    toast.success("Budget added.")
+    toast.success("Budget added")
   }, [budgetResp?.items, queryClient, selectedMonth, toast])
 
   return (

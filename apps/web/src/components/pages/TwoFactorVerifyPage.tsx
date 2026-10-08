@@ -31,7 +31,7 @@ export default function TwoFactorVerifyPage() {
       if (result.warning === "BACKUP_CODES_LOW" && result.backupCodesRemaining !== undefined) {
         const n = result.backupCodesRemaining
         toast.warning(
-          `Only ${n} backup code${n === 1 ? "" : "s"} remaining — generate new ones from Profile.`,
+          `Only ${n} backup code${n === 1 ? "" : "s"} remaining — generate new ones from Profile`,
         )
       }
       navigate(deleteIntent ? "/delete-account/confirm" : "/")

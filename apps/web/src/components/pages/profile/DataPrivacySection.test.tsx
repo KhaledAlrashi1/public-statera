@@ -53,7 +53,7 @@ describe("DataPrivacySection", () => {
     fireEvent.click(screen.getByRole("button", { name: /^download$/i }))
     await waitFor(() => expect(mockExport).toHaveBeenCalledTimes(1))
     await waitFor(() =>
-      expect(mockToastSuccess).toHaveBeenCalledWith("Your data export has started downloading."),
+      expect(mockToastSuccess).toHaveBeenCalledWith("Your data export has started downloading"),
     )
   })
 

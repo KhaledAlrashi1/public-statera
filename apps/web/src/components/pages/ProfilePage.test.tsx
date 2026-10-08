@@ -88,7 +88,7 @@ describe("ProfilePage — Monthly income (MOB-R36 C3)", () => {
     fireEvent.change(field, { target: { value: "1250.500" } })
     fireEvent.click(screen.getByRole("button", { name: "Save" }))
     await waitFor(() => expect(mocks.updateProfile).toHaveBeenCalledWith({ monthly_income_kd: "1250.500" }))
-    await waitFor(() => expect(mocks.toast.success).toHaveBeenCalledWith("Monthly income saved."))
+    await waitFor(() => expect(mocks.toast.success).toHaveBeenCalledWith("Monthly income saved"))
   })
 
   it("clearing the income in the sheet sends null", async () => {

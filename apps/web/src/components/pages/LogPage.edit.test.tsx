@@ -125,8 +125,8 @@ describe("/log edit mode (MOB-R87 D)", () => {
     vi.useFakeTimers()
     fireEvent.click(screen.getByRole("button", { name: "Delete expense" }))
     expect(screen.queryByRole("dialog")).toBeNull()
-    expect(mocks.toast.success).toHaveBeenCalledWith("Transaction deleted.", expect.objectContaining({ label: "Undo" }))
-    const undo = mocks.toast.success.mock.calls.find((c) => c[0] === "Transaction deleted.")![1] as { onClick: () => void }
+    expect(mocks.toast.success).toHaveBeenCalledWith("Transaction deleted", expect.objectContaining({ label: "Undo" }))
+    const undo = mocks.toast.success.mock.calls.find((c) => c[0] === "Transaction deleted")![1] as { onClick: () => void }
     undo.onClick()
     await act(async () => {
       vi.advanceTimersByTime(7000)

@@ -1489,10 +1489,10 @@ export function PreviewImportDialog({
       setImportSummary(null)
       onOpenChange(false)
       toast.success(
-        `${result.deleted_count} imported transaction${result.deleted_count === 1 ? "" : "s"} removed.`
+        `${result.deleted_count} imported transaction${result.deleted_count === 1 ? "" : "s"} removed`
       )
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "We couldn't undo that import right now."
+      const msg = err instanceof Error ? err.message : "We couldn't undo that import right now"
       toast.error(msg)
     }
   }
@@ -1547,7 +1547,7 @@ export function PreviewImportDialog({
         const expiresAt = Date.now() + 60_000
         let undone = false
         toast.success(
-          `${importedCount} transaction${importedCount === 1 ? "" : "s"} imported.`,
+          `${importedCount} transaction${importedCount === 1 ? "" : "s"} imported`,
           {
             label: "Undo",
             durationMs: 60_000,
@@ -1559,7 +1559,7 @@ export function PreviewImportDialog({
           }
         )
       } else if (importedCount > 0) {
-        toast.success(`${importedCount} transaction${importedCount === 1 ? "" : "s"} imported.`)
+        toast.success(`${importedCount} transaction${importedCount === 1 ? "" : "s"} imported`)
       }
     } catch (err) {
       if (err instanceof ApiError && err.code === "demo_data_replace_required") {

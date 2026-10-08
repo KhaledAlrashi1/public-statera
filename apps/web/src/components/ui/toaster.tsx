@@ -55,11 +55,13 @@ const ICONS: Record<ToastType, typeof CheckCircle2> = {
   info: Info,
 }
 
+// MOB-R91 E5 — an opaque surface: the card colour with a tenth of the tone mixed in, so text behind a toast never
+// shows through it (the old bg-<tone>/10 was 90% see-through). Same tint as before, now over the card, in both themes.
 const STYLES: Record<ToastType, string> = {
-  success: "border-success/30 bg-success/10 text-foreground",
-  error: "border-destructive/30 bg-destructive/10 text-foreground",
-  warning: "border-warning/35 bg-warning/10 text-foreground",
-  info: "border-primary/30 bg-primary/10 text-foreground",
+  success: "border-success/30 bg-[color-mix(in_oklab,var(--color-success)_10%,var(--color-card))] text-foreground",
+  error: "border-destructive/30 bg-[color-mix(in_oklab,var(--color-destructive)_10%,var(--color-card))] text-foreground",
+  warning: "border-warning/35 bg-[color-mix(in_oklab,var(--color-warning)_10%,var(--color-card))] text-foreground",
+  info: "border-primary/30 bg-[color-mix(in_oklab,var(--color-primary)_10%,var(--color-card))] text-foreground",
 }
 
 const ICON_STYLES: Record<ToastType, string> = {
@@ -81,7 +83,7 @@ function ToastItem({
   return (
     <div
       className={cn(
-        "pointer-events-auto flex items-start gap-3 rounded-[var(--radius-card)] border px-4 py-3 shadow-[var(--shadow-level-3)] backdrop-blur-sm",
+        "pointer-events-auto flex items-start gap-3 rounded-[var(--radius-card)] border px-4 py-3 shadow-[var(--shadow-level-3)]",
         "transition-all duration-300",
         t.dismissing ? "toast-slide-out" : "toast-slide-in",
         STYLES[t.type]

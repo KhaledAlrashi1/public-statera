@@ -174,7 +174,7 @@ export function SplitTransactionDialog({
       )
       onOpenChange(false)
       onSuccess()
-      toast.success(`Transaction split into ${splits.length}.`)
+      toast.success(`Transaction split into ${splits.length}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : "We couldn't split this transaction right now.")
     } finally {

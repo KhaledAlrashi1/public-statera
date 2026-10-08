@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { LogOut } from "lucide-react"
 import { authApi } from "@/lib/api"
@@ -19,41 +19,6 @@ import { setLayoutCheck } from "@/lib/layout-check"
 import { panelSection } from "@/components/ui/patterns"
 
 const PROFILE_NAME_MAX_LENGTH = 64
-
-const DEFAULT_PROFILE_TIMEZONE = "Asia/Kuwait"
-const COMMON_TIMEZONE_SUGGESTIONS = [
-  "Asia/Kuwait",
-  "Asia/Riyadh",
-  "Asia/Dubai",
-  "Asia/Qatar",
-  "Asia/Bahrain",
-  "Asia/Jerusalem",
-  "Europe/London",
-  "Europe/Paris",
-  "UTC",
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Los_Angeles",
-]
-
-function detectBrowserTimezone(): string | null {
-  try {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-    return typeof tz === "string" && tz.trim() ? tz.trim() : null
-  } catch {
-    return null
-  }
-}
-
-function buildTimezoneSuggestions(browserTimezone: string | null): string[] {
-  return Array.from(
-    new Set(
-      [browserTimezone, ...COMMON_TIMEZONE_SUGGESTIONS]
-        .filter((value): value is string => Boolean(value && value.trim()))
-    )
-  )
-}
 
 // ─── Inline toggle switch (no extra dependency) ──────────────────────────────
 function Toggle({
@@ -111,20 +76,11 @@ export default function ProfilePage() {
   const [loadingProfilePreferences, setLoadingProfilePreferences] = useState(false)
   const [profileLoadError, setProfileLoadError] = useState<string | null>(null)
   const [savingEmailNotifications, setSavingEmailNotifications] = useState(false)
-  const [timezone, setTimezone] = useState(DEFAULT_PROFILE_TIMEZONE)
-  const [savedTimezone, setSavedTimezone] = useState(DEFAULT_PROFILE_TIMEZONE)
-  const [savingTimezone, setSavingTimezone] = useState(false)
 
   // ── Security / 2FA ──
   const [twoFactorSetupData, setTwoFactorSetupData] = useState<TwoFactorSetupData | null>(null)
   const [twoFactorLoading, setTwoFactorLoading] = useState(false)
   const [twoFactorError, setTwoFactorError] = useState("")
-
-  const browserTimezone = useMemo(() => detectBrowserTimezone(), [])
-  const timezoneSuggestions = useMemo(
-    () => buildTimezoneSuggestions(browserTimezone),
-    [browserTimezone]
-  )
 
   // ─── Loaders ──────────────────────────────────────────────────────────────
 
@@ -137,14 +93,11 @@ export default function ProfilePage() {
       const storedIncome = res.profile?.monthly_income_kd ?? null
       setSavedMonthlyIncome(storedIncome)
       setSavedPayday(res.profile?.payday_day ?? null)
-      const nextTimezone = res.profile?.timezone?.trim() || DEFAULT_PROFILE_TIMEZONE
-      setTimezone(nextTimezone)
-      setSavedTimezone(nextTimezone)
       setProfileLoadError(null)
     } catch {
       setEmailNotificationsEnabled(null)
       setProfileLoadError("Couldn't load profile preferences.")
-      toast.error("Couldn't load profile preferences.")
+      toast.error("Couldn't load profile preferences")
     } finally {
       setLoadingProfilePreferences(false)
     }
@@ -184,9 +137,9 @@ export default function ProfilePage() {
         last_name: lastName.trim() || null,
       })
       await refreshUser()
-      toast.success("Name updated.")
+      toast.success("Name updated")
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "We couldn't update your name right now."
+      const msg = err instanceof Error ? err.message : "We couldn't update your name right now"
       toast.error(msg)
     } finally {
       setSavingName(false)
@@ -199,35 +152,13 @@ export default function ProfilePage() {
     try {
       const res = await authApi.updateProfile({ email_notifications_enabled: enabled })
       setEmailNotificationsEnabled(res.profile?.email_notifications_enabled ?? enabled)
-      toast.success(enabled ? "Email notifications enabled." : "Email notifications disabled.")
+      toast.success(enabled ? "Email notifications enabled" : "Email notifications disabled")
     } catch (err) {
       setEmailNotificationsEnabled(previous)
-      const msg = err instanceof Error ? err.message : "We couldn't update your email notifications right now."
+      const msg = err instanceof Error ? err.message : "We couldn't update your email notifications right now"
       toast.error(msg)
     } finally {
       setSavingEmailNotifications(false)
-    }
-  }
-
-  const saveTimezonePreference = async () => {
-    const trimmedTimezone = timezone.trim()
-    if (!trimmedTimezone) {
-      toast.error("Enter a valid IANA timezone such as Asia/Kuwait.")
-      return
-    }
-
-    setSavingTimezone(true)
-    try {
-      const res = await authApi.updateProfile({ timezone: trimmedTimezone })
-      const nextTimezone = res.profile?.timezone?.trim() || trimmedTimezone
-      setTimezone(nextTimezone)
-      setSavedTimezone(nextTimezone)
-      toast.success(`Timezone saved as ${nextTimezone}.`)
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "We couldn't update your timezone right now."
-      toast.error(msg)
-    } finally {
-      setSavingTimezone(false)
     }
   }
 
@@ -243,7 +174,7 @@ export default function ProfilePage() {
       })
       toast.success("2FA setup generated. Save your backup codes.")
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "We couldn't start two-factor setup right now."
+      const msg = err instanceof Error ? err.message : "We couldn't start two-factor setup right now"
       setTwoFactorError(msg)
       toast.error(msg)
     } finally {
@@ -258,9 +189,9 @@ export default function ProfilePage() {
       await authApi.twoFactorConfirm(code)
       setTwoFactorSetupData(null)
       await refreshUser()
-      toast.success("Two-factor authentication enabled.")
+      toast.success("Two-factor authentication enabled")
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "We couldn't confirm your two-factor code right now."
+      const msg = err instanceof Error ? err.message : "We couldn't confirm your two-factor code right now"
       setTwoFactorError(msg)
       toast.error(msg)
     } finally {
@@ -275,9 +206,9 @@ export default function ProfilePage() {
       await authApi.twoFactorDisable(payload)
       setTwoFactorSetupData(null)
       await refreshUser()
-      toast.success("Two-factor authentication disabled.")
+      toast.success("Two-factor authentication disabled")
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "We couldn't turn off two-factor authentication right now."
+      const msg = err instanceof Error ? err.message : "We couldn't turn off two-factor authentication right now"
       setTwoFactorError(msg)
       toast.error(msg)
     } finally {
@@ -298,7 +229,7 @@ export default function ProfilePage() {
         variant="lookA"
         badge="Profile"
         badgeDotClassName="bg-primary"
-        title="Account, security, and preferences"
+        title="Account and settings"
         actions={
           <Button
             variant="outline"
@@ -409,15 +340,12 @@ export default function ProfilePage() {
       <section className={panelSection({ animated: true, stagger: "3", className: "p-5" })}>
         <h2 className="text-lg font-semibold">Security</h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Protect your account with a strong password and two-factor authentication.
+          Keep your account safe.
         </p>
         <div className="mt-4 border-t border-border/60 pt-4">
-          <h3 className="text-sm font-semibold">Two-Factor Authentication</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {twoFactorEnabled
-              ? "2FA is active. You can disable it using your password and current code."
-              : "Add an extra layer of security with an authenticator app."}
-          </p>
+          <h3 className="text-sm font-semibold">Two-factor authentication</h3>
+          {/* MOB-R91 E2 — one line in both states; the old "on" line named a password, and there are no passwords. */}
+          <p className="mt-1 text-xs text-muted-foreground">Add a code from an authenticator app when you sign in.</p>
           <div className="mt-3">
             <TwoFactorSetup
               enabled={twoFactorEnabled}
@@ -468,7 +396,9 @@ export default function ProfilePage() {
                 Email notifications
               </Label>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Budget alerts, consent expiry reminders, and savings milestones.
+                {/* MOB-R91 E3 — the toggle governs one email: the budget alert (budget-alerts-job.ts:154). Sign-in links are
+                    sent whatever it says, so they are not named here. */}
+                Emails about: budget alerts.
               </p>
             </div>
             <Toggle
@@ -480,66 +410,6 @@ export default function ProfilePage() {
                 void updateEmailNotificationPreference(v, previous)
               }}
             />
-          </div>
-          <div className="py-3 border-b border-border/50 last:border-b-0">
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                <div className="max-w-xl">
-                  <Label htmlFor="pref-timezone" className="cursor-pointer select-none">
-                    Timezone
-                  </Label>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    Save your preferred IANA timezone for future analytics localization. Time-based insights currently
-                    use UTC calendar boundaries.
-                  </p>
-                </div>
-                <div className="w-full sm:max-w-sm">
-                  <Input
-                    id="pref-timezone"
-                    value={timezone}
-                    onChange={(e) => setTimezone(e.target.value)}
-                    placeholder={DEFAULT_PROFILE_TIMEZONE}
-                    list="profile-timezone-options"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    spellCheck={false}
-                    disabled={loadingProfilePreferences || savingTimezone}
-                  />
-                  <datalist id="profile-timezone-options">
-                    {timezoneSuggestions.map((zone) => (
-                      <option key={zone} value={zone} />
-                    ))}
-                  </datalist>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {browserTimezone
-                      ? `Browser detected: ${browserTimezone}. Examples: Asia/Kuwait, Europe/London, America/New_York.`
-                      : "Use an IANA timezone such as Asia/Kuwait, Europe/London, or America/New_York."}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (browserTimezone) setTimezone(browserTimezone)
-                  }}
-                  disabled={!browserTimezone || loadingProfilePreferences || savingTimezone}
-                >
-                  Use browser timezone
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => void saveTimezonePreference()}
-                  loading={savingTimezone}
-                  disabled={loadingProfilePreferences || savingTimezone || !timezone.trim() || timezone.trim() === savedTimezone}
-                >
-                  {savingTimezone ? "Saving..." : "Save timezone"}
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
       </section>

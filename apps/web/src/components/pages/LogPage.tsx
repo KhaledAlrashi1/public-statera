@@ -594,11 +594,11 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
         await transactionsApi.delete(id)
         void queryClient.invalidateQueries()
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "We couldn't delete this transaction right now.")
+        toast.error(err instanceof Error ? err.message : "We couldn't delete this transaction right now")
         void queryClient.invalidateQueries()
       }
     }, 6000)
-    toast.success("Transaction deleted.", {
+    toast.success("Transaction deleted", {
       label: "Undo",
       onClick: () => {
         undone = true

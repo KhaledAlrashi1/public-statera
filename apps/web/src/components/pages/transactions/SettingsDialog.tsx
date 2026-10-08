@@ -298,9 +298,9 @@ function ManageCategories({
       setSearch("")
       onRefresh()
       void loadAll()
-      toast.success(`Category "${name}" created.`)
+      toast.success(`Category "${name}" created`)
     } catch {
-      toast.error("We couldn't create that category right now.")
+      toast.error("We couldn't create that category right now")
     } finally {
       setAdding(false)
     }
@@ -325,7 +325,7 @@ function ManageCategories({
       setOpenId(null)
       onRefresh()
       void loadAll()
-      toast.success("Category deleted.")
+      toast.success("Category deleted")
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         const code = err.code
@@ -340,11 +340,11 @@ function ManageCategories({
           const periods = meta.conflicting_periods as string[]
           setDelState({ phase: "conflict", conflicting_periods: periods ?? [] })
         } else {
-          toast.error(err.message || "Could not delete category.")
+          toast.error(err.message || "Could not delete category")
           setDelState({ phase: "idle" })
         }
       } else {
-        toast.error("We couldn't delete that category right now.")
+        toast.error("We couldn't delete that category right now")
         setDelState({ phase: "idle" })
       }
     } finally {
@@ -361,7 +361,7 @@ function ManageCategories({
       onRefresh()
       void loadAll()
       const txnLabel = `${result.remapped_count} transaction${result.remapped_count === 1 ? "" : "s"}`
-      toast.success(`Moved ${txnLabel} to target category.`)
+      toast.success(`Moved ${txnLabel} to target category`)
     } catch (err) {
       if (err instanceof ApiError && err.status === 409 && err.code === "budget_conflict") {
         const periods = (err.meta?.conflicting_periods as string[]) ?? []
@@ -369,7 +369,7 @@ function ManageCategories({
           `Budget conflict for period${periods.length === 1 ? "" : "s"}: ${periods.join(", ")}. Resolve before merging.`
         )
       } else {
-        toast.error("We couldn't merge that category right now.")
+        toast.error("We couldn't merge that category right now")
       }
     } finally {
       setRemapping(false)
@@ -667,9 +667,9 @@ function ManageMerchants({
       setSearch("")
       onRefresh()
       void loadAll()
-      toast.success(`Place "${name}" created.`)
+      toast.success(`Place "${name}" created`)
     } catch {
-      toast.error("We couldn't create that place right now.")
+      toast.error("We couldn't create that place right now")
     } finally {
       setAdding(false)
     }
@@ -690,9 +690,9 @@ function ManageMerchants({
         prev.map((m) => (m.id === id ? { ...m, name: editName.trim() } : m))
       )
       onRefresh()
-      toast.success("Place renamed.")
+      toast.success("Place renamed")
     } catch {
-      toast.error("We couldn't rename that place right now.")
+      toast.error("We couldn't rename that place right now")
     } finally {
       setEditSaving(false)
     }
@@ -717,7 +717,7 @@ function ManageMerchants({
       setOpenId(null)
       onRefresh()
       void loadAll()
-      toast.success("Place deleted.")
+      toast.success("Place deleted")
     } catch (err) {
       if (err instanceof ApiError && err.status === 409 && err.code === "has_dependents") {
         const counts = err.meta?.dependent_counts as MerchantDependentCounts
@@ -726,7 +726,7 @@ function ManageMerchants({
         setReassignTargetId(firstNonSource ? String(firstNonSource.id) : "")
         setDelState({ phase: "reassign", id, name, counts })
       } else {
-        toast.error("We couldn't delete that place right now.")
+        toast.error("We couldn't delete that place right now")
         setDelState({ phase: "idle" })
       }
     } finally {
@@ -744,9 +744,9 @@ function ManageMerchants({
       onRefresh()
       void loadAll()
       const txnLabel = `${result.remapped_count} transaction${result.remapped_count === 1 ? "" : "s"}`
-      toast.success(`Moved ${txnLabel} to target place.`)
+      toast.success(`Moved ${txnLabel} to target place`)
     } catch {
-      toast.error("We couldn't merge that place right now.")
+      toast.error("We couldn't merge that place right now")
     } finally {
       setRemapping(false)
     }
@@ -992,7 +992,7 @@ function ManageMemorized() {
       setHasMore(data.has_more)
       setLoaded(true)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Couldn't load memorized transactions.")
+      toast.error(err instanceof Error ? err.message : "Couldn't load memorized transactions")
     } finally {
       setLoading(false)
     }
@@ -1015,7 +1015,7 @@ function ManageMemorized() {
       const data = await memorizedApi.pin(item.id, next)
       setItems((prev) => prev.map((i) => (i.id === item.id ? data.item : i)))
     } catch {
-      toast.error("Couldn't update pin state.")
+      toast.error("Couldn't update pin state")
     }
   }
 
@@ -1027,9 +1027,9 @@ function ManageMemorized() {
       setItems((prev) => prev.filter((i) => i.id !== confirmDelId))
       setTotal((prev) => Math.max(0, prev - 1))
       setConfirmDelId(null)
-      toast.success("Memorized transaction deleted.")
+      toast.success("Memorized transaction deleted")
     } catch {
-      toast.error("Couldn't delete that memorized transaction.")
+      toast.error("Couldn't delete that memorized transaction")
     } finally {
       setDeleting(false)
     }
