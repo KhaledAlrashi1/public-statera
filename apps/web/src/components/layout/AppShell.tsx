@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useToast } from "@/components/ui/toaster"
 import CommandPalette from "./CommandPalette"
+import { PaydaySync } from "./PaydaySync"
 
 // ============================================================
 // Navigation items — Profile is accessible via the user-name
@@ -219,6 +220,7 @@ function AppShellLayout() {
     // MOB-R73 E5 — below lg the FAB is gone; the padding now clears the tab bar and its raised Log
     // circle only (pb-24 = 96px over a ~60px bar plus the ~20px the circle rises above it).
     <div className="relative min-h-screen bg-background pt-[var(--safe-top)] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-24">
+      <PaydaySync />
       {/* Skip to content — a11y */}
       <a
         href="#main-content"

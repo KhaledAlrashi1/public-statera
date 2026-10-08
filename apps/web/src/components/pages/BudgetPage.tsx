@@ -2,7 +2,8 @@ import { Target } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { analyticsApi } from "@/lib/api"
-import { cn, fmt3, formatDeltaLabel, formatKD, today, toYearMonth, isEditableMonth, labelForYM, prevMonth as prevMonthUtil } from "@/lib/utils"
+import { cn, currentMonthKeyNow, fmt3, formatDeltaLabel, formatKD, isEditableMonth, labelForYM, prevMonth as prevMonthUtil } from "@/lib/utils"
+import { usePayday } from "@/lib/payday-months"
 import { formatMonthYear } from "@/lib/home-summary"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
@@ -50,7 +51,12 @@ export default function BudgetPage() {
   const queryClient = useQueryClient()
   // MOB-R47 Part A — "Set income" / "Edit income" open the income pop-up instead of Profile.
   const [incomeDialogOpen, setIncomeDialogOpen] = useState(false)
-  const [selectedMonth, setSelectedMonth] = useState(toYearMonth(today()))
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthKeyNow())
+  // MOB-R91 C3 — when her payday arrives or changes, the plan opens on the month that holds today.
+  const payday = usePayday()
+  useEffect(() => {
+    setSelectedMonth(currentMonthKeyNow())
+  }, [payday])
   const [addOpen, setAddOpen] = useState(false)
   const [editIndex, setEditIndex] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState("")

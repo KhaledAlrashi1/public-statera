@@ -20,9 +20,9 @@ import {
   formatKD,
   getBudgetUtilizationFill,
   getBudgetUtilizationTone,
-  today,
-  toYearMonth,
+  currentMonthKeyNow,
 } from "@/lib/utils"
+import { shiftKey } from "@/lib/payday-months"
 import { validateNonNegativeAmount } from "@/lib/validation"
 import {
   Dialog,
@@ -778,11 +778,9 @@ export function BudgetTable({
 }
 
 function getBudgetMonthOptions(): { value: string; label: string }[] {
-  const currStr = toYearMonth(today())
-  const [cy, cm] = currStr.split("-").map(Number)
-  const nm = cm === 12 ? 1 : cm + 1
-  const ny = cm === 12 ? cy + 1 : cy
-  const nextStr = `${ny}-${String(nm).padStart(2, "0")}`
+  // MOB-R91 C3 — this month and the next by her payday.
+  const currStr = currentMonthKeyNow()
+  const nextStr = shiftKey(currStr, 1)
   return [
     { value: currStr, label: `This month — ${formatMonthYear(currStr)}` },
     { value: nextStr, label: `Next month — ${formatMonthYear(nextStr)}` },

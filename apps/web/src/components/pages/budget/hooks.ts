@@ -1,7 +1,8 @@
 import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { analyticsApi, budgetsApi, categoriesApi } from "@/lib/api"
-import { kuwaitNow, prevMonth as prevMonthUtil, today, toYearMonth } from "@/lib/utils"
+import { currentMonthKeyNow, prevMonth as prevMonthUtil } from "@/lib/utils"
+import { shiftKey, usePayday } from "@/lib/payday-months"
 import type { BudgetProfileContext, BudgetRange } from "./sections"
 
 export type BudgetItem = { category: string; amount_kd: string }
@@ -9,9 +10,6 @@ export type BudgetData = {
   items: BudgetItem[]
   profileContext: BudgetProfileContext | null
 }
-
-const monthKey = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
 
 export async function getBudgets(month: string) {
   const data = await budgetsApi.get(month)
@@ -57,15 +55,12 @@ export function findDuplicateCategory(items: BudgetItem[]) {
 }
 
 export function useBudgetMonthOptions(count = 24) {
+  // MOB-R91 C3 — from today's month by her payday, back one key at a time.
+  const payday = usePayday()
   return useMemo(() => {
-    const months: string[] = []
-    const d = kuwaitNow()
-    for (let i = 0; i < count; i++) {
-      months.push(monthKey(d))
-      d.setMonth(d.getMonth() - 1)
-    }
-    return months
-  }, [count])
+    const current = currentMonthKeyNow()
+    return Array.from({ length: count }, (_, i) => shiftKey(current, -i))
+  }, [count, payday]) // eslint-disable-line react-hooks/exhaustive-deps
 }
 
 export function useBudgetActiveMonths() {
@@ -80,19 +75,18 @@ export function useBudgetActiveMonths() {
     staleTime: 30_000,
   })
 
+  const payday = usePayday()
   const monthOptions = useMemo(() => {
-    const currStr = toYearMonth(today())
-    const [cy, cm] = currStr.split("-").map(Number)
-    const nm = cm === 12 ? 1 : cm + 1
-    const ny = cm === 12 ? cy + 1 : cy
-    const nextStr = `${ny}-${String(nm).padStart(2, "0")}`
+    // MOB-R91 C3 — this month and the next by her payday.
+    const currStr = currentMonthKeyNow()
+    const nextStr = shiftKey(currStr, 1)
 
     const set = new Set<string>(activeMonths)
     set.add(currStr)
     set.add(nextStr)
 
     return Array.from(set).sort((a, b) => b.localeCompare(a))
-  }, [activeMonths])
+  }, [activeMonths, payday]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     monthOptions,

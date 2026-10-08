@@ -4,6 +4,7 @@
 // integer fils (lib/log-amount toFils) and round half up; no float touches a ledger figure.
 // Remaining is K1's figure (income - expenses - savings, clamped at 0); nothing new is computed.
 import { formatKD } from "./utils"
+import { getPayday, paydayActive, periodBoundsForKey } from "./payday-months"
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -36,6 +37,16 @@ export function homeEyebrow(monthKey: string, currentMonthKey: string, today: Da
   if (!parsed) return monthKey
   if (monthKey < currentMonthKey) return `${formatMonthYear(monthKey)} · closed`
   if (monthKey > currentMonthKey) return formatMonthYear(monthKey)
+  // MOB-R91 C3 — under a payday the day count runs from the period's first day over the period's length.
+  const payday = getPayday()
+  if (paydayActive(payday)) {
+    const { start, end } = periodBoundsForKey(payday, monthKey)
+    const day = (iso: string) => Date.UTC(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10)))
+    const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
+    const dayNo = Math.round((todayUtc - day(start)) / 86_400_000) + 1
+    const length = Math.round((day(end) - day(start)) / 86_400_000) + 1
+    return `${formatMonthYear(monthKey)} · day ${dayNo} of ${length}`
+  }
   const daysInMonth = new Date(parsed.year, parsed.month, 0).getDate()
   return `${formatMonthYear(monthKey)} · day ${today.getDate()} of ${daysInMonth}`
 }

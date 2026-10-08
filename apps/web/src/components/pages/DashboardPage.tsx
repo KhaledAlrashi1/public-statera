@@ -2,7 +2,8 @@ import { LayoutDashboard } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
-import { kuwaitNow, prevMonth as prevMonthUtil, labelForYM } from "@/lib/utils"
+import { currentMonthKeyNow, kuwaitNow, prevMonth as prevMonthUtil, labelForYM } from "@/lib/utils"
+import { usePayday } from "@/lib/payday-months"
 import { authApi, notificationsApi } from "@/lib/api"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -54,7 +55,11 @@ export default function DashboardPage() {
   const queryClient = useQueryClient()
   const toast = useToast()
   const now = kuwaitNow()
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+  // MOB-R91 C3 — today's month follows her payday (the calendar month when none is set).
+  const payday = usePayday()
+  const currentMonth = currentMonthKeyNow()
+  // When today's month moves (her payday arrived or changed), a selection that was "this month" follows it.
+  const lastCurrentMonth = useRef(currentMonth)
   const setupGuideSyncInFlight = useRef(false)
 
   const [selectedMonth, setSelectedMonth] = useState<string>(currentMonth)
@@ -173,11 +178,14 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!monthOptions.length) return
     setSelectedMonth((prev) => {
-      if (prev && monthOptions.includes(prev)) return prev
+      if (prev && prev !== lastCurrentMonth.current && monthOptions.includes(prev)) return prev
       if (monthOptions.includes(currentMonth)) return currentMonth
       return monthOptions[0]
     })
   }, [monthOptions, currentMonth])
+  useEffect(() => {
+    lastCurrentMonth.current = currentMonth
+  }, [currentMonth, payday])
 
   const monthExpensesRaw = selectedMonth ? (monthlyKpiMap.get(selectedMonth)?.expenses || 0) : 0
 

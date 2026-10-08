@@ -5,7 +5,8 @@ import { Info, Sparkles } from "lucide-react"
 
 import { analyticsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
-import { formatKD, kuwaitNow, labelForYM, prevMonth as prevMonthUtil, toYearMonth, today } from "@/lib/utils"
+import { currentMonthKeyNow, formatKD, kuwaitNow, labelForYM, prevMonth as prevMonthUtil } from "@/lib/utils"
+import { paydayActive, periodBoundsForKey, usePayday } from "@/lib/payday-months"
 import PageHeader from "@/components/layout/PageHeader"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -86,8 +87,13 @@ function persistDismissedRecurringNames(
 export default function InsightsPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const currentMonth = toYearMonth(today())
+  // MOB-R91 C3 — today's month follows her payday; when it arrives or changes, Insights opens on that month.
+  const payday = usePayday()
+  const currentMonth = currentMonthKeyNow()
   const [selectedMonth, setSelectedMonth] = useState(currentMonth)
+  useEffect(() => {
+    setSelectedMonth(currentMonthKeyNow())
+  }, [payday])
   const monthLabel = labelForYM(selectedMonth)
   const prevMonth = prevMonthUtil(selectedMonth)
   const [dismissedRecurringNames, setDismissedRecurringNames] = useState<Set<string>>(new Set())
@@ -115,8 +121,13 @@ export default function InsightsPage() {
     if (selectedMonth === currentMonth) return kuwaitNow()
     const [year, month] = selectedMonth.split("-").map(Number)
     if (!Number.isFinite(year) || !Number.isFinite(month)) return kuwaitNow()
+    // A past month's last day: the period's last day when a payday cuts months.
+    if (paydayActive(payday)) {
+      const end = periodBoundsForKey(payday, selectedMonth).end
+      return new Date(Number(end.slice(0, 4)), Number(end.slice(5, 7)) - 1, Number(end.slice(8, 10)))
+    }
     return new Date(year, month, 0)
-  }, [currentMonth, selectedMonth])
+  }, [currentMonth, selectedMonth, payday])
 
   const recurringPatternsQuery = useQuery({
     queryKey: ["insights", "recurring-patterns", 120],

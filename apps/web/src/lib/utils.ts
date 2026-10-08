@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { formatMonthYear } from "./home-summary"
+import { getPayday, periodKeyForDate, shiftKey } from "./payday-months"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -153,6 +154,13 @@ export function today(): string {
 }
 
 /**
+ * MOB-R91 C3 — today's month key on Kuwait's clock, following her payday (the calendar month when none is set).
+ */
+export function currentMonthKeyNow(): string {
+  return periodKeyForDate(getPayday(), today())
+}
+
+/**
  * Get the previous month as YYYY-MM from a YYYY-MM string
  */
 export function prevMonth(ym: string): string {
@@ -202,11 +210,9 @@ export function formatDeltaLabel(
  * Budgets for past months are read-only.
  */
 export function isEditableMonth(month: string): boolean {
-  const now = kuwaitNow()
-  const curr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
-  const nd = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-  const next = `${nd.getFullYear()}-${String(nd.getMonth() + 1).padStart(2, "0")}`
-  return month === curr || month === next
+  // MOB-R91 C3 — this month and the next, by her payday's keys (calendar months when none is set).
+  const curr = currentMonthKeyNow()
+  return month === curr || month === shiftKey(curr, 1)
 }
 
 /**
@@ -214,7 +220,7 @@ export function isEditableMonth(month: string): boolean {
  */
 export function labelForYM(ym: string): string {
   // MOB-R87 F4 — any other month reads "September 2026", never "2026-09" (display only).
-  return ym && ym === toYearMonth(today()) ? "This Month" : ym ? formatMonthYear(ym) : "\u2014"
+  return ym && ym === currentMonthKeyNow() ? "This Month" : ym ? formatMonthYear(ym) : "\u2014"
 }
 
 /**
