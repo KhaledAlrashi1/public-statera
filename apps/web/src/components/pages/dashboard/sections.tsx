@@ -39,6 +39,7 @@ import { Link } from "react-router-dom"
 
 import { chartTooltipStyle, cn, fmt3, formatCompactKD, formatKD, getBudgetUtilizationTone } from "@/lib/utils"
 import { formatMonthYear } from "@/lib/home-summary"
+import { getPayday, periodTick } from "@/lib/payday-months"
 import { COUNT_UP_STAGGER_MS, useCountUp } from "@/lib/use-count-up"
 import { CHART_STROKES, getChartColors } from "@/lib/chart-tokens"
 import { Button } from "@/components/ui/button"
@@ -1153,7 +1154,7 @@ export function IncomeExpensesChart({
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trendData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" strokeOpacity={0.4} />
-                  <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(m: string) => formatMonthYear(m)} />
+                  <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(m: string) => periodTick(getPayday(), m) ?? formatMonthYear(m)} />
                   <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v: number) => formatCompactKD(v)} />
                   <ReferenceLine
                     y={expenseAverage}

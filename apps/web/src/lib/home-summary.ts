@@ -3,8 +3,8 @@
 // Strings are CHANNEL-DRAFTED and provisional (MOB-R68 D2). Money is exact: percentages come from
 // integer fils (lib/log-amount toFils) and round half up; no float touches a ledger figure.
 // Remaining is K1's figure (income - expenses - savings, clamped at 0); nothing new is computed.
-import { formatKD } from "./utils"
-import { getPayday, paydayActive, periodBoundsForKey } from "./payday-months"
+import { formatKD, kuwaitNow } from "./utils"
+import { getPayday, paydayActive, periodBoundsForKey, periodLabel } from "./payday-months"
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -19,14 +19,18 @@ function parseMonthKey(key: string): { year: number; month: number } | null {
   return { year: Number(match[1]), month }
 }
 
-/** "2026-10" -> "October". */
+/** "2026-10" -> "October". MOB-R91 C4: with a payday, the month's dates ("25 Sep – 24 Oct"). */
 export function monthName(key: string): string {
+  const dates = periodLabel(getPayday(), key, kuwaitNow().getFullYear())
+  if (dates) return dates
   const parsed = parseMonthKey(key)
   return parsed ? MONTH_NAMES[parsed.month - 1] : key
 }
 
-/** "2026-10" -> "October 2026" (D6, the month control). */
+/** "2026-10" -> "October 2026" (D6, the month control). MOB-R91 C4: with a payday, the month's dates. */
 export function formatMonthYear(key: string): string {
+  const dates = periodLabel(getPayday(), key, kuwaitNow().getFullYear())
+  if (dates) return dates
   const parsed = parseMonthKey(key)
   return parsed ? `${MONTH_NAMES[parsed.month - 1]} ${parsed.year}` : key
 }

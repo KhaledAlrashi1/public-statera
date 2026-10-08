@@ -326,7 +326,7 @@ export default function InsightsPage() {
               disabled={monthOptionsQuery.isLoading || monthOptions.length === 0}
             >
               <SelectTrigger
-                className="h-10 w-[160px] rounded-full px-4 text-sm shadow-sm sm:w-[180px]"
+                className="h-10 w-fit min-w-[160px] rounded-full px-4 text-sm shadow-sm sm:min-w-[180px]"
                 aria-label="Select insights month"
               >
                 <SelectValue placeholder="No months" />

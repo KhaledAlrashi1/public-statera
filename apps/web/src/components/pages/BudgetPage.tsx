@@ -424,7 +424,7 @@ export default function BudgetPage() {
         actions={(
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger
-              className="h-10 w-[160px] rounded-full px-4 text-sm shadow-sm sm:w-[180px]"
+              className="h-10 w-fit min-w-[160px] rounded-full px-4 text-sm shadow-sm sm:min-w-[180px]"
               aria-label="Select month to view"
             >
               <SelectValue />

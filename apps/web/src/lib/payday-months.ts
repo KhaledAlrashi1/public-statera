@@ -80,3 +80,28 @@ export function usePayday(): number | null {
     getPayday,
   )
 }
+
+// ── Labels (MOB-R91 C4) ───────────────────────────────────────────────────────────────────────────────────
+// With a payday that cuts months, a month is shown by its dates only, "25 Sep – 24 Oct"; a period that is not
+// wholly in the current year adds the year once, at the end ("25 Dec – 24 Jan 2026"). Without one, callers keep
+// the month name (these return null). Fixed short names: en-GB would write "Sept".
+const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const
+
+function dayMonth(date: string): string {
+  return `${Number(date.slice(8, 10))} ${SHORT_MONTHS[Number(date.slice(5, 7)) - 1]}`
+}
+
+/** "25 Sep – 24 Oct" (or with the end year when not wholly in currentYear); null without a payday. */
+export function periodLabel(payday: number | null | undefined, key: string, currentYear: number): string | null {
+  if (!paydayActive(payday) || !/^\d{4}-\d{2}$/.test(key)) return null
+  const { start, end } = periodBoundsForKey(payday, key)
+  const label = `${dayMonth(start)} – ${dayMonth(end)}`
+  const inYear = Number(start.slice(0, 4)) === currentYear && Number(end.slice(0, 4)) === currentYear
+  return inYear ? label : `${label} ${end.slice(0, 4)}`
+}
+
+/** A chart axis tick: the period's first day, "25 Sep"; null without a payday. */
+export function periodTick(payday: number | null | undefined, key: string): string | null {
+  if (!paydayActive(payday) || !/^\d{4}-\d{2}$/.test(key)) return null
+  return dayMonth(periodBoundsForKey(payday, key).start)
+}

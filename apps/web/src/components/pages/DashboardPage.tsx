@@ -705,7 +705,7 @@ export default function DashboardPage() {
           disabled={isLoading || monthOptions.length === 0}
         >
           <SelectTrigger
-            className="h-10 w-[180px] shrink-0 rounded-full px-4 text-sm shadow-sm lg:col-start-2 lg:row-start-2 lg:justify-self-end"
+            className="h-10 w-fit min-w-[180px] shrink-0 rounded-full px-4 text-sm shadow-sm lg:col-start-2 lg:row-start-2 lg:justify-self-end"
             aria-label="Select month to view"
           >
             <SelectValue placeholder="No months" />
