@@ -60,7 +60,6 @@ const AppShell = lazyWithRetry("app-shell", () => import("@/components/layout/Ap
 const DashboardPage = lazyWithRetry("dashboard", () => import("@/components/pages/DashboardPage"))
 // MOB-R53 Part B — hidden v5 logging page (RM-26: linked from nowhere).
 const LogPage = lazyWithRetry("log", () => import("@/components/pages/LogPage"))
-const ExpensesPage = lazyWithRetry("expenses", () => import("@/components/pages/ExpensesPage"))
 const TransactionsPage = lazyWithRetry("transactions", () => import("@/components/pages/TransactionsPage"))
 const BudgetPage = lazyWithRetry("budget", () => import("@/components/pages/BudgetPage"))
 const LoginPage = lazyWithRetry("login", () => import("@/components/pages/LoginPage"))
@@ -73,9 +72,6 @@ const MagicLinkPage = lazyWithRetry("magic-link", () => import("@/components/pag
 const PrivacyPolicyPage = lazyWithRetry("privacy", () => import("@/components/pages/legal/PrivacyPolicyPage"))
 const TermsPage = lazyWithRetry("terms", () => import("@/components/pages/legal/TermsPage"))
 const DeleteAccountConfirmPage = lazyWithRetry("delete-account-confirm", () => import("@/components/pages/DeleteAccountConfirmPage"))
-
-const ENABLE_PHASE2_LEGACY_REDIRECTS =
-  String(import.meta.env.VITE_ENABLE_PHASE2_LEGACY_REDIRECTS ?? "").toLowerCase() === "true"
 
 export class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -188,11 +184,11 @@ function AppRoutes() {
           <Route path="insights" element={<InsightsPage />} />
           <Route
             path="transactions"
-            element={ENABLE_PHASE2_LEGACY_REDIRECTS ? <Navigate to="/activity?type=all" replace /> : <TransactionsPage />}
+            element={<Navigate to="/activity?type=all" replace />}
           />
           <Route
             path="expenses"
-            element={ENABLE_PHASE2_LEGACY_REDIRECTS ? <Navigate to="/activity?type=expense" replace /> : <ExpensesPage />}
+            element={<Navigate to="/activity?type=expense" replace />}
           />
           <Route
             path="income"
@@ -200,7 +196,7 @@ function AppRoutes() {
           />
           <Route
             path="budget"
-            element={ENABLE_PHASE2_LEGACY_REDIRECTS ? <Navigate to="/plan" replace /> : <BudgetPage />}
+            element={<Navigate to="/plan" replace />}
           />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="*" element={<NotFoundPage />} />
