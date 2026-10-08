@@ -1,8 +1,9 @@
 import type { Job } from "bullmq"
 import pLimit from "p-limit"
-import { gte, or, and, isNull, sql } from "drizzle-orm"
+import { eq, gte, or, and, isNull, sql } from "drizzle-orm"
 import { getDb } from "../../db/connection"
-import { users } from "../../db/schema"
+import { users, userProfiles } from "../../db/schema"
+import { currentPeriodKey } from "../../lib/payday-lib"
 import { env } from "../../lib/env"
 import { Sentry } from "../../lib/sentry"
 import {
@@ -19,7 +20,8 @@ export async function handleRebuildDashboardSnapshots(_job: Job): Promise<void> 
 
   const db = getDb()
   const monthsCount = env.dashboardSnapshotMonths
-  const windowEndMonth = currentMonthKeyUtc()
+  // MOB-R91 C5 — each user's window ends at today's month by her payday (Kuwait's month when none is set).
+  const kuwaitMonth = currentMonthKeyUtc()
   const windowDays = env.snapshotRebuildWindowDays
   const concurrency = Math.max(1, env.snapshotRebuildConcurrency)
   const perUserBudgetMs = (env.analyticsComputeTimeoutSeconds + 2) * 1000
@@ -33,8 +35,9 @@ export async function handleRebuildDashboardSnapshots(_job: Job): Promise<void> 
     // every dormant user who ever registered, defeating the recency filter.
     const cutoff = sql`NOW() - INTERVAL ${windowDays} DAY`
     const eligibleUsers = await db
-      .select({ id: users.id })
+      .select({ id: users.id, payday: userProfiles.paydayDay })
       .from(users)
+      .leftJoin(userProfiles, eq(userProfiles.userId, users.id))
       .where(
         or(
           gte(users.lastLoginAt, sql`NOW() - INTERVAL ${windowDays} DAY`),
@@ -45,11 +48,12 @@ export async function handleRebuildDashboardSnapshots(_job: Job): Promise<void> 
     const limit = pLimit(concurrency)
 
     await Promise.all(
-      eligibleUsers.map(({ id: userId }) =>
+      eligibleUsers.map(({ id: userId, payday }) =>
         limit(async () => {
           try {
+            const windowEndMonth = payday == null ? kuwaitMonth : currentPeriodKey(payday)
             await Promise.race([
-              rebuildDashboardSnapshot(userId, db, { monthsCount, windowEndMonth }),
+              rebuildDashboardSnapshot(userId, db, { monthsCount, windowEndMonth, payday: payday ?? null }),
               new Promise<never>((_, reject) =>
                 setTimeout(
                   () => reject(new Error(`Per-user budget exceeded (${perUserBudgetMs}ms)`)),

@@ -386,7 +386,7 @@ export function currentMonthKeyUtc(): string {
 export async function rebuildDashboardSnapshot(
   userId: number,
   db: ReturnType<typeof getDb>,
-  opts?: { monthsCount?: number; windowEndMonth?: string },
+  opts?: { monthsCount?: number; windowEndMonth?: string; payday?: number | null },
 ): Promise<void> {
   const monthsCount = Math.max(1, Math.min(opts?.monthsCount ?? 24, 60))
   const windowEndMonth = opts?.windowEndMonth ?? currentMonthKeyUtc()
@@ -396,6 +396,8 @@ export async function rebuildDashboardSnapshot(
     endYear,
     endMonth,
     cycleEnabled: false,
+    // MOB-R91 C5 — the snapshot is cut by her payday, as the route's Tier 3 computes it.
+    payday: opts?.payday ?? null,
   })
   await persistDashboardSnapshot(userId, db, monthsCount, windowEndMonth, payload)
 }

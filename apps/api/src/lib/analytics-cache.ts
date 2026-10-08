@@ -27,7 +27,6 @@ import type { getDb } from "../db/connection"
 import { dashboardSnapshots } from "../db/schema/dashboard-snapshots"
 import { env } from "./env"
 import { versionedCacheKey } from "./analytics-cache-version"
-import { paydayActive } from "./payday-lib"
 import { Sentry } from "./sentry"
 import {
   computeDashboardMetricsPayload,
@@ -410,18 +409,16 @@ export async function getDashboardMetricsWithCache(
   }
 
   const windowEndMonth = `${endYear}-${String(endMonth).padStart(2, "0")}`
-  // MOB-R91 C2 — the snapshot job still cuts calendar months, so a payday user is served from Tier 3 until it
-  // follows the key (C5).
-  const snapshotEligible =
-    !paydayActive(payday) &&
-    isSnapshotEligible(
-      months,
-      endYear,
-      endMonth,
-      cycleEnabled,
-      currentMonthKey,
-      snapshotMonthsCount,
-    )
+  // MOB-R91 C5 — snapshots are cut by her payday (the job and Tier 3 both pass it), and a payday change deletes
+  // her rows (auth.ts /profile/update), so Tier 2 serves payday users too.
+  const snapshotEligible = isSnapshotEligible(
+    months,
+    endYear,
+    endMonth,
+    cycleEnabled,
+    currentMonthKey,
+    snapshotMonthsCount,
+  )
 
   // Tier 2 — Snapshot table
   if (snapshotEligible) {

@@ -1,5 +1,5 @@
 import type { Job } from "bullmq"
-import { and, eq, sql } from "drizzle-orm"
+import { and, eq, inArray, notInArray, sql, type SQL } from "drizzle-orm"
 import Decimal from "decimal.js"
 import { getDb } from "../../db/connection"
 import { budgets } from "../../db/schema/budgets"
@@ -10,8 +10,7 @@ import { userProfiles } from "../../db/schema/users"
 import { env } from "../../lib/env"
 import { Sentry } from "../../lib/sentry"
 import { formatKd } from "../../lib/kd"
-import { calendarMonthBounds } from "../../lib/analytics-helpers"
-import { expenseCategoryFilter } from "../../lib/payday-lib"
+import { currentPeriodKey, expenseCategoryFilter, paydayActive, periodBoundsForKey } from "../../lib/payday-lib"
 import { currentMonthKeyUtc } from "../../lib/dashboard-snapshot-lib"
 import {
   BUDGET_ALERT_EVENT_NAME,
@@ -33,85 +32,112 @@ export async function handleCheckBudgetAlerts(_job: Job): Promise<void> {
   let errorMessage: string | undefined
   try {
     const db = getDb()
-    const monthKey = currentMonthKeyUtc()
-    const [endYear, endMonth] = monthKey.split("-").map(Number) as [number, number]
-    const { start: monthStart, end: monthEnd } = calendarMonthBounds(endYear, endMonth)
     const threshold = env.budgetAlertThresholdRatio
 
-    const { existing, dismissed } = await collectMonthAlertKeySets(monthKey, db)
+    // MOB-R91 C5 — a budget's month is her payday period. Users whose payday cuts months (2–31) are checked in one
+    // group per payday, at that payday's key and bounds; everyone else in one calendar group at Kuwait's month, which
+    // is today's query exactly (no user filter at all when no payday cuts months).
+    const paydayRows = await db
+      .select({ userId: userProfiles.userId, payday: userProfiles.paydayDay })
+      .from(userProfiles)
+      .where(sql`${userProfiles.paydayDay} BETWEEN 2 AND 31`)
+    const usersByPayday = new Map<number, number[]>()
+    for (const r of paydayRows) {
+      if (!paydayActive(r.payday)) continue
+      usersByPayday.set(r.payday, [...(usersByPayday.get(r.payday) ?? []), r.userId])
+    }
+    const paydayUserIds = [...usersByPayday.values()].flat()
+    const groups: Array<{ monthKey: string; bounds: { start: string; end: string }; userFilter: SQL | undefined }> = [
+      {
+        monthKey: currentMonthKeyUtc(),
+        bounds: periodBoundsForKey(null, currentMonthKeyUtc()),
+        userFilter: paydayUserIds.length > 0 ? notInArray(budgets.userId, paydayUserIds) : undefined,
+      },
+      ...[...usersByPayday.entries()].map(([payday, ids]) => {
+        const monthKey = currentPeriodKey(payday)
+        return { monthKey, bounds: periodBoundsForKey(payday, monthKey), userFilter: inArray(budgets.userId, ids) }
+      }),
+    ]
 
-    // One query: all budgets for this month with per-category spending (expense categories only).
-    const rows = await db
-      .select({
-        userId: budgets.userId,
-        categoryId: budgets.categoryId,
-        amountKd: budgets.amountKd,
-        categoryName: categories.name,
-        spentKd: sql<string>`COALESCE(SUM(${transactions.amountKd}), '0')`,
-      })
-      .from(budgets)
-      .innerJoin(categories, eq(budgets.categoryId, categories.id))
-      .leftJoin(
-        transactions,
-        and(
-          eq(transactions.userId, budgets.userId),
-          eq(transactions.categoryId, budgets.categoryId),
-          sql`${transactions.date} >= ${monthStart}`,
-          sql`${transactions.date} <= ${monthEnd}`,
-        ),
-      )
-      .where(
-        and(
-          eq(budgets.month, monthKey),
-          expenseCategoryFilter(),
-        ),
-      )
-      .groupBy(budgets.userId, budgets.categoryId, budgets.amountKd, categories.name)
+    for (const group of groups) {
+      const { monthKey } = group
+      const { start: monthStart, end: monthEnd } = group.bounds
+      const { existing, dismissed } = await collectMonthAlertKeySets(monthKey, db)
 
-    let alertsCreated = 0
-    for (const row of rows) {
-      const budgetDec = new Decimal(row.amountKd)
-      if (budgetDec.lte(0)) continue
+      // One query: all budgets for this month with per-category spending (expense categories only).
+      const rows = await db
+        .select({
+          userId: budgets.userId,
+          categoryId: budgets.categoryId,
+          amountKd: budgets.amountKd,
+          categoryName: categories.name,
+          spentKd: sql<string>`COALESCE(SUM(${transactions.amountKd}), '0')`,
+        })
+        .from(budgets)
+        .innerJoin(categories, eq(budgets.categoryId, categories.id))
+        .leftJoin(
+          transactions,
+          and(
+            eq(transactions.userId, budgets.userId),
+            eq(transactions.categoryId, budgets.categoryId),
+            sql`${transactions.date} >= ${monthStart}`,
+            sql`${transactions.date} <= ${monthEnd}`,
+          ),
+        )
+        .where(
+          and(
+            eq(budgets.month, monthKey),
+            expenseCategoryFilter(),
+            group.userFilter,
+          ),
+        )
+        .groupBy(budgets.userId, budgets.categoryId, budgets.amountKd, categories.name)
 
-      const alertKey = buildBudgetAlertKey(monthKey, row.categoryId)
-      const compositeKey = `${row.userId}||${alertKey}`
-      if (existing.has(compositeKey) || dismissed.has(compositeKey)) continue
+      let alertsCreated = 0
+      for (const row of rows) {
+        const budgetDec = new Decimal(row.amountKd)
+        if (budgetDec.lte(0)) continue
 
-      const spentDec = new Decimal(row.spentKd)
-      const ratio = roundRatio(spentDec, budgetDec)
-      if (ratio < threshold) continue
+        const alertKey = buildBudgetAlertKey(monthKey, row.categoryId)
+        const compositeKey = `${row.userId}||${alertKey}`
+        if (existing.has(compositeKey) || dismissed.has(compositeKey)) continue
 
-      const category = row.categoryName ?? "Uncategorized"
-      const props = {
-        alert_key: alertKey,
-        month: monthKey,
-        category,
-        category_id: row.categoryId,
-        budget_kd: formatKd(budgetDec),
-        spent_kd: formatKd(spentDec),
-        ratio,
-        threshold,
+        const spentDec = new Decimal(row.spentKd)
+        const ratio = roundRatio(spentDec, budgetDec)
+        if (ratio < threshold) continue
+
+        const category = row.categoryName ?? "Uncategorized"
+        const props = {
+          alert_key: alertKey,
+          month: monthKey,
+          category,
+          category_id: row.categoryId,
+          budget_kd: formatKd(budgetDec),
+          spent_kd: formatKd(spentDec),
+          ratio,
+          threshold,
+        }
+
+        await recordEvent(row.userId, BUDGET_ALERT_EVENT_NAME, props, db)
+
+        await getQueue().add("send-budget-alert-email", {
+          userId: row.userId,
+          alertKey,
+          category,
+          monthKey,
+          budgetKd: formatKd(budgetDec),
+          spentKd: formatKd(spentDec),
+          ratio,
+          threshold,
+        })
+
+        alertsCreated++
       }
 
-      await recordEvent(row.userId, BUDGET_ALERT_EVENT_NAME, props, db)
-
-      await getQueue().add("send-budget-alert-email", {
-        userId: row.userId,
-        alertKey,
-        category,
-        monthKey,
-        budgetKd: formatKd(budgetDec),
-        spentKd: formatKd(spentDec),
-        ratio,
-        threshold,
-      })
-
-      alertsCreated++
+      console.log(
+        `[${TASK_CHECK_BUDGET_ALERTS}] month=${monthKey} budgets_checked=${rows.length} alerts_created=${alertsCreated}`,
+      )
     }
-
-    console.log(
-      `[${TASK_CHECK_BUDGET_ALERTS}] month=${monthKey} budgets_checked=${rows.length} alerts_created=${alertsCreated}`,
-    )
   } catch (err) {
     errorMessage = err instanceof Error ? err.message : String(err)
     Sentry.captureException(err, { tags: { handler: TASK_CHECK_BUDGET_ALERTS } })

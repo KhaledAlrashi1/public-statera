@@ -29,24 +29,18 @@ vi.mock("../task-runs", () => ({
 // ── DB mock ───────────────────────────────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+// MOB-R92 D3 — flat and self-referential: every call returns the same kind of proxy and any await resolves the
+// rows, so a chain of any length (select().from().leftJoin().where()) settles.
 function makeDbReturningUsers(userRows: { id: number }[]): any {
   return new Proxy(
     {},
     {
-      get() {
-        return (..._args: unknown[]) =>
-          new Proxy(
-            {},
-            {
-              get(_t, prop: string) {
-                if (prop === "then") {
-                  return (resolve: (v: unknown) => unknown, reject: (e: unknown) => unknown) =>
-                    Promise.resolve(userRows).then(resolve, reject)
-                }
-                return (..._inner: unknown[]) => makeDbReturningUsers(userRows)
-              },
-            },
-          )
+      get(_t, prop: string) {
+        if (prop === "then") {
+          return (resolve: (v: unknown) => unknown, reject: (e: unknown) => unknown) =>
+            Promise.resolve(userRows).then(resolve, reject)
+        }
+        return (..._args: unknown[]) => makeDbReturningUsers(userRows)
       },
     },
   )
@@ -91,6 +85,7 @@ describe("handleRebuildDashboardSnapshots — single eligible user", () => {
     expect(rebuildDashboardSnapshot).toHaveBeenCalledWith(42, expect.anything(), {
       monthsCount: expect.any(Number),
       windowEndMonth: "2026-01",
+      payday: null,
     })
   })
 
