@@ -24,7 +24,14 @@ import { categories } from "../db/schema/categories"
 import { merchants } from "../db/schema/merchants"
 import { requireAuth } from "../middleware/auth"
 import { importRateLimit, searchRateLimit } from "../lib/rate-limit"
-import { incomeCategoryFilter, expenseCategoryFilter, readIncomeFlag } from "../lib/payday-lib"
+import {
+  incomeCategoryFilter,
+  expenseCategoryFilter,
+  readIncomeFlag,
+  currentPeriodKey,
+  periodKeyExpr,
+  readPaydayDay,
+} from "../lib/payday-lib"
 import {
   validateTransactionInput,
   createTransactionWithDupCheck,
@@ -44,7 +51,6 @@ import {
 import { Sentry } from "../lib/sentry"
 import { cacheBustDashboardMetrics, cacheBustSafeToSpend } from "../lib/analytics-cache"
 import { zodErrorToEnvelope } from "./route-helpers"
-import { currentMonthKey } from "../lib/analytics-helpers"
 
 export const transactionsRouter = new Hono()
 
@@ -712,14 +718,17 @@ transactionsRouter.post("/:id{[0-9]+}/split", requireAuth, async (c) => {
 
 transactionsRouter.get("/summary", requireAuth, async (c) => {
   let month = (c.req.query("month") ?? "").trim()
-  if (!month) {
-    month = currentMonthKey()
+  if (month) {
+    const parsedMonth = SummaryMonthSchema.safeParse(month)
+    if (!parsedMonth.success) return zodErrorToEnvelope(c, parsedMonth.error)
   }
-  const parsedMonth = SummaryMonthSchema.safeParse(month)
-  if (!parsedMonth.success) return zodErrorToEnvelope(c, parsedMonth.error)
 
   const { userId } = c.get("session")
   const db = getDb()
+  // MOB-R91 C2 — the month and its default follow her payday (the calendar month when none is set).
+  const payday = await readPaydayDay(db, userId)
+  const monthExpr = periodKeyExpr(payday)
+  if (!month) month = currentPeriodKey(payday)
 
   // COUNT income vs expense transactions for the month using DATE_FORMAT
   const [incomeRow] = await db
@@ -729,7 +738,7 @@ transactionsRouter.get("/summary", requireAuth, async (c) => {
     .where(
       and(
         eq(transactions.userId, userId),
-        sql`DATE_FORMAT(${transactions.date}, '%Y-%m') = ${month}`,
+        sql`${monthExpr} = ${month}`,
         sql`(${categories.isIncome} = 1 OR ${categories.name} IS NOT NULL AND ${categories.isIncome} = 1)`,
       ),
     )
@@ -740,7 +749,7 @@ transactionsRouter.get("/summary", requireAuth, async (c) => {
     .where(
       and(
         eq(transactions.userId, userId),
-        sql`DATE_FORMAT(${transactions.date}, '%Y-%m') = ${month}`,
+        sql`${monthExpr} = ${month}`,
         sql`(${categories.isIncome} IS NULL OR ${categories.isIncome} = 0)`,
       ),
     )
@@ -1004,7 +1013,8 @@ transactionsRouter.get("/by-category", requireAuth, async (c) => {
     eq(transactions.userId, userId),
     inArray(transactions.categoryId as Parameters<typeof inArray>[0], catIds),
   )
-  if (month) where = and(where, sql`DATE_FORMAT(${transactions.date}, '%Y-%m') = ${month}`)
+  // MOB-R91 C2 — the month follows her payday (the calendar month when none is set).
+  if (month) where = and(where, sql`${periodKeyExpr(await readPaydayDay(db, userId))} = ${month}`)
   if (q) {
     const like = likePattern(q)
     where = and(where, sql`${transactions.name} LIKE ${like} ESCAPE '\\\\'`)

@@ -27,6 +27,7 @@ import type { getDb } from "../db/connection"
 import { dashboardSnapshots } from "../db/schema/dashboard-snapshots"
 import { env } from "./env"
 import { versionedCacheKey } from "./analytics-cache-version"
+import { paydayActive } from "./payday-lib"
 import { Sentry } from "./sentry"
 import {
   computeDashboardMetricsPayload,
@@ -366,6 +367,7 @@ export type GetDashboardMetricsOpts = {
   snapshotMonthsCount?: number // defaults to env.dashboardSnapshotMonths
   until?: string | null // cache key suffix (matches Flask's cache_until)
   hardFail?: boolean // propagated to cacheGet (true → 503 on cache miss)
+  payday?: number | null // MOB-R91 C2 — her payday; null or 1 is the calendar month
 }
 
 // Implements the 3-tier cache stack from Flask's api_dashboard_metrics handler:
@@ -389,9 +391,10 @@ export async function getDashboardMetricsWithCache(
     snapshotMonthsCount = env.dashboardSnapshotMonths,
     until,
     hardFail = false,
+    payday = null,
   } = opts
 
-  const cacheKey = versionedCacheKey(dashboardMetricsCacheKey(userId, months, until))
+  const cacheKey = versionedCacheKey(dashboardMetricsCacheKey(userId, months, until), payday)
 
   // Tier 1 — Redis
   const cached = await cacheGet(cacheKey, { hardFail })
@@ -407,14 +410,18 @@ export async function getDashboardMetricsWithCache(
   }
 
   const windowEndMonth = `${endYear}-${String(endMonth).padStart(2, "0")}`
-  const snapshotEligible = isSnapshotEligible(
-    months,
-    endYear,
-    endMonth,
-    cycleEnabled,
-    currentMonthKey,
-    snapshotMonthsCount,
-  )
+  // MOB-R91 C2 — the snapshot job still cuts calendar months, so a payday user is served from Tier 3 until it
+  // follows the key (C5).
+  const snapshotEligible =
+    !paydayActive(payday) &&
+    isSnapshotEligible(
+      months,
+      endYear,
+      endMonth,
+      cycleEnabled,
+      currentMonthKey,
+      snapshotMonthsCount,
+    )
 
   // Tier 2 — Snapshot table
   if (snapshotEligible) {
@@ -435,6 +442,7 @@ export async function getDashboardMetricsWithCache(
     cycleEnabled,
     cycleStart,
     cycleEnd,
+    payday,
   })
 
   if (snapshotEligible) {

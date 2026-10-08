@@ -243,6 +243,7 @@ describe("GET /api/analytics/expense-breakdown", () => {
     // Sequential: [scopeTotal], [category rows]
     vi.mocked(getDb).mockReturnValue(
       makeSequentialDb([
+        [], // MOB-R92 D2 — the payday read (no profile row: calendar months)
         [{ total: "200.000" }],
         [
           { name: "Food", total: "150.000" },
@@ -271,6 +272,7 @@ describe("GET /api/analytics/expense-breakdown", () => {
   it("dimension=merchant returns merchant-grouped items", async () => {
     vi.mocked(getDb).mockReturnValue(
       makeSequentialDb([
+        [], // MOB-R92 D2 — the payday read (no profile row: calendar months)
         [{ total: "80.000" }],
         [
           { name: "McDonald's", total: "60.000" },
@@ -293,6 +295,7 @@ describe("GET /api/analytics/expense-breakdown", () => {
   it("dimension=transaction returns name-grouped items, filters empty names", async () => {
     vi.mocked(getDb).mockReturnValue(
       makeSequentialDb([
+        [], // MOB-R92 D2 — the payday read (no profile row: calendar months)
         [{ total: "30.000" }],
         [{ name: "Starbucks Coffee", total: "30.000" }],
       ]),
@@ -551,10 +554,11 @@ describe("GET /api/analytics/budget-metrics", () => {
     expect(body.code).toBe("validation_error")
   })
 
-  it("cycle=false, range=month — uses ym filter, no profile query", async () => {
-    // 2 sequential DB calls: monthly, prev12
+  it("cycle=false, range=month — uses ym filter, one profile read", async () => {
+    // 3 sequential DB calls: the payday read, monthly, prev12
     vi.mocked(getDb).mockReturnValue(
       makeSequentialDb([
+        [], // MOB-R92 D2 — the payday read (no profile row: calendar months)
         [{ catName: "Food", total: "120.000" }], // monthly spend
         [],                                       // prev12
       ]),
@@ -631,6 +635,7 @@ describe("GET /api/analytics/budget-metrics", () => {
     // prev12 has 2 months of "Food": 120+60=180 → avg = 180/12 = 15
     vi.mocked(getDb).mockReturnValue(
       makeSequentialDb([
+        [], // MOB-R92 D2 — the payday read (no profile row: calendar months)
         [],                                                               // monthly
         [{ catName: "Food", ym: "2024-04", total: "120.000" }, { catName: "Food", ym: "2024-05", total: "60.000" }], // prev12
       ]),
@@ -795,6 +800,7 @@ describe("GET /api/analytics/account-overview", () => {
     // 6 sequential DB calls: Q1 spend, Q2 income, Q3 manual count, Q4 manual spend, Q5 top cats, Q6 trend
     vi.mocked(getDb).mockReturnValue(
       makeSequentialDb([
+        [], // MOB-R92 D2 — the payday read (no profile row: calendar months)
         [{ total: "500.000" }],          // Q1: total expense spend MTD
         [{ total: "2000.000" }],         // Q2: total income MTD
         [{ count: "5" }],                // Q3: manual transaction count MTD
@@ -1090,7 +1096,8 @@ const FIXTURE_WC3 = {
 // the budgets query then the expense query.) resolveIncomeForPeriod is separately mocked.
 // For F2 (today < cycle_start), the expense query is NOT called — pass an empty expense set.
 function makeR9Db(budgetRows: unknown[], expenseRows: unknown[]) {
-  return makeSequentialDb([budgetRows, expenseRows])
+  // MOB-R92 D2 — the payday read comes first (no profile row: calendar months).
+  return makeSequentialDb([[], budgetRows, expenseRows])
 }
 
 describe("GET /api/analytics/safe-to-spend", () => {
@@ -1200,6 +1207,7 @@ describe("GET /api/analytics/safe-to-spend", () => {
     // Only the budgets sequence: expense query is NOT called when spend_window_end=null.
     vi.mocked(getDb).mockReturnValue(
       makeSequentialDb([
+        [], // MOB-R92 D2 — the payday read (no profile row: calendar months)
         [{ amount: "500.000", catName: "Food" }],    // budgets (Dec 2025)
       ]),
     )
@@ -1564,6 +1572,7 @@ describe("GET /api/analytics/dashboard-bundle", () => {
     // interleaved in Promise.all resolution order.
     vi.mocked(getDb).mockReturnValue(
       makeSequentialDb([
+        [], // MOB-R92 D2 — the payday read (no profile row: calendar months)
         [{ total: "500.000" }],   // accountOverview Q1: total expense MTD
         [{ computedAt: new Date("2026-05-09T10:00:00.000Z") }], // snapshotComputedAt
         [{ total: "2000.000" }],  // accountOverview Q2: total income MTD

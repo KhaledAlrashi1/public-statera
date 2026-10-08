@@ -44,6 +44,7 @@ async function get(path: string) {
 // The ruled month: income 100, expenses 40, savings 30.
 function ruledMonthDb() {
   return makeSequentialDb([
+    [], // MOB-R92 D2 — the payday read (no profile row: calendar months)
     [{ total: "40.000", savings: "30.000" }], // Q1: month totals (expense, savings)
     [{ total: "100.000" }], // Q2: income
     [{ count: "3" }], // Q3: manual count

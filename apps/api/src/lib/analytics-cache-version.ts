@@ -8,6 +8,10 @@
 // v2: MOB-R55 K1 — savings-kind categories leave every expense total.
 export const ANALYTICS_CACHE_VERSION = "v2"
 
-export function versionedCacheKey(key: string): string {
-  return `${key}:${ANALYTICS_CACHE_VERSION}`
+// MOB-R91 C2 — a payday that cuts months (2–31) is part of what R3 and R9 compute, so it is part of the version:
+// ":v2:p25". With no payday (or the 1st) the key is exactly what it was. A payday change also clears both prefixes
+// and the user's snapshot rows (auth.ts /profile/update), so an entry computed under the old payday is never read.
+export function versionedCacheKey(key: string, payday?: number | null): string {
+  const p = typeof payday === "number" && Number.isInteger(payday) && payday >= 2 && payday <= 31 ? `:p${payday}` : ""
+  return `${key}:${ANALYTICS_CACHE_VERSION}${p}`
 }

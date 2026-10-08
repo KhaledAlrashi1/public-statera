@@ -58,13 +58,17 @@ import { budgets } from "../db/schema/budgets"
 import { requireAuth } from "../middleware/auth"
 import {
   currentLocalDate,
-  currentMonthKey,
-  calendarMonthBounds,
   buildMonthWindow,
-  ymExpr,
   roundedKd,
 } from "../lib/analytics-helpers"
-import { expenseCategoryFilter, incomeCategoryFilter, currentPayPeriod } from "../lib/payday-lib"
+import {
+  expenseCategoryFilter,
+  incomeCategoryFilter,
+  currentPeriodKey,
+  periodBoundsForKey,
+  periodKeyExpr,
+  readPaydayDay,
+} from "../lib/payday-lib"
 import { expenseOnlyCategoryFilter, isSavingsCategoryName, savingsCategoryFilter } from "../lib/category-kind"
 import { formatKd } from "../lib/transaction-lib"
 import {
@@ -143,16 +147,18 @@ aggregationRouter.get("/spend-by-category", requireAuth, async (c) => {
 aggregationRouter.get("/spend-by-month", requireAuth, async (c) => {
   const { userId } = c.get("session")
   const db = getDb()
+  // MOB-R91 C2 — months follow her payday (ymExpr itself when none is set).
+  const monthExpr = periodKeyExpr(await readPaydayDay(db, userId))
 
   const rows = await db
     .select({
-      month: ymExpr,
+      month: monthExpr,
       total: sql<string>`SUM(${transactions.amountKd})`,
     })
     .from(transactions)
     .where(eq(transactions.userId, userId))
-    .groupBy(ymExpr)
-    .orderBy(asc(ymExpr))
+    .groupBy(monthExpr)
+    .orderBy(asc(monthExpr))
 
   const items = rows.map((r) => ({ month: r.month, total_kd: roundedKd(r.total) }))
 
@@ -202,14 +208,16 @@ aggregationRouter.get("/expense-breakdown", requireAuth, async (c) => {
   const { dimension, range: rangeKey, limit, source } = parsed.data
 
   let month = (c.req.query("month") ?? "").trim()
-  if (!month) {
-    month = currentMonthKey()
-  } else {
+  if (month) {
     const parsedMonth = MonthFormatSchema.safeParse(month)
     if (!parsedMonth.success) return zodErrorToEnvelope(c, parsedMonth.error)
   }
 
   const db = getDb()
+  // MOB-R91 C2 — the month, its default and the 12-month window follow her payday.
+  const payday = await readPaydayDay(db, userId)
+  const monthExpr = periodKeyExpr(payday)
+  if (!month) month = currentPeriodKey(payday)
   const endYear = parseInt(month.slice(0, 4), 10)
   const endMonth = parseInt(month.slice(5, 7), 10)
   const monthKeys = buildMonthWindow(endYear, endMonth, 12)
@@ -227,9 +235,9 @@ aggregationRouter.get("/expense-breakdown", requireAuth, async (c) => {
 
   const rangeCondition =
     rangeKey === "month"
-      ? sql`${ymExpr} = ${month}`
+      ? sql`${monthExpr} = ${month}`
       : rangeKey === "12m"
-        ? inArray(ymExpr, monthKeys)
+        ? inArray(monthExpr, monthKeys)
         : undefined // "all" — no date filter
 
   const baseWhere = and(eq(transactions.userId, userId), expenseCategoryFilter(), rangeCondition, sourceCondition)
@@ -321,7 +329,10 @@ aggregationRouter.get("/expense-merchant-trend", requireAuth, async (c) => {
   }
 
   const db = getDb()
-  const refMonth = until || currentMonthKey()
+  // MOB-R91 C2 — the window and its months follow her payday.
+  const payday = await readPaydayDay(db, userId)
+  const monthExpr = periodKeyExpr(payday)
+  const refMonth = until || currentPeriodKey(payday)
   const endYear = parseInt(refMonth.slice(0, 4), 10)
   const endMonth = parseInt(refMonth.slice(5, 7), 10)
   const monthKeys = buildMonthWindow(endYear, endMonth, months)
@@ -333,12 +344,12 @@ aggregationRouter.get("/expense-merchant-trend", requireAuth, async (c) => {
       : sql`LOWER(${merchants.name}) = ${merchantLower}`
 
   const rows = await db
-    .select({ ym: ymExpr, total: sql<string>`SUM(${transactions.amountKd})` })
+    .select({ ym: monthExpr, total: sql<string>`SUM(${transactions.amountKd})` })
     .from(transactions)
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
     .leftJoin(merchants, eq(transactions.merchantId, merchants.id))
-    .where(and(eq(transactions.userId, userId), expenseCategoryFilter(), inArray(ymExpr, monthKeys), merchantFilter))
-    .groupBy(ymExpr)
+    .where(and(eq(transactions.userId, userId), expenseCategoryFilter(), inArray(monthExpr, monthKeys), merchantFilter))
+    .groupBy(monthExpr)
 
   // D2: Sparse-month zero-fill — merge DB result with full month window in JS
   const byMonth: Record<string, number> = {}
@@ -358,7 +369,7 @@ aggregationRouter.get("/expense-merchant-trend", requireAuth, async (c) => {
 // ── R7: GET /api/analytics/budget-metrics ────────────────────────────────────
 // Expense vs budget per category with cycle-aware period and configurable range.
 // ?range: month|30|90|365|all — distinct from R5's month|12m|all schemas.
-// ?cycle: true/false — when true, uses currentPayPeriod(paydayDay, firstOfMonth).
+// ?cycle: true/false — when true, the period keyed by the month (periodBoundsForKey, MOB-R91 C2).
 
 const r7Schema = z.object({
   range: z.preprocess(
@@ -377,30 +388,26 @@ aggregationRouter.get("/budget-metrics", requireAuth, async (c) => {
   const { range: rangeKey } = parsed.data
 
   let month = (c.req.query("month") ?? "").trim()
-  if (!month) {
-    month = currentMonthKey()
-  } else {
+  if (month) {
     const parsedMonth = MonthFormatSchema.safeParse(month)
     if (!parsedMonth.success) return zodErrorToEnvelope(c, parsedMonth.error)
   }
 
   const cycleEnabled = parseBoolParam(c.req.query("cycle"))
   const db = getDb()
+  // MOB-R91 C2 — the month, its default, its cycle and the 12 months before it follow her payday.
+  const payday = await readPaydayDay(db, userId)
+  const monthExpr = periodKeyExpr(payday)
+  if (!month) month = currentPeriodKey(payday)
   const year = parseInt(month.slice(0, 4), 10)
   const monthNumber = parseInt(month.slice(5, 7), 10)
 
-  // Resolve cycle period from profile's paydayDay when cycle=true
+  // The cycle is the period with this month's key: with no payday, the calendar month, which is what
+  // currentPayPeriod(null, the 1st) returned; with a payday, rule (c)'s period (MOB-R91 C2).
   let cycleStart: string | null = null
   let cycleEnd: string | null = null
   if (cycleEnabled) {
-    const [profile] = await db
-      .select({ paydayDay: userProfiles.paydayDay })
-      .from(userProfiles)
-      .where(eq(userProfiles.userId, userId))
-      .limit(1)
-    // refDate = first day of the given month — matches Flask's date(year, month_number, 1)
-    const refDate = new Date(Date.UTC(year, monthNumber - 1, 1))
-    const period = currentPayPeriod(profile?.paydayDay ?? null, refDate)
+    const period = periodBoundsForKey(payday, month)
     cycleStart = period.start
     cycleEnd = period.end
   }
@@ -411,7 +418,7 @@ aggregationRouter.get("/budget-metrics", requireAuth, async (c) => {
   const monthlyWhere =
     cycleEnabled && cycleStart && cycleEnd
       ? and(eq(transactions.userId, userId), expFilter, sql`${transactions.date} >= ${cycleStart}`, sql`${transactions.date} <= ${cycleEnd}`)
-      : and(eq(transactions.userId, userId), expFilter, sql`${ymExpr} = ${month}`)
+      : and(eq(transactions.userId, userId), expFilter, sql`${monthExpr} = ${month}`)
 
   const monthlyRows = await db
     .select({ catName: categories.name, total: sql<string>`SUM(${transactions.amountKd})` })
@@ -464,11 +471,11 @@ aggregationRouter.get("/budget-metrics", requireAuth, async (c) => {
   const prevMonthKeys = buildMonthWindow(prevYear, prevMonth, 12)
 
   const prev12Rows = await db
-    .select({ catName: categories.name, ym: ymExpr, total: sql<string>`SUM(${transactions.amountKd})` })
+    .select({ catName: categories.name, ym: monthExpr, total: sql<string>`SUM(${transactions.amountKd})` })
     .from(transactions)
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
-    .where(and(eq(transactions.userId, userId), inArray(ymExpr, prevMonthKeys), expFilter))
-    .groupBy(categories.name, ymExpr)
+    .where(and(eq(transactions.userId, userId), inArray(monthExpr, prevMonthKeys), expFilter))
+    .groupBy(categories.name, monthExpr)
 
   const avg12SumByCategory: Record<string, Decimal> = {}
   for (const row of prev12Rows) {
@@ -525,9 +532,11 @@ aggregationRouter.get("/dashboard-metrics", requireAuth, searchRateLimit, async 
 
   const cycleEnabled = parseBoolParam(c.req.query("cycle"))
   const db = getDb()
+  // MOB-R91 C2 — the current month, the window's months and the cycle follow her payday.
+  const payday = await readPaydayDay(db, userId)
 
   // Resolve current month key and end year/month
-  const currentMonth = currentMonthKey()
+  const currentMonth = currentPeriodKey(payday)
   let endYear: number
   let endMonth: number
   if (until) {
@@ -542,13 +551,8 @@ aggregationRouter.get("/dashboard-metrics", requireAuth, searchRateLimit, async 
   let cycleStart: string | null = null
   let cycleEnd: string | null = null
   if (cycleEnabled) {
-    const [profile] = await db
-      .select({ paydayDay: userProfiles.paydayDay })
-      .from(userProfiles)
-      .where(eq(userProfiles.userId, userId))
-      .limit(1)
-    const refDate = new Date(Date.UTC(endYear, endMonth - 1, 1))
-    const period = currentPayPeriod(profile?.paydayDay ?? null, refDate)
+    // The period keyed by the end month (with no payday, the calendar month, as currentPayPeriod(null, the 1st)).
+    const period = periodBoundsForKey(payday, `${endYear}-${String(endMonth).padStart(2, "0")}`)
     cycleStart = period.start
     cycleEnd = period.end
   }
@@ -566,7 +570,7 @@ aggregationRouter.get("/dashboard-metrics", requireAuth, searchRateLimit, async 
       env.analyticsComputeTimeoutSeconds,
       () => getDashboardMetricsWithCache(userId, db, {
         months, endYear, endMonth, cycleEnabled, cycleStart, cycleEnd,
-        until: cacheUntil, hardFail: true,
+        until: cacheUntil, hardFail: true, payday, currentMonthKey: currentMonth,
       }),
     )
 
@@ -650,10 +654,10 @@ async function _buildSafeToSpendPayload(
   month: string,
   today: Date, // from currentLocalDate() — use UTC accessors only
   db: ReturnType<typeof getDb>,
+  payday: number | null = null,
 ): Promise<Record<string, unknown>> {
-  const year = parseInt(month.slice(0, 4), 10)
-  const monthNumber = parseInt(month.slice(5, 7), 10)
-  const { start: cycleStart, end: cycleEnd } = calendarMonthBounds(year, monthNumber)
+  // MOB-R91 C2 — the month's days are her payday period's (the calendar month when none is set).
+  const { start: cycleStart, end: cycleEnd } = periodBoundsForKey(payday, month)
 
   // UTC accessors on today (currentLocalDate() contract: value is UTC + Kuwait offset)
   const todayStr = today.toISOString().slice(0, 10)
@@ -739,8 +743,9 @@ async function _getSafeToSpendPayloadCached(
   month: string,
   today: Date,
   db: ReturnType<typeof getDb>,
+  payday: number | null = null,
 ): Promise<Record<string, unknown>> {
-  const cacheKey = versionedCacheKey(safeToSpendCacheKey(userId, month))
+  const cacheKey = versionedCacheKey(safeToSpendCacheKey(userId, month), payday)
   const cached = await cacheGet(cacheKey, { hardFail: true })
   if (cached) {
     try {
@@ -750,7 +755,7 @@ async function _getSafeToSpendPayloadCached(
       // corrupt cache entry — recompute
     }
   }
-  const payload = await _buildSafeToSpendPayload(userId, month, today, db)
+  const payload = await _buildSafeToSpendPayload(userId, month, today, db, payday)
   try {
     await cacheSet(cacheKey, JSON.stringify(payload), 300, { hardFail: true })
   } catch (err) {
@@ -768,10 +773,13 @@ async function _buildAccountOverviewPayload(
   userId: number,
   month: string,
   db: ReturnType<typeof getDb>,
+  payday: number | null = null,
 ): Promise<Record<string, unknown>> {
   const year = parseInt(month.slice(0, 4), 10)
   const monthNumber = parseInt(month.slice(5, 7), 10)
-  const { start: monthStart, end: monthEnd } = calendarMonthBounds(year, monthNumber)
+  // MOB-R91 C2 — "this month" and the six-month trend follow her payday (calendar months when none is set).
+  const { start: monthStart, end: monthEnd } = periodBoundsForKey(payday, month)
+  const monthExpr = periodKeyExpr(payday)
   const monthKeys = buildMonthWindow(year, monthNumber, 6)
 
   // MOB-R55 P2 / MOB-R58 D1 — the month's expense total excludes savings-kind categories, whose
@@ -862,14 +870,14 @@ async function _buildAccountOverviewPayload(
   // Single CASE WHEN dual-column query — Flask overview.py:171-189.
   const trendRows = await db
     .select({
-      ym: ymExpr,
+      ym: monthExpr,
       incomeTotal: sql<string>`COALESCE(SUM(CASE WHEN ${incomeCategoryFilter()} THEN ${transactions.amountKd} ELSE 0 END), '0')`,
       spendTotal: sql<string>`COALESCE(SUM(CASE WHEN ${expenseOnlyCategoryFilter()} THEN ${transactions.amountKd} ELSE 0 END), '0')`,
     })
     .from(transactions)
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
-    .where(and(eq(transactions.userId, userId), inArray(ymExpr, monthKeys)))
-    .groupBy(ymExpr)
+    .where(and(eq(transactions.userId, userId), inArray(monthExpr, monthKeys)))
+    .groupBy(monthExpr)
 
   const trendMap: Record<string, { income: string; spend: string }> = {}
   for (const row of trendRows) {
@@ -905,15 +913,15 @@ aggregationRouter.get("/account-overview", requireAuth, searchRateLimit, async (
   const { userId } = c.get("session")
 
   let month = (c.req.query("month") ?? "").trim()
-  if (!month) {
-    month = currentMonthKey()
-  } else {
+  if (month) {
     const parsedMonth = MonthFormatSchema.safeParse(month)
     if (!parsedMonth.success) return zodErrorToEnvelope(c, parsedMonth.error)
   }
 
   const db = getDb()
-  const data = await _buildAccountOverviewPayload(userId, month, db)
+  const payday = await readPaydayDay(db, userId)
+  if (!month) month = currentPeriodKey(payday)
+  const data = await _buildAccountOverviewPayload(userId, month, db, payday)
   return c.json({ ok: true, data, error: null, meta: { connected_accounts_count: 0 } })
 })
 
@@ -927,21 +935,21 @@ aggregationRouter.get("/safe-to-spend", requireAuth, searchRateLimit, async (c) 
   const { userId } = c.get("session")
 
   let month = (c.req.query("month") ?? "").trim()
-  if (!month) {
-    month = currentMonthKey()
-  } else {
+  if (month) {
     const parsedMonth = MonthFormatSchema.safeParse(month)
     if (!parsedMonth.success) return zodErrorToEnvelope(c, parsedMonth.error)
   }
 
   const today = currentLocalDate()
   const db = getDb()
+  const payday = await readPaydayDay(db, userId)
+  if (!month) month = currentPeriodKey(payday, today)
 
   try {
     const payload = await withAnalyticsTimeout(
       db,
       env.analyticsComputeTimeoutSeconds,
-      () => _getSafeToSpendPayloadCached(userId, month, today, db),
+      () => _getSafeToSpendPayloadCached(userId, month, today, db, payday),
     )
     return c.json({ ok: true, data: payload, error: null, meta: {} })
   } catch (err) {
@@ -1015,7 +1023,6 @@ aggregationRouter.get("/weekly-digest", requireAuth, searchRateLimit, async (c) 
   const lastWeekEnd = new Date(weekStartMs - 86400_000).toISOString().slice(0, 10)
   const daysObserved =
     Math.round((new Date(effectiveEnd + "T00:00:00Z").getTime() - weekStartMs) / 86400_000) + 1
-  const month = currentMonthKey()
   const db = getDb()
 
   try {
@@ -1056,7 +1063,10 @@ aggregationRouter.get("/weekly-digest", requireAuth, searchRateLimit, async (c) 
           .where(eq(userProfiles.userId, userId))
           .limit(1)
 
-        const safeToSpendPayload = await _getSafeToSpendPayloadCached(userId, month, today, db)
+        // MOB-R91 C2 — today's month follows her payday; the profile row above already holds it.
+        const payday = profile?.paydayDay ?? null
+        const month = currentPeriodKey(payday, today)
+        const safeToSpendPayload = await _getSafeToSpendPayloadCached(userId, month, today, db, payday)
 
         return {
           week_start: weekStart,
@@ -1117,27 +1127,28 @@ async function _snapshotComputedAt(
 aggregationRouter.get("/dashboard-bundle", requireAuth, searchRateLimit, async (c) => {
   const { userId } = c.get("session")
   const today = currentLocalDate()
-  const currentMonth = currentMonthKey()
 
   let month = (c.req.query("month") ?? "").trim()
-  if (!month) {
-    month = currentMonth
-  } else {
+  if (month) {
     const parsedMonth = MonthFormatSchema.safeParse(month)
     if (!parsedMonth.success) return zodErrorToEnvelope(c, parsedMonth.error)
   }
 
   const db = getDb()
+  // MOB-R91 C2 — today's month and every part of the bundle follow her payday.
+  const payday = await readPaydayDay(db, userId)
+  const currentMonth = currentPeriodKey(payday, today)
+  if (!month) month = currentMonth
 
   try {
     const payload = await withAnalyticsTimeout(
       db,
       env.analyticsComputeTimeoutSeconds,
       async () => {
-        const safeToSpend = await _getSafeToSpendPayloadCached(userId, month, today, db)
+        const safeToSpend = await _getSafeToSpendPayloadCached(userId, month, today, db, payday)
         const [budget, accountOverview, snapshotComputedAt] = await Promise.all([
           buildBudgetPayload(userId, month, db),
-          _buildAccountOverviewPayload(userId, month, db),
+          _buildAccountOverviewPayload(userId, month, db, payday),
           _snapshotComputedAt(userId, db, currentMonth),
         ])
         return {

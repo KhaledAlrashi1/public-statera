@@ -29,6 +29,7 @@ import { dashboardSnapshots } from "../db/schema/dashboard-snapshots"
 import { transactions } from "../db/schema/transactions"
 import { formatKd } from "./transaction-lib"
 import { ymExpr, buildMonthWindow, currentMonthKey } from "./analytics-helpers"
+import { paydayActive, periodBoundsForKey, periodKeyExpr } from "./payday-lib"
 import { incomeCategoryFilter } from "./payday-lib"
 import { isSavingsCategoryName } from "./category-kind"
 
@@ -62,6 +63,8 @@ export type ComputeOpts = {
   cycleEnabled: boolean
   cycleStart?: string | null // YYYY-MM-DD
   cycleEnd?: string | null // YYYY-MM-DD
+  /** MOB-R91 C2 — her payday; null or 1 is the calendar month (the query is then exactly as before). */
+  payday?: number | null
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
@@ -174,11 +177,16 @@ export async function computeDashboardMetricsPayload(
   db: ReturnType<typeof getDb>,
   opts: ComputeOpts,
 ): Promise<DashboardMetricsPayload> {
-  const { months, endYear, endMonth, cycleEnabled, cycleStart, cycleEnd } = opts
+  const { months, endYear, endMonth, cycleEnabled, cycleStart, cycleEnd, payday } = opts
+  // MOB-R91 C2 — with a payday the months are its periods, named by their keys; without one, ymExpr as before.
+  const monthExpr = paydayActive(payday) ? periodKeyExpr(payday) : ymExpr
 
+  // With a payday the cycle is one period, the one keyed by the end month (MOB-R91 C2); rows carry that key.
   const monthKeys =
     cycleEnabled && cycleStart && cycleEnd
-      ? buildMonthsFromRange(cycleStart, cycleEnd)
+      ? paydayActive(payday)
+        ? [`${endYear}-${String(endMonth).padStart(2, "0")}`]
+        : buildMonthsFromRange(cycleStart, cycleEnd)
       : buildMonthWindow(endYear, endMonth, months)
 
   // ymExpr and isIncomeExpr are imported from analytics-helpers and payday-lib.
@@ -192,6 +200,13 @@ export async function computeDashboardMetricsPayload(
       eq(transactions.userId, userId),
       sql`${transactions.date} >= ${cycleStart}`,
       sql`${transactions.date} <= ${cycleEnd}`,
+    )
+  } else if (paydayActive(payday)) {
+    // MOB-R91 C2 — the same sargable range, from the first period's start to the last period's end.
+    whereClause = and(
+      eq(transactions.userId, userId),
+      sql`${transactions.date} >= ${periodBoundsForKey(payday, monthKeys[0]).start}`,
+      sql`${transactions.date} <= ${periodBoundsForKey(payday, monthKeys[monthKeys.length - 1]).end}`,
     )
   } else {
     // Date range filter instead of IN(DATE_FORMAT(date,'%Y-%m'), [...]) — the
@@ -210,7 +225,7 @@ export async function computeDashboardMetricsPayload(
 
   const queryRows = await db
     .select({
-      ym: ymExpr,
+      ym: monthExpr,
       catName: categories.name,
       total: sql<string>`SUM(${transactions.amountKd})`,
       isIncome: isIncomeExpr,
@@ -218,7 +233,7 @@ export async function computeDashboardMetricsPayload(
     .from(transactions)
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
     .where(whereClause)
-    .groupBy(ymExpr, categories.name, isIncomeExpr)
+    .groupBy(monthExpr, categories.name, isIncomeExpr)
 
   const incomeByMonth: Record<string, Decimal> = {}
   const expenseByMonth: Record<string, Decimal> = {}

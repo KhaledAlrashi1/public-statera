@@ -6,10 +6,12 @@
 //   module-level constants) so callers construct the SQL expression in a query-building
 //   context without importing the Drizzle column objects themselves.
 
-import { sql } from "drizzle-orm"
+import { eq, sql, type SQL } from "drizzle-orm"
 import { categories } from "../db/schema/categories"
 import { transactions } from "../db/schema/transactions"
-import { calendarMonthBounds } from "./analytics-helpers"
+import { userProfiles } from "../db/schema/users"
+import type { getDb } from "../db/connection"
+import { calendarMonthBounds, currentLocalDate, currentMonthKey, ymExpr } from "./analytics-helpers"
 
 // Mirrors Flask's income_category_filter_expr:
 //   OR(is_income IS TRUE, LOWER(COALESCE(name,'')) LIKE 'income%')
@@ -93,4 +95,76 @@ export function currentPayPeriod(
       end: endDate.toISOString().slice(0, 10),
     }
   }
+}
+
+// ── MOB-R91 C2 — payday months (rule (c), MOB-R90 B9 / MOB-R91 A2) ───────────────────────────────────────
+// A payday that is null or 1 is the calendar month: every helper below returns exactly what the calendar code
+// returned before (the same ymExpr object, calendarMonthBounds, currentMonthKey), so a user without a payday gets
+// byte-equal answers. A payday of 2–31 cuts months on that day (fixed day, no weekend shift; a day past a short
+// month's end is that month's last day) and names each month by a key that is never shown:
+//   payday 2–15  → the month the period starts in;
+//   payday 16–31 → the month after the one it starts in.
+// So at payday 25 the period 25 Sep – 24 Oct is 2026-10, and at payday 3 the period 3 Oct – 2 Nov is 2026-10.
+// Consecutive periods always get consecutive keys (no gap, no repeat), at every payday.
+
+/** True for a payday that cuts months on its own day (2–31); null, 1 or anything else is the calendar month. */
+export function paydayActive(payday: number | null | undefined): payday is number {
+  return typeof payday === "number" && Number.isInteger(payday) && payday >= 2 && payday <= 31
+}
+
+function parseKey(key: string): [number, number] {
+  return [parseInt(key.slice(0, 4), 10), parseInt(key.slice(5, 7), 10)]
+}
+
+function keyOf(year: number, month: number): string {
+  return `${year}-${String(month).padStart(2, "0")}`
+}
+
+/** The inclusive [start, end] dates of the month with this key. */
+export function periodBoundsForKey(payday: number | null | undefined, key: string): { start: string; end: string } {
+  const [y, m] = parseKey(key)
+  if (!paydayActive(payday)) return calendarMonthBounds(y, m)
+  const [sy, sm] = payday <= 15 ? [y, m] : addMonths(y, m, -1)
+  const [ny, nm] = addMonths(sy, sm, 1)
+  const end = new Date(Date.UTC(ny, nm - 1, clampDay(payday, ny, nm)) - 86_400_000)
+  return { start: toDateStr(sy, sm, clampDay(payday, sy, sm)), end: end.toISOString().slice(0, 10) }
+}
+
+/** The key of the month holding this date (YYYY-MM-DD). */
+export function periodKeyForDate(payday: number | null | undefined, isoDate: string): string {
+  const [y, m] = parseKey(isoDate)
+  if (!paydayActive(payday)) return keyOf(y, m)
+  const d = parseInt(isoDate.slice(8, 10), 10)
+  const shift = (d >= clampDay(payday, y, m) ? 1 : 0) + (payday <= 15 ? -1 : 0)
+  return keyOf(...addMonths(y, m, shift))
+}
+
+/** Today's month key on Kuwait's clock (RM-28). With no payday it is currentMonthKey() itself. */
+export function currentPeriodKey(payday: number | null | undefined, today: Date = currentLocalDate()): string {
+  if (!paydayActive(payday)) return currentMonthKey()
+  return periodKeyForDate(payday, today.toISOString().slice(0, 10))
+}
+
+/**
+ * The SQL that names a transaction's month: ymExpr itself with no payday, else the same DATE_FORMAT of the date
+ * moved by the rule's month shift. The day and the shifts are validated integers written into the SQL (never
+ * bound parameters), so the expression in SELECT and GROUP BY is the same text, as ONLY_FULL_GROUP_BY requires.
+ */
+export function periodKeyExpr(payday: number | null | undefined): SQL<string> {
+  if (!paydayActive(payday)) return ymExpr
+  const day = sql.raw(String(payday))
+  const base = payday <= 15 ? -1 : 0
+  const onOrAfter = sql.raw(String(base + 1))
+  const before = sql.raw(String(base))
+  return sql<string>`DATE_FORMAT(DATE_ADD(${transactions.date}, INTERVAL (CASE WHEN DAY(${transactions.date}) >= LEAST(${day}, DAY(LAST_DAY(${transactions.date}))) THEN ${onOrAfter} ELSE ${before} END) MONTH), '%Y-%m')`
+}
+
+/** The user's payday (1–31), or null when none is set or she has no profile row. */
+export async function readPaydayDay(db: ReturnType<typeof getDb>, userId: number): Promise<number | null> {
+  const [row] = await db
+    .select({ paydayDay: userProfiles.paydayDay })
+    .from(userProfiles)
+    .where(eq(userProfiles.userId, userId))
+    .limit(1)
+  return row?.paydayDay ?? null
 }

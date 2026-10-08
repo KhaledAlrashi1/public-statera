@@ -1219,6 +1219,19 @@ router.post("/profile/update", requireAuth, async (c) => {
       }
     })()
   }
+  // MOB-R91 C2 — a payday moves where every month starts. Clear R3's and R9's Redis entries and her snapshot rows;
+  // the versioned keys also carry the payday (analytics-cache-version.ts), so nothing computed under the old one is
+  // read even if a clear fails.
+  if ("paydayDay" in profileSet) {
+    ;(async () => {
+      try {
+        await cacheBustSafeToSpend(userId)
+        await cacheBustDashboardMetrics(userId, db)
+      } catch (err) {
+        Sentry.captureException(err, { tags: { handler: "auth.profileUpdate.paydayBust", userId } })
+      }
+    })()
+  }
 
   const [[updatedUser], [updatedProfile]] = await Promise.all([
     db
