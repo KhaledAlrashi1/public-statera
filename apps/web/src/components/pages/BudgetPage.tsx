@@ -490,6 +490,7 @@ export default function BudgetPage() {
             open={incomeDialogOpen}
             onOpenChange={setIncomeDialogOpen}
             initialValue={profileContext?.monthly_income_kd ?? null}
+            initialPayday={profileContext?.payday_day ?? null}
           />
 
           {showBudgetEmptyState ? (

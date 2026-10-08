@@ -610,7 +610,7 @@ describe("DashboardPage", () => {
     renderPage()
     const props = mocks.planSetupPrompts.mock.calls.at(-1)?.[0] as { onOpenIncome?: () => void }
     props.onOpenIncome?.()
-    expect(await screen.findByRole("dialog", { name: "Monthly income" })).toBeInTheDocument()
+    expect(await screen.findByRole("dialog", { name: "Income and payday" })).toBeInTheDocument()
     expect(mocks.navigate).not.toHaveBeenCalledWith("/profile")
   })
 
@@ -623,7 +623,7 @@ describe("DashboardPage", () => {
       steps: Array<{ key: string; onAction: () => void }>
     }
     steps.find((step) => step.key === "income")?.onAction()
-    expect(await screen.findByRole("dialog", { name: "Monthly income" })).toBeInTheDocument()
+    expect(await screen.findByRole("dialog", { name: "Income and payday" })).toBeInTheDocument()
     expect(mocks.navigate).not.toHaveBeenCalledWith("/profile")
   })
 
@@ -632,9 +632,9 @@ describe("DashboardPage", () => {
     renderPage()
     const props = mocks.planSetupPrompts.mock.calls.at(-1)?.[0] as { onOpenIncome?: () => void }
     props.onOpenIncome?.()
-    await screen.findByRole("dialog", { name: "Monthly income" })
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }))
-    expect(screen.queryByRole("dialog", { name: "Monthly income" })).toBeNull()
+    await screen.findByRole("dialog", { name: "Income and payday" })
+    fireEvent.click(screen.getByRole("button", { name: "Close" }))
+    expect(screen.queryByRole("dialog", { name: "Income and payday" })).toBeNull()
     expect(mocks.navigate).not.toHaveBeenCalled()
   })
 

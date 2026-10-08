@@ -58,10 +58,6 @@ function renderPage(qc = new QueryClient({ defaultOptions: { queries: { retry: f
   return qc
 }
 
-async function incomeField(): Promise<HTMLInputElement> {
-  return (await screen.findByLabelText("Monthly income (KD)")) as HTMLInputElement
-}
-
 beforeEach(() => {
   vi.clearAllMocks()
   mocks.profile.mockResolvedValue(profileResponse("1500.000"))
@@ -71,44 +67,50 @@ beforeEach(() => {
 })
 
 describe("ProfilePage — Monthly income (MOB-R36 C3)", () => {
-  it("shows the stored monthly income in the field", async () => {
+  // MOB-R92 D1 — the inline editor is gone; each case now reads the Profile income row and edits through the
+  // "Income and payday" sheet its Edit button opens.
+  const row = (label: string) => screen.getByText(label, { selector: "dt" }).parentElement!
+  const openSheet = async () => {
+    await waitFor(() => expect(row("Monthly income")).toHaveTextContent("KD 1,500.000"))
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }))
+    return (await screen.findByLabelText("Monthly income")) as HTMLInputElement
+  }
+
+  it("shows the stored monthly income and payday in the income row", async () => {
     renderPage()
-    const field = await incomeField()
-    await waitFor(() => expect(field.value).toBe("1500.000"))
+    await waitFor(() => expect(row("Monthly income")).toHaveTextContent("KD 1,500.000"))
+    expect(row("Payday")).toHaveTextContent("1st · calendar month")
   })
 
-  it("Save income sends the typed amount as a string, unchanged", async () => {
+  it("Save in the sheet sends the typed amount as the exact 3-decimal string", async () => {
     renderPage()
-    const field = await incomeField()
-    await waitFor(() => expect(field.value).toBe("1500.000"))
+    const field = await openSheet()
     fireEvent.change(field, { target: { value: "1250.500" } })
-    fireEvent.click(screen.getByRole("button", { name: "Save income" }))
+    fireEvent.click(screen.getByRole("button", { name: "Save" }))
     await waitFor(() => expect(mocks.updateProfile).toHaveBeenCalledWith({ monthly_income_kd: "1250.500" }))
     await waitFor(() => expect(mocks.toast.success).toHaveBeenCalledWith("Monthly income saved."))
   })
 
-  it("Clear sends null", async () => {
+  it("clearing the income in the sheet sends null", async () => {
     renderPage()
-    const field = await incomeField()
-    await waitFor(() => expect(field.value).toBe("1500.000"))
-    fireEvent.click(screen.getByRole("button", { name: "Clear" }))
+    const field = await openSheet()
+    fireEvent.change(field, { target: { value: "" } })
+    fireEvent.click(screen.getByRole("button", { name: "Save" }))
     await waitFor(() => expect(mocks.updateProfile).toHaveBeenCalledWith({ monthly_income_kd: null }))
-    await waitFor(() => expect(mocks.toast.success).toHaveBeenCalledWith("Monthly income cleared."))
   })
 
-  it("an invalid amount shows the ruled validation message and does not save", async () => {
+  it("an amount it cannot read shows why and does not save", async () => {
     renderPage()
-    const field = await incomeField()
-    await waitFor(() => expect(field.value).toBe("1500.000"))
+    const field = await openSheet()
     fireEvent.change(field, { target: { value: "12.3456" } })
-    fireEvent.click(screen.getByRole("button", { name: "Save income" }))
-    expect(await screen.findByText("Enter an amount above zero, with up to 3 decimals.")).toBeInTheDocument()
+    fireEvent.click(screen.getByRole("button", { name: "Save" }))
+    expect(await screen.findByText("Can't read this amount.")).toBeInTheDocument()
     expect(mocks.updateProfile).not.toHaveBeenCalled()
   })
 
   it("no longer loads the income-detection pattern (R11 has no caller)", async () => {
     renderPage()
-    expect(await screen.findByRole("heading", { name: "Monthly income" })).toBeInTheDocument()
+    expect(await screen.findByRole("heading", { name: "Income and payday" })).toBeInTheDocument()
     expect(screen.queryByText("Income Detection")).not.toBeInTheDocument()
     expect(mocks.incomePattern).not.toHaveBeenCalled()
   })
@@ -124,10 +126,9 @@ describe("ProfilePage — Monthly income (MOB-R36 C3)", () => {
     }
     for (const k of Object.values(keys)) qc.setQueryData(k, { ok: true })
     renderPage(qc)
-    const field = await incomeField()
-    await waitFor(() => expect(field.value).toBe("1500.000"))
+    const field = await openSheet()
     fireEvent.change(field, { target: { value: "1250.500" } })
-    fireEvent.click(screen.getByRole("button", { name: "Save income" }))
+    fireEvent.click(screen.getByRole("button", { name: "Save" }))
     await waitFor(() => expect(mocks.updateProfile).toHaveBeenCalled())
     const invalidated = (k: readonly unknown[]) => qc.getQueryState(k)?.isInvalidated ?? false
     await waitFor(() => {

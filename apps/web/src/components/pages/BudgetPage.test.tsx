@@ -158,7 +158,7 @@ describe("BudgetPage", () => {
     )
     const props = mocks.incomePlanningCard.mock.calls.at(-1)?.[0] as { onOpenIncome?: () => void }
     act(() => props.onOpenIncome?.())
-    expect(screen.getByRole("dialog", { name: "Monthly income" })).toBeInTheDocument()
+    expect(screen.getByRole("dialog", { name: "Income and payday" })).toBeInTheDocument()
     expect(screen.queryByText("profile page")).toBeNull()
   })
 
@@ -172,6 +172,6 @@ describe("BudgetPage", () => {
     renderPage()
     const props = mocks.incomePlanningCard.mock.calls.at(-1)?.[0] as { onOpenIncome?: () => void }
     act(() => props.onOpenIncome?.())
-    expect((screen.getByLabelText("Monthly income (KD)") as HTMLInputElement).value).toBe("1500.000")
+    expect((screen.getByLabelText("Monthly income") as HTMLInputElement).value).toBe("1500.000")
   })
 })

@@ -958,6 +958,7 @@ export default function DashboardPage() {
         open={incomeDialogOpen}
         onOpenChange={setIncomeDialogOpen}
         initialValue={profile?.monthly_income_kd ?? null}
+        initialPayday={profile?.payday_day ?? null}
       />
 
       <BudgetDialog

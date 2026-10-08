@@ -2,11 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { LogOut } from "lucide-react"
 import { authApi } from "@/lib/api"
-import {
-  MONTHLY_INCOME_INVALID_MESSAGE,
-  isValidMonthlyIncome,
-  useInvalidateIncomeQueries,
-} from "@/lib/monthly-income"
+import { formatAmountReadout } from "@/lib/amount-text"
 import { validateOptionalTextMaxLength } from "@/lib/validation"
 import { useAuth } from "@/contexts/AuthContext"
 import { usePreferences } from "@/contexts/PreferencesContext"
@@ -17,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { TwoFactorSetup, type TwoFactorSetupData } from "@/components/auth/TwoFactorSetup"
 import DataPrivacySection from "@/components/pages/profile/DataPrivacySection"
+import { IncomeQuickDialog, paydayLabel } from "@/components/pages/profile/IncomeQuickDialog"
 import PageHeader from "@/components/layout/PageHeader"
 import { setLayoutCheck } from "@/lib/layout-check"
 import { panelSection } from "@/components/ui/patterns"
@@ -105,10 +102,9 @@ export default function ProfilePage() {
   const [savingName, setSavingName] = useState(false)
 
   // ── Monthly income (typed-only; the one figure every income-derived number uses) ──
-  const [monthlyIncome, setMonthlyIncome] = useState("")
   const [savedMonthlyIncome, setSavedMonthlyIncome] = useState<string | null>(null)
-  const [savingIncome, setSavingIncome] = useState(false)
-  const [incomeInvalid, setIncomeInvalid] = useState(false)
+  const [savedPayday, setSavedPayday] = useState<number | null>(null)
+  const [incomeSheetOpen, setIncomeSheetOpen] = useState(false)
 
   // ── Preferences ──
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState<boolean | null>(null)
@@ -140,7 +136,7 @@ export default function ProfilePage() {
       setEmailNotificationsEnabled(res.profile?.email_notifications_enabled ?? true)
       const storedIncome = res.profile?.monthly_income_kd ?? null
       setSavedMonthlyIncome(storedIncome)
-      setMonthlyIncome(storedIncome ?? "")
+      setSavedPayday(res.profile?.payday_day ?? null)
       const nextTimezone = res.profile?.timezone?.trim() || DEFAULT_PROFILE_TIMEZONE
       setTimezone(nextTimezone)
       setSavedTimezone(nextTimezone)
@@ -162,34 +158,6 @@ export default function ProfilePage() {
   }, [loadProfilePreferences, user])
 
   // ─── Handlers ─────────────────────────────────────────────────────────────
-
-  // Shared with the income pop-up (lib/monthly-income.ts): the four query keys the typed income feeds.
-  const invalidateIncomeQueries = useInvalidateIncomeQueries()
-
-  const writeMonthlyIncome = async (value: string | null) => {
-    setSavingIncome(true)
-    try {
-      const res = await authApi.updateProfile({ monthly_income_kd: value })
-      const stored = res.profile?.monthly_income_kd ?? null
-      setSavedMonthlyIncome(stored)
-      setMonthlyIncome(stored ?? "")
-      setIncomeInvalid(false)
-      await invalidateIncomeQueries()
-      toast.success(value === null ? "Monthly income cleared." : "Monthly income saved.")
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : String(err))
-    } finally {
-      setSavingIncome(false)
-    }
-  }
-
-  const saveMonthlyIncome = async () => {
-    if (!isValidMonthlyIncome(monthlyIncome)) {
-      setIncomeInvalid(true)
-      return
-    }
-    await writeMonthlyIncome(monthlyIncome.trim())
-  }
 
   const handleLogout = async () => {
     try {
@@ -407,46 +375,34 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      {/* ── 2. Income ────────────────────────────────────────────────── */}
+      {/* ── 2. Income and payday ── MOB-R91 C1: shown here, edited in the one sheet every "Set income" opens. */}
       <section className={panelSection({ animated: true, stagger: "2", className: "p-5" })}>
-        <h2 className="text-lg font-semibold">Monthly income</h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Statera uses this for your plan, Home, and budget ratios. Income you log as transactions doesn't change it.
-        </p>
-        <div className="mt-4 grid max-w-sm gap-2">
-          <Label htmlFor="profile-monthly-income">Monthly income (KD)</Label>
-          <Input
-            id="profile-monthly-income"
-            inputMode="decimal"
-            autoComplete="off"
-            value={monthlyIncome}
-            onChange={(e) => {
-              setMonthlyIncome(e.target.value)
-              if (incomeInvalid) setIncomeInvalid(false)
-            }}
-            disabled={loadingProfilePreferences}
-            aria-invalid={incomeInvalid}
-            aria-describedby="profile-monthly-income-hint"
-            className={validationInputClass(incomeInvalid ? "error" : undefined)}
-          />
-          <p id="profile-monthly-income-hint" className="text-xs text-muted-foreground">
-            If your income varies or comes from several sources, enter your average month.
-          </p>
-          <FieldFeedback tone={incomeInvalid ? "error" : undefined} message={incomeInvalid ? MONTHLY_INCOME_INVALID_MESSAGE : undefined} />
-        </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Button onClick={saveMonthlyIncome} loading={savingIncome} disabled={savingIncome || loadingProfilePreferences}>
-            Save income
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => writeMonthlyIncome(null)}
-            disabled={savingIncome || loadingProfilePreferences || savedMonthlyIncome === null}
-          >
-            Clear
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="text-lg font-semibold">Income and payday</h2>
+          <Button type="button" variant="outline" size="sm" className="min-h-11" onClick={() => setIncomeSheetOpen(true)} disabled={loadingProfilePreferences}>
+            Edit
           </Button>
         </div>
+        <dl className="mt-3 divide-y divide-border/60">
+          <div className="flex min-h-11 items-center justify-between gap-3 py-2">
+            <dt className="text-sm text-muted-foreground">Monthly income</dt>
+            <dd className="font-mono text-sm tabular-nums">{savedMonthlyIncome ? formatAmountReadout(savedMonthlyIncome) : "Not set"}</dd>
+          </div>
+          <div className="flex min-h-11 items-center justify-between gap-3 py-2">
+            <dt className="text-sm text-muted-foreground">Payday</dt>
+            <dd className="text-sm">{paydayLabel(savedPayday)}</dd>
+          </div>
+        </dl>
+        <IncomeQuickDialog
+          open={incomeSheetOpen}
+          onOpenChange={(open) => {
+            setIncomeSheetOpen(open)
+            // The sheet saved or was dismissed: show what the server now holds.
+            if (!open) void loadProfilePreferences()
+          }}
+          initialValue={savedMonthlyIncome}
+          initialPayday={savedPayday}
+        />
       </section>
 
       {/* ── 3. Security ─────────────────────────────────────────────────── */}

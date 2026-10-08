@@ -16,6 +16,6 @@ describe("IncomeQuickDialog — copy (MOB-R60 E2)", () => {
         <IncomeQuickDialog open onOpenChange={vi.fn()} />
       </QueryClientProvider>,
     )
-    expect(screen.getByText("You can change this later in Profile.")).toBeInTheDocument()
+    expect(screen.getByText("You can change these anytime in Profile.")).toBeInTheDocument()
   })
 })

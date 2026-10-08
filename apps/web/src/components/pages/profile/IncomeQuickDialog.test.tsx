@@ -32,8 +32,8 @@ function renderDialog(initialValue?: string | null) {
   return { invalidate, onOpenChange }
 }
 
-const amount = () => screen.getByLabelText("Monthly income (KD)") as HTMLInputElement
-const save = () => fireEvent.click(screen.getByRole("button", { name: "Save income" }))
+const amount = () => screen.getByLabelText("Monthly income") as HTMLInputElement
+const save = () => fireEvent.click(screen.getByRole("button", { name: "Save" }))
 
 describe("IncomeQuickDialog", () => {
   beforeEach(() => {
@@ -43,21 +43,21 @@ describe("IncomeQuickDialog", () => {
 
   it("saves only monthly_income_kd, refreshes the four income queries, and closes", async () => {
     const { invalidate, onOpenChange } = renderDialog()
-    fireEvent.change(amount(), { target: { value: "1500" } })
+    fireEvent.change(screen.getByLabelText("Monthly income"), { target: { value: "1500" } })
     save()
 
     await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false))
     expect(mocks.updateProfile).toHaveBeenCalledTimes(1)
-    expect(mocks.updateProfile.mock.calls[0][0]).toEqual({ monthly_income_kd: "1500" })
+    expect(mocks.updateProfile.mock.calls[0][0]).toEqual({ monthly_income_kd: "1500.000" })
     expect(invalidate.mock.calls.map(([f]) => (f as { queryKey: string[] }).queryKey[0]).sort()).toEqual(
       ["auth-profile", "budgets", "dashboard-bundle", "insights"],
     )
   })
 
-  it("an empty amount shows the error and sends nothing", () => {
-    renderDialog()
-    save()
-    expect(screen.getByText("Enter an amount above zero, with up to 3 decimals.")).toBeInTheDocument()
+  it("an empty box with no income saved sends nothing and closes", async () => {
+    const { onOpenChange } = renderDialog()
+    fireEvent.click(screen.getByRole("button", { name: "Save" }))
+    await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false))
     expect(mocks.updateProfile).not.toHaveBeenCalled()
   })
 
@@ -65,7 +65,7 @@ describe("IncomeQuickDialog", () => {
   // dialog is zero — rejected here as it is by the server's parseKd.
   it("a zero amount shows the error and sends nothing — never null", () => {
     renderDialog()
-    fireEvent.change(amount(), { target: { value: "0.000" } })
+    fireEvent.change(screen.getByLabelText("Monthly income"), { target: { value: "0.000" } })
     save()
     expect(screen.getByText("Enter an amount above zero, with up to 3 decimals.")).toBeInTheDocument()
     expect(mocks.updateProfile).not.toHaveBeenCalled()
@@ -73,6 +73,6 @@ describe("IncomeQuickDialog", () => {
 
   it("prefills the current income for Edit income", () => {
     renderDialog("1500.000")
-    expect(amount().value).toBe("1500.000")
+    expect((screen.getByLabelText("Monthly income") as HTMLInputElement).value).toBe("1500.000")
   })
 })
