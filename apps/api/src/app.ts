@@ -83,6 +83,10 @@ export function createApp() {
       })
     }
 
+    // MOB-R89 E2 — a 5xx never carries the error's own text (it can be raw database text); 4xx keeps its message.
+    if (status >= 500) {
+      return c.json({ ok: false, error: "Something went wrong on our side. Try again.", code: "internal_error" }, status as 500)
+    }
     const message =
       err instanceof HTTPException ? err.message : (err.message || "Internal server error.")
     return c.json({ ok: false, error: message }, status as 500)
