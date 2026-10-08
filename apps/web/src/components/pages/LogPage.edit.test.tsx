@@ -123,7 +123,7 @@ describe("/log edit mode (MOB-R87 D)", () => {
     renderEdit(row())
     await waitFor(() => expect(line("Category")).toHaveTextContent("Groceries"))
     vi.useFakeTimers()
-    fireEvent.click(screen.getByRole("button", { name: "Delete" }))
+    fireEvent.click(screen.getByRole("button", { name: "Delete expense" }))
     expect(screen.queryByRole("dialog")).toBeNull()
     expect(mocks.toast.success).toHaveBeenCalledWith("Transaction deleted.", expect.objectContaining({ label: "Undo" }))
     const undo = mocks.toast.success.mock.calls.find((c) => c[0] === "Transaction deleted.")![1] as { onClick: () => void }
@@ -138,7 +138,7 @@ describe("/log edit mode (MOB-R87 D)", () => {
     renderEdit(row())
     await waitFor(() => expect(line("Category")).toHaveTextContent("Groceries"))
     vi.useFakeTimers()
-    fireEvent.click(screen.getByRole("button", { name: "Delete" }))
+    fireEvent.click(screen.getByRole("button", { name: "Delete expense" }))
     await act(async () => {
       vi.advanceTimersByTime(5999)
     })
@@ -153,7 +153,7 @@ describe("/log edit mode (MOB-R87 D)", () => {
     renderEdit(row())
     await waitFor(() => expect(line("Category")).toHaveTextContent("Groceries"))
     expect(screen.queryByRole("dialog", { name: "Split transaction" })).toBeNull()
-    fireEvent.click(screen.getByRole("button", { name: "Split" }))
+    fireEvent.click(screen.getByRole("button", { name: "Split this expense" }))
     expect(screen.getByRole("dialog", { name: "Split transaction" })).toHaveTextContent("split 7")
   })
 

@@ -707,7 +707,7 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
   }
 
   return (
-    <Frame onBack={goBack} style={vvStyle} keyboardInset={keyboardInset(vvStyle)} title={editing ? (isIncome ? "Edit income" : "Edit expense") : undefined}>
+    <Frame onBack={goBack} style={vvStyle} keyboardInset={keyboardInset(vvStyle)} title={editing ? (isIncome ? "Edit income" : "Edit expense") : undefined} subtitle={editing ? null : undefined}>
       {tiles.length > 0 ? (
         <section className="space-y-2" aria-labelledby="log-repeat">
           <h2 id="log-repeat" className="text-sm font-semibold text-muted-foreground">{popular ? "Popular in Kuwait" : "Repeat in two taps"}</h2>
@@ -1016,6 +1016,28 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
         </div>
       </section>
 
+      {/* MOB-R88 E1 — in edit mode, Split and Delete sit in their own card under the fields, each a whole row. */}
+      {editing ? (
+        <section aria-label="Actions" className="overflow-hidden rounded-[var(--radius-card)] border border-border bg-card">
+          <button
+            type="button"
+            disabled={!editRow}
+            onClick={() => setSplitOpen(true)}
+            className="flex min-h-14 w-full items-center border-b border-border px-4 py-3 text-start font-semibold disabled:opacity-50"
+          >
+            {isIncome ? "Split this income" : "Split this expense"}
+          </button>
+          <button
+            type="button"
+            disabled={!editRow}
+            onClick={deleteEntry}
+            className="flex min-h-14 w-full items-center px-4 py-3 text-start font-semibold text-destructive disabled:opacity-50"
+          >
+            {isIncome ? "Delete income" : "Delete expense"}
+          </button>
+        </section>
+      ) : null}
+
       <div className="sticky bottom-0 -mx-4 mt-auto space-y-2 bg-background px-4 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2">
         {/* MOB-R71 C1, MOB-R78 F3 — after a save, one line above Save says what Undo would remove:
             "Last: KD 2.500 · Talabat" and a text button "Undo" (44px). It updates on the next save, goes after
@@ -1049,16 +1071,6 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
             missingSaveLabel(missing)
           )}
         </Button>
-        {editing ? (
-          <div className="flex items-center justify-between gap-3">
-            <Button type="button" variant="ghost" size="sm" className="min-h-11 font-semibold" disabled={!editRow} onClick={() => setSplitOpen(true)}>
-              Split
-            </Button>
-            <Button type="button" variant="ghost" size="sm" className="min-h-11 font-semibold text-destructive" disabled={!editRow} onClick={deleteEntry}>
-              Delete
-            </Button>
-          </div>
-        ) : null}
       </div>
       {editing && editRow ? (
         <SplitTransactionDialog
@@ -1086,12 +1098,15 @@ function Frame({
   style,
   keyboardInset = 0,
   title = "New expense",
+  subtitle = "Amount and category are all you need.",
 }: {
   onBack: () => void
   children: ReactNode
   style?: CSSProperties
   keyboardInset?: number
   title?: string
+  /** MOB-R88 E2 — null hides it (edit mode). */
+  subtitle?: string | null
 }) {
   return (
     // MOB-R69 E1 — at least 16px from both edges, plus the safe-area insets (notch, home bar).
@@ -1099,7 +1114,7 @@ function Frame({
       <header className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-semibold">{title}</h1>
-          <p className="text-sm text-muted-foreground">Amount and category are all you need.</p>
+          {subtitle ? <p className="text-sm text-muted-foreground">{subtitle}</p> : null}
         </div>
         {/* E1 — the close control. Its accessible name stays "Back": it returns to where she came
             from (MOB-R61 D3), which is what it does, and what the existing test names it. */}
