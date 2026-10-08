@@ -12470,3 +12470,78 @@ I3. Push under this block: fast-forward; four jobs on ubuntu-24.04; both probes 
 I4. After C and D commit: save each stash patch, check the hash, drop the stash.
 I5. Queue adds: EditTransactionDialog dead; the "cannot be undone" delete confirm (R87 A) open;
   the API 500-body text (B7 proposal).
+
+MOB-R89 — R88 accepted; polish, edit actions, legacy routes, 5xx text ship (Wed 7 Oct 2026)
+
+Persist first, alone: blank line 12473, payload 12474–12547 (74 lines); read-back reports the
+payload sha256. After: strict 89, loose 91 (loose-only 1513, 6934). Docs-only commit.
+
+A. R88 report accepted. Findings:
+A1. Shipped as 3889a67 (run 37675780140; probes 19:42:05Z, 19:42:06Z): place picker (919e132),
+  search fix (e616cac), /log opens at the top (322ce05), Layout check on Activity (3889a67).
+  FE 525/127, APIH 908/83/83, APII 981/10/83, all as predicted for the items that shipped.
+A2. Three STOPs, each correct under its own rule: polish (D3), edit actions (E3), legacy routes
+  (H1). No operator questions asked.
+A3. Channel miss: R88 H1 said "any hit: STOP" over a grep that also matches API paths. Its one
+  hit, upload.ts:156, is prose naming the API endpoint /transactions/import-commit, not a link
+  to the web route. The rule was too broad; CC followed it as written.
+A4. CC's own grep miss caught by its positive control (zsh passed the file list as one name);
+  rerun valid. Accepted as the control working.
+A5. F proof: at 390x844 WebKit, /log edit fits and does not scroll, so a 0 there could not
+  discriminate; CC used 390x360 instead (main 140, build 0). Accepted. It also says the /log
+  scroll on his phone is phone-only (standalone, insets or 100vh): the readout decides.
+A6. Polish D7: saving one budget re-creates the ids of her other budget rows (the documented
+  full replace of POST /api/budgets); values unchanged. Existing behaviour, not changed by F8.
+  Queued: census of anything that reads budget ids (RM-21 (b) watch).
+A7. The operator's Layout check screenshots are still not in. The /log top fix is NOT ruled
+  here (MOB-R61: core-path defect stays open and named).
+
+B. Polish batch ships (stash c0bf65a0…34ab). Tier 2; F8 Tier 1 (proof accepted, A6 noted).
+B1. CC's proposal granted: BudgetPage passes a monthPhrase computed from the month key, "this
+  month" when the key equals Kuwait's current month (RM-28: kuwaitNow), else labelForYM's text.
+  budget/sections.tsx:310 then reads monthPhrase; nothing compares a label. Quote every reader
+  of monthLabel in budget/sections.tsx (grep, file:line) before the edit.
+B2. New test with mutations: current month reads "this month"; another month reads its name;
+  computing from the device clock instead of kuwaitNow reddens it (boundary case).
+B3. D5 titles accepted, including :1099 "Delete this memorized transaction?" (tab "Memorized",
+  :1141). D4, D6 accepted. Strings provisional.
+B4. The two granted test edits (InsightsPage.test.tsx:305, income-expenses-chart.test.tsx:82)
+  stand. Re-run D3's reader list after B1: every reader display-only, else STOP this item.
+B5. After commit: save both stash patches (c0bf65a0…34ab and the R87 one ba535a51…7351), check
+  hashes, drop both.
+
+C. Edit actions card ships (stash d1426fd8…d6d5). Tier 2.
+C1. Grants, the accessible name string at the line and nothing else in the file:
+  - LogPage.edit.test.tsx:126 and :141: name "Delete" -> the row's new label.
+  - LogPage.edit.test.tsx:156: name "Split" -> the row's new label.
+  Before the edit, state whether each test opens an expense or an income row, and use "...
+  expense" or "... income" to match. Re-measure: 0 breaks.
+C2. Commit after B (both touch LogPage-area files; report any conflict as a STOP).
+
+D. Legacy routes ship (R88 H, H1 re-ruled by A3).
+D1. upload.ts:156 is an API path in prose: not a reader of the web routes. Leave it unedited.
+D2. Proceed with R88 H2–H5 as written. ui/filter-bar.variant.test.tsx:2 (comment naming
+  ExpensesPage) is NOT edited: beyond the grant; queued as stale.
+D3. ExpensesPage.tsx:638 and :667 (B1 search callers) go with the file; say so in the report.
+
+E. Server error text (R88 B7 proposal). Tier 1. Ships.
+E1. Census first: the 500 body's shape today (app.ts:76–88, quoted); grep apps/web for code that
+  reads or compares a server message's text (includes, ===, regex, startsWith; file:line). Any
+  reader that branches on 5xx text: STOP this item and report.
+E2. For 5xx only: same body shape and keys; the message value becomes "Something went wrong on
+  our side. Try again." plus a code "internal_error". Sentry capture unchanged. 4xx unchanged.
+E3. New APIH test: a thrown error whose message holds SQL text yields a 500 whose body contains
+  none of it; a 4xx keeps its message. Mutation: returning err.message reddens it.
+E4. Existing tests that read 500 bodies: list (grep, file:line), predict, measure. Any break:
+  STOP this item (no grant here).
+E5. Dev proof: force one 500 on dev (scratch route or a broken query in a test server, not
+  committed) and show the body verbatim. String channel-drafted, provisional.
+
+F. Counts, commits, push.
+F1. Predictions in the scratch file before the first edit (MOB-R60): base FE 525/127, APIH
+  908/83/83, APII 981/10/83 at 3889a67; a delta per item; the legacy deletions are negative.
+F2. One commit per item, in order B, C, D, E. An item that STOPs stays a stash (by content); the
+  rest go.
+F3. Push under this block: fast-forward; four jobs on ubuntu-24.04; both probes on the new sha,
+  timestamped; 0 unpushed by both routes. No migration in this push.
+F4. Queue adds: budget id re-creation census (A6); stale comment filter-bar.variant.test.tsx:2.
