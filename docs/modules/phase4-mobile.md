@@ -12545,3 +12545,89 @@ F2. One commit per item, in order B, C, D, E. An item that STOPs stays a stash (
 F3. Push under this block: fast-forward; four jobs on ubuntu-24.04; both probes on the new sha,
   timestamped; 0 unpushed by both routes. No migration in this push.
 F4. Queue adds: budget id re-creation census (A6); stale comment filter-bar.variant.test.tsx:2.
+
+MOB-R90 — R89 accepted; payday months and income sheet: census and proposal (Thu 8 Oct 2026)
+
+Persist first, alone: blank line 12548, payload 12549–12633 (85 lines); read-back reports the
+payload sha256. After: strict 90, loose 92 (loose-only 1513, 6934). Docs-only commit.
+
+A. R89 report accepted. Findings and his selections:
+A1. Shipped as 85639e1 (run 37781724949; probes 13:11:26Z, 13:11:27Z): polish (6958e27), edit
+  actions card (f6f5ff2), legacy routes (466cd23), 5xx body text (85639e1). FE 530/127, APIH
+  910/83/84, APII 983/10/84, all as predicted. No stash remains.
+A2. CC miss, reported and fixed in its own code: monthPhraseFor first sat in budget/sections.tsx;
+  five test files mock that module by export list, so 8 tests failed. Moved to the new
+  lib/month-phrase.ts; no test file touched. Accepted as part of the granted B1 edit.
+A3. Channel question, his selection: "When do you plan to invite the next friends (beyond your
+  first tester)?" -> "Soon: demo goes first (Recommended)".
+A4. Channel question, his selection: "Payday months (month starts on payday instead of the 1st):
+  defer it?" -> "Keep it before the demo".
+A5. Work order now: /log top fix (waits on his readout) -> income sheet with payday -> payday
+  months -> demo-first -> budget suggestions (RM-23).
+A6. His words, verbatim, on the channel's three payday questions: "How she sets her payday: in
+  the income sheet. Then the user should and can modify their income along with the payday in
+  the profile page." On calendar months when no payday is set: "I like your suggestion."
+A7. Channel questions (options were the channel's), his answers:
+  - "How should a payday-to-payday month be labelled?" -> free text: "I prefer just dates
+    because what if a customer chooses the 3rd, 4th or 10th of the month. Which name would you
+    give? Dates only might be better. Default is the 1st of the month. Setting the payday is
+    optional. Setting the income is encouraged but it's fine to keep also optional. The user
+    should know that they can edit these two in the profile page."
+  - "When she sets a payday, do her past months follow it too?" -> free text: "Only from now on
+    because she just started using it and I think it's simpler approach. It's easy and quickly
+    to do all months, then let's do it." Channel reading: all months, computed when shown, if
+    that is the simple path (B9 says whether it is).
+  - "Payday falls on a weekend and the salary arrives early. What happens?" -> "Fixed day
+    (Recommended)".
+A8. Earlier selection (prior conversation), not yet in a block: "Editing monthly income: which
+  way?" -> "A: sheet on the keyboard (Recommended)".
+A9. /log top defect still open (MOB-R61): his Layout check screenshots are not in. Not ruled.
+
+B. Payday months and income sheet: CENSUS AND PROPOSAL. Tier 1. Nothing committed.
+  A scratch build is allowed only for B6's width measure, kept as a stash and named by content.
+B1. Profile schema: the income and payday columns (file:line), type, null, default, and the
+  migration that created each. If payday has no column: say so; any fix needs a migration
+  (RM-21 (a)), so the proposal marks it and stops there.
+B2. Every writer of income and payday (grep, file:line): signup, onboarding, Profile, the income
+  setup screens, demo seed, demo clear (which nulls still-default profile fields), the API
+  handler. For each: the keys it sends and what it does when a key is absent or empty.
+B3. Every reader of payday (grep, file:line): payday-lib.ts, currentPayPeriod, every cycle=true
+  caller, anything else.
+B4. Every site that decides a month or "this month" (grep, file:line), server and client:
+  kuwaitNow, today(), isEditableMonth, currentMonthKeyUtc, monthPhraseFor, /summary and other
+  month routes, jobs, caches, product-events-lib.ts:93, activation-reporting-lib.ts:104. For
+  each: the key it produces and who consumes it.
+B5. Month-keyed storage: every table column and Redis key holding a month (budgets,
+  dashboard_snapshots, others), and every API parameter taking YYYY-MM (file:line).
+B6. Every on-screen month label (labelForYM's readers and any other), with its width at 390 for
+  "October 2026" and for "25 Sep – 24 Oct", measured in WebKit on the scratch stash. Any site
+  where the dates do not fit on one line: name it.
+B7. Income UI today: every "Set income" entry point (grep, file:line), Profile's income editor
+  (file:line, what it sends), and the tests that pin each.
+B8. Real-user exposure: write ONE read-only SELECT the operator could run on production,
+  returning only counts (profiles; payday not null; payday not 1; income not null). Do not run
+  it. The operator decides.
+
+B9. Proposal, each line with every reader it touches (R76 A3) and the tests that pin it (R83 A3):
+  - Payday: optional, day 1–31; not set means the 1st (calendar months, as today). Day 29–31 in
+    a shorter month starts on its last day. Fixed day; no weekend shift. Kuwait's clock (RM-28).
+  - Label: payday set and not the 1st -> dates only, "25 Sep – 24 Oct"; otherwise the month
+    name as today. Say which label sites need a second form.
+  - Internal key for a payday period (never shown): channel prefers the month holding most of
+    its days, so at payday 25 her current budget stays under 2026-10. Evaluate against B4/B5;
+    name any reader it breaks, or propose a better rule.
+  - History: all months computed when shown; no stored row is rewritten (RM-21 (b), (c) not
+    touched). If "from now on" is the simpler path in code, say so with the reason.
+  - Income sheet (his A8 pick): one component for every "Set income" entry point and Profile's
+    income row; amount through amount-text.ts (RM-27); payday on the same sheet, optional;
+    income optional; Save visible above the iOS keyboard; one line telling her both can be
+    changed in Profile. Strings channel-drafted on the next block, provisional (RM-26).
+  - Size: how many commits, in what order, and which are Tier 1.
+
+C. Gate RM-29 (new, standing until the payday ruling): no code changes how a month is cut or
+  labelled (payday or otherwise). RM-28 stands.
+
+D. Counts and close.
+D1. Base at 85639e1: FE 530/127; APIH 910/83/84; APII 983/10/84. No source commit, no push.
+D2. Report: B1–B9 in order, each with file:line and command tails; the scratch stash by content
+  hash; tree clean otherwise.
