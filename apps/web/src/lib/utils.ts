@@ -1,4 +1,5 @@
 import { type ClassValue, clsx } from "clsx"
+import { formatMonthYear } from "./home-summary"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -212,7 +213,8 @@ export function isEditableMonth(month: string): boolean {
  * Format a YYYY-MM string as a display label ("This Month" or the raw value)
  */
 export function labelForYM(ym: string): string {
-  return ym && ym === toYearMonth(today()) ? "This Month" : ym || "\u2014"
+  // MOB-R87 F4 — any other month reads "September 2026", never "2026-09" (display only).
+  return ym && ym === toYearMonth(today()) ? "This Month" : ym ? formatMonthYear(ym) : "\u2014"
 }
 
 /**

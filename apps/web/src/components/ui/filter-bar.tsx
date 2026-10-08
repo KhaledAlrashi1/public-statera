@@ -77,7 +77,7 @@ export function FilterBar({
           <Search className="icon-inline text-muted-foreground" />
           <input
             type="text"
-            className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground focus-visible:outline-none"
+            className="w-full bg-transparent text-sm outline-none pointer-coarse:text-[1rem] placeholder:text-muted-foreground focus-visible:outline-none"
             placeholder={searchPlaceholder}
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}

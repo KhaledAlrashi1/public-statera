@@ -302,7 +302,7 @@ describe("InsightsPage", () => {
       expect(mocks.analyticsApi.safeToSpend).toHaveBeenCalledWith("2026-03")
     })
 
-    fireEvent.click(await screen.findByRole("button", { name: "2026-02" }))
+    fireEvent.click(await screen.findByRole("button", { name: "February 2026" }))
 
     await waitFor(() => {
       expect(mocks.analyticsApi.safeToSpend).toHaveBeenCalledWith("2026-02")

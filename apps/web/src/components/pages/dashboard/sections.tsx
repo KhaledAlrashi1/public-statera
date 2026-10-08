@@ -38,6 +38,7 @@ import {
 import { Link } from "react-router-dom"
 
 import { chartTooltipStyle, cn, fmt3, formatCompactKD, formatKD, getBudgetUtilizationTone } from "@/lib/utils"
+import { formatMonthYear } from "@/lib/home-summary"
 import { COUNT_UP_STAGGER_MS, useCountUp } from "@/lib/use-count-up"
 import { CHART_STROKES, getChartColors } from "@/lib/chart-tokens"
 import { Button } from "@/components/ui/button"
@@ -420,7 +421,8 @@ export function SetupProgressPanel({
 
   return (
     <section className="section-panel panel-featured float-in stagger-1" aria-label="Setup progress">
-      <div className="section-header items-start gap-3">
+      {/* MOB-R87 F7 — the dismiss button stays on the title's row at every width (section-header stacks below sm). */}
+      <div className="section-header flex-row items-start gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -1151,7 +1153,7 @@ export function IncomeExpensesChart({
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trendData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" strokeOpacity={0.4} />
-                  <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} />
+                  <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(m: string) => formatMonthYear(m)} />
                   <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v: number) => formatCompactKD(v)} />
                   <ReferenceLine
                     y={expenseAverage}
@@ -1172,6 +1174,7 @@ export function IncomeExpensesChart({
                   ) : null}
                   <RechartsTooltip
                     formatter={(value: number) => [`KD ${value.toFixed(3)}`, "Expenses"]}
+                    labelFormatter={(m) => formatMonthYear(String(m))}
                     contentStyle={chartTooltipStyle}
                   />
                   <Legend
@@ -1191,7 +1194,7 @@ export function IncomeExpensesChart({
             </div>
             {peakExpenseMonth ? (
               <p className="mt-3 text-sm text-muted-foreground">
-                Highest expense month in view: <span className="font-semibold text-foreground">{peakExpenseMonth.month}</span>{" "}
+                Highest expense month in view: <span className="font-semibold text-foreground">{formatMonthYear(peakExpenseMonth.month)}</span>{" "}
                 at <span className="tabular-nums text-foreground">{formatCompactKD(peakExpenseMonth.expenses)}</span>.{" "}
                 {/* MOB-R36 #12. Its second sentence names the income line, which is only drawn when the
                     income is set; without it the sentence would be false, so it is omitted. */}

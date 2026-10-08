@@ -164,7 +164,7 @@ export default function CommandPalette({
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={onKeyDown}
               placeholder="Type a command or search…"
-              className="flex-1 bg-transparent text-base sm:text-sm outline-none placeholder:text-muted-foreground"
+              className="flex-1 bg-transparent text-base sm:text-sm outline-none pointer-coarse:text-[1rem] placeholder:text-muted-foreground"
               aria-label="Search commands"
             />
             <kbd className="hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground sm:inline">

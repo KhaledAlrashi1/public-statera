@@ -1061,7 +1061,7 @@ export function ImportDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[calc(100vw-1rem)] max-w-2xl space-y-5 sm:w-full">
         <DialogHeader>
-          <DialogTitle>Import Transactions</DialogTitle>
+          <DialogTitle>Import transactions</DialogTitle>
           <DialogDescription>
             Import transactions from a CSV or Excel file.
           </DialogDescription>
@@ -1984,7 +1984,7 @@ export function PreviewImportDialog({
       {/* overflow-hidden is required: border-radius alone does not clip children in CSS */}
       <DialogContent className="flex max-h-[92vh] w-[calc(100vw-1rem)] max-w-5xl flex-col overflow-hidden sm:w-full">
         <DialogHeader className="pb-1">
-          <DialogTitle>{importSummary ? "Import Complete" : "Preview Import"}</DialogTitle>
+          <DialogTitle>{importSummary ? "Import complete" : "Preview import"}</DialogTitle>
           <DialogDescription>
             {importSummary
               ? "Here's a breakdown of what changed."

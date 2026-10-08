@@ -79,7 +79,7 @@ describe("MOB-1 Group 2 — IncomeExpensesChart", () => {
     // The peak sentence still names the real peak. NOTE: this assertion alone does NOT
     // discriminate — 2026-03 is the peak either way — which is why the average is asserted above.
     expect(screen.getByText(/Highest expense month in view/)).toBeInTheDocument()
-    expect(screen.getByText("2026-03")).toBeInTheDocument()
+    expect(screen.getByText("March 2026")).toBeInTheDocument()
   })
 
   it("CONTROL — a window where every month has data is unaffected", () => {

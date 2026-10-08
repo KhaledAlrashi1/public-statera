@@ -278,6 +278,7 @@ function ManageCategories({
 
       {/* Step 1: simple confirm */}
       <ConfirmDialog
+        title="Delete this category?"
         open={delState.phase === "confirm"}
         onOpenChange={(v) => !v && setDelState({ phase: "idle" })}
         message={
@@ -377,7 +378,7 @@ function ManageCategories({
       <Dialog open={!!remapSource} onOpenChange={(open) => !open && setRemapSourceId(null)}>
         <DialogContent className="w-[calc(100vw-1rem)] max-w-md space-y-5 sm:w-full">
           <DialogHeader>
-            <DialogTitle>Merge Category</DialogTitle>
+            <DialogTitle>Merge category</DialogTitle>
             <DialogDescription>
               {remapSource
                 ? `Move all ${remapSource.transaction_count ?? 0} transactions from "${remapSource.name}" to another category.`
@@ -687,6 +688,7 @@ function ManageMerchants({
 
       {/* Step 1: simple confirm */}
       <ConfirmDialog
+        title="Delete this merchant?"
         open={delState.phase === "confirm"}
         onOpenChange={(v) => !v && setDelState({ phase: "idle" })}
         message={
@@ -761,7 +763,7 @@ function ManageMerchants({
       <Dialog open={!!remapSource} onOpenChange={(open) => !open && setRemapSourceId(null)}>
         <DialogContent className="w-[calc(100vw-1rem)] max-w-md space-y-5 sm:w-full">
           <DialogHeader>
-            <DialogTitle>Merge Merchant</DialogTitle>
+            <DialogTitle>Merge merchant</DialogTitle>
             <DialogDescription>
               {remapSource
                 ? `Move all transactions from "${remapSource.name}" to another merchant.`
@@ -1097,6 +1099,7 @@ function ManageMemorized() {
       )}
 
       <ConfirmDialog
+        title="Delete this memorized transaction?"
         open={!!confirmDelId}
         onOpenChange={(v) => !v && setConfirmDelId(null)}
         message={`Delete memorized transaction "${items.find((i) => i.id === confirmDelId)?.canonical}"? It will no longer appear in autocomplete suggestions.`}
@@ -1126,7 +1129,7 @@ function SettingsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[88vh] w-[calc(100vw-1rem)] max-w-4xl flex-col space-y-5 sm:w-full">
         <DialogHeader>
-          <DialogTitle>Categories &amp; Merchants</DialogTitle>
+          <DialogTitle>Categories &amp; merchants</DialogTitle>
           <DialogDescription>
             Manage categories, merchants, and memorized transactions.
           </DialogDescription>
@@ -1160,7 +1163,7 @@ function SettingsDialog({
         </div>
 
         {/* Tab content */}
-        <div className="flex-1 overflow-y-auto pt-2">
+        <div className="-mx-1 flex-1 overflow-y-auto px-1 pt-2">
           {tab === "categories" && (
             <ManageCategories onRefresh={onRefresh} />
           )}

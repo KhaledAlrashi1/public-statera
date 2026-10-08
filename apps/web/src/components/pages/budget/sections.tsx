@@ -41,6 +41,8 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { MoneyInput } from "@/components/ui/money-input"
+import { AMOUNT_REFUSED_MESSAGE, parseAmountText } from "@/lib/amount-text"
+import { formatMonthYear } from "@/lib/home-summary"
 import { FieldFeedback, validationInputClass } from "@/components/ui/field-feedback"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -89,6 +91,11 @@ export type BudgetRow = {
 export function kpiAmountClass(text: string): string {
   const size = text.length <= 9 ? "text-xl" : text.length <= 14 ? "text-lg" : "text-base"
   return cn("mt-1 whitespace-nowrap font-mono font-semibold tabular-nums", size)
+}
+
+// MOB-R87 F3 — figures shown together share one size: the one the longest of them needs.
+export function kpiGroupClass(texts: string[]): string {
+  return kpiAmountClass(texts.reduce((a, b) => (b.length > a.length ? b : a), ""))
 }
 
 // MOB-R82 C5 — an amount inside a sentence or a row: a no-break space keeps "KD" with its figure.
@@ -156,6 +163,8 @@ export function BudgetHero({
         : "Spending within plan"
 
   const remainingText = !hasBudget ? "—" : isOver ? `−${formatKD(Math.abs(remaining))}` : formatKD(remaining)
+  const percentText = hasBudget ? `${percentUsed.toFixed(1)}%` : "N/A"
+  const kpiGroupSize = kpiGroupClass([formatKD(totalBudget), formatKD(totalSpent), remainingText, percentText])
   return (
     <section className="float-in space-y-4" aria-label="Budget overview">
       {/* Narration voice + status chip; month context pinned top-right */}
@@ -177,12 +186,12 @@ export function BudgetHero({
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="min-w-0">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Planned total</div>
-          <div className={kpiAmountClass(formatKD(totalBudget))}>{formatKD(totalBudget)}</div>
+          <div className={kpiGroupSize}>{formatKD(totalBudget)}</div>
           <div className="mt-1 text-xs text-muted-foreground">{totalBudgetTrendLabel}</div>
         </div>
         <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Spent so far</div>
-          <div className={kpiAmountClass(formatKD(totalSpent))}>{formatKD(totalSpent)}</div>
+          <div className={kpiGroupSize}>{formatKD(totalSpent)}</div>
           <div className="mt-1 text-xs text-muted-foreground">{totalSpentTrendLabel}</div>
         </div>
         <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
@@ -190,16 +199,14 @@ export function BudgetHero({
           {/* MOB-R50 F3 — with no budget, "remaining" is just −(spend): it reads "—" instead (the
               MOB-R36 #8 precedent). The vs-last-month chip needs a budget in BOTH months; without
               one last month its base is −(last month's spend) and the percentage measures nothing. */}
-          <div className={kpiAmountClass(remainingText)}>{remainingText}</div>
+          <div className={kpiGroupSize}>{remainingText}</div>
           {hasBudget && hasPreviousBudget ? (
             <div className="mt-1 text-xs text-muted-foreground">{remainingTrendLabel}</div>
           ) : null}
         </div>
         <div className="min-w-0 sm:border-s sm:border-border/60 sm:ps-4">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">% Used</div>
-          <div className="mt-1 font-mono text-xl font-semibold tabular-nums">
-            {hasBudget ? `${percentUsed.toFixed(1)}%` : "N/A"}
-          </div>
+          <div className={kpiGroupSize}>{percentText}</div>
           {pctUsedTrendLabel ? (
             <div className="mt-1 text-xs text-muted-foreground">{pctUsedTrendLabel}</div>
           ) : null}
@@ -228,10 +235,12 @@ export function BudgetHero({
 
 export function IncomePlanningCard({
   monthLabel,
+  monthPhrase,
   profileContext,
   onOpenIncome,
 }: {
   monthLabel: string
+  monthPhrase?: string
   profileContext: BudgetProfileContext | null
   onOpenIncome?: () => void
 }) {
@@ -300,7 +309,7 @@ export function IncomePlanningCard({
             Income Context
           </div>
           <div className="mt-1 text-xs text-muted-foreground">
-            Budget vs your income for {monthLabel}
+            Budget vs your income for {monthPhrase ?? monthLabel}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -775,8 +784,8 @@ function getBudgetMonthOptions(): { value: string; label: string }[] {
   const ny = cm === 12 ? cy + 1 : cy
   const nextStr = `${ny}-${String(nm).padStart(2, "0")}`
   return [
-    { value: currStr, label: `This month — ${currStr}` },
-    { value: nextStr, label: `Next month — ${nextStr}` },
+    { value: currStr, label: `This month — ${formatMonthYear(currStr)}` },
+    { value: nextStr, label: `Next month — ${formatMonthYear(nextStr)}` },
   ]
 }
 
@@ -831,11 +840,16 @@ export function BudgetDialog({
       setError(amountCheck.message)
       return
     }
-    const amountVal = parseFloat(amount)
+    // MOB-R87 F8 (RM-27) — what saves is the normalizer's exact 3-decimal value, the one the readout shows.
+    const parsed = parseAmountText(amount)
+    if (parsed.kind !== "ok") {
+      setError(AMOUNT_REFUSED_MESSAGE)
+      return
+    }
 
     setSaving(true)
     try {
-      await onSave({ month, category: category.trim(), amount_kd: amountVal.toFixed(3) })
+      await onSave({ month, category: category.trim(), amount_kd: parsed.kd })
       onOpenChange(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : "We couldn't save that budget right now.")
@@ -861,7 +875,7 @@ export function BudgetDialog({
         }
       }}>
         <DialogHeader>
-          <DialogTitle>{mode === "edit" ? "Edit Budget" : "Add Budget"}</DialogTitle>
+          <DialogTitle>{mode === "edit" ? "Edit budget" : "Add budget"}</DialogTitle>
           <DialogDescription>
             Set a budget amount for a category and month.
           </DialogDescription>

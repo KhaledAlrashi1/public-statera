@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { analyticsApi } from "@/lib/api"
 import { cn, fmt3, formatDeltaLabel, formatKD, today, toYearMonth, isEditableMonth, labelForYM, prevMonth as prevMonthUtil } from "@/lib/utils"
+import { formatMonthYear } from "@/lib/home-summary"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Select,
@@ -33,6 +34,7 @@ import {
   IncomePlanningCard,
   type BudgetRange,
 } from "./budget/sections"
+import { monthPhraseFor } from "@/lib/month-phrase"
 import {
   type BudgetItem,
   findDuplicateCategory,
@@ -325,7 +327,7 @@ export default function BudgetPage() {
       setCopyOpen(false)
       setCopyPreview(null)
       toast.success(
-        `Copied ${cloned.length} budget ${cloned.length === 1 ? "category" : "categories"} from ${copyPreview.month}.`
+        `Copied ${cloned.length} budget ${cloned.length === 1 ? "category" : "categories"} from ${formatMonthYear(copyPreview.month)}.`
       )
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "We couldn't copy the previous month's budgets right now.")
@@ -424,7 +426,7 @@ export default function BudgetPage() {
             <SelectContent>
               {monthOptions.map((m) => (
                 <SelectItem key={m} value={m}>
-                  {m}
+                  {formatMonthYear(m)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -479,6 +481,7 @@ export default function BudgetPage() {
 
           <IncomePlanningCard
             monthLabel={labelForYM(selectedMonth)}
+            monthPhrase={monthPhraseFor(selectedMonth)}
             profileContext={profileContext}
             onOpenIncome={() => setIncomeDialogOpen(true)}
           />
