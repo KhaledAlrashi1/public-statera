@@ -22,7 +22,7 @@
 // selection) calls the existing DELETE only with the id this page's own most recent create
 // returned. After a save or an undo every query is invalidated (MOB-R55 G3).
 // Test stats are local only: sessionStorage, shown at /log?stats=1, never sent anywhere.
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react"
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type Ref } from "react"
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { CalendarDays, Check, Delete, Plus, X } from "lucide-react"
@@ -221,8 +221,11 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
   const editing = editId !== null
   // MOB-R88 F2 — /log sits outside AppShell, whose scroll reset (AppShell.tsx:133) never runs here: entering /log
   // (new or edit) starts at the top and left edge, before the first paint.
+  // MOB-R91 B2 — the frame scrolls now, not the document; both go to the top.
+  const frameRef = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
     window.scrollTo(0, 0)
+    if (frameRef.current) frameRef.current.scrollTop = 0
   }, [])
 
   const [today] = useState(() => kuwaitNow())
@@ -649,8 +652,11 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
     const margin = 12
     const visibleTop = vv.offsetTop + margin
     const visibleBottom = vv.offsetTop + vv.height - margin
-    if (r.bottom > visibleBottom) window.scrollBy(0, r.bottom - visibleBottom)
-    else if (r.top < visibleTop) window.scrollBy(0, r.top - visibleTop)
+    // MOB-R91 B2 — the frame is the scrolling box; the document does not scroll.
+    const box = frameRef.current
+    const scroll = (dy: number) => (box && typeof box.scrollBy === "function" ? box.scrollBy(0, dy) : window.scrollBy(0, dy))
+    if (r.bottom > visibleBottom) scroll(r.bottom - visibleBottom)
+    else if (r.top < visibleTop) scroll(r.top - visibleTop)
   }
   const vvStyle = useVisualViewportVars(open === "place" || open === "what" || open === "category", revealFocused)
 
@@ -700,14 +706,14 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
 
   if (moment) {
     return (
-      <Frame onBack={goBack}>
+      <Frame onBack={goBack} frameRef={frameRef}>
         <SaveMoment moment={moment} canUndo={lastCreatedId !== null} error={error} onUndo={() => void undo()} onAnother={() => { closeMoment(); setError(null) }} />
       </Frame>
     )
   }
 
   return (
-    <Frame onBack={goBack} style={vvStyle} keyboardInset={keyboardInset(vvStyle)} title={editing ? (isIncome ? "Edit income" : "Edit expense") : undefined} subtitle={editing ? null : undefined}>
+    <Frame onBack={goBack} frameRef={frameRef} style={vvStyle} keyboardInset={keyboardInset(vvStyle)} title={editing ? (isIncome ? "Edit income" : "Edit expense") : undefined} subtitle={editing ? null : undefined}>
       {tiles.length > 0 ? (
         <section className="space-y-2" aria-labelledby="log-repeat">
           <h2 id="log-repeat" className="text-sm font-semibold text-muted-foreground">{popular ? "Popular in Kuwait" : "Repeat in two taps"}</h2>
@@ -1099,6 +1105,7 @@ function Frame({
   keyboardInset = 0,
   title = "New expense",
   subtitle = "Amount and category are all you need.",
+  frameRef,
 }: {
   onBack: () => void
   children: ReactNode
@@ -1107,10 +1114,16 @@ function Frame({
   title?: string
   /** MOB-R88 E2 — null hides it (edit mode). */
   subtitle?: string | null
+  /** MOB-R91 B2 — the scrolling box, for scroll-to-top and revealing a focused field. */
+  frameRef?: Ref<HTMLDivElement>
 }) {
   return (
-    // MOB-R69 E1 — at least 16px from both edges, plus the safe-area insets (notch, home bar).
-    <div style={style} className="mx-auto flex min-h-screen w-full max-w-[28rem] flex-col gap-4 bg-background ps-[calc(1rem+env(safe-area-inset-left))] pe-[calc(1rem+env(safe-area-inset-right))] pt-[calc(1rem+var(--safe-top))]">
+    // MOB-R91 B2 — the frame is the visible height (h-visible: 100dvh, 100vh fallback) and scrolls inside itself;
+    // the document never scrolls. Opened from the Home Screen, 100vh is the whole screen (844) while 797 shows, so
+    // the old min-h-screen made the page 47px taller than the screen and it slid up under the clock.
+    <div ref={frameRef} data-log-frame="" style={style} className="h-visible overflow-y-auto overscroll-contain bg-background">
+    {/* MOB-R69 E1 — at least 16px from both edges, plus the safe-area insets (notch, home bar). */}
+    <div className="mx-auto flex min-h-full w-full max-w-[28rem] flex-col gap-4 ps-[calc(1rem+env(safe-area-inset-left))] pe-[calc(1rem+env(safe-area-inset-right))] pt-[calc(1rem+var(--safe-top))]">
       <header className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-semibold">{title}</h1>
@@ -1139,6 +1152,7 @@ function Frame({
           page as tall as the keyboard, so a field near the end (What for) can still be scrolled above
           it. With the keyboard down there is no spacer at all. */}
       {keyboardInset > 0 ? <div aria-hidden="true" data-testid="log-keyboard-spacer" className="shrink-0" style={{ height: keyboardInset }} /> : null}
+    </div>
     </div>
   )
 }

@@ -48,7 +48,7 @@ describe("status bar: --safe-top and its strip (MOB-R78 E)", () => {
 
   it("the app's top is padded by --safe-top, and what sat at the top moved down by it", () => {
     expect(lineWith("/src/components/layout/AppShell.tsx", "relative min-h-screen bg-background")).toContain("pt-[var(--safe-top)]")
-    expect(lineWith("/src/components/pages/LogPage.tsx", "mx-auto flex min-h-screen")).toContain("pt-[calc(1rem+var(--safe-top))]")
+    expect(lineWith("/src/components/pages/LogPage.tsx", "mx-auto flex min-h-full")).toContain("pt-[calc(1rem+var(--safe-top))]")
     const header = lineWith("/src/components/layout/AppShell.tsx", "sticky top-")
     expect(header).toContain("sticky top-[var(--safe-top)]")
     expect(src("/src/components/layout/AppShell.tsx")).toContain("fixed right-0 top-[var(--safe-top)] bottom-0")

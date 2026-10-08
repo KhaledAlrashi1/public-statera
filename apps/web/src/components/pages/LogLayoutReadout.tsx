@@ -19,6 +19,9 @@ type Readout = {
   visualViewportScale: number | null
   scrollX: number
   overWide: string[]
+  // MOB-R91 B3 — /log's scrolling frame (absent elsewhere) and what 100vh, 100dvh and 100svh measure on this phone.
+  frame: { scrollHeight: number; clientHeight: number; scrollTop: number } | null
+  probes: { vh: number; dvh: number; svh: number }
 }
 
 /** Up to 5 elements whose right edge is past innerWidth: tag, first two classes, left, right. Fixed elements (and
@@ -45,7 +48,9 @@ function overWideElements(): string[] {
     })
 }
 
-function measure(probe: HTMLElement | null): Readout {
+type HeightProbes = { vh: HTMLElement | null; dvh: HTMLElement | null; svh: HTMLElement | null }
+
+function measure(probe: HTMLElement | null, heights: HeightProbes): Readout {
   const probeStyle = probe ? getComputedStyle(probe) : null
   const strip = document.querySelector<HTMLElement>('[data-testid="safe-top-strip"]')
   const stripBox = strip?.getBoundingClientRect()
@@ -74,25 +79,40 @@ function measure(probe: HTMLElement | null): Readout {
     visualViewportScale: window.visualViewport ? Math.round(window.visualViewport.scale * 1000) / 1000 : null,
     scrollX: window.scrollX,
     overWide: overWideElements(),
+    frame: (() => {
+      const f = document.querySelector<HTMLElement>("[data-log-frame]")
+      return f ? { scrollHeight: f.scrollHeight, clientHeight: f.clientHeight, scrollTop: Math.round(f.scrollTop) } : null
+    })(),
+    probes: {
+      vh: Math.round(heights.vh?.getBoundingClientRect().height ?? 0),
+      dvh: Math.round(heights.dvh?.getBoundingClientRect().height ?? 0),
+      svh: Math.round(heights.svh?.getBoundingClientRect().height ?? 0),
+    },
   }
 }
 
 export function LogLayoutReadout() {
   const probe = useRef<HTMLDivElement>(null)
+  const vhProbe = useRef<HTMLDivElement>(null)
+  const dvhProbe = useRef<HTMLDivElement>(null)
+  const svhProbe = useRef<HTMLDivElement>(null)
   const [r, setR] = useState<Readout | null>(null)
 
   useEffect(() => {
-    const update = () => setR(measure(probe.current))
+    const update = () => setR(measure(probe.current, { vh: vhProbe.current, dvh: dvhProbe.current, svh: svhProbe.current }))
     update()
     const vv = window.visualViewport
     window.addEventListener("resize", update)
     window.addEventListener("scroll", update, { passive: true })
+    // MOB-R91 B3 — an element's scroll (the /log frame) does not bubble; listen in the capture phase.
+    document.addEventListener("scroll", update, { capture: true, passive: true })
     vv?.addEventListener("resize", update)
     vv?.addEventListener("scroll", update)
     const timer = window.setInterval(update, 1000)
     return () => {
       window.removeEventListener("resize", update)
       window.removeEventListener("scroll", update)
+      document.removeEventListener("scroll", update, { capture: true })
       vv?.removeEventListener("resize", update)
       vv?.removeEventListener("scroll", update)
       window.clearInterval(timer)
@@ -112,6 +132,10 @@ export function LogLayoutReadout() {
           paddingLeft: "env(safe-area-inset-left)",
         }}
       />
+      {/* MOB-R91 B3 — one fixed, invisible, zero-width box per unit; its height is what the unit measures here. */}
+      <div ref={vhProbe} aria-hidden="true" className="pointer-events-none invisible fixed start-0 top-0 w-0" style={{ height: "100vh" }} />
+      <div ref={dvhProbe} aria-hidden="true" className="pointer-events-none invisible fixed start-0 top-0 w-0" style={{ height: "100dvh" }} />
+      <div ref={svhProbe} aria-hidden="true" className="pointer-events-none invisible fixed start-0 top-0 w-0" style={{ height: "100svh" }} />
       <div
         data-testid="log-layout-readout"
         data-layout-readout=""
@@ -124,6 +148,12 @@ export function LogLayoutReadout() {
             <p>visualViewport.height {r.visualViewportHeight ?? "n/a"}</p>
             <p>documentElement.clientHeight {r.clientHeight}</p>
             <p>scrollingElement.scrollHeight {r.scrollHeight ?? "n/a"}</p>
+            <p>
+              {r.frame
+                ? `frame scrollHeight ${r.frame.scrollHeight} · clientHeight ${r.frame.clientHeight} · scrollTop ${r.frame.scrollTop}`
+                : "frame none"}
+            </p>
+            <p>{`100vh ${r.probes.vh} · 100dvh ${r.probes.dvh} · 100svh ${r.probes.svh}`}</p>
             <p>{`safe-area top ${r.insets.top} · right ${r.insets.right} · bottom ${r.insets.bottom} · left ${r.insets.left}`}</p>
             <p>display-mode standalone {r.standalone ? "yes" : "no"}</p>
             <p>

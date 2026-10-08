@@ -349,6 +349,18 @@
 }
 
 @layer utilities {
+  /* MOB-R91 B2 — the visible height. Opened from the Home Screen, iOS reports 100vh as the whole screen (844 on
+     his phone) while only 797 is visible below the status bar; 100dvh is the visible part. 100vh first is the
+     fallback for a browser that does not know dvh (it drops the second line). */
+  .h-visible {
+    height: 100vh;
+    height: 100dvh;
+  }
+  .min-h-visible {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
   /* .brand-gradient retired in design-5.4c-2 (flat ink & brass identity);
      the flat brass mark uses bg-accent + brand-mark instead. */
 
