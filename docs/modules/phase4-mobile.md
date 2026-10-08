@@ -12759,3 +12759,92 @@ F3. Push under this block: fast-forward; four jobs on ubuntu-24.04; both probes 
   timestamped; 0 unpushed by both routes. No migration.
 F4. Queue adds: Activity "Spent (loaded)" total; demo seed payday under C; Layout check link
   removal after his readout.
+
+MOB-R92 — R91 accepted; /log frame, Profile fixes, payday months ship; places count (Thu 8 Oct 2026)
+
+Persist first, alone: blank line 12762, payload 12763–12850 (88 lines); read-back reports the
+payload sha256. After: strict 92, loose 94 (loose-only 1513, 6934). Docs-only commit.
+
+A. R91 report accepted. Findings, his words and selections:
+A1. D shipped as ef55f2e (run 37792017010; probes 14:27:22Z, 14:27:23Z). FE 537/128; API
+  unchanged. B and E held on measured breaks; C built as five cumulative stashes with proofs.
+A2. Three prediction misses, each named by CC: B +5 tests (predicted +3), D +7 (+6), E 8 breaks
+  (at least 5). Accepted as reported.
+A3. Channel premise miss: R91 E4 said Profile kept an old header; it already uses PageHeader
+  (PageHeader.tsx:44, ProfilePage.tsx:329). Only the title changed. Recorded beside R91.
+A4. B1 corrects the channel's R91 A6 reading: AppShell has no fixed frame (AppShell.tsx:221,
+  document scroll). body's 100vh minimum alone made the 844. B changes body and frames /log.
+A5. E3: two emails are sent; the toggle stops only budget_alert. "Emails about: budget alerts."
+  accepted.
+A6. C6 proofs accepted: a no-payday user gets byte-equal JSON from 23 month routes (positive
+  control: payday 25 changes 19); paydays 25, 3, 16, 31 contiguous; SQL key equals JS key; the
+  sheet sent only {"payday_day":25}.
+A7. His words, verbatim: "No one is using the app other than me and my friend. Don't stress
+  things too much." Channel reading: Tier 1 rigour stays for money and user data; frontend
+  items get lighter proofs (B5-style WebKit measures, no pixel-diff positive controls unless a
+  change is meant to be invisible).
+A8. His answers to the channel's meta-questions, verbatim: on the demo setting payday 25: "Why
+  not? It's fine."; on what "Used in: 9 expenses" does when tapped: "Do waht you think is best
+  here."; on the Activity sideways scroll: "Skip it if Activity no longer scrolls sideways
+  (true)." Sideways scroll closed, cause not measured.
+A9. R90 B8 count not run: the channel advised skipping it (two users); he checks payday in
+  Profile after C ships.
+
+B. /log frame ships (stash 400b3e20…b264). Tier 2.
+B1. Grant: SafeTopStrip.test.tsx:51, the searched string "mx-auto flex min-h-screen" becomes
+  the frame's new class string as it appears in LogPage (quote both in the report). Nothing
+  else in that file. Re-measure: 0 breaks.
+
+C. Profile fixes ship (stash 4b68eda6…106a), rebased onto D. Tier 2.
+C1. Rebase onto ef55f2e. In SettingsDialog keep D's code and apply E's rule to it (single-
+  sentence toast titles lose a trailing period). List the conflict hunks and their resolution.
+C2. Grants, each line's expected string loses its trailing period and nothing else changes:
+  LogPage.edit-actions.test.tsx:67; LogPage.edit.test.tsx:128; ProfilePage.test.tsx:87, :96;
+  TwoFactorVerifyPage.test.tsx:71; WorkspaceChoicePage.test.tsx:108;
+  DataPrivacySection.test.tsx:56; import-dialogs.test.tsx:318.
+C3. Re-measure after rebase. A break outside C2 that only asserts a trailing period on a D
+  string: granted the same way, listed. Any other break: STOP this item.
+
+D. Payday months ship (stash series C1–C5, final d9ca989b…9bc6). Tier 1. RM-29 closes on ship.
+D1. Grants, C1 (income sheet), at each line only:
+  - IncomeQuickDialog.test.tsx 46, 59, 68, 76 and IncomeQuickDialog.copy.test.tsx:19: if the
+    component file is deleted, these test files go with it (list); else each line takes the
+    sheet's new name or string.
+  - ProfilePage.test.tsx 76, 82, 92, 101, 111, 127: each case asserts the Profile income row
+    (income and payday shown, Edit opens the sheet) in place of the removed inline editor.
+  - BudgetPage.test.tsx 161, 175; DashboardPage.test.tsx 613, 626, 635: dialog name "Income
+    and payday".
+D2. Grants, C2 (server key): aggregation.test.ts 263, 290, 308, 574, 644, 814, 1189, 1212,
+  1235, 1258, 1301, 1341, 1587; aggregation.savings.test.ts 65, 74: each mock sequence gains
+  the payday read at its position, nothing else. The "no profile query" assertion becomes
+  "one profile read" (name the line). money-wire-shape.test.ts 837, 906, 927, 1058: confirm
+  they pass at the series' final state; no edit.
+D3. Grant, C5: rebuild-dashboard-snapshots.test.ts, the alternating-proxy mock helper resolves
+  a chain of any length (name the helper's lines). The 7 cases unchanged otherwise.
+D4. Open choices, ruled by the channel without asking him: the current period keeps "This
+  Month"; payday is a native 16px select; the toast reads "Income and payday saved" (no period,
+  C1 rule); the Home heading on two lines with dates accepted for now (his phone decides).
+D5. Commit as five commits in order C1–C5 after B and C. Re-run all suites at the final state;
+  report counts per commit. Any break beyond D1–D3: STOP this item (the whole series).
+D6. Queue: demo budgets vanish from the 25th to the 31st (written under the calendar key,
+  demo-data-lib.ts:440); demo-first replaces the seed. R11 calendar grouping (no caller).
+
+E. Places count and "Used in" (his A8: channel's choice). Tier 1 for the API part (read-only).
+E1. Census first: the places list endpoint and its response (file:line); how categories get
+  their count today (file:line); Activity's filters and whether a URL can open Activity
+  filtered to one category or one place (file:line); the contract fixture entries touched.
+E2. The places list adds an expense count per place: read-only, additive field, same rule as
+  categories' count. No other response changes.
+E3. Places rows show "N expenses"; each item's screen shows "Used in N expenses". If E1 finds
+  a URL filter for that item, tapping it opens Activity filtered and closes the manager; else
+  plain text, said in the report.
+E4. Tests with mutations; contract fixture updated for the added field only. Measured breaks
+  beyond the fixture: this item stays a stash.
+
+F. Counts, commits, push.
+F1. Predictions in the scratch file before the first edit (MOB-R60); base FE 537/128, APIH
+  910/83/84, APII 983/10/84 at ef55f2e; a delta per item.
+F2. Order: B, C, D (C1–C5), E. An item that stops stays a stash; D is all or nothing.
+F3. Push under this block: fast-forward; four jobs on ubuntu-24.04; both probes on the new sha,
+  timestamped; 0 unpushed by both routes. No migration.
+F4. Drop each shipped stash after saving its patch and checking the hash.
