@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils"
 import { useDarkMode } from "@/lib/useDarkMode"
 import { useAuth, getUserFirstName } from "@/contexts/AuthContext"
 import { InstallGuide } from "./InstallGuide"
+import { DemoBar } from "./DemoBar"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useToast } from "@/components/ui/toaster"
@@ -536,6 +537,8 @@ function AppShellLayout() {
 
       {/* ==================== Main content ==================== */}
       <main id="main-content" className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-5 py-4 sm:px-6 lg:px-8 lg:py-6">
+        {/* MOB-R95 C7 — the demo's bar; renders nothing outside the demo. */}
+        <DemoBar />
         {/* MOB-R69 F4 — once, on iPhone, outside the installed app. */}
         <InstallGuide />
         <div key={location.pathname} className="page-transition">

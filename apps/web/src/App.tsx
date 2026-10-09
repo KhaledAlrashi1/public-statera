@@ -1,4 +1,4 @@
-import React, { Suspense } from "react"
+import React, { Suspense, useState } from "react"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
@@ -9,16 +9,21 @@ import { PreferencesProvider } from "@/contexts/PreferencesContext"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import { SafeTopStrip } from "@/components/layout/SafeTopStrip"
 import { reportError } from "@/lib/error-reporter"
+import { DEMO_BASE, isDemoMode } from "@/lib/demo/mode"
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 30_000,
-      retry: 1,
-      refetchOnWindowFocus: false,
+function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 30_000,
+        retry: 1,
+        refetchOnWindowFocus: false,
+      },
     },
-  },
-})
+  })
+}
+
+export const queryClient = makeQueryClient()
 
 type ModuleLoader<T extends React.ComponentType<unknown>> = () => Promise<{ default: T }>
 
@@ -207,19 +212,39 @@ function AppRoutes() {
   )
 }
 
+// MOB-R95 C2 — the demo's screens: outside ProtectedRoute, every path under /demo (the router's basename, so the
+// screens' own links stay in the demo). Home, Activity, Plan and Insights in the shell; /log without it, as in
+// the app. Any other path (Profile included) goes to the demo's Home.
+function DemoRoutes() {
+  return (
+    <Routes>
+      <Route path="/log" element={<LogPage />} />
+      <Route element={<AppShell />}>
+        <Route index element={<DashboardPage />} />
+        <Route path="activity" element={<TransactionsPage />} />
+        <Route path="plan" element={<BudgetPage />} />
+        <Route path="insights" element={<InsightsPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
+    </Routes>
+  )
+}
 
 export default function App() {
+  // MOB-R95 C2 — under /demo the app gets its own query cache, made for this page load and dropped with it.
+  const demo = isDemoMode()
+  const [client] = useState(() => (demo ? makeQueryClient() : queryClient))
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={client}>
       <AuthProvider>
         <PreferencesProvider>
           <ToastProvider>
             <TooltipProvider>
-              <BrowserRouter>
+              <BrowserRouter basename={demo ? DEMO_BASE : undefined}>
                 <SafeTopStrip />
                 <ErrorBoundary>
                   <Suspense fallback={<RouteFallback />}>
-                    <AppRoutes />
+                    {demo ? <DemoRoutes /> : <AppRoutes />}
                   </Suspense>
                 </ErrorBoundary>
               </BrowserRouter>

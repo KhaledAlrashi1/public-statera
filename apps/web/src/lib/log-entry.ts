@@ -3,6 +3,7 @@
 //
 // The entry (C1): required = amount and category; optional = place, what for, date (today unless
 // changed). Nothing else is required and nothing required is hidden.
+import { storageKey } from "./demo/mode"
 
 export type RequiredField = "amount" | "category"
 
@@ -71,8 +72,8 @@ export const LOG_FIRST_SAVE_KEY = "statera.log.first-save-date"
  */
 export function claimFirstSaveOfDay(todayIso: string): boolean {
   try {
-    if (window.localStorage.getItem(LOG_FIRST_SAVE_KEY) === todayIso) return false
-    window.localStorage.setItem(LOG_FIRST_SAVE_KEY, todayIso)
+    if (window.localStorage.getItem(storageKey(LOG_FIRST_SAVE_KEY)) === todayIso) return false
+    window.localStorage.setItem(storageKey(LOG_FIRST_SAVE_KEY), todayIso)
     return true
   } catch {
     return false

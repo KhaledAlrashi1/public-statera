@@ -2,6 +2,7 @@
 // API Client — talks to the Flask backend
 // ============================================================
 
+import { isDemoMode } from "@/lib/demo/mode"
 import type {
   Category,
   CategoryRemapResult,
@@ -253,6 +254,17 @@ async function apiFetch<T>(
 ): Promise<T> {
   const method = (options.method || "GET").toUpperCase()
 
+  // MOB-R95 C2 — under /demo every call is answered by the demo transport, never by the network. Its module
+  // (sample, answers, decimal.js) loads only here, so the real app's bundle does not carry it.
+  if (isDemoMode()) {
+    const { demoRequest } = await import("@/lib/demo/transport")
+    const { status, body } = demoRequest(url, { method, body: options.body })
+    if (status >= 400) {
+      throw new ApiError(readErrorMessage(body, status), status, readErrorCode(body), asRecord(body) ?? {})
+    }
+    return body as T
+  }
+
   const headers: Record<string, string> = {
     Accept: "application/json",
     "X-Requested-With": "fetch",
@@ -287,6 +299,11 @@ async function apiFetch<T>(
   }
 
   return res.json()
+}
+
+// MOB-R95 C6 — the demo keeps nothing it is not built to keep; raw-fetch writes refuse the same way.
+function demoRefusal(): ApiError {
+  return new ApiError("Sign up to keep your own", 403, "demo_read_only", {})
 }
 
 // ============================================================
@@ -762,6 +779,7 @@ export const uploadApi = {
     fd.append("file", file)
     if (columnMap) fd.append("column_map", JSON.stringify(columnMap))
 
+    if (isDemoMode()) throw demoRefusal()
     const res = await fetch("/api/transactions/upload-preview", {
       method: "POST",
       headers: { Accept: "application/json", "X-Requested-With": "fetch" },
@@ -1011,6 +1029,7 @@ export const accountApi = {
   // because we want the exact response bytes for the file, not res.json(). Throws
   // ApiError on !ok so callers can branch on 429 (rate limit 5/3600).
   dataExport: async (): Promise<void> => {
+    if (isDemoMode()) throw demoRefusal()
     const res = await fetch("/api/account/data-export", {
       method: "GET",
       headers: { Accept: "application/json", "X-Requested-With": "fetch" },

@@ -5,6 +5,7 @@
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { storageKey } from "@/lib/demo/mode"
 
 export const INSTALL_GUIDE_KEY = "statera.install-guide.seen"
 
@@ -19,7 +20,7 @@ function readVariant(): Variant | null {
     (navigator as Navigator & { standalone?: boolean }).standalone === true
   if (standalone) return null
   try {
-    if (window.localStorage.getItem(INSTALL_GUIDE_KEY) === "true") return null
+    if (window.localStorage.getItem(storageKey(INSTALL_GUIDE_KEY)) === "true") return null
   } catch {
     /* storage unavailable: still show it */
   }
@@ -41,7 +42,7 @@ export function InstallGuide() {
 
   const dismiss = () => {
     try {
-      window.localStorage.setItem(INSTALL_GUIDE_KEY, "true")
+      window.localStorage.setItem(storageKey(INSTALL_GUIDE_KEY), "true")
     } catch {
       /* storage unavailable: hidden for this visit only */
     }

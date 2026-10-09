@@ -87,6 +87,15 @@ export default function LoginPage() {
 
           <MagicLinkRequestForm />
 
+          {/* MOB-R95 C7 — the demo: no account, nothing saved. A full page load, so the app mounts in demo mode
+              with its own cache (also reachable as /demo). */}
+          <a
+            href="/demo"
+            className="mt-6 flex w-full items-center justify-center rounded-lg border border-input bg-background px-4 py-2.5 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground"
+          >
+            See a demo
+          </a>
+
           <p className="mt-6 text-center text-xs text-muted-foreground">
             <Link to="/privacy" className="hover:underline">
               Privacy

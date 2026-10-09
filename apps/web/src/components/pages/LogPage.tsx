@@ -54,6 +54,7 @@ import {
   recentDateChips,
   type RequiredField,
 } from "@/lib/log-entry"
+import { DEMO_SIGN_UP_HREF, isDemoMode, storageKey } from "@/lib/demo/mode"
 
 export const LOG_STATS_KEY = "statera.log.stats"
 
@@ -83,7 +84,7 @@ type Moment = { amount: string; label: string; burst: boolean; still: boolean }
 
 function readStats(): StatEntry[] {
   try {
-    const raw = window.sessionStorage.getItem(LOG_STATS_KEY)
+    const raw = window.sessionStorage.getItem(storageKey(LOG_STATS_KEY))
     return raw ? (JSON.parse(raw) as StatEntry[]) : []
   } catch {
     return []
@@ -92,7 +93,7 @@ function readStats(): StatEntry[] {
 
 function writeStats(entries: StatEntry[]) {
   try {
-    window.sessionStorage.setItem(LOG_STATS_KEY, JSON.stringify(entries))
+    window.sessionStorage.setItem(storageKey(LOG_STATS_KEY), JSON.stringify(entries))
   } catch {
     /* storage unavailable: stats are a local convenience only */
   }
@@ -1205,6 +1206,16 @@ function SaveMoment({
         <p className="text-xl font-semibold">Logged</p>
         <p className="font-mono text-sm tabular-nums text-muted-foreground">{`${amountText} · ${moment.label}`}</p>
       </div>
+      {/* MOB-R95 C6 — in the demo the save lives only in this page's memory. */}
+      {isDemoMode() ? (
+        <p data-testid="log-demo-note" className="text-sm text-muted-foreground">
+          Logged in the demo only.{" "}
+          <a href={DEMO_SIGN_UP_HREF} className="font-medium text-foreground underline underline-offset-2">
+            Sign up
+          </a>{" "}
+          to keep it.
+        </p>
+      ) : null}
       {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
       <div className="flex w-full max-w-xs gap-2">
         {canUndo ? (

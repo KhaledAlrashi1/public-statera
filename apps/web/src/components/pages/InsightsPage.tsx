@@ -22,6 +22,7 @@ import {
   type RecurringCommitmentRow,
 } from "@/components/pages/insights/RecurringCommitmentsCard"
 import { MonthDeltaCard, type MonthDeltaRow } from "@/components/pages/insights/MonthDeltaCard"
+import { storageKey } from "@/lib/demo/mode"
 
 function clampDate(year: number, monthIndex: number, dayOfMonth: number): Date {
   const daysInMonth = new Date(year, monthIndex + 1, 0).getDate()
@@ -48,7 +49,7 @@ function recurringDismissalsStorageKey(userId: number | string | null | undefine
 function readDismissedRecurringNames(userId: number | string | null | undefined): Set<string> {
   if (typeof window === "undefined") return new Set()
   try {
-    const raw = window.localStorage.getItem(recurringDismissalsStorageKey(userId))
+    const raw = window.localStorage.getItem(storageKey(recurringDismissalsStorageKey(userId)))
     if (!raw) return new Set()
     const parsed = JSON.parse(raw) as Record<string, number>
     const now = Date.now()
@@ -60,7 +61,7 @@ function readDismissedRecurringNames(userId: number | string | null | undefined)
     const shouldRewrite = nextEntries.length !== Object.keys(parsed || {}).length
     if (shouldRewrite) {
       const compact = Object.fromEntries(nextEntries)
-      window.localStorage.setItem(recurringDismissalsStorageKey(userId), JSON.stringify(compact))
+      window.localStorage.setItem(storageKey(recurringDismissalsStorageKey(userId)), JSON.stringify(compact))
     }
     return normalized
   } catch {
@@ -78,7 +79,7 @@ function persistDismissedRecurringNames(
     const payload = Object.fromEntries(
       [...dismissedNames].map((name) => [normalizeRecurringName(name), timestamp])
     )
-    window.localStorage.setItem(recurringDismissalsStorageKey(userId), JSON.stringify(payload))
+    window.localStorage.setItem(storageKey(recurringDismissalsStorageKey(userId)), JSON.stringify(payload))
   } catch {
     // ignore storage failures
   }

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react"
+import { storageKey } from "./demo/mode"
 
 const STORAGE_KEY = "theme"
 
 function readPreference(): boolean {
   if (typeof window === "undefined") return false
-  const stored = window.localStorage.getItem(STORAGE_KEY)
+  const stored = window.localStorage.getItem(storageKey(STORAGE_KEY))
   if (stored === "dark") return true
   if (stored === "light") return false
   return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -17,7 +18,7 @@ export function useDarkMode() {
     if (typeof document === "undefined") return
     document.documentElement.classList.toggle("dark", isDark)
     try {
-      window.localStorage.setItem(STORAGE_KEY, isDark ? "dark" : "light")
+      window.localStorage.setItem(storageKey(STORAGE_KEY), isDark ? "dark" : "light")
     } catch {
       /* ignore storage failures */
     }

@@ -39,6 +39,7 @@ import {
   percentOfIncome,
   remainingBar,
 } from "@/lib/home-summary"
+import { storageKey } from "@/lib/demo/mode"
 
 const DASHBOARD_CATEGORY_PAGE_SIZE = 100
 
@@ -67,10 +68,10 @@ export default function DashboardPage() {
   const [isMounted, setIsMounted] = useState(false)
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [onboardingDismissed, setOnboardingDismissed] = useState(
-    () => localStorage.getItem(ONBOARDING_DISMISSED_KEY) === "true"
+    () => localStorage.getItem(storageKey(ONBOARDING_DISMISSED_KEY)) === "true"
   )
   const [setupGuideSeenLocal, setSetupGuideSeenLocal] = useState(
-    () => localStorage.getItem(SETUP_GUIDE_AUTO_LAUNCH_KEY) === "true"
+    () => localStorage.getItem(storageKey(SETUP_GUIDE_AUTO_LAUNCH_KEY)) === "true"
   )
   const [categoryOffset, setCategoryOffset] = useState(0)
   const [categoryRowsSource, setCategoryRowsSource] = useState<Transaction[]>([])
@@ -561,7 +562,7 @@ export default function DashboardPage() {
     if (!profile?.setup_guide_seen) return
     setSetupGuideSeenLocal(true)
     try {
-      window.localStorage.setItem(SETUP_GUIDE_AUTO_LAUNCH_KEY, "true")
+      window.localStorage.setItem(storageKey(SETUP_GUIDE_AUTO_LAUNCH_KEY), "true")
     } catch {
       // ignore storage issues
     }
@@ -571,7 +572,7 @@ export default function DashboardPage() {
     if (!profile?.setup_guide_dismissed) return
     setOnboardingDismissed(true)
     try {
-      window.localStorage.setItem(ONBOARDING_DISMISSED_KEY, "true")
+      window.localStorage.setItem(storageKey(ONBOARDING_DISMISSED_KEY), "true")
     } catch {
       // ignore storage issues
     }
@@ -622,7 +623,7 @@ export default function DashboardPage() {
     if (effectiveSetupGuideSeen) return
     setSetupGuideSeenLocal(true)
     try {
-      window.localStorage.setItem(SETUP_GUIDE_AUTO_LAUNCH_KEY, "true")
+      window.localStorage.setItem(storageKey(SETUP_GUIDE_AUTO_LAUNCH_KEY), "true")
     } catch {
       // ignore storage issues and still show the guided flow once this session
     }
@@ -954,8 +955,8 @@ export default function DashboardPage() {
           onDismiss={() => {
             setOnboardingDismissed(true)
             setSetupGuideSeenLocal(true)
-            localStorage.setItem(ONBOARDING_DISMISSED_KEY, "true")
-            localStorage.setItem(SETUP_GUIDE_AUTO_LAUNCH_KEY, "true")
+            localStorage.setItem(storageKey(ONBOARDING_DISMISSED_KEY), "true")
+            localStorage.setItem(storageKey(SETUP_GUIDE_AUTO_LAUNCH_KEY), "true")
             setSetupGuideOpen(false)
             void syncSetupGuideProfile({ setup_guide_seen: true, setup_guide_dismissed: true })
           }}
