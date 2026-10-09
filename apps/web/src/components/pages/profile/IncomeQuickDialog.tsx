@@ -109,7 +109,18 @@ export function IncomeQuickDialog({
       // refreshes the screens that use it.
       if ("payday_day" in body) await queryClient.invalidateQueries()
       else await invalidateIncomeQueries()
-      toast.success("payday_day" in body ? "Income and payday saved" : "Monthly income saved")
+      // MOB-R95 B1 — the toast names what changed.
+      const incomeChanged = "monthly_income_kd" in body
+      const paydayChanged = "payday_day" in body
+      toast.success(
+        incomeChanged && paydayChanged
+          ? "Income and payday saved"
+          : paydayChanged
+            ? "Payday saved"
+            : body.monthly_income_kd === null
+              ? "Monthly income cleared"
+              : "Monthly income saved",
+      )
       onOpenChange(false)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : String(err))

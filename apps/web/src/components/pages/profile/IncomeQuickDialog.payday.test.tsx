@@ -83,3 +83,43 @@ describe("Income and payday sheet (MOB-R91 C1)", () => {
     expect(mocks.updateProfile).not.toHaveBeenCalled()
   })
 })
+
+// MOB-R95 B1 — the toast names what changed.
+describe("Income and payday sheet — the saved toast (MOB-R95 B1)", () => {
+  it("income set or changed only: Monthly income saved", async () => {
+    const onOpenChange = renderSheet({ initialValue: "1500.000", initialPayday: 25 })
+    fireEvent.change(income(), { target: { value: "1600" } })
+    save()
+    await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false))
+    expect(mocks.updateProfile).toHaveBeenCalledWith({ monthly_income_kd: "1600.000" })
+    expect(mocks.toast.success).toHaveBeenCalledWith("Monthly income saved")
+  })
+
+  it("income cleared only: Monthly income cleared", async () => {
+    const onOpenChange = renderSheet({ initialValue: "1500.000", initialPayday: 25 })
+    fireEvent.change(income(), { target: { value: "" } })
+    save()
+    await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false))
+    expect(mocks.updateProfile).toHaveBeenCalledWith({ monthly_income_kd: null })
+    expect(mocks.toast.success).toHaveBeenCalledWith("Monthly income cleared")
+  })
+
+  it("payday only: Payday saved", async () => {
+    const onOpenChange = renderSheet({ initialValue: "1500.000", initialPayday: 25 })
+    fireEvent.change(payday(), { target: { value: "27" } })
+    save()
+    await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false))
+    expect(mocks.updateProfile).toHaveBeenCalledWith({ payday_day: 27 })
+    expect(mocks.toast.success).toHaveBeenCalledWith("Payday saved")
+  })
+
+  it("both: Income and payday saved", async () => {
+    const onOpenChange = renderSheet({ initialValue: "1500.000", initialPayday: 25 })
+    fireEvent.change(income(), { target: { value: "1600" } })
+    fireEvent.change(payday(), { target: { value: "27" } })
+    save()
+    await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false))
+    expect(mocks.updateProfile).toHaveBeenCalledWith({ monthly_income_kd: "1600.000", payday_day: 27 })
+    expect(mocks.toast.success).toHaveBeenCalledWith("Income and payday saved")
+  })
+})
