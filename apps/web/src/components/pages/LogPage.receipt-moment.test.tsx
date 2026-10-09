@@ -7,7 +7,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import LogPage from "./LogPage"
-import { LOG_FIRST_SAVE_KEY, localIso } from "@/lib/log-entry"
+import { LOG_FIRST_SAVE_KEY } from "@/lib/log-entry"
 
 const mocks = vi.hoisted(() => ({ logSuggestions: vi.fn(), categoriesList: vi.fn(), create: vi.fn() }))
 
@@ -58,14 +58,23 @@ describe("/log save moment (MOB-R70 E7)", () => {
     mocks.categoriesList.mockResolvedValue([])
     mocks.create.mockResolvedValue({ ok: true, data: { item: { id: 1 } }, error: null, meta: {} })
   })
-  afterEach(() => vi.unstubAllGlobals())
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.useRealTimers()
+  })
 
-  it("bursts on the first save of the day, records the day, and not on the next save", async () => {
+  // MOB-R94 C5 — the day is Kuwait's: the runner's clock is pinned either side of Kuwait midnight (21:00Z).
+  it.each([
+    ["2026-10-08T20:59:00Z", "2026-10-08"],
+    ["2026-10-08T21:00:00Z", "2026-10-09"],
+  ])("bursts on the first save of the day, records the day, and not on the next save (at %s, day %s)", async (instant, day) => {
+    vi.useFakeTimers({ toFake: ["Date"] })
+    vi.setSystemTime(new Date(instant))
     motion(false)
     renderLog()
     await saveTile()
     expect(screen.getByTestId("log-burst")).toBeInTheDocument()
-    expect(window.localStorage.getItem(LOG_FIRST_SAVE_KEY)).toBe(localIso(new Date()))
+    expect(window.localStorage.getItem(LOG_FIRST_SAVE_KEY)).toBe(day)
     expect(screen.getByRole("status")).toHaveTextContent("Logged, KD 1.250")
     expect(screen.getByText("KD 1.250 · PICK")).toBeInTheDocument()
 
