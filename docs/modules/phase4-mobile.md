@@ -12922,3 +12922,84 @@ G. Report back
 G1. Persistence (lines, sha256, header counts); predictions file sha; per item, counts with
     predicted signs and the actual; C3's citations; C8's outcome; D3's hits; base shas;
     commits, run, probes; stash list.
+
+MOB-R94 — R93 accepted; Kuwait-clock tests fixed; demo survey (read-only)
+Issued Fri 9 Oct 2026 (Kuwait) by the review channel, on CC's MOB-R93 report.
+
+A. Review of R93 (recorded)
+A1. Persisted: R93 at 12852–12924, 73 lines, sha 65c0bf1d…91ea = issued. Strict 93, loose 95.
+A2. Live: fed9d11, 7 commits on b45a7c4. Run 37848524642 attempt 2: four jobs green on
+    ubuntu-24.04; deploy 10:22:13Z (Fri 9 Oct 2026, 13:22 Kuwait); probes 10:22:29Z and
+    10:22:30Z on fed9d11. 0 unpushed. Migrations 8. RM-29 is closed. Next gate: RM-30.
+A3. Counts matched every prediction. At fed9d11: FE 560/134; APIH 920/97/88; APII 1007/10/88.
+    D 2/5 was red in the four money-wire-shape cases only and green at 5/5, as R92 D2 allowed.
+A4. C3 met (auth.ts:1147, kd.ts:20, auth.profile-update.test.ts:118). C8: no change needed;
+    the sheet stays open with "Can't read this amount." (IncomeQuickDialog.tsx:88,
+    money-input.tsx:99–101). D3: 9 hits as predicted, 0 after.
+A5. C's conflict resolutions accepted, including the dropped "Monthly income cleared"
+    assertion (its Clear case went with D's inline editor).
+A6. Attempt 1 failed at LogPage.receipt-moment.test.tsx:68: the test reads the runner's date,
+    the page reads Kuwait's (LogPage.tsx:231). It fails at b45a7c4 too. The rerun of failed
+    jobs is accepted because CC named the cause and reproduced it on the base first.
+A7. CC's timer never fired; the deploy waited about ten hours. Recorded; B1 covers it.
+A8. Question: R92's report gave the D stash as 0415cb5a…7228; R93's gives 0415cb5a…6b1b. One
+    was retyped. Print sha256sum of the saved D patch; say which command produced each value.
+
+B. Standing from R94
+B1. A CI failure the block did not cause: CC may rerun the failed jobs once, only after naming
+    the cause and reproducing it on the base sha. CC never waits for a clock window to pass;
+    it STOPs and reports the red run, the cause and its plan.
+B2. Every hash in a report is pasted from command output, never retyped (extends R78 A2 to
+    stash and patch hashes).
+
+C. Kuwait-clock tests (Tier 2; RM-28)
+C1. Write the predicted hit count (at least 1) to the predictions file first.
+C2. Census at fed9d11, before any edit: run FE and APIH, and APII if the CI test job runs it
+    (cite the workflow file:line), twice with the system clock pinned: at
+    2026-12-31T20:30:00Z (Kuwait 23:30, same day) and at 2026-12-31T21:30:00Z (Kuwait 00:30
+    on 1 Jan 2027: next day, month and year). Name the pinning method.
+C3. A hit is a test that passes at 20:30Z and fails at 21:30Z. Tests that fail at both
+    instants go on a separate list (fixture dates): queued, not edited.
+C4. Positive control: LogPage.receipt-moment.test.tsx:68 must be a hit. If not, the
+    instrument did not take: STOP.
+C5. Grant: LogPage.receipt-moment.test.tsx pins Date only (fake Date, not timers) at two
+    instants: 2026-10-08T20:59:00Z expects "2026-10-08"; 2026-10-08T21:00:00Z expects
+    "2026-10-09". Expected values are literals, never computed by the app's own helper.
+C6. Class grant, every other hit: the only change is pinning Date in that test and writing
+    its expected values as literals. List each as file:line with before and after. A hit
+    whose runner-clock read is in app code, not in the test, is an RM-28 defect: STOP.
+C7. Control after the fix: point LogPage.tsx:231 at the runner's UTC date; the 21:00Z case
+    must go red; restore it byte-equal (sha256 before and after).
+C8. Then C2's two runs again: 0 hits.
+
+D. Demo-first survey (read-only: no code, no stash)
+    His picks (the channel's options): "Button and /demo link (Recommended)"; "All four,
+    read-only (Recommended)"; "Yes, never saved (Recommended)". Standing: no account, writes
+    nothing, dates relative to Kuwait's today, payday 25.
+D1. For Home, Activity, Plan, Insights and the Log screen: every API call each makes
+    (frontend file:line) and the route that serves it (server file:line).
+D2. For each route: the functions that compute the answer and each DB read they make. Say
+    which could run over in-memory rows with no DB, and what blocks the rest.
+D3. Auth: where routes require a session (file:line); what the frontend does without one.
+D4. The old "Load demo workspace": entry points, and the tables and rows it writes
+    (demo-data-lib.ts).
+D5. Options, each with files touched, every reader of any value it changes (R76 A3) and its
+    cost: (a) sample data and answers built in the browser; (b) read-only /api/demo routes
+    running the same server code over in-memory sample rows; (c) any better shape CC finds.
+    Out: a demo account or any demo rows in the production DB (RM-21). Recommend one.
+D6. There are no rate limits (queue). For any option with a public route: the cost per
+    request and what stops abuse.
+
+E. Read-only
+E1. The income sheet: every toast it can show, with its condition and file:line, including
+    an empty box with an income saved (clearing it).
+
+F. Order and push
+F1. Persist R94 first: blank 12925, payload from 12926. After: strict 94, loose 96.
+F2. Ship C under the usual rule: fast-forward; four Actions jobs succeed on ubuntu-24.04;
+    /healthz and /readyz on the new sha, timestamped; 0 unpushed by both routes.
+F3. D and E: report only.
+
+G. Report back
+G1. Persistence; predictions sha; C's pinning method, both lists, controls and counts (fields
+    named); D's survey and recommendation; E1; A8's answer; commits, run, probes.
