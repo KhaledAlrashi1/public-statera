@@ -13003,3 +13003,84 @@ F3. D and E: report only.
 G. Report back
 G1. Persistence; predictions sha; C's pinning method, both lists, controls and counts (fields
     named); D's survey and recommendation; E1; A8's answer; commits, run, probes.
+
+MOB-R95 — R94 accepted; income sheet toasts; the demo, built in the browser
+Issued Fri 9 Oct 2026 (Kuwait) by the review channel, on CC's MOB-R94 report.
+
+A. Review of R94 (recorded)
+A1. Persisted: R94 at 12926–13005, 80 lines, sha 37b1064b…2836 = issued. Strict 94, loose 96.
+A2. Live: dddf004. Run 37919601891: four jobs green on ubuntu-24.04; deploy 10:50:27Z (Fri 9
+    Oct 2026, 13:50 Kuwait); probes 10:50:36Z and 10:50:37Z on dddf004. 0 unpushed.
+    Migrations 8. FE 561/134; APIH 920/97/88.
+A3. Clock census accepted: 1 hit (the positive control), fixed, controls passed, 0 hits after.
+    CC's predicted non-empty fixture list was a miss, reported by CC; recorded.
+A4. A8 settled: the D patch is 0415cb5a…6b1b. R92's "…7228" was a retype (B2 covers it).
+A5. Recorded: CI runs FE and APIH only (deploy.yml:91, :92); APII runs only in CC's blocks.
+A6. Channel premise miss: D6 said there were no rate limits. They exist (rate-limit.ts:96,
+    :103; anon bucket :68). The queue line is corrected.
+A7. Demo survey accepted. Channel ruling, not asked of the operator: option (a). Server-side
+    options (b), (c2) are out: (b) rewrites every money route; (c2) adds a second database.
+
+B. Income sheet toasts (Tier 2; RM-26 strings provisional)
+B1. IncomeQuickDialog.tsx:112 picks the toast by what changed:
+    income set or changed only: "Monthly income saved";
+    income cleared only (sends null, :90): "Monthly income cleared";
+    payday only: "Payday saved";
+    both: "Income and payday saved".
+B2. One test case for each of the four. Predict the count first.
+B3. Class grant: an existing test line whose only change is its expected toast string, per
+    B1. Grep each old string across apps/web tests first; predict the hit count; list each
+    hit as file:line with before and after. Any other break: STOP.
+
+C. The demo (option a: frontend only; Tier 1 rigour for the safety lines C3)
+C1. His picks (the channel's options), verbatim: "Button and /demo link (Recommended)"; "All
+    four, read-only (Recommended)"; "Yes, never saved (Recommended)"; "A: Bar on every screen
+    (Recommended)"; "Single, ~1,200 KD, payday 25 (Recommended)"; "I see where my money goes
+    (Recommended)". Opens on Home.
+C2. Shape: one demo transport in the frontend API layer answers every call while the URL is
+    under /demo. /demo routes sit outside ProtectedRoute. The demo has its own query cache,
+    dropped when she leaves. Every in-demo link stays under /demo, except Sign up.
+C3. Safety (each pinned by a test):
+    a. No network in demo: a test visits Home, Activity, Plan, Insights and logs, edits and
+       deletes an expense, with fetch spied: 0 calls. Includes a signed-in user opening /demo.
+    b. A call the demo does not know throws; it never falls through to the network.
+    c. No demo value reaches the real app: after the demo, real Home shows no demo rows
+       (cache isolation).
+    d. Browser storage: list every localStorage/sessionStorage key the five screens write
+       (file:line). The demo writes none of them, or writes them under a demo-only name.
+C4. Sample: one data file (JSON) with day offsets from Kuwait's today, read by the demo and
+    by the parity test (C8). Person: single; monthly income 1,200.000 KD; payday 25; history
+    for the current and two earlier payday periods; Kuwait places; budgets for the current
+    period, one category over its budget. Report the sample as a table: categories, budgets,
+    spend per period.
+C5. Answers: the demo answers the 14 read calls of the R94 survey (D1) by computing over the
+    sample in TS. Fields the screens read are computed; list any field left at a default.
+    Payday periods use payday-months.ts.
+C6. Writes: logging, editing and deleting an expense change only the demo's memory, and
+    reset when the page reloads. Every other write answers with "Sign up to keep your own"
+    and the screen shows it as it shows a save error. After a demo save on Log, show "Logged
+    in the demo only. Sign up to keep it." with a Sign up link.
+C7. Entry and exit: a "See a demo" button on the welcome page (LoginPage) and the /demo link.
+    The bar "Like it? Keep your own" with "Sign up" sits on Home, Activity, Plan and
+    Insights; not on Log (its Save bar). Sign up goes to the sign-up screen.
+C8. Parity test (APII): seed the sample file as a test user, pin Date at 2026-10-24T20:30:00Z
+    (Kuwait 23:30, last day of a period) and 2026-10-24T21:30:00Z (Kuwait 00:30, first day of
+    the next), call the real routes, compare every field the screens read with the demo's.
+    Positive control: change one sample amount on the demo side only; the test goes red.
+C9. WebKit at 375x667 and 390x844, demo Home, Activity, Plan, Insights: the bar covers
+    nothing (FAB, last row, tab bar reachable); report the measures.
+C10. Gates: no server source change, no route, no migration (test files excepted). Any
+    existing-test break from C: STOP with a stash and list each line; the next block grants.
+C11. The old "Load demo workspace" stays for now (queued: offer "See a demo" in its place).
+
+D. Order and push
+D1. Persist R95 first: blank 13006, payload from 13007. After: strict 95, loose 97.
+D2. Predictions to the scratch file before the first edit. B, then C, as separate commits.
+D3. Push under the usual rule: fast-forward; four Actions jobs succeed on ubuntu-24.04;
+    /healthz and /readyz on the new sha, timestamped; 0 unpushed by both routes.
+D4. If C stops, ship B alone.
+
+E. Report back
+E1. Persistence; predictions sha; counts per commit (fields named) with predicted signs; B3
+    hits; C3 test names and results; C4 table; C5 defaults; C8 result and control; C9
+    measures; commits, run, probes.
