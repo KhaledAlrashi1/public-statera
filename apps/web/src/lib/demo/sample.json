@@ -1,5 +1,5 @@
 {
-  "_about": "MOB-R95 C4 — the demo's sample. Dates are day offsets from Kuwait's today (0 = today, -1 = yesterday). Read by the demo (lib/demo) and by the API parity test (demo-parity.integration.test.ts). Change an amount here and both sides move together.",
+  "_about": "MOB-R96 B — the demo's sample. A row with period and day_of_month is placed in a payday period: period 0 is the current one, -1 and -2 the two before it, on that day of the month (1–28, so it exists in every month); rows of the current period appear once their day has come. A row with offset_days is that many days from Kuwait's today (0 = today). Read by the demo (lib/demo) and by the API parity test (demo-parity.integration.test.ts); change an amount here and both sides move together.",
   "person": {
     "first_name": "Demo",
     "last_name": null,
@@ -77,620 +77,580 @@
   ],
   "transactions": [
     {
-      "offset_days": -117,
-      "name": "Phone case",
-      "category": "Shopping",
-      "merchant": "X-cite",
-      "amount_kd": "6.500"
-    },
-    {
-      "offset_days": -116,
-      "name": "Coffee",
-      "category": "Dining",
-      "merchant": "Caribou Coffee",
-      "amount_kd": "2.250"
-    },
-    {
-      "offset_days": -115,
-      "name": "Ride to the Avenues",
-      "category": "Transport",
-      "merchant": "Careem",
-      "amount_kd": "2.750"
-    },
-    {
-      "offset_days": -114,
-      "name": "Groceries",
-      "category": "Groceries",
-      "merchant": "Sultan Center",
-      "amount_kd": "33.600"
-    },
-    {
-      "offset_days": -112,
-      "name": "Dinner delivery",
-      "category": "Dining",
-      "merchant": "Talabat",
-      "amount_kd": "8.250"
-    },
-    {
-      "offset_days": -109,
-      "name": "Salad",
-      "category": "Dining",
-      "merchant": "Pick",
-      "amount_kd": "6.500"
-    },
-    {
-      "offset_days": -108,
-      "name": "Fuel",
-      "category": "Transport",
-      "merchant": "Oula",
-      "amount_kd": "5.000"
-    },
-    {
-      "offset_days": -107,
-      "name": "Weekly groceries",
-      "category": "Groceries",
-      "merchant": "Lulu Hypermarket",
-      "amount_kd": "45.125"
-    },
-    {
-      "offset_days": -105,
-      "name": "Coffee",
-      "category": "Dining",
-      "merchant": "Caribou Coffee",
-      "amount_kd": "2.250"
-    },
-    {
-      "offset_days": -104,
-      "name": "Electricity",
-      "category": "Bills",
-      "merchant": "MEW",
-      "amount_kd": "8.750"
-    },
-    {
-      "offset_days": -103,
-      "name": "Clothes",
-      "category": "Shopping",
-      "merchant": "The Avenues",
-      "amount_kd": "28.000"
-    },
-    {
-      "offset_days": -102,
-      "name": "Lunch delivery",
-      "category": "Dining",
-      "merchant": "Talabat",
-      "amount_kd": "11.500"
-    },
-    {
-      "offset_days": -101,
-      "name": "Ride home",
-      "category": "Transport",
-      "merchant": "Careem",
-      "amount_kd": "4.500"
-    },
-    {
-      "offset_days": -100,
-      "name": "Groceries",
-      "category": "Groceries",
-      "merchant": "Sultan Center",
-      "amount_kd": "38.900"
-    },
-    {
-      "offset_days": -99,
-      "name": "Netflix",
-      "category": "Subscriptions",
-      "merchant": "Netflix",
-      "amount_kd": "3.500"
-    },
-    {
-      "offset_days": -98,
-      "name": "Coffee",
-      "category": "Dining",
-      "merchant": "Caribou Coffee",
-      "amount_kd": "2.250"
-    },
-    {
-      "offset_days": -96,
-      "name": "Mobile plan",
-      "category": "Bills",
-      "merchant": "Ooredoo",
-      "amount_kd": "12.000"
-    },
-    {
-      "offset_days": -95,
-      "name": "Ride to work",
-      "category": "Transport",
-      "merchant": "Careem",
-      "amount_kd": "3.250"
-    },
-    {
-      "offset_days": -94,
-      "name": "Dinner delivery",
-      "category": "Dining",
-      "merchant": "Talabat",
-      "amount_kd": "9.750"
-    },
-    {
-      "offset_days": -94,
-      "name": "Apartment rent",
-      "category": "Rent",
-      "merchant": "Salmiya Residences",
-      "amount_kd": "350.000"
-    },
-    {
-      "offset_days": -93,
-      "name": "Weekly groceries",
-      "category": "Groceries",
-      "merchant": "Lulu Hypermarket",
-      "amount_kd": "42.350"
-    },
-    {
-      "offset_days": -92,
+      "period": -2,
+      "day_of_month": 25,
       "name": "Salary",
       "category": "Salary",
       "merchant": "Gulf Trading Co",
       "amount_kd": "1200.000"
     },
     {
-      "offset_days": -87,
-      "name": "Phone case",
-      "category": "Shopping",
-      "merchant": "X-cite",
-      "amount_kd": "6.500"
-    },
-    {
-      "offset_days": -86,
-      "name": "Coffee",
-      "category": "Dining",
-      "merchant": "Caribou Coffee",
-      "amount_kd": "2.250"
-    },
-    {
-      "offset_days": -85,
-      "name": "Ride to the Avenues",
-      "category": "Transport",
-      "merchant": "Careem",
-      "amount_kd": "2.750"
-    },
-    {
-      "offset_days": -84,
-      "name": "Groceries",
-      "category": "Groceries",
-      "merchant": "Sultan Center",
-      "amount_kd": "33.600"
-    },
-    {
-      "offset_days": -82,
-      "name": "Dinner delivery",
-      "category": "Dining",
-      "merchant": "Talabat",
-      "amount_kd": "8.250"
-    },
-    {
-      "offset_days": -79,
-      "name": "Salad",
-      "category": "Dining",
-      "merchant": "Pick",
-      "amount_kd": "6.500"
-    },
-    {
-      "offset_days": -78,
-      "name": "Fuel",
-      "category": "Transport",
-      "merchant": "Oula",
-      "amount_kd": "5.000"
-    },
-    {
-      "offset_days": -77,
-      "name": "Weekly groceries",
-      "category": "Groceries",
-      "merchant": "Lulu Hypermarket",
-      "amount_kd": "45.125"
-    },
-    {
-      "offset_days": -75,
-      "name": "Coffee",
-      "category": "Dining",
-      "merchant": "Caribou Coffee",
-      "amount_kd": "2.250"
-    },
-    {
-      "offset_days": -74,
-      "name": "Electricity",
-      "category": "Bills",
-      "merchant": "MEW",
-      "amount_kd": "8.750"
-    },
-    {
-      "offset_days": -73,
-      "name": "Clothes",
-      "category": "Shopping",
-      "merchant": "The Avenues",
-      "amount_kd": "28.000"
-    },
-    {
-      "offset_days": -72,
-      "name": "Lunch delivery",
-      "category": "Dining",
-      "merchant": "Talabat",
-      "amount_kd": "11.500"
-    },
-    {
-      "offset_days": -71,
-      "name": "Ride home",
-      "category": "Transport",
-      "merchant": "Careem",
-      "amount_kd": "4.500"
-    },
-    {
-      "offset_days": -70,
-      "name": "Groceries",
-      "category": "Groceries",
-      "merchant": "Sultan Center",
-      "amount_kd": "38.900"
-    },
-    {
-      "offset_days": -69,
-      "name": "Netflix",
-      "category": "Subscriptions",
-      "merchant": "Netflix",
-      "amount_kd": "3.500"
-    },
-    {
-      "offset_days": -68,
-      "name": "Coffee",
-      "category": "Dining",
-      "merchant": "Caribou Coffee",
-      "amount_kd": "2.250"
-    },
-    {
-      "offset_days": -66,
-      "name": "Mobile plan",
-      "category": "Bills",
-      "merchant": "Ooredoo",
-      "amount_kd": "12.000"
-    },
-    {
-      "offset_days": -65,
-      "name": "Ride to work",
-      "category": "Transport",
-      "merchant": "Careem",
-      "amount_kd": "3.250"
-    },
-    {
-      "offset_days": -64,
-      "name": "Dinner delivery",
-      "category": "Dining",
-      "merchant": "Talabat",
-      "amount_kd": "9.750"
-    },
-    {
-      "offset_days": -63,
-      "name": "Weekly groceries",
-      "category": "Groceries",
-      "merchant": "Lulu Hypermarket",
-      "amount_kd": "42.350"
-    },
-    {
-      "offset_days": -63,
+      "period": -2,
+      "day_of_month": 26,
       "name": "Apartment rent",
       "category": "Rent",
       "merchant": "Salmiya Residences",
       "amount_kd": "350.000"
     },
     {
-      "offset_days": -62,
-      "name": "Salary",
-      "category": "Salary",
-      "merchant": "Gulf Trading Co",
-      "amount_kd": "1200.000"
-    },
-    {
-      "offset_days": -57,
+      "period": -2,
+      "day_of_month": 27,
       "name": "Phone case",
       "category": "Shopping",
       "merchant": "X-cite",
       "amount_kd": "6.500"
     },
     {
-      "offset_days": -56,
+      "period": -2,
+      "day_of_month": 27,
       "name": "Coffee",
       "category": "Dining",
       "merchant": "Caribou Coffee",
       "amount_kd": "2.250"
     },
     {
-      "offset_days": -55,
-      "name": "Ride to the Avenues",
-      "category": "Transport",
-      "merchant": "Careem",
-      "amount_kd": "2.750"
-    },
-    {
-      "offset_days": -54,
-      "name": "Groceries",
-      "category": "Groceries",
-      "merchant": "Sultan Center",
-      "amount_kd": "33.600"
-    },
-    {
-      "offset_days": -52,
-      "name": "Dinner delivery",
-      "category": "Dining",
-      "merchant": "Talabat",
-      "amount_kd": "8.250"
-    },
-    {
-      "offset_days": -49,
-      "name": "Salad",
-      "category": "Dining",
-      "merchant": "Pick",
-      "amount_kd": "6.500"
-    },
-    {
-      "offset_days": -48,
-      "name": "Fuel",
-      "category": "Transport",
-      "merchant": "Oula",
-      "amount_kd": "5.000"
-    },
-    {
-      "offset_days": -47,
-      "name": "Weekly groceries",
-      "category": "Groceries",
-      "merchant": "Lulu Hypermarket",
-      "amount_kd": "45.125"
-    },
-    {
-      "offset_days": -45,
-      "name": "Coffee",
-      "category": "Dining",
-      "merchant": "Caribou Coffee",
-      "amount_kd": "2.250"
-    },
-    {
-      "offset_days": -44,
-      "name": "Electricity",
-      "category": "Bills",
-      "merchant": "MEW",
-      "amount_kd": "8.750"
-    },
-    {
-      "offset_days": -43,
-      "name": "Clothes",
-      "category": "Shopping",
-      "merchant": "The Avenues",
-      "amount_kd": "28.000"
-    },
-    {
-      "offset_days": -42,
-      "name": "Lunch delivery",
-      "category": "Dining",
-      "merchant": "Talabat",
-      "amount_kd": "11.500"
-    },
-    {
-      "offset_days": -41,
-      "name": "Ride home",
-      "category": "Transport",
-      "merchant": "Careem",
-      "amount_kd": "4.500"
-    },
-    {
-      "offset_days": -40,
-      "name": "Groceries",
-      "category": "Groceries",
-      "merchant": "Sultan Center",
-      "amount_kd": "38.900"
-    },
-    {
-      "offset_days": -39,
-      "name": "Netflix",
-      "category": "Subscriptions",
-      "merchant": "Netflix",
-      "amount_kd": "3.500"
-    },
-    {
-      "offset_days": -38,
-      "name": "Coffee",
-      "category": "Dining",
-      "merchant": "Caribou Coffee",
-      "amount_kd": "2.250"
-    },
-    {
-      "offset_days": -36,
+      "period": -2,
+      "day_of_month": 28,
       "name": "Mobile plan",
       "category": "Bills",
       "merchant": "Ooredoo",
       "amount_kd": "12.000"
     },
     {
-      "offset_days": -35,
+      "period": -2,
+      "day_of_month": 28,
+      "name": "Ride to the Avenues",
+      "category": "Transport",
+      "merchant": "Careem",
+      "amount_kd": "2.750"
+    },
+    {
+      "period": -2,
+      "day_of_month": 1,
+      "name": "Groceries",
+      "category": "Groceries",
+      "merchant": "Sultan Center",
+      "amount_kd": "38.600"
+    },
+    {
+      "period": -2,
+      "day_of_month": 3,
+      "name": "Dinner delivery",
+      "category": "Dining",
+      "merchant": "Talabat",
+      "amount_kd": "8.250"
+    },
+    {
+      "period": -2,
+      "day_of_month": 5,
+      "name": "Electricity",
+      "category": "Bills",
+      "merchant": "MEW",
+      "amount_kd": "9.250"
+    },
+    {
+      "period": -2,
+      "day_of_month": 6,
+      "name": "Salad",
+      "category": "Dining",
+      "merchant": "Pick",
+      "amount_kd": "6.500"
+    },
+    {
+      "period": -2,
+      "day_of_month": 7,
+      "name": "Fuel",
+      "category": "Transport",
+      "merchant": "Oula",
+      "amount_kd": "5.000"
+    },
+    {
+      "period": -2,
+      "day_of_month": 8,
+      "name": "Weekly groceries",
+      "category": "Groceries",
+      "merchant": "Lulu Hypermarket",
+      "amount_kd": "45.125"
+    },
+    {
+      "period": -2,
+      "day_of_month": 10,
+      "name": "Coffee",
+      "category": "Dining",
+      "merchant": "Caribou Coffee",
+      "amount_kd": "2.250"
+    },
+    {
+      "period": -2,
+      "day_of_month": 11,
+      "name": "Clothes",
+      "category": "Shopping",
+      "merchant": "The Avenues",
+      "amount_kd": "28.000"
+    },
+    {
+      "period": -2,
+      "day_of_month": 12,
+      "name": "Netflix",
+      "category": "Subscriptions",
+      "merchant": "Netflix",
+      "amount_kd": "3.500"
+    },
+    {
+      "period": -2,
+      "day_of_month": 13,
+      "name": "Lunch delivery",
+      "category": "Dining",
+      "merchant": "Talabat",
+      "amount_kd": "11.500"
+    },
+    {
+      "period": -2,
+      "day_of_month": 14,
+      "name": "Ride home",
+      "category": "Transport",
+      "merchant": "Careem",
+      "amount_kd": "4.500"
+    },
+    {
+      "period": -2,
+      "day_of_month": 15,
+      "name": "Groceries",
+      "category": "Groceries",
+      "merchant": "Sultan Center",
+      "amount_kd": "41.900"
+    },
+    {
+      "period": -2,
+      "day_of_month": 17,
+      "name": "Coffee",
+      "category": "Dining",
+      "merchant": "Caribou Coffee",
+      "amount_kd": "2.250"
+    },
+    {
+      "period": -2,
+      "day_of_month": 19,
       "name": "Ride to work",
       "category": "Transport",
       "merchant": "Careem",
       "amount_kd": "3.250"
     },
     {
-      "offset_days": -34,
+      "period": -2,
+      "day_of_month": 20,
       "name": "Dinner delivery",
       "category": "Dining",
       "merchant": "Talabat",
       "amount_kd": "9.750"
     },
     {
-      "offset_days": -33,
+      "period": -2,
+      "day_of_month": 21,
       "name": "Weekly groceries",
       "category": "Groceries",
       "merchant": "Lulu Hypermarket",
-      "amount_kd": "42.350"
+      "amount_kd": "52.350"
     },
     {
-      "offset_days": -32,
+      "period": -2,
+      "day_of_month": 22,
+      "name": "Fuel",
+      "category": "Transport",
+      "merchant": "Oula",
+      "amount_kd": "5.000"
+    },
+    {
+      "period": -2,
+      "day_of_month": 23,
+      "name": "Lunch delivery",
+      "category": "Dining",
+      "merchant": "Talabat",
+      "amount_kd": "7.250"
+    },
+    {
+      "period": -1,
+      "day_of_month": 25,
       "name": "Salary",
       "category": "Salary",
       "merchant": "Gulf Trading Co",
       "amount_kd": "1200.000"
     },
     {
-      "offset_days": -32,
+      "period": -1,
+      "day_of_month": 26,
       "name": "Apartment rent",
       "category": "Rent",
       "merchant": "Salmiya Residences",
       "amount_kd": "350.000"
     },
     {
-      "offset_days": -27,
-      "name": "Phone case",
+      "period": -1,
+      "day_of_month": 26,
+      "name": "Coffee",
+      "category": "Dining",
+      "merchant": "Caribou Coffee",
+      "amount_kd": "2.250"
+    },
+    {
+      "period": -1,
+      "day_of_month": 27,
+      "name": "Groceries",
+      "category": "Groceries",
+      "merchant": "Sultan Center",
+      "amount_kd": "33.600"
+    },
+    {
+      "period": -1,
+      "day_of_month": 27,
+      "name": "Ride to the Avenues",
+      "category": "Transport",
+      "merchant": "Careem",
+      "amount_kd": "2.750"
+    },
+    {
+      "period": -1,
+      "day_of_month": 28,
+      "name": "Mobile plan",
+      "category": "Bills",
+      "merchant": "Ooredoo",
+      "amount_kd": "12.000"
+    },
+    {
+      "period": -1,
+      "day_of_month": 28,
+      "name": "Dinner delivery",
+      "category": "Dining",
+      "merchant": "Talabat",
+      "amount_kd": "8.250"
+    },
+    {
+      "period": -1,
+      "day_of_month": 2,
+      "name": "Weekly groceries",
+      "category": "Groceries",
+      "merchant": "Lulu Hypermarket",
+      "amount_kd": "45.125"
+    },
+    {
+      "period": -1,
+      "day_of_month": 3,
+      "name": "Salad",
+      "category": "Dining",
+      "merchant": "Pick",
+      "amount_kd": "6.500"
+    },
+    {
+      "period": -1,
+      "day_of_month": 3,
+      "name": "Fuel",
+      "category": "Transport",
+      "merchant": "Oula",
+      "amount_kd": "5.000"
+    },
+    {
+      "period": -1,
+      "day_of_month": 4,
+      "name": "Phone charger",
       "category": "Shopping",
       "merchant": "X-cite",
-      "amount_kd": "6.500"
+      "amount_kd": "9.750"
     },
     {
-      "offset_days": -26,
-      "name": "Coffee",
-      "category": "Dining",
-      "merchant": "Caribou Coffee",
-      "amount_kd": "2.250"
-    },
-    {
-      "offset_days": -25,
-      "name": "Ride to the Avenues",
-      "category": "Transport",
-      "merchant": "Careem",
-      "amount_kd": "2.750"
-    },
-    {
-      "offset_days": -24,
-      "name": "Groceries",
-      "category": "Groceries",
-      "merchant": "Sultan Center",
-      "amount_kd": "33.600"
-    },
-    {
-      "offset_days": -22,
-      "name": "Dinner delivery",
-      "category": "Dining",
-      "merchant": "Talabat",
-      "amount_kd": "8.250"
-    },
-    {
-      "offset_days": -19,
-      "name": "Salad",
-      "category": "Dining",
-      "merchant": "Pick",
-      "amount_kd": "6.500"
-    },
-    {
-      "offset_days": -18,
-      "name": "Fuel",
-      "category": "Transport",
-      "merchant": "Oula",
-      "amount_kd": "5.000"
-    },
-    {
-      "offset_days": -17,
-      "name": "Weekly groceries",
-      "category": "Groceries",
-      "merchant": "Lulu Hypermarket",
-      "amount_kd": "45.125"
-    },
-    {
-      "offset_days": -15,
-      "name": "Coffee",
-      "category": "Dining",
-      "merchant": "Caribou Coffee",
-      "amount_kd": "2.250"
-    },
-    {
-      "offset_days": -14,
+      "period": -1,
+      "day_of_month": 5,
       "name": "Electricity",
       "category": "Bills",
       "merchant": "MEW",
-      "amount_kd": "8.750"
-    },
-    {
-      "offset_days": -13,
-      "name": "Clothes",
-      "category": "Shopping",
-      "merchant": "The Avenues",
-      "amount_kd": "28.000"
-    },
-    {
-      "offset_days": -12,
-      "name": "Lunch delivery",
-      "category": "Dining",
-      "merchant": "Talabat",
       "amount_kd": "11.500"
     },
     {
-      "offset_days": -11,
-      "name": "Ride home",
-      "category": "Transport",
-      "merchant": "Careem",
-      "amount_kd": "4.500"
+      "period": -1,
+      "day_of_month": 6,
+      "name": "Coffee",
+      "category": "Dining",
+      "merchant": "Caribou Coffee",
+      "amount_kd": "2.250"
     },
     {
-      "offset_days": -10,
+      "period": -1,
+      "day_of_month": 9,
       "name": "Groceries",
       "category": "Groceries",
       "merchant": "Sultan Center",
       "amount_kd": "38.900"
     },
     {
-      "offset_days": -9,
+      "period": -1,
+      "day_of_month": 9,
+      "name": "Lunch delivery",
+      "category": "Dining",
+      "merchant": "Talabat",
+      "amount_kd": "11.500"
+    },
+    {
+      "period": -1,
+      "day_of_month": 10,
+      "name": "Ride home",
+      "category": "Transport",
+      "merchant": "Careem",
+      "amount_kd": "4.500"
+    },
+    {
+      "period": -1,
+      "day_of_month": 12,
       "name": "Netflix",
       "category": "Subscriptions",
       "merchant": "Netflix",
       "amount_kd": "3.500"
     },
     {
-      "offset_days": -8,
+      "period": -1,
+      "day_of_month": 13,
       "name": "Coffee",
       "category": "Dining",
       "merchant": "Caribou Coffee",
       "amount_kd": "2.250"
     },
     {
-      "offset_days": -6,
-      "name": "Mobile plan",
-      "category": "Bills",
-      "merchant": "Ooredoo",
-      "amount_kd": "12.000"
+      "period": -1,
+      "day_of_month": 14,
+      "name": "Shoes",
+      "category": "Shopping",
+      "merchant": "The Avenues",
+      "amount_kd": "32.500"
     },
     {
-      "offset_days": -5,
+      "period": -1,
+      "day_of_month": 15,
       "name": "Ride to work",
       "category": "Transport",
       "merchant": "Careem",
       "amount_kd": "3.250"
     },
     {
-      "offset_days": -4,
-      "name": "Dinner delivery",
-      "category": "Dining",
-      "merchant": "Talabat",
-      "amount_kd": "9.750"
-    },
-    {
-      "offset_days": -3,
+      "period": -1,
+      "day_of_month": 16,
       "name": "Weekly groceries",
       "category": "Groceries",
       "merchant": "Lulu Hypermarket",
       "amount_kd": "42.350"
     },
     {
-      "offset_days": -2,
+      "period": -1,
+      "day_of_month": 16,
+      "name": "Dinner delivery",
+      "category": "Dining",
+      "merchant": "Talabat",
+      "amount_kd": "9.750"
+    },
+    {
+      "period": -1,
+      "day_of_month": 18,
+      "name": "Fuel",
+      "category": "Transport",
+      "merchant": "Oula",
+      "amount_kd": "5.000"
+    },
+    {
+      "period": -1,
+      "day_of_month": 19,
+      "name": "Birthday dinner",
+      "category": "Dining",
+      "merchant": "Mais Alghanim",
+      "amount_kd": "18.500"
+    },
+    {
+      "period": -1,
+      "day_of_month": 20,
+      "name": "Clothes",
+      "category": "Shopping",
+      "merchant": "The Avenues",
+      "amount_kd": "21.000"
+    },
+    {
+      "period": -1,
+      "day_of_month": 22,
+      "name": "Groceries",
+      "category": "Groceries",
+      "merchant": "Sultan Center",
+      "amount_kd": "47.800"
+    },
+    {
+      "period": -1,
+      "day_of_month": 23,
+      "name": "Coffee",
+      "category": "Dining",
+      "merchant": "Caribou Coffee",
+      "amount_kd": "2.250"
+    },
+    {
+      "period": -1,
+      "day_of_month": 24,
+      "name": "Ride to the airport",
+      "category": "Transport",
+      "merchant": "Careem",
+      "amount_kd": "7.500"
+    },
+    {
+      "period": 0,
+      "day_of_month": 25,
       "name": "Salary",
       "category": "Salary",
       "merchant": "Gulf Trading Co",
       "amount_kd": "1200.000"
     },
     {
-      "offset_days": -1,
+      "period": 0,
+      "day_of_month": 26,
       "name": "Apartment rent",
       "category": "Rent",
       "merchant": "Salmiya Residences",
       "amount_kd": "350.000"
+    },
+    {
+      "period": 0,
+      "day_of_month": 26,
+      "name": "Coffee",
+      "category": "Dining",
+      "merchant": "Caribou Coffee",
+      "amount_kd": "2.250"
+    },
+    {
+      "period": 0,
+      "day_of_month": 27,
+      "name": "Weekly groceries",
+      "category": "Groceries",
+      "merchant": "Lulu Hypermarket",
+      "amount_kd": "44.250"
+    },
+    {
+      "period": 0,
+      "day_of_month": 27,
+      "name": "Ride to the Avenues",
+      "category": "Transport",
+      "merchant": "Careem",
+      "amount_kd": "3.000"
+    },
+    {
+      "period": 0,
+      "day_of_month": 28,
+      "name": "Mobile plan",
+      "category": "Bills",
+      "merchant": "Ooredoo",
+      "amount_kd": "12.000"
+    },
+    {
+      "period": 0,
+      "day_of_month": 1,
+      "name": "Dinner delivery",
+      "category": "Dining",
+      "merchant": "Talabat",
+      "amount_kd": "8.750"
+    },
+    {
+      "period": 0,
+      "day_of_month": 2,
+      "name": "Headphones",
+      "category": "Shopping",
+      "merchant": "X-cite",
+      "amount_kd": "15.500"
+    },
+    {
+      "period": 0,
+      "day_of_month": 3,
+      "name": "Groceries",
+      "category": "Groceries",
+      "merchant": "Sultan Center",
+      "amount_kd": "36.400"
+    },
+    {
+      "period": 0,
+      "day_of_month": 4,
+      "name": "Fuel",
+      "category": "Transport",
+      "merchant": "Oula",
+      "amount_kd": "5.000"
+    },
+    {
+      "period": 0,
+      "day_of_month": 5,
+      "name": "Electricity",
+      "category": "Bills",
+      "merchant": "MEW",
+      "amount_kd": "8.750"
+    },
+    {
+      "period": 0,
+      "day_of_month": 7,
+      "name": "Coffee",
+      "category": "Dining",
+      "merchant": "Caribou Coffee",
+      "amount_kd": "2.250"
+    },
+    {
+      "period": 0,
+      "day_of_month": 10,
+      "name": "Weekly groceries",
+      "category": "Groceries",
+      "merchant": "Lulu Hypermarket",
+      "amount_kd": "48.900"
+    },
+    {
+      "period": 0,
+      "day_of_month": 11,
+      "name": "Ride home",
+      "category": "Transport",
+      "merchant": "Careem",
+      "amount_kd": "4.500"
+    },
+    {
+      "period": 0,
+      "day_of_month": 12,
+      "name": "Netflix",
+      "category": "Subscriptions",
+      "merchant": "Netflix",
+      "amount_kd": "3.500"
+    },
+    {
+      "period": 0,
+      "day_of_month": 14,
+      "name": "Salad",
+      "category": "Dining",
+      "merchant": "Pick",
+      "amount_kd": "6.500"
+    },
+    {
+      "period": 0,
+      "day_of_month": 17,
+      "name": "Groceries",
+      "category": "Groceries",
+      "merchant": "Sultan Center",
+      "amount_kd": "35.750"
+    },
+    {
+      "period": 0,
+      "day_of_month": 18,
+      "name": "Gift",
+      "category": "Shopping",
+      "merchant": "The Avenues",
+      "amount_kd": "12.000"
+    },
+    {
+      "period": 0,
+      "day_of_month": 19,
+      "name": "Fuel",
+      "category": "Transport",
+      "merchant": "Oula",
+      "amount_kd": "5.000"
+    },
+    {
+      "period": 0,
+      "day_of_month": 20,
+      "name": "Lunch delivery",
+      "category": "Dining",
+      "merchant": "Talabat",
+      "amount_kd": "10.250"
     },
     {
       "offset_days": 0,

@@ -34,8 +34,18 @@ export type DemoSample = {
   }
   categories: Array<{ name: string; is_income: boolean }>
   budgets_current_period: Array<{ category: string; amount_kd: string }>
-  transactions: Array<{ offset_days: number; name: string; category: string | null; merchant: string | null; amount_kd: string }>
+  transactions: SampleRow[]
 }
+
+/**
+ * MOB-R96 B1 — where a sample row falls. A period row sits in a payday period (0 = the current one, -1 and -2 the
+ * two before it) on a day of the month from 1 to 28, so it exists in every month and a monthly item lands exactly
+ * once in each period. An offset row is that many days from Kuwait's today (0 = today).
+ */
+export type SampleRow = { name: string; category: string | null; merchant: string | null; amount_kd: string } & (
+  | { offset_days: number; period?: never; day_of_month?: never }
+  | { period: number; day_of_month: number; offset_days?: never }
+)
 
 type Category = { id: number; name: string; isIncome: boolean }
 type Merchant = { id: number; name: string }
@@ -87,9 +97,21 @@ function stamp(d: Date): string {
   return d.toISOString().replace(/\.\d{3}Z$/, "+00:00")
 }
 
+/** MOB-R96 B1 — the date of a period row: the day of the month inside that payday period. */
+function periodRowDate(payday: number | null, currentKey: string, period: number, dayOfMonth: number): string {
+  const { start, end } = periodBoundsForKey(payday, shiftKey(currentKey, period))
+  const month = dayOfMonth >= Number(start.slice(8, 10)) ? start.slice(0, 7) : end.slice(0, 7)
+  const date = `${month}-${String(dayOfMonth).padStart(2, "0")}`
+  if (!(dayOfMonth >= 1 && dayOfMonth <= 28) || date < start || date > end) {
+    throw new Error(`sample row on day ${dayOfMonth} is not inside period ${period} (${start} – ${end})`)
+  }
+  return date
+}
+
 /**
- * The rows the demo starts with, for an instant: dates from day offsets, keeping the current payday period and
- * the two before it. The parity test seeds exactly these rows, in this order.
+ * The rows the demo starts with, for an instant: period rows on their day inside their payday period, offset rows
+ * that many days from today; only the current payday period and the two before it, and nothing after today. In
+ * date order (the sample's order within a day). The parity test seeds exactly these rows, in this order.
  */
 export function materializeSample(sample: DemoSample, now: Date) {
   const today = kuwaitToday(now)
@@ -98,8 +120,14 @@ export function materializeSample(sample: DemoSample, now: Date) {
   const currentKey = periodKeyForDate(payday, todayIso)
   const earliest = periodBoundsForKey(payday, shiftKey(currentKey, -2)).start
   const transactions = sample.transactions
-    .map((t) => ({ ...t, date: addDays(todayIso, t.offset_days) }))
+    .map(({ offset_days, period, day_of_month, ...t }) => ({
+      ...t,
+      date: offset_days !== undefined ? addDays(todayIso, offset_days) : periodRowDate(payday, currentKey, period, day_of_month),
+    }))
     .filter((t) => t.date >= earliest && t.date <= todayIso)
+    .map((t, i) => ({ t, i }))
+    .sort((a, b) => (a.t.date < b.t.date ? -1 : a.t.date > b.t.date ? 1 : a.i - b.i))
+    .map(({ t }) => t)
   const merchantNames: string[] = []
   for (const t of transactions) if (t.merchant && !merchantNames.includes(t.merchant)) merchantNames.push(t.merchant)
   return {
