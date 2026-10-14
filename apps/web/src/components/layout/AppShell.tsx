@@ -22,7 +22,8 @@ import { useDarkMode } from "@/lib/useDarkMode"
 import { useAuth, getUserFirstName } from "@/contexts/AuthContext"
 import { InstallGuide } from "./InstallGuide"
 import { DemoBar } from "./DemoBar"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { DEMO_LEAVE_HREF, isDemoMode } from "@/lib/demo/mode"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useToast } from "@/components/ui/toaster"
 import CommandPalette from "./CommandPalette"
@@ -60,6 +61,7 @@ function AppShellLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const demo = isDemoMode()
   const { isDark, toggleDarkMode } = useDarkMode()
   const toast = useToast()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -347,19 +349,32 @@ function AppShellLayout() {
                       <User className="mr-2 h-4 w-4" />
                       Profile
                     </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="w-full justify-start rounded-xl text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      onClick={() => {
-                        void handleLogout()
-                      }}
-                      disabled={signingOut}
-                      role="menuitem"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      {signingOut ? "Signing out..." : "Sign out"}
-                    </Button>
+                    {/* MOB-R96 C1 — in the demo there is no session to end: "Leave demo" is a full page load to
+                        the welcome page, which drops the demo's memory and cache. No logout call, no toast. */}
+                    {demo ? (
+                      <a
+                        href={DEMO_LEAVE_HREF}
+                        role="menuitem"
+                        className={cn(buttonVariants({ variant: "ghost" }), "w-full justify-start rounded-xl text-sm")}
+                      >
+                        <LogOut className="me-2 h-4 w-4" />
+                        Leave demo
+                      </a>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="w-full justify-start rounded-xl text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => {
+                          void handleLogout()
+                        }}
+                        disabled={signingOut}
+                        role="menuitem"
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        {signingOut ? "Signing out..." : "Sign out"}
+                      </Button>
+                    )}
                   </div>
                 ) : null}
               </div>
@@ -503,7 +518,16 @@ function AppShellLayout() {
             <Search className="icon-inline" />
             <span>Quick actions</span>
           </Button>
-          {user ? (
+          {/* MOB-R96 C1 — the wide-screen copy of the same menu item. */}
+          {user && demo ? (
+            <a
+              href={DEMO_LEAVE_HREF}
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-center gap-2 rounded-full text-xs")}
+            >
+              <LogOut className="icon-inline" />
+              <span>Leave demo</span>
+            </a>
+          ) : user ? (
             <Button
               type="button"
               variant="outline"

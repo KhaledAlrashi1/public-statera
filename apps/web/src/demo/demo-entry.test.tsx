@@ -1,12 +1,12 @@
 // MOB-R95 C7 — the way in ("See a demo" on the welcome page, and /demo) and the way out (the bar's Sign up, on
 // Home, Activity, Plan and Insights; not on /log, which has its own Save bar).
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import App from "@/App"
 import LoginPage from "@/components/pages/LoginPage"
-import { resetDemoState } from "@/lib/demo/transport"
+import { DEMO_CALL_EVENT, resetDemoState, type DemoCallDetail } from "@/lib/demo/transport"
 
 beforeEach(() => {
   resetDemoState()
@@ -46,5 +46,30 @@ describe("the demo's way in and way out (MOB-R95 C7)", () => {
     // Log is up once its usual places (the demo's) are on screen.
     expect(await screen.findByRole("button", { name: /^Talabat/ }, { timeout: 5000 })).toBeInTheDocument()
     expect(screen.queryByTestId("demo-bar")).toBeNull()
+  }, 30_000)
+
+  it("MOB-R96 C1: the menu's \"Sign out\" reads \"Leave demo\" and goes to the welcome page, with no logout call and no toast", async () => {
+    const calls: string[] = []
+    const record = (e: Event) => calls.push(`${(e as CustomEvent<DemoCallDetail>).detail.method} ${(e as CustomEvent<DemoCallDetail>).detail.path}`)
+    window.addEventListener(DEMO_CALL_EVENT, record)
+    // jsdom does not navigate; the link's href is the way out.
+    const noNavigation = (e: Event) => e.preventDefault()
+    document.addEventListener("click", noNavigation)
+    window.history.pushState({}, "", "/demo")
+    render(<App />)
+    await screen.findByTestId("demo-bar", undefined, { timeout: 5000 })
+    fireEvent.click(await screen.findByRole("button", { name: "Open user menu" }, { timeout: 5000 }))
+    const leave = await screen.findByRole("menuitem", { name: "Leave demo" })
+    expect(leave).toHaveAttribute("href", "/login")
+    // The phone's menu (the navigation drawer) carries the same item; "Sign out" nowhere.
+    fireEvent.click(screen.getByRole("button", { name: "Open navigation menu" }))
+    expect(await screen.findByRole("link", { name: "Leave demo" })).toHaveAttribute("href", "/login")
+    expect(screen.queryByText(/sign out/i)).toBeNull()
+    fireEvent.click(leave)
+    expect(calls.filter((c) => c.includes("/api/auth/logout"))).toEqual([])
+    expect(screen.queryByText(/couldn't sign you out/i)).toBeNull()
+    expect(screen.queryByRole("status")).toBeNull()
+    document.removeEventListener("click", noNavigation)
+    window.removeEventListener(DEMO_CALL_EVENT, record)
   }, 30_000)
 })

@@ -20,3 +20,6 @@ export function storageKey(key: string): string {
 
 /** The sign-up screen, reached by a full page load so the demo's memory and cache are dropped. */
 export const DEMO_SIGN_UP_HREF = "/login"
+
+/** MOB-R96 C1 — "Leave demo": the welcome page (LoginPage, where "See a demo" is), by a full page load. */
+export const DEMO_LEAVE_HREF = "/login"
