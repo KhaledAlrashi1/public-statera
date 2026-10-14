@@ -12,7 +12,7 @@ const sample = JSON.parse(readFileSync(resolve(__dirname, "sample.json"), "utf8"
 const body = <T,>(r: { body: unknown }) => (r.body as { data: T }).data
 
 describe("the demo's sample and answers (MOB-R95 C4, C5)", () => {
-  it("dates are day offsets from Kuwait's today: 21:00Z is already the next day in Kuwait", () => {
+  it("today's rows are day offsets from Kuwait's today: 21:00Z is already the next day in Kuwait", () => {
     expect(materializeSample(sample, new Date("2026-10-24T20:59:00Z")).todayIso).toBe("2026-10-24")
     expect(materializeSample(sample, new Date("2026-10-24T21:00:00Z")).todayIso).toBe("2026-10-25")
     const s = createDemoState(sample, new Date("2026-10-09T09:00:00Z"))
