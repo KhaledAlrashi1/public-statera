@@ -13084,3 +13084,64 @@ E. Report back
 E1. Persistence; predictions sha; counts per commit (fields named) with predicted signs; B3
     hits; C3 test names and results; C4 table; C5 defaults; C8 result and control; C9
     measures; commits, run, probes.
+
+MOB-R96 — R95 accepted; demo sample made true to its periods; budget survey (read-only)
+Issued Fri 9 Oct 2026 (Kuwait) by the review channel, on CC's MOB-R95 report.
+
+A. Review of R95 (recorded)
+A1. Persisted: R95 at 13007–13086, 80 lines, sha 669279e8…7a20 = issued. Strict 95, loose 97.
+A2. Live: 63a94d0. Run 37925160012: four jobs green on ubuntu-24.04; deploy 11:46:21Z (Fri 9
+    Oct 2026, 14:46 Kuwait); probes 11:46:33Z and 11:46:34Z on 63a94d0. 0 unpushed.
+    Migrations 8. Stashes 0. FE 578/139; APIH 920/99/89; APII 1009/10/89.
+A3. FE miss of 2 at C (580 predicted, 578 actual): the engine file holds 4 cases, not the ~6
+    estimated. Reported by CC, cause named; recorded.
+A4. B accepted: four toasts, four cases; the control reddens only "cleared" and "payday only".
+A5. C3 accepted: each safety test shown able to fail by its own control. CC caught its own
+    vacuous walk test before shipping; recorded as the right call.
+A6. C8 parity accepted: both instants pass; the control reddens 11 routes. C9 accepted.
+A7. Accepted within C: the Rent budget added mid-cycle (Plan reads "on track"); decimal.js
+    10.6.0 in apps/web, the API's version, in a 68 kB chunk loaded only under /demo.
+A8. Found by the channel in C4's table: Bills, Groceries, Shopping and Transport are equal
+    to the fils in 2026-08 and 2026-09, so any period-to-period comparison reads 0% change.
+A9. Found by the channel: Rent rows 31 days apart can leave a 30-day period with no Rent; the
+    400-day test does not check it. The queued Salary drift is the same defect. A known
+    defect on the demo's first screen is fixed now, not queued (MOB-R61).
+
+B. Demo sample (Tier 2; parity test stays green)
+B1. Monthly rows (Salary, Rent, Bills, Subscriptions) fall on a fixed day inside each payday
+    period: Salary on the period's first day (the 25th); the others on fixed days CC picks
+    and reports.
+B2. Variable categories (Dining, Groceries, Shopping, Transport) differ in every complete
+    period, by 10% or more from the period before. Keep each complete period's expenses
+    between 50% and 85% of income.
+B3. Over-budget rule: on every day, Dining is the only category that may be over its budget,
+    and Plan never reads over overall.
+B4. The 400-day test adds: each period holds exactly one row of each monthly item; B2's
+    spread; B3. Positive control: put Salary back on the 30-day offset; the test goes red.
+B5. Report the new C4 table.
+
+C. Demo menu
+C1. In the demo, the menu's "Sign out" reads "Leave demo" and goes to the welcome page; no
+    toast. One case pins it.
+C2. Confirm the call announcement on window lives only in the demo transport (file:line).
+
+D. Budget suggestions survey (read-only: no code, no stash; RM-23 still holds)
+D1. The budgets table: columns, keys, indexes (cite the migration file:line). Is there a
+    unique key on user, period and category?
+D2. Plan's save: POST /api/budgets full replace (budgets.ts:187). List every reader of a
+    budget row id (file:line), and what breaks when ids are re-created.
+D3. Inputs for "match your spending" and "trim your top 3": which existing queries give
+    spend per category for the last complete payday periods (file:line).
+D4. An insert-if-absent endpoint (fill-only: never overwrites a budget she set): what it
+    needs, whether it needs a migration (that would be an RM-21 STOP for the build, not for
+    this survey), and how it meets the full-replace save and the alerts job.
+
+E. Order and push
+E1. Persist R96 first: blank 13087, payload from 13088. After: strict 96, loose 98.
+E2. Predictions to the scratch file first. B and C as separate commits.
+E3. Push under the usual rule: fast-forward; four Actions jobs succeed on ubuntu-24.04;
+    /healthz and /readyz on the new sha, timestamped; 0 unpushed by both routes.
+
+F. Report back
+F1. Persistence; predictions sha; counts per commit (fields named) with predicted signs; B's
+    fixed days, table and control; C2's citation; D1–D4; commits, run, probes.
