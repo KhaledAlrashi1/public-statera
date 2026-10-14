@@ -13145,3 +13145,69 @@ E3. Push under the usual rule: fast-forward; four Actions jobs succeed on ubuntu
 F. Report back
 F1. Persistence; predictions sha; counts per commit (fields named) with predicted signs; B's
     fixed days, table and control; C2's citation; D1–D4; commits, run, probes.
+
+MOB-R97 — R96 results; demo test title; Plan editor survey (Wed 14 Oct 2026)
+
+A — R96 results (accepted)
+A1 Persistence: R96 at 13088–13147 after a blank 13087, sha c3977c5c…3b1f equal to issued;
+  strict 96, loose 98; commit 2b5e0f8.
+A2 Counts accepted as predicted. B 9fe8558: FE 578/139; APIH 920/99/89; APII 1009/10/89; tsc 0/0.
+  C 47d03ae: FE 579/139 (+1). New baselines at 47d03ae: FE 579/139 tests/files; APIH 920/99/89
+  and APII 1009/10/89 passed/skipped/files (both last run at 9fe8558; C touched apps/web only).
+A3 Production 47d03ae: run 38587253797, four jobs on ubuntu-24.04, deploy 15:17:19Z (18:17
+  Kuwait, Wed 14 Oct 2026); probes on 47d03ae; 0 unpushed by both routes. Stashes 0. Migrations 8.
+A4 Probe timeouts came from inside the sandbox only (retries outside passed; probes green). Read
+  as the sandbox's route, not the server. From now on each probe line says inside or outside the
+  sandbox. A timeout inside only is recorded, not chased. Two failures outside it are a STOP.
+
+B — Demo sample (accepted)
+B1 Channel rechecked C4: expenses −2 657.725 (54.8%), −1 739.525 (61.6%), current 655.300.
+  Spreads −2 to −1: Dining +27.0%, Groceries +16.7%, Shopping +83.3%, Transport +36.6%,
+  Bills +10.6%. Only Dining over; −1 stays 10.475 under 750.000 overall.
+B2 Three controls accepted, including the replaced third one (cause named).
+B3 Rulings on CC's readings: "monthly item" means the five items (Bills carries Electricity and
+  Mobile plan); the current period holds an item once its day has come; the history rolling over
+  on the 25th is intended.
+B4 Grant (Tier 2, one line): the engine test titled "dates are day offsets from Kuwait's today"
+  is renamed "today's rows are day offsets from Kuwait's today". Title string only; no assertion
+  or other line. Predict +0/+0 in its runner. Report file:line and the diff tail.
+
+C — Demo menu (accepted)
+C1 "Leave demo" in both copies (user menu, nav drawer) is a link to /login: full load, no logout
+  call, no toast; pinned by one case that is red against the old AppShell.
+C2 DEMO_CALL_EVENT: defined transport.ts:29, dispatched :35; only listener demo-app.test.tsx:29.
+  Demo-only, as ruled.
+
+D — Budget suggestions survey (accepted; channel rulings, not asked of the operator)
+D1 No migration: uq_budget_user_month_category (0000_cultured_jimmy_woo.sql:81) makes a fill
+  atomic. RM-21(a) is not reached.
+D2 Source: dashboard-metrics expense_by_category (dashboard-snapshot-lib.ts:241–263, route
+  aggregation.ts:516) over complete periods. avg12_by_category (aggregation.ts:470–486) is ruled
+  out. Savings-kind categories and "Uncategorized" are dropped.
+D3 Preferred shape (premise checked in E): a suggestion fills only empty rows in Plan's editor and
+  writes nothing; her Save sends it through the existing POST /api/budgets. One save path: no new
+  write route, no race with the full-replace save, no alert from a fill she never saved. The
+  insert-if-absent endpoint (R96 D4) is the fallback only if E rules the prefill out.
+D4 RM-21(c) reading: a row written only by her own Save is a product write, not a seed. RM-21(c)
+  stays for rows the system writes for her. RM-23 still holds all suggestion code.
+D5 Alerts at 90% (env.ts:116): a budget matched to typical spend crosses 90% in many periods.
+  The rounding rule comes with the build.
+D6 Queue: old demo manifest budget ids go stale after a Plan save (demo-data-lib.ts:624,
+  :553–561); joins "Old demo seed".
+
+E — Plan editor survey (read-only; report text only, no code, no counts)
+E1 Every caller of POST /api/budgets in apps/web, file:line. Does one Save send the full list from
+  the editor's local state, or does each add or edit save at once?
+E2 Can a row sit in the editor filled but unsaved? What marks a row as changed, and what happens
+  when she leaves Plan with unsaved rows?
+E3 Does Plan list categories that have no budget (an empty row)? If not, where does a category
+  with spend but no budget appear?
+E4 Which period the editor writes (current only, or the picked one) and the month key it sends.
+E5 Categories a brand-new account has (any seed at sign-up, file:line) and what Plan shows with
+  no budgets and no spend.
+E6 Tests that pin Plan's save or its empty state, file:line.
+
+F — Carried
+F1 Phone checks still owed; the Profile "Layout check" link stays until his readout.
+
+Order: persist R97 alone; predictions to scratch; B4; E; push B4 under the standing push rules.
