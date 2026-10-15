@@ -57,6 +57,36 @@ describe("BudgetTable", () => {
     rerender(<BudgetTable {...props} isEditable={false} />)
     expect(within(mobileEmptyState()).queryByRole("button", { name: "Add your first budget" })).toBeNull()
   })
+
+  // MOB-R100 B1 — the desktop table's empty state takes the same gate. Scoped to the desktop
+  // container, asserted present; the editable render is the control.
+  it("offers no first-budget button in the desktop empty state on a past period", () => {
+    const props = {
+      rows: [],
+      hasBudgets: false,
+      searchQuery: "",
+      setSearchQuery: vi.fn(),
+      range: "month" as const,
+      setRange: vi.fn(),
+      onAdd: vi.fn(),
+      onEdit: vi.fn(),
+      onDelete: vi.fn(),
+    }
+    const desktopEmptyState = () => {
+      const found = screen
+        .getAllByText("Set your first budget")
+        .map((el) => el.closest(".md\\:block"))
+        .filter((el): el is HTMLElement => el !== null)
+      expect(found).toHaveLength(1)
+      return found[0]
+    }
+
+    const { rerender } = render(<BudgetTable {...props} isEditable />)
+    expect(within(desktopEmptyState()).getByRole("button", { name: "Add your first budget" })).toBeInTheDocument()
+
+    rerender(<BudgetTable {...props} isEditable={false} />)
+    expect(within(desktopEmptyState()).queryByRole("button", { name: "Add your first budget" })).toBeNull()
+  })
 })
 
 describe("IncomePlanningCard — profile_context string fields (typed-drift regression)", () => {

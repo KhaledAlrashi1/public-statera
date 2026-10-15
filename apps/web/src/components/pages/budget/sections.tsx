@@ -681,11 +681,12 @@ export function BudgetTable({
                     icon={<Target className="h-5 w-5" />}
                     title="Set your first budget"
                     description="Add monthly category limits so you can compare your plan with what you actually spend."
-                    action={(
+                    // MOB-R100 B1 — the same gate as the mobile empty state above (MOB-R99 B1).
+                    action={isEditable ? (
                       <Button type="button" variant="default" size="sm" onClick={onAdd}>
                         Add your first budget
                       </Button>
-                    )}
+                    ) : undefined}
                   />
                 </td>
               </tr>
