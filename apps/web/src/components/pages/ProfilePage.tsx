@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { LogOut } from "lucide-react"
 import { authApi } from "@/lib/api"
 import { formatAmountReadout } from "@/lib/amount-text"
@@ -15,7 +15,6 @@ import { TwoFactorSetup, type TwoFactorSetupData } from "@/components/auth/TwoFa
 import DataPrivacySection from "@/components/pages/profile/DataPrivacySection"
 import { IncomeQuickDialog, paydayLabel } from "@/components/pages/profile/IncomeQuickDialog"
 import PageHeader from "@/components/layout/PageHeader"
-import { setLayoutCheck } from "@/lib/layout-check"
 import { panelSection } from "@/components/ui/patterns"
 
 const PROFILE_NAME_MAX_LENGTH = 64
@@ -416,13 +415,6 @@ export default function ProfilePage() {
 
       {/* ── 6. Data & privacy ───────────────────────────────────────────── */}
       <DataPrivacySection />
-
-      {/* MOB-R87 C1 — the /log layout readout, reachable from inside the installed app. Removed when the /log top fix ships. */}
-      <p className="text-center text-xs text-muted-foreground">
-        <Link to="/log?layout=1" onClick={() => setLayoutCheck(true)} className="underline-offset-4 hover:underline">
-          Layout check
-        </Link>
-      </p>
     </div>
   )
 }

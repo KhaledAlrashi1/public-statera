@@ -35,8 +35,6 @@ import {
   type SkippedRowDiagnostic,
 } from "./transactions/ImportDialogs"
 import { BulkEditDialog } from "./transactions/BulkEditDialog"
-import { LogLayoutReadout } from "./LogLayoutReadout"
-import { useLayoutCheck } from "@/lib/layout-check"
 
 
 
@@ -57,7 +55,6 @@ export default function TransactionsPage() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const layoutCheck = useLayoutCheck()
 
   // Reference data
   const {
@@ -477,8 +474,6 @@ export default function TransactionsPage() {
         skippedRows={previewSkippedRows}
         demoWorkspace={activeDemoWorkspace ?? undefined}
       />
-      {/* MOB-R88 G2 — the layout readout, while Profile's "Layout check" is on. */}
-      {layoutCheck ? <LogLayoutReadout /> : null}
     </div>
   )
 }

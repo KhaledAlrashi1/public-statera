@@ -1,57 +1,17 @@
-// MOB-R88 G — "Layout check" is an in-memory flag, off by default. While on, the layout readout shows on Activity
-// (and on /log), and it lists elements whose right edge is past innerWidth.
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+// MOB-R101 B — the layout readout on /log?layout=1: it lists elements whose right edge is past innerWidth and
+// shows /log's frame. These three cases moved here from layout-check.test.tsx (MOB-R88 G, MOB-R91 B3), deleted
+// with Profile's "Layout check" link and its flag; the readout itself stays on /log?layout=1. Only the last
+// title changed: it dropped "(Activity)", which no longer shows the readout.
 import { render, screen } from "@testing-library/react"
-import { MemoryRouter } from "react-router-dom"
-import { act } from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { setLayoutCheck } from "@/lib/layout-check"
 import { LogLayoutReadout } from "./LogLayoutReadout"
 
-vi.mock("@/lib/api", () => ({
-  authApi: { profile: vi.fn().mockResolvedValue({ ok: true, profile: null }), clearDemoData: vi.fn() },
-  categoriesApi: { list: vi.fn().mockResolvedValue([]) },
-  merchantsApi: { list: vi.fn().mockResolvedValue([]) },
-  transactionsApi: { bulkDelete: vi.fn() },
-}))
-vi.mock("@/components/ui/toaster", () => ({ useToast: () => ({ success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn() }) }))
-vi.mock("@/components/ui/confirm-dialog", () => ({ ConfirmDialog: () => null }))
-vi.mock("@/components/ui/demo-workspace-banner", () => ({ DemoWorkspaceBanner: () => null }))
-vi.mock("./transactions/TransactionsTable", () => ({ default: () => null }))
-vi.mock("./transactions/SettingsDialog", () => ({ default: () => null }))
-vi.mock("./transactions/ImportDialogs", () => ({ ImportDialog: () => null, PreviewImportDialog: () => null }))
-vi.mock("./transactions/BulkEditDialog", () => ({ BulkEditDialog: () => null }))
-
-import TransactionsPage from "./TransactionsPage"
-
-function renderActivity() {
-  render(
-    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-      <MemoryRouter initialEntries={["/activity"]}>
-        <TransactionsPage />
-      </MemoryRouter>
-    </QueryClientProvider>,
-  )
-}
-
 afterEach(() => {
-  act(() => setLayoutCheck(false))
   vi.restoreAllMocks()
 })
 
-describe("Layout check (MOB-R88 G)", () => {
-  it("is off by default: Activity shows no readout", () => {
-    renderActivity()
-    expect(screen.queryByTestId("log-layout-readout")).toBeNull()
-  })
-
-  it("while on, Activity shows the readout", () => {
-    act(() => setLayoutCheck(true))
-    renderActivity()
-    expect(screen.getByTestId("log-layout-readout")).toHaveTextContent("innerWidth")
-  })
-
+describe("LogLayoutReadout", () => {
   it("lists an element wider than the screen (a forced 500px child at 390)", () => {
     vi.spyOn(window, "innerWidth", "get").mockReturnValue(390)
     const wide = document.createElement("div")
@@ -88,7 +48,7 @@ describe("Layout check (MOB-R88 G)", () => {
     frame.remove()
   })
 
-  it("says \"frame none\" where there is no /log frame (Activity)", () => {
+  it("says \"frame none\" where there is no /log frame", () => {
     render(<LogLayoutReadout />)
     expect(screen.getByTestId("log-layout-readout")).toHaveTextContent("frame none")
   })
