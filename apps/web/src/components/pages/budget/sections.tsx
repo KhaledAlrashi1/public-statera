@@ -454,6 +454,7 @@ export function BudgetTable({
   onCopy,
   copyLoading = false,
   onExport,
+  onFill,
   isEditable = true,
 }: {
   rows: BudgetRow[]
@@ -468,6 +469,8 @@ export function BudgetTable({
   onCopy?: () => void
   copyLoading?: boolean
   onExport?: () => void
+  /** MOB-R98 B2 — opens "Fill from my spending"; absent when the rule gives no row. */
+  onFill?: () => void
   isEditable?: boolean
 }) {
   return (
@@ -497,6 +500,11 @@ export function BudgetTable({
                 >
                   <ClipboardCopy className="h-3.5 w-3.5" />
                   {copyLoading ? "Checking..." : "Copy last month"}
+                </Button>
+              ) : null}
+              {onFill ? (
+                <Button type="button" variant="outline" size="sm" onClick={onFill}>
+                  Fill from my spending
                 </Button>
               ) : null}
               {onExport ? (

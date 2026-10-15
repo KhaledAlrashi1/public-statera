@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog"
 import PageHeader from "@/components/layout/PageHeader"
 import { IncomeQuickDialog } from "./profile/IncomeQuickDialog"
+import { FillFromSpendingSheet, useFillSuggestions } from "./budget/FillFromSpendingSheet"
 import {
   BudgetChart,
   BudgetDialog,
@@ -69,6 +70,7 @@ export default function BudgetPage() {
   const [copyPreviewLoading, setCopyPreviewLoading] = useState(false)
   const [copyPreview, setCopyPreview] = useState<{ month: string; items: BudgetItem[] } | null>(null)
   const [animDone, setAnimDone] = useState(false)
+  const [fillOpen, setFillOpen] = useState(false)
 
   const isEditable = isEditableMonth(selectedMonth)
 
@@ -234,6 +236,11 @@ export default function BudgetPage() {
     rows.sort((a, b) => (anySpend ? b.spent - a.spent : b.budget - a.budget) || a.category.localeCompare(b.category))
     return rows.slice(0, 7)
   }, [budgets, spentMap])
+
+  // MOB-R98 B2 — "Fill from my spending": this period and the next only (the same gate), and only when the
+  // rule gives a row.
+  const fillRows = useFillSuggestions({ enabled: isEditable, budgets, categories })
+  const canFill = isEditable && fillRows.length > 0
 
   const budgetCategories = useMemo(
     () => categories.filter((c) => !c.counts_as_income).map((c) => c.name),
@@ -506,16 +513,23 @@ export default function BudgetPage() {
                 title="Set your first budget plan"
                 description="Give each category a monthly limit; Plan tracks spending against it."
                 action={isEditable ? (
-                  <Button
-                    type="button"
-                    variant="default"
-                    onClick={() => {
-                      setEditIndex(null)
-                      setAddOpen(true)
-                    }}
-                  >
-                    Add your first budget
-                  </Button>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <Button
+                      type="button"
+                      variant="default"
+                      onClick={() => {
+                        setEditIndex(null)
+                        setAddOpen(true)
+                      }}
+                    >
+                      Add your first budget
+                    </Button>
+                    {canFill ? (
+                      <Button type="button" variant="outline" onClick={() => setFillOpen(true)}>
+                        Fill from my spending
+                      </Button>
+                    ) : null}
+                  </div>
                 ) : (
                   // MOB-R98 C — the table's gate (isEditableMonth): a past period is read only here too.
                   <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
@@ -550,6 +564,7 @@ export default function BudgetPage() {
                 }}
                 copyLoading={copyPreviewLoading}
                 onExport={handleExport}
+                onFill={canFill ? () => setFillOpen(true) : undefined}
               />
             </>
           )}
@@ -566,6 +581,22 @@ export default function BudgetPage() {
             mode={editIndex !== null ? "edit" : "create"}
             initialValues={editIndex !== null ? budgets[editIndex] : undefined}
             onSave={handleSave}
+          />
+
+          <FillFromSpendingSheet
+            open={fillOpen}
+            onOpenChange={setFillOpen}
+            month={selectedMonth}
+            rows={fillRows}
+            savedBudgets={budgets}
+            monthlyIncomeKd={profileContext?.monthly_income_kd ?? null}
+            onSaved={(saved) => {
+              queryClient.setQueryData(["budget-items", selectedMonth], saved)
+              queryClient.invalidateQueries({ queryKey: ["budgets"] })
+              queryClient.invalidateQueries({ queryKey: ["budget-metrics"] })
+              queryClient.invalidateQueries({ queryKey: ["dashboard-bundle"] })
+              queryClient.invalidateQueries({ queryKey: ["insights"] })
+            }}
           />
 
           <ConfirmDialog
