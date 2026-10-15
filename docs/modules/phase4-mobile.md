@@ -13300,3 +13300,53 @@ E2 Queue: copy-previous replaces the month (BudgetPage.tsx:316–327); no test p
 
 Order: persist R98 alone; predictions to scratch; C; B; D; push C and B under the standing push
 rules (one deploy may carry both).
+
+MOB-R99 — R98 results; mobile empty-state CTA; demo clear held on his answers (Thu 15 Oct 2026)
+
+A — R98 results (accepted)
+A1 Persistence: R98 at 13215–13302 after a blank 13214, sha 25cd0e57…ec80e equal to issued;
+  strict 98, loose 100; commit 4b2a177.
+A2 C a29282f: FE 579/139 -> 580/139 tests/files (+1 predicted). The first test was not
+  discriminating; CC named why, fixed it, and reran it red against the old page, then green.
+  Accepted.
+A3 B 4a5a647: +19/+2 predicted and met, FE 599/141; tsc 0. Rule and UI controls red, then
+  restored. The first gate mutant stayed green; the cause was named and the test moved to the
+  table path. Accepted. 0 diff lines in apps/api and the demo; APIH and APII were last run at
+  9fe8558 and apps/api is unchanged since. Baseline FE 599/141.
+A4 Channel miss: R98 B5's x110 value 390.000 is wrong. In integers 350000 x 110 / 100 = 385000,
+  already a multiple of 5000, so it stays 385.000. Cause: the channel computed that control in
+  floating point (350 x 1.10 = 385.00000000000006, rounded up to 390). From now on the channel
+  computes every literal in integer fils. CC predicted the right value before running: noted.
+A5 Readings accepted: a period counts when expense_kd > 0; a net refund counts 0; a half-fil
+  "usual" rounds half up; plural copy; "Enter an amount."; "No new budgets to add". All strings
+  provisional (RM-26).
+A6 Production 4a5a647: run 38757461202, four jobs on ubuntu-24.04, deploy 15:11:55Z (18:11
+  Kuwait, Thu 15 Oct 2026). Probes inside and outside the sandbox, all 200 on 4a5a647.
+  0 unpushed by both routes; stashes 0; migrations 8.
+
+B — Mobile empty-state CTA (CC's finding)
+B1 BudgetTable's mobile empty state (sections.tsx; name the file:line) takes isEditableMonth
+  (utils.ts:212–216) as C did: no "Add your first budget" on a past period. One new case, red
+  against the old file. budget/sections.test.tsx:7 pins the table's empty CTA: predict, then
+  list any break; a break is built as a stash and granted next block.
+
+C — Old demo rows (operator premise answers; no fix ruled in this block, R74 A3)
+C1 His answers to the channel's questions, verbatim: banner on Home: "No"; payday: "It's
+  actually set to 1st. […]"; income: "Not it's actually 1,620. […]"
+C2 Channel correction: the handoff's "payday probably 25 from an old demo load" was a guess and
+  was wrong. Neither the channel nor CC can see any account's data.
+C3 Reading: with no banner, the old clear is not reachable for him (R98 D1: 409 when nothing is
+  active). His payday and income do not hold the demo values, so its profile reset would not
+  touch them. It would reset country when it holds "Kuwait": a future clear must not.
+C4 R98 D accepted. "Income" is his own category (QuickAdd, removed in 71033ed) and never goes on
+  a clear list. Citation correction: transactions.category_id is SET NULL at
+  0000_cultured_jimmy_woo.sql:299; R96 D1's "no cascade at :300–301" was imprecise.
+C5 Held: the preview route (R98 D4) is not built. The next block decides after his own look at
+  his category list.
+
+D — Carried
+D1 Phone checks still owed; the Profile "Layout check" link stays until his readout.
+D2 Queue: copy-previous replaces the month (BudgetPage.tsx:316–327); no test pins delete,
+  Undo, copy-previous or closing the dialog.
+
+Order: persist R99 alone; predictions to scratch; B; push B under the standing push rules.
