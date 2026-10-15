@@ -13350,3 +13350,71 @@ D2 Queue: copy-previous replaces the month (BudgetPage.tsx:316–327); no test p
   Undo, copy-previous or closing the dialog.
 
 Order: persist R99 alone; predictions to scratch; B; push B under the standing push rules.
+
+MOB-R100 — R99 results; fill always on; old demo loader out; account surveys (Thu 15 Oct 2026)
+
+A — R99 results (accepted)
+A1 Persistence: R99 at 13304–13352 after a blank 13303, payload sha dd90fa0f…49b9fca2 before and
+  after appending, equal to the issued sha (channel-checked); strict 99, loose 101, loose-only
+  lines 1513 and 6934; commit 8ed7d2c.
+A2 B 51a01ea: sections.tsx:567–571 gated by isEditable (from isEditableMonth, utils.ts:212–216).
+  No chip on a past period, since the header already reads "Read only — past month"
+  (sections.tsx:484): accepted. New case red against the old file after its control passed,
+  green after. FE 599/141 -> 600/141 tests/files; tsc 0; 0 lines in apps/api.
+A3 Production 51a01ea: run 38760653471, four jobs on ubuntu-24.04, deploy 15:32:43Z (18:32
+  Kuwait, Thu 15 Oct 2026); probes inside and outside the sandbox, 200 on 51a01ea; 0 unpushed by
+  both routes; stashes 0; migrations 8.
+A4 The issued sha travels with the channel's message, not inside the block. CC reports the payload
+  sha before and after appending; the channel checks it against the issued sha, as in A1.
+
+B — Desktop empty-state CTA (CC's finding)
+B1 sections.tsx:684 takes the same isEditable gate as :567–571. One new case, red against the old
+  file. Predict, then list any break.
+
+C — "Fill from my spending" always shown (channel miss in R98 B2)
+C1 R98 B2 hid the button when the rule gives no row, so "nothing to suggest" looked the same as
+  "not deployed" on his phone. The button now shows on the current and next period whenever Plan
+  loads (table header and empty state); the past-period gate stays.
+C2 When the rule gives no row, the sheet opens with one line and no Add button:
+  - n = 0: "Suggestions start after your first full month of spending."
+  - otherwise: "Every category you spent on already has a budget."
+  Strings provisional (RM-26).
+C3 Tests: one case per line in C2; any existing case that asserts the button is hidden with no
+  rows is a break: list it, predict, stash, grant next block.
+
+D — Remove the old "Load demo workspace" (operator selection)
+D0 His selection (options were the channel's): "Remove it; "See a demo" only (Recommended)".
+D1 Before the edit, list every UI entry and reader of the old loader by grep, file:line (R76 A3),
+  including WorkspaceChoicePage.tsx:33 and Home.
+D2 Each UI entry is removed; where it was a choice for a new user, it becomes "See a demo",
+  a link to /demo. Frontend only: the load and clear routes, the demo banner with "Clear demo
+  workspace" (for accounts still marked active) and upload.ts:247 stay. An apps/api edit = STOP.
+D3 Tests that pin the old entries: predict and list breaks; a break is built as a stash and
+  granted next block.
+
+E — Cleaning his old demo account (read-only survey; any delete = RM-21(b) STOP)
+E0 His selection (options were the channel's): "Clean this account" (the option read: build a
+  preview and clear, then use this account for real data). He also said: "this account I am
+  checking right now used to be the demo one. I still haven't used to log in my real
+  transactions."
+E1 Does an existing path delete all of a user's data, or the whole account (file:line)? What it
+  deletes, what it keeps, any delay or restore window, and whether the same email can sign up
+  again afterwards and when.
+E2 Compare with R98 D4 (preview + clear): what each needs built, what each leaves behind
+  (categories, places, memorized rows, events). No code.
+
+F — Account count (read-only; the operator runs it, CC never does)
+F1 CC derives from the repo (compose files, schema) the exact command the operator runs on the
+  server as deploy: a confirm step (whoami && hostname), then one SELECT listing every user's
+  id, email, created_at, last_login_at and transaction count, ordered by id. Table and column
+  names from the schema, file:line; the password is read the way the running stack reads it and
+  never printed. CC states the expected output shape. CC does not run it.
+
+G — Carried
+G1 Phone checks: Layout check from the installed app (home-screen icon); Plan month shown and
+  whether his account has expenses in July–September.
+G2 Queue: copy-previous replaces the month (BudgetPage.tsx:316–327); no test pins delete, Undo,
+  copy-previous or closing the dialog.
+
+Order: persist R100 alone; predictions to scratch; B; C; D; E; F; push B, C and D under the
+standing push rules (one deploy may carry all three).
