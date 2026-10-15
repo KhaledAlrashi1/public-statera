@@ -100,3 +100,22 @@ export function suggestBudgets({
   }
   return rows.sort((a, b) => b.suggestionFils - a.suggestionFils || a.category.localeCompare(b.category))
 }
+
+/**
+ * MOB-R101 C1 — why the rule gave no row, for the sheet's one line; null when it gave one.
+ *   no-history    n = 0
+ *   all-budgeted  some expense category has usual > 0, and every such category is budgeted
+ *   nothing       anything else: spend only in Uncategorized, non-expense categories, or netting to 0
+ */
+export type FillEmptyReason = "no-history" | "all-budgeted" | "nothing"
+
+export function fillEmptyReason(input: {
+  periods: FillPeriod[]
+  categories: FillCategory[]
+  budgeted: string[]
+}): FillEmptyReason | null {
+  if (countFillPeriods(input.periods) === 0) return "no-history"
+  if (suggestBudgets(input).length > 0) return null
+  // The same rule with nothing budgeted: a row here is a category she spent on that is already budgeted.
+  return suggestBudgets({ ...input, budgeted: [] }).length > 0 ? "all-budgeted" : "nothing"
+}

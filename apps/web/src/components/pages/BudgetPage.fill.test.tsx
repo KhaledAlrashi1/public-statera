@@ -243,6 +243,24 @@ describe("MOB-R98 B — Fill from my spending", () => {
     expect(within(sheet).queryByTestId("fill-summary")).toBeNull()
   })
 
+  // MOB-R101 C1 — periods counted, but no expense category with a usual spend (here, only Uncategorized).
+  it("with spend only in Uncategorized, says there is nothing to suggest, with no Add button", async () => {
+    mocks.dashboardMetrics.mockResolvedValue({
+      ...HISTORY,
+      expense_by_category: {
+        "2026-02": { Uncategorized: "80.000" },
+        "2026-03": { Uncategorized: "95.500" },
+        "2026-04": { Uncategorized: "280.750" },
+      },
+    })
+    const sheet = await openSheet()
+
+    expect(within(sheet).getByText("Nothing to suggest from your last three months.")).toBeInTheDocument()
+    expect(within(sheet).queryByText("Every category you spent on already has a budget.")).toBeNull()
+    expect(within(sheet).queryByText("Suggestions start after your first full month of spending.")).toBeNull()
+    expect(within(sheet).queryByRole("button", { name: /^Add / })).toBeNull()
+  })
+
   it("the toast counts the rows actually added", async () => {
     const sheet = await openSheet()
     mocks.getBudgets.mockResolvedValue({ items: [{ category: "Dining", amount_kd: "60.000" }], profileContext: null })

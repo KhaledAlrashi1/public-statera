@@ -3,7 +3,17 @@ import { useQuery } from "@tanstack/react-query"
 
 import { analyticsApi } from "@/lib/api"
 import { formatAmountReadout, parseAmountText } from "@/lib/amount-text"
-import { FILL_HISTORY_PERIODS, countFillPeriods, filsToKd, kdToFils, suggestBudgets, type FillPeriod, type FillRow } from "@/lib/budget-fill"
+import {
+  FILL_HISTORY_PERIODS,
+  countFillPeriods,
+  fillEmptyReason,
+  filsToKd,
+  kdToFils,
+  suggestBudgets,
+  type FillEmptyReason,
+  type FillPeriod,
+  type FillRow,
+} from "@/lib/budget-fill"
 import { shiftKey, usePayday } from "@/lib/payday-months"
 import { VISUAL_VIEWPORT_SHEET_CLASS, useVisualViewportVars } from "@/lib/useVisualViewport"
 import { cn, currentMonthKeyNow } from "@/lib/utils"
@@ -21,8 +31,9 @@ import { findDuplicateCategory, getBudgets, saveBudgets, type BudgetData, type B
 // All strings are provisional (RM-26).
 
 /**
- * The suggestions for the selected period, and how many periods counted. Until the history has loaded
- * (or when it fails, or the period is not editable) countedPeriods is null and rows is [].
+ * The suggestions for the selected period, how many periods counted, and why there is no row (null when there
+ * is one). Until the history has loaded (or when it fails, or the period is not editable) countedPeriods and
+ * emptyReason are null and rows is [].
  */
 export function useFillSuggestions({
   enabled,
@@ -32,7 +43,7 @@ export function useFillSuggestions({
   enabled: boolean
   budgets: BudgetItem[]
   categories: Category[]
-}): { rows: FillRow[]; countedPeriods: number | null } {
+}): { rows: FillRow[]; countedPeriods: number | null; emptyReason: FillEmptyReason | null } {
   const payday = usePayday()
   // The period before today's: the history ends there (complete periods only).
   const until = useMemo(() => shiftKey(currentMonthKeyNow(), -1), [payday]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -43,14 +54,16 @@ export function useFillSuggestions({
     enabled,
   })
   return useMemo(() => {
-    if (!enabled || !data) return { rows: [], countedPeriods: null }
+    if (!enabled || !data) return { rows: [], countedPeriods: null, emptyReason: null }
     const periods: FillPeriod[] = (data.monthly ?? []).map((m) => ({
       expenseKd: m.expense_kd,
       byCategory: data.expense_by_category?.[m.month] ?? {},
     }))
+    const input = { periods, categories, budgeted: budgets.map((b) => b.category) }
     return {
-      rows: suggestBudgets({ periods, categories, budgeted: budgets.map((b) => b.category) }),
+      rows: suggestBudgets(input),
       countedPeriods: countFillPeriods(periods),
+      emptyReason: fillEmptyReason(input),
     }
   }, [enabled, data, categories, budgets])
 }
@@ -64,7 +77,7 @@ export function FillFromSpendingSheet({
   onOpenChange,
   month,
   rows,
-  countedPeriods,
+  emptyReason,
   savedBudgets,
   monthlyIncomeKd,
   onSaved,
@@ -74,8 +87,8 @@ export function FillFromSpendingSheet({
   /** The selected period's key: the period the budgets are written to. */
   month: string
   rows: FillRow[]
-  /** MOB-R100 C2 — the periods that counted; picks the line shown when rows is empty. */
-  countedPeriods: number | null
+  /** MOB-R101 C1 — why the rule gave no row; picks the one line shown when rows is empty. */
+  emptyReason: FillEmptyReason | null
   /** The period's saved budgets, for the total. */
   savedBudgets: BudgetItem[]
   /** Her typed monthly income ("1500.000"), or null when none is set. */
@@ -159,11 +172,13 @@ export function FillFromSpendingSheet({
           <DialogTitle>Fill from my spending</DialogTitle>
         </DialogHeader>
         {rows.length === 0 ? (
-          // MOB-R100 C2 — the rule gave no row: one line, no Add button. Strings provisional (RM-26).
+          // MOB-R100 C2, MOB-R101 C1 — the rule gave no row: one line, no Add button. Strings provisional (RM-26).
           <p className="pt-4 text-sm text-muted-foreground">
-            {countedPeriods === 0
+            {emptyReason === "no-history"
               ? "Suggestions start after your first full month of spending."
-              : "Every category you spent on already has a budget."}
+              : emptyReason === "all-budgeted"
+                ? "Every category you spent on already has a budget."
+                : "Nothing to suggest from your last three months."}
           </p>
         ) : (
         <form onSubmit={(e) => void onSubmit(e)} className="flex min-h-0 flex-1 flex-col gap-5 pt-4">
