@@ -61,6 +61,15 @@ function nameKey(name: string): string {
   return name.trim().toLowerCase()
 }
 
+/** n: the periods that count (expense_kd > 0). MOB-R100 C2 picks the sheet's no-row line from it. */
+export function countFillPeriods(periods: FillPeriod[]): number {
+  return countedPeriods(periods).length
+}
+
+function countedPeriods(periods: FillPeriod[]): FillPeriod[] {
+  return periods.filter((p) => (kdToFils(p.expenseKd) ?? 0) > 0)
+}
+
 export function suggestBudgets({
   periods,
   categories,
@@ -71,7 +80,7 @@ export function suggestBudgets({
   /** Category names that already have a budget in the selected period. */
   budgeted: string[]
 }): FillRow[] {
-  const counted = periods.filter((p) => (kdToFils(p.expenseKd) ?? 0) > 0)
+  const counted = countedPeriods(periods)
   const n = counted.length
   if (n === 0) return []
 

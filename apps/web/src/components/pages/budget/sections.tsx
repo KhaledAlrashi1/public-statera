@@ -469,7 +469,7 @@ export function BudgetTable({
   onCopy?: () => void
   copyLoading?: boolean
   onExport?: () => void
-  /** MOB-R98 B2 — opens "Fill from my spending"; absent when the rule gives no row. */
+  /** MOB-R98 B2 — opens "Fill from my spending"; absent on a past period or before her history loads (MOB-R100 C1). */
   onFill?: () => void
   isEditable?: boolean
 }) {

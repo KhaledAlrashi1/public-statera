@@ -237,10 +237,10 @@ export default function BudgetPage() {
     return rows.slice(0, 7)
   }, [budgets, spentMap])
 
-  // MOB-R98 B2 — "Fill from my spending": this period and the next only (the same gate), and only when the
-  // rule gives a row.
-  const fillRows = useFillSuggestions({ enabled: isEditable, budgets, categories })
-  const canFill = isEditable && fillRows.length > 0
+  // MOB-R98 B2 — "Fill from my spending": this period and the next only (the same gate). MOB-R100 C1 — shown
+  // once her history has loaded, rows or none; with none the sheet says why (C2).
+  const { rows: fillRows, countedPeriods: fillCountedPeriods } = useFillSuggestions({ enabled: isEditable, budgets, categories })
+  const canFill = isEditable && fillCountedPeriods !== null
 
   const budgetCategories = useMemo(
     () => categories.filter((c) => !c.counts_as_income).map((c) => c.name),
@@ -588,6 +588,7 @@ export default function BudgetPage() {
             onOpenChange={setFillOpen}
             month={selectedMonth}
             rows={fillRows}
+            countedPeriods={fillCountedPeriods}
             savedBudgets={budgets}
             monthlyIncomeKd={profileContext?.monthly_income_kd ?? null}
             onSaved={(saved) => {

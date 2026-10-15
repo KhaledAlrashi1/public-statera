@@ -215,6 +215,34 @@ describe("MOB-R98 B — Fill from my spending", () => {
     ])
   })
 
+  // MOB-R100 C — the button shows when the rule gives no row, and the sheet says why, with no Add button.
+  it("with no counted period, offers the button and says suggestions start after a full month", async () => {
+    mocks.dashboardMetrics.mockResolvedValue({
+      ...HISTORY,
+      monthly: HISTORY.monthly.map((m) => ({ ...m, expense_kd: "0.000" })),
+    })
+    const sheet = await openSheet()
+
+    expect(within(sheet).getByText("Suggestions start after your first full month of spending.")).toBeInTheDocument()
+    expect(within(sheet).queryByText("Every category you spent on already has a budget.")).toBeNull()
+    expect(within(sheet).queryByRole("button", { name: /^Add / })).toBeNull()
+    expect(within(sheet).queryByTestId("fill-summary")).toBeNull()
+  })
+
+  it("with every spent category budgeted, offers the button and says so, with no Add button", async () => {
+    pageQueries([
+      { category: "Dining", amount_kd: "60.000" },
+      { category: "Groceries", amount_kd: "25.000" },
+      { category: "Transport", amount_kd: "10.000" },
+    ])
+    const sheet = await openSheet()
+
+    expect(within(sheet).getByText("Every category you spent on already has a budget.")).toBeInTheDocument()
+    expect(within(sheet).queryByText("Suggestions start after your first full month of spending.")).toBeNull()
+    expect(within(sheet).queryByRole("button", { name: /^Add / })).toBeNull()
+    expect(within(sheet).queryByTestId("fill-summary")).toBeNull()
+  })
+
   it("the toast counts the rows actually added", async () => {
     const sheet = await openSheet()
     mocks.getBudgets.mockResolvedValue({ items: [{ category: "Dining", amount_kd: "60.000" }], profileContext: null })

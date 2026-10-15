@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 
 import { analyticsApi } from "@/lib/api"
 import { formatAmountReadout, parseAmountText } from "@/lib/amount-text"
-import { FILL_HISTORY_PERIODS, filsToKd, kdToFils, suggestBudgets, type FillRow } from "@/lib/budget-fill"
+import { FILL_HISTORY_PERIODS, countFillPeriods, filsToKd, kdToFils, suggestBudgets, type FillPeriod, type FillRow } from "@/lib/budget-fill"
 import { shiftKey, usePayday } from "@/lib/payday-months"
 import { VISUAL_VIEWPORT_SHEET_CLASS, useVisualViewportVars } from "@/lib/useVisualViewport"
 import { cn, currentMonthKeyNow } from "@/lib/utils"
@@ -20,7 +20,10 @@ import { findDuplicateCategory, getBudgets, saveBudgets, type BudgetData, type B
 // modules with factories that list their exports, so a new export there would be undefined in them.
 // All strings are provisional (RM-26).
 
-/** The suggestions for the selected period: [] while loading, on error, or when the rule gives no row. */
+/**
+ * The suggestions for the selected period, and how many periods counted. Until the history has loaded
+ * (or when it fails, or the period is not editable) countedPeriods is null and rows is [].
+ */
 export function useFillSuggestions({
   enabled,
   budgets,
@@ -29,7 +32,7 @@ export function useFillSuggestions({
   enabled: boolean
   budgets: BudgetItem[]
   categories: Category[]
-}): FillRow[] {
+}): { rows: FillRow[]; countedPeriods: number | null } {
   const payday = usePayday()
   // The period before today's: the history ends there (complete periods only).
   const until = useMemo(() => shiftKey(currentMonthKeyNow(), -1), [payday]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -40,12 +43,15 @@ export function useFillSuggestions({
     enabled,
   })
   return useMemo(() => {
-    if (!enabled || !data) return []
-    const periods = (data.monthly ?? []).map((m) => ({
+    if (!enabled || !data) return { rows: [], countedPeriods: null }
+    const periods: FillPeriod[] = (data.monthly ?? []).map((m) => ({
       expenseKd: m.expense_kd,
       byCategory: data.expense_by_category?.[m.month] ?? {},
     }))
-    return suggestBudgets({ periods, categories, budgeted: budgets.map((b) => b.category) })
+    return {
+      rows: suggestBudgets({ periods, categories, budgeted: budgets.map((b) => b.category) }),
+      countedPeriods: countFillPeriods(periods),
+    }
   }, [enabled, data, categories, budgets])
 }
 
@@ -58,6 +64,7 @@ export function FillFromSpendingSheet({
   onOpenChange,
   month,
   rows,
+  countedPeriods,
   savedBudgets,
   monthlyIncomeKd,
   onSaved,
@@ -67,6 +74,8 @@ export function FillFromSpendingSheet({
   /** The selected period's key: the period the budgets are written to. */
   month: string
   rows: FillRow[]
+  /** MOB-R100 C2 — the periods that counted; picks the line shown when rows is empty. */
+  countedPeriods: number | null
   /** The period's saved budgets, for the total. */
   savedBudgets: BudgetItem[]
   /** Her typed monthly income ("1500.000"), or null when none is set. */
@@ -149,6 +158,14 @@ export function FillFromSpendingSheet({
         <DialogHeader>
           <DialogTitle>Fill from my spending</DialogTitle>
         </DialogHeader>
+        {rows.length === 0 ? (
+          // MOB-R100 C2 — the rule gave no row: one line, no Add button. Strings provisional (RM-26).
+          <p className="pt-4 text-sm text-muted-foreground">
+            {countedPeriods === 0
+              ? "Suggestions start after your first full month of spending."
+              : "Every category you spent on already has a budget."}
+          </p>
+        ) : (
         <form onSubmit={(e) => void onSubmit(e)} className="flex min-h-0 flex-1 flex-col gap-5 pt-4">
           <div className="min-h-0 flex-1 space-y-5 overflow-y-auto">
             <div className="space-y-2" data-testid="fill-summary">
@@ -209,6 +226,7 @@ export function FillFromSpendingSheet({
             {`Add ${n} ${n === 1 ? "budget" : "budgets"}`}
           </Button>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   )
