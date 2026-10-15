@@ -13481,3 +13481,74 @@ F3 Fill: no string when the history request fails. Carried: copy-previous replac
 
 Order: persist R101 alone; predictions to scratch; D; B; C; push D, B and C under the standing
 push rules (one deploy may carry all three); stashes 0 at the end.
+
+MOB-R102 — R101 results; charts in dark mode, legend, income line; welcome copy (Thu 15 Oct 2026)
+
+A — R101 results (accepted)
+A1 Persistence: R101 at 13422–13483 after a blank 13421, payload sha 758e2df7…4991ef2 before and
+  after appending, equal to the issued sha (channel-checked); strict 101, loose 103; commit
+  c47e0a3. The predictions-file slip (:55/:70 written as :54/:71) is recorded; counts unaffected.
+A2 D 4f24f24: stash 8c442242… applied by content hash, applied diff equal to patch a227bf72…;
+  dropped. FE 603/141. B bb92246: 600/140 (6 deleted under B3, 3 re-added byte-identical in
+  LogLayoutReadout.test.tsx). C 099bfb9: 601/140. All three predicted and met; tsc 0.
+A3 Keeping the readout at /log?layout=1 (second entry, LogPage.tsx:158) is accepted.
+A4 Production 099bfb9: run 38767070402, four jobs on ubuntu-24.04, deploy 16:17:17Z (19:17
+  Kuwait, Thu 15 Oct 2026); probes inside and outside the sandbox, 200 on 099bfb9; 0 unpushed by
+  both routes; stashes 0; migrations 8.
+A5 Miss: the probes ran 22 minutes late because a run watch outlived its timeout, against R98 A4.
+  CI state is read with gh run view; gh run watch is not used.
+
+B — Operator results (no code)
+B1 His readout of the F command, counts only: row 1, 22 transactions (his Google email, the one
+  he keeps; taken before the delete); row 2, 0 (his words: "Row 2 was a demo account as well. I
+  won't even use the email address."); row 3, 56 (his friend).
+B2 His words: "I deleted my account and it worked." The delete path ran in production for the
+  first time. On the demo: "It was good enough." The bar-position question closes. The Plan-month
+  phone check (R100 G1) closes with the deleted account.
+
+C — Charts (his report; frontend only)
+C0 His words: "one chart isn't adoptable to dark mode. And all charts have the issue of the legend
+  moving ridiculously and badly when hovering over several bars." His selections (channel's
+  options): "Green: red only when over (Recommended)"; "Add the income line (Recommended)".
+  Channel's reading of his screenshots (desktop, dark, demo): Expenses by Category, Rent bar near
+  invisible, light grey hover band, tooltip value dark on dark; Budget vs Spending, "Spent" legend
+  swatch black; Income vs Expenses, caption says "The solid line is your monthly income" but only
+  expenses are drawn, and 8 flat zero months lead the line.
+C1 Inventory first: every chart (file:line), its library and version, and where each colour,
+  hover band, tooltip and legend style comes from (token or literal).
+C2 Dark and light: every bar, line, swatch and hover band at least 3:1 against its card, and
+  tooltip text at least 4.5:1, in both themes. Colours come from theme tokens, not literals.
+  CC measures each pair before and after (WebKit, 1280 and 390), lists them, and names any that
+  stay below.
+C3 Budget vs Spending: spent at or under budget is green, over is red. One helper decides it;
+  list every reader of the current rule by grep, file:line (R76 A3), and every test that pins it
+  (R83 A3), before the edit. The legend names Budget, On or under, Over, each with its own swatch.
+C4 Income vs Expenses: name the income source the caption's "income ahead of expenses" sentence
+  uses, file:line. If it is one per-period series, draw it as an income line with its own legend
+  entry, and make the caption match the drawing. If the source is not one per-period series:
+  STOP and report. The line starts at the first period with any income or expense (12 at most).
+C5 Legend movement: reproduce in Chromium and WebKit at 390 and 1280, light and dark, on every
+  chart. Hover across every bar or point and record the legend's box at each step. Report the
+  largest move per chart, name the cause (file:line), fix it, and remeasure: predicted 0 px. If
+  no chart reproduces it, change nothing and say so; the channel asks him for a recording.
+C6 Strings provisional (RM-26). A library upgrade or an apps/api edit = STOP.
+C7 Tests: the colour helper's cases with literal values (under, equal, over); the legend entries;
+  the income series and the first-period start. Predict counts by field first; list any break.
+
+D — Welcome page copy (stale after R101 D; channel-drafted, provisional)
+D1 WorkspaceChoicePage: title "Explore the demo workspace" -> "See a demo"; bullets "40+
+  realistic income and spending transactions" -> "Three months of sample spending" and
+  "Current-month budgets across your spending categories" -> "A sample plan with a budget per
+  category"; intro "load a realistic demo workspace" -> "see a demo", rest of the sentence kept
+  (report it whole); left panel "Demo mode shows six months of realistic spend and budgets." ->
+  "The demo shows three months of sample spending and budgets." and "The demo workspace can be
+  cleared later or replaced by your first real import." -> "Your account stays empty until you
+  add your own."
+D2 Grant: remove the second of the two consecutive blank lines in WorkspaceChoicePage.test.tsx
+  left by R101 D1. Grep tests for each old string first; list hits.
+
+E — Carried
+E1 Queue as in R101 F1–F3.
+
+Order: persist R102 alone; predictions to scratch; D; C (C1 inventory and C5 before-measure
+first); push under the standing push rules.
