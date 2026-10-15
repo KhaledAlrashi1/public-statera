@@ -73,14 +73,16 @@
   --color-ring: hsl(var(--ring));
 
   --color-chart-1: hsl(var(--primary));
-  --color-chart-2: hsl(var(--accent));
+  /* MOB-R102 C2 — chart brass on accent-strong: plain accent is 2.15 on the light card (below 3:1);
+     accent-strong is the same colour as accent in dark, so dark is unchanged. */
+  --color-chart-2: hsl(var(--accent-strong));
   --color-chart-3: hsl(var(--success));
   --color-chart-4: hsl(342 76% 62%);
   --color-chart-5: hsl(271 70% 64%);
   --color-chart-6: hsl(var(--info));
   --color-chart-7: hsl(173 52% 40%);
-  --color-chart-budget: hsl(var(--accent));
-  --color-chart-income: hsl(var(--accent));
+  --color-chart-budget: hsl(var(--accent-strong));
+  --color-chart-income: hsl(var(--accent-strong));
   --color-chart-expense: hsl(var(--primary));
   --color-chart-accent-1: hsl(var(--accent));
   --color-chart-accent-2: hsl(var(--info));

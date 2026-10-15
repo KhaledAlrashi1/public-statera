@@ -37,11 +37,11 @@ import {
 
 import { Link } from "react-router-dom"
 
-import { chartTooltipStyle, cn, fmt3, formatCompactKD, formatKD, getBudgetUtilizationTone } from "@/lib/utils"
+import { chartTooltipItemStyle, chartTooltipStyle, cn, fmt3, formatCompactKD, formatKD, getBudgetUtilizationTone } from "@/lib/utils"
 import { formatMonthYear } from "@/lib/home-summary"
 import { getPayday, periodTick } from "@/lib/payday-months"
 import { COUNT_UP_STAGGER_MS, useCountUp } from "@/lib/use-count-up"
-import { CHART_STROKES, getChartColors } from "@/lib/chart-tokens"
+import { CHART_CURSOR, CHART_STROKES, getChartColors } from "@/lib/chart-tokens"
 import { Button } from "@/components/ui/button"
 import { Highlight } from "@/components/ui/highlight"
 import { HomeFreshness } from "./home-freshness"
@@ -1156,11 +1156,11 @@ export function IncomeExpensesChart({
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" strokeOpacity={0.4} />
                   <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(m: string) => periodTick(getPayday(), m) ?? formatMonthYear(m)} />
                   <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v: number) => formatCompactKD(v)} />
+                  {/* MOB-R102 C2 — full opacity: at 0.5 the average line was 2.08:1 (light) and 2.92:1 (dark). */}
                   <ReferenceLine
                     y={expenseAverage}
                     stroke="var(--color-muted-foreground)"
                     strokeDasharray="4 4"
-                    strokeOpacity={0.5}
                     ifOverflow="extendDomain"
                   />
                   {typedIncome !== null ? (
@@ -1177,6 +1177,8 @@ export function IncomeExpensesChart({
                     formatter={(value: number) => [`KD ${value.toFixed(3)}`, "Expenses"]}
                     labelFormatter={(m) => formatMonthYear(String(m))}
                     contentStyle={chartTooltipStyle}
+                    itemStyle={chartTooltipItemStyle}
+                    cursor={CHART_CURSOR.line}
                   />
                   <Legend
                     verticalAlign="bottom"
@@ -1297,6 +1299,8 @@ export function CategoryBreakdownChart({
                   <RechartsTooltip
                     formatter={(value: number) => [`KD ${value.toFixed(3)}`, "Amount"]}
                     contentStyle={chartTooltipStyle}
+                    itemStyle={chartTooltipItemStyle}
+                    cursor={CHART_CURSOR.bar}
                   />
                 </BarChart>
               </ResponsiveContainer>

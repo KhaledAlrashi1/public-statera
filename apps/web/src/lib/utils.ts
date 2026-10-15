@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from "clsx"
 import { formatMonthYear } from "./home-summary"
 import { getPayday, periodKeyForDate, shiftKey } from "./payday-months"
 import { twMerge } from "tailwind-merge"
+import { CHART_FILLS } from "./chart-tokens"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -12,6 +13,12 @@ export const chartTooltipStyle: React.CSSProperties = {
   border: "1px solid var(--color-border)",
   fontSize: "13px",
   backgroundColor: "var(--color-card)",
+  color: "var(--color-card-foreground)",
+}
+
+// MOB-R102 C2 — Recharts colours each tooltip row in its series colour, black when the series has
+// none (a bar coloured by cells): 1.27:1 on the dark card. The rows take the card's text colour.
+export const chartTooltipItemStyle: React.CSSProperties = {
   color: "var(--color-card-foreground)",
 }
 
@@ -119,12 +126,12 @@ export function getBudgetUtilizationTone(percent: number): {
   }
 }
 
+// MOB-R102 C3 — the one rule for Budget vs Spending's spent bars: at or under the budget (100% or
+// less) is green, over it is red. The chart's legend takes the same two fills (budget/sections.tsx).
 export function getBudgetUtilizationFill(percent: number): string {
   const safePercent = Number.isFinite(percent) ? percent : 0
 
-  if (safePercent >= 100) return "var(--color-destructive)"
-  if (safePercent >= 70) return "var(--color-warning)"
-  return "var(--color-success)"
+  return safePercent > 100 ? CHART_FILLS.spentOver : CHART_FILLS.spentOnOrUnder
 }
 
 /**

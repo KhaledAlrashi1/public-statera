@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { formatDisplayDate, formatKD, labelForYM, prevMonth, toYearMonth, today } from "@/lib/utils"
+import { formatDisplayDate, formatKD, getBudgetUtilizationFill, labelForYM, prevMonth, toYearMonth, today } from "@/lib/utils"
 
 describe("utils", () => {
   it("formats KD amounts with 3 decimals and thousands grouping", () => {
@@ -28,5 +28,20 @@ describe("utils", () => {
   it("labels current month as This Month", () => {
     const ym = toYearMonth(today())
     expect(labelForYM(ym)).toBe("This Month")
+  })
+})
+
+// MOB-R102 C3 — Budget vs Spending's spent bars: at or under the budget is green, over it is red.
+describe("getBudgetUtilizationFill", () => {
+  it("is green under the budget (spent 70 of 100)", () => {
+    expect(getBudgetUtilizationFill(70)).toBe("var(--color-success)")
+  })
+
+  it("is green exactly at the budget (spent 100 of 100)", () => {
+    expect(getBudgetUtilizationFill(100)).toBe("var(--color-success)")
+  })
+
+  it("is red over the budget (spent 100.5 of 100)", () => {
+    expect(getBudgetUtilizationFill(100.5)).toBe("var(--color-destructive)")
   })
 })

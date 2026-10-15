@@ -11,9 +11,10 @@ import {
   Tooltip as RechartsTooltip,
   Legend,
 } from "@/lib/recharts"
-import { CHART_FILLS } from "@/lib/chart-tokens"
+import { CHART_CURSOR, CHART_FILLS } from "@/lib/chart-tokens"
 
 import {
+  chartTooltipItemStyle,
   chartTooltipStyle,
   cn,
   formatCompactKD,
@@ -348,6 +349,15 @@ export function IncomePlanningCard({
   )
 }
 
+// MOB-R102 C3 — the legend names what the colours mean, each with its own swatch. The spent bars are
+// coloured per row by getBudgetUtilizationFill, so the series has no one colour: Recharts drew its
+// swatch black. The fills here are the ones that helper returns.
+const BUDGET_CHART_LEGEND = [
+  { value: "Budget", type: "square", id: "budget", color: CHART_FILLS.budget },
+  { value: "On or under", type: "square", id: "on-or-under", color: CHART_FILLS.spentOnOrUnder },
+  { value: "Over", type: "square", id: "over", color: CHART_FILLS.spentOver },
+] as const
+
 export function BudgetChart({
   data,
   isLoading,
@@ -411,9 +421,16 @@ export function BudgetChart({
                 <RechartsTooltip
                   formatter={(value: number, name: string) => [`KD ${value.toFixed(3)}`, name]}
                   contentStyle={chartTooltipStyle}
+                  itemStyle={chartTooltipItemStyle}
+                  cursor={CHART_CURSOR.bar}
                 />
                 {/* MOB-R82 C6 — the legend's words in muted ink; its swatch keeps the series colour (brass stays in the marks). */}
-                <Legend verticalAlign="bottom" height={36} formatter={(value) => <span className="text-muted-foreground">{value}</span>} />
+                <Legend
+                  verticalAlign="bottom"
+                  height={36}
+                  payload={[...BUDGET_CHART_LEGEND]}
+                  formatter={(value) => <span className="text-muted-foreground">{value}</span>}
+                />
                 <Bar
                   dataKey="budget"
                   name="Budget"
