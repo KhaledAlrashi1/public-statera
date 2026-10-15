@@ -13418,3 +13418,66 @@ G2 Queue: copy-previous replaces the month (BudgetPage.tsx:316–327); no test p
 
 Order: persist R100 alone; predictions to scratch; B; C; D; E; F; push B, C and D under the
 standing push rules (one deploy may carry all three).
+
+MOB-R101 — R100 results; /log closed; D granted; fill copy; his account (Thu 15 Oct 2026)
+
+A — R100 results (accepted)
+A1 Persistence: R100 at 13354–13420 after a blank 13353, payload sha b761b3a9…e6daa6 before and
+  after appending, equal to the issued sha (channel-checked); strict 100, loose 102; commit
+  eb3d103.
+A2 B 6dae922: sections.tsx:684 gated; FE 600/141 -> 601/141 tests/files, +1 predicted and met.
+A3 C c0ee401: FE 603/141, +2 predicted and met; three mutations red, restored byte for byte.
+  CC's narrower reading accepted: the button shows once the history has loaded, rows or none;
+  if the history request fails it stays hidden (queued: no string for that case).
+A4 Production c0ee401: run 38763610665, four jobs on ubuntu-24.04, deploy 15:53:13Z (18:53
+  Kuwait, Thu 15 Oct 2026); probes inside and outside the sandbox, 200 on c0ee401; 0 unpushed by
+  both routes; migrations 8. Stashes 1 (D, held). 0 lines in apps/api since 9fe8558.
+
+B — /log top defect closed; remove the Layout check link
+B1 His readout, installed app, dark, Thu 15 Oct 2026: display-mode standalone yes; innerHeight
+  797; visualViewport.height 797; scrollingElement.scrollHeight 797; frame scrollHeight 797,
+  clientHeight 797, scrollTop 0; 100vh 844, 100dvh 797; safe-area top 0, bottom 34; width 390,
+  scrollWidth 390, wider none. Fix live since b45a7c4: closed.
+B2 Remove the Profile "Layout check" link (R87 C). List every reader of the readout by grep,
+  file:line (R76 A3). Remove the readout too when the link is its only entry.
+B3 Narrow class grant (R93 D3): a test whose only subject is the Layout check link or readout may
+  be deleted, after CC greps, predicts and lists each one. Any other break: stash, grant next.
+
+C — Fill sheet: a third empty line (CC's R100 finding)
+C1 When the rule gives no row, the sheet shows exactly one line:
+  - n = 0: "Suggestions start after your first full month of spending."
+  - at least one expense category has usual > 0 and all such are budgeted: "Every category you
+    spent on already has a budget."
+  - anything else (only Uncategorized, non-expense or net-zero spend): "Nothing to suggest from
+    your last three months."
+  Strings provisional (RM-26). One new case for the third line; predict, then list any break.
+
+D — Old demo loader removal (R100 D stash 8c442242…, base c0ee401, patch a227bf72…c9222)
+D1 Grants, line by line (R79 A3): delete WorkspaceChoicePage.test.tsx:93–111 (every assertion is
+  about the removed loader); delete DashboardPage.test.tsx:667–681 (its check at :679 now passes
+  vacuously). Home's demo action removed with no replacement: accepted.
+D2 WorkspaceChoicePage demo card copy (channel-drafted, provisional, RM-26): replace "Load a seeded
+  six-month sample…" with "Look around a sample account with three months of spending." and
+  "Can be cleared or replaced…" with "Nothing you do there is saved to your account." Grep for
+  tests asserting the old copy first; list hits.
+D3 Expected after D1 and D2: FE 603/141 tests/files (+2 new, −2 deleted), plus any copy-test
+  change named in D2. Apply the stash by content hash; report the applied diff's sha.
+
+E — His account (operator actions, no code)
+E1 E survey accepted: Delete account (Profile > Data & privacy, DELETE /api/account, account.ts:60,
+  purgeUserAccountRows at account-deletion.ts:76) wipes his rows; same email signs in again empty.
+E2 His answers (channel's options): sign-in "I sign in with Google […]"; clean-up "Yes, delete
+  and start fresh (Recommended)". He deletes his own account in the app; CC does nothing for it.
+E3 F accepted. The operator runs CC's read-only command before deleting; counts relayed.
+
+F — Queue (operator words, verbatim)
+F1 "I like the suggestion of email code in the app and the email + password on the browser. The
+  classic version is preferable but let's push these two items for later. They're not urgent or
+  important. They're nice to have."
+F2 Dead after D: the demoAction prop (dashboard/sections.tsx:394–487), authApi.loadDemoData
+  (api.ts:963, capture.ts:154), six e2e specs naming the loader (not in CI).
+F3 Fill: no string when the history request fails. Carried: copy-previous replaces the month;
+  no test pins delete, Undo, copy-previous or closing the dialog.
+
+Order: persist R101 alone; predictions to scratch; D; B; C; push D, B and C under the standing
+push rules (one deploy may carry all three); stashes 0 at the end.
