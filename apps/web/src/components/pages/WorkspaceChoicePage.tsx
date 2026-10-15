@@ -1,19 +1,13 @@
-import { useState } from "react"
-import { useQueryClient } from "@tanstack/react-query"
 import { ArrowRight, BarChart3, DatabaseZap, Sparkles, Scale } from "lucide-react"
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom"
 
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/toaster"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { getUserFirstName, useAuth } from "@/contexts/AuthContext"
-import { ApiError, authApi } from "@/lib/api"
 
 export default function WorkspaceChoicePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const toast = useToast()
-  const [loadingDemo, setLoadingDemo] = useState(false)
   const [searchParams] = useSearchParams()
   const fromSignup = searchParams.get("source") === "signup"
 
@@ -25,32 +19,6 @@ export default function WorkspaceChoicePage() {
 
   const continueEmpty = () => {
     navigate("/", { replace: true })
-  }
-
-  const loadDemoWorkspace = async () => {
-    setLoadingDemo(true)
-    try {
-      const summary = await authApi.loadDemoData()
-      await queryClient.invalidateQueries()
-      toast.success(
-        `Loaded ${summary.transactions_created} demo transactions across ${summary.months_seeded} months`
-      )
-      navigate("/", { replace: true })
-    } catch (error) {
-      // Category C correction of a source bug: the demo_data_not_empty branch navigates but
-      // the original omitted the `return`, so a misleading error toast fired even on the
-      // benign "account already has data" outcome. Source refs: personal-finance has no
-      // WorkspaceChoicePage (its demo CTA lives on DashboardPage.tsx); personal_statera's
-      // frontend/src/components/pages/WorkspaceChoicePage.tsx:44-48 carries the same
-      // missing-return. Fixed here with an early return before the error toast.
-      if (error instanceof ApiError && error.code === "demo_data_not_empty") {
-        navigate("/", { replace: true })
-        return
-      }
-      toast.error(error instanceof Error ? error.message : "We couldn't load the demo workspace right now")
-    } finally {
-      setLoadingDemo(false)
-    }
   }
 
   return (
@@ -129,26 +97,20 @@ export default function WorkspaceChoicePage() {
             <div className="inner-card border-primary/25 bg-primary/5">
               <p className="text-sm font-semibold text-foreground">Explore the demo workspace</p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Load a seeded six-month sample and inspect the product before committing your own
-                data.
+                Look around a sample account with three months of spending.
               </p>
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                 <li>- 40+ realistic income and spending transactions</li>
                 <li>- Current-month budgets across your spending categories</li>
-                <li>- Can be cleared or replaced when you import real data</li>
+                <li>- Nothing you do there is saved to your account.</li>
               </ul>
-              <Button
-                type="button"
-                className="mt-5 w-full justify-between"
-                loading={loadingDemo}
-                disabled={loadingDemo}
-                onClick={() => {
-                  void loadDemoWorkspace()
-                }}
-              >
-                {loadingDemo ? "Loading demo workspace..." : "Load demo workspace"}
-                {!loadingDemo ? <ArrowRight className="h-4 w-4" /> : null}
-              </Button>
+              {/* MOB-R100 D2 — the old loader wrote demo rows into her account; this choice is now the demo
+                  itself, as on the welcome page (LoginPage.tsx): a full page load to /demo, nothing saved. */}
+              {/* A plain styled <a>: Button's asChild path drops its children (CLAUDE.md, 10c-3). */}
+              <a href="/demo" className={cn(buttonVariants(), "mt-5 w-full justify-between")}>
+                See a demo
+                <ArrowRight className="h-4 w-4" />
+              </a>
             </div>
           </section>
         </div>

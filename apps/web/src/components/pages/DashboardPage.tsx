@@ -78,7 +78,6 @@ export default function DashboardPage() {
   const [categoryHasMore, setCategoryHasMore] = useState(false)
   const [categoryRowsTotal, setCategoryRowsTotal] = useState(0)
   const [dismissingAlertId, setDismissingAlertId] = useState<string | null>(null)
-  const [loadingDemoData, setLoadingDemoData] = useState(false)
   const [clearingDemoData, setClearingDemoData] = useState(false)
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false)
   // MOB-R47 Part A — the income asks open the income pop-up instead of sending the user to Profile.
@@ -521,38 +520,6 @@ export default function DashboardPage() {
     && !hasRecordedTransactions
     && !setupBudgetResp?.items?.length
   const showDashboardEmptyState = noDashboardData && !showSetupProgress
-  // MOB-R36 re-key (MOB-R33 correction (iii)) — mirror the backend's hasFinancialData
-  // (apps/api/src/lib/demo-data-lib.ts:312): the demo is refused (409) once the profile holds an
-  // income or a payday, or rows exist. Keying on the logged income being 0 offered a demo the
-  // backend then refused, and a typed income makes that common.
-  const canLoadDemoData = !loadingDemoData
-    && !hasRecordedTransactions
-    && profile?.monthly_income_kd == null
-    && profile?.payday_day == null
-    && !setupBudgetResp?.items?.length
-
-  const loadDemoData = useCallback(async () => {
-    setLoadingDemoData(true)
-    try {
-      const summary = await authApi.loadDemoData()
-      await invalidateFinancialQueries()
-      toast.success(
-        `Loaded ${summary.transactions_created} demo transactions across ${summary.months_seeded} months`
-      )
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "We couldn't load demo data right now"
-      toast.error(message)
-    } finally {
-      setLoadingDemoData(false)
-    }
-  }, [
-    hasRecordedTransactions,
-    monthIncome,
-    invalidateFinancialQueries,
-    setupBudgetResp?.items?.length,
-    toast,
-  ])
-
   useEffect(() => {
     if (showSetupProgress) return
     setSetupGuideOpen(false)
@@ -944,14 +911,6 @@ export default function DashboardPage() {
             description: "Follow one focused next step at a time without hunting through the app.",
             onAction: () => setSetupGuideOpen(true),
           }}
-          demoAction={canLoadDemoData ? {
-            label: "Load demo workspace",
-            description: "Populate a realistic six-month sample so you can evaluate the dashboard, planning, and insights immediately.",
-            loading: loadingDemoData,
-            onAction: () => {
-              void loadDemoData()
-            },
-          } : null}
           onDismiss={() => {
             setOnboardingDismissed(true)
             setSetupGuideSeenLocal(true)

@@ -664,18 +664,14 @@ describe("DashboardPage", () => {
     })
   })
 
-  it("canLoadDemoData: once a typed income exists the demo is not offered; with nothing set it is", () => {
-    // The backend's hasFinancialData refuses the demo (409) once the profile holds an income.
-    mocks.useDashboardPageQueries.mockReturnValue({ ...baseResult, profile: { monthly_income_kd: "1500.000" } })
-    renderPage()
-    const withIncome = mocks.setupProgressPanel.mock.calls.at(-1)?.[0] as { demoAction?: unknown }
-    expect(withIncome.demoAction ?? null).toBeNull()
-
-    // NEGATIVE — nothing set, no rows, no budgets: the demo IS offered.
-    mocks.setupProgressPanel.mockClear()
+  // MOB-R100 D2 — Home no longer offers the old loader, even to an account with nothing set. The panel is
+  // asserted rendered first, so an absent prop cannot come from an absent panel.
+  it("Home offers no demo action, even with nothing set", () => {
     mocks.useDashboardPageQueries.mockReturnValue({ ...baseResult, profile: null })
     renderPage()
-    const withNothing = mocks.setupProgressPanel.mock.calls.at(-1)?.[0] as { demoAction?: unknown }
-    expect(withNothing.demoAction).not.toBeNull()
+    expect(mocks.setupProgressPanel).toHaveBeenCalled()
+    const props = mocks.setupProgressPanel.mock.calls.at(-1)?.[0] as { demoAction?: unknown }
+    expect(props).toBeDefined()
+    expect("demoAction" in props).toBe(false)
   })
 })

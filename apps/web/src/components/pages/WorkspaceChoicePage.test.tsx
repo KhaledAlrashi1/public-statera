@@ -90,23 +90,13 @@ describe("WorkspaceChoicePage", () => {
     expect(screen.getByText("Home page")).toBeInTheDocument()
   })
 
-  it("loads the demo workspace and returns home", async () => {
-    mocks.loadDemoData.mockResolvedValue({
-      transactions_created: 47,
-      months_seeded: 6,
-    })
+
+  // MOB-R100 D2 — the demo choice is the demo itself: a full page load to /demo; nothing loads into her account.
+  it("offers \"See a demo\", a link to /demo, and no loader button", () => {
     renderPage("/welcome?source=signup")
 
-    fireEvent.click(screen.getByRole("button", { name: "Load demo workspace" }))
-
-    await waitFor(() => {
-      expect(mocks.loadDemoData).toHaveBeenCalledTimes(1)
-    })
-    await waitFor(() => {
-      expect(screen.getByText("Home page")).toBeInTheDocument()
-    })
-    expect(mocks.success).toHaveBeenCalledWith(
-      "Loaded 47 demo transactions across 6 months"
-    )
+    expect(screen.getByRole("link", { name: "See a demo" })).toHaveAttribute("href", "/demo")
+    expect(screen.queryByRole("button", { name: /load demo workspace/i })).toBeNull()
+    expect(mocks.loadDemoData).not.toHaveBeenCalled()
   })
 })
