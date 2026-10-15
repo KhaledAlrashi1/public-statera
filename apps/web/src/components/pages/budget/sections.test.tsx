@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { BudgetChart, BudgetDialog, BudgetHero, BudgetTable, IncomePlanningCard, type BudgetProfileContext } from "./sections"
@@ -24,6 +24,38 @@ describe("BudgetTable", () => {
     expect(screen.getAllByText("Set your first budget").length).toBeGreaterThan(0)
     fireEvent.click(screen.getAllByRole("button", { name: "Add your first budget" })[0])
     expect(onAdd).toHaveBeenCalledTimes(1)
+  })
+
+  // MOB-R99 B1 — the mobile empty state takes the same gate as the page's (MOB-R98 C): no
+  // "Add your first budget" on a past period. Scoped to the mobile container, whose title is
+  // asserted present so a missing button cannot come from a missing container; the editable
+  // render is the control that the same scope finds the button when it is offered.
+  it("offers no first-budget button in the mobile empty state on a past period", () => {
+    const props = {
+      rows: [],
+      hasBudgets: false,
+      searchQuery: "",
+      setSearchQuery: vi.fn(),
+      range: "month" as const,
+      setRange: vi.fn(),
+      onAdd: vi.fn(),
+      onEdit: vi.fn(),
+      onDelete: vi.fn(),
+    }
+    const mobileEmptyState = () => {
+      const found = screen
+        .getAllByText("Set your first budget")
+        .map((el) => el.closest(".md\\:hidden"))
+        .filter((el): el is HTMLElement => el !== null)
+      expect(found).toHaveLength(1)
+      return found[0]
+    }
+
+    const { rerender } = render(<BudgetTable {...props} isEditable />)
+    expect(within(mobileEmptyState()).getByRole("button", { name: "Add your first budget" })).toBeInTheDocument()
+
+    rerender(<BudgetTable {...props} isEditable={false} />)
+    expect(within(mobileEmptyState()).queryByRole("button", { name: "Add your first budget" })).toBeNull()
   })
 })
 

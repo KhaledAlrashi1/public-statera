@@ -564,11 +564,13 @@ export function BudgetTable({
             icon={<Target className="h-8 w-8" />}
             title="Set your first budget"
             description="Add monthly category limits so you can compare your plan with what you actually spend."
-            action={(
+            // MOB-R99 B1 — the page's gate (isEditableMonth, MOB-R98 C): no first-budget button on a
+            // past period. The header already reads "Read only — past month", so no second chip here.
+            action={isEditable ? (
               <Button type="button" variant="default" size="sm" onClick={onAdd}>
                 Add your first budget
               </Button>
-            )}
+            ) : undefined}
             compact
           />
         ) : rows.length === 0 ? (
