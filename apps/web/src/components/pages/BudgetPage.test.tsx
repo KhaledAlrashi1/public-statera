@@ -127,6 +127,36 @@ describe("BudgetPage", () => {
     expect(screen.getByText("budget dialog")).toBeInTheDocument()
   })
 
+  // MOB-R98 C — the empty state takes the same gate as the table: on a past period there is no
+  // "Add your first budget", and it reads "Read only — past month".
+  it("on a past period the empty state offers no add button and reads read only", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] })
+    try {
+      vi.setSystemTime(new Date("2026-05-15T09:00:00"))
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      // A new element each time: rerendering the same element object lets React skip the page.
+      const page = () => (
+        <MemoryRouter initialEntries={["/plan"]}>
+          <QueryClientProvider client={queryClient}>
+            <BudgetPage />
+          </QueryClientProvider>
+        </MemoryRouter>
+      )
+      const { rerender } = render(page())
+      expect(await screen.findByRole("button", { name: "Add your first budget" })).toBeInTheDocument()
+
+      // The page stays open on 2026-05 while the clock moves two periods on: 2026-05 is now past.
+      vi.setSystemTime(new Date("2026-07-15T09:00:00"))
+      rerender(page())
+
+      expect(screen.getByText("Set your first budget plan")).toBeInTheDocument()
+      expect(screen.queryByRole("button", { name: "Add your first budget" })).toBeNull()
+      expect(screen.getByText("Read only — past month")).toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it("surfaces active-month query failures in the planning warning banner", async () => {
     mocks.budgetHooks.useBudgetActiveMonths.mockReturnValue({
       monthOptions: ["2026-03"],

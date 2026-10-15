@@ -505,7 +505,7 @@ export default function BudgetPage() {
                 icon={<Target className="h-8 w-8" />}
                 title="Set your first budget plan"
                 description="Give each category a monthly limit; Plan tracks spending against it."
-                action={(
+                action={isEditable ? (
                   <Button
                     type="button"
                     variant="default"
@@ -516,6 +516,11 @@ export default function BudgetPage() {
                   >
                     Add your first budget
                   </Button>
+                ) : (
+                  // MOB-R98 C — the table's gate (isEditableMonth): a past period is read only here too.
+                  <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                    Read only — past month
+                  </span>
                 )}
               />
             </section>
