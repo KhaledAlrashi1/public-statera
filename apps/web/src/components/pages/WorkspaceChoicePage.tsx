@@ -43,8 +43,8 @@ export default function WorkspaceChoicePage() {
             </div>
 
             <p className="mt-4 max-w-2xl text-sm text-muted-foreground">
-              You can start with a clean workspace and add your own data, or load a realistic demo
-              workspace to evaluate the dashboard, planning tools, and insights immediately.
+              You can start with a clean workspace and add your own data, or see a demo to evaluate
+              the dashboard, planning tools, and insights immediately.
             </p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -52,14 +52,14 @@ export default function WorkspaceChoicePage() {
                 <Sparkles className="h-5 w-5 text-primary" />
                 <p className="mt-3 text-sm font-semibold text-foreground">See value fast</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Demo mode shows six months of realistic spend and budgets.
+                  The demo shows three months of sample spending and budgets.
                 </p>
               </div>
               <div className="surface-muted-card p-4">
                 <BarChart3 className="h-5 w-5 text-primary" />
                 <p className="mt-3 text-sm font-semibold text-foreground">Stay in control</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  The demo workspace can be cleared later or replaced by your first real import.
+                  Your account stays empty until you add your own.
                 </p>
               </div>
               <div className="surface-muted-card p-4">
@@ -95,13 +95,13 @@ export default function WorkspaceChoicePage() {
             </div>
 
             <div className="inner-card border-primary/25 bg-primary/5">
-              <p className="text-sm font-semibold text-foreground">Explore the demo workspace</p>
+              <p className="text-sm font-semibold text-foreground">See a demo</p>
               <p className="mt-2 text-sm text-muted-foreground">
                 Look around a sample account with three months of spending.
               </p>
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                <li>- 40+ realistic income and spending transactions</li>
-                <li>- Current-month budgets across your spending categories</li>
+                <li>- Three months of sample spending</li>
+                <li>- A sample plan with a budget per category</li>
                 <li>- Nothing you do there is saved to your account.</li>
               </ul>
               {/* MOB-R100 D2 — the old loader wrote demo rows into her account; this choice is now the demo

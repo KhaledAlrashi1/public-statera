@@ -90,7 +90,6 @@ describe("WorkspaceChoicePage", () => {
     expect(screen.getByText("Home page")).toBeInTheDocument()
   })
 
-
   // MOB-R100 D2 — the demo choice is the demo itself: a full page load to /demo; nothing loads into her account.
   it("offers \"See a demo\", a link to /demo, and no loader button", () => {
     renderPage("/welcome?source=signup")
