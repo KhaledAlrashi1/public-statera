@@ -13211,3 +13211,92 @@ F — Carried
 F1 Phone checks still owed; the Profile "Layout check" link stays until his readout.
 
 Order: persist R97 alone; predictions to scratch; B4; E; push B4 under the standing push rules.
+
+MOB-R98 — R97 results; "Fill from my spending"; past-period CTA; demo clear survey (Thu 15 Oct 2026)
+
+A — R97 results (accepted)
+A1 Persistence: R97 at 13149–13213 after a blank 13148, sha d7e76e9d…4ccf3 equal to issued;
+  strict 97, loose 99; commit 72a91a3.
+A2 B4 89df162: engine.test.ts:15, 1 insertion, 1 deletion; runner 4/1; FE 579/139 tests/files;
+  tsc 0. Keeping the suffix is accepted. A test title quoted in a report is quoted whole.
+A3 Production 89df162: run 38601781878, four jobs on ubuntu-24.04, deploy 16:56:45Z (19:56
+  Kuwait, Wed 14 Oct 2026). Probes 04:30Z Thu 15 Oct, inside and outside the sandbox, all 200 on
+  89df162. 0 unpushed by both routes; stashes 0; migrations 8.
+A4 The gh run watch hang is recorded. CI state is read with gh run view, never by waiting.
+A5 E accepted. Channel miss: R97 D3 assumed Plan has empty rows and one Save. E1–E3 show it has
+  neither. The channel's mock to the operator showed the same wrong rows; a corrected mock was
+  shown to him. D3 is replaced by B.
+
+B — "Fill from my spending" (RM-23 ruling; her rows written through the existing POST)
+B0 Operator selections (options and mocks were the channel's): "B: Always on Plan
+  (Recommended)"; "Match my spending (Recommended)"; "Preview, then Save (Recommended)";
+  "B: Summary plus row lines (Recommended)"; "Yes, ignore it (Recommended)"; "15%
+  (Recommended)"; "Yes, the sheet (Recommended)". His words: "rounded up to the next 5 KD";
+  after saving she should feel "now I understand where my money goes". He first chose "Add 10%
+  room, then round (Recommended)" on a wrong channel claim (that 10% keeps a usual month under
+  the 90% alert); after the correction he chose 15%.
+B1 Rule: one pure function in a new file, integer fils, no floats.
+  - History: the last 3 complete periods before the current one (Kuwait clock, payday rules),
+    from dashboard-metrics expense_by_category (dashboard-snapshot-lib.ts:241–263, route
+    aggregation.ts:516). Name the helper that gives the period keys, file:line.
+  - A period counts only if it holds any expense. n = counted periods, 0 to 3.
+  - Per category, a counted period without its spend is 0. usual = median of 3, mean of 2,
+    the value of 1.
+  - suggestion = usual x 115 / 100, rounded UP to a multiple of 5.000 (exact multiples stay).
+  - No row when: n = 0; usual = 0; the category has a budget in the selected period; income
+    categories; savings-kind (reuse the server's rule and name it, file:line; never restate it);
+    "Uncategorized".
+B2 Surface: a "Fill from my spending" button on Plan for the current and next period only (the
+  gate at utils.ts:212–215), also in the empty state; hidden when the rule gives no row. Tap
+  opens a sheet (income sheet pattern):
+  - Summary: total = saved budgets in the period + ticked rows; with monthly income set,
+    "of <income> income" and "<income - total> left each month", else the total alone. One bar,
+    total over income, in ink: no category colours (colour means her places).
+  - Rows: tick (on by default), category, amount editable through the RM-27 normalizer, line
+    "You usually spend <usual>".
+  - Button "Add N budgets", N = ticked rows. Unreadable amount keeps the sheet open.
+  All strings provisional (RM-26).
+B3 Save: on Add, fetch the period's budgets fresh (not from the cache), then send that list plus
+  the ticked rows whose category still has no budget, through saveBudgets (budget/hooks.ts:22),
+  built the way BudgetPage.tsx:250–258 builds its list. Existing rows go out unchanged. Toast
+  "N budgets added", N = rows actually added.
+B4 Gates: no migration, no new route, no server edit; any of those = STOP. RM-21(c) is not
+  reached (R97 D4). In the demo the sheet runs on the sample and Add gets the demo transport's
+  refusal as today; a demo code change = STOP.
+B5 Tests (new; predict counts by field first). Rule cases, literal values (channel-computed):
+  [50.000, 63.500, 70.750] -> 75.000; [20.000, 22.000, 200.000] -> 30.000; [0, 30.000, 40.000]
+  -> 35.000; [0, 0, 30.000] -> no row; two periods [40.000, 50.000] -> 55.000; one period
+  [56.750] -> 70.000; [100.000 x3] -> 115.000; [350.000 x3] -> 405.000; a period with no
+  expense at all is not counted; budgeted, income, savings-kind, "Uncategorized" -> no row.
+  Controls, each red then restored (cmp): mean for median (spike case gives 95.000); x110
+  (350 gives 390.000); round to nearest (56.750 gives 65.000); empty period counted.
+  UI: button absent on a past period; sheet rows and summary from a fixture; an unticked row is
+  not sent; the POST body equals the fresh list plus ticked rows, existing amounts unchanged; a
+  category budgeted between open and Add is not sent; toast count.
+  Existing tests: none expected to break. Any break is listed, built as a stash, granted next.
+
+C — Plan empty-state CTA on a past period (R97 E4 finding)
+C1 "Add your first budget" (BudgetPage.tsx:502–518) takes the gate at utils.ts:212–215: on a past
+  period it is hidden and the empty state reads as the table does ("Read only — past month").
+  One new case, red against the old page. BudgetPage.test.tsx:117 and budget/sections.test.tsx:7
+  pin the empty state: predict, then list any break.
+
+D — Old demo rows in his account (read-only survey; any delete = RM-21(b) STOP)
+D0 His words: "Let's clear the old demo rows in my account." Selections: "Real, keep it
+  (Recommended)"; "Not sure (Recommended)" (whether real rows sit in demo categories).
+D1 How the old clear is reached (route, UI entry, file:line) and what it deletes, by row type,
+  from the manifest (demo-data-lib.ts:228–299, :624).
+D2 What it misses: budgets re-created by Plan saves (R96 D2), memorized rows, the "Income" and
+  "Income: Salary" categories (is_income = 0), anything else found.
+D3 What happens to a real row of his in a demo category when that category is deleted (foreign
+  keys without cascade, 0000_cultured_jimmy_woo.sql:300–301): blocked, nulled or deleted.
+D4 Proposal only, no code: a dry run that shows him in the app what a clear would remove
+  (counts and names) before anything is deleted; every reader and writer touched (R76 A3).
+
+E — Carried
+E1 Phone checks still owed; the Profile "Layout check" link stays until his readout.
+E2 Queue: copy-previous replaces the month (BudgetPage.tsx:316–327); no test pins delete,
+  Undo, copy-previous or closing the dialog (R97 E6).
+
+Order: persist R98 alone; predictions to scratch; C; B; D; push C and B under the standing push
+rules (one deploy may carry both).
