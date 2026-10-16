@@ -13552,3 +13552,56 @@ E1 Queue as in R101 F1–F3.
 
 Order: persist R102 alone; predictions to scratch; D; C (C1 inventory and C5 before-measure
 first); push under the standing push rules.
+
+MOB-R103 — R102 results; budget colours; income line visible; tooltip snaps (Fri 16 Oct 2026)
+
+A — R102 results (accepted)
+A1 Persistence: R102 at 13485–13554 after a blank 13484, payload sha def852d2…0d50cae8 before and
+  after appending, equal to the issued sha (channel-checked); strict 102, loose 104; b11270d.
+A2 D f5fdc39: six source strings changed as drafted; intro now reads in full "You can start with a
+  clean workspace and add your own data, or see a demo to evaluate the dashboard, planning tools,
+  and insights immediately."; blank line removed; FE 601/140.
+A3 C1 inventory (Recharts 2.15.4 via lib/recharts.ts) and C2 contrast accepted: 92 of 480 pairs
+  below before, 0 of 503 after, both engines, 1280 and 390, light, dark and dark after a toggle.
+  The instrument fault (cursor read by fill, not stroke) was named and the before-run retaken.
+A4 C3 built as ruled; C5 measured 0 px legend movement in 24 runs with a positive control: both
+  accepted. CC's zsh argument miss was named and every mutation redone behind a control. FE
+  605/141, predicted and met; tsc 0.
+A5 Production 393de43: run 38791878881 read with gh run view, four jobs on ubuntu-24.04, deploy
+  19:16:15Z (22:16 Kuwait, Thu 15 Oct 2026); probes inside and outside, 200 on 393de43;
+  0 unpushed by both routes; stashes 0; migrations 8.
+A6 Channel miss: R102 C3 ruled "at or under budget is green" without checking the existing rule;
+  it had a 70% amber step, which the ruling removed. C4's premise (a per-period income series)
+  was not checked either; CC's STOP was correct.
+
+B — Budget vs Spending colours (his selections; channel's options)
+B0 "What moved": "The small box (tooltip)". Amber: "Amber from 90% (Recommended)". No budget:
+  "Grey, labelled "No budget" (Recommended)".
+B1 One helper, integer fils, no floats: no budget -> grey; spent x 10 < budget x 9 -> green;
+  otherwise spent <= budget -> amber; spent > budget -> red. 90% matches the alert threshold
+  (env.ts:116). Cases, budget 100.000: spent 89.999 green; 90.000 amber; 100.000 amber;
+  100.001 red; no budget with spent 5.000 grey. A mutation per case reddens it alone.
+B2 Legend: Budget, On track, Close, Over, and No budget only when such a bar is drawn. Every
+  colour at least 3:1 against its card in both themes, measured as in R102 C2. Strings
+  provisional (RM-26). Readers and pinning tests listed first (R76 A3, R83 A3).
+
+C — Income vs Expenses (C4 re-scoped: no per-period series)
+C1 Channel's hypothesis, to confirm or refute before the edit: the income reference line exists
+  but falls outside the y-axis range when income is above every period's spend (demo: income
+  1,200.000, highest period 739.525), so it is not drawn. Confirm with the demo sample.
+C2 If confirmed: the y-axis range always includes the income line. Legend: Income, Expenses,
+  Average. The caption names what is drawn ("The dashed line is your average monthly spending.
+  The flat line is your monthly income."). If refuted: report the cause and STOP.
+C3 The line starts at the first period with any expense or income, 12 at most. Report which
+  periods the average already uses, file:line; it must not count the dropped leading periods.
+
+D — Tooltip snaps (all three charts)
+D1 No slide: the tooltip appears next to the hovered bar or point with no transition. Measure in
+  Chromium and WebKit at 390 and 1280: the tooltip's box 50 ms after each hover step equals its
+  final box (before the fix it does not). Predict both.
+
+E — Carried
+E1 Queue as in R101 F1–F3; IncomePage.tsx (not routed) joins the dead-code list.
+
+Order: persist R103 alone; predictions to scratch; C1 check first; B; C; D; push under the
+standing push rules.
