@@ -13605,3 +13605,56 @@ E1 Queue as in R101 F1–F3; IncomePage.tsx (not routed) joins the dead-code lis
 
 Order: persist R103 alone; predictions to scratch; C1 check first; B; C; D; push under the
 standing push rules.
+
+MOB-R104 — R103 review: grant B and C stashes, deeper red for Over, ship both
+
+A. R103 report: accepted
+A1 Persistence: payload sha 171b67b2…36ff6d7a equals the issued sha (channel's message:
+   171b67b26920575fddca678c85e6f313214642012305151b7fe5402236ff6d7a). Strict 103, loose 105.
+   The issued sha travels in the operator's message with the file, never inside the block.
+   For R104: compare against the sha in his message; report "equal" or STOP.
+A2 D accepted at ac1c14e: 256 steps, 0 differing, control red in 12 of 12 cells; 605/141 met.
+A3 C1 cause accepted: jsx() under React 19 drops ReferenceLine's default yAxisId, so the
+   Recharts 2.15.4 check at DetectReferenceElementsDomain.js:23 never matched.
+A4 B miss on utils.test.ts:45 accepted with its cause (one argument, budget undefined, falls
+   through to red).
+
+B. Budget vs Spending: apply stash@{1} (patch b39c9600…6a114ebf)
+B1 Grant: utils.test.ts:34–47 and budget-chart.legend.test.tsx, as rewritten in the stash.
+B2 Operator selection, verbatim: "A: Deeper red for Over (Recommended)" (options were the
+   channel's). Close stays --color-warning, unchanged. Over becomes:
+   light #8E1B1B, dark #DC2626, on the bar and its legend swatch.
+   Before editing: grep every reader of the current Over colour source. If it has readers
+   outside the Budget vs Spending chart, add a chart token in chart-tokens.ts; no shared or
+   global token changes. List the readers in the report.
+B3 Channel's measured basis (sRGB; WCAG ratio; CIE76 ΔE; Machado 2009 deuteranopia, sev. 1):
+   light Close (178,75,31) vs #8E1B1B: ΔE 21.2, deuteranopia 18.3 (was 16.5 / 4.6);
+   dark Close (231,136,95) vs #DC2626: ΔE 40.1, deuteranopia 19.7 (was 14.0 / 6.4);
+   #8E1B1B vs #F5F2EC 8.09, vs #FFFFFF 9.04; #DC2626 vs rgb(23,20,18) 3.80, vs #221E1B 3.43.
+B4 Re-run the contrast instrument (same 324-pair grid): 0 pairs below 3:1. Report the
+   rendered rgb of Close and Over in light, dark, and dark after a toggle; the channel
+   recomputes ΔE. Any pair below 3:1 = STOP.
+B5 Report only, no change: what getBudgetUtilizationFill returns for budget undefined, null
+   and 0, each with spent 0 and spent > 0. Cite file:line.
+
+C. Income vs Expenses: apply stash@{0} (patch 366f8503…d4e577)
+C1 Grant: income-expenses-chart.test.tsx:154, :155, :159, :160 as rewritten in the stash,
+   plus that test's title line, to drop "solid-line" and name what it checks (list the line).
+C2 Ruled: legend words in muted ink with the brass swatch (Look A: brass never as text in
+   light mode; matches R82 C6). Ruled: caption with no income set reads "The dashed line is
+   your average monthly spending." (RM-26: provisional).
+C3 The income line sitting on the top tick (1,200) is accepted as is. No headroom change.
+
+D. Order, counts, ship
+D1 Verify each stash's patch sha before applying. Apply C, then B, then B2. A conflict
+   between them = STOP, nothing committed.
+D2 Predict before each step, with sign, from FE: C +3 tests +2 files; B +3 tests +0 files;
+   B2 delta predicted by CC from the files it reads. Stated target before B2: 611/143.
+D3 One commit per item (C, B, B2). tsc exit 0; Errors check 0; last two runner lines verbatim.
+D4 Deploy; CI read with gh run view; probes /healthz and /readyz on the new sha, inside and
+   outside the sandbox. End state: 0 unpushed, stashes 0, migrations 8, apps/api 0 lines.
+
+E. Queue
+E1 IncomePage.tsx on the dead-code list (accepted from the R103 report).
+E2 After this ships, the operator starts logging real money on the clean account. Small
+   issues from real use come next, one block each.
