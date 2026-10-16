@@ -50,7 +50,8 @@ export const CHART_FILLS = {
   // over it, and spending in a category with no budget.
   spentOnTrack: "var(--color-success)",
   spentClose: "var(--color-warning)",
-  spentOver: "var(--color-destructive)",
+  // MOB-R104 B2 — its own chart token (index.css), not --color-destructive, which the rest of the app reads.
+  spentOver: "var(--color-chart-over)",
   noBudget: "var(--color-muted-foreground)",
 } as const
 

@@ -46,7 +46,7 @@ describe("getBudgetUtilizationFill", () => {
   })
 
   it("is red one fil over the budget (spent 100.001 of 100.000)", () => {
-    expect(getBudgetUtilizationFill(100001, 100000)).toBe("var(--color-destructive)")
+    expect(getBudgetUtilizationFill(100001, 100000)).toBe("var(--color-chart-over)")
   })
 
   it("is grey with no budget (spent 5.000)", () => {

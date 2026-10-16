@@ -56,13 +56,13 @@ describe("MOB-R103 B2 — BudgetChart legend", () => {
       ["Budget", BUDGET],
       ["On track", "var(--color-success)"],
       ["Close", "var(--color-warning)"],
-      ["Over", "var(--color-destructive)"],
+      ["Over", "var(--color-chart-over)"],
     ])
     // Under 90% (Groceries) on "On track", at the budget (Transport) on "Close", over it (Dining) on "Over".
     expect(screen.getAllByTestId("cell").map((c) => c.getAttribute("data-fill"))).toEqual([
       "var(--color-success)",
       "var(--color-warning)",
-      "var(--color-destructive)",
+      "var(--color-chart-over)",
     ])
   })
 
