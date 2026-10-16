@@ -52,4 +52,17 @@ describe("getBudgetUtilizationFill", () => {
   it("is grey with no budget (spent 5.000)", () => {
     expect(getBudgetUtilizationFill(5000, null)).toBe("var(--color-muted-foreground)")
   })
+
+  // MOB-R105 C1 — undefined, null and a budget of 0 or less are all "no budget": grey, whatever is spent.
+  it("is grey for a missing, null or zero budget, with spent 0 and 5.000", () => {
+    for (const budget of [undefined, null, 0]) {
+      for (const spent of [0, 5000]) {
+        expect([budget, spent, getBudgetUtilizationFill(spent, budget)]).toEqual([
+          budget,
+          spent,
+          "var(--color-muted-foreground)",
+        ])
+      }
+    }
+  })
 })

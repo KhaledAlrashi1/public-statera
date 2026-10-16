@@ -35,10 +35,10 @@ vi.mock("@/lib/recharts", async () => {
     // Rendering it as a Leaf made the D4 assertion non-discriminating: the first attempt asserted
     // the peak month instead, which is 2026-03 with or without the fix. Captured so the average
     // itself can be asserted.
-    // MOB-R36/R37 — two ReferenceLines now: the dashed expense average and the solid typed-income
-    // line. Rendering both as "avg-line" would make them one testid — an instrument sharing a
-    // mechanism with what it measures — so the mock tells them apart by the className the
-    // component sets on the income line.
+    // MOB-R36/R37 — two ReferenceLines now: the dashed average monthly spending and the flat income
+    // line labelled "Your income". Rendering both as "avg-line" would make them one testid — an
+    // instrument sharing a mechanism with what it measures — so the mock tells them apart by the
+    // className the component sets on the income line.
     ReferenceLine: ({ y, className }: { y?: number; className?: string }) =>
       React.createElement(
         "div",
@@ -146,7 +146,7 @@ describe("MOB-R36 — IncomeExpensesChart typed-income reference line", () => {
   // MOB-R38 (1) / MOB-R40 F4(b) — #12. The second sentence names the income line, which is drawn
   // only when the income is set. Substring matchers, because the sentences share their <p> with
   // the peak-month text. The dashed-line sentence is asserted PRESENT in the null case, so the
-  // absence of the solid-line sentence cannot be satisfied by a paragraph that never rendered.
+  // absence of the flat-line sentence cannot be satisfied by a paragraph that never rendered.
   it("#12 — the flat-line sentence renders only when the income is set", () => {
     const { unmount } = render(
       <IncomeExpensesChart isLoading={false} trendData={TYPED_FIXTURE} typedIncome={1000} />

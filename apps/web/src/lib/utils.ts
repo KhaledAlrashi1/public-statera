@@ -129,9 +129,10 @@ export function getBudgetUtilizationTone(percent: number): {
 // MOB-R103 B1 — the one rule for Budget vs Spending's spent bars, in integer fils (1 KD = 1000 fils),
 // no floats: no budget is grey; under 90% of the budget is green; from 90% up to the budget is amber;
 // over it is red. 90% is the budget alert threshold (apps/api env.ts:116). The chart's legend takes
-// the same fills (budget/sections.tsx).
-export function getBudgetUtilizationFill(spentFils: number, budgetFils: number | null): string {
-  if (budgetFils === null) return CHART_FILLS.noBudget
+// the same fills (budget/sections.tsx). MOB-R105 C1 — a budget that is undefined, null, or 0 or less
+// is no budget: grey, whatever is spent.
+export function getBudgetUtilizationFill(spentFils: number, budgetFils: number | null | undefined): string {
+  if (budgetFils === undefined || budgetFils === null || budgetFils <= 0) return CHART_FILLS.noBudget
   if (spentFils * 10 < budgetFils * 9) return CHART_FILLS.spentOnTrack
   if (spentFils <= budgetFils) return CHART_FILLS.spentClose
   return CHART_FILLS.spentOver
