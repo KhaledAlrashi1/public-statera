@@ -12,6 +12,7 @@ import {
   Legend,
 } from "@/lib/recharts"
 import { CHART_CURSOR, CHART_FILLS } from "@/lib/chart-tokens"
+import { kdToFils } from "@/lib/budget-fill"
 
 import {
   chartTooltipItemStyle,
@@ -351,12 +352,23 @@ export function IncomePlanningCard({
 
 // MOB-R102 C3 — the legend names what the colours mean, each with its own swatch. The spent bars are
 // coloured per row by getBudgetUtilizationFill, so the series has no one colour: Recharts drew its
-// swatch black. The fills here are the ones that helper returns.
+// swatch black. The fills here are the ones that helper returns. MOB-R103 B2 — four states, and
+// "No budget" is listed only when such a bar is drawn.
 const BUDGET_CHART_LEGEND = [
   { value: "Budget", type: "square", id: "budget", color: CHART_FILLS.budget },
-  { value: "On or under", type: "square", id: "on-or-under", color: CHART_FILLS.spentOnOrUnder },
+  { value: "On track", type: "square", id: "on-track", color: CHART_FILLS.spentOnTrack },
+  { value: "Close", type: "square", id: "close", color: CHART_FILLS.spentClose },
   { value: "Over", type: "square", id: "over", color: CHART_FILLS.spentOver },
 ] as const
+const BUDGET_CHART_LEGEND_NO_BUDGET = { value: "No budget", type: "square", id: "no-budget", color: CHART_FILLS.noBudget } as const
+
+// MOB-R103 B1 — the chart's amounts arrive as numbers (R7's spent_by_category, roundedKd; a budget's
+// amount_kd through parseFloat at BudgetPage.tsx:224), each a 3-decimal KD value. toFixed(3) gives back
+// that decimal exactly and kdToFils reads it as integer fils, so the colour rule compares integers.
+// A budget of 0 is no budget (the comment in BudgetChart below).
+function chartFils(kd: number): number {
+  return kdToFils(Number.isFinite(kd) ? kd.toFixed(3) : "0") ?? 0
+}
 
 export function BudgetChart({
   data,
@@ -386,6 +398,12 @@ export function BudgetChart({
         ? `${widestGap.category} is ${kdNoBreak(Math.abs(widestGap.delta))} under plan, leaving the most headroom.`
         : `${widestGap.category} is tracking right on plan in the current view.`
     : "Compare planned and actual spending across the categories taking the biggest share this month."
+  const spentFills = data.map((row) =>
+    getBudgetUtilizationFill(chartFils(row.spent), row.budget === 0 ? null : chartFils(row.budget)),
+  )
+  const legendPayload = data.some((row) => row.budget === 0 && chartFils(row.spent) > 0)
+    ? [...BUDGET_CHART_LEGEND, BUDGET_CHART_LEGEND_NO_BUDGET]
+    : [...BUDGET_CHART_LEGEND]
 
   return (
     <section className="section-panel float-in stagger-2">
@@ -430,7 +448,7 @@ export function BudgetChart({
                 <Legend
                   verticalAlign="bottom"
                   height={36}
-                  payload={[...BUDGET_CHART_LEGEND]}
+                  payload={legendPayload}
                   formatter={(value) => <span className="text-muted-foreground">{value}</span>}
                 />
                 <Bar
@@ -444,10 +462,10 @@ export function BudgetChart({
                   name="Spent"
                   radius={[6, 6, 0, 0]}
                 >
-                  {data.map((row) => (
+                  {data.map((row, i) => (
                     <Cell
                       key={`spent-${row.category}`}
-                      fill={getBudgetUtilizationFill(row.pct)}
+                      fill={spentFills[i]}
                     />
                   ))}
                 </Bar>

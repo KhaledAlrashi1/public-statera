@@ -31,17 +31,25 @@ describe("utils", () => {
   })
 })
 
-// MOB-R102 C3 — Budget vs Spending's spent bars: at or under the budget is green, over it is red.
+// MOB-R103 B1 — Budget vs Spending's spent bars, in integer fils, budget 100.000 KD = 100000 fils.
 describe("getBudgetUtilizationFill", () => {
-  it("is green under the budget (spent 70 of 100)", () => {
-    expect(getBudgetUtilizationFill(70)).toBe("var(--color-success)")
+  it("is green under 90% (spent 89.999 of 100.000)", () => {
+    expect(getBudgetUtilizationFill(89999, 100000)).toBe("var(--color-success)")
   })
 
-  it("is green exactly at the budget (spent 100 of 100)", () => {
-    expect(getBudgetUtilizationFill(100)).toBe("var(--color-success)")
+  it("is amber at 90% (spent 90.000 of 100.000)", () => {
+    expect(getBudgetUtilizationFill(90000, 100000)).toBe("var(--color-warning)")
   })
 
-  it("is red over the budget (spent 100.5 of 100)", () => {
-    expect(getBudgetUtilizationFill(100.5)).toBe("var(--color-destructive)")
+  it("is amber exactly at the budget (spent 100.000 of 100.000)", () => {
+    expect(getBudgetUtilizationFill(100000, 100000)).toBe("var(--color-warning)")
+  })
+
+  it("is red one fil over the budget (spent 100.001 of 100.000)", () => {
+    expect(getBudgetUtilizationFill(100001, 100000)).toBe("var(--color-destructive)")
+  })
+
+  it("is grey with no budget (spent 5.000)", () => {
+    expect(getBudgetUtilizationFill(5000, null)).toBe("var(--color-muted-foreground)")
   })
 })

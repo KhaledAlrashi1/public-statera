@@ -46,9 +46,12 @@ export const CHART_STROKES = {
 export const CHART_FILLS = {
   budget: "var(--color-chart-budget, var(--color-chart-4, var(--color-primary)))",
   spent: "var(--color-chart-expense, var(--color-primary))",
-  // MOB-R102 C3 — Budget vs Spending: spent at or under its budget, and over it.
-  spentOnOrUnder: "var(--color-success)",
+  // MOB-R103 B — Budget vs Spending's spent bars: under 90% of the budget, from 90% up to the budget,
+  // over it, and spending in a category with no budget.
+  spentOnTrack: "var(--color-success)",
+  spentClose: "var(--color-warning)",
   spentOver: "var(--color-destructive)",
+  noBudget: "var(--color-muted-foreground)",
 } as const
 
 // MOB-R102 C2 — the hover cursor. Recharts' default is a #ccc literal (1.56:1 on the light card, a
