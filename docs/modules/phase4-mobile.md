@@ -13658,3 +13658,61 @@ E. Queue
 E1 IncomePage.tsx on the dead-code list (accepted from the R103 report).
 E2 After this ships, the operator starts logging real money on the clean account. Small
    issues from real use come next, one block each.
+
+MOB-R105 — persist R104, ship B2, close the helper's odd budgets, three desktop fixes
+
+A. Persistence, R104 then R105, each alone
+A1 R104 first: issued sha 42b0ed52e53fef35cc5621c7dad32c71f161cc862e29cf94ff18aca24007ad58
+   (now in the operator's message; it equals the payload sha CC reported). Blank 13608,
+   R104 at 13609–13660. Then R105: blank 13661, from 13662. After both: strict 105, loose 107.
+A2 Standing: a missing or unequal issued sha stops the whole block, not only persistence.
+   R104 was acted on before it was persisted; recorded, not chased.
+A3 R104 report accepted: C 78bb608 (608/143), B ea54080 (611/143), B5 table, B4 contrast.
+   Channel recomputed: CC's rendered Close/Over rgb equal the R104 B3 values; both light
+   ratios imply one card luminance (0.972), so the readings agree.
+
+B. B2: deeper red for Over
+B1 Grant: utils.test.ts:49, budget-chart.legend.test.tsx:59 and :65, as rewritten in the
+   stash (patch b83ef87d…a404b708bc8). Verify the patch sha before applying; 611/143, +0/+0.
+B2 --color-chart-over (#8e1b1b light, #dc2626 dark) ruled as built; no shared token changes.
+
+C. Colour helper: odd budgets (utils.ts:133–138)
+C1 Budget undefined, null, or <= 0 means no budget: grey, whatever is spent. Today undefined
+   gives red and 0 gives amber or red (R104 B5 table).
+C2 Readers by grep first; tests that pin the old cases listed before the edit. One test
+   covers the table: undefined, null, 0, each with spent 0 and 5.000. Predict the count.
+C3 Comments at income-expenses-chart.test.tsx:38 and :149 may be rewritten to name what is
+   drawn; quote before and after.
+
+D. Income and payday dialog
+Operator selections, verbatim (options were the channel's): "A: Big amount, live month
+(Recommended)"; "A: Soft band (Recommended)"; "A: Centred dialog (Recommended)". His words:
+"We can do better than that"; "rectangle surrounds the bar which is not nice"; "improve that
+while keeping things as they are mobile version".
+D0 Locate first (file:line): the dialog, amount field, echo line, payday select, focus-ring
+   rule, and the source of the green text-selection colour.
+D1 Amount: one field showing the grouped value in Space Grotesk at the Log amount's size;
+   "KD" as a muted prefix; one brass focus ring, no double border; echo line removed.
+   Same normalizer (RM-27); what is saved does not change.
+D2 Payday: a Look A field (no native grey gradient), label "<n>th of each month". The hint
+   names the period from the Kuwait clock (RM-28) and follows the selection before Save.
+   Example, payday 25 on Fri 16 Oct 2026: "This month runs 25 Sep to 24 Oct." Reuse the
+   existing period helper (grep its readers); paydays 29–31 follow it, unchanged.
+D3 Strings provisional (RM-26). Phone and desktop alike.
+
+E. Chart hover: Expenses by Category and Budget vs Spending
+E1 Locate the outline's source on both charts (file:line). Replace it with a soft band:
+   fill only, no stroke; muted-ink tint about 6% in light, with a dark pair.
+E2 Measured: band visible in both themes; every bar keeps >= 3:1 over the band.
+E3 Tooltip "Amount : " becomes "Amount: " where the separator is Recharts' default.
+
+F. Desktop expense logging
+F1 Locate the breakpoint and container that make New expense full-screen on desktop.
+F2 Desktop width only: the same Log form in a centred dialog over a dimmed page, sized like
+   the Income dialog; Escape and the close button dismiss; focus stays inside.
+F3 Phone unchanged: 0 px movement at 390, both engines. No scroll at 1280x800 and 1440x900.
+
+G. Order and ship
+G1 B, C, D, E, F; one commit each; FE counts predicted with sign before each.
+G2 New breaks in existing tests: stash and list them; the next block grants.
+G3 Deploy; CI by gh run view; probes inside and outside on the new sha. Stashes 0.
