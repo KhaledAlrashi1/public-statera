@@ -22,7 +22,7 @@
 // selection) calls the existing DELETE only with the id this page's own most recent create
 // returned. After a save or an undo every query is invalidated (MOB-R55 G3).
 // Test stats are local only: sessionStorage, shown at /log?stats=1, never sent anywhere.
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type Ref } from "react"
+import { useContext, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type Ref } from "react"
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { CalendarDays, Check, Delete, Plus, X } from "lucide-react"
@@ -33,6 +33,8 @@ import { SplitTransactionDialog } from "./transactions/dialogs"
 import { cn, formatDisplayDate, formatKD, kuwaitNow } from "@/lib/utils"
 import { normalizeAmount, pressDecimal, pressDelete, pressDigit } from "@/lib/log-amount"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { LogDialogContext } from "@/lib/log-dialog"
 import { Input } from "@/components/ui/input"
 import type { LogSuggestionItem, LogSuggestionPlace } from "@/types/api"
 import { GENERIC_SAVINGS_CATEGORY } from "@/lib/suggested-names"
@@ -222,10 +224,12 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
   // (new or edit) starts at the top and left edge, before the first paint.
   // MOB-R91 B2 — the frame scrolls now, not the document; both go to the top.
   const frameRef = useRef<HTMLDivElement>(null)
+  // MOB-R105 F2 — as a dialog the page behind stays where she left it.
+  const asDialog = useContext(LogDialogContext)
   useLayoutEffect(() => {
-    window.scrollTo(0, 0)
+    if (!asDialog) window.scrollTo(0, 0)
     if (frameRef.current) frameRef.current.scrollTop = 0
-  }, [])
+  }, [asDialog])
 
   const [today] = useState(() => kuwaitNow())
   const todayIso = localIso(today)
@@ -1116,6 +1120,26 @@ function Frame({
   /** MOB-R91 B2 — the scrolling box, for scroll-to-top and revealing a focused field. */
   frameRef?: Ref<HTMLDivElement>
 }) {
+  // MOB-R105 F2 — at desktop width, opened from inside the app, the same form in a centred dialog over the dimmed
+  // page she was on (lib/log-dialog), sized like the Income dialog (max-w-md, 90vh). Escape and the dialog's close
+  // button go back, as Back does; the dialog keeps focus inside. No safe-area padding or keyboard spacer: those
+  // are the phone's. The phone's full-screen frame below is unchanged.
+  const asDialog = useContext(LogDialogContext)
+  if (asDialog) {
+    return (
+      <Dialog open onOpenChange={(open) => { if (!open) onBack() }}>
+        <DialogContent ref={frameRef} data-log-frame="" aria-describedby={undefined} className="max-w-md overscroll-contain bg-background">
+          <div className="flex flex-col gap-4">
+            <header className="min-w-0 pe-8">
+              <DialogTitle className="text-xl leading-normal tracking-normal">{title}</DialogTitle>
+              {subtitle ? <p className="text-sm text-muted-foreground">{subtitle}</p> : null}
+            </header>
+            {children}
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
+  }
   return (
     // MOB-R91 B2 — the frame is the visible height (h-visible: 100dvh, 100vh fallback) and scrolls inside itself;
     // the document never scrolls. Opened from the Home Screen, 100vh is the whole screen (844) while 797 shows, so

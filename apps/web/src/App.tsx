@@ -1,5 +1,5 @@
 import React, { Suspense, useState } from "react"
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -10,6 +10,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import { SafeTopStrip } from "@/components/layout/SafeTopStrip"
 import { reportError } from "@/lib/error-reporter"
 import { DEMO_BASE, isDemoMode } from "@/lib/demo/mode"
+import { LogDialogContext, useLogBackground } from "@/lib/log-dialog"
 
 function makeQueryClient() {
   return new QueryClient({
@@ -163,52 +164,66 @@ function RouteFallback() {
 }
 
 function AppRoutes() {
+  const location = useLocation()
+  // MOB-R105 F2 — at desktop width, New expense is a dialog over the page she was on (lib/log-dialog).
+  const background = useLogBackground()
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/auth/2fa-verify" element={<TwoFactorVerifyPage />} />
-      {/* Magic-link landing (10e-4). The clicker has NO session at mount — the page's
-          own POST creates it — so this is deliberately OUTSIDE ProtectedRoute, as
-          /auth/2fa-verify above is, for the same reason. */}
-      <Route path="/auth/magic" element={<MagicLinkPage />} />
-      {/* Standalone (post-reauth, no session) — the delete-reauth OIDC flow redirects
-          here with a statera_delete_intent cookie; deliberately OUTSIDE ProtectedRoute. */}
-      <Route path="/delete-account/confirm" element={<DeleteAccountConfirmPage />} />
-      {/* Public (pre-auth) legal pages — reachable with no session. */}
-      <Route path="/privacy" element={<PrivacyPolicyPage />} />
-      <Route path="/terms" element={<TermsPage />} />
-      <Route element={<ProtectedRoute />}>
-        <Route path="/welcome" element={<WorkspaceChoicePage />} />
-        {/* MOB-R53 B2 — inside ProtectedRoute, OUTSIDE AppShell: no FAB or tabs over the keypad. */}
-        <Route path="/log" element={<LogPage />} />
-        <Route element={<AppShell />}>
-          <Route index element={<DashboardPage />} />
-          <Route path="home" element={<Navigate to="/" replace />} />
-          <Route path="activity" element={<TransactionsPage />} />
-          <Route path="plan" element={<BudgetPage />} />
-          <Route path="insights" element={<InsightsPage />} />
-          <Route
-            path="transactions"
-            element={<Navigate to="/activity?type=all" replace />}
-          />
-          <Route
-            path="expenses"
-            element={<Navigate to="/activity?type=expense" replace />}
-          />
-          <Route
-            path="income"
-            element={<Navigate to="/activity?type=income" replace />} // MOB-R75 P5: the row-derived Income page is retired
-          />
-          <Route
-            path="budget"
-            element={<Navigate to="/plan" replace />}
-          />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="*" element={<NotFoundPage />} />
+    <>
+      <Routes location={background ?? location}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth/2fa-verify" element={<TwoFactorVerifyPage />} />
+        {/* Magic-link landing (10e-4). The clicker has NO session at mount — the page's
+            own POST creates it — so this is deliberately OUTSIDE ProtectedRoute, as
+            /auth/2fa-verify above is, for the same reason. */}
+        <Route path="/auth/magic" element={<MagicLinkPage />} />
+        {/* Standalone (post-reauth, no session) — the delete-reauth OIDC flow redirects
+            here with a statera_delete_intent cookie; deliberately OUTSIDE ProtectedRoute. */}
+        <Route path="/delete-account/confirm" element={<DeleteAccountConfirmPage />} />
+        {/* Public (pre-auth) legal pages — reachable with no session. */}
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/welcome" element={<WorkspaceChoicePage />} />
+          {/* MOB-R53 B2 — inside ProtectedRoute, OUTSIDE AppShell: no FAB or tabs over the keypad. */}
+          <Route path="/log" element={<LogPage />} />
+          <Route element={<AppShell />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="home" element={<Navigate to="/" replace />} />
+            <Route path="activity" element={<TransactionsPage />} />
+            <Route path="plan" element={<BudgetPage />} />
+            <Route path="insights" element={<InsightsPage />} />
+            <Route
+              path="transactions"
+              element={<Navigate to="/activity?type=all" replace />}
+            />
+            <Route
+              path="expenses"
+              element={<Navigate to="/activity?type=expense" replace />}
+            />
+            <Route
+              path="income"
+              element={<Navigate to="/activity?type=income" replace />} // MOB-R75 P5: the row-derived Income page is retired
+            />
+            <Route
+              path="budget"
+              element={<Navigate to="/plan" replace />}
+            />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
         </Route>
-      </Route>
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+      {background ? (
+        <LogDialogContext.Provider value={true}>
+          <Routes>
+            <Route element={<ProtectedRoute />}>
+              <Route path="/log" element={<LogPage />} />
+            </Route>
+          </Routes>
+        </LogDialogContext.Provider>
+      ) : null}
+    </>
   )
 }
 
@@ -216,17 +231,28 @@ function AppRoutes() {
 // screens' own links stay in the demo). Home, Activity, Plan and Insights in the shell; /log without it, as in
 // the app. Any other path (Profile included) goes to the demo's Home.
 function DemoRoutes() {
+  const location = useLocation()
+  const background = useLogBackground()
   return (
-    <Routes>
-      <Route path="/log" element={<LogPage />} />
-      <Route element={<AppShell />}>
-        <Route index element={<DashboardPage />} />
-        <Route path="activity" element={<TransactionsPage />} />
-        <Route path="plan" element={<BudgetPage />} />
-        <Route path="insights" element={<InsightsPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Route>
-    </Routes>
+    <>
+      <Routes location={background ?? location}>
+        <Route path="/log" element={<LogPage />} />
+        <Route element={<AppShell />}>
+          <Route index element={<DashboardPage />} />
+          <Route path="activity" element={<TransactionsPage />} />
+          <Route path="plan" element={<BudgetPage />} />
+          <Route path="insights" element={<InsightsPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+      {background ? (
+        <LogDialogContext.Provider value={true}>
+          <Routes>
+            <Route path="/log" element={<LogPage />} />
+          </Routes>
+        </LogDialogContext.Provider>
+      ) : null}
+    </>
   )
 }
 
