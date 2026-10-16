@@ -1179,6 +1179,8 @@ export function IncomeExpensesChart({
                     contentStyle={chartTooltipStyle}
                     itemStyle={chartTooltipItemStyle}
                     cursor={CHART_CURSOR.line}
+                    // MOB-R103 D1 — no slide: Recharts moves the box with a 400 ms transform transition by default.
+                    isAnimationActive={false}
                   />
                   <Legend
                     verticalAlign="bottom"
@@ -1301,6 +1303,8 @@ export function CategoryBreakdownChart({
                     contentStyle={chartTooltipStyle}
                     itemStyle={chartTooltipItemStyle}
                     cursor={CHART_CURSOR.bar}
+                    // MOB-R103 D1 — no slide: Recharts moves the box with a 400 ms transform transition by default.
+                    isAnimationActive={false}
                   />
                 </BarChart>
               </ResponsiveContainer>

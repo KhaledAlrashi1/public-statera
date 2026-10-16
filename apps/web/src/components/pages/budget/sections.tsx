@@ -423,6 +423,8 @@ export function BudgetChart({
                   contentStyle={chartTooltipStyle}
                   itemStyle={chartTooltipItemStyle}
                   cursor={CHART_CURSOR.bar}
+                  // MOB-R103 D1 — no slide: Recharts moves the box with a 400 ms transform transition by default.
+                  isAnimationActive={false}
                 />
                 {/* MOB-R82 C6 — the legend's words in muted ink; its swatch keeps the series colour (brass stays in the marks). */}
                 <Legend
