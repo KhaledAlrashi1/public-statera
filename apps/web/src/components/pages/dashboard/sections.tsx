@@ -1123,6 +1123,19 @@ export function IncomeExpensesChart({
   // An empty window keeps the existing fallback even when income is not set (MOB-R37, a channel
   // ruling): asking for expenses first is the more useful instruction. The not-set caption (#10)
   // applies only when there is data.
+  // MOB-R103 C3 — the line starts at the first period with any expense or income (the window is 12 at
+  // most, DashboardPage.tsx:310). The leading periods dropped are empty (both zero), and the average
+  // above never counted them: monthsWithData keeps only periods with expenses.
+  const firstWithData = trendData.findIndex((row) => row.expenses !== 0 || row.income !== 0)
+  const drawnData = firstWithData > 0 ? trendData.slice(firstWithData) : trendData
+  // MOB-R103 C2 — the legend names what is drawn: the income line only when the income is set.
+  const legendPayload = [
+    ...(typedIncome !== null
+      ? [{ value: "Income", type: "plainline" as const, id: "income", color: CHART_STROKES.income, payload: { strokeDasharray: "0" } }]
+      : []),
+    { value: "Expenses", type: "line" as const, id: "expenses", color: CHART_STROKES.expense },
+    { value: "Average", type: "plainline" as const, id: "average", color: "var(--color-muted-foreground)", payload: { strokeDasharray: "4 4" } },
+  ]
   const insightCaption = monthsWithData.length === 0
     ? "Compare how income and expenses move together across recent months."
     : typedIncome === null
@@ -1152,12 +1165,18 @@ export function IncomeExpensesChart({
           <>
             <div className="h-[240px] sm:h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={trendData}>
+                <LineChart data={drawnData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" strokeOpacity={0.4} />
                   <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(m: string) => periodTick(getPayday(), m) ?? formatMonthYear(m)} />
                   <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v: number) => formatCompactKD(v)} />
-                  {/* MOB-R102 C2 — full opacity: at 0.5 the average line was 2.08:1 (light) and 2.92:1 (dark). */}
+                  {/* MOB-R102 C2 — full opacity: at 0.5 the average line was 2.08:1 (light) and 2.92:1 (dark).
+                      MOB-R103 C2 — yAxisId is written out on both lines. Recharts widens the y axis for an
+                      ifOverflow="extendDomain" line only when el.props.yAxisId equals the axis id
+                      (DetectReferenceElementsDomain.js:23); React 19's jsx() leaves a class component's
+                      defaultProps off element.props, so the default 0 never got there and an income above
+                      every period's spend was drawn above the plot. */}
                   <ReferenceLine
+                    yAxisId={0}
                     y={expenseAverage}
                     stroke="var(--color-muted-foreground)"
                     strokeDasharray="4 4"
@@ -1165,6 +1184,7 @@ export function IncomeExpensesChart({
                   />
                   {typedIncome !== null ? (
                     <ReferenceLine
+                      yAxisId={0}
                       y={typedIncome}
                       className="income-reference-line"
                       stroke={CHART_STROKES.income}
@@ -1185,7 +1205,11 @@ export function IncomeExpensesChart({
                   <Legend
                     verticalAlign="bottom"
                     height={24}
+                    payload={legendPayload}
                     wrapperStyle={{ fontSize: 12, color: CHART_STROKES.legendText }}
+                    // MOB-R103 C2 — the words in muted ink, as on Budget vs Spending (MOB-R82 C6): in its series
+                    // colour "Income" was light brass, 3.53:1 on the card. The swatch keeps the series colour.
+                    formatter={(value) => <span className="text-muted-foreground">{value}</span>}
                   />
                   <Line
                     type="monotone"
@@ -1204,8 +1228,8 @@ export function IncomeExpensesChart({
                 {/* MOB-R36 #12. Its second sentence names the income line, which is only drawn when the
                     income is set; without it the sentence would be false, so it is omitted. */}
                 {typedIncome !== null
-                  ? "The dashed line shows your average monthly spending. The solid line is your monthly income."
-                  : "The dashed line shows your average monthly spending."}
+                  ? "The dashed line is your average monthly spending. The flat line is your monthly income."
+                  : "The dashed line is your average monthly spending."}
               </p>
             ) : null}
           </>

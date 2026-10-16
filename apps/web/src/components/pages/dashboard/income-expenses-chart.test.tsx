@@ -147,16 +147,16 @@ describe("MOB-R36 — IncomeExpensesChart typed-income reference line", () => {
   // only when the income is set. Substring matchers, because the sentences share their <p> with
   // the peak-month text. The dashed-line sentence is asserted PRESENT in the null case, so the
   // absence of the solid-line sentence cannot be satisfied by a paragraph that never rendered.
-  it("#12 — the solid-line sentence renders only when the income is set", () => {
+  it("#12 — the flat-line sentence renders only when the income is set", () => {
     const { unmount } = render(
       <IncomeExpensesChart isLoading={false} trendData={TYPED_FIXTURE} typedIncome={1000} />
     )
-    expect(screen.getByText(/The dashed line shows your average monthly spending\./)).toBeInTheDocument()
-    expect(screen.getByText(/The solid line is your monthly income\./)).toBeInTheDocument()
+    expect(screen.getByText(/The dashed line is your average monthly spending\./)).toBeInTheDocument()
+    expect(screen.getByText(/The flat line is your monthly income\./)).toBeInTheDocument()
     unmount()
 
     render(<IncomeExpensesChart isLoading={false} trendData={TYPED_FIXTURE} typedIncome={null} />)
-    expect(screen.getByText(/The dashed line shows your average monthly spending\./)).toBeInTheDocument()
-    expect(screen.queryByText(/The solid line is your monthly income\./)).not.toBeInTheDocument()
+    expect(screen.getByText(/The dashed line is your average monthly spending\./)).toBeInTheDocument()
+    expect(screen.queryByText(/The flat line is your monthly income\./)).not.toBeInTheDocument()
   })
 })
