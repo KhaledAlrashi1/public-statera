@@ -1324,6 +1324,8 @@ export function CategoryBreakdownChart({
                   </Bar>
                   <RechartsTooltip
                     formatter={(value: number) => [`KD ${value.toFixed(3)}`, "Amount"]}
+                    // MOB-R105 E3 — "Amount: KD …", not Recharts' default " : ".
+                    separator=": "
                     contentStyle={chartTooltipStyle}
                     itemStyle={chartTooltipItemStyle}
                     cursor={CHART_CURSOR.bar}

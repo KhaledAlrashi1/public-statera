@@ -56,9 +56,10 @@ export const CHART_FILLS = {
 } as const
 
 // MOB-R102 C2 — the hover cursor. Recharts' default is a #ccc literal (1.56:1 on the light card, a
-// glaring band on the dark one). An outline in muted ink marks the hovered column without covering
-// its bars; on the line chart it is a single line.
+// glaring band on the dark one). On the line chart it is a single line in muted ink. MOB-R105 E1 — on
+// the bar charts a soft band behind the hovered column, fill only, no stroke (index.css), in place of
+// R102's outline.
 export const CHART_CURSOR = {
-  bar: { fill: "transparent", stroke: "var(--color-muted-foreground)", strokeWidth: 1 },
+  bar: { fill: "var(--color-chart-cursor-band)", stroke: "none" },
   line: { stroke: "var(--color-muted-foreground)", strokeWidth: 1 },
 } as const

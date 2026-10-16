@@ -86,6 +86,8 @@
   --color-chart-expense: hsl(var(--primary));
   /* MOB-R104 B2 — Budget vs Spending's "Over": a deeper red than --color-destructive, apart from Close (rust). */
   --color-chart-over: #8e1b1b;
+  /* MOB-R105 E1 — the hover band behind a bar chart's column: muted ink at 6%, fill only (ΔL* 3.1 on the card). */
+  --color-chart-cursor-band: hsl(var(--text-muted) / 0.06);
   --color-chart-accent-1: hsl(var(--accent));
   --color-chart-accent-2: hsl(var(--info));
   --color-chart-accent-3: hsl(271 70% 64%);
@@ -215,6 +217,8 @@
   --color-success: hsl(var(--success));
   --color-warning: hsl(var(--warning));
   --color-chart-over: #dc2626; /* MOB-R104 B2 */
+  /* MOB-R105 E1 — the dark pair: 4.5% gives the same ΔL* on the dark card (about 3.2) as 6% does on the light one. */
+  --color-chart-cursor-band: hsl(var(--text-muted) / 0.045);
 }
 
 @layer base {

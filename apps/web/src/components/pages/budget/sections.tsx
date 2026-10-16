@@ -438,6 +438,8 @@ export function BudgetChart({
                 />
                 <RechartsTooltip
                   formatter={(value: number, name: string) => [`KD ${value.toFixed(3)}`, name]}
+                  // MOB-R105 E3 — "Spent: KD …", not Recharts' default " : ".
+                  separator=": "
                   contentStyle={chartTooltipStyle}
                   itemStyle={chartTooltipItemStyle}
                   cursor={CHART_CURSOR.bar}
