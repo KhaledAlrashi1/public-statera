@@ -13980,3 +13980,46 @@ E. Do not ship. Breaks in existing tests are measured, not fixed: list each file
 
 F. Persist R112 first, alone. Push that commit only; read CI with gh run view; probe /healthz
    and /readyz on the new sha inside and outside the sandbox; two failures outside = STOP.
+
+MOB-R113 — Income step 1: grant the measured breaks, check in a browser, ship (prod 587d9e9)
+
+A. R112 persisted as issued: 13939–13982, sha d94d16ed…cd8133e, commit 587d9e9, deploy run
+   39050539815 green, probes 200. Report accepted: D1–D8 as built, D7 bytes identical in both
+   captures, the mutation red on both sides, the prediction file written before the first edit.
+A1. Accepted readings: kind null or any other value = 400; extras in a new lib/income-extras.ts;
+    months-ahead compares each period with its own income (follows D4, operator choice A).
+A2. Miss recorded: API files predicted +1, measured +2 (the helper's own test file).
+
+B. Apply the stash. Patch sha must equal 5e3bcd8c…d63513e8 (1425 lines), else STOP.
+
+C. Grants, line by line, expectations only. A test may change what it expects; it may not
+   drop a case. Any production-code change beyond the patch = STOP.
+C1. Snapshot and cache v2 → v3: money-wire-shape.test.ts:837, :906, :1058;
+    analytics-cache-version.test.ts:67, :79; payday-months.test.ts:73;
+    dashboard-snapshot-lib.test.ts:126; dashboard-snapshot-version.test.ts:56;
+    dashboard-snapshot-tier.test.ts:184. Fixtures move to v3. One test must still prove a
+    stored v2 snapshot is refused and recomputed once: name it, file:line.
+C2. money-wire-shape.test.ts:927: regenerate the committed shape JSON. The diff may add only
+    monthly[].extras_kd. Report the diff.
+C3. money-wire-shape.test.ts:1027: 4 → 5 only if the 5th call site is the extras read. Name
+    it, file:line; otherwise STOP.
+C4. extras_kd key: dashboard-snapshot-savings.test.ts:37;
+    aggregation.savings.integration.test.ts:70; the fixture at dashboard-snapshot-lib.test.ts
+    :193 (TS2345).
+C5. Chart: income-expenses-chart.domain.test.tsx:45; income-expenses-chart.test.tsx:133, :155
+    move to the per-period line and its new sentence.
+C6. The stale yAxisId comment in sections.tsx: fix the comment only.
+C7. Add one FE test for the category_not_income message. Predict its count first.
+
+D. Browser check, demo engine, Chromium and WebKit, at 390 and 1280×800:
+D1. Log → Income → Bonus → KD 50.000 → Save. Report the request body.
+D2. Home period income and the Income vs Expenses line rise by exactly 50000 fils in that
+    period only; other periods unchanged. Compute with a tool.
+D3. Spent mode looks and saves as before; phone 0 px movement at 390 (R106 D3 method).
+D4. Screenshots of Log in Income mode at 390, light and dark, sent with the report.
+
+E. Counts: APIH, APII and FE each predicted before C, and reported from the runner with the
+   command named. API typecheck exits 0. APII is run locally (not in CI).
+
+F. Persist R113 first, alone. Then B–E. Push; read CI with gh run view; probe /healthz and
+   /readyz on the new sha inside and outside the sandbox; two failures outside = STOP.
