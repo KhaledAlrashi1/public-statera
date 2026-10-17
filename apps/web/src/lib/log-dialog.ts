@@ -1,11 +1,11 @@
 // MOB-R105 F2 — on a desktop-width screen, New expense opens as a centred dialog over the page she was on,
 // not as a full-screen page. Phones keep the full-screen /log, unchanged.
 //
-// The router remembers the last page that was not /log. At /log, on a desktop width, for a New expense (not
-// /log?edit=, which stays a page), opened from inside the app (not a /log typed or reloaded: React Router's
-// first location has the key "default"), the routes keep rendering that page and /log renders on top of it
-// inside LogDialogContext, where LogPage's frame becomes the dialog. The entry points still call
-// navigate("/log") exactly as before.
+// The router remembers the last page that was not /log. At /log, on a desktop width, for a New expense, or
+// for an edit (/log?edit=) opened from Activity (MOB-R106 D1), opened from inside the app (not a /log typed
+// or reloaded: React Router's first location has the key "default"), the routes keep rendering that page and
+// /log renders on top of it inside LogDialogContext, where LogPage's frame becomes the dialog. The entry
+// points still call navigate("/log") and navigate(`/log?edit=${id}`) exactly as before.
 import { createContext, useEffect, useRef, useState } from "react"
 import { useLocation, type Location } from "react-router-dom"
 
@@ -43,6 +43,10 @@ export function useLogBackground(): Location | null {
   useEffect(() => {
     if (!onLog) last.current = location
   }, [location, onLog])
-  const newExpense = !new URLSearchParams(location.search).has("edit")
-  return desktop && onLog && newExpense && location.key !== "default" ? last.current : null
+  // MOB-R106 D1 — an edit (/log?edit=) is a dialog too, but only over Activity: its row tap
+  // (TransactionsPage onEdit) is the one way into an edit. From anywhere else an edit stays a page.
+  const edit = new URLSearchParams(location.search).has("edit")
+  const behind = last.current
+  if (!desktop || !onLog || location.key === "default" || behind === null) return null
+  return edit && behind.pathname !== "/activity" ? null : behind
 }
