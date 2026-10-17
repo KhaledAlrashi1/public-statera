@@ -13716,3 +13716,44 @@ G. Order and ship
 G1 B, C, D, E, F; one commit each; FE counts predicted with sign before each.
 G2 New breaks in existing tests: stash and list them; the next block grants.
 G3 Deploy; CI by gh run view; probes inside and outside on the new sha. Stashes 0.
+
+MOB-R106 — R105 review: ship the income dialog, edit as a dialog on desktop
+
+A. Persistence and review
+A1 Blank 13719, R106 from 13720. After: strict 106, loose 108. The issued sha is in the
+   operator's message; missing or unequal stops the whole block.
+A2 R105 accepted: B 4b6169a, C 40e44ac, E a54b6ab, F 74d32d1; 614/144; probes 200 on 74d32d1.
+A3 Miss recorded: C's count was predicted after the edit. Standing: predict before the edit.
+A4 Reconcile: the helper's reader was cited at budget/sections.tsx:448 (R103) and :402
+   (R105), and :402 is also where a zero budget becomes null (R104). Quote the grep lines.
+
+B. Income dialog: apply the D stash (patch 424d5aa0…1957d48)
+B1 Grant: BudgetPage.test.tsx:205; IncomeQuickDialog.test.tsx:76;
+   IncomeQuickDialog.payday.test.tsx:2, :36, :40, :43, :44, as rewritten in the stash.
+B2 Verify the patch sha; it must apply cleanly on 74d32d1, else STOP. Predicted from 614/144:
+   +8 tests, +1 file, so 622/145.
+B3 Ruled as built: grouping as she types (only commas the box added move); no grouping on
+   comma-decimal locales; "Can't read this amount." kept; payday select at 16px.
+   The green selection is the system highlight colour: no change.
+
+C. Tooltip separator: Income vs Expenses
+C1 "Expenses : " (dashboard/sections.tsx:1196) and every other series label in that tooltip
+   read "<Name>: ". List the lines.
+
+D. Desktop logging follow-ups
+Operator selections, verbatim (options were the channel's): "Dialog too (Recommended)";
+"Keep the standard veil (Recommended)"; "Let it scroll (Recommended)".
+D1 At 1024px and wider, editing an expense from Activity opens the same dialog over
+   Activity; Escape and Close return with Activity's scroll kept. An edit URL opened
+   directly stays a full page. List every entry point that opens an edit (grep).
+D2 RM-21 guard: the container changes, the writes do not. Capture the save and delete
+   requests from the edit form before and after: same method, URL and body, byte for byte.
+   Any difference = STOP. Delete's confirm opens above the dialog; Escape closes only the
+   top layer.
+D3 Phone unchanged: 0 px movement at 390, both engines, both entry routes (new and edit).
+D4 Backdrop stays the standard veil. Six tiles at 1280x800 may scroll; Save stays in view.
+
+E. Order and ship
+E1 B, C, D1; one commit each; FE counts predicted with sign before each edit.
+E2 Breaks in existing tests: stash and list them; the next block grants.
+E3 Deploy; CI by gh run view; probes inside and outside on the new sha.
