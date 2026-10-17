@@ -13894,3 +13894,44 @@ B6. Partial refund: does a transaction have any link to another (a parent or sou
 
 E. Persist R110 first, alone. Push; read CI with gh run view; probe /healthz and /readyz on
    the new sha inside and outside the sandbox; two failures outside = STOP.
+
+MOB-R111 — Income and refunds: decisions, data check, plan (production 5bf8460)
+
+A. R110 persisted as issued: 13861–13896, sha 993fc480…d745c23a, commit 5bf8460, deploy run
+   39024449309 green, probes 200. Report accepted in full.
+
+B. Operator decisions, verbatim (all options were the channel's):
+B1. "A: Spent · Refund · Income (Recommended)"; "Less spending (Recommended)"; "Part of that
+    period's income (Recommended)"; "Salary stays in the Plan (Recommended)"; "Income first,
+    refund next (Recommended)".
+B2. R73 D is reversed by the operator's words: "So, adding income is now important. I would
+    like us to bring the add income thing even though I said I wanted the app to focus on
+    expenses."
+
+C. Data check, read-only. CC writes one command; the operator runs it on the server and pastes
+   the output back; CC never touches the DB. Per user id: count, sum and first and last date of
+   rows in income-kind categories (the payday-lib.ts:19–21 rule), and the count of rows with
+   amount_kd <= 0 (expected 0). No writes.
+
+D. Plan, report only. No edit, no migration.
+D1. Step 1, income (no migration). Contract, as the channel's (RM-26 for every string):
+    (a) Log gets "Spent · Income". Refund joins in step 2.
+    (b) Income mode: tiles Bonus, Commission, Other; no Salary tile; no places.
+    (c) It saves through POST /api/transactions into an income-kind category. Say how that
+        category is found or created so it is income by flag, not only by name.
+    (d) Period income = typed monthly income + logged income in that payday period, wherever
+        income is shown or used. List each reader by file:line, its change, and its tests.
+    (e) An expense save stays byte-identical before and after (R106 D2 method).
+    Report: the readers, the tests that break (measured, not guessed), and predicted counts.
+D2. Step 2, refund (migration; RM-21: backup first, CC STOPs before deploy). Report the exact
+    up and down SQL, the parseKd change, and every reader that needs an exception: the
+    category chart (no slice below 0), log-suggestions (refunds not counted, no negative
+    last_amount), Activity display, editing a refund keeps its sign, Split refused for a
+    refund. No refund_of_id link. The importer is unchanged: negatives stay excluded.
+
+E. Queue, unruled: the importer maps a Type column to category (Credit and Debit become
+   categories); R2 counts income as spend (no UI caller); /summary and /top-patterns use a
+   flag-only income rule (no UI caller); top-up of "Repeat in two taps" (R110 A4).
+
+F. Persist R111 first, alone. Push; read CI with gh run view; probe /healthz and /readyz on
+   the new sha inside and outside the sandbox; two failures outside = STOP.
