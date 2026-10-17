@@ -13935,3 +13935,48 @@ E. Queue, unruled: the importer maps a Type column to category (Credit and Debit
 
 F. Persist R111 first, alone. Push; read CI with gh run view; probe /healthz and /readyz on
    the new sha inside and outside the sandbox; two failures outside = STOP.
+
+MOB-R112 — Income step 1: build and measure, do not ship (production e28c3e2)
+
+A. R111 persisted as issued: 13898–13937, sha a9de9eb3…4ae449, commit e28c3e2, deploy run
+   39026069944 green, probes 200. Report accepted.
+A1. Channel error, recorded: R111 D said "no edit" and also "tests that break (measured)".
+    CC took the narrower reading. Correct.
+
+B. C output, run by the operator on statera-prod, Sat 17 Oct 2026 16:39:39 UTC: db
+   statera_prod; 61 transactions; chk_transactions_amount_positive = (`amount_kd` > 0) live.
+   Only user 3 has rows: 1 income row, KD 2.000, dated 2026-10-02; 0 rows at or below 0.
+   Users 1 and 2: 0 rows.
+
+C. Operator selections, verbatim (options were the channel's): "Only Bonus, Commission, Other
+   (Recommended)"; "A: Steps up with extras (Recommended)"; "Still ask for salary
+   (Recommended)".
+
+D. Build step 1, as R111 D1 and CC's plan, with these rules (RM-26 for every string):
+D1. POST /api/transactions takes optional kind: "income". Without kind: today's path, bytes
+    unchanged. With it: a found income category is used; a found non-income one returns 409
+    category_not_income and is never flipped; none found is inserted with isIncome true.
+    Tiles: Bonus → "Bonus", Commission → "Commission", Other → "Other income".
+D2. Extras = rows whose category is income by the payday-lib rule AND whose trimmed,
+    lower-cased name is "bonus", "commission" or "other income". One helper on the server and
+    one mirror in the demo engine; no other copy. Every other income row stays listed, not
+    counted, as today. Demo salary rows ("Income: Salary", "Salary") are not extras: test it.
+D3. Period income = typed monthly income + extras dated in that payday period. Readers: R9
+    (aggregation.ts:688), budgets profile_context (budgets.ts:76-96), Home
+    (DashboardPage.tsx:200-207; not total_income_mtd, which counts every income row),
+    Insights via R9, demo engine (engine.ts:306-308), same commit.
+D4. Income vs Expenses: the income line per period = typed + that period's extras.
+D5. No typed income: income_source stays declared_in_profile | not_set by typed income only.
+    Extras are listed and count only once income is typed. No enum change.
+D6. Log: "Spent · Income" switch on new entries only; Income mode shows the three tiles, no
+    places, no Salary tile. Edit mode unchanged.
+D7. An expense save is byte-identical before and after (R106 D2 method). Report the bytes.
+D8. Predict API and FE counts with their sign before the edit. Mutation: drop the name filter
+    in D2; a test must go red; restore.
+
+E. Do not ship. Breaks in existing tests are measured, not fixed: list each file:line with its
+   failure. Keep the whole change unpushed as one stash; report its patch sha256 and file
+   list. The next block grants test lines and rules the push.
+
+F. Persist R112 first, alone. Push that commit only; read CI with gh run view; probe /healthz
+   and /readyz on the new sha inside and outside the sandbox; two failures outside = STOP.
