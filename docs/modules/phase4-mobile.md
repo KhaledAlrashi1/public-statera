@@ -13820,3 +13820,40 @@ E1. Queue, no work now: CC reports the frontend tsconfig excludes test files, so
 E2. This block rules no code. Persist R108 alone, commit, push, read CI with gh run view. If a
     deploy runs, probe /healthz and /readyz on the new sha inside and outside the sandbox. Then
     wait for the next block.
+
+MOB-R109 — Quick picks from her own places (production 52ae844)
+
+A. R108 persisted as issued: 13795–13822, sha 7077fb4e…b9fa8b, commit 52ae844, deploy run
+   39022887053 green, probes 200. R107 re-hash reproduced. Accepted.
+
+B. Operator selection, verbatim: "Her places first (Recommended)" (option was the channel's).
+   "Popular in Kuwait" keeps six chips: her most-used places first, the fixed six fill the rest.
+
+B1. Report first, before any edit: where the six are defined; every reader by grep; the tests
+    that pin them; which fields a chip tap fills today, and how it treats a field she already
+    typed; what history the Log screen already has loaded, and from which request.
+B2. Rule, as the channel's (RM-26 for the heading string):
+    (a) Source: her own expense transactions dated within 90 calendar days including today,
+        Kuwait clock (RM-28). Income and empty merchants are not counted.
+    (b) Group by merchant, trimmed, case-insensitive. Show the spelling of her latest use.
+    (c) Rank by count, then latest date, then name A–Z.
+    (d) Top up with the fixed six in their current order, skipping any already shown
+        (case-insensitive), to six chips.
+    (e) Her chip fills the same fields a fixed chip fills today, with values from her latest
+        transaction at that place. A field she already typed is treated exactly as today.
+    (f) Heading: "Your places" when at least one chip is hers, else "Popular in Kuwait".
+    (g) While history loads, or if it fails: the fixed six, no new string.
+    (h) The demo builds its chips from demo data with no network request.
+B3. STOP and report, no fix, if B needs any apps/api change, a new request, or any write.
+B4. Writes unchanged: a fixed-chip log on an empty account sends a byte-identical POST before
+    and after (R106 D2 method). Report the bytes.
+B5. Tests: predict the count with its sign before the edit. Cover the empty account, the
+    ranking and its ties, the top-up and dedupe, case grouping, and the 90-day edge (compute
+    the edge dates with a tool). Mutation: drop the 90-day filter; a test must go red; restore.
+    Breaks in existing tests: stash and list, standing.
+B6. Phone at 390: the chip row keeps today's lines and overflow with the longest name in the
+    demo data. Report what a long name does today and after.
+
+E. Persist R109 first, alone. Then FE (pnpm --filter statera-frontend run test:unit) and
+   tsc --noEmit. Push; read CI with gh run view; probe /healthz and /readyz on the new sha
+   inside and outside the sandbox; two failures outside = STOP.
