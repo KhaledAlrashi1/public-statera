@@ -87,7 +87,8 @@ export function usePayday(): number | null {
 // the month name (these return null). Fixed short names: en-GB would write "Sept".
 const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const
 
-function dayMonth(date: string): string {
+/** "25 Sep": the day and short month of a date (YYYY-MM-DD). */
+export function dayMonth(date: string): string {
   return `${Number(date.slice(8, 10))} ${SHORT_MONTHS[Number(date.slice(5, 7)) - 1]}`
 }
 

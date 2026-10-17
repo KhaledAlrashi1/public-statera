@@ -75,3 +75,71 @@ export function formatAmountReadout(kd: string): string {
 
 /** The refusal line shown under a box whose text cannot be read as an amount (provisional). */
 export const AMOUNT_REFUSED_MESSAGE = "Can't read this amount."
+
+// ── MOB-R105 D1 — the grouped box ─────────────────────────────────────────────────────────────────────
+// A box that shows its whole part grouped while she types ("1500" -> "1,500"). Only the commas the box
+// put there itself are ever removed or moved: a comma she types or pastes stays exactly where she put it
+// and the normalizer above reads or refuses it (RM-27). On a device whose decimal separator is "," the
+// box does not group, since "1,500.000" would be read as two separators there.
+
+const PLAIN = /^[0-9]*(\.[0-9]*)?$/
+
+function groupPlain(s: string): string {
+  const dot = s.indexOf(".")
+  const whole = dot === -1 ? s : s.slice(0, dot)
+  return whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (dot === -1 ? "" : s.slice(dot))
+}
+
+/** True when this text is exactly what the box would write: plain digits with its own grouping. */
+export function isOwnGrouping(text: string): boolean {
+  const bare = text.replace(/,/g, "")
+  return PLAIN.test(bare) && groupPlain(bare) === text
+}
+
+/** "1500.000" -> "1,500.000" on a "." device; unchanged on a "," device. */
+export function groupedKd(kd: string, decimalSeparator: string = localeDecimalSeparator()): string {
+  return decimalSeparator === "." && PLAIN.test(kd) ? groupPlain(kd) : kd
+}
+
+/** What she inserted going from `prev` to `next` (the text between their common prefix and suffix). */
+function insertedText(prev: string, next: string): string {
+  let start = 0
+  while (start < prev.length && start < next.length && prev[start] === next[start]) start++
+  let end = 0
+  while (end < prev.length - start && end < next.length - start && prev[prev.length - 1 - end] === next[next.length - 1 - end]) end++
+  return next.slice(start, next.length - end)
+}
+
+/**
+ * The box's text after she edits it. `prev` is what the box showed and `prevOwned` says its commas were
+ * the box's own; `raw` is the text after her edit. Returns the text to show and whether its commas are
+ * the box's own.
+ */
+export function regroupTyped(
+  prev: string,
+  prevOwned: boolean,
+  raw: string,
+  decimalSeparator: string = localeDecimalSeparator(),
+): { text: string; owned: boolean } {
+  if (decimalSeparator !== ".") return { text: raw, owned: !raw.includes(",") }
+  // A comma she typed or pasted: kept where she put it.
+  if (insertedText(prev, raw).includes(",")) return { text: raw, owned: isOwnGrouping(raw) }
+  if (prevOwned || !raw.includes(",")) {
+    const bare = raw.replace(/,/g, "")
+    if (PLAIN.test(bare)) return { text: groupPlain(bare), owned: true }
+    return { text: raw, owned: true }
+  }
+  return { text: raw, owned: isOwnGrouping(raw) }
+}
+
+/** The caret in `text` after the same number of non-comma characters as `caret` had in `raw`. */
+export function caretAfterRegroup(raw: string, caret: number, text: string): number {
+  let kept = 0
+  for (let i = 0; i < caret && i < raw.length; i++) if (raw[i] !== ",") kept++
+  let i = 0
+  while (i < text.length && kept > 0) {
+    if (text[i] !== ",") kept--
+    i++
+  }
+  return i
+}

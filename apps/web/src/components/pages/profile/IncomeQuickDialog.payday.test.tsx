@@ -1,5 +1,5 @@
 // MOB-R91 C1 — "Income and payday": one sheet; income through the amount normalizer, optional; payday 1–31,
-// optional, the 1st reading "1st · calendar month". Save sends only the fields she changed; clearing an income
+// optional, each day reading "<n>th of each month". Save sends only the fields she changed; clearing an income
 // she had sends null; nothing changed sends nothing.
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
@@ -33,15 +33,19 @@ beforeEach(() => {
 })
 
 describe("Income and payday sheet (MOB-R91 C1)", () => {
-  it("shows the ruled strings; payday has 31 days and the 1st reads as the calendar month", () => {
+  it("shows the ruled strings; payday has 31 days, each read as '<n>th of each month'", () => {
     renderSheet({ initialValue: null, initialPayday: null })
     expect(screen.getByRole("heading", { name: "Income and payday" })).toBeInTheDocument()
     expect(screen.getByText("If it varies, use your average month.")).toBeInTheDocument()
-    expect(screen.getByText("Your month starts on this day.")).toBeInTheDocument()
+    expect(screen.getByText(/^This month runs \d{1,2} [A-Z][a-z]{2} to \d{1,2} [A-Z][a-z]{2}\.$/)).toBeInTheDocument()
     expect(screen.getByText("You can change these anytime in Profile.")).toBeInTheDocument()
     expect(payday().options).toHaveLength(31)
-    expect(payday().selectedOptions[0].textContent).toBe("1st · calendar month")
-    expect(Array.from(payday().options).map((o) => o.textContent).slice(1, 4)).toEqual(["2nd", "3rd", "4th"])
+    expect(payday().selectedOptions[0].textContent).toBe("1st of each month")
+    expect(Array.from(payday().options).map((o) => o.textContent).slice(1, 4)).toEqual([
+      "2nd of each month",
+      "3rd of each month",
+      "4th of each month",
+    ])
     expect(paydayLabel(21)).toBe("21st")
     expect(paydayLabel(12)).toBe("12th")
   })

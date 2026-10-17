@@ -73,6 +73,6 @@ describe("IncomeQuickDialog", () => {
 
   it("prefills the current income for Edit income", () => {
     renderDialog("1500.000")
-    expect((screen.getByLabelText("Monthly income") as HTMLInputElement).value).toBe("1500.000")
+    expect((screen.getByLabelText("Monthly income") as HTMLInputElement).value).toBe("1,500.000")
   })
 })

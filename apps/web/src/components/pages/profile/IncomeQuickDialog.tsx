@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
+import { ChevronDown } from "lucide-react"
 
 import { authApi } from "@/lib/api"
 import { parseAmountText } from "@/lib/amount-text"
@@ -8,8 +9,9 @@ import {
   isValidMonthlyIncome,
   useInvalidateIncomeQueries,
 } from "@/lib/monthly-income"
+import { dayMonth, periodBoundsForKey, periodKeyForDate } from "@/lib/payday-months"
 import { VISUAL_VIEWPORT_SHEET_CLASS, useVisualViewportVars } from "@/lib/useVisualViewport"
-import { cn } from "@/lib/utils"
+import { cn, today } from "@/lib/utils"
 import { useToast } from "@/components/ui/toaster"
 import {
   Dialog,
@@ -34,6 +36,25 @@ export function paydayLabel(day: number | null | undefined): string {
   const d = day ?? 1
   return d === 1 ? "1st · calendar month" : paydayOrdinal(d)
 }
+
+/** MOB-R105 D2 — a payday option in the sheet: "25th of each month". */
+export function paydayOptionLabel(day: number): string {
+  return `${paydayOrdinal(day)} of each month`
+}
+
+/**
+ * MOB-R105 D2 — the month this payday gives today, on the Kuwait clock (RM-28), through the one period rule
+ * (lib/payday-months): payday 25 on 16 Oct 2026 reads "This month runs 25 Sep to 24 Oct."
+ */
+export function paydayPeriodHint(payday: number, todayIso: string): string {
+  const { start, end } = periodBoundsForKey(payday, periodKeyForDate(payday, todayIso))
+  return `This month runs ${dayMonth(start)} to ${dayMonth(end)}.`
+}
+
+// MOB-R105 D1/D2 — one brass ring on focus, drawn by the border and a 1px ring together: no offset, so no
+// second outline around the field.
+const FIELD_FOCUS =
+  "focus-visible:outline-none focus-visible:border-accent-strong focus-visible:ring-1 focus-visible:ring-accent-strong focus-visible:ring-offset-0"
 
 /**
  * MOB-R91 C1 — "Income and payday": one sheet for every "Set income" entry point (Home's setup step,
@@ -143,36 +164,57 @@ export function IncomeQuickDialog({
           <div className="min-h-0 flex-1 space-y-5 overflow-y-auto">
             <div className="space-y-2">
               <Label htmlFor="income-quick-amount">Monthly income</Label>
+              {/* MOB-R105 D1 — one field: the grouped value in Space Grotesk at the Log amount's size (text-3xl),
+                  "KD" muted in front, no echo line under it. The "!" wins over .money-input (index.css), which sets
+                  the mono face and 18px for every MoneyInput and would otherwise override both. */}
               <MoneyInput
                 ref={amountRef}
                 id="income-quick-amount"
                 value={value}
+                grouped
+                echo={false}
                 onValueChange={(v) => {
                   setValue(v)
                   if (error) setError(null)
                 }}
                 aria-invalid={error !== null}
-                className={cn("text-base", validationInputClass(error ? "error" : undefined))}
+                currencyClassName="text-base"
+                className={cn(
+                  "h-14 font-sans! text-3xl! font-semibold",
+                  error ? validationInputClass("error") : FIELD_FOCUS,
+                )}
               />
               <FieldFeedback tone={error ? "error" : undefined} message={error ?? undefined} />
               <p className="text-xs text-muted-foreground">If it varies, use your average month.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="income-quick-payday">Payday</Label>
-              {/* 16px, so iOS does not zoom into it. */}
-              <select
-                id="income-quick-payday"
-                value={payday}
-                onChange={(e) => setPayday(Number(e.target.value))}
-                className="h-11 w-full rounded-[var(--radius-control,0.75rem)] border border-input bg-background px-3 text-base"
-              >
-                {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                  <option key={d} value={d}>
-                    {paydayLabel(d)}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-muted-foreground">Your month starts on this day.</p>
+              {/* 16px, so iOS does not zoom into it: text-[1rem], since text-base is 15px here (index.css). MOB-R105
+                  D2 — appearance-none drops the native grey gradient; the field matches the amount box, with its
+                  own chevron. */}
+              <div className="relative">
+                <select
+                  id="income-quick-payday"
+                  value={payday}
+                  onChange={(e) => setPayday(Number(e.target.value))}
+                  className={cn(
+                    "h-11 w-full appearance-none rounded-[var(--radius-input)] border border-input bg-card ps-3 pe-10 text-[1rem] shadow-sm transition-colors",
+                    FIELD_FOCUS,
+                  )}
+                >
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                    <option key={d} value={d}>
+                      {paydayOptionLabel(d)}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  aria-hidden="true"
+                  className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                />
+              </div>
+              {/* The month as it would run with the payday selected now, before Save. */}
+              <p className="text-xs text-muted-foreground">{paydayPeriodHint(payday, today())}</p>
             </div>
           </div>
           <div className="space-y-3">
