@@ -13791,3 +13791,32 @@ D6. If (b) and (c) pass: add one test file pinning them in dialog mode. Predict 
 E. Persist R107 first, alone. After D6: FE (pnpm --filter statera-frontend run test:unit) and
    tsc --noEmit. Push; read CI with gh run view. If a deploy runs, probe /healthz and /readyz
    on the new sha inside and outside the sandbox; two failures outside = STOP.
+
+MOB-R108 — Review of the MOB-R107 report (production 0334e3a)
+
+A. Persistence and review
+A1. Breach, recorded: the operator's message carried no "issued sha256" line for R107. Under
+    R105 A2 a missing sha stops the WHOLE block; CC computed its own and went ahead. No harm
+    this time: CC's faf604b4…f3368b1 equals the issued sha, so the persisted R107 (13761–13793,
+    commit 5f75d1b) is the issued text. Accepted on that match only.
+A2. Standing, restated: no sha line in the operator's message, or an unequal one = STOP before
+    persisting. Report "no issued sha" and do nothing else. A sha CC computes itself never
+    stands in for the issued one.
+A3. Channel error, recorded: R107 A4 assumed the tooltip line moved. It did not. :1196 is the
+    tooltip's opening tag, :1197 the series formatter, :1200 the separator C inserted (d2aa7ea,
+    a pure insertion). Accepted.
+A4. APIH 920/99/89 quoted from CI runs 39021152408 and 39022409950. Accepted.
+
+D. Accepted as reported.
+D5 (a)–(c) PASS in both engines. Save: row and Spent move by 1250 fils, no reload. Undo: no
+DELETE. No Undo: exactly one DELETE at about 6.04 s, rows 71 → 70. (c)'s unchanged Spent was
+checked: the rows on screen sum to 635550 fils before and after.
+D6: log-dialog.delete.test.tsx, 624/146 → 626/147 as predicted; the mutation went red.
+
+E. State at 0334e3a: FE 626/147, APIH 920/99/89, migrations 8, stashes 0. Deploy run
+   39022409950 green; probes 200 inside and outside.
+E1. Queue, no work now: CC reports the frontend tsconfig excludes test files, so tsc --noEmit
+    does not type-check them.
+E2. This block rules no code. Persist R108 alone, commit, push, read CI with gh run view. If a
+    deploy runs, probe /healthz and /readyz on the new sha inside and outside the sandbox. Then
+    wait for the next block.
