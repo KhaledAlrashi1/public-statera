@@ -13757,3 +13757,37 @@ E. Order and ship
 E1 B, C, D1; one commit each; FE counts predicted with sign before each edit.
 E2 Breaks in existing tests: stash and list them; the next block grants.
 E3 Deploy; CI by gh run view; probes inside and outside on the new sha.
+
+MOB-R107 — Review of the MOB-R106 report (production a736447)
+
+A. Persistence and review
+A1. R106 persisted as issued: 13720–13759, sha 28862bbe…caba3, commit 74091c8. Accepted.
+A2. R106 A4 reconciled: :448 at 393de43, :402 at HEAD after R104 B moved the call. Accepted.
+A3. Channel error, recorded: R106 D assumed a Delete confirm. None exists; the channel did not
+    verify that premise. The line is struck. Delete stays as ruled in MOB-R87 D1 (d): the edit
+    leaves at once, a 6-second Undo toast, then the DELETE. CC was right not to add a confirm.
+A4. Reconcile the C citations. R106 named dashboard/sections.tsx:1196. The report names :1197
+    for the one series line and :1200 in "all three use ': '". At a736447, say which line holds
+    the Income vs Expenses tooltip and why it moved from :1196 (git log -L or diff). Report only.
+A5. APIH: quote the API summary line from CI's test job (gh run view 39021152408 --log), or say
+    it is not in the log. apps/api is untouched; no local run.
+
+B, C, D1, D3, D4: accepted as reported. FE 614/144 → 622/145 → 622/145 → 624/146.
+D2: accepted. Save and delete requests byte-identical; Split is the layer above the dialog;
+Escape closes Split only; Activity scroll kept at 300.
+
+D5. Activity now stays mounted under the edit dialog; the old full page remounted it. Prove,
+    at 1280×800, both engines, demo engine answering the API, entering from Activity's Edit:
+    (a) Save with a changed amount: the row shows the new values with no reload, and
+        "Spent (loaded)" moves by the change, computed in fils with a tool.
+    (b) Delete, then Undo within 6 s: zero DELETE requests; after Undo the row is listed.
+        Report what the row shows during the 6 s.
+    (c) Delete, no Undo: exactly one DELETE after the toast ends; the row leaves the list
+        with no reload.
+    Any of (a)–(c) failing: STOP. Report file:line and the observed values. Do not fix.
+D6. If (b) and (c) pass: add one test file pinning them in dialog mode. Predict the count with
+    its sign before the edit. Mutation: drop the Undo cancel; the test must go red; restore.
+
+E. Persist R107 first, alone. After D6: FE (pnpm --filter statera-frontend run test:unit) and
+   tsc --noEmit. Push; read CI with gh run view. If a deploy runs, probe /healthz and /readyz
+   on the new sha inside and outside the sandbox; two failures outside = STOP.
