@@ -1195,6 +1195,9 @@ export function IncomeExpensesChart({
                   ) : null}
                   <RechartsTooltip
                     formatter={(value: number) => [`KD ${value.toFixed(3)}`, "Expenses"]}
+                    // MOB-R106 C1 — "Expenses: KD …", not Recharts' default " : ". The one Line here is the
+                    // only series in the tooltip; the reference lines never enter it.
+                    separator=": "
                     labelFormatter={(m) => formatMonthYear(String(m))}
                     contentStyle={chartTooltipStyle}
                     itemStyle={chartTooltipItemStyle}
