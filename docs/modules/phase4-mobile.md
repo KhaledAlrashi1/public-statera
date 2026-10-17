@@ -13857,3 +13857,40 @@ B6. Phone at 390: the chip row keeps today's lines and overflow with the longest
 E. Persist R109 first, alone. Then FE (pnpm --filter statera-frontend run test:unit) and
    tsc --noEmit. Push; read CI with gh run view; probe /healthz and /readyz on the new sha
    inside and outside the sandbox; two failures outside = STOP.
+
+MOB-R110 — R109 withdrawn; income and refunds, report only (production 545743a)
+
+A. R109 persisted as issued: 13824–13859, sha f610e2b4…242e1d, commit 545743a, deploy run
+   39023558769 green, probes 200. FE 626/147. Accepted.
+A1. B3 STOP accepted. CC was right to stop and not to fix.
+A2. Channel error, recorded: R109 B assumed the six fixed tiles always show. At HEAD they show
+    only with no places; with any place she sees up to 4 of her own under "Repeat in two taps"
+    (LogPage.tsx:698-702, TILE_LIMIT = 4 at :76). The operator's selection "Her places first
+    (Recommended)" is met by what is live, except a top-up when she has 1 to 3 places.
+A3. R109 B is withdrawn whole. No change to the tiles, to /api/log-suggestions, or to its
+    window (date >= today − 90, log-suggestions-lib.ts:122-125, accepted as is).
+A4. Queue, unruled: top up "Repeat in two taps" with the fixed six when she has 1 to 3 places.
+
+B. Operator words, verbatim: "My friend had a good idea/point where she was able to add
+   partial-refund/refund to the app. Also, we added that people sometimes get a commission or
+   an annual bonus and they can't add it to the app. So, adding income is now important." And:
+   "I still want to keep it as simple as possible, user-friendly and quick to add such
+   transactions while maintaining the amazing UI/UX and design thinking."
+   This block is a report only. No edit, no migration, nothing run against production.
+
+B1. Income today: every place income is stored (table, columns, migration file), what the
+    income dialog writes and to which request, and what the Income vs Expenses income line
+    reads. Does a transaction carry a type, kind or sign? Can amount_kd be zero or negative
+    (API validation file:line, DB constraint file:line)?
+B2. Every reader that sums transactions, listed by grep: Activity "Spent (loaded)", each
+    dashboard chart, Budget vs Spending, Fill from my spending, log-suggestions, the importer,
+    the demo engine, exports. For each: what it would do with a negative amount, and with an
+    income row if a type exists.
+B3. The importer: what it does today with credit rows (positive or negative, a credit column).
+B4. Can a one-off income (bonus, commission) and a refund each be stored with no migration?
+    If not, name the smallest schema change for each. RM-21: no edit.
+B5. The tests that pin "expenses only" behaviour, file:line.
+B6. Partial refund: does a transaction have any link to another (a parent or source id)?
+
+E. Persist R110 first, alone. Push; read CI with gh run view; probe /healthz and /readyz on
+   the new sha inside and outside the sandbox; two failures outside = STOP.
