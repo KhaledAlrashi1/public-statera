@@ -14170,3 +14170,67 @@ F2 No existing test line is edited. Each break: file:line plus the runner's fail
 F3 Down runbook (R115 E1 text) as a doc beside the backups runbook, inside the stash.
 F4 Both tsc --noEmit exit 0. One stash by content hash (lines, sha256); tree clean after.
 F5 A miss is reported with its cause. A fix beyond this block = STOP.
+
+MOB-R117 — REFUND: FIX, GRANT, BUILD. COMMIT, STOP BEFORE PUSH (RM-21). Sun 18 Oct 2026.
+
+Tier 1: API, demo engine, signs, request bodies. Tier 2 (lighter): strings and the row look.
+
+A. PERSIST, ACCEPT, APPLY
+A1 Persist this block first, alone; commit. Blank 14173, then from 14174. Strict 117, loose 119.
+A2 R116 ACCEPTED. Persisted 14113–14172, hash-equal; strict 116, loose 118. Every R116 line
+   delivered; counts met exactly; the APII miss has its cause. C3 measured as asked.
+A3 Apply the R116 stash only if its --include-untracked patch re-hashes equal (6520 lines):
+27a9e8e6aa26a2358b63b3a238c612c8f71b7ad4e4e90e8f10f21dbe9b0a9f9b
+   Unequal = STOP. Equal: apply, then drop it. Stashes 0 after.
+A4 Granted, CC's, all provisional (RM-26): migration names 0008_lame_mesmero and
+   0009_dazzling_blue_blade; 409 category_is_income "That category is an income category.";
+   the 400 text naming both kinds; "A refund can't be split."; the Log 409 string
+   Your "<category>" category is for income, so this refund can't go there.
+
+B. GRANTS, LINE BY LINE (measured in R116)
+B1 apps/api/src/routes/transactions.test.ts:382:24 (APIH and APII): the invalid-kind case
+   sends a kind other than "refund" and expects 400 with the new text. Edit, do not delete.
+B2 apps/web/src/lib/demo/engine.test.ts:161:155 (FE): the same change.
+   Grants alone give APIH 943/0/105, APII 1038/0/10, FE 652/0; files 92, 92, 153.
+
+C. ONE RULE: A REFUND NEVER SITS IN A CATEGORY THAT COUNTS AS INCOME (Tier 1)
+C1 One predicate: the existing server code behind category_counts_as_income (flag and name
+   rule). Name its file:line. No second copy on the server; the demo keeps its one mirror.
+C2 POST kind:"refund": the predicate runs before any insert, so a NEW category the name rule
+   matches is refused too: same 409, no row and no category written.
+C3 PATCH on a negative row into a category the predicate matches: same 409, row unchanged.
+   Positive rows: response and stored bytes unchanged, including expense rows moved to income.
+C4 Edit from Log shows the A4 Log string on that 409. Bulk edit: report what it shows; no
+   new string.
+C5 Demo engine: the same rule for POST and PATCH.
+C6 Tests: C2 (a new "income…" name) and C3 (refund to Bonus = 409; row still −2.250; that
+   period's extras unchanged) in APIH and APII; C4 and C5 in FE. Each mutated red, restored.
+
+D. SMALL FIXES
+D1 POST fallback insert: both inserts take the one stored-amount value (negated for refunds).
+   Test it if reachable; if not, give file:line and why. No wrong-sign write path stays.
+D2 Demo log suggestions skip negative rows, in the one demo mirror. FE test, mutated red.
+D3 Editing a refund: the delete control reads "Delete refund" (RM-26). Undo unchanged.
+D4 Activity refund row. Operator: "B: + green and "Refund" (Recommended)". Keep CC's +KD in
+   the success colour; add the word "Refund" after the category on the row's secondary line,
+   with that line's own separator (RM-26). No such line = STOP with a screenshot. Spend and
+   income rows unchanged. CategoryDetailModal uses the same helper. Screenshots: Activity at
+   390 and 1280, light and dark, both engines.
+
+E. QUEUED, NOT BUILT. Touching any = STOP. Category chart caption % reads the net figure. The
+1280 log dialog overflows after any save (762 > 718, existing Spent). R116 E items.
+
+F. SHIP: COMMIT, THEN STOP BEFORE PUSH (RM-21 stays)
+F1 All three suites exit 0, both tsc --noEmit exit 0, Errors 0. Commit the code on top of the
+   persist commits. Do not push: the push deploys 0008 and 0009 to production.
+F2 Report the commit shas (full, each on its own line), ahead count, the migrations the push
+   applies, and the down runbook path. The next block pushes after the operator's backup and
+   his R115 E3 output (rows_le_zero 0).
+F3 The journal at the new HEAD lists 10 migrations, matching the dev DB's 10.
+
+G. MEASURE AND REPORT
+G1 Before any edit: readers by grep for the predicate and each changed behaviour; every count
+   predicted with sign (tests and files); every break predicted. Re-derive; do not carry.
+G2 Ungranted breaks: no code commit; stash by content hash, list each with file:line and the
+   runner's failure text.
+G3 A miss is reported with its cause. A fix beyond this block = STOP.
