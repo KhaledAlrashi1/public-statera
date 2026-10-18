@@ -14069,3 +14069,43 @@ I. **Counts**: APIH 934/0/102, 91 files; APII 1026/0/10; FE 638 + E5's predicted
    Typechecks exit 0; Errors 0 in all three runs.
 J. **Ship**: persist this block first (blank 14026, then from 14027; strict 114, loose 116),
    commit, push, CI by gh run view, /healthz and /readyz on the new sha inside and outside.
+
+MOB-R115 — R114 accepted; grant; stashes dropped; switch gap and desktop fit; refund report-first
+A. **Accept the R114 report.** Income step 1 is live at 3d52416 (run 39115649496).
+   Channel premise errors in R114: B said the full sha was in the R113 report text (it held only
+   the ends); E1's formula assumed the production layout as "before", while before was the R113
+   tree. CC's measured shifts stand. Against production, Spent content under the switch moves
+   +22 px at 390 (+70 in R113, then −48); Save stays at 836.
+B. **Grant** income-expenses-chart.domain.test.tsx:27–29 (periodIncome: 1200 in TREND), already
+   live. The standing rule holds: an ungranted line is stashed and listed, not shipped.
+C. **Drop both stashes**, each after its patch hash matches. stash@{0}, 1985 lines:
+   dc135d3255c7782a17c136fa3afb177ee8b55c8d8d365e33839523d0275acddd
+   stash@{1}, 1425 lines: 5e3bcd8c…d63513e8 (ends only). Stashes 0 after.
+D. **Switch gap and desktop fit** (frontend, lighter proofs).
+   D1 before the edit, both engines, on 3d52416: the 1280×800 log dialog in Spent and in Income,
+   scrollHeight and clientHeight; at 390 the gap between the switch and the line under it.
+   D2 8 px between the switch and the line under it, new entries only.
+   D3 at 1280×800 the dialog fits with no inner scroll in Spent and in Income (scrollHeight <=
+   clientHeight), by trimming the dialog's own vertical spacing; each px changed is listed.
+   Fitting needs an element removed or a font changed = STOP and report.
+   D4 shifts predicted from D1 before the edit, sign included. 390: Spent Save visible without
+   scrolling. Spent save body byte-identical at 390 and 1280 (R106 D2 method). Screenshots
+   Spent and Income at 390 and 1280, light and dark.
+   D5 FE count predicted (expected +0). Any break: stash and list.
+E. **Refund step 2: report only.** No code, no migration file committed, no stash.
+   E1 0008 (ADD CHECK amount_kd <> 0) and 0009 (DROP chk_transactions_amount_positive): exact
+   SQL from drizzle-kit generate in a scratch copy, then discarded. Down runbook SQL.
+   E2 readers by grep: every reader of transactions.amount_kd, file:line, what a negative row
+   does there, and the tests that pin positivity. Map each to the planned exceptions (chart
+   clamp, suggestions and learnTransaction skip, R12 skip, Activity style, PATCH keeps the sign,
+   Split refuses, importer unchanged) or name it as unplanned.
+   E3 RM-21: the backup step and deploy order, plus read-only server commands for the operator
+   (R111 C method): rows with amount_kd <= 0 (expected 0), and user 3's income row of Fri
+   2 Oct 2026 (id, date, name, category, amount). CC writes them; the operator runs them.
+   E4 "Spent · Refund · Income" in the title row: a throwaway local render, discarded. Report
+   each segment's width, wrap or no wrap, tap height, at 390 and 1280.
+   E5 predicted breaks by suite (APIH, APII, FE) from E2, and the files the build would touch.
+F. Counts from the runner after D, against APIH 934/0/102, APII 1026/0/10, FE 638/148.
+   Typechecks 0; Errors 0. Persist this block first (blank 14072, then from 14073; strict 115,
+   loose 117). Ship D: commit, push, CI by gh run view, probes on the new sha inside and
+   outside. E goes in the report text.
