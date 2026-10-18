@@ -1135,7 +1135,11 @@ export function IncomeExpensesChart({
   // most, DashboardPage.tsx:310). The leading periods dropped are empty (both zero), and the average
   // above never counted them: monthsWithData keeps only periods with expenses.
   const firstWithData = trendData.findIndex((row) => row.expenses !== 0 || row.income !== 0)
-  const drawnData = firstWithData > 0 ? trendData.slice(firstWithData) : trendData
+  // MOB-R116 D6 — refunds can take a period's expenses below 0; the line is clamped at 0 where it is drawn (the
+  // caption and average above still read the period's own figure).
+  const drawnData = (firstWithData > 0 ? trendData.slice(firstWithData) : trendData).map((row) =>
+    row.expenses < 0 ? { ...row, expenses: 0 } : row
+  )
   // MOB-R103 C2 — the legend names what is drawn: the income line only when the income is set.
   const legendPayload = [
     ...(typedIncome !== null
@@ -1271,8 +1275,10 @@ export function CategoryBreakdownChart({
     return current
   }, null)
   const chartData = useMemo(() => {
-    const primary = categoryData.slice(0, 6)
-    const otherValue = categoryData.slice(6).reduce((sum, item) => sum + item.value, 0)
+    // MOB-R116 D6 — a category whose refunds outweigh its spending is drawn at 0, never below.
+    const clamped = categoryData.map((row) => (row.value < 0 ? { ...row, value: 0 } : row))
+    const primary = clamped.slice(0, 6)
+    const otherValue = clamped.slice(6).reduce((sum, item) => sum + item.value, 0)
     return otherValue > 0 ? [...primary, { name: "Other", value: otherValue }] : primary
   }, [categoryData])
   const insightCaption = topCategory && totalSpend > 0

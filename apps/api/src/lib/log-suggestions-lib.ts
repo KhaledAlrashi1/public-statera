@@ -82,6 +82,8 @@ export function shapeLogSuggestions(placeRows: PlaceRow[], entryRows: EntryRow[]
 
   entryRows.forEach((row, index) => {
     if (row.merchantId === null) return
+    // MOB-R116 C4 — a refund (a negative row) is not counted and never becomes last_amount.
+    if (row.amountKd.trim().startsWith("-")) return
     const place = byPlace.get(row.merchantId)
     if (!place) return
     if (place.last === null || isMoreRecent(row, place.last)) place.last = row
@@ -121,7 +123,8 @@ export async function buildLogSuggestions(
   today: Date = currentLocalDate(),
 ): Promise<LogSuggestionPlace[]> {
   const cutoff = isoDate(new Date(today.getTime() - PLACE_WINDOW_DAYS * 86_400_000))
-  const owned = and(eq(transactions.userId, userId), ne(transactions.source, "demo"), expenseCategoryFilter())
+  // MOB-R116 C4 — refunds (negative rows) are left out: a place seen only through a refund is not a place she spends at.
+  const owned = and(eq(transactions.userId, userId), ne(transactions.source, "demo"), expenseCategoryFilter(), sql`${transactions.amountKd} > 0`)
 
   const recentCount = sql<number>`SUM(CASE WHEN ${transactions.date} >= ${cutoff} THEN 1 ELSE 0 END)`
   const placeRows = await db

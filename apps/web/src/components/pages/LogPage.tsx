@@ -30,7 +30,8 @@ import { ApiError, categoriesApi, transactionsApi } from "@/lib/api"
 import type { Transaction } from "@/types/api"
 import { useToast } from "@/components/ui/toaster"
 import { SplitTransactionDialog } from "./transactions/dialogs"
-import { cn, formatDisplayDate, formatKD, kuwaitNow } from "@/lib/utils"
+import { cn, formatAmount, formatDisplayDate, formatKD, kuwaitNow } from "@/lib/utils"
+import { isRefundRow } from "@/lib/row-amount"
 import { normalizeAmount, pressDecimal, pressDelete, pressDigit } from "@/lib/log-amount"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
@@ -286,8 +287,10 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
   const [editRow, setEditRow] = useState<Transaction | null>(null)
   const [splitOpen, setSplitOpen] = useState(false)
   // MOB-R112 D6 — "Spent · Income", on new entries only; edit mode never shows it.
-  const [entryKind, setEntryKind] = useState<"spent" | "income">("spent")
+  // MOB-R116 D1 — "Spent · Refund · Income": Refund is the Spent screen, saved with kind "refund".
+  const [entryKind, setEntryKind] = useState<"spent" | "refund" | "income">("spent")
   const incomeMode = !editing && entryKind === "income"
+  const refundMode = !editing && entryKind === "refund"
 
   const stat = useRef<{ start: number | null; taps: number; suggestion: boolean }>({ start: null, taps: 0, suggestion: false })
   const tap = (fromSuggestion = false) => {
@@ -322,7 +325,9 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
         const isSame = (x: string | null) => x !== null && name.toLowerCase() === x.toLowerCase()
         const what = isSame(placeName) || isSame(cat) ? "" : name
         setEditRow(row)
-        setAmount(row.amount_kd)
+        // MOB-R116 D2 — a refund is stored negative; the field shows its magnitude through the existing formatter
+        // (RM-27: no second normaliser), and PATCH sends that magnitude (the server keeps the sign).
+        setAmount(row.amount_kd.trim().startsWith("-") ? formatAmount(row.amount_kd).text : row.amount_kd)
         setPrefilled(false)
         setCategory(cat)
         setCategoryHers(cat !== null)
@@ -340,6 +345,7 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
     }
   }, [editId])
   const isIncome = editRow?.category_counts_as_income === true
+  const isRefund = editRow !== null && isRefundRow(editRow)
 
   // MOB-R69 E4 — the readout shows what will save, through the RM-27 normalizer; refused text is
   // shown as typed, with the refusal line, and cannot be saved.
@@ -416,7 +422,7 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
 
   // MOB-R112 D6 — switching kind keeps the amount she typed and the date; place, category and What for go,
   // since income mode has none of them but its tile.
-  const switchKind = (k: "spent" | "income") => {
+  const switchKind = (k: "spent" | "refund" | "income") => {
     if (k === entryKind) return
     tap()
     changed()
@@ -548,7 +554,10 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
         setError(
           err instanceof ApiError && err.code === "transaction_duplicate_conflict"
             ? "This would duplicate an existing transaction."
-            : "Couldn't save. Check your connection and try again."
+            : err instanceof ApiError && err.code === "category_is_income"
+              ? // MOB-R117 C4 — a refund moved into a category that counts as income; the same line as Log's create.
+                `Your "${category}" category is for income, so this refund can't go there.`
+              : "Couldn't save. Check your connection and try again."
         )
       } finally {
         setSaving(false)
@@ -559,18 +568,22 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
     setSaving(true)
     setError(null)
     try {
+      const spentBody = {
+        date,
+        merchant: place ?? undefined,
+        category,
+        name: whatFor.trim() || place || category,
+        amount_kd: normalized,
+        force: forceNext ? "1" : undefined,
+      }
       const res = await transactionsApi.create(
         incomeMode
           ? // MOB-R112 D1 — income: the tile's category is also its name; no place.
             { date, category, name: category, amount_kd: normalized, force: forceNext ? "1" : undefined, kind: "income" as const }
-          : {
-              date,
-              merchant: place ?? undefined,
-              category,
-              name: whatFor.trim() || place || category,
-              amount_kd: normalized,
-              force: forceNext ? "1" : undefined,
-            }
+          : refundMode
+            ? // MOB-R116 D1 — refund: the Spent body plus kind; the server stores it negative.
+              { ...spentBody, kind: "refund" as const }
+            : spentBody
       )
       const id = res.data?.item?.id
       if (typeof id === "number") {
@@ -596,6 +609,9 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
       if (err instanceof ApiError && err.code === "category_not_income") {
         // MOB-R112 D1 — a spending category of that name exists; the server never flips it.
         setError(`Your "${category}" category is for spending, so this income can't go there.`)
+      } else if (err instanceof ApiError && err.code === "category_is_income") {
+        // MOB-R116 C2 — an income category of that name exists; the server never flips it (provisional, RM-26).
+        setError(`Your "${category}" category is for income, so this refund can't go there.`)
       } else if (err instanceof ApiError && err.status === 409) {
         setError("Already saved for this date. Tap Save again to keep both.")
         setForceNext(true)
@@ -776,15 +792,17 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
       frameRef={frameRef}
       style={vvStyle}
       keyboardInset={keyboardInset(vvStyle)}
-      title={editing ? (isIncome ? "Edit income" : "Edit expense") : incomeMode ? "New income" : undefined}
+      title={editing ? (isIncome ? "Edit income" : isRefund ? "Edit refund" : "Edit expense") : incomeMode ? "New income" : refundMode ? "New refund" : undefined}
       // MOB-R114 E2 — Income's line (RM-26 provisional); Spent keeps the default.
-      subtitle={editing ? null : incomeMode ? "Bonus, commission or other. Amount and date." : undefined}
+      // MOB-R116 D1 — Refund's line (RM-26).
+      subtitle={editing ? null : incomeMode ? "Bonus, commission or other. Amount and date." : refundMode ? "Money back from a place. Lowers your spending." : undefined}
       titleSlot={
         editing ? undefined : (
           // MOB-R112 D6 — "Spent · Income", new entries only. MOB-R114 E2 — it is the visible title.
           // MOB-R115 D2 — 8px (mb-2) between it and the line under it.
-          <div role="group" aria-label="Entry type" className="mb-2 grid grid-cols-2 gap-1 rounded-full border border-border bg-card p-1">
-            {(["spent", "income"] as const).map((k) => (
+          // MOB-R116 D1 — three segments, 44px, one line each (R115 E4).
+          <div role="group" aria-label="Entry type" className="mb-2 grid grid-cols-3 gap-1 rounded-full border border-border bg-card p-1">
+            {(["spent", "refund", "income"] as const).map((k) => (
               <button
                 key={k}
                 type="button"
@@ -792,7 +810,7 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
                 onClick={() => switchKind(k)}
                 className="min-h-11 rounded-full text-sm font-semibold text-muted-foreground transition-colors aria-pressed:bg-primary aria-pressed:text-primary-foreground"
               >
-                {k === "spent" ? "Spent" : "Income"}
+                {k === "spent" ? "Spent" : k === "refund" ? "Refund" : "Income"}
               </button>
             ))}
           </div>
@@ -1134,14 +1152,17 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
       {/* MOB-R88 E1 — in edit mode, Split and Delete sit in their own card under the fields, each a whole row. */}
       {editing ? (
         <section aria-label="Actions" className="overflow-hidden rounded-[var(--radius-card)] border border-border bg-card">
-          <button
-            type="button"
-            disabled={!editRow}
-            onClick={() => setSplitOpen(true)}
-            className="flex min-h-14 w-full items-center border-b border-border px-4 py-3 text-start font-semibold disabled:opacity-50"
-          >
-            {isIncome ? "Split this income" : "Split this expense"}
-          </button>
+          {/* MOB-R116 D5 — a refund is not split (the server refuses it), so its row has no Split. */}
+          {isRefund ? null : (
+            <button
+              type="button"
+              disabled={!editRow}
+              onClick={() => setSplitOpen(true)}
+              className="flex min-h-14 w-full items-center border-b border-border px-4 py-3 text-start font-semibold disabled:opacity-50"
+            >
+              {isIncome ? "Split this income" : "Split this expense"}
+            </button>
+          )}
           <button
             type="button"
             disabled={!editRow}

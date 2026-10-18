@@ -57,6 +57,7 @@ export const transactions = mysqlTable(
     index("ix_transactions_user_date_id").on(t.userId, t.date, t.id),
     index("ix_transactions_user_category_date").on(t.userId, t.categoryId, t.date),
     index("ix_transactions_user_source_date").on(t.userId, t.source, t.date),
-    check("chk_transactions_amount_positive", sql`${t.amountKd} > 0`),
+    // MOB-R116 C1 — a refund is stored negative (POST kind "refund"); zero stays refused.
+    check("chk_transactions_amount_nonzero", sql`${t.amountKd} <> 0`),
   ],
 )

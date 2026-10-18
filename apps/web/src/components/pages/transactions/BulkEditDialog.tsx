@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { transactionsApi } from "@/lib/api"
-import { formatDisplayDate } from "@/lib/utils"
+import { formatAmount, formatDisplayDate } from "@/lib/utils"
 import { useToast } from "@/components/ui/toaster"
 import type { Transaction } from "@/types/api"
 
@@ -149,7 +149,8 @@ export function BulkEditDialog({
               name: changes.name ?? orig.name,
               category: changes.category ?? orig.category,
               merchant: changes.merchant ?? orig.merchant ?? "",
-              amount_kd: String(orig.amount_kd),
+              // MOB-R116 D3 — PATCH takes a magnitude and keeps the row's sign, so a refund sends its magnitude.
+              amount_kd: String(orig.amount_kd).trim().startsWith("-") ? formatAmount(String(orig.amount_kd)).text : String(orig.amount_kd),
             })
           )
         }

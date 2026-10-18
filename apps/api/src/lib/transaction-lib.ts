@@ -129,6 +129,59 @@ export async function getOrCreateIncomeCategory(
   return { id, name: trimmed }
 }
 
+// ── categoryCountsAsIncomeByName ──────────────────────────────────────────────
+// MOB-R117 C1 — would a row in the category of this name count as income? The one rule, payday-lib
+// incomeCategoryFilter (the flag, or a name starting "income"). A found category (same lower-cased name as
+// getOrCreateCategory) is read by its own row; with none found, the rule runs on the name with the flag false,
+// as a new category would be inserted, so a new "Income…" name counts too. Reads only; nothing is written.
+
+export async function categoryCountsAsIncomeByName(
+  name: string,
+  userId: number,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db: any,
+): Promise<{ existing: { id: number; name: string } | null; countsAsIncome: boolean }> {
+  const trimmed = name.trim()
+  const [existing] = await db
+    .select({ id: categories.id, name: categories.name, countsAsIncome: incomeCategoryFilter() })
+    .from(categories)
+    .where(and(eq(categories.userId, userId), sql`LOWER(${categories.name}) = LOWER(${trimmed})`))
+    .limit(1)
+  if (existing) {
+    return { existing: { id: existing.id, name: existing.name }, countsAsIncome: readIncomeFlag(existing.countsAsIncome) }
+  }
+  const [rule] = await db
+    .select({ nameCountsAsIncome: incomeCategoryFilter(sql`FALSE`, sql`${trimmed}`) })
+    .from(sql`DUAL`)
+  return { existing: null, countsAsIncome: readIncomeFlag(rule?.nameCountsAsIncome) }
+}
+
+// ── getOrCreateRefundCategory ─────────────────────────────────────────────────
+// MOB-R116 C2 — POST /api/transactions with kind "refund", the mirror of getOrCreateIncomeCategory. A refund lowers
+// spending, so it goes into a spending category: a found one that does not count as income is used; a found income
+// one is refused ("is_income") and never flipped; none found is inserted with isIncome false. No name, no category.
+// MOB-R117 C2 — the rule runs before any insert (categoryCountsAsIncomeByName), so a new name the rule matches is
+// refused too, and no category is written.
+
+export async function getOrCreateRefundCategory(
+  name: string | null,
+  userId: number,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db: any,
+): Promise<{ id: number; name: string } | "is_income" | null> {
+  const trimmed = (name ?? "").trim()
+  if (!trimmed) return null
+  const { existing, countsAsIncome } = await categoryCountsAsIncomeByName(trimmed, userId, db)
+  if (countsAsIncome) return "is_income"
+  if (existing) return existing
+
+  const [{ id }] = await db
+    .insert(categories)
+    .values({ userId, name: trimmed, isIncome: false })
+    .$returningId()
+  return { id, name: trimmed }
+}
+
 // ── getOrCreateMerchant ───────────────────────────────────────────────────────
 
 export async function getOrCreateMerchant(

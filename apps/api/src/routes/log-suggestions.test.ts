@@ -95,3 +95,13 @@ describe("shapeLogSuggestions", () => {
     expect(p.items[0]).toEqual({ name: "LATTE", category: "Coffee", amount_kd: "2.000" })
   })
 })
+
+// MOB-R116 C4 — a refund (a negative row) is not counted as an item and never becomes last_amount.
+describe("shapeLogSuggestions — refunds (MOB-R116 C4)", () => {
+  it("skips a negative entry: no item from it, last_amount from the spend", () => {
+    const entries = [entry(1, "refund", "-2.000", "Coffee"), entry(1, "latte", "1.500", "Coffee")]
+    const [p] = shapeLogSuggestions([place(1, "PICK")], entries)
+    expect(p.items).toEqual([{ name: "LATTE", category: "Coffee", amount_kd: "1.500" }])
+    expect(p.last_amount).toBe("1.500")
+  })
+})

@@ -1,4 +1,6 @@
-import { formatDisplayDate, formatKD } from "@/lib/utils"
+import { cn, formatDisplayDate, formatKD } from "@/lib/utils"
+// MOB-R116 D5 — a refund row uses Activity's style helper; every other row is unchanged.
+import { isRefundRow, rowAmount } from "@/lib/row-amount"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -151,8 +153,8 @@ export function CategoryDetailModal({
                           ) : null}
                           <p className="mt-2 text-xs text-muted-foreground">{formatDisplayDate(t.date)}</p>
                         </div>
-                        <div className="text-right text-base font-semibold tabular-nums">
-                          {formatKD(t.amount_kd)}
+                        <div className={cn("text-right text-base font-semibold tabular-nums", isRefundRow(t) && rowAmount(t).className)}>
+                          {rowAmount(t).text}
                         </div>
                       </div>
                     </article>
@@ -175,8 +177,8 @@ export function CategoryDetailModal({
                         <td className="px-4 py-3.5">{formatDisplayDate(t.date)}</td>
                         <td className="px-4 py-3.5">{t.merchant || "—"}</td>
                         <td className="px-4 py-3.5">{t.name || "—"}</td>
-                        <td className="px-4 py-3.5 text-right font-medium tabular-nums">
-                          {formatKD(t.amount_kd)}
+                        <td className={cn("px-4 py-3.5 text-right font-medium tabular-nums", isRefundRow(t) && rowAmount(t).className)}>
+                          {rowAmount(t).text}
                         </td>
                       </tr>
                     ))}

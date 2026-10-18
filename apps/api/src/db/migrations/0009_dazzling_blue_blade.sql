@@ -1,0 +1,1 @@
+ALTER TABLE `transactions` DROP CONSTRAINT `chk_transactions_amount_positive`;

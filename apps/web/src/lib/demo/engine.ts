@@ -436,7 +436,8 @@ function nameKey(name: string): string {
 /** log-suggestions-lib buildLogSuggestions + shapeLogSuggestions */
 function logSuggestions(s: DemoState) {
   const cutoff = isoDay(new Date(s.today.getTime() - 90 * DAY_MS))
-  const owned = s.rows.filter((r) => r.source !== "demo" && rowIsExpense(s, r) && r.merchantId !== null)
+  // MOB-R117 D2 — the server leaves refunds (negative rows) out (log-suggestions-lib, amount_kd > 0).
+  const owned = s.rows.filter((r) => r.source !== "demo" && rowIsExpense(s, r) && r.merchantId !== null && !r.amountKd.startsWith("-"))
   const byPlace = new Map<number, Row[]>()
   for (const r of owned) byPlace.set(r.merchantId!, [...(byPlace.get(r.merchantId!) ?? []), r])
   const places = [...byPlace.entries()].map(([id, rows]) => ({
@@ -894,14 +895,40 @@ function incomeCategoryFor(s: DemoState, name: string): number | "not_income" {
   return c.id
 }
 
+/** transaction-lib categoryCountsAsIncomeByName (MOB-R117 C1): a found category by its own row; none found, the rule
+ * on the name with the flag false, as a new one would be added. Reads only. */
+function categoryNameCountsAsIncome(s: DemoState, name: string): boolean {
+  const found = s.categories.find((c) => c.name.toLowerCase() === name.toLowerCase())
+  return isIncomeCategory(found ?? { id: 0, name, isIncome: false })
+}
+
+/** transaction-lib getOrCreateRefundCategory (MOB-R116 C2): a found spending category is used, a found income one is
+ * refused (never flipped), none found is added as spending. MOB-R117 C2 — a new name the rule matches is refused too. */
+function refundCategoryFor(s: DemoState, name: string): number | "is_income" {
+  if (categoryNameCountsAsIncome(s, name)) return "is_income"
+  return categoryFor(s, name)
+}
+
 function createTransaction(s: DemoState, body: Record<string, unknown>) {
   const amount = amountOf(body.amount_kd)
   if (!amount) return validationError("Amount is invalid.")
   const categoryName = String(body.category ?? "").trim()
   if (!categoryName) return validationError("Category is required.")
-  if (body.kind !== undefined && body.kind !== "income") return validationError('kind must be "income".')
+  if (body.kind !== undefined && body.kind !== "income" && body.kind !== "refund") {
+    return validationError('kind must be "income" or "refund".')
+  }
   let categoryId: number
-  if (body.kind === "income") {
+  if (body.kind === "refund") {
+    // MOB-R116 D4 — the refund mirror of the server: the positive amount is stored negative.
+    const found = refundCategoryFor(s, categoryName)
+    if (found === "is_income") {
+      return {
+        status: 409,
+        body: { ok: false, data: null, error: "That category is an income category.", code: "category_is_income" },
+      }
+    }
+    categoryId = found
+  } else if (body.kind === "income") {
     const found = incomeCategoryFor(s, categoryName)
     if (found === "not_income") {
       return {
@@ -916,7 +943,7 @@ function createTransaction(s: DemoState, body: Record<string, unknown>) {
     id: s.nextId.row++,
     date,
     name: String(body.name ?? categoryName).trim() || categoryName,
-    amountKd: amount,
+    amountKd: body.kind === "refund" ? `-${amount}` : amount,
     categoryId,
     merchantId: merchantFor(s, String(body.merchant ?? "")),
     source: "manual",
@@ -928,10 +955,24 @@ function createTransaction(s: DemoState, body: Record<string, unknown>) {
 function updateTransaction(s: DemoState, id: number, body: Record<string, unknown>) {
   const row = s.rows.find((r) => r.id === id)
   if (!row) return { status: 404, body: { ok: false, data: null, error: "Transaction not found.", code: "not_found" } }
+  // MOB-R117 C5 — transactions.ts PATCH: a refund (a negative row) is never moved into a category that counts as
+  // income; refused before anything changes. Positive rows skip it.
+  if (
+    row.amountKd.startsWith("-") &&
+    typeof body.category === "string" &&
+    body.category.trim() &&
+    categoryNameCountsAsIncome(s, body.category.trim())
+  ) {
+    return {
+      status: 409,
+      body: { ok: false, data: null, error: "That category is an income category.", code: "category_is_income" },
+    }
+  }
   if ("amount_kd" in body) {
     const amount = amountOf(body.amount_kd)
     if (!amount) return validationError("Amount is invalid.")
-    row.amountKd = amount
+    // MOB-R116 D4 — amount_kd is a magnitude; the row keeps its sign (transactions.ts PATCH).
+    row.amountKd = row.amountKd.startsWith("-") ? `-${amount}` : amount
   }
   if (typeof body.category === "string" && body.category.trim()) row.categoryId = categoryFor(s, body.category.trim())
   if (typeof body.name === "string" && body.name.trim()) row.name = body.name.trim()

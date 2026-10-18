@@ -1,0 +1,1 @@
+ALTER TABLE `transactions` ADD CONSTRAINT `chk_transactions_amount_nonzero` CHECK (`transactions`.`amount_kd` <> 0);

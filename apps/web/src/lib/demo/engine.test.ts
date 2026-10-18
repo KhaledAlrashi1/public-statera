@@ -158,6 +158,93 @@ describe("the demo's income extras (MOB-R112)", () => {
     expect(refused.status).toBe(409)
     expect((refused.body as { code: string }).code).toBe("category_not_income")
     expect(s.categories.find((c) => c.name === "Dining")!.isIncome).toBe(false)
-    expect(demoAnswer(s, "POST", "/api/transactions", { date: s.todayIso, category: "Bonus", name: "Bonus", amount_kd: "1.000", kind: "refund" }).status).toBe(400)
+    expect(demoAnswer(s, "POST", "/api/transactions", { date: s.todayIso, category: "Bonus", name: "Bonus", amount_kd: "1.000", kind: "gift" })).toMatchObject({ status: 400, body: { error: 'kind must be "income" or "refund".' } })
+  })
+})
+
+// MOB-R116 D4 — the demo mirrors the server's refund: a spending category is used or added, an income one is refused
+// (never flipped), the positive amount is stored negative, and a PATCH amount is a magnitude that keeps the sign.
+describe("the demo's refunds (MOB-R116 D4)", () => {
+  const now = new Date("2026-10-09T09:00:00Z")
+  const logRefund = (s: ReturnType<typeof createDemoState>, category: string, amount: string) =>
+    demoAnswer(s, "POST", "/api/transactions", { date: s.todayIso, merchant: "Caribou Coffee", category, name: "Caribou Coffee", amount_kd: amount, kind: "refund" })
+
+  it("a refund into a spending category is stored negative", () => {
+    const s = createDemoState(sample, now)
+    const created = logRefund(s, "dining", "2.250")
+    expect(created.status).toBe(201)
+    expect(body<{ item: { amount_kd: string; category: string; category_counts_as_income: boolean } }>(created).item).toMatchObject({
+      amount_kd: "-2.250", category: "Dining", category_counts_as_income: false,
+    })
+  })
+
+  it("a refund into an income category: 409 category_is_income, never flipped, nothing stored", () => {
+    const s = createDemoState(sample, now)
+    const rows = s.rows.length
+    const refused = logRefund(s, "Salary", "2.250")
+    expect(refused.status).toBe(409)
+    expect((refused.body as { code: string }).code).toBe("category_is_income")
+    expect(s.categories.find((c) => c.name === "Salary")!.isIncome).toBe(true)
+    expect(s.rows.length).toBe(rows)
+  })
+
+  it("editing a refund: amount_kd is a magnitude and the row keeps its sign", () => {
+    const s = createDemoState(sample, now)
+    const id = body<{ item: { id: number } }>(logRefund(s, "Dining", "2.250")).item.id
+    const updated = demoAnswer(s, "PATCH", `/api/transactions/${id}`, { amount_kd: "3.000", category: "Dining", name: "Caribou Coffee", merchant: "Caribou Coffee", date: s.todayIso })
+    expect(body<{ item: { amount_kd: string } }>(updated).item.amount_kd).toBe("-3.000")
+  })
+})
+
+// MOB-R117 C5, D2 — the demo mirrors the server: a refund never sits in a category that counts as income (POST and
+// PATCH, a new "Income…" name included), and log suggestions leave refunds out.
+describe("the demo's refunds and income categories (MOB-R117 C5, D2)", () => {
+  const now = new Date("2026-10-09T09:00:00Z")
+  const post = (s: ReturnType<typeof createDemoState>, extra: Record<string, unknown>) =>
+    demoAnswer(s, "POST", "/api/transactions", { date: s.todayIso, merchant: "Caribou Coffee", category: "Dining", name: "Caribou Coffee", amount_kd: "2.250", ...extra })
+  const refused = { status: 409, body: { ok: false, data: null, error: "That category is an income category.", code: "category_is_income" } }
+
+  it("C5: POST a refund into a new \"Income…\" name: 409, no category and no row added", () => {
+    const s = createDemoState(sample, now)
+    const [rows, cats] = [s.rows.length, s.categories.length]
+    expect(post(s, { category: "Income tips", kind: "refund" })).toEqual(refused)
+    expect([s.rows.length, s.categories.length]).toEqual([rows, cats])
+  })
+
+  it("C5: PATCH a refund into an income category: 409, the row unchanged", () => {
+    const s = createDemoState(sample, now)
+    const id = body<{ item: { id: number } }>(post(s, { kind: "refund" })).item.id
+    const before = { ...s.rows.find((r) => r.id === id)! }
+    expect(demoAnswer(s, "PATCH", `/api/transactions/${id}`, { amount_kd: "3.000", category: "Salary", name: "Caribou Coffee", merchant: "Caribou Coffee", date: s.todayIso })).toEqual(refused)
+    expect(s.rows.find((r) => r.id === id)).toEqual(before)
+  })
+
+  it("C5: PATCH a refund into a new \"Income…\" name: 409, no category added", () => {
+    const s = createDemoState(sample, now)
+    const id = body<{ item: { id: number } }>(post(s, { kind: "refund" })).item.id
+    const cats = s.categories.length
+    expect(demoAnswer(s, "PATCH", `/api/transactions/${id}`, { amount_kd: "2.250", category: "Income misc", name: "Caribou Coffee" })).toEqual(refused)
+    expect(s.categories.length).toBe(cats)
+  })
+
+  it("C5: a positive row moved into an income category still saves (today's path)", () => {
+    const s = createDemoState(sample, now)
+    const id = body<{ item: { id: number } }>(post(s, {})).item.id
+    const moved = demoAnswer(s, "PATCH", `/api/transactions/${id}`, { amount_kd: "2.250", category: "Salary", name: "Caribou Coffee" })
+    expect(moved.status).toBe(200)
+    expect(body<{ item: { amount_kd: string; category: string } }>(moved).item).toMatchObject({ amount_kd: "2.250", category: "Salary" })
+  })
+
+  it("D2: log suggestions leave refunds out (no refund-only place, no negative item or last amount)", () => {
+    const s = createDemoState(sample, now)
+    post(s, { merchant: "Refund Only Shop", name: "Returned mug", amount_kd: "4.000", kind: "refund" })
+    post(s, { merchant: "Two Kinds Cafe", name: "Latte", amount_kd: "1.500" })
+    post(s, { merchant: "Two Kinds Cafe", name: "Latte refund", amount_kd: "2.000", kind: "refund" })
+    type Place = { name: string; items: Array<{ amount_kd: string }>; last_amount: string | null }
+    const places = body<{ places: Place[] }>(demoAnswer(s, "GET", "/api/log-suggestions")).places
+    expect(places.find((p) => p.name === "Refund Only Shop")).toBeUndefined()
+    const two = places.find((p) => p.name === "Two Kinds Cafe")!
+    expect(two.items.map((i) => i.amount_kd)).toEqual(["1.500"])
+    expect(two.last_amount).toBe("1.500")
   })
 })

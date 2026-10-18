@@ -7,6 +7,8 @@ import {
 
 import { transactionsApi } from "@/lib/api"
 import { nameColour } from "@/lib/tile-colours"
+// MOB-R116 D5 — the row amount helper (refund style added) lives in lib/row-amount.
+import { rowAmount } from "@/lib/row-amount"
 import { cn, formatDisplayDate, formatKD, kuwaitNow } from "@/lib/utils"
 import type { Transaction } from "@/types/api"
 import { CategoryBadge } from "@/components/ui/category-badge"
@@ -15,12 +17,6 @@ import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useDebounce } from "./helpers"
 
-// MOB-R81 C6 — a row's amount: KD through formatKD, income as "+KD x" in the success colour. Display only.
-function rowAmount(row: Transaction): { text: string; className: string } {
-  return row.category_counts_as_income
-    ? { text: `+${formatKD(row.amount_kd)}`, className: "text-success" }
-    : { text: formatKD(row.amount_kd), className: "text-foreground" }
-}
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const

@@ -6,7 +6,7 @@
 //   module-level constants) so callers construct the SQL expression in a query-building
 //   context without importing the Drizzle column objects themselves.
 
-import { eq, sql, type SQL } from "drizzle-orm"
+import { eq, sql, type SQL, type SQLWrapper } from "drizzle-orm"
 import { categories } from "../db/schema/categories"
 import { transactions } from "../db/schema/transactions"
 import { userProfiles } from "../db/schema/users"
@@ -16,8 +16,11 @@ import { calendarMonthBounds, currentLocalDate, currentMonthKey, ymExpr } from "
 // Mirrors Flask's income_category_filter_expr:
 //   OR(is_income IS TRUE, LOWER(COALESCE(name,'')) LIKE 'income%')
 // The LIKE fallback handles legacy rows where is_income was not explicitly set.
-export function incomeCategoryFilter() {
-  return sql<number>`(${categories.isIncome} IS TRUE OR LOWER(COALESCE(${categories.name}, '')) LIKE 'income%')`
+// MOB-R117 C1 — the two operands default to the category columns, so every existing call emits the same SQL. A
+// caller that has no row yet (a category about to be inserted) passes its own flag and name, so the rule is never
+// restated (transaction-lib categoryCountsAsIncomeByName).
+export function incomeCategoryFilter(isIncome: SQLWrapper = categories.isIncome, name: SQLWrapper = categories.name) {
+  return sql<number>`(${isIncome} IS TRUE OR LOWER(COALESCE(${name}, '')) LIKE 'income%')`
 }
 
 // MOB-R77 C2 — the same rule for a transactions select that does not join categories (data-export):

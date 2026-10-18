@@ -36,8 +36,10 @@ import {
   validateTransactionInput,
   createTransactionWithDupCheck,
   forceUniqueNameKey,
+  categoryCountsAsIncomeByName,
   getOrCreateCategory,
   getOrCreateIncomeCategory,
+  getOrCreateRefundCategory,
   getOrCreateMerchant,
   learnTransaction,
   serializeTransaction,
@@ -224,11 +226,14 @@ transactionsRouter.post("/", requireAuth, importRateLimit, async (c) => {
   }
 
   // MOB-R112 D1 — optional kind: "income". Absent, the request takes today's path unchanged.
+  // MOB-R116 C2 — or kind: "refund". The amount is still parsed as a positive (parseKd unchanged); the server
+  // stores it negative, so a refund lowers spending wherever expenses are summed.
   const rawKind = body["kind"]
-  if (rawKind !== undefined && rawKind !== "income") {
-    return c.json({ ok: false, data: null, error: 'kind must be "income".', code: "validation_error" }, 400)
+  if (rawKind !== undefined && rawKind !== "income" && rawKind !== "refund") {
+    return c.json({ ok: false, data: null, error: 'kind must be "income" or "refund".', code: "validation_error" }, 400)
   }
   const incomeKind = rawKind === "income"
+  const refundKind = rawKind === "refund"
   if (incomeKind && !validated.categoryName) {
     return c.json({ ok: false, data: null, error: "Category is required for income.", code: "validation_error" }, 400)
   }
@@ -250,6 +255,15 @@ transactionsRouter.post("/", requireAuth, importRateLimit, async (c) => {
         )
       }
       categoryId = cat.id
+    } else if (refundKind) {
+      const cat = await getOrCreateRefundCategory(validated.categoryName, userId, db)
+      if (cat === "is_income") {
+        return c.json(
+          { ok: false, data: null, error: "That category is an income category.", code: "category_is_income" },
+          409,
+        )
+      }
+      categoryId = cat?.id ?? null
     } else {
       const cat = await getOrCreateCategory(validated.categoryName, userId, db)
       categoryId = cat?.id ?? null
@@ -260,6 +274,10 @@ transactionsRouter.post("/", requireAuth, importRateLimit, async (c) => {
     return c.json({ ok: false, data: null, error: (e as Error).message, code: "validation_error" }, 400)
   }
 
+  // MOB-R117 D1 — the one stored amount: negated for a refund. Both inserts below take it, so no write path
+  // can store a refund positive.
+  const storedAmountKd = refundKind ? validated.amountKd.negated() : validated.amountKd
+
   let txnId: number | null
   let isDup: boolean
   try {
@@ -268,7 +286,7 @@ transactionsRouter.post("/", requireAuth, importRateLimit, async (c) => {
       categoryId,
       merchantId,
       name: validated.name,
-      amountKd: validated.amountKd,
+      amountKd: storedAmountKd,
       userId,
       force,
       source: "manual",
@@ -310,7 +328,7 @@ transactionsRouter.post("/", requireAuth, importRateLimit, async (c) => {
           merchantId,
           name: validated.name,
           nameKey: fallbackKey,
-          amountKd: formatKd(validated.amountKd),
+          amountKd: formatKd(storedAmountKd),
           source: "manual",
         })
         .$returningId()
@@ -323,7 +341,8 @@ transactionsRouter.post("/", requireAuth, importRateLimit, async (c) => {
     }
   }
 
-  await learnTransaction(db, validated.name, userId, { categoryId, merchantId })
+  // MOB-R116 C4 — a refund is not learned: the next suggestion would carry a negative amount.
+  if (!refundKind) await learnTransaction(db, validated.name, userId, { categoryId, merchantId })
 
   ;(async () => {
     try {
@@ -398,12 +417,22 @@ transactionsRouter.patch("/:id{[0-9]+}", requireAuth, async (c) => {
     name = nameRaw
 
     try {
-      amountKd = parseKd(((body["amount_kd"] as string) ?? "").trim())
+      // MOB-R116 C3 — amount_kd is a magnitude; the row keeps its sign, so a refund stays a refund.
+      const magnitude = parseKd(((body["amount_kd"] as string) ?? "").trim())
+      amountKd = new Decimal(txn.amountKd).isNegative() ? magnitude.negated() : magnitude
     } catch (e) {
       return c.json({ ok: false, data: null, error: (e as Error).message, code: "validation_error" }, 400)
     }
 
     const catName = ((body["category"] as string) ?? "").trim()
+    // MOB-R117 C3 — a refund (a negative row) never sits in a category that counts as income: checked by the one
+    // rule before anything is written, so the row and the categories table stay as they were. Positive rows skip it.
+    if (catName && amountKd.isNegative() && (await categoryCountsAsIncomeByName(catName, userId, db)).countsAsIncome) {
+      return c.json(
+        { ok: false, data: null, error: "That category is an income category.", code: "category_is_income" },
+        409,
+      )
+    }
     const cat = await getOrCreateCategory(catName || null, userId, db)
     categoryId = cat?.id ?? null
   }
@@ -440,7 +469,8 @@ transactionsRouter.patch("/:id{[0-9]+}", requireAuth, async (c) => {
     )
   }
 
-  await learnTransaction(db, name, userId, { categoryId, merchantId })
+  // MOB-R116 C4 — a refund row is not learned (as on create).
+  if (!amountKd.isNegative()) await learnTransaction(db, name, userId, { categoryId, merchantId })
 
   ;(async () => {
     try {
@@ -528,6 +558,11 @@ transactionsRouter.post("/:id{[0-9]+}/split", requireAuth, async (c) => {
 
   if (!txn) {
     return c.json({ ok: false, data: null, error: "Transaction not found.", code: "not_found" }, 404)
+  }
+
+  // MOB-R116 C4 — a refund (a negative row) is not split.
+  if (new Decimal(txn.amountKd).isNegative()) {
+    return c.json({ ok: false, data: null, error: "A refund can't be split.", code: "validation_error" }, 400)
   }
 
   // ── Parse split rows

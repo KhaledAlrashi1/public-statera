@@ -378,9 +378,9 @@ describe("POST /api/transactions — kind income (MOB-R112 D1)", () => {
   it("any other kind is refused: 400, nothing written", async () => {
     const { db, writes } = recordingDb([])
     vi.mocked(getDb).mockReturnValue(db)
-    const res = await post({ ...income, kind: "refund" })
+    const res = await post({ ...income, kind: "gift" })
     expect(res.status).toBe(400)
-    expect(await res.json()).toEqual({ ok: false, data: null, error: 'kind must be "income".', code: "validation_error" })
+    expect(await res.json()).toEqual({ ok: false, data: null, error: 'kind must be "income" or "refund".', code: "validation_error" })
     expect(writes).toEqual([])
   })
 
@@ -1084,5 +1084,233 @@ describe("POST /api/transactions — cache-bust failure is non-fatal", () => {
         tags: expect.objectContaining({ handler: "transactions.post.cacheBust" }),
       }),
     )
+  })
+})
+
+// ── MOB-R116 C2–C4 — refunds ──────────────────────────────────────────────────
+
+describe("POST /api/transactions — kind refund (MOB-R116 C2)", () => {
+  // Routes each select by its COLUMNS (the MOB-R112 recorder) and records every write.
+  function recordingDb(foundCategory: Array<{ id: number; name: string; countsAsIncome: number }>, existingTxn: unknown[] = []) {
+    const writes: Array<{ op: string; table: string; values?: unknown; set?: unknown }> = []
+    const created = {
+      id: 81, date: "2026-10-17", name: "Caribou Coffee", memo: null, amountKd: "-2.250", source: "manual", importBatchId: null,
+      categoryId: 70, merchantId: null, categoryName: "Dining", categoryCountsAsIncome: 0, merchantName: null,
+    }
+    const chain = (rows: unknown, w?: { op: string; table: string; values?: unknown; set?: unknown }): unknown =>
+      new Proxy({}, {
+        get(_t, prop: string) {
+          if (prop === "then") return (res: (v: unknown) => unknown, rej: (e: unknown) => unknown) => Promise.resolve(rows).then(res, rej)
+          if (prop === "$returningId") return () => Promise.resolve([{ id: 70 }])
+          return (...args: unknown[]) => {
+            if (w && prop === "values") w.values = args[0]
+            if (w && prop === "set") w.set = args[0]
+            return chain(rows, w)
+          }
+        },
+      })
+    const db = new Proxy({}, {
+      get(_t, prop: string) {
+        if (prop === "transaction") return async (cb: (tx: unknown) => unknown) => cb(db)
+        return (...args: unknown[]) => {
+          if (prop === "select") {
+            const cols = args[0] ? Object.keys(args[0] as object) : []
+            if (cols.includes("countsAsIncome")) return chain(foundCategory)
+            if (cols.includes("categoryName")) return chain([created])
+            if (cols.length === 0) return chain(existingTxn)
+            return chain([])
+          }
+          const w = { op: prop, table: getTableName(args[0] as Table) }
+          writes.push(w)
+          return chain([{ affectedRows: 1 }], w)
+        }
+      },
+    }) as ReturnType<typeof getDb>
+    return { db, writes }
+  }
+  const post = async (body: Record<string, unknown>) =>
+    app.request("/api/transactions", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+  const refund = { date: "2026-10-17", merchant: "Caribou Coffee", category: "Dining", name: "Caribou Coffee", amount_kd: "2.250", kind: "refund" }
+
+  it("a found spending category is used and the row is stored negative", async () => {
+    const { db, writes } = recordingDb([{ id: 12, name: "Dining", countsAsIncome: 0 }])
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await post(refund)
+    expect(res.status).toBe(201)
+    expect(writes.filter((w) => w.table === "categories")).toEqual([])
+    expect(writes.find((w) => w.table === "transactions")).toMatchObject({ values: { categoryId: 12, amountKd: "-2.250" } })
+  })
+
+  it("a found income category: 409 category_is_income, never flipped, nothing written", async () => {
+    const { db, writes } = recordingDb([{ id: 12, name: "Bonus", countsAsIncome: 1 }])
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await post({ ...refund, category: "Bonus" })
+    expect(res.status).toBe(409)
+    expect(await res.json()).toEqual({
+      ok: false, data: null, error: "That category is an income category.", code: "category_is_income",
+    })
+    expect(writes).toEqual([])
+  })
+
+  it("no category by that name: inserts one with isIncome false", async () => {
+    const { db, writes } = recordingDb([])
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await post(refund)
+    expect(res.status).toBe(201)
+    expect(writes[0]).toMatchObject({ op: "insert", table: "categories", values: { userId: 1, name: "Dining", isIncome: false } })
+    expect(writes.find((w) => w.table === "transactions")).toMatchObject({ values: { categoryId: 70, amountKd: "-2.250" } })
+  })
+
+  it("a refund is not learned: no memorized_transactions write", async () => {
+    const { db, writes } = recordingDb([{ id: 12, name: "Dining", countsAsIncome: 0 }])
+    vi.mocked(getDb).mockReturnValue(db)
+    expect((await post(refund)).status).toBe(201)
+    expect(writes.filter((w) => w.table === "memorized_transactions")).toEqual([])
+  })
+
+  it("any other kind: 400 naming both kinds, nothing written", async () => {
+    const { db, writes } = recordingDb([])
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await post({ ...refund, kind: "gift" })
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ ok: false, data: null, error: 'kind must be "income" or "refund".', code: "validation_error" })
+    expect(writes).toEqual([])
+  })
+
+  const negativeRow = {
+    id: 5, userId: 1, date: new Date("2026-10-17T00:00:00Z"), name: "Caribou Coffee", nameKey: "caribou coffee", memo: null,
+    amountKd: "-2.250", source: "manual", importBatchId: null, categoryId: 12, merchantId: null,
+  }
+  const patch = async (body: Record<string, unknown>) =>
+    app.request("/api/transactions/5", {
+      method: "PATCH",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+
+  it("PATCH (C3): amount_kd is a magnitude and a refund row keeps its sign", async () => {
+    const { db, writes } = recordingDb([], [negativeRow])
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await patch({ name: "Caribou Coffee", category: "Dining", amount_kd: "3.000", merchant: "", date: "2026-10-17" })
+    expect(res.status).toBe(200)
+    expect(writes.find((w) => w.op === "update" && w.table === "transactions")).toMatchObject({ set: { amountKd: "-3.000" } })
+  })
+
+  it("PATCH (C4): a refund row is not learned", async () => {
+    const { db, writes } = recordingDb([], [negativeRow])
+    vi.mocked(getDb).mockReturnValue(db)
+    expect((await patch({ name: "Caribou Coffee", category: "Dining", amount_kd: "3.000" })).status).toBe(200)
+    expect(writes.filter((w) => w.table === "memorized_transactions")).toEqual([])
+  })
+
+  it("Split (C4): a refund row is refused, nothing written", async () => {
+    const { db, writes } = recordingDb([], [negativeRow])
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await app.request("/api/transactions/5/split", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ rows: [{ name: "A", amount_kd: "1.000" }, { name: "B", amount_kd: "1.250" }] }),
+    })
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ ok: false, data: null, error: "A refund can't be split.", code: "validation_error" })
+    expect(writes).toEqual([])
+  })
+})
+
+// ── MOB-R117 C2–C3 — a refund never sits in a category that counts as income ──
+
+describe("refunds and income categories (MOB-R117 C2, C3)", () => {
+  // Routes each select by its COLUMNS, records each select's columns and every write. `found` answers the lookup by
+  // name; `nameRule` answers the rule run on a new name (categoryCountsAsIncomeByName).
+  function recordingDb(opts: { found?: unknown[]; nameRule?: number; row?: unknown }) {
+    const writes: Array<{ op: string; table: string; values?: unknown; set?: unknown }> = []
+    const selects: string[][] = []
+    const chain = (rows: unknown, w?: { op: string; table: string; values?: unknown; set?: unknown }): unknown =>
+      new Proxy({}, {
+        get(_t, prop: string) {
+          if (prop === "then") return (res: (v: unknown) => unknown, rej: (e: unknown) => unknown) => Promise.resolve(rows).then(res, rej)
+          if (prop === "$returningId") return () => Promise.resolve([{ id: 70 }])
+          return (...args: unknown[]) => {
+            if (w && prop === "values") w.values = args[0]
+            if (w && prop === "set") w.set = args[0]
+            return chain(rows, w)
+          }
+        },
+      })
+    const db = new Proxy({}, {
+      get(_t, prop: string) {
+        if (prop === "transaction") return async (cb: (tx: unknown) => unknown) => cb(db)
+        return (...args: unknown[]) => {
+          if (prop === "select") {
+            const cols = args[0] ? Object.keys(args[0] as object) : []
+            selects.push(cols)
+            if (cols.includes("nameCountsAsIncome")) return chain([{ nameCountsAsIncome: opts.nameRule ?? 0 }])
+            if (cols.includes("countsAsIncome")) return chain(opts.found ?? [])
+            if (cols.length === 0) return chain(opts.row ? [opts.row] : [])
+            return chain(opts.row ? [opts.row] : [])
+          }
+          const w = { op: prop, table: getTableName(args[0] as Table) }
+          writes.push(w)
+          return chain([{ affectedRows: 1 }], w)
+        }
+      },
+    }) as ReturnType<typeof getDb>
+    return { db, writes, selects }
+  }
+  const call = async (method: string, path: string, body: Record<string, unknown>) =>
+    app.request(path, {
+      method,
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+  const refused = { ok: false, data: null, error: "That category is an income category.", code: "category_is_income" }
+  const refundRow = {
+    id: 5, userId: 1, date: new Date("2026-10-17T00:00:00Z"), name: "Bonus", nameKey: "bonus", memo: null,
+    amountKd: "-2.250", source: "manual", importBatchId: null, categoryId: 12, merchantId: null,
+  }
+
+  it("C2: POST refund to a new name the income rule matches: 409, no category and no row written", async () => {
+    const { db, writes } = recordingDb({ found: [], nameRule: 1 })
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await call("POST", "/api/transactions", {
+      date: "2026-10-17", category: "Income from sale", name: "Sale", amount_kd: "2.250", kind: "refund",
+    })
+    expect(res.status).toBe(409)
+    expect(await res.json()).toEqual(refused)
+    expect(writes).toEqual([])
+  })
+
+  it("C3: PATCH a refund into Bonus (counts as income): 409, row and categories untouched", async () => {
+    const { db, writes } = recordingDb({ found: [{ id: 30, name: "Bonus", countsAsIncome: 1 }], row: refundRow })
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await call("PATCH", "/api/transactions/5", { name: "Bonus", category: "Bonus", amount_kd: "2.250", merchant: "", date: "2026-10-17" })
+    expect(res.status).toBe(409)
+    expect(await res.json()).toEqual(refused)
+    expect(writes).toEqual([])
+  })
+
+  it("C3: PATCH a refund into a new name the income rule matches: 409, no category written", async () => {
+    const { db, writes } = recordingDb({ found: [], nameRule: 1, row: refundRow })
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await call("PATCH", "/api/transactions/5", { name: "Bonus", category: "Income misc", amount_kd: "2.250" })
+    expect(res.status).toBe(409)
+    expect(writes).toEqual([])
+  })
+
+  it("C3: a positive row moved into an income category takes today's path: no rule read, 200, same update", async () => {
+    const positive = { ...refundRow, amountKd: "10.000", name: "Lunch", nameKey: "lunch" }
+    const { db, writes, selects } = recordingDb({ found: [{ id: 30, name: "Bonus", countsAsIncome: 1 }], row: positive })
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await call("PATCH", "/api/transactions/5", { name: "Lunch", category: "Bonus", amount_kd: "10.000" })
+    expect(res.status).toBe(200)
+    expect(selects.some((cols) => cols.includes("countsAsIncome") && !cols.includes("categoryName"))).toBe(false)
+    expect(selects.some((cols) => cols.includes("nameCountsAsIncome"))).toBe(false)
+    expect(writes.find((w) => w.op === "update" && w.table === "transactions")).toMatchObject({
+      set: { name: "Lunch", nameKey: "lunch", amountKd: "10.000" },
+    })
   })
 })
