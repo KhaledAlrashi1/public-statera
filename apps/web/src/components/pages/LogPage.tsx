@@ -782,7 +782,8 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
       titleSlot={
         editing ? undefined : (
           // MOB-R112 D6 — "Spent · Income", new entries only. MOB-R114 E2 — it is the visible title.
-          <div role="group" aria-label="Entry type" className="grid grid-cols-2 gap-1 rounded-full border border-border bg-card p-1">
+          // MOB-R115 D2 — 8px (mb-2) between it and the line under it.
+          <div role="group" aria-label="Entry type" className="mb-2 grid grid-cols-2 gap-1 rounded-full border border-border bg-card p-1">
             {(["spent", "income"] as const).map((k) => (
               <button
                 key={k}
@@ -1232,12 +1233,14 @@ function Frame({
   // page she was on (lib/log-dialog), sized like the Income dialog (max-w-md, 90vh). Escape and the dialog's close
   // button go back, as Back does; the dialog keeps focus inside. No safe-area padding or keyboard spacer: those
   // are the phone's. The phone's full-screen frame below is unchanged.
+  // MOB-R115 D3 — at 1280×800 it fits with no inner scroll: padding top and bottom 24→16px (sm:py-4), column gap
+  // 16→12px (gap-3).
   const asDialog = useContext(LogDialogContext)
   if (asDialog) {
     return (
       <Dialog open onOpenChange={(open) => { if (!open) onBack() }}>
-        <DialogContent ref={frameRef} data-log-frame="" aria-describedby={undefined} className="max-w-md overscroll-contain bg-background">
-          <div className="flex flex-col gap-4">
+        <DialogContent ref={frameRef} data-log-frame="" aria-describedby={undefined} className="max-w-md overscroll-contain bg-background sm:py-4">
+          <div className="flex flex-col gap-3">
             <header className="min-w-0 pe-8">
               <DialogTitle className={titleSlot ? "sr-only" : "text-xl leading-normal tracking-normal"}>{title}</DialogTitle>
               {titleSlot}
