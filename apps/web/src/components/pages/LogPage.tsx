@@ -1169,7 +1169,8 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
             onClick={deleteEntry}
             className="flex min-h-14 w-full items-center px-4 py-3 text-start font-semibold text-destructive disabled:opacity-50"
           >
-            {isIncome ? "Delete income" : "Delete expense"}
+            {/* MOB-R117 D3 — a refund's delete control names it (RM-26). */}
+            {isIncome ? "Delete income" : isRefund ? "Delete refund" : "Delete expense"}
           </button>
         </section>
       ) : null}

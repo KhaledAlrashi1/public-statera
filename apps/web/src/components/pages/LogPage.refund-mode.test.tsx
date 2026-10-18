@@ -111,7 +111,7 @@ describe("/log editing a refund (MOB-R116 D2, D5)", () => {
     await screen.findByRole("heading", { level: 1, name: "Edit refund" })
     await waitFor(() => expect(screen.getByRole("button", { name: /^Amount/ })).toHaveTextContent("KD 2.250"))
     expect(screen.queryByRole("button", { name: /^Split this/ })).toBeNull()
-    expect(screen.getByRole("button", { name: "Delete expense" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Delete refund" })).toBeInTheDocument()
   })
 })
 

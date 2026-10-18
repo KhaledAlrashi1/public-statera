@@ -8,7 +8,7 @@ import {
 import { transactionsApi } from "@/lib/api"
 import { nameColour } from "@/lib/tile-colours"
 // MOB-R116 D5 — the row amount helper (refund style added) lives in lib/row-amount.
-import { rowAmount } from "@/lib/row-amount"
+import { isRefundRow, rowAmount } from "@/lib/row-amount"
 import { cn, formatDisplayDate, formatKD, kuwaitNow } from "@/lib/utils"
 import type { Transaction } from "@/types/api"
 import { CategoryBadge } from "@/components/ui/category-badge"
@@ -33,6 +33,11 @@ function dayLabel(iso: string, today: string): string {
   const weekday = WEEKDAYS[new Date(Date.UTC(y, mo - 1, d)).getUTCDay()]
   const year = m[1] === today.slice(0, 4) ? "" : ` ${y}`
   return `${weekday} ${d} ${MONTHS[mo - 1]}${year}`
+}
+
+// MOB-R118 C1 — the word is provisional (RM-26); the separator is " · " (U+00B7 with spaces).
+function refundCategoryText(category: string): string {
+  return `${category} · Refund`
 }
 
 function TransactionsTable({
@@ -370,6 +375,10 @@ function TransactionsTable({
                     const line1 = row.merchant || row.category || row.name
                     const line2 = row.merchant ? row.category : row.category ? row.name || null : null
                     const amount = rowAmount(row)
+                    // MOB-R118 C1 — a refund's category text reads "<category> · Refund", on whichever line shows it.
+                    const refund = isRefundRow(row)
+                    const shown1 = refund && !row.merchant && row.category ? refundCategoryText(line1) : line1
+                    const shown2 = refund && row.merchant && line2 ? refundCategoryText(line2) : line2
                     const rowBody = (
                       <>
                         <span
@@ -383,8 +392,8 @@ function TransactionsTable({
                           {line1.trim().charAt(0).toUpperCase()}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-semibold">{line1}</span>
-                          {line2 ? <span className="block truncate text-xs text-muted-foreground">{line2}</span> : null}
+                          <span className="block truncate text-sm font-semibold">{shown1}</span>
+                          {shown2 ? <span className="block truncate text-xs text-muted-foreground">{shown2}</span> : null}
                         </span>
                         <span className={cn("shrink-0 font-mono text-sm font-semibold tabular-nums", amount.className)}>
                           {amount.text}
@@ -528,7 +537,10 @@ function TransactionsTable({
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <CategoryBadge category={row.category} countsAsIncome={row.category_counts_as_income} />
+                        <CategoryBadge
+                          category={isRefundRow(row) ? refundCategoryText(row.category || "Uncategorized") : row.category}
+                          countsAsIncome={row.category_counts_as_income}
+                        />
                       </td>
                       <td className="max-w-[240px] truncate px-4 py-3" title={row.name}>
                         {row.name}
