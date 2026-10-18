@@ -14234,3 +14234,55 @@ G1 Before any edit: readers by grep for the predicate and each changed behaviour
 G2 Ungranted breaks: no code commit; stash by content hash, list each with file:line and the
    runner's failure text.
 G3 A miss is reported with its cause. A fix beyond this block = STOP.
+
+MOB-R118 — REFUND: FINISH D3/D4, PROVE THE SQL, SHIP WITH THE RM-21 LINE. Sun 18 Oct 2026.
+
+Tier 1: the income predicate, the push, the migrations. Tier 2 (lighter): D3, D4.
+
+A. PERSIST, ACCEPT
+A1 Persist this block first, alone; commit. Blank 14237, then from 14238. Strict 118, loose 120.
+A2 R117 ACCEPTED. Persisted 14174–14236, hash-equal; stash applied by hash and dropped. Commits
+   eda2386 and 3f97c26; counts as predicted: APIH 947/0/108, APII 1045/0/10, FE 658/0.
+   Both STOPs were right. Channel premise errors: D3 missed R116's own test pinning the label;
+   D4 assumed a secondary line with a separator, drawn from a channel render, not an artifact.
+
+B. D3, GRANTED
+B1 LogPage.refund-mode.test.tsx:114 now asserts "Delete refund". Then build R117 D3 as written.
+
+C. D4, RE-RULED FROM CC'S MEASURE
+C1 A refund row's category text reads "<category> · Refund" in both layouts: the 390 line and
+   the 1280 category column. Separator " · " (U+00B7 with spaces). Word provisional (RM-26).
+   Spend and income rows unchanged. CategoryDetailModal: no change.
+C2 Screenshots of Activity at 390 and 1280, light and dark, demo; plus one live at 390. If the
+   text wraps or truncates at 390, report it with the screenshot. No STOP for that.
+
+D. PROOF BEFORE PUSH (Tier 1)
+D1 incomeCategoryFilter (payday-lib.ts:22) with default inputs: its emitted SQL for every
+   existing caller is byte-equal to 9c88ee7. Show it: both strings captured from the code
+   (toSQL or equivalent), compared with cmp or a test. Unequal = STOP.
+D2 R117 C6 M1 turned APIH 2 red but APII 1. One line: which test does not run under
+   INTEGRATION, and why. No change unless it shows a gap.
+
+E. QUEUED, NOT BUILT. Touching any = STOP. expenseCategoryFilter (payday-lib.ts:39) spells the
+income rule a second time. Bulk edit saves through Promise.all, so one refusal can leave other
+rows saved. Dead fallback insert behind the empty try (transactions.ts:317-319). R117 E items.
+
+F. SHIP
+F1 All three suites exit 0, both tsc --noEmit exit 0, Errors 0. Commit B and C.
+F2 RM-21 GATE. Push only if the operator's message carries, outside this block, a line that
+   begins "RM-21" (his backup confirmation or his waiver). Record it verbatim in the report.
+   No such line = STOP before push.
+F3 Push. Read the run with gh run view: every job succeeded and the migrate step applied 0008
+   then 0009. /healthz and /readyz report the new sha, inside and outside the sandbox; two
+   failures outside = STOP.
+F4 A failed migration or deploy: STOP and report. The down runbook runs only under a block.
+F5 Write, do not run, a read-only server command (R115 E3 method) for the operator: all_rows,
+   rows_le_zero, and the CHECK constraint names on transactions (expected: only
+   chk_transactions_amount_nonzero). Print it in the report.
+
+G. MEASURE AND REPORT
+G1 Before any edit: readers and pinning tests by grep; every count predicted with sign (tests
+   and files); every break predicted. Re-derive; do not carry.
+G2 Ungranted breaks: no code commit; stash by content hash, list each with file:line and the
+   runner's failure text.
+G3 A miss is reported with its cause. A fix beyond this block = STOP.
