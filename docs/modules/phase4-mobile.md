@@ -14109,3 +14109,64 @@ F. Counts from the runner after D, against APIH 934/0/102, APII 1026/0/10, FE 63
    Typechecks 0; Errors 0. Persist this block first (blank 14072, then from 14073; strict 115,
    loose 117). Ship D: commit, push, CI by gh run view, probes on the new sha inside and
    outside. E goes in the report text.
+
+MOB-R116 — REFUND: BUILD AND MEASURE. STASH ONLY. NO PUSH, NO DEPLOY. Sun 18 Oct 2026.
+
+Tier 1: API, migrations, demo engine, request bodies. Tier 2 (lighter): visuals.
+
+A. R115 ACCEPTED. Persisted 14073–14111, hash-equal; strict 115, loose 117; stashes 0 by hash.
+D live at 9c88ee7 (run 39117376526); FE 638/148, APIH 934/102, APII 1026/10, all unchanged.
+Channel re-check of D at 1280: Spent 730−20 = 710 and Income 445−20 = 425, both met.
+INSTRUMENT NOTE: vs the dialog top, Income's Save moved −12 but Spent's moved 0. That fits the
+Spent "before" Save being read at scrollTop 12. From now on every 1280 position names scrollTop.
+E is the plan. Granted: the constraint name chk_transactions_amount_nonzero (CC's choice) and
+the generated migration names.
+
+B. RM-21 SCOPE. This block lets CC write 0008/0009 and run them on dev and test DBs only.
+Production DB and server untouched. The persist commit stays local and rides R117's push.
+R117 ships after the operator's backup and his R115 E3 output (rows_le_zero must read 0).
+
+C. API (Tier 1)
+C1 0008 then 0009 exactly as R115 E1, two generate steps; a third reads "No schema changes".
+C2 POST kind:"refund": parseKd unchanged (positive); the server stores the negative. Found
+   expense category used; found income category = 409 (code mirrors category_not_income, name is
+   CC's, provisional); none = insert isIncome false. Absent kind and kind:"income": response and
+   stored bytes unchanged. Other values = 400, message names both kinds (provisional).
+C3 PATCH: amount_kd is a magnitude; the row keeps its sign (transactions.ts:401). Positive rows:
+   bytes and result unchanged. MEASURE ONLY: what PATCH does when a refund moves to an income
+   category. Report it; no fix.
+C4 Planned exceptions per R115 E2: Split refuses negatives; learnTransaction (:326/:443/:644) and
+   log-suggestions (:94/:144) skip refunds; R12 skips negatives (:217); importer unchanged.
+C5 New tests: APIH for C2/C3. APII after 0009: −1.500 accepted, 0 refused, POST refund round trip.
+
+D. FRONTEND
+D1 Switch "Spent · Refund · Income": 44 px, one line (R115 E4). Refund body = the Spent body
+   (same tiles, place, category, amount, date). Hidden heading "New refund"; line under the
+   switch "Money back from a place. Lowers your spending." (RM-26). Save = Spent body plus
+   "kind":"refund".
+D2 Edit a refund (LogPage.tsx:325): the field shows the magnitude via the existing formatter
+   (RM-27: no second normalizer); heading "Edit refund"; PATCH sends the magnitude.
+D3 Bulk edit (BulkEditDialog.tsx:152): sends the magnitude for negative rows.
+D4 Demo engine (engine.ts:898/902/931): refund mirror of C2. No network (Tier 1).
+D5 Activity refund style as planned in the R111 report. CategoryDetailModal reuses that same
+   style helper; no new strings. Hide the Split control on refund rows if one renders today.
+D6 Category chart and Income vs Expenses bars clamp at 0 at render. R3 bytes for a user with no
+   refunds unchanged; analytics cache stays v3, snapshot format 3.
+D7 BYTE PROOF (R106 D2 method), 390 and 1280, both engines, vs 9c88ee7: Spent and Income POST,
+   Spent and Income edit PATCH, bulk-edit PATCH on a positive row. Capture the Refund body too.
+D8 Refund at 390 and 1280, new and edit, light and dark, both engines: screenshots. 1280 Refund
+   dialog: scrollHeight <= clientHeight. Spent and Income positions equal R115 D "after".
+
+E. QUEUED, NOT BUILT. Touching any = STOP. "Zero sum means no rows" (WeeklyDigest delta, Income
+vs Expenses caption, SpendForecastWidget); R4 top_categories pct and digest top list go net;
+API-only R1/R2/R5/R6, /top-patterns, /dup-check; an exported −2.250 does not re-import.
+
+F. MEASURE AND REPORT
+F1 Before any edit: readers by grep for each changed behaviour; every suite count predicted with
+   sign (tests and files); every break predicted. R115 E5 said APIH 1 (transactions.test.ts
+   :378-385), FE 1 (engine.test.ts:161), APII 0. Re-derive; do not carry.
+F2 No existing test line is edited. Each break: file:line plus the runner's failure text. R117
+   grants line by line.
+F3 Down runbook (R115 E1 text) as a doc beside the backups runbook, inside the stash.
+F4 Both tsc --noEmit exit 0. One stash by content hash (lines, sha256); tree clean after.
+F5 A miss is reported with its cause. A fix beyond this block = STOP.
