@@ -451,6 +451,8 @@ export const transactionsApi = {
     name: string
     amount_kd: string
     force?: string
+    // MOB-R112 D1 — Log's income mode only; an expense sends no kind.
+    kind?: "income"
   }) =>
     apiFetch<ApiEnvelope<{ item: Transaction }>>("/api/transactions", {
       method: "POST",

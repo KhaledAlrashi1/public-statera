@@ -155,8 +155,10 @@ export default function DashboardPage() {
   )
   // R3's per-month strings, for the exact-fils figures below.
   const monthlyKdMap = useMemo(() => {
-    const map = new Map<string, { expense_kd: string; savings_kd: string }>()
-    monthlyMetrics.forEach((row) => map.set(row.month, { expense_kd: row.expense_kd, savings_kd: row.savings_kd }))
+    const map = new Map<string, { expense_kd: string; savings_kd: string; extras_kd: string }>()
+    monthlyMetrics.forEach((row) =>
+      map.set(row.month, { expense_kd: row.expense_kd, savings_kd: row.savings_kd, extras_kd: row.extras_kd })
+    )
     return map
   }, [monthlyMetrics])
   const hasRecordedExpenses = useMemo(
@@ -204,10 +206,14 @@ export default function DashboardPage() {
     return Number.isFinite(n) && n > 0 ? n : null
   }, [profile?.monthly_income_kd])
 
-  const monthIncome = typedIncome
+  // MOB-R112 D3/D5 — the period's income: the typed income plus the extras dated in the selected
+  // payday period (R3's extras_kd), not R4's total_income_mtd, which counts every income row. With
+  // nothing typed, the extras do not count and income stays not set.
+  const periodExtrasFils = filsOf(selectedMonth ? monthlyKdMap.get(selectedMonth)?.extras_kd : null)
+  const incomeFils = typedIncome === null ? null : filsOf(String(profile?.monthly_income_kd ?? "")) + periodExtrasFils
+  const monthIncome = incomeFils === null ? null : filsToDisplayKd(incomeFils)
   // MOB-R55 P3 / MOB-R58 D1 — the month's savings total comes from the server: R4 when present,
   // else R3 for the same month. Exact fils throughout (KS13).
-  const incomeFils = typedIncome === null ? null : filsOf(String(profile?.monthly_income_kd ?? ""))
   const monthExpensesFils = accountOverview
     ? filsOf(accountOverview.total_spend_mtd)
     : filsOf(selectedMonth ? monthlyKdMap.get(selectedMonth)?.expense_kd : null)
@@ -311,8 +317,12 @@ export default function DashboardPage() {
       month: row.month,
       income: Number(row.income_kd || 0),
       expenses: Number(row.expense_kd || 0),
+      // MOB-R112 D4 — the income line per period: typed + that period's extras; null when not typed.
+      periodIncome: typedIncome === null
+        ? null
+        : filsToDisplayKd(filsOf(String(profile?.monthly_income_kd ?? "")) + filsOf(row.extras_kd)),
     }))
-  }, [monthlyMetrics])
+  }, [monthlyMetrics, typedIncome, profile?.monthly_income_kd])
 
   const selectedMonthExpenseMap = useMemo(
     () => (selectedMonth ? (expenseByCategoryByMonth[selectedMonth] || {}) : {}),
@@ -784,6 +794,7 @@ export default function DashboardPage() {
         footers={heroFooters}
         analyticsUpdatedAt={analyticsUpdatedAt}
         onOpenIncome={() => setIncomeDialogOpen(true)}
+        incomeHasExtras={incomeSet && periodExtrasFils > 0}
       />
 
       {showDashboardEmptyState ? (

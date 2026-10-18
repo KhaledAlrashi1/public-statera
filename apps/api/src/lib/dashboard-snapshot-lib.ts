@@ -32,6 +32,7 @@ import { ymExpr, buildMonthWindow, currentMonthKey } from "./analytics-helpers"
 import { paydayActive, periodBoundsForKey, periodKeyExpr } from "./payday-lib"
 import { incomeCategoryFilter } from "./payday-lib"
 import { isSavingsCategoryName } from "./category-kind"
+import { incomeExtraFilter } from "./income-extras"
 
 // Re-export buildMonthWindow for existing callers (including tests importing from this file).
 export { buildMonthWindow }
@@ -44,6 +45,9 @@ export type DashboardMonthlyEntry = {
   // MOB-R55 P2 — expense_kd excludes savings-kind categories; their total is savings_kd.
   expense_kd: string
   savings_kd: string
+  // MOB-R112 D4 — the period's extras (lib/income-lib.ts incomeExtraFilter), a part of income_kd.
+  // Raw: a reader adds it to the typed income only when income is typed (D5).
+  extras_kd: string
 }
 
 export type DashboardMetricsPayload = {
@@ -151,6 +155,7 @@ function validateSnapshotPayload(raw: unknown): DashboardMetricsPayload | null {
     if (typeof e.income_kd !== "string") return null
     if (typeof e.expense_kd !== "string") return null
     if (typeof e.savings_kd !== "string") return null
+    if (typeof e.extras_kd !== "string") return null
   }
 
   // expense_by_category is a two-level map with DYNAMIC keys at both levels
@@ -229,6 +234,7 @@ export async function computeDashboardMetricsPayload(
       catName: categories.name,
       total: sql<string>`SUM(${transactions.amountKd})`,
       isIncome: isIncomeExpr,
+      extras: sql<string>`SUM(CASE WHEN ${incomeExtraFilter()} THEN ${transactions.amountKd} ELSE 0 END)`,
     })
     .from(transactions)
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
@@ -238,22 +244,25 @@ export async function computeDashboardMetricsPayload(
   const incomeByMonth: Record<string, Decimal> = {}
   const expenseByMonth: Record<string, Decimal> = {}
   const savingsByMonth: Record<string, Decimal> = {}
+  const extrasByMonth: Record<string, Decimal> = {}
   const expenseByCategory: Record<string, Record<string, Decimal>> = {}
 
   for (const key of monthKeys) {
     incomeByMonth[key] = new Decimal(0)
     expenseByMonth[key] = new Decimal(0)
     savingsByMonth[key] = new Decimal(0)
+    extrasByMonth[key] = new Decimal(0)
     expenseByCategory[key] = {}
   }
 
-  for (const { ym, catName, total, isIncome } of queryRows) {
+  for (const { ym, catName, total, isIncome, extras } of queryRows) {
     const monthKey = ym ?? ""
     if (!(monthKey in incomeByMonth)) continue
     const amount = toD(total)
     const category = catName ?? "Uncategorized"
     if (isIncome) {
       incomeByMonth[monthKey] = incomeByMonth[monthKey].plus(amount)
+      extrasByMonth[monthKey] = extrasByMonth[monthKey].plus(toD(extras))
     } else {
       // MOB-R55 P2 — a savings-kind category leaves the expense total but keeps its own row in
       // the per-category breakdown, under its own name.
@@ -270,6 +279,7 @@ export async function computeDashboardMetricsPayload(
     income_kd: formatKd(incomeByMonth[key] ?? new Decimal(0)),
     expense_kd: formatKd(expenseByMonth[key] ?? new Decimal(0)),
     savings_kd: formatKd(savingsByMonth[key] ?? new Decimal(0)),
+    extras_kd: formatKd(extrasByMonth[key] ?? new Decimal(0)),
   }))
 
   const expenseByCategoryStr: Record<string, Record<string, string>> = {}
@@ -296,7 +306,8 @@ export async function computeDashboardMetricsPayload(
 // without the current version (every row written before K1, whose expense_kd still includes
 // savings) reads as a miss and is recomputed through the existing Tier 3 path, which rewrites it.
 // An old-rule row is never shown. No migration and no schema change: the column is unchanged.
-export const SNAPSHOT_FORMAT_VERSION = 2
+// v3 (MOB-R112 D4): monthly[] carries extras_kd; a v2 row lacks it and is recomputed the same way.
+export const SNAPSHOT_FORMAT_VERSION = 3
 
 // Upserts a snapshot row. The unique constraint on (user_id, months_count,
 // window_end_month) guarantees at most one canonical snapshot per window.

@@ -19,6 +19,8 @@ import { getOrCreateCategory } from "../lib/transaction-lib"
 import { parseKd, formatKd } from "../lib/transaction-lib"
 import { cacheBustSafeToSpend } from "../lib/analytics-cache"
 import { recordEvent, recordEventOnce } from "../lib/product-events-lib"
+import { sumIncomeExtrasBetween } from "../lib/income-extras"
+import { periodBoundsForKey } from "../lib/payday-lib"
 
 export const budgetsRouter = new Hono()
 
@@ -109,13 +111,20 @@ async function buildProfileContext(
   }, new Decimal(0))
 
   const income = await resolveIncomeForPeriod(userId, month, db)
-  const incomeKd = income.amountKd
 
   const [profile] = await db
     .select({ paydayDay: userProfiles.paydayDay })
     .from(userProfiles)
     .where(eq(userProfiles.userId, userId))
     .limit(1)
+
+  // MOB-R112 D3/D5 — typed income plus the extras dated in this month's payday period; with nothing
+  // typed, extras do not count (no query is run) and income stays not set.
+  let incomeKd = income.amountKd
+  if (incomeKd !== null) {
+    const { start, end } = periodBoundsForKey(profile?.paydayDay ?? null, month)
+    incomeKd = incomeKd.plus(await sumIncomeExtrasBetween(userId, start, end, db))
+  }
 
   // Explicit divide-by-zero guard — decimal.js throws on .div(0), don't rely on try/catch
   let budgetToIncomePct: string | null = null

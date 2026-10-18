@@ -144,3 +144,26 @@ describe("DashboardHero — typed income (MOB-R36)", () => {
     expect(screen.queryByText(/vs last month/i)).toBeNull()
   })
 })
+
+// MOB-R114 F — the Income tile's footer says the figure includes extras when the period has any.
+describe("DashboardHero — Income footer with extras (MOB-R114 F)", () => {
+  it("extras in the period: 'Set by you + extras'; none: 'Monthly, set by you'", () => {
+    const hero = (incomeHasExtras: boolean) => (
+      <DashboardHero
+        isLoading={false}
+        monthLabel="March 2026"
+        monthIncome={1250}
+        monthExpenses={600}
+        monthSavings={0}
+        monthRemaining={650}
+        incomeHasExtras={incomeHasExtras}
+      />
+    )
+    const { rerender } = render(hero(true))
+    expect(screen.getByText("Set by you + extras")).toBeInTheDocument()
+    expect(screen.queryByText("Monthly, set by you")).toBeNull()
+    rerender(hero(false))
+    expect(screen.getByText("Monthly, set by you")).toBeInTheDocument()
+    expect(screen.queryByText("Set by you + extras")).toBeNull()
+  })
+})

@@ -1291,6 +1291,43 @@ describe("GET /api/analytics/safe-to-spend", () => {
   // real currentLocalDate() — today 2026-05-10 > 2025-06-30 always
   // → days_elapsed=30, days_remaining=0, spendWindowEnd=cycleEnd, daily_rate=X/max(0,1)
 
+  // MOB-R112 D3/D5 — the period's income is typed + the extras dated in the period. The extras
+  // query runs after the budgets and spend queries, so it reads the fourth slot.
+  it("MOB-R112 D3: monthly_income_kd = typed income + the period's extras", async () => {
+    vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(new Date(Date.UTC(2025, 10, 10)))
+    vi.mocked(resolveIncomeForPeriod).mockResolvedValue({ amountKd: new Decimal("1500.000"), source: "declared_in_profile" })
+    vi.mocked(getDb).mockReturnValue(
+      makeSequentialDb([[], [{ amount: "500.000", catName: "Food" }], [{ total: "120.000" }], [{ total: "75.000" }]]),
+    )
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-11", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const data = ((await res.json()) as { data: Record<string, unknown> }).data
+    expect(data.monthly_income_kd).toBe("1575.000")
+    expect(data.income_source).toBe("declared_in_profile")
+    // 1575 - 500 - 120 = 955 over 20 days remaining
+    expect(data.remaining_budget_kd).toBe("955.000")
+    expect(data.daily_rate_kd).toBe("47.750")
+  })
+
+  it("MOB-R112 D5: with no typed income the extras do not count and income stays not set", async () => {
+    vi.spyOn(analyticsHelpers, "currentLocalDate").mockReturnValue(new Date(Date.UTC(2025, 10, 10)))
+    vi.mocked(resolveIncomeForPeriod).mockResolvedValue({ amountKd: null, source: "not_set" })
+    vi.mocked(getDb).mockReturnValue(
+      makeSequentialDb([[], [{ amount: "500.000", catName: "Food" }], [{ total: "120.000" }], [{ total: "75.000" }]]),
+    )
+    const res = await app.request("/api/analytics/safe-to-spend?month=2025-11", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const data = ((await res.json()) as { data: Record<string, unknown> }).data
+    expect(data.monthly_income_kd).toBeNull()
+    expect(data.income_source).toBe("not_set")
+    expect(data.warnings).toContain("income_not_set")
+    expect(data.remaining_budget_kd).toBe("0.000")
+  })
+
   describe("warning-state combinations (stable past month 2025-06)", () => {
     // WC1: income_not_set standalone — budget set, income absent.
     it("WC1: income_not_set — remaining and daily_rate both zero", async () => {

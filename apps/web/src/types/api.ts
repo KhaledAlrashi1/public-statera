@@ -97,6 +97,8 @@ export interface DashboardMetricsResponse {
     // MOB-R55 P2 — expense_kd excludes savings-kind categories; their total is savings_kd.
     expense_kd: string
     savings_kd: string
+    // MOB-R112 D4 — the period's extras (Bonus, Commission, Other income), a part of income_kd.
+    extras_kd: string
   }>
   // R3 expense_by_category leaf values are 3-decimal strings via formatKd, not number.
   expense_by_category: Record<string, Record<string, string>>

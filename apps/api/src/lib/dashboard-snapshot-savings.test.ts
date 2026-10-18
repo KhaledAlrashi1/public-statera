@@ -35,7 +35,7 @@ describe("computeDashboardMetricsPayload — savings split (MOB-R55 P2)", () => 
       cycleEnabled: false,
     })
     expect(payload.monthly).toEqual([
-      { month: "2026-01", income_kd: "100.000", expense_kd: "40.000", savings_kd: "30.000" },
+      { month: "2026-01", income_kd: "100.000", expense_kd: "40.000", savings_kd: "30.000", extras_kd: "0.000" },
     ])
     expect(payload.expense_by_category["2026-01"]).toEqual({ Groceries: "40.000", "Savings & investing": "30.000" })
   })

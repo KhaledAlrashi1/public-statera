@@ -242,6 +242,42 @@ describe("GET /api/budgets", () => {
     expect(ctx.budget_to_income_pct).toBeNull()
     expect(incomeSumQueries).toBe(0)
   })
+
+  // MOB-R112 D3 — typed income plus the extras dated in the month's payday period. The `total`
+  // select is the extras sum (lib/income-extras.ts), routed by its columns, not by call order.
+  it("profile_context adds the period's extras to the typed income (MOB-R112 D3)", async () => {
+    const budgetRow = { id: 1, month: "2026-04", amountKd: "430.000", categoryName: "Food" }
+    let extrasQueries = 0
+    vi.mocked(getDb).mockImplementation(() => {
+      const proxy: ReturnType<typeof getDb> = new Proxy({}, {
+        get(_t, prop: string) {
+          if (prop === "transaction") return async (cb: unknown) => (cb as (tx: unknown) => Promise<unknown>)(proxy)
+          return (...args: unknown[]) => {
+            const cols = prop === "select" && args[0] ? Object.keys(args[0] as object) : []
+            if (cols.includes("amountKd")) return makeChain([budgetRow])
+            if (cols.includes("total")) {
+              extrasQueries++
+              return makeChain([{ total: "75.000" }])
+            }
+            if (cols.includes("monthlyIncomeKd")) return makeChain([{ monthlyIncomeKd: "1000.000", paydayDay: null }])
+            if (cols.includes("paydayDay")) return makeChain([{ paydayDay: null }])
+            return makeChain([])
+          }
+        },
+      }) as ReturnType<typeof getDb>
+      return proxy
+    })
+    const res = await app.request("/api/budgets?month=2026-04", {
+      headers: { Authorization: await authHeader() },
+    })
+    expect(res.status).toBe(200)
+    const ctx = (((await res.json()) as Record<string, unknown>).data as Record<string, unknown>).profile_context as Record<string, unknown>
+    expect(ctx.monthly_income_kd).toBe("1075.000")
+    expect(ctx.income_source).toBe("declared_in_profile")
+    // 430 / 1075 * 100 = 40.0
+    expect(ctx.budget_to_income_pct).toBe("40.0")
+    expect(extrasQueries).toBe(1)
+  })
 })
 
 // ── POST /api/budgets ─────────────────────────────────────────────────────────

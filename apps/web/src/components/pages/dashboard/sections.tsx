@@ -722,6 +722,7 @@ export function DashboardHero({
   footers = null,
   analyticsUpdatedAt,
   onOpenIncome,
+  incomeHasExtras = false,
 }: {
   isLoading: boolean
   monthLabel: string
@@ -740,6 +741,8 @@ export function DashboardHero({
   analyticsUpdatedAt?: string | null
   // MOB-R81 C7 — a tap on the Income tile opens the edit for the typed monthly income (IncomeQuickDialog).
   onOpenIncome?: () => void
+  // MOB-R114 F — the period's income includes extras she logged (extras_kd > 0).
+  incomeHasExtras?: boolean
 }) {
   const incomeSet = monthIncome !== null
   const over = overBy !== null && overBy > 0
@@ -783,6 +786,7 @@ export function DashboardHero({
           overBy={overBy}
           footers={incomeSet ? footers : null}
           onOpenIncome={onOpenIncome}
+          incomeHasExtras={incomeHasExtras}
         />
       )}
     </section>
@@ -804,6 +808,7 @@ function HeroTiles({
   overBy,
   footers,
   onOpenIncome,
+  incomeHasExtras,
 }: {
   riseOnMount: boolean
   income: CountUpText | null
@@ -815,6 +820,7 @@ function HeroTiles({
   overBy: number | null
   footers: HeroFooters
   onOpenIncome?: () => void
+  incomeHasExtras: boolean
 }) {
   const [rise] = useState(riseOnMount)
   const riseProps = (index: number) =>
@@ -827,7 +833,8 @@ function HeroTiles({
         label="Income"
         money={income ?? undefined}
         value={income ? undefined : "Not set"}
-        footer={incomeSet ? "Monthly, set by you" : null}
+        // MOB-R114 F — with extras in the period the figure is no longer only what she set.
+        footer={incomeSet ? (incomeHasExtras ? "Set by you + extras" : "Monthly, set by you") : null}
         {...(onOpenIncome
           ? {
               role: "button",
@@ -1088,8 +1095,9 @@ export function IncomeExpensesChart({
   isLoading: boolean
   // `income` is the LOGGED income sum (R3). It is used only to tell a month with rows from an empty
   // one; it is no longer drawn (MOB-R36, RM-17 flat).
-  trendData: Array<{ month: string; income: number; expenses: number }>
-  // The TYPED monthly income, drawn as one reference line; null when not set.
+  // MOB-R112 D4 — periodIncome: typed income + that period's extras; null when income is not typed.
+  trendData: Array<{ month: string; income: number; expenses: number; periodIncome?: number | null }>
+  // The TYPED monthly income; null when not set (then no income line is drawn).
   typedIncome?: number | null
 }) {
   // MOB-1 Group 2 — zero-vs-no-data. The server zero-FILLS every month in the window before folding
@@ -1104,10 +1112,10 @@ export function IncomeExpensesChart({
   // month that "finished with income ahead of expenses", and it dragged the expense average toward
   // zero as though it were a frugal month.
   const monthsWithData = trendData.filter((row) => row.expenses !== 0) // MOB-R75 P1: saved income is not counted
-  // MOB-R36 — RM-17 flat: every month is compared against the one typed income.
+  // MOB-R112 D4 — each period is compared against its own income: typed + that period's extras.
   const monthsAhead = typedIncome === null
     ? 0
-    : monthsWithData.filter((row) => typedIncome >= row.expenses).length
+    : monthsWithData.filter((row) => (row.periodIncome ?? typedIncome) >= row.expenses).length
   const expenseAverage = monthsWithData.length > 0
     ? monthsWithData.reduce((sum, row) => sum + row.expenses, 0) / monthsWithData.length
     : 0
@@ -1170,7 +1178,7 @@ export function IncomeExpensesChart({
                   <XAxis dataKey="month" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(m: string) => periodTick(getPayday(), m) ?? formatMonthYear(m)} />
                   <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v: number) => formatCompactKD(v)} />
                   {/* MOB-R102 C2 — full opacity: at 0.5 the average line was 2.08:1 (light) and 2.92:1 (dark).
-                      MOB-R103 C2 — yAxisId is written out on both lines. Recharts widens the y axis for an
+                      MOB-R103 C2 — yAxisId is written out on this line. Recharts widens the y axis for an
                       ifOverflow="extendDomain" line only when el.props.yAxisId equals the axis id
                       (DetectReferenceElementsDomain.js:23); React 19's jsx() leaves a class component's
                       defaultProps off element.props, so the default 0 never got there and an income above
@@ -1182,21 +1190,11 @@ export function IncomeExpensesChart({
                     strokeDasharray="4 4"
                     ifOverflow="extendDomain"
                   />
-                  {typedIncome !== null ? (
-                    <ReferenceLine
-                      yAxisId={0}
-                      y={typedIncome}
-                      className="income-reference-line"
-                      stroke={CHART_STROKES.income}
-                      strokeWidth={2}
-                      ifOverflow="extendDomain"
-                      label={{ value: "Your income", position: "insideTopRight", fill: CHART_STROKES.legendText, fontSize: 12 }}
-                    />
-                  ) : null}
                   <RechartsTooltip
-                    formatter={(value: number) => [`KD ${value.toFixed(3)}`, "Expenses"]}
-                    // MOB-R106 C1 — "Expenses: KD …", not Recharts' default " : ". The one Line here is the
-                    // only series in the tooltip; the reference lines never enter it.
+                    // MOB-R112 D4 — two series now: each row names its own line ("Expenses", "Income").
+                    formatter={(value: number, name: string) => [`KD ${value.toFixed(3)}`, name]}
+                    // MOB-R106 C1 — "Expenses: KD …", not Recharts' default " : ". The two Lines here (Expenses,
+                    // Income) are the only series in the tooltip; the reference line never enters it.
                     separator=": "
                     labelFormatter={(m) => formatMonthYear(String(m))}
                     contentStyle={chartTooltipStyle}
@@ -1217,10 +1215,25 @@ export function IncomeExpensesChart({
                   <Line
                     type="monotone"
                     dataKey="expenses"
+                    name="Expenses"
                     stroke={CHART_STROKES.expense}
                     strokeWidth={2.5}
                     dot={{ r: 3 }}
                   />
+                  {/* MOB-R112 D4 — the income line per period: typed + that period's extras. It replaces the
+                      flat "Your income" reference line; with no extras it is flat at the typed income. */}
+                  {typedIncome !== null ? (
+                    <Line
+                      type="linear"
+                      dataKey="periodIncome"
+                      name="Income"
+                      className="income-line"
+                      stroke={CHART_STROKES.income}
+                      strokeWidth={2}
+                      dot={false}
+                      isAnimationActive={false}
+                    />
+                  ) : null}
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -1231,7 +1244,7 @@ export function IncomeExpensesChart({
                 {/* MOB-R36 #12. Its second sentence names the income line, which is only drawn when the
                     income is set; without it the sentence would be false, so it is omitted. */}
                 {typedIncome !== null
-                  ? "The dashed line is your average monthly spending. The flat line is your monthly income."
+                  ? "The dashed line is your average monthly spending. The income line is your monthly income plus any extra income you logged."
                   : "The dashed line is your average monthly spending."}
               </p>
             ) : null}

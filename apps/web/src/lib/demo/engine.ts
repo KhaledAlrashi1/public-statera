@@ -193,6 +193,11 @@ const rowIsExpense = (s: DemoState, r: Row) => !rowIsIncome(s, r)
 /** category-kind expenseOnlyCategoryFilter: not income and not savings. */
 const rowIsExpenseOnly = (s: DemoState, r: Row) => !rowIsIncome(s, r) && !isSavingsName(category(s, r.categoryId)?.name)
 const catName = (s: DemoState, r: Row) => category(s, r.categoryId)?.name ?? null
+/** income-extras INCOME_EXTRA_NAMES / incomeExtraFilter (MOB-R112 D2) — the one mirror of the server's
+ * definition: an income row whose name, trimmed of spaces and lower-cased, is one of Log's three tiles. */
+const INCOME_EXTRA_NAMES = ["bonus", "commission", "other income"]
+const isIncomeExtra = (s: DemoState, r: Row) =>
+  rowIsIncome(s, r) && INCOME_EXTRA_NAMES.includes(r.name.replace(/^ +| +$/g, "").toLowerCase())
 
 const dec = (v: string | number) => new Decimal(v)
 const sum = (rows: Row[]) => rows.reduce((a, r) => a.plus(r.amountKd), new Decimal(0))
@@ -308,6 +313,13 @@ function typedIncome(s: DemoState): Decimal | null {
   const raw = s.sample.profile.monthly_income_kd
   if (raw && dec(raw).gt(0)) return dec(raw)
   return null
+}
+
+/** MOB-R112 D3/D5 — typed income + the extras dated in [start, end]; null (extras not counted) when not typed. */
+function periodIncome(s: DemoState, start: string, end: string): Decimal | null {
+  const typed = typedIncome(s)
+  if (typed === null) return null
+  return typed.plus(sum(s.rows.filter((r) => r.date >= start && r.date <= end && isIncomeExtra(s, r))))
 }
 
 /** categories.ts GET / */
@@ -467,7 +479,8 @@ function budgetPayload(s: DemoState, month: string) {
     .map((b) => ({ id: b.id, month: b.month, category: category(s, b.categoryId)?.name ?? "Uncategorized", amount_kd: formatKd(dec(b.amountKd)) }))
     .sort((a, b) => (a.category.toLowerCase() < b.category.toLowerCase() ? -1 : a.category.toLowerCase() > b.category.toLowerCase() ? 1 : 0))
   const total = items.reduce((a, it) => a.plus(it.amount_kd), new Decimal(0))
-  const income = typedIncome(s)
+  const { start, end } = periodBoundsForKey(s.payday, month)
+  const income = periodIncome(s, start, end)
   return {
     month,
     items,
@@ -515,7 +528,7 @@ function safeToSpendPayload(s: DemoState, month: string) {
     daysRemaining = Math.round((ms(end) - ms(todayStr)) / DAY_MS)
     spendWindowEnd = todayStr
   }
-  const income = typedIncome(s)
+  const income = periodIncome(s, start, end)
   const totalBudget = s.budgets.filter((b) => b.month === month).reduce((a, b) => a.plus(b.amountKd), new Decimal(0))
   const actualSpend = spendWindowEnd === null ? new Decimal(0) : sumExpenseBetween(s, start, spendWindowEnd)
   const incomeForCalc = income ?? new Decimal(0)
@@ -608,13 +621,16 @@ function dashboardMetrics(s: DemoState, q: URLSearchParams) {
   const income = new Map(keys.map((k) => [k, new Decimal(0)]))
   const expense = new Map(keys.map((k) => [k, new Decimal(0)]))
   const savings = new Map(keys.map((k) => [k, new Decimal(0)]))
+  const extras = new Map(keys.map((k) => [k, new Decimal(0)]))
   const byCat: Record<string, Record<string, Decimal>> = Object.fromEntries(keys.map((k) => [k, {}]))
   for (const r of s.rows) {
     if (!inScope(r)) continue
     const k = periodKey(s, r.date)
     if (!income.has(k)) continue
-    if (rowIsIncome(s, r)) income.set(k, income.get(k)!.plus(r.amountKd))
-    else {
+    if (rowIsIncome(s, r)) {
+      income.set(k, income.get(k)!.plus(r.amountKd))
+      if (isIncomeExtra(s, r)) extras.set(k, extras.get(k)!.plus(r.amountKd))
+    } else {
       const name = catName(s, r)
       if (isSavingsName(name)) savings.set(k, savings.get(k)!.plus(r.amountKd))
       else expense.set(k, expense.get(k)!.plus(r.amountKd))
@@ -632,6 +648,7 @@ function dashboardMetrics(s: DemoState, q: URLSearchParams) {
         income_kd: formatKd(income.get(k)!),
         expense_kd: formatKd(expense.get(k)!),
         savings_kd: formatKd(savings.get(k)!),
+        extras_kd: formatKd(extras.get(k)!),
       })),
       expense_by_category,
       cycle_enabled: cycle,
@@ -867,18 +884,40 @@ function amountOf(raw: unknown): string | null {
   }
 }
 
+/** transaction-lib getOrCreateIncomeCategory (MOB-R112 D1): a found income category is used, a found
+ * spending one is refused (never flipped), none found is added as income. */
+function incomeCategoryFor(s: DemoState, name: string): number | "not_income" {
+  const found = s.categories.find((c) => c.name.toLowerCase() === name.toLowerCase())
+  if (found) return isIncomeCategory(found) ? found.id : "not_income"
+  const c = { id: s.nextId.category++, name, isIncome: true }
+  s.categories.push(c)
+  return c.id
+}
+
 function createTransaction(s: DemoState, body: Record<string, unknown>) {
   const amount = amountOf(body.amount_kd)
   if (!amount) return validationError("Amount is invalid.")
   const categoryName = String(body.category ?? "").trim()
   if (!categoryName) return validationError("Category is required.")
+  if (body.kind !== undefined && body.kind !== "income") return validationError('kind must be "income".')
+  let categoryId: number
+  if (body.kind === "income") {
+    const found = incomeCategoryFor(s, categoryName)
+    if (found === "not_income") {
+      return {
+        status: 409,
+        body: { ok: false, data: null, error: "That category is not an income category.", code: "category_not_income" },
+      }
+    }
+    categoryId = found
+  } else categoryId = categoryFor(s, categoryName)
   const date = String(body.date ?? s.todayIso)
   const row: Row = {
     id: s.nextId.row++,
     date,
     name: String(body.name ?? categoryName).trim() || categoryName,
     amountKd: amount,
-    categoryId: categoryFor(s, categoryName),
+    categoryId,
     merchantId: merchantFor(s, String(body.merchant ?? "")),
     source: "manual",
   }

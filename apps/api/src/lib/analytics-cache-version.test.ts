@@ -50,7 +50,7 @@ describe("analytics cache keys carry the version (MOB-R60 C3)", () => {
   it("R3 reads dashboard_metrics with the version suffix", async () => {
     const keys = fakeRedisServing({
       months: ["2026-01"],
-      monthly: [{ month: "2026-01", income_kd: "100.000", expense_kd: "40.000", savings_kd: "30.000" }],
+      monthly: [{ month: "2026-01", income_kd: "100.000", expense_kd: "40.000", savings_kd: "30.000", extras_kd: "0.000" }],
       expense_by_category: {},
       cycle_enabled: false,
       cycle_start: null,
@@ -64,7 +64,7 @@ describe("analytics cache keys carry the version (MOB-R60 C3)", () => {
       hardFail: false,
     })
     expect(cacheStatus).toBe("hit")
-    expect(keys).toEqual(["dashboard_metrics:1:24::v2"])
+    expect(keys).toEqual(["dashboard_metrics:1:24::v3"])
   })
 
   it("R9 reads safe_to_spend with the version suffix", async () => {
@@ -76,6 +76,6 @@ describe("analytics cache keys carry the version (MOB-R60 C3)", () => {
       headers: { Authorization: `Bearer ${token}` },
     })
     expect(res.status).toBe(200)
-    expect(keys).toContain("safe_to_spend:7:2026-05:v2")
+    expect(keys).toContain("safe_to_spend:7:2026-05:v3")
   })
 })

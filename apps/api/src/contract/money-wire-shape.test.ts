@@ -211,12 +211,12 @@ const FIXTURES: Record<string, unknown[]> = {
   // R3 (C2): BOTH window months carry an expense row so neither
   // expense_by_category bucket is empty, and the map-key normalisation is
   // exercised on multi-key data rather than a degenerate single key.
-  "ym,catName,total,isIncome": [
-    { ym: "2026-04", catName: "Salary", total: "1950.000", isIncome: 1 },
-    { ym: "2026-04", catName: "Groceries", total: "160.125", isIncome: 0 },
-    { ym: "2026-04", catName: "Transport", total: "40.500", isIncome: 0 },
-    { ym: "2026-05", catName: "Salary", total: "2000.000", isIncome: 1 },
-    { ym: "2026-05", catName: "Groceries", total: "175.250", isIncome: 0 },
+  "ym,catName,total,isIncome,extras": [
+    { ym: "2026-04", catName: "Salary", total: "1950.000", isIncome: 1, extras: "0.000" },
+    { ym: "2026-04", catName: "Groceries", total: "160.125", isIncome: 0, extras: "0.000" },
+    { ym: "2026-04", catName: "Transport", total: "40.500", isIncome: 0, extras: "0.000" },
+    { ym: "2026-05", catName: "Salary", total: "2000.000", isIncome: 1, extras: "0.000" },
+    { ym: "2026-05", catName: "Groceries", total: "175.250", isIncome: 0, extras: "0.000" },
   ],
   "ym,incomeTotal,spendTotal": [{ ym: "2026-05", incomeTotal: "2000.000", spendTotal: "175.250" }],
   monthlyIncomeKd: [{ monthlyIncomeKd: "1800.000" }],
@@ -263,10 +263,10 @@ const FIXTURES: Record<string, unknown[]> = {
       windowEndMonth: "2026-05",
       monthsJson: JSON.stringify(["2026-04", "2026-05"]),
       monthlyJson: JSON.stringify({
-        v: 2,
+        v: 3,
         monthly: [
-          { month: "2026-04", income_kd: "1950.000", expense_kd: "200.625", savings_kd: "0.000" },
-          { month: "2026-05", income_kd: "2000.000", expense_kd: "175.250", savings_kd: "0.000" },
+          { month: "2026-04", income_kd: "1950.000", expense_kd: "200.625", savings_kd: "0.000", extras_kd: "0.000" },
+          { month: "2026-05", income_kd: "2000.000", expense_kd: "175.250", savings_kd: "0.000", extras_kd: "0.000" },
         ],
       }),
       expenseByCategoryJson: JSON.stringify({
@@ -782,7 +782,7 @@ const REPO_SRC = resolve(__dirname, "..")
 const PRIMITIVE_BASELINES: Array<{ file: string; sites: number; feeds: string }> = [
   { file: "routes/aggregation.ts", sites: 29, feeds: "R1 R2 R4 R5 R6 R7 R9 R10" },
   { file: "lib/intelligence-lib.ts", sites: 9, feeds: "R11 R12 R13" },
-  { file: "lib/dashboard-snapshot-lib.ts", sites: 4, feeds: "R3" },
+  { file: "lib/dashboard-snapshot-lib.ts", sites: 5, feeds: "R3" },
   { file: "routes/budgets.ts", sites: 2, feeds: "R8 (:64 wire; :306 write-path, see NON_WIRE_PRIMITIVE)" },
   { file: "lib/budget-alerts-lib.ts", sites: 1, feeds: "R8" },
 ]
@@ -883,6 +883,7 @@ describe("B4-1 money wire-shape capture", () => {
     expect(r3).toEqual([
       "data.expense_by_category.*.*",
       "data.monthly[].expense_kd",
+      "data.monthly[].extras_kd",
       "data.monthly[].income_kd",
       "data.monthly[].savings_kd",
     ])
@@ -1033,8 +1034,8 @@ describe("B4-1 money wire-shape capture", () => {
     console.log(`    ${total - NON_WIRE_PRIMITIVE.length}  wire-emitting primitive sites`)
     console.log(`    ${NON_PRIMITIVE_SITES.length}  non-primitive wire sites (pinned file:line, not greppable)`)
     console.log(`    ${total - NON_WIRE_PRIMITIVE.length + NON_PRIMITIVE_SITES.length}  wire-emitting sites feeding R1-R13`)
-    expect(total).toBe(45)
-    expect(total - NON_WIRE_PRIMITIVE.length + NON_PRIMITIVE_SITES.length).toBe(49)
+    expect(total).toBe(46)
+    expect(total - NON_WIRE_PRIMITIVE.length + NON_PRIMITIVE_SITES.length).toBe(50)
   })
 
   it("C7: MULTI_PATH inventory — every CAPTURED-BOTH claim holds at runtime", async () => {

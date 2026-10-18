@@ -592,6 +592,26 @@ describe("DashboardPage", () => {
     expect(lastHero().monthIncome).toBe(1500)
   })
 
+  // MOB-R112 D3 — the period's income is typed + that period's extras (R3 extras_kd), not R4's
+  // total_income_mtd (every income row). Typed 1500; the selected period 2026-03 has 75 of extras,
+  // 2026-02 has 100: 1575, not 1500 (typed only), 1600 (another period) or 1800 (every income row).
+  it("the hero shows typed income plus the selected period's extras (MOB-R112 D3)", () => {
+    mocks.useDashboardPageQueries.mockReturnValue({
+      ...baseResult,
+      dashboardMetrics: {
+        ...TWO_MONTHS,
+        monthly: [
+          { month: "2026-02", income_kd: "1800.000", expense_kd: "800.000", extras_kd: "100.000" },
+          { month: "2026-03", income_kd: "1800.000", expense_kd: "250.000", extras_kd: "75.000" },
+        ],
+      },
+      accountOverview: { total_income_mtd: "1800.000", total_spend_mtd: "250.000" },
+      profile: { monthly_income_kd: "1500.000" },
+    })
+    renderPage()
+    expect(lastHero().monthIncome).toBe(1575)
+  })
+
   // MOB-R69 C1 — rewritten: the hero has no deltas (MOB-R68 D4); income not set means no footers.
   it("income not set: the hero gets null income and no footers", () => {
     mocks.useDashboardPageQueries.mockReturnValue({

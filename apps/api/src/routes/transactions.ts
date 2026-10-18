@@ -37,6 +37,7 @@ import {
   createTransactionWithDupCheck,
   forceUniqueNameKey,
   getOrCreateCategory,
+  getOrCreateIncomeCategory,
   getOrCreateMerchant,
   learnTransaction,
   serializeTransaction,
@@ -222,6 +223,16 @@ transactionsRouter.post("/", requireAuth, importRateLimit, async (c) => {
     return c.json({ ok: false, data: null, error: (e as Error).message, code: "validation_error" }, 400)
   }
 
+  // MOB-R112 D1 — optional kind: "income". Absent, the request takes today's path unchanged.
+  const rawKind = body["kind"]
+  if (rawKind !== undefined && rawKind !== "income") {
+    return c.json({ ok: false, data: null, error: 'kind must be "income".', code: "validation_error" }, 400)
+  }
+  const incomeKind = rawKind === "income"
+  if (incomeKind && !validated.categoryName) {
+    return c.json({ ok: false, data: null, error: "Category is required for income.", code: "validation_error" }, 400)
+  }
+
   const rawForce = body["force"]
   const force = rawForce === true || String(rawForce ?? "0") === "1"
 
@@ -230,8 +241,19 @@ transactionsRouter.post("/", requireAuth, importRateLimit, async (c) => {
   let categoryId: number | null = null
   let merchantId: number | null = null
   try {
-    const cat = await getOrCreateCategory(validated.categoryName, userId, db)
-    categoryId = cat?.id ?? null
+    if (incomeKind) {
+      const cat = await getOrCreateIncomeCategory(validated.categoryName!, userId, db)
+      if (cat === "not_income") {
+        return c.json(
+          { ok: false, data: null, error: "That category is not an income category.", code: "category_not_income" },
+          409,
+        )
+      }
+      categoryId = cat.id
+    } else {
+      const cat = await getOrCreateCategory(validated.categoryName, userId, db)
+      categoryId = cat?.id ?? null
+    }
     const mer = await getOrCreateMerchant(validated.merchantName, userId, db)
     merchantId = mer?.id ?? null
   } catch (e) {

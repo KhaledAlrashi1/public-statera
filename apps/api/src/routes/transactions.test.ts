@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import { Hono } from "hono"
 import { transactionsRouter } from "./transactions"
 import { createSessionToken } from "../middleware/auth"
+import { getTableName, type Table } from "drizzle-orm"
 
 // Cache-bust and Sentry mocks — must be hoisted before transactionsRouter import.
 vi.mock("../lib/analytics-cache", () => ({
@@ -293,6 +294,103 @@ describe("DELETE /api/transactions/:id", () => {
     expect(res.status).toBe(200)
     const body = (await res.json()) as Record<string, unknown>
     expect((body.data as Record<string, unknown>).deleted).toBe(true)
+  })
+})
+
+// ── POST /api/transactions — kind "income" (MOB-R112 D1) ──────────────────────
+
+describe("POST /api/transactions — kind income (MOB-R112 D1)", () => {
+  // Routes each select by its COLUMNS and records every write, so a test can say which category
+  // row was used, what was inserted, and that nothing was written at all.
+  function recordingDb(foundCategory: Array<{ id: number; name: string; countsAsIncome: number }>) {
+    const writes: Array<{ op: string; table: string; values?: unknown; set?: unknown }> = []
+    const created = {
+      id: 81, date: "2026-10-17", name: "Bonus", memo: null, amountKd: "50.000", source: "manual", importBatchId: null,
+      categoryId: 70, merchantId: null, categoryName: "Bonus", categoryCountsAsIncome: 1, merchantName: null,
+    }
+    const chain = (rows: unknown, w?: { op: string; table: string; values?: unknown; set?: unknown }): unknown =>
+      new Proxy({}, {
+        get(_t, prop: string) {
+          if (prop === "then") return (res: (v: unknown) => unknown, rej: (e: unknown) => unknown) => Promise.resolve(rows).then(res, rej)
+          if (prop === "$returningId") return () => Promise.resolve([{ id: 70 }])
+          return (...args: unknown[]) => {
+            if (w && prop === "values") w.values = args[0]
+            if (w && prop === "set") w.set = args[0]
+            return chain(rows, w)
+          }
+        },
+      })
+    const db = new Proxy({}, {
+      get(_t, prop: string) {
+        if (prop === "transaction") return async (cb: (tx: unknown) => unknown) => cb(db)
+        return (...args: unknown[]) => {
+          if (prop === "select") {
+            const cols = args[0] ? Object.keys(args[0] as object) : []
+            if (cols.includes("countsAsIncome")) return chain(foundCategory)
+            if (cols.includes("categoryName")) return chain([created])
+            return chain([])
+          }
+          const w = { op: prop, table: getTableName(args[0] as Table) }
+          writes.push(w)
+          return chain([{ affectedRows: 1 }], w)
+        }
+      },
+    }) as ReturnType<typeof getDb>
+    return { db, writes }
+  }
+  const post = async (body: Record<string, unknown>) =>
+    app.request("/api/transactions", {
+      method: "POST",
+      headers: { Authorization: await authHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+  const income = { date: "2026-10-17", category: "Bonus", name: "Bonus", amount_kd: "50.000", kind: "income" }
+
+  it("no category by that name: inserts one with isIncome true and saves the row into it", async () => {
+    const { db, writes } = recordingDb([])
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await post(income)
+    expect(res.status).toBe(201)
+    expect(writes[0]).toMatchObject({ op: "insert", table: "categories", values: { userId: 1, name: "Bonus", isIncome: true } })
+    expect(writes.find((w) => w.table === "transactions")).toMatchObject({ values: { categoryId: 70, name: "Bonus", amountKd: "50.000" } })
+  })
+
+  it("a category that counts as income is used as found, with no category write", async () => {
+    const { db, writes } = recordingDb([{ id: 12, name: "bonus", countsAsIncome: 1 }])
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await post(income)
+    expect(res.status).toBe(201)
+    expect(writes.filter((w) => w.table === "categories")).toEqual([])
+    expect(writes.find((w) => w.table === "transactions")).toMatchObject({ values: { categoryId: 12 } })
+  })
+
+  it("a category that does not count as income: 409 category_not_income, never flipped, nothing written", async () => {
+    const { db, writes } = recordingDb([{ id: 12, name: "Bonus", countsAsIncome: 0 }])
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await post(income)
+    expect(res.status).toBe(409)
+    expect(await res.json()).toEqual({
+      ok: false, data: null, error: "That category is not an income category.", code: "category_not_income",
+    })
+    expect(writes).toEqual([])
+  })
+
+  it("any other kind is refused: 400, nothing written", async () => {
+    const { db, writes } = recordingDb([])
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await post({ ...income, kind: "refund" })
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ ok: false, data: null, error: 'kind must be "income".', code: "validation_error" })
+    expect(writes).toEqual([])
+  })
+
+  it("income needs a category: 400, nothing written", async () => {
+    const { db, writes } = recordingDb([])
+    vi.mocked(getDb).mockReturnValue(db)
+    const res = await post({ ...income, category: "  " })
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ ok: false, data: null, error: "Category is required for income.", code: "validation_error" })
+    expect(writes).toEqual([])
   })
 })
 

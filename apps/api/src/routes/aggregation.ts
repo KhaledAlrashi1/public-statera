@@ -82,6 +82,7 @@ import {
 } from "../lib/analytics-cache"
 import { versionedCacheKey } from "../lib/analytics-cache-version"
 import { resolveIncomeForPeriod } from "../lib/income-lib"
+import { sumIncomeExtrasBetween } from "../lib/income-extras"
 import { dashboardSnapshots } from "../db/schema/dashboard-snapshots"
 import { buildBudgetPayload } from "./budgets"
 import { Sentry } from "../lib/sentry"
@@ -686,7 +687,6 @@ async function _buildSafeToSpendPayload(
   }
 
   const incomeResolution = await resolveIncomeForPeriod(userId, month, db)
-  const monthlyIncome = incomeResolution.amountKd
   const incomeSource = incomeResolution.source
 
   const [totalBudget] = await _budgetAmountsForMonth(userId, month, db)
@@ -695,6 +695,13 @@ async function _buildSafeToSpendPayload(
   if (spendWindowEnd !== null) {
     actualSpend = await _sumExpenseBetween(userId, cycleStart, spendWindowEnd, db)
   }
+
+  // MOB-R112 D3/D5 — the period's income is the typed figure plus the extras dated in this payday
+  // period. With nothing typed, extras do not count and income stays not set (no query is run).
+  const monthlyIncome =
+    incomeResolution.amountKd === null
+      ? null
+      : incomeResolution.amountKd.plus(await sumIncomeExtrasBetween(userId, cycleStart, cycleEnd, db))
 
   const incomeForCalc = monthlyIncome ?? new Decimal("0")
   // phase4 SC-1/2: committed obligations = budget allocations only. Debt minimums and

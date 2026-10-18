@@ -67,7 +67,7 @@ describe.runIf(RUN)("K1 savings split — real MySQL", () => {
     ])
 
     const r3 = await getJson("/api/analytics/dashboard-metrics?months=1&until=2026-05")
-    expect(r3.monthly).toEqual([{ month: "2026-05", income_kd: "100.000", expense_kd: "40.000", savings_kd: "30.000" }])
+    expect(r3.monthly).toEqual([{ month: "2026-05", income_kd: "100.000", expense_kd: "40.000", savings_kd: "30.000", extras_kd: "0.000" }])
     expect(r3.expense_by_category["2026-05"]).toEqual({ Groceries: "40.000", "Savings & investing": "30.000" })
   })
 

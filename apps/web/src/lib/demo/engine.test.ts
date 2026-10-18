@@ -109,3 +109,55 @@ describe("the demo's sample and answers (MOB-R95 C4, C5)", () => {
     expect(() => demoAnswer(s, "GET", "/api/analytics/snapshot")).toThrow(DemoUnknownCallError)
   })
 })
+
+// MOB-R112 D1–D5 — the demo mirrors the server's income extras: typed income + the period's Bonus,
+// Commission and Other income rows; the sample's Salary rows are income but never extras.
+describe("the demo's income extras (MOB-R112)", () => {
+  const now = new Date("2026-10-09T09:00:00Z")
+  const logIncome = (s: ReturnType<typeof createDemoState>, category: string, amount: string) =>
+    demoAnswer(s, "POST", "/api/transactions", { date: s.todayIso, category, name: category, amount_kd: amount, kind: "income" })
+
+  it("R9 and Plan: typed income plus the period's extras; a Salary row is not an extra", () => {
+    const s = createDemoState(sample, now)
+    const current = periodKeyForDate(25, s.todayIso)
+    expect(s.rows.some((r) => r.name === "Salary" && periodKeyForDate(25, r.date) === current)).toBe(true)
+    const r9 = () => body<{ monthly_income_kd: string }>(demoAnswer(s, "GET", `/api/analytics/safe-to-spend?month=${current}`))
+    const plan = () =>
+      body<{ profile_context: { monthly_income_kd: string } }>(demoAnswer(s, "GET", `/api/budgets?month=${current}`)).profile_context
+    expect(r9().monthly_income_kd).toBe("1200.000")
+    expect(plan().monthly_income_kd).toBe("1200.000")
+    expect(logIncome(s, "Bonus", "50.000").status).toBe(201)
+    expect(r9().monthly_income_kd).toBe("1250.000")
+    expect(plan().monthly_income_kd).toBe("1250.000")
+  })
+
+  it("R3: each period carries its extras; the Salary periods carry none", () => {
+    const s = createDemoState(sample, now)
+    const current = periodKeyForDate(25, s.todayIso)
+    logIncome(s, "Other income", "5.000")
+    const r3 = body<{ monthly: Array<{ month: string; income_kd: string; extras_kd: string }> }>(
+      demoAnswer(s, "GET", `/api/analytics/dashboard-metrics?months=3&until=${current}`),
+    )
+    expect(r3.monthly.map((m) => [m.month, m.extras_kd])).toEqual([
+      [shiftKey(current, -2), "0.000"],
+      [shiftKey(current, -1), "0.000"],
+      [current, "5.000"],
+    ])
+    expect(r3.monthly.every((m) => Number(m.income_kd) > 0)).toBe(true)
+  })
+
+  it("POST kind income: a new name is an income category; a spending one is refused and never flipped", () => {
+    const s = createDemoState(sample, now)
+    const created = logIncome(s, "Commission", "20.000")
+    expect(created.status).toBe(201)
+    expect(body<{ item: { category: string; category_counts_as_income: boolean } }>(created).item).toMatchObject({
+      category: "Commission",
+      category_counts_as_income: true,
+    })
+    const refused = logIncome(s, "Dining", "20.000")
+    expect(refused.status).toBe(409)
+    expect((refused.body as { code: string }).code).toBe("category_not_income")
+    expect(s.categories.find((c) => c.name === "Dining")!.isIncome).toBe(false)
+    expect(demoAnswer(s, "POST", "/api/transactions", { date: s.todayIso, category: "Bonus", name: "Bonus", amount_kd: "1.000", kind: "refund" }).status).toBe(400)
+  })
+})

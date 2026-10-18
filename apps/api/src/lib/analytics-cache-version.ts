@@ -6,7 +6,8 @@
 //
 // Bump ANALYTICS_CACHE_VERSION whenever what R3 or R9 computes changes.
 // v2: MOB-R55 K1 — savings-kind categories leave every expense total.
-export const ANALYTICS_CACHE_VERSION = "v2"
+// v3: MOB-R112 D3/D4 — R9's income adds the period's extras; R3's monthly[] carries extras_kd.
+export const ANALYTICS_CACHE_VERSION = "v3"
 
 // MOB-R91 C2 — a payday that cuts months (2–31) is part of what R3 and R9 compute, so it is part of the version:
 // ":v2:p25". With no payday (or the 1st) the key is exactly what it was. A payday change also clears both prefixes

@@ -70,9 +70,9 @@ describe("payday months (MOB-R91 C2)", () => {
   })
 
   it("the cache version carries a payday that cuts months, and is unchanged without one", () => {
-    expect(versionedCacheKey("safe_to_spend:7:2026-10")).toBe("safe_to_spend:7:2026-10:v2")
-    expect(versionedCacheKey("safe_to_spend:7:2026-10", null)).toBe("safe_to_spend:7:2026-10:v2")
-    expect(versionedCacheKey("safe_to_spend:7:2026-10", 1)).toBe("safe_to_spend:7:2026-10:v2")
-    expect(versionedCacheKey("safe_to_spend:7:2026-10", 25)).toBe("safe_to_spend:7:2026-10:v2:p25")
+    expect(versionedCacheKey("safe_to_spend:7:2026-10")).toBe("safe_to_spend:7:2026-10:v3")
+    expect(versionedCacheKey("safe_to_spend:7:2026-10", null)).toBe("safe_to_spend:7:2026-10:v3")
+    expect(versionedCacheKey("safe_to_spend:7:2026-10", 1)).toBe("safe_to_spend:7:2026-10:v3")
+    expect(versionedCacheKey("safe_to_spend:7:2026-10", 25)).toBe("safe_to_spend:7:2026-10:v3:p25")
   })
 })

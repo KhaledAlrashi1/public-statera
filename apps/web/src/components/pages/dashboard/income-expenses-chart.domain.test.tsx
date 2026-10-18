@@ -24,9 +24,9 @@ import { IncomeExpensesChart } from "./sections"
 
 // The demo's shape: typed income 1,200.000 above every period's spend (highest 739.525).
 const TREND = [
-  { month: "2026-07", income: 0, expenses: 614.2 },
-  { month: "2026-08", income: 0, expenses: 739.525 },
-  { month: "2026-09", income: 0, expenses: 560 },
+  { month: "2026-07", income: 0, expenses: 614.2, periodIncome: 1200 },
+  { month: "2026-08", income: 0, expenses: 739.525, periodIncome: 1200 },
+  { month: "2026-09", income: 0, expenses: 560, periodIncome: 1200 },
 ]
 
 function plotTopAndBottom(container: HTMLElement) {
@@ -41,10 +41,14 @@ describe("MOB-R103 C2 — IncomeExpensesChart y axis", () => {
     const plot = plotTopAndBottom(container)
     // The instrument: the grid rendered, so a plot area exists to be inside of.
     expect(plot.lines).toBeGreaterThan(1)
-    const income = container.querySelector(".income-reference-line line")
+    // MOB-R112 D4 — the income is the per-period line now; every point of its path is inside the plot.
+    const income = container.querySelector(".income-line path.recharts-curve")
     expect(income).not.toBeNull()
-    const y1 = Number(income?.getAttribute("y1"))
-    expect(y1).toBeGreaterThanOrEqual(plot.top)
-    expect(y1).toBeLessThanOrEqual(plot.bottom)
+    const ys = [...(income?.getAttribute("d") ?? "").matchAll(/[ML]([-\d.]+),([-\d.]+)/g)].map((m) => Number(m[2]))
+    expect(ys.length).toBe(TREND.length)
+    for (const y of ys) {
+      expect(y).toBeGreaterThanOrEqual(plot.top)
+      expect(y).toBeLessThanOrEqual(plot.bottom)
+    }
   })
 })

@@ -6,7 +6,7 @@ import { memorizedTransactions } from "../db/schema/memorized-transactions"
 import { transactions } from "../db/schema/transactions"
 import { buildNameKey } from "./name-key"
 import { formatKd, parseKd } from "./kd"
-import { readIncomeFlag } from "./payday-lib"
+import { incomeCategoryFilter, readIncomeFlag } from "./payday-lib"
 
 export { buildNameKey } from "./name-key"
 export { formatKd, parseKd } from "./kd"
@@ -95,6 +95,36 @@ export async function getOrCreateCategory(
   const [{ id }] = await db
     .insert(categories)
     .values({ userId, name: trimmed })
+    .$returningId()
+  return { id, name: trimmed }
+}
+
+// ── getOrCreateIncomeCategory ─────────────────────────────────────────────────
+// MOB-R112 D1 — POST /api/transactions with kind "income". Found by the same lower-cased name as
+// getOrCreateCategory. A found category that counts as income (the payday-lib rule) is used; a found
+// one that does not is refused ("not_income") and never flipped, since flipping would reclassify her
+// existing rows; none found is inserted with isIncome true, so it is income by flag, not only by name.
+
+export async function getOrCreateIncomeCategory(
+  name: string,
+  userId: number,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db: any,
+): Promise<{ id: number; name: string } | "not_income"> {
+  const trimmed = name.trim()
+  const [existing] = await db
+    .select({ id: categories.id, name: categories.name, countsAsIncome: incomeCategoryFilter() })
+    .from(categories)
+    .where(and(eq(categories.userId, userId), sql`LOWER(${categories.name}) = LOWER(${trimmed})`))
+    .limit(1)
+
+  if (existing) {
+    return readIncomeFlag(existing.countsAsIncome) ? { id: existing.id, name: existing.name } : "not_income"
+  }
+
+  const [{ id }] = await db
+    .insert(categories)
+    .values({ userId, name: trimmed, isIncome: true })
     .$returningId()
   return { id, name: trimmed }
 }

@@ -23,7 +23,12 @@ vi.mock("@/lib/recharts", async () => {
     BarChart: Pass,
     ComposedChart: Pass,
     ResponsiveContainer: Pass,
-    Line: Leaf,
+    // MOB-R112 D4 — the income is a per-period Line (className "income-line"), drawn from dataKey
+    // "periodIncome". Its testid carries the dataKey, so the test sees which series the line plots.
+    Line: ({ dataKey, className }: { dataKey?: string; className?: string }) =>
+      className === "income-line"
+        ? React.createElement("div", { "data-testid": "income-line" }, String(dataKey))
+        : null,
     Bar: Leaf,
     Cell: Leaf,
     XAxis: Leaf,
@@ -130,7 +135,7 @@ const TYPED_FIXTURE = [
 describe("MOB-R36 — IncomeExpensesChart typed-income reference line", () => {
   it("draws the typed income as a reference line and compares months against it", () => {
     render(<IncomeExpensesChart isLoading={false} trendData={TYPED_FIXTURE} typedIncome={1000} />)
-    expect(screen.getByTestId("income-line").textContent).toBe("1000")
+    expect(screen.getByTestId("income-line").textContent).toBe("periodIncome")
     expect(screen.getByTestId("avg-line").textContent).toBe("1100")
     expect(screen.getByText("1 of 2 visible months finished with income ahead of expenses.")).toBeInTheDocument()
   })
@@ -152,11 +157,26 @@ describe("MOB-R36 — IncomeExpensesChart typed-income reference line", () => {
       <IncomeExpensesChart isLoading={false} trendData={TYPED_FIXTURE} typedIncome={1000} />
     )
     expect(screen.getByText(/The dashed line is your average monthly spending\./)).toBeInTheDocument()
-    expect(screen.getByText(/The flat line is your monthly income\./)).toBeInTheDocument()
+    expect(screen.getByText(/The income line is your monthly income plus any extra income you logged\./)).toBeInTheDocument()
     unmount()
 
     render(<IncomeExpensesChart isLoading={false} trendData={TYPED_FIXTURE} typedIncome={null} />)
     expect(screen.getByText(/The dashed line is your average monthly spending\./)).toBeInTheDocument()
-    expect(screen.queryByText(/The flat line is your monthly income\./)).not.toBeInTheDocument()
+    expect(screen.queryByText(/The income line is your monthly income plus any extra income you logged\./)).not.toBeInTheDocument()
+  })
+})
+
+// MOB-R112 D4 — each period is compared against its OWN income: typed + that period's extras. Typed
+// 1000; January carried a 100 bonus, so January's 1050 of spending is under its 1100 income while
+// February's 1050 is over its 1000. Compared against the typed 1000 alone this read "0 of 2".
+describe("MOB-R112 D4 — IncomeExpensesChart, income per period", () => {
+  it("counts a period ahead against typed + that period's extras, and says what the income line is", () => {
+    const data = [
+      { month: "2026-01", income: 1100, expenses: 1050, periodIncome: 1100 },
+      { month: "2026-02", income: 1000, expenses: 1050, periodIncome: 1000 },
+    ]
+    render(<IncomeExpensesChart isLoading={false} trendData={data} typedIncome={1000} />)
+    expect(screen.getByText("1 of 2 visible months finished with income ahead of expenses.")).toBeInTheDocument()
+    expect(screen.getByText(/The income line is your monthly income plus any extra income you logged\./)).toBeInTheDocument()
   })
 })

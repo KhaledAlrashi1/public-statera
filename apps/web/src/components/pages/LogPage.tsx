@@ -68,6 +68,19 @@ export const POPULAR_IN_KUWAIT: ReadonlyArray<{ name: string; category: string }
   { name: "Oula", category: "Fuel" },
   { name: "Careem", category: "Transport" },
 ]
+/** MOB-R112 D6 — Log's income mode: three tiles and no Salary tile (salary is the typed income). Each
+ * saves its category as its name, so the row is an extra (apps/api/src/lib/income-extras.ts). The
+ * strings are provisional (RM-26). */
+export const INCOME_TILES: ReadonlyArray<{ label: string; category: string }> = [
+  { label: "Bonus", category: "Bonus" },
+  { label: "Commission", category: "Commission" },
+  { label: "Other", category: "Other income" },
+]
+/** MOB-R112 D6 — what is missing, in income mode's words: its tiles stand in for Category. */
+function incomeMissingPhrase(missing: RequiredField[]): string {
+  if (missing.length === 2) return "an amount and a type"
+  return missing[0] === "amount" ? "an amount" : "a type"
+}
 /** MOB-R74 F (E4b) — the close control's drawn circle stays 40px; an invisible ::before gives it a
  * 44x44 hit area, so the circle and its neighbours do not move. The ::before is placed against the
  * PADDING box, inside the 1px border (38px), so -3px makes 44px; -2px measured only 42px. */
@@ -272,6 +285,9 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
   // MOB-R87 D1 — edit mode: the saved row, loaded once; Split's dialog.
   const [editRow, setEditRow] = useState<Transaction | null>(null)
   const [splitOpen, setSplitOpen] = useState(false)
+  // MOB-R112 D6 — "Spent · Income", on new entries only; edit mode never shows it.
+  const [entryKind, setEntryKind] = useState<"spent" | "income">("spent")
+  const incomeMode = !editing && entryKind === "income"
 
   const stat = useRef<{ start: number | null; taps: number; suggestion: boolean }>({ start: null, taps: 0, suggestion: false })
   const tap = (fromSuggestion = false) => {
@@ -398,6 +414,36 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
     setOpen(null)
   }
 
+  // MOB-R112 D6 — switching kind keeps the amount she typed and the date; place, category and What for go,
+  // since income mode has none of them but its tile.
+  const switchKind = (k: "spent" | "income") => {
+    if (k === entryKind) return
+    tap()
+    changed()
+    setEntryKind(k)
+    setCategory(null)
+    setCategoryHers(false)
+    setPlace(null)
+    setPlaceHers(false)
+    setPlaceItems([])
+    setWhatFor("")
+    setWhatHers(false)
+    if (prefilled) {
+      setAmount("")
+      setPrefilled(false)
+    }
+    setOpen(null)
+  }
+
+  // MOB-R112 D6 — an income tile is her choice of category.
+  const pickIncomeTile = (t: { category: string }) => {
+    tap()
+    changed()
+    setCategory(t.category)
+    setCategoryHers(true)
+    setOpen(amountOk ? null : "amount")
+  }
+
   const pickCategory = (name: string) => {
     tap()
     changed()
@@ -477,8 +523,9 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
     if (saving) return
     if (!ready || !normalized || !category) {
       // E6 — a tap while something is missing opens the first missing line and says what.
-      setNudge(`Add ${missingPhrase(missing)} to save`)
-      setOpen(next as RequiredField)
+      setNudge(`Add ${incomeMode ? incomeMissingPhrase(missing) : missingPhrase(missing)} to save`)
+      // In income mode there is no Category line to open; the tiles above stand in for it.
+      setOpen(incomeMode && next === "category" ? null : (next as RequiredField))
       return
     }
     if (editing) {
@@ -512,14 +559,19 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
     setSaving(true)
     setError(null)
     try {
-      const res = await transactionsApi.create({
-        date,
-        merchant: place ?? undefined,
-        category,
-        name: whatFor.trim() || place || category,
-        amount_kd: normalized,
-        force: forceNext ? "1" : undefined,
-      })
+      const res = await transactionsApi.create(
+        incomeMode
+          ? // MOB-R112 D1 — income: the tile's category is also its name; no place.
+            { date, category, name: category, amount_kd: normalized, force: forceNext ? "1" : undefined, kind: "income" as const }
+          : {
+              date,
+              merchant: place ?? undefined,
+              category,
+              name: whatFor.trim() || place || category,
+              amount_kd: normalized,
+              force: forceNext ? "1" : undefined,
+            }
+      )
       const id = res.data?.item?.id
       if (typeof id === "number") {
         setLastCreatedId(id)
@@ -541,7 +593,10 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
       }, SAVE_MOMENT_MS)
       resetEntry()
     } catch (err) {
-      if (err instanceof ApiError && err.status === 409) {
+      if (err instanceof ApiError && err.code === "category_not_income") {
+        // MOB-R112 D1 — a spending category of that name exists; the server never flips it.
+        setError(`Your "${category}" category is for spending, so this income can't go there.`)
+      } else if (err instanceof ApiError && err.status === 409) {
         setError("Already saved for this date. Tap Save again to keep both.")
         setForceNext(true)
       } else {
@@ -695,7 +750,7 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
 
   // MOB-R71 C2 — with no places of her own, the existing Popular in Kuwait list, unchanged, as tiles.
   const popular = placesLoaded && places.length === 0
-  const tiles: LogSuggestionPlace[] = editing
+  const tiles: LogSuggestionPlace[] = editing || incomeMode
     ? []
     : popular
     ? POPULAR_IN_KUWAIT.map((p) => ({ ...p, count: 0, items: [], last_amount: null, last_used: null }))
@@ -716,7 +771,53 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
   }
 
   return (
-    <Frame onBack={goBack} frameRef={frameRef} style={vvStyle} keyboardInset={keyboardInset(vvStyle)} title={editing ? (isIncome ? "Edit income" : "Edit expense") : undefined} subtitle={editing ? null : undefined}>
+    <Frame
+      onBack={goBack}
+      frameRef={frameRef}
+      style={vvStyle}
+      keyboardInset={keyboardInset(vvStyle)}
+      title={editing ? (isIncome ? "Edit income" : "Edit expense") : incomeMode ? "New income" : undefined}
+      // MOB-R114 E2 — Income's line (RM-26 provisional); Spent keeps the default.
+      subtitle={editing ? null : incomeMode ? "Bonus, commission or other. Amount and date." : undefined}
+      titleSlot={
+        editing ? undefined : (
+          // MOB-R112 D6 — "Spent · Income", new entries only. MOB-R114 E2 — it is the visible title.
+          <div role="group" aria-label="Entry type" className="grid grid-cols-2 gap-1 rounded-full border border-border bg-card p-1">
+            {(["spent", "income"] as const).map((k) => (
+              <button
+                key={k}
+                type="button"
+                aria-pressed={entryKind === k}
+                onClick={() => switchKind(k)}
+                className="min-h-11 rounded-full text-sm font-semibold text-muted-foreground transition-colors aria-pressed:bg-primary aria-pressed:text-primary-foreground"
+              >
+                {k === "spent" ? "Spent" : "Income"}
+              </button>
+            ))}
+          </div>
+        )
+      }
+    >
+
+      {incomeMode ? (
+        <section className="space-y-2" aria-labelledby="log-income">
+          <h2 id="log-income" className="text-sm font-semibold text-muted-foreground">What kind of income</h2>
+          <div className="grid grid-cols-3 gap-2">
+            {INCOME_TILES.map((t) => (
+              <button
+                key={t.category}
+                type="button"
+                aria-pressed={category === t.category}
+                onClick={() => pickIncomeTile(t)}
+                className="flex min-h-16 min-w-0 items-center justify-center rounded-[var(--radius-card)] border-2 border-border bg-card p-3 text-sm font-semibold transition-colors aria-pressed:border-primary"
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       {tiles.length > 0 ? (
         <section className="space-y-2" aria-labelledby="log-repeat">
           <h2 id="log-repeat" className="text-sm font-semibold text-muted-foreground">{popular ? "Popular in Kuwait" : "Repeat in two taps"}</h2>
@@ -822,6 +923,9 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
             ) : null}
           </EntryLine>
 
+          {/* MOB-R112 D6 — income mode: no Category, Place or What for; its tiles are the category. */}
+          {incomeMode ? null : (
+            <>
           <EntryLine
             id="category"
             label="Category"
@@ -965,7 +1069,8 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
               }}
             />
           </EntryLine>
-
+            </>
+          )}
           <EntryLine
             id="date"
             label="Date"
@@ -1077,7 +1182,7 @@ function LogPanel({ editId = null }: { editId?: number | null }) {
               {`Save ${formatKD(normalized)}`}
             </>
           ) : (
-            missingSaveLabel(missing)
+            incomeMode ? `Add ${incomeMissingPhrase(missing)}` : missingSaveLabel(missing)
           )}
         </Button>
       </div>
@@ -1108,6 +1213,7 @@ function Frame({
   keyboardInset = 0,
   title = "New expense",
   subtitle = "Amount and category are all you need.",
+  titleSlot,
   frameRef,
 }: {
   onBack: () => void
@@ -1117,6 +1223,8 @@ function Frame({
   title?: string
   /** MOB-R88 E2 — null hides it (edit mode). */
   subtitle?: string | null
+  /** MOB-R114 E2 — when given, it is shown in the title's place and the title stays as a visually hidden heading. */
+  titleSlot?: ReactNode
   /** MOB-R91 B2 — the scrolling box, for scroll-to-top and revealing a focused field. */
   frameRef?: Ref<HTMLDivElement>
 }) {
@@ -1131,7 +1239,8 @@ function Frame({
         <DialogContent ref={frameRef} data-log-frame="" aria-describedby={undefined} className="max-w-md overscroll-contain bg-background">
           <div className="flex flex-col gap-4">
             <header className="min-w-0 pe-8">
-              <DialogTitle className="text-xl leading-normal tracking-normal">{title}</DialogTitle>
+              <DialogTitle className={titleSlot ? "sr-only" : "text-xl leading-normal tracking-normal"}>{title}</DialogTitle>
+              {titleSlot}
               {subtitle ? <p className="text-sm text-muted-foreground">{subtitle}</p> : null}
             </header>
             {children}
@@ -1149,7 +1258,8 @@ function Frame({
     <div className="mx-auto flex min-h-full w-full max-w-[28rem] flex-col gap-4 ps-[calc(1rem+env(safe-area-inset-left))] pe-[calc(1rem+env(safe-area-inset-right))] pt-[calc(1rem+var(--safe-top))]">
       <header className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-semibold">{title}</h1>
+          <h1 className={titleSlot ? "sr-only" : "text-xl font-semibold"}>{title}</h1>
+          {titleSlot}
           {subtitle ? <p className="text-sm text-muted-foreground">{subtitle}</p> : null}
         </div>
         {/* E1 — the close control. Its accessible name stays "Back": it returns to where she came
